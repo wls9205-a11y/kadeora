@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic'
 'use client'
+export const dynamic = 'force-dynamic'
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -10,10 +10,10 @@ import { X, ImagePlus, ChevronDown, Lock } from 'lucide-react'
 import { cn, REGION_LABELS, generateSlug } from '@/lib/utils'
 
 const CATEGORIES = [
-  { id: 'local', label: '📍 지역' },
-  { id: 'stock', label: '📈 주식' },
-  { id: 'housing', label: '🏠 청약' },
-  { id: 'free', label: '💬 자유' },
+  { id: 'local', label: '?뱧 吏?? },
+  { id: 'stock', label: '?뱢 二쇱떇' },
+  { id: 'housing', label: '?룧 泥?빟' },
+  { id: 'free', label: '?뮠 ?먯쑀' },
 ]
 
 export default function WritePostPage() {
@@ -47,7 +47,7 @@ export default function WritePostPage() {
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (images.length + files.length > 5) {
-      toast.error('이미지는 최대 5장')
+      toast.error('?대?吏??理쒕? 5??)
       return
     }
 
@@ -61,11 +61,11 @@ export default function WritePostPage() {
 
   async function handleSubmit() {
     if (!title.trim() || title.length < 2) {
-      toast.error('제목을 입력해주세요')
+      toast.error('?쒕ぉ???낅젰?댁＜?몄슂')
       return
     }
     if (!content.trim() || content.length < 5) {
-      toast.error('내용을 입력해주세요')
+      toast.error('?댁슜???낅젰?댁＜?몄슂')
       return
     }
 
@@ -89,14 +89,14 @@ export default function WritePostPage() {
 
       if (error) throw error
 
-      // slug 업데이트
+      // slug ?낅뜲?댄듃
       const slug = generateSlug(title, data.id)
       await supabase.from('posts').update({ slug }).eq('id', data.id)
 
-      toast.success('게시글이 등록됐어요')
+      toast.success('寃뚯떆湲???깅줉?먯뼱??)
       router.push(`/post/${slug}`)
     } catch {
-      toast.error('등록 실패. 다시 시도해주세요.')
+      toast.error('?깅줉 ?ㅽ뙣. ?ㅼ떆 ?쒕룄?댁＜?몄슂.')
     } finally {
       setSubmitting(false)
     }
@@ -104,23 +104,23 @@ export default function WritePostPage() {
 
   return (
     <div className="min-h-dvh flex flex-col max-w-mobile mx-auto bg-[#0F0F0F]">
-      {/* 헤더 */}
+      {/* ?ㅻ뜑 */}
       <div className="flex items-center gap-3 px-4 h-14 border-b border-white/[0.06] sticky top-0 bg-[#0F0F0F]/95 backdrop-blur-md z-10">
         <button onClick={() => router.back()} className="p-2 -ml-2 rounded-lg hover:bg-white/5">
           <X size={20} className="text-white/70" />
         </button>
-        <span className="text-base font-semibold flex-1">글쓰기</span>
+        <span className="text-base font-semibold flex-1">湲?곌린</span>
         <button
           onClick={handleSubmit}
           disabled={submitting || !title.trim() || !content.trim()}
           className="btn-brand py-2 px-4 text-sm"
         >
-          {submitting ? '등록 중...' : '등록'}
+          {submitting ? '?깅줉 以?..' : '?깅줉'}
         </button>
       </div>
 
       <div className="flex-1 px-4 py-4 space-y-4">
-        {/* 카테고리 + 지역 */}
+        {/* 移댄뀒怨좊━ + 吏??*/}
         <div className="flex gap-2">
           <select
             value={category}
@@ -142,38 +142,38 @@ export default function WritePostPage() {
           </select>
         </div>
 
-        {/* 제목 */}
+        {/* ?쒕ぉ */}
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목"
+          placeholder="?쒕ぉ"
           maxLength={100}
           className="input-base text-[17px] font-semibold"
         />
 
-        {/* 내용 */}
+        {/* ?댁슜 */}
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="내용을 입력하세요..."
+          placeholder="?댁슜???낅젰?섏꽭??.."
           rows={10}
           className="input-base resize-none text-[15px] leading-relaxed"
         />
 
-        {/* 주식 태그 (주식 카테고리일 때) */}
+        {/* 二쇱떇 ?쒓렇 (二쇱떇 移댄뀒怨좊━???? */}
         {category === 'stock' && (
           <div>
-            <p className="text-xs text-white/40 mb-2">종목 태그 (최대 5개)</p>
+            <p className="text-xs text-white/40 mb-2">醫낅ぉ ?쒓렇 (理쒕? 5媛?</p>
             <div className="flex gap-2">
               <input
                 value={stockInput}
                 onChange={(e) => setStockInput(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && addStockTag()}
-                placeholder="종목코드 (예: 005930)"
+                placeholder="醫낅ぉ肄붾뱶 (?? 005930)"
                 className="input-base flex-1 text-sm"
               />
-              <button onClick={addStockTag} className="btn-outline px-3 py-2 text-sm">추가</button>
+              <button onClick={addStockTag} className="btn-outline px-3 py-2 text-sm">異붽?</button>
             </div>
             {stockTags.length > 0 && (
               <div className="flex gap-1.5 flex-wrap mt-2">
@@ -190,7 +190,7 @@ export default function WritePostPage() {
           </div>
         )}
 
-        {/* 이미지 첨부 */}
+        {/* ?대?吏 泥⑤? */}
         <div>
           <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
           {images.length > 0 && (
@@ -214,15 +214,15 @@ export default function WritePostPage() {
             className="flex items-center gap-2 text-sm text-white/40 hover:text-white/60 transition-colors"
           >
             <ImagePlus size={16} />
-            사진 추가 ({images.length}/5)
+            ?ъ쭊 異붽? ({images.length}/5)
           </button>
         </div>
 
-        {/* 익명 토글 */}
+        {/* ?듬챸 ?좉? */}
         <div className="flex items-center justify-between py-3 border-t border-white/[0.06]">
           <div className="flex items-center gap-2">
             <Lock size={15} className="text-white/40" />
-            <span className="text-sm text-white/60">익명으로 작성</span>
+            <span className="text-sm text-white/60">?듬챸?쇰줈 ?묒꽦</span>
           </div>
           <button
             onClick={() => setIsAnonymous(!isAnonymous)}
