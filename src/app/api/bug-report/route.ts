@@ -29,13 +29,12 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const { data, error } = await supabase.from("posts").insert({
-      author_id: user?.id || "anonymous",
+      author_id: user?.id || null,
       title: `[버그] ${title}`,
       content,
-      category: "bug" as const,
-      image_urls: null,
-      is_pinned: false,
-      is_megaphone: false,
+      category: "bug",
+      region_id: "",
+      images: [],
     }).select("id").single();
 
     if (error) throw error;

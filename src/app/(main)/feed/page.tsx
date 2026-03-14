@@ -121,8 +121,8 @@ async function PostList({ category }: { category: string }) {
     async () => {
       const sb = await createServerSupabaseClient();
       let q = sb.from("posts")
-        .select("id, title, content, category, view_count, like_count, comment_count, share_count, is_megaphone, created_at, profiles(nickname, avatar_url)")
-        .order("is_megaphone", { ascending: false }).order("created_at", { ascending: false }).limit(20);
+        .select("id, title, content, category, view_count, likes_count, comments_count, created_at, profiles(nickname, avatar_url)")
+        .order("created_at", { ascending: false }).limit(20);
       if (category !== "all") q = q.eq("category", category);
       const { data } = await q;
       return data || [];
@@ -146,7 +146,7 @@ async function PostList({ category }: { category: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {posts.map((post: Record<string, unknown>, idx: number) => {
-        const p = post as { id: string; title: string; content: string; category: string; view_count: number; like_count: number; comment_count: number; share_count: number; is_megaphone: boolean; created_at: string; profiles: { nickname: string; avatar_url: string | null } | null };
+        const p = post as { id: number; title: string; content: string; category: string; view_count: number; likes_count: number; comments_count: number; created_at: string; profiles: { nickname: string; avatar_url: string | null } | null };
         return (
           <Link key={p.id} href={`/feed/${p.id}`} style={{ display: "block", textDecoration: "none", padding: "16px 18px", borderRadius: 14, background: "#111827", border: "1px solid #1E293B" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -156,7 +156,6 @@ async function PostList({ category }: { category: string }) {
               <span style={{ padding: "2px 8px", borderRadius: 10, fontSize: 10, fontWeight: 700, background: `${CAT_COLORS[p.category] || "#64748B"}15`, color: CAT_COLORS[p.category] || "#64748B" }}>
                 {CAT_LABELS[p.category] || p.category}
               </span>
-              {p.is_megaphone && <span style={{ fontSize: 10, color: "#F59E0B" }}>📢 메가폰</span>}
               <span style={{ fontSize: 11, color: "#334155", marginLeft: "auto" }}>{new Date(p.created_at).toLocaleDateString("ko-KR")}</span>
             </div>
             <h3 style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4 }}>{p.title}</h3>
@@ -165,8 +164,8 @@ async function PostList({ category }: { category: string }) {
             </p>
             <div style={{ display: "flex", gap: 14, marginTop: 10, fontSize: 11, color: "#64748B" }}>
               <span>👁 {p.view_count.toLocaleString()}</span>
-              <span>❤️ {p.like_count}</span>
-              <span>💬 {p.comment_count}</span>
+              <span>❤️ {p.likes_count}</span>
+              <span>💬 {p.comments_count}</span>
             </div>
           </Link>
         );

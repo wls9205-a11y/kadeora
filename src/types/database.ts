@@ -1,4 +1,9 @@
-﻿export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+// ============================================================
+// KADEORA v4.0 — 실제 Supabase DB 스키마 기반 타입
+// 실제 배포 시: npx supabase gen types typescript --project-id tezftxakuwhsclarprlz --schema public > src/types/database.ts
+// ============================================================
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
@@ -6,449 +11,208 @@ export interface Database {
       profiles: {
         Row: {
           id: string;
-          username: string;
-          nickname: string | null;
+          nickname: string;
+          bio: string | null;
           avatar_url: string | null;
-          region: string | null;
-          interests: string[] | null;
-          grade_id: number;
-          points: number;
-          streak_days: number;
-          last_active_at: string | null;
-          is_ghost: boolean;
+          likes_count: number;
+          provider: string | null;
           created_at: string;
           updated_at: string;
-        };
-        Insert: {
-          id: string;
-          username: string;
-          nickname?: string | null;
-          avatar_url?: string | null;
-          region?: string | null;
-          interests?: string[] | null;
-          grade_id: number;
+          followers_count: number;
+          following_count: number;
+          posts_count: number;
+          full_name: string | null;
+          phone: string | null;
+          interests: string[] | null;
+          region_text: string | null;
+          kakao_id: string | null;
+          google_email: string | null;
+          marketing_agreed: boolean | null;
+          onboarded: boolean | null;
+          residence_city: string | null;
+          residence_district: string | null;
           points: number;
+          profile_completed: boolean;
           streak_days: number;
-          last_active_at?: string | null;
+          last_checked_date: string | null;
+          nickname_set: boolean;
+          nickname_change_count: number;
+          nickname_change_tickets: number;
+          is_premium: boolean;
+          premium_expires_at: string | null;
+          gender: string | null;
+          influence_score: number;
+          grade: number;
+          grade_title: string;
+          // v4.0 추가 컬럼
+          consent_analytics: boolean;
+          consent_updated_at: string | null;
+          birth_date: string | null;
           is_ghost: boolean;
-          created_at?: string;
-          updated_at?: string;
+          deleted_at: string | null;
+          is_deleted: boolean;
+          last_active_at: string | null;
         };
-        Update: {
-          id?: string;
-          username?: string;
-          nickname?: string | null;
-          avatar_url?: string | null;
-          region?: string | null;
-          interests?: string[] | null;
-          grade_id?: number;
-          points?: number;
-          streak_days?: number;
-          last_active_at?: string | null;
-          is_ghost?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
+        Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string; nickname: string };
+        Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
       };
       posts: {
         Row: {
-          id: string;
-          author_id: string;
+          id: number; // bigint
+          author_id: string | null;
+          category: string;
+          region_id: string;
+          city: string;
           title: string;
           content: string;
-          category: "stock" | "apt" | "community" | "bug" | "free";
-          image_urls: string[] | null;
-          view_count: number;
-          like_count: number;
-          comment_count: number;
-          share_count: number;
-          is_pinned: boolean;
-          is_megaphone: boolean;
+          is_anonymous: boolean;
+          likes_count: number;
+          comments_count: number;
+          report_count: number;
+          tag: string | null;
+          stock_tags: string[];
+          images: string[];
+          is_deleted: boolean;
           created_at: string;
           updated_at: string;
+          apt_tags: string[];
+          downvotes_count: number;
+          view_count: number;
+          room_id: number | null;
+          slug: string | null;
         };
-        Insert: {
-          author_id: string;
-          title: string;
-          content: string;
-          category: "stock" | "apt" | "community" | "bug" | "free";
-          image_urls?: string[] | null;
-          is_pinned?: boolean;
-          is_megaphone?: boolean;
-        };
-        Update: {
-          author_id?: string;
-          title?: string;
-          content?: string;
-          category?: "stock" | "apt" | "community" | "bug" | "free";
-          image_urls?: string[] | null;
-          view_count?: number;
-          like_count?: number;
-          comment_count?: number;
-          share_count?: number;
-          is_pinned?: boolean;
-          is_megaphone?: boolean;
-        };
+        Insert: Partial<Database["public"]["Tables"]["posts"]["Row"]> & { title: string; content: string; category: string };
+        Update: Partial<Database["public"]["Tables"]["posts"]["Row"]>;
       };
       comments: {
         Row: {
-          id: string;
-          post_id: string;
-          author_id: string;
+          id: number; // bigint
+          post_id: number;
+          author_id: string | null;
+          parent_id: number | null;
           content: string;
-          parent_id: string | null;
+          is_anonymous: boolean;
+          likes_count: number;
+          is_deleted: boolean;
           created_at: string;
         };
-        Insert: {
-          post_id: string;
-          author_id: string;
-          content: string;
-          parent_id?: string | null;
-        };
-        Update: {
-          post_id?: string;
-          author_id?: string;
-          content?: string;
-          parent_id?: string | null;
-        };
+        Insert: Partial<Database["public"]["Tables"]["comments"]["Row"]> & { post_id: number; content: string };
+        Update: Partial<Database["public"]["Tables"]["comments"]["Row"]>;
       };
       post_likes: {
-        Row: {
-          id: string;
-          post_id: string;
-          user_id: string;
-          created_at: string;
-        };
-        Insert: {
-          post_id: string;
-          user_id: string;
-        };
-        Update: {
-          post_id?: string;
-          user_id?: string;
-        };
+        Row: { post_id: number; user_id: string; created_at: string };
+        Insert: { post_id: number; user_id: string };
+        Update: Partial<Database["public"]["Tables"]["post_likes"]["Row"]>;
       };
       discussion_rooms: {
         Row: {
-          id: string;
-          title: string;
+          id: number;
+          room_type: string;
+          room_key: string;
+          display_name: string;
           description: string | null;
-          category: string;
-          creator_id: string;
-          participant_count: number;
-          is_premium: boolean;
-          heat_score: number;
-          created_at: string;
-        };
-        Insert: {
-          title: string;
-          description?: string | null;
-          category: string;
-          creator_id: string;
-          is_premium?: boolean;
-        };
-        Update: {
-          title?: string;
-          description?: string | null;
-          category?: string;
-          creator_id?: string;
-          participant_count?: number;
-          is_premium?: boolean;
-          heat_score?: number;
-        };
-      };
-      discussion_messages: {
-        Row: {
-          id: string;
-          room_id: string;
-          sender_id: string;
-          content: string;
-          created_at: string;
-        };
-        Insert: {
-          room_id: string;
-          sender_id: string;
-          content: string;
-        };
-        Update: {
-          room_id?: string;
-          sender_id?: string;
-          content?: string;
-        };
-      };
-      stock_quotes: {
-        Row: {
-          id: string;
-          symbol: string;
-          name: string;
-          price: number;
-          change_percent: number;
-          volume: number;
-          updated_at: string;
-        };
-        Insert: {
-          symbol: string;
-          name: string;
-          price: number;
-          change_percent: number;
-          volume: number;
-        };
-        Update: {
-          symbol?: string;
-          name?: string;
-          price?: number;
-          change_percent?: number;
-          volume?: number;
-        };
-      };
-      apt_subscriptions: {
-        Row: {
-          id: string;
-          name: string;
-          region: string;
-          status: string;
-          start_date: string;
-          end_date: string;
-          total_units: number;
-          competition_rate: number | null;
-          created_at: string;
-        };
-        Insert: {
-          name: string;
-          region: string;
-          status: string;
-          start_date: string;
-          end_date: string;
-          total_units: number;
-          competition_rate?: number | null;
-        };
-        Update: {
-          name?: string;
-          region?: string;
-          status?: string;
-          start_date?: string;
-          end_date?: string;
-          total_units?: number;
-          competition_rate?: number | null;
-        };
-      };
-      shop_products: {
-        Row: {
-          id: string;
-          name: string;
-          description: string | null;
-          price: number;
-          category: "badge" | "megaphone" | "profile_effect" | "nickname_color";
-          image_url: string | null;
+          member_count: number;
+          post_count: number;
           is_active: boolean;
           created_at: string;
         };
-        Insert: {
+        Insert: Partial<Database["public"]["Tables"]["discussion_rooms"]["Row"]> & { room_type: string; room_key: string; display_name: string };
+        Update: Partial<Database["public"]["Tables"]["discussion_rooms"]["Row"]>;
+      };
+      discussion_messages: {
+        Row: {
+          id: number;
+          room_id: number;
+          author_id: string;
+          content: string;
+          is_anonymous: boolean | null;
+          created_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["discussion_messages"]["Row"]> & { room_id: number; author_id: string; content: string };
+        Update: Partial<Database["public"]["Tables"]["discussion_messages"]["Row"]>;
+      };
+      stock_quotes: {
+        Row: {
+          symbol: string; // PK
           name: string;
-          description?: string | null;
-          price: number;
-          category: "badge" | "megaphone" | "profile_effect" | "nickname_color";
-          image_url?: string | null;
-          is_active?: boolean;
+          market: string;
+          price: number | null;
+          change_amt: number | null;
+          change_pct: number | null;
+          volume: number | null;
+          updated_at: string;
         };
-        Update: {
-          name?: string;
-          description?: string | null;
-          price?: number;
-          category?: "badge" | "megaphone" | "profile_effect" | "nickname_color";
-          image_url?: string | null;
-          is_active?: boolean;
+        Insert: Partial<Database["public"]["Tables"]["stock_quotes"]["Row"]> & { symbol: string; name: string; market: string };
+        Update: Partial<Database["public"]["Tables"]["stock_quotes"]["Row"]>;
+      };
+      shop_products: {
+        Row: {
+          id: string; // text PK
+          name: string;
+          description: string;
+          price_krw: number;
+          icon: string;
+          is_active: boolean;
+          created_at: string;
         };
+        Insert: Database["public"]["Tables"]["shop_products"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["shop_products"]["Row"]>;
       };
       grade_definitions: {
         Row: {
-          id: number;
-          name: string;
-          min_points: number;
-          badge_url: string | null;
-          perks: Json;
+          grade: number;
+          title: string;
+          emoji: string;
+          color_hex: string;
+          min_score: number;
+          description: string;
         };
-        Insert: {
-          id: number;
-          name: string;
-          min_points: number;
-          badge_url?: string | null;
-          perks: Json;
-        };
-        Update: {
-          id?: number;
-          name?: string;
-          min_points?: number;
-          badge_url?: string | null;
-          perks?: Json;
-        };
+        Insert: Database["public"]["Tables"]["grade_definitions"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["grade_definitions"]["Row"]>;
       };
+      // v4.0 신규 테이블
       search_logs: {
-        Row: {
-          id: string;
-          user_id: string | null;
-          query: string;
-          results_count: number;
-          clicked_rank: number | null;
-          created_at: string;
-        };
-        Insert: {
-          user_id?: string | null;
-          query: string;
-          results_count: number;
-          clicked_rank?: number | null;
-        };
-        Update: {
-          user_id?: string | null;
-          query?: string;
-          results_count?: number;
-          clicked_rank?: number | null;
-        };
+        Row: { id: string; user_id: string | null; query: string; results_count: number; clicked_rank: number | null; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["search_logs"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["search_logs"]["Insert"]>;
       };
       view_logs: {
-        Row: {
-          id: string;
-          user_id: string | null;
-          post_id: string;
-          duration_seconds: number;
-          scroll_depth: number;
-          created_at: string;
-        };
-        Insert: {
-          user_id?: string | null;
-          post_id: string;
-          duration_seconds: number;
-          scroll_depth: number;
-        };
-        Update: {
-          user_id?: string | null;
-          post_id?: string;
-          duration_seconds?: number;
-          scroll_depth?: number;
-        };
+        Row: { id: string; user_id: string | null; post_id: number; duration_seconds: number; scroll_depth: number; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["view_logs"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["view_logs"]["Insert"]>;
       };
       share_logs: {
-        Row: {
-          id: string;
-          user_id: string;
-          post_id: string;
-          platform: "kakao" | "link" | "other";
-          created_at: string;
-        };
-        Insert: {
-          user_id: string;
-          post_id: string;
-          platform: "kakao" | "link" | "other";
-        };
-        Update: {
-          user_id?: string;
-          post_id?: string;
-          platform?: "kakao" | "link" | "other";
-        };
+        Row: { id: number; post_id: number; user_id: string | null; platform: string; created_at: string | null };
+        Insert: Partial<Database["public"]["Tables"]["share_logs"]["Row"]> & { post_id: number; platform: string };
+        Update: Partial<Database["public"]["Tables"]["share_logs"]["Row"]>;
       };
       trending_keywords: {
-        Row: {
-          id: string;
-          keyword: string;
-          heat_score: number;
-          category: string | null;
-          updated_at: string;
-        };
-        Insert: {
-          keyword: string;
-          heat_score: number;
-          category?: string | null;
-        };
-        Update: {
-          keyword?: string;
-          heat_score?: number;
-          category?: string | null;
-        };
+        Row: { id: string; keyword: string; heat_score: number; category: string | null; updated_at: string };
+        Insert: Omit<Database["public"]["Tables"]["trending_keywords"]["Row"], "id" | "updated_at">;
+        Update: Partial<Database["public"]["Tables"]["trending_keywords"]["Insert"]>;
       };
       user_streaks: {
-        Row: {
-          user_id: string;
-          current_streak: number;
-          longest_streak: number;
-          last_login_date: string;
-          updated_at: string;
-        };
-        Insert: {
-          user_id: string;
-          current_streak: number;
-          longest_streak: number;
-          last_login_date: string;
-          updated_at?: string;
-        };
-        Update: {
-          user_id?: string;
-          current_streak?: number;
-          longest_streak?: number;
-          last_login_date?: string;
-          updated_at?: string;
-        };
+        Row: { user_id: string; current_streak: number; longest_streak: number; last_login_date: string; updated_at: string };
+        Insert: Database["public"]["Tables"]["user_streaks"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["user_streaks"]["Row"]>;
       };
       content_reports: {
-        Row: {
-          id: string;
-          reporter_id: string;
-          target_type: "post" | "comment" | "chat";
-          target_id: string;
-          reason: string;
-          status: "pending" | "reviewed" | "resolved" | "dismissed";
-          reviewed_at: string | null;
-          created_at: string;
-        };
-        Insert: {
-          reporter_id: string;
-          target_type: "post" | "comment" | "chat";
-          target_id: string;
-          reason: string;
-        };
-        Update: {
-          reporter_id?: string;
-          target_type?: "post" | "comment" | "chat";
-          target_id?: string;
-          reason?: string;
-          status?: "pending" | "reviewed" | "resolved" | "dismissed";
-          reviewed_at?: string | null;
-        };
+        Row: { id: string; reporter_id: string; target_type: string; target_id: number; reason: string; status: string; reviewed_at: string | null; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["content_reports"]["Row"], "id" | "status" | "reviewed_at" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["content_reports"]["Insert"]>;
       };
       payments: {
-        Row: {
-          id: string;
-          user_id: string;
-          product_id: string;
-          amount: number;
-          payment_key: string;
-          order_id: string;
-          status: "pending" | "completed" | "failed" | "refunded";
-          created_at: string;
-        };
-        Insert: {
-          user_id: string;
-          product_id: string;
-          amount: number;
-          payment_key: string;
-          order_id: string;
-          status?: "pending" | "completed" | "failed" | "refunded";
-        };
-        Update: {
-          user_id?: string;
-          product_id?: string;
-          amount?: number;
-          payment_key?: string;
-          order_id?: string;
-          status?: "pending" | "completed" | "failed" | "refunded";
-        };
+        Row: { id: string; user_id: string; product_id: string; amount: number; payment_key: string; order_id: string; status: string; created_at: string };
+        Insert: Omit<Database["public"]["Tables"]["payments"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["payments"]["Insert"]>;
+      };
+      invite_codes: {
+        Row: { id: string; code: string; creator_id: string; used_by: string | null; is_used: boolean; created_at: string; used_at: string | null };
+        Insert: Omit<Database["public"]["Tables"]["invite_codes"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["invite_codes"]["Insert"]>;
       };
     };
-    Functions: {
-      get_trending_keywords: {
-        Args: { limit_count: number };
-        Returns: Database["public"]["Tables"]["trending_keywords"]["Row"][];
-      };
-    };
+    Functions: Record<string, never>;
   };
 }
 

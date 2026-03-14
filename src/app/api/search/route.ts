@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerSupabaseClient();
     const { data: posts, error } = await supabase
       .from("posts")
-      .select("id, title, content, category, created_at, view_count, like_count")
+      .select("id, title, content, category, created_at, view_count, likes_count")
       .or(`title.ilike.%${parsed.data.q}%,content.ilike.%${parsed.data.q}%`)
       .order("created_at", { ascending: false })
       .limit(20);

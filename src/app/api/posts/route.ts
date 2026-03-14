@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerSupabaseClient();
     let query = supabase
       .from("posts")
-      .select("id, title, content, category, view_count, like_count, comment_count, share_count, is_megaphone, created_at, profiles(nickname, avatar_url)", { count: "exact" })
-      .order("is_megaphone", { ascending: false })
+      .select("id, title, content, category, view_count, likes_count, comments_count, created_at, profiles(nickname, avatar_url)", { count: "exact" })
+      
       .order("created_at", { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
 

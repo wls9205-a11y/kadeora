@@ -103,9 +103,9 @@ export function WriteClient() {
         author_id: user.id,
         title: cleanTitle,
         content: cleanContent,
-        category: category as "stock" | "apt" | "community" | "bug" | "free",
-        images: imageUrls,
+        category: category,
         region_id: "",
+        images: imageUrls.length > 0 ? imageUrls : [],
       }).select("id").single();
 
       if (insertError) throw insertError;

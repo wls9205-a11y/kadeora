@@ -13,7 +13,7 @@ export const PostCreateSchema = z.object({
 });
 
 export const CommentCreateSchema = z.object({
-  postId: z.string().uuid("유효한 게시글 ID가 필요합니다"),
+  postId: z.coerce.number().int().positive("유효한 게시글 ID가 필요합니다"),
   content: z.string().min(1, "댓글을 입력하세요").max(1000, "댓글은 1000자 이하"),
   parentId: z.string().uuid().nullable().optional(),
 });

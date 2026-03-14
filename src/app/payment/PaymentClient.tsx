@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase-browser";
 interface PaymentProduct {
   id: string;
   name: string;
-  price: number;
+  price_krw: number;
   description: string | null;
 }
 
@@ -32,7 +32,7 @@ export function PaymentClient() {
   async function loadProduct(id: string) {
     const { data, error } = await supabase
       .from("shop_products")
-      .select("id, name, price, description")
+      .select("id, name, price_krw, description")
       .eq("id", id)
       .eq("is_active", true)
       .single();
@@ -58,7 +58,7 @@ export function PaymentClient() {
 
       // ✅ 법무팀 피드백: 결제 전 개인정보 처리 안내
       const confirmed = window.confirm(
-        `${product.name} (${product.price.toLocaleString()}원)\n\n` +
+        `${product.name} (${product.price_krw.toLocaleString()}원)\n\n` +
         "결제를 진행하시겠습니까?\n\n" +
         "※ 결제 정보는 토스페이먼츠를 통해 안전하게 처리됩니다.\n" +
         "※ 환불 정책은 서비스 이용약관을 참고해주세요."
@@ -72,7 +72,7 @@ export function PaymentClient() {
         body: JSON.stringify({
           productId: product.id,
           orderId,
-          amount: product.price,
+          amount: product.price_krw,
           orderName: product.name,
         }),
       });
@@ -140,7 +140,7 @@ export function PaymentClient() {
           }}>
             <span style={{ fontSize: 14, color: "#94A3B8" }}>결제 금액</span>
             <span style={{ fontSize: 24, fontWeight: 900, color: "#3B82F6" }}>
-              {product.price.toLocaleString()}원
+              {product.price_krw.toLocaleString()}원
             </span>
           </div>
         </div>

@@ -4,8 +4,6 @@ import { unstable_cache } from "next/cache";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { StockClient } from "./StockClient";
 
-// ✅ A-grade Guillermo Rauch: Server Component + 30s cache
-
 export const metadata: Metadata = {
   title: "주식 — 실시간 시세 & 커뮤니티",
   description: "실시간 주식 시세와 커뮤니티 관심 종목을 확인하세요.",

@@ -50,5 +50,17 @@ function validateClientEnv() {
   return result.data;
 }
 
-export const serverEnv = typeof window === "undefined" ? validateServerEnv() : ({} as z.infer<typeof serverSchema>);
-export const clientEnv = validateClientEnv();
+/** Lazy-validated server env — validates on first access, not at import time */
+let _serverEnv: z.infer<typeof serverSchema> | null = null;
+export function getServerEnv() {
+  if (typeof window !== "undefined") return {} as z.infer<typeof serverSchema>;
+  if (!_serverEnv) _serverEnv = validateServerEnv();
+  return _serverEnv;
+}
+
+/** Lazy-validated client env */
+let _clientEnv: z.infer<typeof clientSchema> | null = null;
+export function getClientEnv() {
+  if (!_clientEnv) _clientEnv = validateClientEnv();
+  return _clientEnv;
+}

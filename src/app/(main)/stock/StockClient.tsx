@@ -4,14 +4,9 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import Link from "next/link";
 
-/**
- * Abramov + Dahl: "Supabase Realtime이 있는데 왜 polling?"
- * → Realtime subscription으로 전환
- */
-
 interface Quote {
-  id: string; symbol: string; name: string; price: number;
-  change_percent: number; volume: number; updated_at: string;
+  symbol: string; name: string; market: string; price: number | null;
+  change_amt: number | null; change_pct: number | null; volume: number | null; updated_at: string;
 }
 
 export function StockClient({ initialQuotes }: { initialQuotes: Quote[] }) {
@@ -29,15 +24,13 @@ export function StockClient({ initialQuotes }: { initialQuotes: Quote[] }) {
         if (payload.eventType === "UPDATE" || payload.eventType === "INSERT") {
           const updated = payload.new as Quote;
           setQuotes((prev) =>
-            prev.map((q) => (q.id === updated.id ? updated : q))
+            prev.map((q) => (q.symbol === updated.symbol ? updated : q))
           );
         }
       })
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [supabase]);
 
   return (
@@ -66,16 +59,19 @@ export function StockClient({ initialQuotes }: { initialQuotes: Quote[] }) {
             <span role="columnheader" style={{ textAlign: "right" }}>등락률</span>
             <span role="columnheader" style={{ textAlign: "right" }}>거래량</span>
           </div>
-          {quotes.map((q) => (
-            <div key={q.id} role="row" style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 100px", padding: "14px 20px", borderBottom: "1px solid rgba(30,41,59,0.5)", alignItems: "center" }}>
-              <div><div style={{ fontSize: 14, fontWeight: 700, color: "#F1F5F9" }}>{q.name}</div><div style={{ fontSize: 11, color: "#475569" }}>{q.symbol}</div></div>
-              <div style={{ textAlign: "right", fontSize: 14, fontWeight: 700, color: "#F1F5F9", fontFamily: "monospace" }}>{q.price.toLocaleString()}</div>
-              <div style={{ textAlign: "right", fontSize: 13, fontWeight: 700, fontFamily: "monospace", color: q.change_percent > 0 ? "#EF4444" : q.change_percent < 0 ? "#3B82F6" : "#64748B" }}>
-                {q.change_percent > 0 ? "+" : ""}{q.change_percent.toFixed(2)}%
+          {quotes.map((q) => {
+            const pct = q.change_pct ?? 0;
+            return (
+              <div key={q.symbol} role="row" style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 100px", padding: "14px 20px", borderBottom: "1px solid rgba(30,41,59,0.5)", alignItems: "center" }}>
+                <div><div style={{ fontSize: 14, fontWeight: 700, color: "#F1F5F9" }}>{q.name}</div><div style={{ fontSize: 11, color: "#475569" }}>{q.symbol}</div></div>
+                <div style={{ textAlign: "right", fontSize: 14, fontWeight: 700, color: "#F1F5F9", fontFamily: "monospace" }}>{(q.price ?? 0).toLocaleString()}</div>
+                <div style={{ textAlign: "right", fontSize: 13, fontWeight: 700, fontFamily: "monospace", color: pct > 0 ? "#EF4444" : pct < 0 ? "#3B82F6" : "#64748B" }}>
+                  {pct > 0 ? "+" : ""}{Number(pct).toFixed(2)}%
+                </div>
+                <div style={{ textAlign: "right", fontSize: 12, color: "#64748B", fontFamily: "monospace" }}>{Math.round((q.volume ?? 0) / 1000)}K</div>
               </div>
-              <div style={{ textAlign: "right", fontSize: 12, color: "#64748B", fontFamily: "monospace" }}>{Math.round(q.volume / 1000)}K</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
