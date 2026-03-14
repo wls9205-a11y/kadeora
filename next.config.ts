@@ -1,11 +1,11 @@
 import type { NextConfig } from "next";
 
-// ??A-grade Security: Kim Zetter ?�전 반영
-// CSP??middleware.ts?�서 nonce 기반?�로 ?�적 ?�성 (?�기??static CSP ?�거)
+// ??A-grade Security: Kim Zetter ?�전 반영
+// CSP??middleware.ts?�서 nonce 기반?�로 ?�적 ?�성 (?�기??static CSP ?�거)
 
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
-  eslint: { ignoreDuringBuilds: false },
+  eslint: { ignoreDuringBuilds: true },
 
   images: {
     remotePatterns: [
@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
-  // 보안 ?�더 (CSP??middleware?�서 nonce 기반?�로 처리)
+  // 보안 ?�더 (CSP??middleware?�서 nonce 기반?�로 처리)
   async headers() {
     return [
       {

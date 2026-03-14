@@ -99,7 +99,7 @@ export default function ProfilePage() {
               fontWeight: 900,
               color: 'white',
               boxShadow: gradeInfo.glow ? `0 4px 20px ${gradeInfo.color}70` : 'none',
-              // @ts-ignore
+              // @ts-expect-error
               '--gc': `${gradeInfo.color}88`,
               flexShrink: 0,
             }}
@@ -286,7 +286,7 @@ export default function ProfilePage() {
                   alignItems: 'center',
                   gap: 12,
                   opacity: isLocked ? 0.32 : 1,
-                  // @ts-ignore
+                  // @ts-expect-error
                   '--gc': `${info.color}88`,
                 }}
               >
