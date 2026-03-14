@@ -1,10 +1,19 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/lib/theme'
 import { Logo, Spinner } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
+
+interface LoginButton {
+  id: 'kakao' | 'google' | 'phone'
+  label: string
+  bg: string
+  color: string
+  icon: string
+  border?: boolean
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,7 +26,6 @@ export default function LoginPage() {
 
     try {
       if (provider === 'phone') {
-        // 전화번호 로그인은 별도 페이지로 이동
         router.push('/login/phone')
         return
       }
@@ -25,7 +33,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider === 'kakao' ? 'kakao' : 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: ${window.location.origin}/auth/callback,
         },
       })
 
@@ -36,11 +44,11 @@ export default function LoginPage() {
     }
   }
 
-  const loginButtons = [
+  const loginButtons: LoginButton[] = [
     { id: 'kakao', label: '카카오로 시작하기', bg: '#FEE500', color: '#191600', icon: '💬' },
     { id: 'google', label: 'Google로 시작하기', bg: 'rgba(255,255,255,0.06)', color: C.text, border: true, icon: '🔍' },
     { id: 'phone', label: '휴대폰 번호로 시작하기', bg: 'rgba(255,255,255,0.03)', color: C.w50, border: true, icon: '📱' },
-  ] as const
+  ]
 
   return (
     <div
@@ -55,7 +63,6 @@ export default function LoginPage() {
         gap: 40,
       }}
     >
-      {/* 로고 영역 */}
       <div className="fade-in" style={{ textAlign: 'center' }}>
         <Logo size={60} />
         <h1
@@ -64,7 +71,7 @@ export default function LoginPage() {
             fontWeight: 900,
             letterSpacing: -1.5,
             marginTop: 14,
-            background: `linear-gradient(135deg, ${C.text} 20%, ${C.brandLight})`,
+            background: linear-gradient(135deg,  20%, ),
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
@@ -76,7 +83,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* 로그인 버튼 */}
       <div
         className="fade-in"
         style={{
@@ -96,7 +102,7 @@ export default function LoginPage() {
             style={{
               height: 52,
               borderRadius: 14,
-              border: btn.border ? `1px solid ${C.w10}` : 'none',
+              border: btn.border ? 1px solid  : 'none',
               background: btn.bg,
               color: btn.color,
               fontSize: 15,
@@ -121,7 +127,6 @@ export default function LoginPage() {
         ))}
       </div>
 
-      {/* 약관 안내 */}
       <p
         style={{
           marginTop: 28,
