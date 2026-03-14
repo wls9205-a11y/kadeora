@@ -1,23 +1,45 @@
 import { create } from 'zustand'
-import type { User } from '@supabase/supabase-js'
+import { persist } from 'zustand/middleware'
 import type { Profile } from '@/types/database'
 
 interface AuthState {
-  user: User | null
-  profile: Profile | null
+  user: Profile | null
   isLoading: boolean
-  setUser: (user: User | null) => void
-  setProfile: (profile: Profile | null) => void
+  isAuthenticated: boolean
+  setUser: (user: Profile | null) => void
   setLoading: (loading: boolean) => void
-  reset: () => void
+  logout: () => void
+  updateProfile: (updates: Partial<Profile>) => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  profile: null,
-  isLoading: true,
-  setUser: (user) => set({ user }),
-  setProfile: (profile) => set({ profile }),
-  setLoading: (isLoading) => set({ isLoading }),
-  reset: () => set({ user: null, profile: null, isLoading: false }),
-}))
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isLoading: true,
+      isAuthenticated: false,
+
+      setUser: (user) => set({ 
+        user, 
+        isAuthenticated: !!user,
+        isLoading: false 
+      }),
+
+      setLoading: (isLoading) => set({ isLoading }),
+
+      logout: () => set({ 
+        user: null, 
+        isAuthenticated: false,
+        isLoading: false 
+      }),
+
+      updateProfile: (updates) => set((state) => ({
+        user: state.user ? { ...state.user, ...updates } : null
+      })),
+    }),
+    {
+      name: 'kadeora-auth',
+      partialize: (state) => ({ user: state.user }),
+    }
+  )
+)

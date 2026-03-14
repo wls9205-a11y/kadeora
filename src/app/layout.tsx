@@ -1,29 +1,30 @@
 import type { Metadata, Viewport } from 'next'
+import { ThemeProvider } from '@/lib/theme'
+import { AuthProvider, QueryProvider } from '@/components/providers'
 import './globals.css'
-import { Toaster } from 'react-hot-toast'
-import { AuthProvider } from '@/components/providers/AuthProvider'
-import { QueryProvider } from '@/components/providers/QueryProvider'
 
 export const metadata: Metadata = {
-  title: {
-    default: '카더라 - 동네 소문의 중심',
-    template: '%s | 카더라',
-  },
-  description: '우리 동네 주식, 청약, 부동산 이야기. 카더라에서 확인하세요.',
-  keywords: ['동네', '주식', '청약', '아파트', '부동산', '커뮤니티'],
+  title: '카더라 - 동네 소문의 중심',
+  description: '주식/부동산에 관심 있는 위치 기반 소리소문 커뮤니티',
+  keywords: ['카더라', '주식', '부동산', '커뮤니티', '청약', '투자'],
+  authors: [{ name: 'KADEORA' }],
   openGraph: {
-    type: 'website',
-    locale: 'ko_KR',
-    siteName: '카더라',
     title: '카더라 - 동네 소문의 중심',
-    description: '우리 동네 주식, 청약, 부동산 이야기',
+    description: '주식/부동산에 관심 있는 위치 기반 소리소문 커뮤니티',
+    url: 'https://kadeora.vercel.app',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
+    title: '카더라 - 동네 소문의 중심',
+    description: '주식/부동산에 관심 있는 위치 기반 소리소문 커뮤니티',
   },
-  robots: {
-    index: true,
-    follow: true,
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
   },
 }
 
@@ -32,8 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0F0F0F',
-  viewportFit: 'cover',
+  themeColor: '#0A0A0A',
 }
 
 export default function RootLayout({
@@ -42,34 +42,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <head>
-        {/* PWA */}
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      </head>
+    <html lang="ko" className="dark">
       <body>
         <QueryProvider>
-          <AuthProvider>
-            {children}
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                style: {
-                  background: '#252525',
-                  color: '#F5F5F5',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                },
-                success: {
-                  iconTheme: { primary: '#FF4B36', secondary: '#0F0F0F' },
-                },
-              }}
-            />
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
         </QueryProvider>
       </body>
     </html>

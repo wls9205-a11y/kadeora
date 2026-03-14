@@ -1,56 +1,114 @@
 'use client'
 
 import Link from 'next/link'
-import { Bell, Search, PenSquare } from 'lucide-react'
-import { useAuthStore } from '@/stores/authStore'
-import { cn } from '@/lib/utils'
+import { useTheme } from '@/lib/theme'
+import { Logo } from '@/components/ui'
+import { SearchIcon, BellIcon } from '@/components/ui/Icons'
 
 export function TopBar() {
-  const { profile, isAuthenticated } = useAuthStore()
+  const { C, isDark, toggleTheme } = useTheme()
 
   return (
-    <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-mobile z-40
-                        bg-[#0F0F0F]/95 backdrop-blur-md border-b border-white/[0.06]
-                        h-14 flex items-center px-4 gap-3">
-      {/* 로고 */}
-      <Link href="/" className="flex-1 flex items-center gap-2">
-        <span className="text-xl font-black text-brand tracking-tight">카더라</span>
-        {profile?.grade_title && (
-          <span className="text-[10px] text-white/30 font-medium hidden xs:block">
-            {profile.grade_title}
-          </span>
-        )}
+    <div
+      style={{
+        height: 52,
+        padding: '0 14px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        borderBottom: `1px solid ${C.w05}`,
+        flexShrink: 0,
+        background: C.bg,
+        zIndex: 20,
+        transition: 'background 0.2s, border-color 0.2s',
+      }}
+    >
+      <Logo size={28} />
+      <span
+        style={{
+          fontSize: 18,
+          fontWeight: 900,
+          background: `linear-gradient(135deg, ${isDark ? '#fff' : '#111'} 30%, ${C.brandLight})`,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: -0.5,
+        }}
+      >
+        카더라
+      </span>
+      
+      <div style={{ flex: 1 }} />
+      
+      <Link
+        href="/search"
+        style={{
+          padding: '8px 10px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <SearchIcon />
       </Link>
-
-      {/* 액션 버튼들 */}
-      <div className="flex items-center gap-1">
-        {/* 검색 */}
-        <Link href="/search" className="p-2 rounded-lg hover:bg-white/5 transition-colors">
-          <Search size={20} className="text-white/70" />
-        </Link>
-
-        {/* 글쓰기 */}
-        {isAuthenticated && (
-          <Link href="/post/write" className="p-2 rounded-lg hover:bg-white/5 transition-colors">
-            <PenSquare size={20} className="text-white/70" />
-          </Link>
-        )}
-
-        {/* 알림 */}
-        {isAuthenticated ? (
-          <Link href="/notifications" className="p-2 rounded-lg hover:bg-white/5 transition-colors relative">
-            <Bell size={20} className="text-white/70" />
-            {/* 미읽음 뱃지 - 추후 실시간으로 */}
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand rounded-full" />
-          </Link>
-        ) : (
-          <Link href="/login"
-            className="text-sm font-semibold text-brand px-3 py-1.5 rounded-lg
-                       border border-brand/30 hover:bg-brand/10 transition-colors">
-            로그인
-          </Link>
-        )}
-      </div>
-    </header>
+      
+      <Link
+        href="/notifications"
+        style={{
+          padding: '8px 10px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <BellIcon />
+        <span
+          style={{
+            position: 'absolute',
+            top: 5,
+            right: 5,
+            width: 7,
+            height: 7,
+            borderRadius: 4,
+            background: C.brand,
+          }}
+        />
+      </Link>
+      
+      <Link
+        href="/shop"
+        style={{
+          padding: '8px 10px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <span style={{ fontSize: 16 }}>🛍️</span>
+      </Link>
+      
+      <button
+        onClick={toggleTheme}
+        title={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
+        style={{
+          padding: '6px 8px',
+          background: isDark ? C.w05 : C.w10,
+          border: `1px solid ${C.w10}`,
+          borderRadius: 10,
+          cursor: 'pointer',
+          fontSize: 15,
+          lineHeight: 1,
+          transition: 'all 0.2s',
+        }}
+      >
+        {isDark ? '☀️' : '🌙'}
+      </button>
+    </div>
   )
 }

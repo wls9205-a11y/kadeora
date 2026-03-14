@@ -1,55 +1,60 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/authStore'
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { setUser, setProfile, setLoading, reset } = useAuthStore()
-  const supabase = createClient()
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const { setUser, setLoading } = useAuthStore()
 
   useEffect(() => {
-    // 초기 세션
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      if (user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
-          .then(({ data }) => {
-            setProfile(data)
-            setLoading(false)
-          })
-      } else {
-        setLoading(false)
-      }
-    })
+    const supabase = createClient()
 
-    // 세션 변경 리스너
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        const user = session?.user ?? null
-        setUser(user)
-
-        if (user) {
-          const { data } = await supabase
+    // 초기 세션 확인
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user) {
+          const { data: profile } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', user.id)
+            .eq('id', session.user.id)
             .single()
-          setProfile(data)
-          setLoading(false)
+
+          setUser(profile)
         } else {
-          reset()
+          setUser(null)
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        setUser(null)
+      }
+    }
+
+    checkSession()
+
+    // 인증 상태 변경 리스너
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+
+          setUser(profile)
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null)
         }
       }
     )
 
-    return () => subscription.unsubscribe()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [setUser, setLoading])
 
   return <>{children}</>
 }

@@ -2,63 +2,69 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, TrendingUp, Building2, MessageSquare, User, ShoppingBag } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/authStore'
+import { useTheme } from '@/lib/theme'
+import { HomeIcon, StockIcon, HouseIcon, ChatIcon, UserIcon } from '@/components/ui/Icons'
 
 const NAV_ITEMS = [
-  { href: '/', icon: Home, label: '홈' },
-  { href: '/stocks', icon: TrendingUp, label: '주식' },
-  { href: '/housing', icon: Building2, label: '청약' },
-  { href: '/discuss', icon: MessageSquare, label: '토론방' },
-  { href: '/shop', icon: ShoppingBag, label: '상점' },
-  { href: '/profile', icon: User, label: '내 정보' },
+  { id: 'feed', label: '홈', href: '/feed', Icon: HomeIcon },
+  { id: 'stocks', label: '주식', href: '/stocks', Icon: StockIcon },
+  { id: 'housing', label: '부동산', href: '/housing', Icon: HouseIcon },
+  { id: 'discuss', label: '토론방', href: '/discuss', Icon: ChatIcon },
+  { id: 'profile', label: '내 정보', href: '/profile', Icon: UserIcon },
 ]
 
 export function BottomNav() {
+  const { C } = useTheme()
   const pathname = usePathname()
-  const { profile } = useAuthStore()
 
   return (
-    <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-mobile z-40
-                  bg-[#0F0F0F]/95 backdrop-blur-md border-t border-white/[0.06]"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        flexShrink: 0,
+        borderTop: `1px solid ${C.w05}`,
+        background: C.bg,
+        zIndex: 20,
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        minHeight: 58,
+        transition: 'background 0.2s',
+      }}
     >
-      <div className="h-16 flex items-center">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
-          const isActive = href === '/'
-            ? pathname === '/'
-            : pathname.startsWith(href)
-
-          // 내 정보 탭은 프로필 아바타 사용 가능
-          const isProfile = href === '/profile'
-
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex-1 flex flex-col items-center justify-center gap-1 h-full',
-                'transition-colors duration-150',
-                isActive ? 'text-brand' : 'text-white/40 hover:text-white/60'
-              )}
+      {NAV_ITEMS.map(({ id, label, href, Icon }) => {
+        const isActive = pathname.startsWith(href)
+        return (
+          <Link
+            key={id}
+            href={href}
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '6px 0',
+              transition: 'all 0.15s',
+              textDecoration: 'none',
+            }}
+          >
+            <Icon active={isActive} />
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? C.brand : C.w35,
+              }}
             >
-              <Icon
-                size={22}
-                strokeWidth={isActive ? 2.5 : 2}
-                className="transition-transform duration-150 active:scale-90"
-              />
-              <span className={cn(
-                'text-[10px] font-medium',
-                isActive ? 'text-brand' : 'text-white/40'
-              )}>
-                {label}
-              </span>
-            </Link>
-          )
-        })}
-      </div>
-    </nav>
+              {label}
+            </span>
+          </Link>
+        )
+      })}
+    </div>
   )
 }

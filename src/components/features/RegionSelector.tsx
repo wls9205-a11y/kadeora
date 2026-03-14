@@ -1,84 +1,150 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronDown, MapPin } from 'lucide-react'
-import { useState } from 'react'
-import { REGION_LABELS, cn } from '@/lib/utils'
+import { useState, useEffect } from 'react'
+import { useTheme } from '@/lib/theme'
+import { REGIONS } from '@/lib/utils'
+import { CloseIcon } from '@/components/ui/Icons'
 
 interface RegionSelectorProps {
-  currentRegion: string
+  isOpen: boolean
+  onClose: () => void
+  selected: string[]
+  onSelect: (regions: string[]) => void
+  maxSelect?: number
 }
 
-export function RegionSelector({ currentRegion }: RegionSelectorProps) {
-  const [open, setOpen] = useState(false)
-  const router = useRouter()
-  const searchParams = useSearchParams()
+export function RegionSelector({ 
+  isOpen, 
+  onClose, 
+  selected, 
+  onSelect,
+  maxSelect = 3 
+}: RegionSelectorProps) {
+  const { C } = useTheme()
+  const [localSelected, setLocalSelected] = useState<string[]>(selected)
 
-  function selectRegion(regionId: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('region', regionId)
-    router.push(`/?${params.toString()}`)
-    setOpen(false)
+  useEffect(() => {
+    setLocalSelected(selected)
+  }, [selected])
+
+  const toggleRegion = (region: string) => {
+    if (region === '전국') {
+      setLocalSelected(['전국'])
+      return
+    }
+
+    setLocalSelected(prev => {
+      const without = prev.filter(x => x !== '전국')
+      if (without.includes(region)) {
+        const next = without.filter(x => x !== region)
+        return next.length === 0 ? ['전국'] : next
+      }
+      if (without.length >= maxSelect) return prev
+      return [...without, region]
+    })
   }
 
-  const currentLabel = REGION_LABELS[currentRegion] ?? currentRegion
+  const handleConfirm = () => {
+    onSelect(localSelected)
+    onClose()
+  }
+
+  if (!isOpen) return null
 
   return (
-    <div className="relative px-4 py-2.5 flex items-center gap-2 border-b border-white/[0.04]">
-      <MapPin size={13} className="text-white/40" />
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-sm text-white/60 hover:text-white transition-colors"
+    <>
+      {/* 백드롭 */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          background: 'rgba(0,0,0,0.65)',
+        }}
+        onClick={onClose}
+      />
+
+      {/* 바텀시트 */}
+      <div
+        className="slide-up"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          maxWidth: 430,
+          zIndex: 60,
+          background: C.s1,
+          borderRadius: '20px 20px 0 0',
+          paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+        }}
       >
-        {currentLabel}
-        <ChevronDown size={14} className={cn('transition-transform', open && 'rotate-180')} />
-      </button>
-
-      {/* 드롭다운 */}
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-30"
-            onClick={() => setOpen(false)}
-          />
-          <div className="absolute top-full left-0 right-0 z-40 mt-1 mx-3
-                          bg-[#1A1A1A] border border-white/[0.08] rounded-xl
-                          shadow-xl shadow-black/50 overflow-hidden
-                          animate-slide-down">
-            <div className="grid grid-cols-4 p-2 gap-1">
-              {/* 전국 */}
-              <button
-                onClick={() => selectRegion('national')}
-                className={cn(
-                  'col-span-4 py-2 text-sm rounded-lg transition-colors',
-                  currentRegion === 'national'
-                    ? 'bg-brand/20 text-brand font-semibold'
-                    : 'text-white/60 hover:bg-white/5'
-                )}
-              >
-                전국
-              </button>
-
-              {Object.entries(REGION_LABELS)
-                .filter(([id]) => id !== 'national')
-                .map(([id, label]) => (
-                  <button
-                    key={id}
-                    onClick={() => selectRegion(id)}
-                    className={cn(
-                      'py-2 text-sm rounded-lg transition-colors',
-                      currentRegion === id
-                        ? 'bg-brand/20 text-brand font-semibold'
-                        : 'text-white/60 hover:bg-white/5'
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
-            </div>
+        {/* 헤더 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 8px' }}>
+          <div>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: C.text }}>지역 선택</h3>
+            <p style={{ fontSize: 11, color: C.w20, marginTop: 2 }}>최대 {maxSelect}개까지 선택 가능해요</p>
           </div>
-        </>
-      )}
-    </div>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+          >
+            <CloseIcon />
+          </button>
+        </div>
+
+        <div style={{ height: 1, background: C.w05, margin: '0 0 12px' }} />
+
+        {/* 지역 그리드 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, padding: '0 14px 20px' }}>
+          {REGIONS.map(region => {
+            const isSelected = localSelected.includes(region)
+            const isMaxed = !localSelected.includes('전국') && localSelected.length >= maxSelect && !isSelected
+            
+            return (
+              <button
+                key={region}
+                onClick={() => toggleRegion(region)}
+                disabled={isMaxed}
+                style={{
+                  padding: '10px 0',
+                  borderRadius: 10,
+                  border: `1.5px solid ${isSelected ? C.brand : 'transparent'}`,
+                  background: isSelected ? `${C.brand}20` : isMaxed ? C.w03 : C.w05,
+                  color: isSelected ? C.brand : isMaxed ? C.w20 : C.w50,
+                  fontSize: 13,
+                  fontWeight: isSelected ? 700 : 500,
+                  cursor: isMaxed ? 'default' : 'pointer',
+                  transition: 'all 0.12s',
+                }}
+              >
+                {region}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* 확인 버튼 */}
+        <div style={{ padding: '0 14px 16px' }}>
+          <button
+            onClick={handleConfirm}
+            style={{
+              width: '100%',
+              height: 48,
+              borderRadius: 14,
+              border: 'none',
+              background: C.brand,
+              color: 'white',
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            {localSelected.includes('전국') ? '전국 선택' : `${localSelected.length}개 지역 선택`} 완료
+          </button>
+        </div>
+      </div>
+    </>
   )
 }

@@ -1,26 +1,35 @@
-import { BottomNav } from '@/components/layout/BottomNav'
-import { TopBar } from '@/components/layout/TopBar'
-import { MegaphoneBanner } from '@/components/features/MegaphoneBanner'
+'use client'
+
+import { useTheme } from '@/lib/theme'
+import { TopBar, BottomNav, WriteFAB } from '@/components/layout'
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { C } = useTheme()
+
   return (
-    <div className="relative min-h-dvh max-w-mobile mx-auto bg-[#0F0F0F]">
-      {/* 상단 바 */}
+    <div
+      className="mobile-container"
+      style={{ background: C.bg, transition: 'background 0.2s' }}
+    >
       <TopBar />
-
-      {/* 메가폰 배너 */}
-      <MegaphoneBanner />
-
-      {/* 메인 콘텐츠 */}
-      <main className="pt-14 pb-nav page-enter">
+      
+      <div
+        className="scrollable"
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+        }}
+      >
         {children}
-      </main>
-
-      {/* 하단 네비 */}
+      </div>
+      
+      <WriteFAB />
       <BottomNav />
     </div>
   )

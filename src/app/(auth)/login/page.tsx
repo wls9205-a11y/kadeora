@@ -1,98 +1,138 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTheme } from '@/lib/theme'
+import { Logo, Spinner } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
-import { cn } from '@/lib/utils'
 
-export const dynamic = 'force-dynamic'
-
-function LoginContent() {
-  const [loading, setLoading] = useState<'kakao' | 'google' | null>(null)
+export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const next = searchParams.get('next') ?? '/'
-  const supabase = createClient()
+  const { C } = useTheme()
+  const [loading, setLoading] = useState<string | null>(null)
 
-  async function handleKakao() {
-    setLoading('kakao')
+  const handleLogin = async (provider: 'kakao' | 'google' | 'phone') => {
+    setLoading(provider)
+    const supabase = createClient()
+
     try {
+      if (provider === 'phone') {
+        // 전화번호 로그인은 별도 페이지로 이동
+        router.push('/login/phone')
+        return
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'kakao',
-        options: { redirectTo: `${window.location.origin}/auth/callback?next=${next}` },
+        provider: provider === 'kakao' ? 'kakao' : 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
+
       if (error) throw error
-    } catch {
-      toast.error('카카오 로그인 실패')
+    } catch (error) {
+      console.error('Login error:', error)
       setLoading(null)
     }
   }
 
-  async function handleGoogle() {
-    setLoading('google')
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: `${window.location.origin}/auth/callback?next=${next}` },
-      })
-      if (error) throw error
-    } catch {
-      toast.error('구글 로그인 실패')
-      setLoading(null)
-    }
-  }
+  const loginButtons = [
+    { id: 'kakao', label: '카카오로 시작하기', bg: '#FEE500', color: '#191600', icon: '💬' },
+    { id: 'google', label: 'Google로 시작하기', bg: 'rgba(255,255,255,0.06)', color: C.text, border: true, icon: '🔍' },
+    { id: 'phone', label: '휴대폰 번호로 시작하기', bg: 'rgba(255,255,255,0.03)', color: C.w50, border: true, icon: '📱' },
+  ] as const
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6 bg-[#0F0F0F]">
-      <div className="mb-12 text-center">
-        <h1 className="text-5xl font-black text-brand mb-2 tracking-tight">카더라</h1>
-        <p className="text-white/40 text-sm">동네 소문의 중심</p>
-      </div>
-      <div className="w-full max-w-xs flex flex-col gap-3">
-        <button
-          onClick={handleKakao}
-          disabled={!!loading}
-          className={cn(
-            'w-full h-14 rounded-2xl font-semibold text-[#191600] text-[15px]',
-            'flex items-center justify-center gap-3',
-            'bg-[#FEE500] active:brightness-90',
-            'transition-all duration-150 active:scale-[0.98]',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
-          )}
+    <div
+      className="mobile-container"
+      style={{
+        background: C.bg,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+        gap: 40,
+      }}
+    >
+      {/* 로고 영역 */}
+      <div className="fade-in" style={{ textAlign: 'center' }}>
+        <Logo size={60} />
+        <h1
+          style={{
+            fontSize: 40,
+            fontWeight: 900,
+            letterSpacing: -1.5,
+            marginTop: 14,
+            background: `linear-gradient(135deg, ${C.text} 20%, ${C.brandLight})`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
         >
-          {loading === 'kakao' ? (
-            <span className="w-5 h-5 border-2 border-[#191600]/30 border-t-[#191600] rounded-full animate-spin" />
-          ) : '카카오로 시작하기'}
-        </button>
-        <button
-          onClick={handleGoogle}
-          disabled={!!loading}
-          className={cn(
-            'w-full h-14 rounded-2xl font-semibold text-white text-[15px]',
-            'flex items-center justify-center gap-3',
-            'bg-white/[0.08] border border-white/[0.1]',
-            'hover:bg-white/[0.12] active:bg-white/[0.06]',
-            'transition-all duration-150 active:scale-[0.98]',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
-          )}
-        >
-          {loading === 'google' ? (
-            <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-          ) : 'Google로 시작하기'}
-        </button>
+          카더라
+        </h1>
+        <p style={{ color: C.w35, fontSize: 14, marginTop: 6, letterSpacing: 2 }}>
+          동네 소문의 중심
+        </p>
       </div>
-      <p className="mt-8 text-center text-[11px] text-white/20 leading-relaxed">
+
+      {/* 로그인 버튼 */}
+      <div
+        className="fade-in"
+        style={{
+          width: '100%',
+          maxWidth: 320,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+          animationDelay: '0.1s',
+        }}
+      >
+        {loginButtons.map(btn => (
+          <button
+            key={btn.id}
+            onClick={() => handleLogin(btn.id)}
+            disabled={loading !== null}
+            style={{
+              height: 52,
+              borderRadius: 14,
+              border: btn.border ? `1px solid ${C.w10}` : 'none',
+              background: btn.bg,
+              color: btn.color,
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              transition: 'all 0.15s',
+              opacity: loading && loading !== btn.id ? 0.4 : 1,
+            }}
+          >
+            {loading === btn.id ? (
+              <Spinner color={btn.color} />
+            ) : (
+              <>
+                {btn.icon} {btn.label}
+              </>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* 약관 안내 */}
+      <p
+        style={{
+          marginTop: 28,
+          fontSize: 11,
+          color: C.w10,
+          textAlign: 'center',
+          lineHeight: 1.8,
+        }}
+      >
         로그인 시 카더라의 이용약관 및 개인정보처리방침에 동의하게 됩니다.
       </p>
     </div>
-  )
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="min-h-dvh bg-[#0F0F0F]" />}>
-      <LoginContent />
-    </Suspense>
   )
 }

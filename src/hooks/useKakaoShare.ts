@@ -1,84 +1,82 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useCallback } from 'react'
 
 declare global {
   interface Window {
-    Kakao: {
-      init: (key: string) => void
-      isInitialized: () => boolean
-      Share: {
-        sendDefault: (options: KakaoShareOptions) => void
-      }
-    }
+    Kakao: any
   }
 }
 
-interface KakaoShareOptions {
-  objectType: 'feed'
-  content: {
-    title: string
-    description?: string
-    imageUrl?: string
-    link: { mobileWebUrl: string; webUrl: string }
-  }
-  buttons?: Array<{
-    title: string
-    link: { mobileWebUrl: string; webUrl: string }
-  }>
-}
-
-interface KakaoShareParams {
+interface ShareOptions {
   title: string
-  description?: string
+  description: string
   imageUrl?: string
-  url: string
-  postId: number
+  link: string
+  buttonText?: string
 }
 
 export function useKakaoShare() {
-  const initialized = useRef(false)
-
   useEffect(() => {
-    if (initialized.current) return
-    const jsKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY
-    if (!jsKey) return
-
-    const script = document.createElement('script')
-    script.src = 'https://developers.kakao.com/sdk/js/kakao.min.js'
-    script.onload = () => {
-      if (window.Kakao && !window.Kakao.isInitialized()) {
-        window.Kakao.init(jsKey)
-        initialized.current = true
+    // Kakao SDK 로드
+    if (typeof window !== 'undefined' && !window.Kakao) {
+      const script = document.createElement('script')
+      script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.6.0/kakao.min.js'
+      script.async = true
+      script.onload = () => {
+        if (window.Kakao && !window.Kakao.isInitialized()) {
+          // TODO: 실제 카카오 앱 키로 교체
+          window.Kakao.init('YOUR_KAKAO_APP_KEY')
+        }
       }
+      document.head.appendChild(script)
     }
-    document.head.appendChild(script)
   }, [])
 
-  function shareToKakao({ title, description, imageUrl, url }: KakaoShareParams) {
-    if (!window.Kakao?.isInitialized()) {
-      // 폴백: URL 복사
-      navigator.clipboard.writeText(url)
+  const share = useCallback(({ title, description, imageUrl, link, buttonText = '자세히 보기' }: ShareOptions) => {
+    if (typeof window === 'undefined' || !window.Kakao) {
+      console.error('Kakao SDK not loaded')
       return false
     }
 
-    window.Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title,
-        description: description ?? '카더라에서 확인하세요',
-        imageUrl: imageUrl ?? `${window.location.origin}/og-default.png`,
-        link: { mobileWebUrl: url, webUrl: url },
-      },
-      buttons: [
-        {
-          title: '카더라에서 보기',
-          link: { mobileWebUrl: url, webUrl: url },
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title,
+          description,
+          imageUrl: imageUrl || 'https://kadeora.vercel.app/icon.svg',
+          link: {
+            mobileWebUrl: link,
+            webUrl: link,
+          },
         },
-      ],
-    })
-    return true
-  }
+        buttons: [
+          {
+            title: buttonText,
+            link: {
+              mobileWebUrl: link,
+              webUrl: link,
+            },
+          },
+        ],
+      })
+      return true
+    } catch (error) {
+      console.error('Kakao share error:', error)
+      return false
+    }
+  }, [])
 
-  return { shareToKakao }
+  const sharePost = useCallback((postId: string, title: string, content: string) => {
+    const link = `https://kadeora.vercel.app/post/${postId}`
+    return share({
+      title,
+      description: content.slice(0, 100) + (content.length > 100 ? '...' : ''),
+      link,
+      buttonText: '게시글 보기',
+    })
+  }, [share])
+
+  return { share, sharePost }
 }

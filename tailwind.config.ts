@@ -10,78 +10,65 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // 카더라 브랜드 컬러
         brand: {
           DEFAULT: '#FF4B36',
-          50: '#FFF1EF',
-          100: '#FFE0DB',
-          200: '#FFC1B8',
-          300: '#FF9485',
-          400: '#FF6B58',
-          500: '#FF4B36',
-          600: '#E8341F',
-          700: '#C22817',
-          800: '#9C2014',
-          900: '#7A1C12',
+          light: '#FF6B58',
+          dark: '#E8341F',
         },
-        // 다크 UI 기반
+        bull: '#E8341F',
+        bear: '#2563EB',
         surface: {
-          DEFAULT: '#0F0F0F',
-          50: '#1A1A1A',
-          100: '#252525',
-          200: '#2F2F2F',
-          300: '#3A3A3A',
+          1: 'var(--surface-1)',
+          2: 'var(--surface-2)',
+          3: 'var(--surface-3)',
+          4: 'var(--surface-4)',
         },
-        // 주식 컬러
-        bull: '#FF4B36',   // 상승 (한국식 빨강)
-        bear: '#2563EB',   // 하락 (한국식 파랑)
       },
       fontFamily: {
-        sans: ['Pretendard Variable', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-      },
-      screens: {
-        xs: '375px',
-        sm: '640px',
-        md: '768px',
-        lg: '1024px',
-        xl: '1280px',
+        pretendard: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       maxWidth: {
         mobile: '430px',
       },
+      spacing: {
+        'bottom-nav': '64px',
+        'safe-bottom': 'env(safe-area-inset-bottom, 0px)',
+      },
       animation: {
-        'slide-up': 'slideUp 0.3s ease-out',
-        'slide-down': 'slideDown 0.3s ease-out',
-        'fade-in': 'fadeIn 0.2s ease-out',
-        'marquee': 'marquee 20s linear infinite',
-        'pulse-brand': 'pulseBrand 2s ease-in-out infinite',
+        'spin-slow': 'spin 0.6s linear infinite',
+        'slide-up': 'slideUp 0.3s ease-out both',
+        'fade-in': 'fadeIn 0.25s ease-out both',
+        'ticker': 'ticker 30s linear infinite',
+        'pulse-soft': 'pulse 2.4s ease-in-out infinite',
+        'shimmer': 'shimmer 3s linear infinite',
+        'float-badge': 'floatBadge 2s ease-in-out infinite',
+        'legend-pulse': 'legendPulse 2s ease-in-out infinite',
       },
       keyframes: {
         slideUp: {
           from: { transform: 'translateY(100%)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },
-        slideDown: {
-          from: { transform: 'translateY(-10px)', opacity: '0' },
-          to: { transform: 'translateY(0)', opacity: '1' },
-        },
         fadeIn: {
-          from: { opacity: '0' },
-          to: { opacity: '1' },
+          from: { opacity: '0', transform: 'translateY(6px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
         },
-        marquee: {
-          from: { transform: 'translateX(100%)' },
-          to: { transform: 'translateX(-100%)' },
+        ticker: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
         },
-        pulseBrand: {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(255,75,54,0.4)' },
-          '50%': { boxShadow: '0 0 0 8px rgba(255,75,54,0)' },
+        shimmer: {
+          '0%': { backgroundPosition: '200% center' },
+          '100%': { backgroundPosition: '-200% center' },
         },
-      },
-      backgroundImage: {
-        'gradient-brand': 'linear-gradient(135deg, #FF4B36 0%, #FF8C00 100%)',
-        'gradient-dark': 'linear-gradient(180deg, #0F0F0F 0%, #1A1A1A 100%)',
+        floatBadge: {
+          '0%, 100%': { transform: 'translateY(0) scale(1)' },
+          '50%': { transform: 'translateY(-3px) scale(1.06)' },
+        },
+        legendPulse: {
+          '0%, 100%': { boxShadow: '0 0 12px 3px #FFD70066, 0 0 32px 8px #F59E0B33' },
+          '50%': { boxShadow: '0 0 24px 8px #FFD700AA, 0 0 56px 16px #F59E0B66' },
+        },
       },
     },
   },

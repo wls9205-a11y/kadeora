@@ -1,83 +1,111 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/authStore'
 
 export function useAuth() {
-  const { user, profile, isLoading, setUser, setProfile, setLoading, reset } = useAuthStore()
-  const supabase = createClient()
+  const router = useRouter()
+  const { user, isLoading, isAuthenticated, setUser, logout: storeLogout } = useAuthStore()
 
-  useEffect(() => {
-    // 초기 세션 로드
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      if (user) {
-        loadProfile(user.id)
-      } else {
-        setLoading(false)
+  const refreshProfile = useCallback(async () => {
+    const supabase = createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    
+    if (authUser) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
+
+      if (profile) {
+        setUser(profile)
       }
-    })
+    }
+  }, [setUser])
 
-    // 세션 변경 구독
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentUser = session?.user ?? null
-      setUser(currentUser)
+  const logout = useCallback(async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    storeLogout()
+    router.push('/login')
+  }, [storeLogout, router])
 
-      if (currentUser) {
-        await loadProfile(currentUser.id)
-      } else {
-        reset()
-      }
-    })
+  const updatePoints = useCallback(async (amount: number, description: string) => {
+    if (!user) return false
 
-    return () => subscription.unsubscribe()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    const supabase = createClient()
+    const newPoints = user.points + amount
 
-  async function loadProfile(userId: string) {
-    const { data } = await supabase
+    const { error } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('id', userId)
+      .update({ points: newPoints })
+      .eq('id', user.id)
+
+    if (!error) {
+      await supabase.from('point_transactions').insert({
+        user_id: user.id,
+        amount,
+        type: amount > 0 ? 'earn' : 'spend',
+        description,
+      })
+
+      await refreshProfile()
+      return true
+    }
+
+    return false
+  }, [user, refreshProfile])
+
+  const checkAttendance = useCallback(async () => {
+    if (!user) return null
+
+    const supabase = createClient()
+    const today = new Date().toISOString().split('T')[0]
+
+    // 오늘 출석 여부 확인
+    const { data: existing } = await supabase
+      .from('attendance')
+      .select('id')
+      .eq('user_id', user.id)
+      .gte('attended_at', today)
       .single()
 
-    setProfile(data)
-    setLoading(false)
-  }
+    if (existing) {
+      return { alreadyChecked: true }
+    }
 
-  async function signInWithKakao() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (error) throw error
-  }
+    // 출석 체크
+    await supabase.from('attendance').insert({ user_id: user.id })
 
-  async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (error) throw error
-  }
+    // 연속 출석 계산
+    const consecutive = user.consecutive_attendance + 1
+    const isBonus = consecutive % 7 === 0
+    const points = 10 + (isBonus ? 30 : 0)
 
-  async function signOut() {
-    await supabase.auth.signOut()
-    reset()
-  }
+    await supabase
+      .from('profiles')
+      .update({
+        consecutive_attendance: consecutive,
+        total_attendance: user.total_attendance + 1,
+        points: user.points + points,
+      })
+      .eq('id', user.id)
+
+    await refreshProfile()
+
+    return { points, isBonus, consecutive }
+  }, [user, refreshProfile])
 
   return {
     user,
-    profile,
     isLoading,
-    isAuthenticated: !!user,
-    signInWithKakao,
-    signInWithGoogle,
-    signOut,
+    isAuthenticated,
+    logout,
+    refreshProfile,
+    updatePoints,
+    checkAttendance,
   }
 }
