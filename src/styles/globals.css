@@ -1,4 +1,6 @@
-@import "tailwindcss";
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --kd-bg: #0A0E17;
@@ -9,21 +11,12 @@
   --kd-text-secondary: #94A3B8;
   --kd-text-muted: #64748B;
   --kd-primary: #3B82F6;
-  --kd-primary-hover: #2563EB;
-  --kd-accent: #F59E0B;
-  --kd-success: #10B981;
   --kd-danger: #EF4444;
-  --kd-warning: #F59E0B;
+  --kd-success: #10B981;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  color-scheme: dark;
-}
-
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
 body {
   margin: 0;
   background: var(--kd-bg);
@@ -32,21 +25,8 @@ body {
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
 }
-
-/* 스크롤바 */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--kd-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--kd-text-muted); }
-
-/* 선택 영역 */
-::selection {
-  background: rgba(59, 130, 246, 0.3);
-  color: white;
-}
-
-/* 포커스 링 — 접근성 */
-:focus-visible {
-  outline: 2px solid var(--kd-primary);
-  outline-offset: 2px;
-}
+::selection { background: rgba(59, 130, 246, 0.3); color: white; }
+:focus-visible { outline: 2px solid var(--kd-primary); outline-offset: 2px; }
