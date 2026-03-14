@@ -1,1 +1,324 @@
-甧敳挠楬湥❴਍਍浩潰瑲笠甠敳瑓瑡⁥⁽牦浯✠敲捡❴਍浩潰瑲䰠湩⁫牦浯✠敮瑸氯湩❫਍浩潰瑲笠甠敳桔浥⁥⁽牦浯✠⽀楬⽢桴浥❥਍浩潰瑲笠䈠瑵潴⁮⁽牦浯✠⽀潣灭湯湥獴甯❩਍浩潰瑲笠倠獯䍴牡⁤⁽牦浯✠⽀潣灭湯湥獴是慥畴敲❳਍浩潰瑲笠䜠䅒䕄ⱓ朠瑥片摡䥥普⁯⁽牦浯✠⽀楬⽢瑵汩❳਍਍⼯㼠鲋㼠ꦚ㼿뀿鷬㾴ਿ潣獮⁴位䭃啟䕓⁒‽ൻ 渠捩湫浡㩥✠갿黬㾐ꂋⰧ਍†牧摡㩥㜠ബ 椠普畬湥散›㈵〰ബ 椠偳敲業浵›牴敵ബ 戠潩›벣诬⾝뛫㾀낂ㄠ㼰ꢰ㼠邞㼿肰맬겈逿㿬肧㼿뛫鶄㼿ꋬ蒕ꤿ诫㾈✿ബ 瀠獯䍴畯瑮›㈱ⰸ਍†潦汬睯牥潃湵㩴㈠〴ⰰ਍†潦汬睯湩䍧畯瑮›㤸ബ 瀠楯瑮㩳㌠㔴ⰰ਍†潣獮捥瑵癩䅥瑴湥慤据㩥㈠ⰳ਍†潴慴䅬瑴湥慤据㩥ㄠ㘵ബ紊਍਍潣獮⁴位䭃啟䕓归佐呓⁓‽൛ 笠਍††摩›ㄧⰧ਍††畡桴牯楟㩤✠✱ബ †挠瑡来牯㩹✠瑳捯❫愠⁳潣獮ⱴ਍††楴汴㩥✠밿蓬㾱邞㤠꟫蒠㼿냪㾀ꂕ맪钚✿ബ †挠湯整瑮›颰迫㾲갿鷬㾴㼿떳룪邗㼠뒖㼿닪馰㿬㼿갿鿫㾶頿닪㾬㾀Ⱗ਍††慴獧›❛밿蓬㾱邞Ⱗ✠냫蒏달崿ബ †椠彳湡湯浹畯㩳映污敳ബ †椠彳潨㩴琠畲ⱥ਍††獩灟敲業浵›慦獬ⱥ਍††楬敫彳潣湵㩴㌠㈴ബ †挠浯敭瑮彳潣湵㩴㠠ⰹ਍††楶睥彳潣湵㩴㈠㐸ⰱ਍††敲楧湯›畮汬ബ †挠敲瑡摥慟㩴渠睥䐠瑡⡥⸩潴卉协牴湩⡧Ⱙ਍††灵慤整彤瑡›敮⁷慄整⤨琮䥯体瑓楲杮⤨ബ †愠瑵潨㩲笠椠㩤✠✱‬楮正慮敭›㼧邞頿诬➠‬牧摡㩥㜠‬湩汦敵据㩥㔠〲ⰰ愠慶慴彲牵㩬渠汵ⱬ戠潩›畮汬‬敲楧湯›畮汬‬湩整敲瑳㩳渠汵ⱬ椠彳牰浥畩㩭映污敳‬潰湩獴›ⰰ挠湯敳畣楴敶慟瑴湥慤据㩥〠‬潴慴彬瑡整摮湡散›ⰰ映汯潬敷彲潣湵㩴〠‬潦汬睯湩彧潣湵㩴〠‬潰瑳损畯瑮›ⰰ挠敲瑡摥慟㩴✠Ⱗ甠摰瑡摥慟㩴✠‧ⱽ਍†ⱽ਍൝ഊ攊灸牯⁴敤慦汵⁴畦据楴湯倠潲楦敬慐敧⤨笠਍†潣獮⁴⁻⁃⁽‽獵呥敨敭⤨਍†潣獮⁴瑛扡‬敳呴扡⁝‽獵卥慴整✼潰瑳❳簠✠牧摡❥⠾瀧獯獴⤧਍਍†潣獮⁴牧摡䥥普⁯‽敧䝴慲敤湉潦䴨䍏彋单剅朮慲敤ഩ 挠湯瑳渠硥䝴慲敤㴠䴠䍏彋单剅朮慲敤㰠ㄠ‰‿敧䝴慲敤湉潦䴨䍏彋单剅朮慲敤⬠ㄠ ›畮汬਍†਍†⼯㼠貝㼠覸맪‿꟬視ꗫ蒳苬ධ 挠湯瑳挠牵敲瑮楍⁮‽牧摡䥥普⹯業൮ 挠湯瑳渠硥䵴湩㴠渠硥䝴慲敤㼠渠硥䝴慲敤洮湩㨠朠慲敤湉潦洮湩਍†潣獮⁴牰杯敲獳㴠渠硥䝴慲敤ഠ †㼠䴠瑡⹨業⡮〱ⰰ⠠䴨䍏彋单剅椮普畬湥散ⴠ挠牵敲瑮楍⥮⼠⠠敮瑸楍⁮‭畣牲湥䵴湩⤩⨠ㄠ〰ഩ †㨠ㄠ〰਍਍†敲畴湲⠠਍††搼癩挠慬獳慎敭∽慦敤椭≮ാ ††笠⨯㼠钍낰蓫₈⼪ൽ ††㰠楤൶ †††猠祴敬笽ൻ ††††栠楥桧㩴ㄠ〱ബ ††††戠捡杫潲湵㩤怠楬敮牡札慲楤湥⡴㌱搵来‬笤牧摡䥥普⹯潣潬絲〴‬笤牧摡䥥普⹯潣潬絲〱㘠┰‬牴湡灳牡湥⥴Ⱡ਍†††††潰楳楴湯›爧汥瑡癩❥ബ ††††漠敶晲潬㩷✠楨摤湥Ⱗ਍††††絽਍†††ാ †††笠牧摡䥥普⹯汧睯☠…ന ††††㰠楤൶ †††††猠祴敬笽ൻ ††††††瀠獯瑩潩㩮✠扡潳畬整Ⱗ਍†††††††湩敳㩴〠ബ ††††††戠捡杫潲湵㩤怠楬敮牡札慲楤湥⡴〱搵来‬牴湡灳牡湥⁴〴Ⱕ␠杻慲敤湉潦挮汯牯ㅽ‸〵Ⱕ琠慲獮慰敲瑮㘠┰怩ബ ††††††戠捡杫潲湵卤穩㩥✠〲┰ㄠ〰✥ബ ††††††愠楮慭楴湯›猧楨浭牥㌠⁳楬敮牡椠普湩瑩❥ബ †††††素ൽ ††††⼠ാ †††⤠ൽ ††㰠搯癩ാഊ ††㰠楤⁶瑳汹㵥筻瀠摡楤杮›〧ㄠ瀶❸‬慭杲湩潔㩰ⴠ〵素㹽਍††††⽻‪萿냫㾔₀‫렿꟬ₑ닫벊⨠累਍††††搼癩猠祴敬笽⁻楤灳慬㩹✠汦硥Ⱗ愠楬湧瑉浥㩳✠汦硥攭摮Ⱗ樠獵楴祦潃瑮湥㩴✠灳捡ⵥ敢睴敥❮‬慭杲湩潂瑴浯›〱素㹽਍†††††搼癩਍††††††汣獡乳浡㵥杻慲敤湉潦朮潬⁷‿朧慲敤札潬❷㨠✠紧਍††††††瑳汹㵥筻਍†††††††楷瑤㩨㜠ⰶ਍†††††††敨杩瑨›㘷ബ ††††††戠牯敤割摡畩㩳㈠ⰲ਍†††††††潢摲牥›㍠硰猠汯摩␠䍻戮絧Ⱡ਍†††††††慢正牧畯摮›池湩慥⵲牧摡敩瑮ㄨ㔳敤Ⱨ␠杻慲敤湉潦朮慲孤崰ⱽ␠杻慲敤湉潦朮慲孤牧摡䥥普⹯牧摡氮湥瑧⁨‭崱⥽Ⱡ਍†††††††楤灳慬㩹✠汦硥Ⱗ਍†††††††污杩䥮整獭›挧湥整❲ബ ††††††樠獵楴祦潃瑮湥㩴✠散瑮牥Ⱗ਍†††††††潦瑮楓敺›㠲ബ ††††††映湯坴楥桧㩴㤠〰ബ ††††††挠汯牯›眧楨整Ⱗ਍†††††††潢卸慨潤㩷朠慲敤湉潦朮潬⁷‿だ㐠硰㈠瀰⁸笤牧摡䥥普⹯潣潬絲〷⁠›渧湯❥ബ ††††††⼠ 瑀⵳硥数瑣攭牲牯਍†††††††ⴧ札❣›①杻慲敤湉潦挮汯牯㡽怸ബ ††††††映敬卸牨湩㩫〠ബ †††††素ൽ ††††㸠਍††††††䵻䍏彋单剅渮捩湫浡孥崰ൽ ††††㰠搯癩ാ ††††㰠楌歮栠敲㵦⼢牰景汩⽥摥瑩㸢਍††††††䈼瑵潴⁮牰浩牡⁹浳污㹬萿ꇫ㾜㼿醧⼼畂瑴湯ാ ††††㰠䰯湩㹫਍††††⼼楤㹶਍਍††††⽻‪됿ꛫ₄‫냫‿⼪ൽ †††㰠楤⁶瑳汹㵥筻搠獩汰祡›昧敬❸‬污杩䥮整獭›挧湥整❲‬慧㩰㜠‬慭杲湩潂瑴浯›ⰴ映敬坸慲㩰✠牷灡‧絽ാ ††††㰠ㅨ猠祴敬笽⁻潦瑮楓敺›〲‬潦瑮敗杩瑨›〸ⰰ挠汯牯›⹃整瑸素㹽䵻䍏彋单剅渮捩湫浡絥⼼ㅨാ ††††笠位䭃啟䕓⹒獩牐浥畩⁭☦㰠灳湡猠祴敬笽⁻潦瑮楓敺›〱‬潣潬㩲✠䘣䉂㉆✴素㹽㼿萿ꛫ뢯韬㲄猯慰㹮ൽ ††††㰠灳湡਍††††††瑳汹㵥筻਍†††††††潦瑮楓敺›㈱ബ ††††††映湯坴楥桧㩴㜠〰ബ ††††††瀠摡楤杮›㌧硰ㄠ瀰❸ബ ††††††戠牯敤割摡畩㩳㈠ⰰ਍†††††††慢正牧畯摮›池湩慥⵲牧摡敩瑮ㄨ㔳敤Ⱨ␠杻慲敤湉潦朮慲孤崰ⱽ␠杻慲敤湉潦朮慲孤牧摡䥥普⹯牧摡氮湥瑧⁨‭崱⥽Ⱡ਍†††††††潣潬㩲✠桷瑩❥ബ ††††††戠硯桓摡睯›牧摡䥥普⹯汧睯㼠怠‰瀲⁸〱硰␠杻慲敤湉潦挮汯牯㙽怰㨠✠潮敮Ⱗ਍††††††絽਍†††††ാ †††††笠牧摡䥥普⹯慢杤絥笠牧摡䥥普⹯慮敭ൽ ††††㰠猯慰㹮਍††††⼼楤㹶਍਍††††⽻‪谿냪ₜ⼪ൽ †††㰠⁰瑳汹㵥筻映湯却穩㩥ㄠⰳ挠汯牯›⹃㍷ⰵ氠湩䡥楥桧㩴ㄠ㘮‬慭杲湩潂瑴浯›㈱素㹽䵻䍏彋单剅戮潩㱽瀯ാഊ †††笠⨯㼠蒳⨠累਍††††搼癩猠祴敬笽⁻楤灳慬㩹✠汦硥Ⱗ朠灡›㘱‬慭杲湩潂瑴浯›㘱素㹽਍†††††孻਍††††††❛닪鲋룪➀‬位䭃啟䕓⹒潰瑳潃湵⹴潴瑓楲杮⤨ⱝ਍††††††❛鐿ꇫ㾜ⰿ䴠䍏彋单剅昮汯潬敷䍲畯瑮㸠‽〱〰㼠怠笤䴨䍏彋单剅昮汯潬敷䍲畯瑮⼠ㄠ〰⤰琮䙯硩摥ㄨ紩달‿›位䭃啟䕓⹒潦汬睯牥潃湵⹴潴瑓楲杮⤨ⱝ਍††††††❛鐿ꇫ㾜ⰿ䴠䍏彋单剅昮汯潬楷杮潃湵⹴潴瑓楲杮⤨ⱝ਍††††††❛갿鷬㾸ⰿ䴠䍏彋单剅瀮楯瑮⹳潴潌慣敬瑓楲杮⤨ⱝ਍†††††⹝慭⡰嬨慬敢ⱬ瘠污敵⥝㴠‾ന †††††㰠楤⁶敫㵹汻扡汥⁽瑳汹㵥筻琠硥䅴楬湧›挧湥整❲素㹽਍†††††††瀼猠祴敬笽⁻潦瑮楓敺›㜱‬潦瑮敗杩瑨›〸ⰰ挠汯牯›⹃整瑸素㹽登污敵㱽瀯ാ ††††††㰠⁰瑳汹㵥筻映湯却穩㩥ㄠⰱ挠汯牯›⹃㉷‰絽笾慬敢絬⼼㹰਍††††††⼼楤㹶਍†††††⤩ൽ †††㰠搯癩ാഊ †††笠⨯鲶蓬₝萿駭₩⼪ൽ †††㰠楤⁶瑳汹㵥筻瀠摡楤杮›㐱‬潢摲牥慒楤獵›㐱‬慢正牧畯摮›⹃㉳‬潢摲牥›ㅠ硰猠汯摩␠䍻眮㔰恽‬慭杲湩潂瑴浯›㈱素㹽਍†††††搼癩猠祴敬笽⁻楤灳慬㩹✠汦硥Ⱗ樠獵楴祦潃瑮湥㩴✠灳捡ⵥ敢睴敥❮‬污杩䥮整獭›挧湥整❲‬慭杲湩潂瑴浯›〱素㹽਍††††††猼慰⁮瑳汹㵥筻映湯却穩㩥ㄠⰴ映湯坴楥桧㩴㜠〰‬潣潬㩲䌠琮硥⁴絽㼾ꖔ鲶蓬₝萿駭㲩猯慰㹮਍††††††䈼瑵潴⁮牰浩牡⁹浳污㹬ꐿ諫ₘ뛬鶄⼼畂瑴湯ാ ††††㰠搯癩ാ ††††㰠楤⁶瑳汹㵥筻搠獩汰祡›昧敬❸‬慧㩰㈠‰絽ാ †††††㰠楤㹶਍†††††††瀼猠祴敬笽⁻潦瑮楓敺›〲‬潦瑮敗杩瑨›〸ⰰ挠汯牯›⹃整瑸素㹽䵻䍏彋单剅挮湯敳畣楴敶瑁整摮湡散㽽⼿㹰਍†††††††瀼猠祴敬笽⁻潦瑮楓敺›ㄱ‬潣潬㩲䌠眮〲素㹽뀿蛬₍뛬鶄⼼㹰਍††††††⼼楤㹶਍††††††搼癩ാ ††††††㰠⁰瑳汹㵥筻映湯却穩㩥㈠ⰰ映湯坴楥桧㩴㠠〰‬潣潬㩲䌠琮硥⁴絽笾位䭃啟䕓⹒潴慴䅬瑴湥慤据絥㼿瀯ാ ††††††㰠⁰瑳汹㵥筻映湯却穩㩥ㄠⰱ挠汯牯›⹃㉷‰絽㼾膠鲶蓬㲝瀯ാ †††††㰠搯癩ാ ††††㰠搯癩ാ †††㰠搯癩ാഊ †††笠⨯㼠覸蒧雭₉⼪ൽ †††㰠楤൶ ††††猠祴敬笽ൻ †††††瀠摡楤杮›㘱ബ †††††戠牯敤割摡畩㩳ㄠⰶ਍††††††慢正牧畯摮›⹃㉳ബ †††††戠牯敤㩲怠瀱⁸潳楬⁤笤牧摡䥥普⹯潣潬絲〳Ⱡ਍††††††慭杲湩潂瑴浯›㘱ബ †††††瀠獯瑩潩㩮✠敲慬楴敶Ⱗ਍††††††癯牥汦睯›栧摩敤❮ബ ††††素ൽ †††㸠਍†††††杻慲敤湉潦朮潬⁷☦⠠਍††††††搼癩਍†††††††瑳汹㵥筻਍††††††††潰楳楴湯›愧獢汯瑵❥ബ †††††††椠獮瑥›ⰰ਍††††††††慢正牧畯摮›池湩慥⵲牧摡敩瑮ㄨ㔳敤Ⱨ␠杻慲敤湉潦挮汯牯ぽⰶ琠慲獮慰敲瑮㜠┰怩ബ †††††††瀠楯瑮牥癅湥獴›渧湯❥ബ ††††††素ൽ †††††⼠ാ ††††⤠ൽ ††††㰠楤⁶瑳汹㵥筻搠獩汰祡›昧敬❸‬番瑳晩䍹湯整瑮›猧慰散戭瑥敷湥Ⱗ愠楬湧瑉浥㩳✠散瑮牥Ⱗ洠牡楧䉮瑯潴㩭ㄠ‰絽ാ †††††㰠楤⁶瑳汹㵥筻搠獩汰祡›昧敬❸‬污杩䥮整獭›挧湥整❲‬慧㩰㠠素㹽਍†††††††猼慰⁮瑳汹㵥筻映湯却穩㩥㈠′絽笾牧摡䥥普⹯慢杤絥⼼灳湡ാ ††††††㰠楤㹶਍††††††††瀼猠祴敬笽⁻潦瑮楓敺›㌱‬潦瑮敗杩瑨›〸ⰰ挠汯牯›牧摡䥥普⹯潣潬⁲絽笾牧摡䥥普⹯慮敭㱽瀯ാ †††††††㰠⁰瑳汹㵥筻映湯却穩㩥ㄠⰰ挠汯牯›⹃㉷‰絽㼾겞㼠覸⼼㹰਍†††††††⼼楤㹶਍††††††⼼楤㹶਍††††††搼癩猠祴敬笽⁻整瑸汁杩㩮✠楲桧❴素㹽਍†††††††瀼猠祴敬笽⁻潦瑮楓敺›㠱‬潦瑮敗杩瑨›〹ⰰ挠汯牯›牧摡䥥普⹯潣潬⁲絽笾位䭃啟䕓⹒湩汦敵据⹥潴潌慣敬瑓楲杮⤨㱽瀯ാ ††††††㰠⁰瑳汹㵥筻映湯却穩㩥ㄠⰰ挠汯牯›⹃㉷‰絽㼾ꖖ㼿逿裬㲘瀯ാ †††††㰠搯癩ാ ††††㰠搯癩ാഊ ††††笠⨯蒧雭㾰⼪ൽ ††††㰠楤⁶瑳汹㵥筻栠楥桧㩴ㄠⰰ戠牯敤割摡畩㩳㘠‬慢正牧畯摮›⹃ぷⰵ漠敶晲潬㩷✠楨摤湥Ⱗ洠牡楧䉮瑯潴㩭㠠素㹽਍††††††搼癩਍†††††††瑳汹㵥筻਍††††††††敨杩瑨›ㄧ〰✥ബ †††††††戠牯敤割摡畩㩳㘠ബ †††††††眠摩桴›①灻潲牧獥絳急ബ †††††††戠捡杫潲湵㩤怠楬敮牡札慲楤湥⡴〹敤Ⱨ␠杻慲敤湉潦朮慲孤崰ⱽ␠杻慲敤湉潦朮慲孤牧摡䥥普⹯牧摡氮湥瑧⁨‭崱⥽Ⱡ਍††††††††潢卸慨潤㩷朠慲敤湉潦朮潬⁷‿だ〠㠠硰␠杻慲敤湉潦挮汯牯恽㨠✠潮敮Ⱗ਍††††††††牴湡楳楴湯›眧摩桴〠㘮⁳慥敳Ⱗ਍†††††††絽਍††††††㸯਍†††††⼼楤㹶਍਍†††††湻硥䝴慲敤㼠⠠਍††††††搼癩猠祴敬笽⁻楤灳慬㩹✠汦硥Ⱗ樠獵楴祦潃瑮湥㩴✠灳捡ⵥ敢睴敥❮‬污杩䥮整獭›挧湥整❲素㹽਍†††††††瀼猠祴敬笽⁻潦瑮楓敺›ㄱ‬潣潬㩲䌠眮㔳素㹽਍††††††††ꐿ鷬㪌㰠灳湡猠祴敬笽⁻潣潬㩲渠硥䝴慲敤挮汯牯‬潦瑮敗杩瑨›〷‰絽笾敮瑸片摡⹥慢杤絥笠敮瑸片摡⹥慮敭㱽猯慰㹮਍†††††††⼼㹰਍†††††††瀼猠祴敬笽⁻潦瑮楓敺›ㄱ‬潣潬㩲朠慲敤湉潦挮汯牯‬潦瑮敗杩瑨›〷‰絽ാ †††††††⬠⡻敮瑸片摡⹥業⁮‭位䭃啟䕓⹒湩汦敵据⥥琮䱯捯污卥牴湩⡧紩㼿萿髬ඔ ††††††㰠瀯ാ †††††㰠搯癩ാ ††††⤠㨠⠠਍††††††瀼猠祴敬笽⁻潦瑮楓敺›㈱‬潣潬㩲✠䘣䑆〷✰‬潦瑮敗杩瑨›〷ⰰ琠硥䅴楬湧›挧湥整❲素㹽輿₆뗬ꂳ㼠覸㼠놄㰡瀯ാ ††††⤠ൽ †††㰠搯癩ാ ††㰠搯癩ാഊ ††笠⨯㼠⨿累਍†††搼癩猠祴敬笽⁻楤灳慬㩹✠汦硥Ⱗ戠牯敤䉲瑯潴㩭怠瀱⁸潳楬⁤笤⹃ぷ紵⁠絽ാ †††笠൛ ††††笠椠㩤✠潰瑳❳‬慬敢㩬✠닪鲋룪➀素ബ ††††笠椠㩤✠牧摡❥‬慬敢㩬✠넿룪➉素ബ †††崠洮灡琨㴠‾ന ††††㰠畢瑴湯਍††††††敫㵹瑻椮絤਍††††††湯汃捩㵫⡻ 㸽猠瑥慔⡢⹴摩愠⁳祴数景琠扡紩਍††††††瑳汹㵥筻਍†††††††汦硥›ⰱ਍†††††††慰摤湩㩧✠ㄱ硰〠Ⱗ਍†††††††潦瑮楓敺›㌱ബ ††††††映湯坴楥桧㩴琠扡㴠㴽琠椮⁤‿〷‰›〵ⰰ਍†††††††潣潬㩲琠扡㴠㴽琠椮⁤‿⹃整瑸㨠䌠眮㔳ബ ††††††戠牯敤䉲瑯潴㩭怠⸲瀵⁸潳楬⁤笤慴⁢㴽‽⹴摩㼠䌠戮慲摮㨠✠牴湡灳牡湥❴恽ബ ††††††戠捡杫潲湵㩤✠潮敮Ⱗ਍†††††††潢摲牥›渧湯❥ബ ††††††戠牯敤䉲瑯潴卭祴敬›猧汯摩Ⱗ਍†††††††畣獲牯›瀧楯瑮牥Ⱗ਍††††††絽਍†††††ാ †††††笠⹴慬敢絬਍†††††⼼畢瑴湯ാ †††⤠紩਍†††⼼楤㹶਍਍†††⽻‪뷬邅룬⨿累਍†††瑻扡㴠㴽✠潰瑳❳㼠⠠਍††††搼癩猠祴敬笽⁻慰摤湩䉧瑯潴㩭㈠‰絽ാ ††††笠位䭃啟䕓归佐呓⹓慭⡰潰瑳㴠‾ന †††††㰠潐瑳慃摲欠祥笽潰瑳椮絤瀠獯㵴灻獯絴⼠ാ ††††⤠紩਍††††⼼楤㹶਍††† ›ന †††㰠楤⁶瑳汹㵥筻瀠摡楤杮›ㄧ瀴⁸㘱硰ㄠ〰硰Ⱗ搠獩汰祡›昧敬❸‬汦硥楄敲瑣潩㩮✠潣畬湭Ⱗ朠灡›〱素㹽਍†††††佻橢捥⹴湥牴敩⡳則䑁卅⸩慭⡰嬨敬敶ⱬ椠普嵯 㸽笠਍††††††潣獮⁴敬敶乬浵㴠瀠牡敳湉⡴敬敶⥬਍††††††潣獮⁴獩畃牲湥⁴‽敬敶乬浵㴠㴽䴠䍏彋单剅朮慲敤਍††††††潣獮⁴獩慐獳摥㴠氠癥汥畎⁭‼位䭃啟䕓⹒牧摡൥ †††††挠湯瑳椠䱳捯敫⁤‽椡偳獡敳⁤☦℠獩畃牲湥൴ഊ †††††爠瑥牵⁮ന ††††††㰠楤൶ †††††††欠祥笽敬敶絬਍††††††††汣獡乳浡㵥恻慦敤椭⁮笤湩潦朮潬⁷☦℠獩潌正摥㼠✠牧摡ⵥ汧睯‧›✧恽ൽ †††††††猠祴敬笽ൻ ††††††††瀠摡楤杮›ㄧ瀴⁸㘱硰Ⱗ਍†††††††††潢摲牥慒楤獵›㠱ബ ††††††††戠捡杫潲湵㩤椠䱳捯敫⁤‿⹃㉳㨠椠䍳牵敲瑮㼠怠笤湩潦朮慲孤崰ㅽ怰㨠䌠献ⰲ਍†††††††††潢摲牥›獩畃牲湥⁴‿ㅠ㔮硰猠汯摩␠楻普⹯潣潬絲〵⁠›ㅠ硰猠汯摩␠䍻眮㌰恽ബ ††††††††搠獩汰祡›昧敬❸ബ ††††††††愠楬湧瑉浥㩳✠散瑮牥Ⱗ਍†††††††††慧㩰ㄠⰲ਍†††††††††灯捡瑩㩹椠䱳捯敫⁤‿⸰㈳㨠ㄠബ ††††††††⼠ 瑀⵳硥数瑣攭牲牯਍†††††††††ⴧ札❣›①楻普⹯潣潬絲㠸Ⱡ਍††††††††絽਍†††††††ാ †††††††㰠灳湡猠祴敬笽⁻潦瑮楓敺›㐲素㹽楻普⹯慢杤絥⼼灳湡ാ †††††††㰠楤⁶瑳汹㵥筻映敬㩸ㄠ素㹽਍†††††††††瀼猠祴敬笽⁻潦瑮楓敺›㐱‬潦瑮敗杩瑨›〷ⰰ挠汯牯›獩潌正摥㼠䌠眮㔳㨠椠普⹯潣潬⁲絽笾湩潦渮浡絥⼼㹰਍†††††††††瀼猠祴敬笽⁻潦瑮楓敺›ㄱ‬潣潬㩲䌠眮〲素㹽楻普⹯数歲㱽瀯ാ †††††††㰠搯癩ാ †††††††㰠楤൶ ††††††††猠祴敬笽ൻ †††††††††瀠摡楤杮›㐧硰ㄠ瀰❸ബ †††††††††戠牯敤割摡畩㩳㠠ബ †††††††††戠捡杫潲湵㩤椠䱳捯敫⁤‿⹃ぷ‵›池湩慥⵲牧摡敩瑮ㄨ㔳敤Ⱨ␠楻普⹯牧摡せ絝‬笤湩潦朮慲孤湩潦朮慲⹤敬杮桴ⴠㄠ絝怩ബ †††††††††戠牯敤㩲椠䱳捯敫⁤‿ㅠ硰猠汯摩␠䍻眮㔰恽㨠怠瀱⁸潳楬⁤笤湩潦挮汯牯㑽怴ബ ††††††††素ൽ †††††††㸠਍†††††††††猼慰൮ †††††††††猠祴敬笽ൻ ††††††††††映湯却穩㩥ㄠⰱ਍†††††††††††潦瑮敗杩瑨›〸ⰰ਍†††††††††††潣潬㩲椠䱳捯敫⁤‿⹃㉷‰›眧楨整Ⱗ਍†††††††††††潦瑮慆業祬›洧湯獯慰散Ⱗ਍††††††††††絽਍†††††††††ാ †††††††††䰠⹶汻癥汥ൽ ††††††††㰠猯慰㹮਍††††††††⼼楤㹶਍†††††††⼼楤㹶਍††††††ഩ ††††素紩਍††††⼼楤㹶਍†††紩਍††⼼楤㹶਍†ഩ紊਍਍
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { useTheme } from '@/lib/theme'
+import { Button } from '@/components/ui'
+import { PostCard } from '@/components/features'
+import { GRADES, getGradeInfo } from '@/lib/utils'
+
+// 임시 사용자 데이터
+const MOCK_USER = {
+  nickname: '투자의신',
+  grade: 7,
+  influence: 5200,
+  isPremium: true,
+  bio: '주식/부동산 10년차 투자자. 가치투자와 지역 분석을 좋아합니다.',
+  postCount: 128,
+  followerCount: 2400,
+  followingCount: 89,
+  points: 3450,
+  consecutiveAttendance: 23,
+  totalAttendance: 156,
+}
+
+const MOCK_USER_POSTS = [
+  {
+    id: '1',
+    author_id: '1',
+    category: 'stock' as const,
+    title: '삼성전자 9만전자 가능할까요?',
+    content: '반도체 사이클 회복기에 접어든 것 같은데 여러분 의견은?',
+    tags: ['삼성전자', '반도체'],
+    is_anonymous: false,
+    is_hot: true,
+    is_premium: false,
+    likes_count: 342,
+    comments_count: 89,
+    views_count: 2841,
+    region: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    author: { id: '1', nickname: '투자의신', grade: 7, influence: 5200, avatar_url: null, bio: null, region: null, interests: null, is_premium: false, points: 0, consecutive_attendance: 0, total_attendance: 0, follower_count: 0, following_count: 0, post_count: 0, created_at: '', updated_at: '' },
+  },
+]
+
+export default function ProfilePage() {
+  const { C } = useTheme()
+  const [tab, setTab] = useState<'posts' | 'grade'>('posts')
+
+  const gradeInfo = getGradeInfo(MOCK_USER.grade)
+  const nextGrade = MOCK_USER.grade < 10 ? getGradeInfo(MOCK_USER.grade + 1) : null
+  
+  // 다음 등급까지 진행률 계산
+  const currentMin = gradeInfo.min
+  const nextMin = nextGrade ? nextGrade.min : gradeInfo.min
+  const progress = nextGrade 
+    ? Math.min(100, ((MOCK_USER.influence - currentMin) / (nextMin - currentMin)) * 100)
+    : 100
+
+  return (
+    <div className="fade-in">
+      {/* 헤더 배너 */}
+      <div
+        style={{
+          height: 110,
+          background: `linear-gradient(135deg, ${gradeInfo.color}40, ${gradeInfo.color}10 60%, transparent)`,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {gradeInfo.glow && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(105deg, transparent 40%, ${gradeInfo.color}18 50%, transparent 60%)`,
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 3s linear infinite',
+            }}
+          />
+        )}
+      </div>
+
+      <div style={{ padding: '0 16px', marginTop: -50 }}>
+        {/* 아바타 + 편집 버튼 */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div
+            className={gradeInfo.glow ? 'grade-glow' : ''}
+            style={{
+              width: 76,
+              height: 76,
+              borderRadius: 22,
+              border: `3px solid ${C.bg}`,
+              background: `linear-gradient(135deg, ${gradeInfo.grad[0]}, ${gradeInfo.grad[gradeInfo.grad.length - 1]})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 28,
+              fontWeight: 900,
+              color: 'white',
+              boxShadow: gradeInfo.glow ? `0 4px 20px ${gradeInfo.color}70` : 'none',
+              // @ts-ignore
+              '--gc': `${gradeInfo.color}88`,
+              flexShrink: 0,
+            }}
+          >
+            {MOCK_USER.nickname[0]}
+          </div>
+          <Link href="/profile/edit">
+            <Button primary small>프로필 편집</Button>
+          </Link>
+        </div>
+
+        {/* 이름 + 배지 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.nickname}</h1>
+          {MOCK_USER.isPremium && <span style={{ fontSize: 10, color: '#FBBF24' }}>✦ 프리미엄</span>}
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              padding: '3px 10px',
+              borderRadius: 20,
+              background: `linear-gradient(135deg, ${gradeInfo.grad[0]}, ${gradeInfo.grad[gradeInfo.grad.length - 1]})`,
+              color: 'white',
+              boxShadow: gradeInfo.glow ? `0 2px 10px ${gradeInfo.color}60` : 'none',
+            }}
+          >
+            {gradeInfo.badge} {gradeInfo.name}
+          </span>
+        </div>
+
+        {/* 소개 */}
+        <p style={{ fontSize: 13, color: C.w35, lineHeight: 1.6, marginBottom: 12 }}>{MOCK_USER.bio}</p>
+
+        {/* 통계 */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+          {[
+            ['게시글', MOCK_USER.postCount.toString()],
+            ['팔로워', MOCK_USER.followerCount >= 1000 ? `${(MOCK_USER.followerCount / 1000).toFixed(1)}천` : MOCK_USER.followerCount.toString()],
+            ['팔로잉', MOCK_USER.followingCount.toString()],
+            ['포인트', MOCK_USER.points.toLocaleString()],
+          ].map(([label, value]) => (
+            <div key={label} style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: 17, fontWeight: 800, color: C.text }}>{value}</p>
+              <p style={{ fontSize: 11, color: C.w20 }}>{label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* 출석 현황 */}
+        <div style={{ padding: 14, borderRadius: 14, background: C.s2, border: `1px solid ${C.w05}`, marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>🔥 출석 현황</span>
+            <Button primary small>오늘 출석</Button>
+          </div>
+          <div style={{ display: 'flex', gap: 20 }}>
+            <div>
+              <p style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.consecutiveAttendance}일</p>
+              <p style={{ fontSize: 11, color: C.w20 }}>연속 출석</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.totalAttendance}일</p>
+              <p style={{ fontSize: 11, color: C.w20 }}>누적 출석</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 등급 진행 */}
+        <div
+          style={{
+            padding: 16,
+            borderRadius: 16,
+            background: C.s2,
+            border: `1px solid ${gradeInfo.color}30`,
+            marginBottom: 16,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {gradeInfo.glow && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: `linear-gradient(135deg, ${gradeInfo.color}06, transparent 70%)`,
+                pointerEvents: 'none',
+              }}
+            />
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 22 }}>{gradeInfo.badge}</span>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 800, color: gradeInfo.color }}>{gradeInfo.name}</p>
+                <p style={{ fontSize: 10, color: C.w20 }}>현재 등급</p>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: 18, fontWeight: 900, color: gradeInfo.color }}>{MOCK_USER.influence.toLocaleString()}</p>
+              <p style={{ fontSize: 10, color: C.w20 }}>영향력 점수</p>
+            </div>
+          </div>
+
+          {/* 진행바 */}
+          <div style={{ height: 10, borderRadius: 6, background: C.w05, overflow: 'hidden', marginBottom: 8 }}>
+            <div
+              style={{
+                height: '100%',
+                borderRadius: 6,
+                width: `${progress}%`,
+                background: `linear-gradient(90deg, ${gradeInfo.grad[0]}, ${gradeInfo.grad[gradeInfo.grad.length - 1]})`,
+                boxShadow: gradeInfo.glow ? `0 0 8px ${gradeInfo.color}` : 'none',
+                transition: 'width 0.6s ease',
+              }}
+            />
+          </div>
+
+          {nextGrade ? (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <p style={{ fontSize: 11, color: C.w35 }}>
+                다음: <span style={{ color: nextGrade.color, fontWeight: 700 }}>{nextGrade.badge} {nextGrade.name}</span>
+              </p>
+              <p style={{ fontSize: 11, color: gradeInfo.color, fontWeight: 700 }}>
+                +{(nextGrade.min - MOCK_USER.influence).toLocaleString()}점 필요
+              </p>
+            </div>
+          ) : (
+            <p style={{ fontSize: 12, color: '#FFD700', fontWeight: 700, textAlign: 'center' }}>🏆 최고 등급 달성!</p>
+          )}
+        </div>
+      </div>
+
+      {/* 탭 */}
+      <div style={{ display: 'flex', borderBottom: `1px solid ${C.w05}` }}>
+        {[
+          { id: 'posts', label: '게시글' },
+          { id: 'grade', label: '등급' },
+        ].map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id as typeof tab)}
+            style={{
+              flex: 1,
+              padding: '11px 0',
+              fontSize: 13,
+              fontWeight: tab === t.id ? 700 : 500,
+              color: tab === t.id ? C.text : C.w35,
+              borderBottom: `2.5px solid ${tab === t.id ? C.brand : 'transparent'}`,
+              background: 'none',
+              border: 'none',
+              borderBottomStyle: 'solid',
+              cursor: 'pointer',
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 콘텐츠 */}
+      {tab === 'posts' ? (
+        <div style={{ paddingBottom: 20 }}>
+          {MOCK_USER_POSTS.map(post => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ padding: '14px 16px 100px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {Object.entries(GRADES).map(([level, info]) => {
+            const levelNum = parseInt(level)
+            const isCurrent = levelNum === MOCK_USER.grade
+            const isPassed = levelNum < MOCK_USER.grade
+            const isLocked = !isPassed && !isCurrent
+
+            return (
+              <div
+                key={level}
+                className={`fade-in ${info.glow && !isLocked ? 'grade-glow' : ''}`}
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: 18,
+                  background: isLocked ? C.s2 : isCurrent ? `${info.grad[0]}10` : C.s2,
+                  border: isCurrent ? `1.5px solid ${info.color}50` : `1px solid ${C.w03}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  opacity: isLocked ? 0.32 : 1,
+                  // @ts-ignore
+                  '--gc': `${info.color}88`,
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{info.badge}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: isLocked ? C.w35 : info.color }}>{info.name}</p>
+                  <p style={{ fontSize: 11, color: C.w20 }}>{info.perk}</p>
+                </div>
+                <div
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 8,
+                    background: isLocked ? C.w05 : `linear-gradient(135deg, ${info.grad[0]}, ${info.grad[info.grad.length - 1]})`,
+                    border: isLocked ? `1px solid ${C.w05}` : `1px solid ${info.color}44`,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: isLocked ? C.w20 : 'white',
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    Lv.{level}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

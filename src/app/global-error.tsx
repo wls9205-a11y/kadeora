@@ -1,1 +1,61 @@
-產敳挠楬湥≴഻ഊ⼊⨪਍⨠䬠湥⁴⹃䐠摯獤›䔢牲牯䈠畯摮牡⁹蘿鳬㾩萿달₴넿鷬₴頿㿬㼠뒩밿ꇫₜ갿꟫㾝ꒋഢ ‪萿韬₭逿鿫€냫뒚鐿ꛫ€‫돫겵蒲諭඼ ⼪਍਍硥潰瑲搠晥畡瑬映湵瑣潩⁮汇扯污牅潲⡲ൻ 攠牲牯ബ 爠獥瑥ബ紊›ൻ 攠牲牯›牅潲⁲…⁻楤敧瑳㨿猠牴湩⁧㭽਍†敲敳㩴⠠ 㸽瘠楯㭤਍⥽笠਍†敲畴湲⠠਍††格浴⁬慬杮∽潫㸢਍†††戼摯⁹瑳汹㵥筻਍††††慢正牧畯摮›⌢䄰䔰㜱Ⱒ挠汯牯›⌢ㅆ㕆㥆Ⱒ਍††††潦瑮慆業祬›✢牐瑥湥慤摲嘠牡慩汢❥‬慳獮猭牥晩Ⱒ਍††††楤灳慬㩹∠汦硥Ⱒ愠楬湧瑉浥㩳∠散瑮牥Ⱒ樠獵楴祦潃瑮湥㩴∠散瑮牥Ⱒ਍††††業䡮楥桧㩴∠〱瘰≨‬慰摤湩㩧㈠ⰰ洠牡楧㩮〠ബ ††素㹽਍††††搼癩猠祴敬笽⁻整瑸汁杩㩮∠散瑮牥Ⱒ洠硡楗瑤㩨㐠〰素㹽਍†††††搼癩猠祴敬笽⁻潦瑮楓敺›㠴‬慭杲湩潂瑴浯›㘱素㹽ꀿ룯㲏搯癩ാ ††††㰠ㅨ猠祴敬笽⁻潦瑮楓敺›〲‬潦瑮敗杩瑨›〷ⰰ洠牡楧䉮瑯潴㩭㠠素㹽਍††††††곫鲠냪₀냫鶃蠿諬㾵ꒋ਍†††††⼼ㅨാ ††††㰠⁰瑳汹㵥筻映湯却穩㩥ㄠⰴ挠汯牯›⌢㐹㍁㡂Ⱒ洠牡楧䉮瑯潴㩭㈠ⰴ氠湩䡥楥桧㩴ㄠ㘮素㹽਍††††††밿诬㾜뢝㼠颥蔿诫㾈‿萿黫ₘ닫벊㼿谿鿫€ꐿ诬ₜ鰿迫㾄벣렿髬⺔਍†††††⼼㹰਍†††††敻牲牯搮杩獥⁴☦⠠਍††††††瀼猠祴敬笽⁻潦瑮楓敺›ㄱ‬潣潬㩲∠㐣㔷㘵∹‬潦瑮慆業祬›洢湯獯慰散Ⱒ洠牡楧䉮瑯潴㩭ㄠ‶絽ാ ††††††䔠牲牯䤠㩄笠牥潲⹲楤敧瑳ൽ †††††㰠瀯ാ ††††⤠ൽ ††††㰠楤⁶瑳汹㵥筻搠獩汰祡›昢敬≸‬慧㩰ㄠⰰ樠獵楴祦潃瑮湥㩴∠散瑮牥•絽ാ †††††㰠畢瑴湯਍†††††††湯汃捩㵫牻獥瑥ൽ ††††††猠祴敬笽ൻ †††††††瀠摡楤杮›ㄢ瀲⁸㐲硰Ⱒ戠牯敤割摡畩㩳ㄠⰰ戠牯敤㩲∠潮敮Ⱒ਍††††††††慢正牧畯摮›⌢䈳㈸㙆Ⱒ挠汯牯›⌢䙆≆‬潦瑮楓敺›㐱‬潦瑮敗杩瑨›〷ⰰ挠牵潳㩲∠潰湩整≲ബ ††††††素ൽ †††††㸠਍†††††††ꐿ诬ₜ鰿迫඄ †††††㰠戯瑵潴㹮਍††††††愼栠敲㵦⼢•湯汃捩㵫⡻⥥㴠‾⁻⹥牰癥湥䑴晥畡瑬⤨※楷摮睯氮捯瑡潩⹮牨晥㴠∠∯※絽਍†††††††瑳汹㵥筻਍††††††††慰摤湩㩧∠㈱硰㈠瀴≸‬潢摲牥慒楤獵›〱‬整瑸敄潣慲楴湯›渢湯≥ബ †††††††戠牯敤㩲∠瀱⁸潳楬⁤㌣㐳㔱∵‬潣潬㩲∠㤣䄴䈳∸‬潦瑮楓敺›㐱ബ †††††††搠獩汰祡›椢汮湩ⵥ汦硥Ⱒ愠楬湧瑉浥㩳∠散瑮牥Ⱒ਍†††††††絽਍††††††ാ ††††††㼠벜ꇫਿ††††††⼼㹡਍†††††⼼楤㹶਍††††⼼楤㹶਍†††⼼潢祤ാ †㰠栯浴㹬਍†㬩਍ൽഊ
+"use client";
+
+/**
+ * Kent C. Dodds: "Error Boundary 없으면 전체 앱이 하얀 화면으로 사망한다"
+ * 전역 에러 바운더리 + 복구 버튼
+ */
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  return (
+    <html lang="ko">
+      <body style={{
+        background: "#0A0E17", color: "#F1F5F9",
+        fontFamily: "'Pretendard Variable', sans-serif",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        minHeight: "100vh", padding: 20, margin: 0,
+      }}>
+        <div style={{ textAlign: "center", maxWidth: 400 }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+          <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
+            문제가 발생했습니다
+          </h1>
+          <p style={{ fontSize: 14, color: "#94A3B8", marginBottom: 24, lineHeight: 1.6 }}>
+            일시적인 오류입니다. 아래 버튼을 눌러 다시 시도해주세요.
+          </p>
+          {error.digest && (
+            <p style={{ fontSize: 11, color: "#475569", fontFamily: "monospace", marginBottom: 16 }}>
+              Error ID: {error.digest}
+            </p>
+          )}
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            <button
+              onClick={reset}
+              style={{
+                padding: "12px 24px", borderRadius: 10, border: "none",
+                background: "#3B82F6", color: "#FFF", fontSize: 14, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              다시 시도
+            </button>
+            <a
+              href="/"
+              style={{
+                padding: "12px 24px", borderRadius: 10, textDecoration: "none",
+                border: "1px solid #334155", color: "#94A3B8", fontSize: 14,
+                display: "inline-flex", alignItems: "center",
+              }}
+            >
+              홈으로
+            </a>
+          </div>
+        </div>
+      </body>
+    </html>
+  );
+}
