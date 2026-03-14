@@ -1,235 +1,187 @@
-'use client'
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { unstable_cache } from "next/cache";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
+import Link from "next/link";
+import Image from "next/image";
 
-import { useState } from 'react'
-import { useTheme } from '@/lib/theme'
-import { CATEGORIES } from '@/lib/utils'
-import { StockTicker, PostCard, RegionSelector } from '@/components/features'
+/**
+ * Abramov: "Suspense boundary가 너무 넓다 → Trending과 PostList를 분리"
+ * Abramov: "필터를 searchParams로 관리 → 서버 재렌더링 트리거"
+ */
 
-// 임시 게시글 데이터 (실제로는 서버에서 가져옴)
-const MOCK_POSTS = [
-  {
-    id: '1',
-    author_id: '1',
-    category: 'stock' as const,
-    title: '삼성전자 9만전자 가능할까요?',
-    content: '반도체 사이클 회복기에 접어든 것 같은데 여러분 의견은? HBM 수요가 폭발적으로 늘고 있고 TSMC도 CAPEX를 늘리는 상황입니다.',
-    tags: ['삼성전자', '반도체'],
-    is_anonymous: false,
-    is_hot: true,
-    is_premium: false,
-    likes_count: 342,
-    comments_count: 89,
-    views_count: 2841,
-    region: '서울',
-    created_at: new Date(Date.now() - 23 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-    author: { id: '1', nickname: '투자의신', grade: 7, influence: 5200, avatar_url: null, bio: null, region: null, interests: null, is_premium: false, points: 0, consecutive_attendance: 0, total_attendance: 0, follower_count: 0, following_count: 0, post_count: 0, created_at: '', updated_at: '' },
-  },
-  {
-    id: '2',
-    author_id: '2',
-    category: 'housing' as const,
-    title: '래미안 원베일리 전매 풀리면 얼마나 오를까',
-    content: '입주까지 1년 남았는데 전매제한 해제되면 가격이 어느정도 갈지 궁금합니다. 주변 시세 대비 아직 갭이 있다고 봐요.',
-    tags: ['래미안', '서초'],
-    is_anonymous: false,
-    is_hot: true,
-    is_premium: false,
-    likes_count: 156,
-    comments_count: 67,
-    views_count: 1523,
-    region: '서울',
-    created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-    author: { id: '2', nickname: '부린이탈출', grade: 5, influence: 1800, avatar_url: null, bio: null, region: null, interests: null, is_premium: false, points: 0, consecutive_attendance: 0, total_attendance: 0, follower_count: 0, following_count: 0, post_count: 0, created_at: '', updated_at: '' },
-  },
-  {
-    id: '3',
-    author_id: '3',
-    category: 'local' as const,
-    title: '[부산] 해운대 센텀시티 상권 변화 체감',
-    content: '최근에 센텀시티 쪽 공실률이 줄어든 느낌인데 저만 그런가요? 주변 가게들이 많이 바뀌었더라고요. 특히 IT 기업들이 많이 입주한 듯.',
-    tags: null,
-    is_anonymous: true,
-    is_hot: false,
-    is_premium: false,
-    likes_count: 87,
-    comments_count: 34,
-    views_count: 892,
-    region: '부산',
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    author_id: '4',
-    category: 'stock' as const,
-    title: '코스닥 900 재돌파 의견 나눠봐요',
-    content: 'AI 관련주 중심으로 수급이 몰리고 있는데, 이번에는 900선 안착 가능할까요? 외인 수급이 관건이라 봅니다.',
-    tags: ['코스닥', 'AI'],
-    is_anonymous: false,
-    is_hot: true,
-    is_premium: true,
-    likes_count: 234,
-    comments_count: 112,
-    views_count: 3201,
-    region: null,
-    created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-    author: { id: '4', nickname: '차트분석가', grade: 8, influence: 9200, avatar_url: null, bio: null, region: null, interests: null, is_premium: true, points: 0, consecutive_attendance: 0, total_attendance: 0, follower_count: 0, following_count: 0, post_count: 0, created_at: '', updated_at: '' },
-  },
-  {
-    id: '5',
-    author_id: '5',
-    category: 'free' as const,
-    title: '요즘 재테크 뭐하세요?',
-    content: '금리도 내려가고 주식도 불안하고... 다들 어디에 투자하고 계신가요? 저는 최근 배당주로 갈아타고 있습니다.',
-    tags: null,
-    is_anonymous: false,
-    is_hot: true,
-    is_premium: false,
-    likes_count: 421,
-    comments_count: 156,
-    views_count: 5673,
-    region: null,
-    created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-    author: { id: '5', nickname: '월급루팡', grade: 3, influence: 450, avatar_url: null, bio: null, region: null, interests: null, is_premium: false, points: 0, consecutive_attendance: 0, total_attendance: 0, follower_count: 0, following_count: 0, post_count: 0, created_at: '', updated_at: '' },
-  },
-]
+export const metadata: Metadata = {
+  title: "피드 — 지금 뜨는 금융 이야기",
+  description: "주식, 부동산, 청약 등 실시간 금융 커뮤니티 피드.",
+};
 
-export default function FeedPage() {
-  const { C } = useTheme()
-  const [category, setCategory] = useState('hot')
-  const [regions, setRegions] = useState<string[]>(['전국'])
-  const [showRegionSelector, setShowRegionSelector] = useState(false)
+interface FeedPageProps {
+  searchParams: Promise<{ category?: string }>;
+}
 
-  // 카테고리 필터링
-  const filteredPosts = category === 'hot'
-    ? MOCK_POSTS.filter(p => p.is_hot).sort((a, b) => b.likes_count - a.likes_count)
-    : MOCK_POSTS.filter(p => p.category === category)
-
-  const displayPosts = filteredPosts.length > 0 ? filteredPosts : MOCK_POSTS
-
-  const regionLabel = regions.includes('전국') ? '전국' : regions.join(' · ')
+export default async function FeedPage({ searchParams }: FeedPageProps) {
+  const params = await searchParams;
+  const category = params.category || "all";
 
   return (
-    <div>
-      <StockTicker />
+    <div style={{ paddingBottom: 80 }}>
+      {/* Breadcrumb (Fishkin) */}
+      <nav style={{ fontSize: 11, color: "#475569", marginBottom: 16 }} aria-label="breadcrumb">
+        <Link href="/" style={{ color: "#3B82F6", textDecoration: "none" }}>홈</Link>
+        <span style={{ margin: "0 6px" }} aria-hidden="true">/</span>
+        <span aria-current="page">피드</span>
+      </nav>
 
-      {/* 지역 선택 버튼 */}
-      <div
-        style={{
-          padding: '9px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          borderBottom: `1px solid ${C.w03}`,
-        }}
-      >
-        <span style={{ fontSize: 12, flexShrink: 0 }}>📍</span>
-        <button
-          onClick={() => setShowRegionSelector(true)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: C.w50,
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            minWidth: 0,
-            overflow: 'hidden',
-          }}
-        >
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>
-            {regionLabel}
-          </span>
-          <span style={{ fontSize: 10, color: C.w20, flexShrink: 0 }}>▼</span>
-        </button>
-        {!regions.includes('전국') && (
-          <span style={{ fontSize: 11, color: C.w20, flexShrink: 0 }}>{regions.length}/3</span>
-        )}
+      {/* Independent Suspense for trending */}
+      <Suspense fallback={<div style={{ height: 72, borderRadius: 14, background: "#111827", marginBottom: 18 }} />}>
+        <TrendingWidget />
+      </Suspense>
+
+      {/* Category filter (server-driven via searchParams) */}
+      <CategoryFilter current={category} />
+
+      {/* Independent Suspense for posts */}
+      <Suspense fallback={<PostsSkeleton />}>
+        <PostList category={category} />
+      </Suspense>
+    </div>
+  );
+}
+
+/** Trending keywords — separate data fetch + Suspense */
+async function TrendingWidget() {
+  const trending = await unstable_cache(
+    async () => {
+      const sb = await createServerSupabaseClient();
+      const { data } = await sb.from("trending_keywords").select("*").order("heat_score", { ascending: false }).limit(10);
+      return data || [];
+    },
+    ["trending"],
+    { revalidate: 60 }
+  )();
+
+  if (trending.length === 0) return null;
+
+  return (
+    <div style={{
+      background: "linear-gradient(135deg, rgba(59,130,246,0.06) 0%, rgba(139,92,246,0.06) 100%)",
+      border: "1px solid rgba(59,130,246,0.12)", borderRadius: 14, padding: "14px 18px", marginBottom: 18,
+      minHeight: 72, /* Osmani: CLS 방어 */
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <span style={{ fontSize: 14 }}>🔥</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#F1F5F9" }}>지금 뜨는 키워드</span>
       </div>
-
-      {/* 지역 선택 바텀시트 */}
-      <RegionSelector
-        isOpen={showRegionSelector}
-        onClose={() => setShowRegionSelector(false)}
-        selected={regions}
-        onSelect={setRegions}
-      />
-
-      {/* 카테고리 탭 */}
-      <div
-        style={{
-          display: 'flex',
-          overflowX: 'auto',
-          borderBottom: `1px solid ${C.w05}`,
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          background: `${C.bg}f0`,
-          backdropFilter: 'blur(10px)',
-        }}
-      >
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setCategory(cat.id)}
-            style={{
-              padding: '11px 15px',
-              fontSize: 13,
-              fontWeight: category === cat.id ? 700 : 500,
-              color: category === cat.id ? C.text : C.w35,
-              borderBottom: `2.5px solid ${category === cat.id ? C.brand : 'transparent'}`,
-              background: 'none',
-              border: 'none',
-              borderBottomStyle: 'solid',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s',
-            }}
-          >
-            <span style={{ fontSize: 11 }}>{cat.icon}</span>
-            {cat.label}
-          </button>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {trending.map((kw: { id: string; keyword: string; heat_score: number }, i: number) => (
+          <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.keyword)}`} style={{
+            padding: "5px 12px", borderRadius: 20, textDecoration: "none",
+            background: i < 3 ? "rgba(239,68,68,0.1)" : "rgba(255,255,255,0.03)",
+            border: `1px solid ${i < 3 ? "rgba(239,68,68,0.2)" : "#1E293B"}`,
+            color: i < 3 ? "#FCA5A5" : "#94A3B8", fontSize: 12, fontWeight: 600,
+          }}>
+            <span style={{ fontSize: 10, fontWeight: 800, color: i < 3 ? "#EF4444" : "#64748B", fontFamily: "monospace", marginRight: 4 }}>{i + 1}</span>
+            {kw.keyword}
+          </Link>
         ))}
       </div>
+    </div>
+  );
+}
 
-      {/* 확성기 배너 */}
-      <div
-        style={{
-          margin: '10px 14px 2px',
-          padding: '11px 14px',
-          borderRadius: 12,
-          background: `linear-gradient(135deg, ${C.brand}12, rgba(255,140,0,0.06))`,
-          border: `1px solid ${C.brand}18`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          cursor: 'pointer',
-        }}
-      >
-        <span style={{ fontSize: 18 }}>📢</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 13, color: C.text, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            3월 부동산 분양 일정 총정리! 서울/경기 위주
-          </p>
-          <p style={{ fontSize: 11, color: C.w35 }}>부동산마스터 · 광고</p>
-        </div>
-        <span style={{ fontSize: 10, color: C.w20, flexShrink: 0 }}>AD</span>
-      </div>
+const CATS = [
+  { value: "all", label: "전체" }, { value: "stock", label: "주식" },
+  { value: "apt", label: "청약" }, { value: "community", label: "커뮤니티" }, { value: "free", label: "자유" },
+];
 
-      {/* 게시글 목록 */}
-      {displayPosts.map(post => (
-        <PostCard key={post.id} post={post} />
+function CategoryFilter({ current }: { current: string }) {
+  return (
+    <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto" }} role="tablist" aria-label="카테고리 필터">
+      {CATS.map((c) => (
+        <Link key={c.value} href={c.value === "all" ? "/feed" : `/feed?category=${c.value}`}
+          role="tab" aria-selected={current === c.value}
+          style={{
+            padding: "7px 14px", borderRadius: 20, textDecoration: "none", whiteSpace: "nowrap",
+            border: `1px solid ${current === c.value ? "#3B82F6" : "#1E293B"}`,
+            background: current === c.value ? "rgba(59,130,246,0.1)" : "transparent",
+            color: current === c.value ? "#93C5FD" : "#64748B", fontSize: 12, fontWeight: 600,
+          }}
+        >{c.label}</Link>
       ))}
     </div>
-  )
+  );
+}
+
+const CAT_COLORS: Record<string, string> = { stock: "#3B82F6", apt: "#10B981", community: "#8B5CF6", bug: "#EF4444", free: "#F59E0B" };
+const CAT_LABELS: Record<string, string> = { stock: "주식", apt: "청약", community: "커뮤니티", bug: "버그", free: "자유" };
+
+/** Post list — separate data fetch */
+async function PostList({ category }: { category: string }) {
+  const posts = await unstable_cache(
+    async () => {
+      const sb = await createServerSupabaseClient();
+      let q = sb.from("posts")
+        .select("id, title, content, category, view_count, like_count, comment_count, share_count, is_megaphone, created_at, profiles(nickname, avatar_url)")
+        .order("is_megaphone", { ascending: false }).order("created_at", { ascending: false }).limit(20);
+      if (category !== "all") q = q.eq("category", category);
+      const { data } = await q;
+      return data || [];
+    },
+    [`posts-${category}`],
+    { revalidate: 30 }
+  )();
+
+  if (posts.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: 60, background: "#111827", borderRadius: 16, border: "1px solid #1E293B" }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>📝</div>
+        <p style={{ color: "#94A3B8", fontSize: 14, margin: "0 0 16px" }}>아직 게시글이 없습니다.</p>
+        <Link href="/write" style={{ padding: "10px 24px", borderRadius: 8, background: "#3B82F6", color: "#FFF", textDecoration: "none", fontSize: 13, fontWeight: 700 }}>
+          첫 글 작성하기
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {posts.map((post: Record<string, unknown>, idx: number) => {
+        const p = post as { id: string; title: string; content: string; category: string; view_count: number; like_count: number; comment_count: number; share_count: number; is_megaphone: boolean; created_at: string; profiles: { nickname: string; avatar_url: string | null } | null };
+        return (
+          <Link key={p.id} href={`/feed/${p.id}`} style={{ display: "block", textDecoration: "none", padding: "16px 18px", borderRadius: 14, background: "#111827", border: "1px solid #1E293B" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              {p.profiles?.avatar_url && (
+                <Image src={p.profiles.avatar_url} alt={`${p.profiles.nickname} 프로필`} width={24} height={24} style={{ borderRadius: "50%" }} priority={idx === 0} />
+              )}
+              <span style={{ padding: "2px 8px", borderRadius: 10, fontSize: 10, fontWeight: 700, background: `${CAT_COLORS[p.category] || "#64748B"}15`, color: CAT_COLORS[p.category] || "#64748B" }}>
+                {CAT_LABELS[p.category] || p.category}
+              </span>
+              {p.is_megaphone && <span style={{ fontSize: 10, color: "#F59E0B" }}>📢 메가폰</span>}
+              <span style={{ fontSize: 11, color: "#334155", marginLeft: "auto" }}>{new Date(p.created_at).toLocaleDateString("ko-KR")}</span>
+            </div>
+            <h3 style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4 }}>{p.title}</h3>
+            <p style={{ margin: 0, fontSize: 13, color: "#94A3B8", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+              {(p.content as string).replace(/<[^>]*>/g, "")}
+            </p>
+            <div style={{ display: "flex", gap: 14, marginTop: 10, fontSize: 11, color: "#64748B" }}>
+              <span>👁 {p.view_count.toLocaleString()}</span>
+              <span>❤️ {p.like_count}</span>
+              <span>💬 {p.comment_count}</span>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function PostsSkeleton() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {[1, 2, 3].map((i) => (
+        <div key={i} style={{ height: 120, borderRadius: 14, background: "#111827", animation: "pulse 2s infinite" }} />
+      ))}
+      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}`}</style>
+    </div>
+  );
 }

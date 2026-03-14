@@ -1,82 +1,72 @@
-'use client'
+"use client";
 
-import { useEffect, useCallback } from 'react'
+import { useCallback } from "react";
+import { createClient } from "@/lib/supabase-browser";
 
 declare global {
   interface Window {
-    Kakao: any
+    Kakao?: {
+      init: (key: string) => void;
+      isInitialized: () => boolean;
+      Share: {
+        sendDefault: (params: Record<string, unknown>) => void;
+      };
+    };
   }
 }
 
-interface ShareOptions {
-  title: string
-  description: string
-  imageUrl?: string
-  link: string
-  buttonText?: string
+interface ShareParams {
+  title: string;
+  description: string;
+  imageUrl?: string;
+  linkUrl: string;
+  postId?: string;
 }
 
+// ✅ 마케팅팀 피드백: 카카오 공유 바이럴화
 export function useKakaoShare() {
-  useEffect(() => {
-    // Kakao SDK 로드
-    if (typeof window !== 'undefined' && !window.Kakao) {
-      const script = document.createElement('script')
-      script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.6.0/kakao.min.js'
-      script.async = true
-      script.onload = () => {
-        if (window.Kakao && !window.Kakao.isInitialized()) {
-          // TODO: 실제 카카오 앱 키로 교체
-          window.Kakao.init('YOUR_KAKAO_APP_KEY')
-        }
+  const supabase = createClient();
+
+  const share = useCallback(async (params: ShareParams) => {
+    const { title, description, imageUrl, linkUrl, postId } = params;
+
+    // Kakao SDK 초기화
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || "");
+    }
+
+    if (!window.Kakao?.isInitialized()) {
+      // Fallback: 클립보드 복사
+      await navigator.clipboard.writeText(linkUrl);
+      alert("링크가 복사되었습니다!");
+      return;
+    }
+
+    window.Kakao.Share.sendDefault({
+      objectType: "feed",
+      content: {
+        title,
+        description,
+        imageUrl: imageUrl || "https://kadeora.vercel.app/og-image.png",
+        link: { webUrl: linkUrl, mobileWebUrl: linkUrl },
+      },
+      buttons: [
+        { title: "카더라에서 보기", link: { webUrl: linkUrl, mobileWebUrl: linkUrl } },
+      ],
+    });
+
+    // ✅ 전략기획팀: 공유 로그 기록
+    if (postId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("share_logs").insert({
+          user_id: user.id,
+          post_id: postId,
+          platform: "kakao" as const,
+        });
       }
-      document.head.appendChild(script)
     }
-  }, [])
+  }, [supabase]);
 
-  const share = useCallback(({ title, description, imageUrl, link, buttonText = '자세히 보기' }: ShareOptions) => {
-    if (typeof window === 'undefined' || !window.Kakao) {
-      console.error('Kakao SDK not loaded')
-      return false
-    }
-
-    try {
-      window.Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title,
-          description,
-          imageUrl: imageUrl || 'https://kadeora.vercel.app/icon.svg',
-          link: {
-            mobileWebUrl: link,
-            webUrl: link,
-          },
-        },
-        buttons: [
-          {
-            title: buttonText,
-            link: {
-              mobileWebUrl: link,
-              webUrl: link,
-            },
-          },
-        ],
-      })
-      return true
-    } catch (error) {
-      console.error('Kakao share error:', error)
-      return false
-    }
-  }, [])
-
-  const sharePost = useCallback((postId: string, title: string, content: string) => {
-    const link = `https://kadeora.vercel.app/post/${postId}`
-    return share({
-      title,
-      description: content.slice(0, 100) + (content.length > 100 ? '...' : ''),
-      link,
-      buttonText: '게시글 보기',
-    })
-  }, [share])
-
-  return { share, sharePost }
+  return { share };
 }
