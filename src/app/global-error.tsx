@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 /**
- * Kent C. Dodds: "Error Boundary 없으면 전체 앱이 하얀 화면으로 사망한다"
- * 전역 에러 바운더리 + 복구 버튼
+ * Kent C. Dodds: "Error Boundary ?놁쑝硫??꾩껜 ?깆씠 ?섏? ?붾㈃?쇰줈 ?щ쭩?쒕떎"
+ * ?꾩뿭 ?먮윭 諛붿슫?붾━ + 蹂듦뎄 踰꾪듉
  */
 
 export default function GlobalError({
@@ -21,12 +21,12 @@ export default function GlobalError({
         minHeight: "100vh", padding: 20, margin: 0,
       }}>
         <div style={{ textAlign: "center", maxWidth: 400 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>?좑툘</div>
           <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
-            문제가 발생했습니다
+            臾몄젣媛 諛쒖깮?덉뒿?덈떎
           </h1>
           <p style={{ fontSize: 14, color: "#94A3B8", marginBottom: 24, lineHeight: 1.6 }}>
-            일시적인 오류입니다. 아래 버튼을 눌러 다시 시도해주세요.
+            ?쇱떆?곸씤 ?ㅻ쪟?낅땲?? ?꾨옒 踰꾪듉???뚮윭 ?ㅼ떆 ?쒕룄?댁＜?몄슂.
           </p>
           {error.digest && (
             <p style={{ fontSize: 11, color: "#475569", fontFamily: "monospace", marginBottom: 16 }}>
@@ -41,7 +41,7 @@ export default function GlobalError({
                 background: "#3B82F6", color: "#FFF", fontSize: 14, fontWeight: 700, cursor: "pointer",
               }}
             >
-              다시 시도
+              ?ㅼ떆 ?쒕룄
             </button>
             <a
               href="/"
@@ -51,7 +51,7 @@ export default function GlobalError({
                 display: "inline-flex", alignItems: "center",
               }}
             >
-              홈으로
+              ?덉쑝濡?
             </a>
           </div>
         </div>
@@ -59,3 +59,4 @@ export default function GlobalError({
     </html>
   );
 }
+
