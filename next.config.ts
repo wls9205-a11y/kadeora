@@ -1,4 +1,4 @@
-﻿import type { NextConfig } from 'next'
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-  experimental: { missingSuspenseWithCSRBailout: false },
 }
 
 export default nextConfig
