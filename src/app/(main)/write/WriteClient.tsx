@@ -104,9 +104,8 @@ export function WriteClient() {
         title: cleanTitle,
         content: cleanContent,
         category: category as "stock" | "apt" | "community" | "bug" | "free",
-        image_urls: imageUrls.length > 0 ? imageUrls : null,
-        is_pinned: false,
-        is_megaphone: false,
+        images: imageUrls,
+        region_id: "",
       }).select("id").single();
 
       if (insertError) throw insertError;
