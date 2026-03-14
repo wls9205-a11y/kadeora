@@ -33,7 +33,8 @@ export default function OnboardingPage() {
       const { data: authData } = await supabase.auth.getUser()
       
       if (authData.user) {
-        await supabase.from('profiles').update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from('profiles') as any).update({
           nickname: nickname,
           region_text: region,
           interests: interests,
