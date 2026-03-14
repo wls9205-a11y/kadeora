@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- 배경 -->
+  <rect width="512" height="512" rx="120" fill="#0F0F0F"/>
+
+  <!-- 말풍선 몸통 -->
+  <path d="M96 140C96 117.9 113.9 100 136 100H376C398.1 100 416 117.9 416 140V300C416 322.1 398.1 340 376 340H200L140 400V340H136C113.9 340 96 322.1 96 300V140Z"
+        fill="#FF4B36"/>
+
+  <!-- K 텍스트 -->
+  <text x="172" y="278" font-family="Arial Black, sans-serif" font-weight="900"
+        font-size="168" fill="white" letter-spacing="-8">K</text>
+
+  <!-- 점 3개 (소문 느낌) -->
+  <circle cx="296" cy="220" r="20" fill="white" opacity="0.9"/>
+  <circle cx="340" cy="220" r="20" fill="white" opacity="0.7"/>
+  <circle cx="384" cy="220" r="20" fill="white" opacity="0.5"/>
+</svg>

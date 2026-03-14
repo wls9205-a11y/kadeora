@@ -1,0 +1,174 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #FF4B36;
+  --brand-light: #FF6B58;
+  --bull: #FF4B36;
+  --bear: #2563EB;
+  --bg: #0F0F0F;
+  --surface: #1A1A1A;
+  --surface-2: #252525;
+  --border: rgba(255,255,255,0.08);
+  --text: #F5F5F5;
+  --text-muted: #888888;
+  --radius: 12px;
+  --nav-height: 56px;
+  --bottom-nav-height: 64px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  min-height: 100dvh;
+  /* 모바일 앱 느낌 */
+  overscroll-behavior: none;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+}
+
+/* 선택 영역 */
+::selection {
+  background: rgba(255, 75, 54, 0.3);
+  color: white;
+}
+
+/* 포커스 링 */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* 입력 필드 자동완성 배경 제거 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #252525 inset !important;
+  -webkit-text-fill-color: #F5F5F5 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* 유틸리티 컴포넌트 */
+@layer components {
+  /* 카드 */
+  .card {
+    @apply bg-[#1A1A1A] rounded-xl border border-white/[0.06];
+  }
+
+  /* 버튼 */
+  .btn-brand {
+    @apply bg-brand text-white rounded-xl px-4 py-2.5 font-semibold
+           active:scale-95 transition-transform duration-100
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply border border-white/10 text-white rounded-xl px-4 py-2.5 font-medium
+           hover:bg-white/5 active:scale-95 transition-all duration-100;
+  }
+
+  .btn-ghost {
+    @apply text-white/70 rounded-lg px-3 py-2 font-medium
+           hover:text-white hover:bg-white/5 active:scale-95 transition-all duration-100;
+  }
+
+  /* 입력 필드 */
+  .input-base {
+    @apply w-full bg-[#252525] border border-white/[0.08] rounded-xl px-4 py-3
+           text-white placeholder:text-white/30
+           focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/30
+           transition-colors duration-200;
+  }
+
+  /* 배지 */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-brand {
+    @apply badge bg-brand/15 text-brand;
+  }
+
+  .badge-bull {
+    @apply badge bg-red-500/15 text-red-400;
+  }
+
+  .badge-bear {
+    @apply badge bg-blue-500/15 text-blue-400;
+  }
+
+  /* 구분선 */
+  .divider {
+    @apply border-t border-white/[0.06];
+  }
+
+  /* 리스트 아이템 */
+  .list-item {
+    @apply px-4 py-3 active:bg-white/[0.03] transition-colors duration-100 cursor-pointer;
+  }
+
+  /* 바텀 네비 패딩 */
+  .pb-nav {
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  }
+
+  /* 상태: 상승 */
+  .text-bull {
+    @apply text-red-400;
+  }
+
+  /* 상태: 하락 */
+  .text-bear {
+    @apply text-blue-400;
+  }
+
+  /* 상태: 보합 */
+  .text-flat {
+    @apply text-gray-400;
+  }
+}
+
+/* 메가폰 마퀴 애니메이션 */
+@keyframes marquee {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+
+.megaphone-marquee {
+  animation: marquee 18s linear infinite;
+  white-space: nowrap;
+}
+
+/* 페이지 전환 */
+@keyframes pageSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: pageSlideIn 0.25s ease-out;
+}
