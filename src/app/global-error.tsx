@@ -1,10 +1,8 @@
 "use client";
-
+/* eslint-disable @next/next/no-html-link-for-pages */
 /**
- * Kent C. Dodds: "Error Boundary 없으면 전체 앱이 하얀 화면으로 사망한다"
- * 전역 에러 바운더리 + 복구 버튼
+ * 전역 에러 바운더리
  */
-
 export default function GlobalError({
   error,
   reset,
@@ -21,7 +19,7 @@ export default function GlobalError({
         minHeight: "100vh", padding: 20, margin: 0,
       }}>
         <div style={{ textAlign: "center", maxWidth: 400 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🚨</div>
           <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
             문제가 발생했습니다
           </h1>
@@ -43,7 +41,7 @@ export default function GlobalError({
             >
               다시 시도
             </button>
-            <a
+            
               href="/"
               style={{
                 padding: "12px 24px", borderRadius: 10, textDecoration: "none",
