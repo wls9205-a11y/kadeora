@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -30,10 +30,12 @@ export default function LoginPage() {
         return
       }
 
+      const redirectUrl = window.location.origin + '/auth/callback'
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider === 'kakao' ? 'kakao' : 'google',
         options: {
-          redirectTo: ${window.location.origin}/auth/callback,
+          redirectTo: redirectUrl,
         },
       })
 
@@ -71,7 +73,7 @@ export default function LoginPage() {
             fontWeight: 900,
             letterSpacing: -1.5,
             marginTop: 14,
-            background: linear-gradient(135deg,  20%, ),
+            background: 'linear-gradient(135deg, ' + C.text + ' 20%, ' + C.brandLight + ')',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
@@ -102,7 +104,7 @@ export default function LoginPage() {
             style={{
               height: 52,
               borderRadius: 14,
-              border: btn.border ? 1px solid  : 'none',
+              border: btn.border ? '1px solid ' + C.w10 : 'none',
               background: btn.bg,
               color: btn.color,
               fontSize: 15,
