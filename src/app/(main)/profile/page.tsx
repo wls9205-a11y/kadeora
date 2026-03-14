@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -7,13 +7,13 @@ import { Button } from '@/components/ui'
 import { PostCard } from '@/components/features'
 import { GRADES, getGradeInfo } from '@/lib/utils'
 
-// ?꾩떆 ?ъ슜???곗씠??
+// 임시 사용자 데이터
 const MOCK_USER = {
-  nickname: '?ъ옄?섏떊',
+  nickname: '투자의신',
   grade: 7,
   influence: 5200,
   isPremium: true,
-  bio: '二쇱떇/遺?숈궛 10?꾩감 ?ъ옄?? 媛移섑닾?먯? 吏??遺꾩꽍??醫뗭븘?⑸땲??',
+  bio: '주식/부동산 10년차 투자자. 가치투자와 지역 분석을 좋아합니다.',
   postCount: 128,
   followerCount: 2400,
   followingCount: 89,
@@ -27,9 +27,9 @@ const MOCK_USER_POSTS = [
     id: '1',
     author_id: '1',
     category: 'stock' as const,
-    title: '?쇱꽦?꾩옄 9留뚯쟾??媛?ν븷源뚯슂?',
-    content: '諛섎룄泥??ъ씠???뚮났湲곗뿉 ?묒뼱??寃?媛숈????щ윭遺??섍껄??',
-    tags: ['?쇱꽦?꾩옄', '諛섎룄泥?],
+    title: '삼성전자 9만전자 가능할까요?',
+    content: '반도체 사이클 회복기에 접어든 것 같은데 여러분 의견은?',
+    tags: ['삼성전자', '반도체'],
     is_anonymous: false,
     is_hot: true,
     is_premium: false,
@@ -39,7 +39,7 @@ const MOCK_USER_POSTS = [
     region: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    author: { id: '1', nickname: '?ъ옄?섏떊', grade: 7, influence: 5200, avatar_url: null, bio: null, region: null, interests: null, is_premium: false, points: 0, consecutive_attendance: 0, total_attendance: 0, follower_count: 0, following_count: 0, post_count: 0, created_at: '', updated_at: '' },
+    author: { id: '1', nickname: '투자의신', grade: 7, influence: 5200, avatar_url: null, bio: null, region: null, interests: null, is_premium: false, points: 0, consecutive_attendance: 0, total_attendance: 0, follower_count: 0, following_count: 0, post_count: 0, created_at: '', updated_at: '' },
   },
 ]
 
@@ -50,7 +50,7 @@ export default function ProfilePage() {
   const gradeInfo = getGradeInfo(MOCK_USER.grade)
   const nextGrade = MOCK_USER.grade < 10 ? getGradeInfo(MOCK_USER.grade + 1) : null
   
-  // ?ㅼ쓬 ?깃툒源뚯? 吏꾪뻾瑜?怨꾩궛
+  // 다음 등급까지 진행률 계산
   const currentMin = gradeInfo.min
   const nextMin = nextGrade ? nextGrade.min : gradeInfo.min
   const progress = nextGrade 
@@ -59,7 +59,7 @@ export default function ProfilePage() {
 
   return (
     <div className="fade-in">
-      {/* ?ㅻ뜑 諛곕꼫 */}
+      {/* 헤더 배너 */}
       <div
         style={{
           height: 110,
@@ -82,7 +82,7 @@ export default function ProfilePage() {
       </div>
 
       <div style={{ padding: '0 16px', marginTop: -50 }}>
-        {/* ?꾨컮? + ?몄쭛 踰꾪듉 */}
+        {/* 아바타 + 편집 버튼 */}
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
           <div
             className={gradeInfo.glow ? 'grade-glow' : ''}
@@ -99,7 +99,7 @@ export default function ProfilePage() {
               fontWeight: 900,
               color: 'white',
               boxShadow: gradeInfo.glow ? `0 4px 20px ${gradeInfo.color}70` : 'none',
-              // @ts-expect-error -- supabase generated type mismatch
+              // @ts-expect-error -- supabase type workaround
               '--gc': `${gradeInfo.color}88`,
               flexShrink: 0,
             }}
@@ -107,14 +107,14 @@ export default function ProfilePage() {
             {MOCK_USER.nickname[0]}
           </div>
           <Link href="/profile/edit">
-            <Button primary small>?꾨줈???몄쭛</Button>
+            <Button primary small>프로필 편집</Button>
           </Link>
         </div>
 
-        {/* ?대쫫 + 諛곗? */}
+        {/* 이름 + 배지 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.nickname}</h1>
-          {MOCK_USER.isPremium && <span style={{ fontSize: 10, color: '#FBBF24' }}>???꾨━誘몄뾼</span>}
+          {MOCK_USER.isPremium && <span style={{ fontSize: 10, color: '#FBBF24' }}>✦ 프리미엄</span>}
           <span
             style={{
               fontSize: 12,
@@ -130,16 +130,16 @@ export default function ProfilePage() {
           </span>
         </div>
 
-        {/* ?뚭컻 */}
+        {/* 소개 */}
         <p style={{ fontSize: 13, color: C.w35, lineHeight: 1.6, marginBottom: 12 }}>{MOCK_USER.bio}</p>
 
-        {/* ?듦퀎 */}
+        {/* 통계 */}
         <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
           {[
-            ['寃뚯떆湲', MOCK_USER.postCount.toString()],
-            ['?붾줈??, MOCK_USER.followerCount >= 1000 ? `${(MOCK_USER.followerCount / 1000).toFixed(1)}泥? : MOCK_USER.followerCount.toString()],
-            ['?붾줈??, MOCK_USER.followingCount.toString()],
-            ['?ъ씤??, MOCK_USER.points.toLocaleString()],
+            ['게시글', MOCK_USER.postCount.toString()],
+            ['팔로워', MOCK_USER.followerCount >= 1000 ? `${(MOCK_USER.followerCount / 1000).toFixed(1)}천` : MOCK_USER.followerCount.toString()],
+            ['팔로잉', MOCK_USER.followingCount.toString()],
+            ['포인트', MOCK_USER.points.toLocaleString()],
           ].map(([label, value]) => (
             <div key={label} style={{ textAlign: 'center' }}>
               <p style={{ fontSize: 17, fontWeight: 800, color: C.text }}>{value}</p>
@@ -148,25 +148,25 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {/* 異쒖꽍 ?꾪솴 */}
+        {/* 출석 현황 */}
         <div style={{ padding: 14, borderRadius: 14, background: C.s2, border: `1px solid ${C.w05}`, marginBottom: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>?뵦 異쒖꽍 ?꾪솴</span>
-            <Button primary small>?ㅻ뒛 異쒖꽍</Button>
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>🔥 출석 현황</span>
+            <Button primary small>오늘 출석</Button>
           </div>
           <div style={{ display: 'flex', gap: 20 }}>
             <div>
-              <p style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.consecutiveAttendance}??/p>
-              <p style={{ fontSize: 11, color: C.w20 }}>?곗냽 異쒖꽍</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.consecutiveAttendance}일</p>
+              <p style={{ fontSize: 11, color: C.w20 }}>연속 출석</p>
             </div>
             <div>
-              <p style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.totalAttendance}??/p>
-              <p style={{ fontSize: 11, color: C.w20 }}>?꾩쟻 異쒖꽍</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{MOCK_USER.totalAttendance}일</p>
+              <p style={{ fontSize: 11, color: C.w20 }}>누적 출석</p>
             </div>
           </div>
         </div>
 
-        {/* ?깃툒 吏꾪뻾 */}
+        {/* 등급 진행 */}
         <div
           style={{
             padding: 16,
@@ -193,16 +193,16 @@ export default function ProfilePage() {
               <span style={{ fontSize: 22 }}>{gradeInfo.badge}</span>
               <div>
                 <p style={{ fontSize: 13, fontWeight: 800, color: gradeInfo.color }}>{gradeInfo.name}</p>
-                <p style={{ fontSize: 10, color: C.w20 }}>?꾩옱 ?깃툒</p>
+                <p style={{ fontSize: 10, color: C.w20 }}>현재 등급</p>
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontSize: 18, fontWeight: 900, color: gradeInfo.color }}>{MOCK_USER.influence.toLocaleString()}</p>
-              <p style={{ fontSize: 10, color: C.w20 }}>?곹뼢???먯닔</p>
+              <p style={{ fontSize: 10, color: C.w20 }}>영향력 점수</p>
             </div>
           </div>
 
-          {/* 吏꾪뻾諛?*/}
+          {/* 진행바 */}
           <div style={{ height: 10, borderRadius: 6, background: C.w05, overflow: 'hidden', marginBottom: 8 }}>
             <div
               style={{
@@ -219,23 +219,23 @@ export default function ProfilePage() {
           {nextGrade ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <p style={{ fontSize: 11, color: C.w35 }}>
-                ?ㅼ쓬: <span style={{ color: nextGrade.color, fontWeight: 700 }}>{nextGrade.badge} {nextGrade.name}</span>
+                다음: <span style={{ color: nextGrade.color, fontWeight: 700 }}>{nextGrade.badge} {nextGrade.name}</span>
               </p>
               <p style={{ fontSize: 11, color: gradeInfo.color, fontWeight: 700 }}>
-                +{(nextGrade.min - MOCK_USER.influence).toLocaleString()}???꾩슂
+                +{(nextGrade.min - MOCK_USER.influence).toLocaleString()}점 필요
               </p>
             </div>
           ) : (
-            <p style={{ fontSize: 12, color: '#FFD700', fontWeight: 700, textAlign: 'center' }}>?룇 理쒓퀬 ?깃툒 ?ъ꽦!</p>
+            <p style={{ fontSize: 12, color: '#FFD700', fontWeight: 700, textAlign: 'center' }}>🏆 최고 등급 달성!</p>
           )}
         </div>
       </div>
 
-      {/* ??*/}
+      {/* 탭 */}
       <div style={{ display: 'flex', borderBottom: `1px solid ${C.w05}` }}>
         {[
-          { id: 'posts', label: '寃뚯떆湲' },
-          { id: 'grade', label: '?깃툒' },
+          { id: 'posts', label: '게시글' },
+          { id: 'grade', label: '등급' },
         ].map(t => (
           <button
             key={t.id}
@@ -258,7 +258,7 @@ export default function ProfilePage() {
         ))}
       </div>
 
-      {/* 肄섑뀗痢?*/}
+      {/* 콘텐츠 */}
       {tab === 'posts' ? (
         <div style={{ paddingBottom: 20 }}>
           {MOCK_USER_POSTS.map(post => (
@@ -286,7 +286,7 @@ export default function ProfilePage() {
                   alignItems: 'center',
                   gap: 12,
                   opacity: isLocked ? 0.32 : 1,
-                  // @ts-expect-error -- supabase generated type mismatch
+                  // @ts-expect-error -- supabase type workaround
                   '--gc': `${info.color}88`,
                 }}
               >
@@ -322,4 +322,3 @@ export default function ProfilePage() {
     </div>
   )
 }
-
