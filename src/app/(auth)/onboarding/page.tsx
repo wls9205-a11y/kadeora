@@ -30,18 +30,17 @@ export default function OnboardingPage() {
     setLoading(true)
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: authData } = await supabase.auth.getUser()
       
-      if (user) {
-        await supabase.from('profiles').insert({
-          id: user.id,
-          nickname,
-          region,
-          interests,
-          grade: 1,
-          influence: 0,
-          points: 50, // 가입 보너스
-        })
+      if (authData.user) {
+        await supabase.from('profiles').update({
+          nickname: nickname,
+          region_text: region,
+          interests: interests,
+          onboarded: true,
+          nickname_set: true,
+          points: 50,
+        }).eq('id', authData.user.id)
       }
       
       router.push('/feed')
@@ -61,13 +60,11 @@ export default function OnboardingPage() {
         flexDirection: 'column',
       }}
     >
-      {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
         <Logo size={36} />
         <span style={{ fontSize: 20, fontWeight: 800, color: C.text }}>카더라</span>
       </div>
 
-      {/* 진행 바 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 32 }}>
         {[1, 2, 3].map(s => (
           <div
@@ -83,7 +80,6 @@ export default function OnboardingPage() {
         ))}
       </div>
 
-      {/* 스텝 1: 닉네임 */}
       {step === 1 && (
         <div className="fade-in" style={{ flex: 1 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, marginBottom: 8 }}>
@@ -101,7 +97,7 @@ export default function OnboardingPage() {
               width: '100%',
               height: 52,
               borderRadius: 14,
-              border: `1px solid ${C.w10}`,
+              border: '1px solid ' + C.w10,
               background: C.s2,
               color: C.text,
               fontSize: 16,
@@ -115,7 +111,6 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* 스텝 2: 지역 */}
       {step === 2 && (
         <div className="fade-in" style={{ flex: 1 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, marginBottom: 8 }}>
@@ -132,8 +127,8 @@ export default function OnboardingPage() {
                 style={{
                   padding: '14px 0',
                   borderRadius: 12,
-                  border: `1.5px solid ${region === r ? C.brand : 'transparent'}`,
-                  background: region === r ? `${C.brand}15` : C.w05,
+                  border: region === r ? '1.5px solid ' + C.brand : '1.5px solid transparent',
+                  background: region === r ? C.brand + '15' : C.w05,
                   color: region === r ? C.brand : C.w50,
                   fontSize: 14,
                   fontWeight: region === r ? 700 : 500,
@@ -148,7 +143,6 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* 스텝 3: 관심사 */}
       {step === 3 && (
         <div className="fade-in" style={{ flex: 1 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, marginBottom: 8 }}>
@@ -167,8 +161,8 @@ export default function OnboardingPage() {
                   style={{
                     padding: '12px 20px',
                     borderRadius: 24,
-                    border: `1.5px solid ${selected ? C.brand : 'transparent'}`,
-                    background: selected ? `${C.brand}15` : C.w05,
+                    border: selected ? '1.5px solid ' + C.brand : '1.5px solid transparent',
+                    background: selected ? C.brand + '15' : C.w05,
                     color: selected ? C.brand : C.w50,
                     fontSize: 14,
                     fontWeight: selected ? 700 : 500,
@@ -187,7 +181,6 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* 하단 버튼 */}
       <div style={{ marginTop: 'auto', paddingTop: 24 }}>
         {step < 3 ? (
           <Button
