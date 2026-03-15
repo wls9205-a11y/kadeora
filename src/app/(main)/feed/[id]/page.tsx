@@ -195,7 +195,7 @@ export default async function FeedDetailPage({ params }: Props) {
           {post.title}
         </h1>
 
-        <div style={{ fontSize: 15, color: 'var(--kd-text-secondary, #CBD5E1)', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
+        <div style={{ fontSize: 15, color: 'var(--kd-text)', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
           {post.content}
         </div>
 
