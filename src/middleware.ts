@@ -1,3 +1,5 @@
+﻿const BOT_SCAN_PATHS=['/wp-admin','/wp-login.php','/.env','/.git'];
+
 const BOT_SCAN_PATHS = ['/wp-admin','/wp-login.php','/.env','/.git','/phpmyadmin'];
 
 import { NextResponse, type NextRequest } from 'next/server';
@@ -52,7 +54,7 @@ export async function middleware(request: NextRequest) {
     session = data.session;
   } catch { /* ignore */ }
 
-  // 보호??경로 ??비로그인 ??로그???�이지�?
+  // 보호??경로 ??비로그인 ??로그???�이지�?
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
   if (isProtected && !session) {
     const loginUrl = new URL('/login', request.url);
@@ -60,8 +62,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // ?�보??가????로그?�했지�??�보??미완�???
-  // (공개 경로, API, ?�보???�이지 ?�체???�외)
+  // ?�보??가????로그?�했지�??�보??미완�???
+  // (공개 경로, API, ?�보???�이지 ?�체???�외)
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p)) || pathname.startsWith('/api/') || pathname.startsWith('/_next/');
   if (session && !isPublic && pathname !== '/onboarding') {
     try {
@@ -73,10 +75,10 @@ export async function middleware(request: NextRequest) {
       if (profile && (!profile.onboarded || !profile.nickname_set)) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }
-    } catch { /* ignore, ?�로???�으�??�과 */ }
+    } catch { /* ignore, ?�로???�으�??�과 */ }
   }
 
-  // CSP ?�더
+  // CSP ?�더
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
     `default-src 'self'`,
