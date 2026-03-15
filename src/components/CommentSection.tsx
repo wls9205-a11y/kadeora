@@ -27,7 +27,8 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
-  const { success, error } = useToast();
+  const [likingIds, setLikingIds] = useState<Set<number>>(new Set());
+  const { success, error, info } = useToast();
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -69,12 +70,32 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
     success('댓글이 삭제되었습니다');
   };
 
+  const handleCommentLike = async (commentId: number, currentLikes: number) => {
+    if (!user) { info('로그인이 필요합니다'); return; }
+    if (likingIds.has(commentId)) return;
+    setLikingIds(prev => new Set(prev).add(commentId));
+    // Optimistic update
+    setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes_count: currentLikes + 1 } : c));
+    try {
+      const sb = createSupabaseBrowser();
+      const { error: err } = await sb.from('comments').update({ likes_count: currentLikes + 1 }).eq('id', commentId);
+      if (err) {
+        // rollback
+        setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes_count: currentLikes } : c));
+        error('오류가 발생했습니다');
+      }
+    } finally {
+      setLikingIds(prev => { const s = new Set(prev); s.delete(commentId); return s; });
+    }
+  };
+
   return (
     <div style={{ marginTop: 32 }}>
       <h3 style={{ color: 'var(--kd-text)', fontSize: 16, fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
         <span>💬</span> 댓글 <span style={{ color: 'var(--kd-primary)', fontSize: 14, fontWeight: 500 }}>{comments.length}</span>
       </h3>
 
+      {/* 댓글 입력 */}
       <div style={{ background: 'var(--kd-surface)', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid var(--kd-border)' }}>
         {user ? (
           <>
@@ -94,22 +115,25 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
               onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit(); }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-              <span style={{ fontSize: 12, color: content.length > 450 ? 'var(--kd-danger)' : '#64748B' }}>{content.length}/500자</span>
+              <span style={{ fontSize: 12, color: content.length > 450 ? 'var(--kd-danger)' : 'var(--kd-text-dim)' }}>{content.length}/500자</span>
               <button onClick={handleSubmit} disabled={loading || !content.trim()} className="kd-btn kd-btn-primary" style={{ fontSize: 13, padding: '7px 16px' }}>
                 {loading ? '작성 중...' : '댓글 작성'}
               </button>
             </div>
           </>
         ) : (
-          <div style={{ textAlign: 'center', padding: '12px 0', color: '#94A3B8', fontSize: 14 }}>
+          <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--kd-text-muted)', fontSize: 14 }}>
             <a href="/login" style={{ color: 'var(--kd-primary)', textDecoration: 'none', fontWeight: 600 }}>로그인</a>하시면 댓글을 작성할 수 있습니다
           </div>
         )}
       </div>
 
+      {/* 댓글 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {comments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 0', color: '#64748B', fontSize: 14 }}>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</div>
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--kd-text-dim)', fontSize: 14 }}>
+            아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+          </div>
         ) : (
           comments.map(comment => (
             <div key={comment.id} style={{ background: 'var(--kd-surface)', borderRadius: 10, border: '1px solid var(--kd-border)', padding: '14px 16px' }}>
@@ -119,11 +143,35 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text)' }}>{comment.profiles?.nickname ?? '익명'}</span>
-                  <span style={{ fontSize: 11, color: '#64748B' }}>{timeAgo(comment.created_at)}</span>
+                  <span style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>{timeAgo(comment.created_at)}</span>
                 </div>
-                {user?.id === comment.author_id && (
-                  <button onClick={() => setDeleteTarget(comment.id)} style={{ background: 'none', border: 'none', color: 'var(--kd-danger)', fontSize: 12, cursor: 'pointer', opacity: 0.7 }}>삭제</button>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {/* 댓글 좋아요 */}
+                  <button
+                    onClick={() => handleCommentLike(comment.id, comment.likes_count ?? 0)}
+                    disabled={likingIds.has(comment.id)}
+                    aria-label="댓글 좋아요"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 4,
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'var(--kd-text-dim)', fontSize: 12, padding: '2px 6px',
+                      borderRadius: 6, transition: 'all 0.15s',
+                      opacity: likingIds.has(comment.id) ? 0.5 : 1,
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--kd-danger)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--kd-text-dim)')}
+                  >
+                    🤍 <span>{comment.likes_count ?? 0}</span>
+                  </button>
+                  {/* 삭제 버튼 */}
+                  {user?.id === comment.author_id && (
+                    <button
+                      onClick={() => setDeleteTarget(comment.id)}
+                      aria-label="댓글 삭제"
+                      style={{ background: 'none', border: 'none', color: 'var(--kd-danger)', fontSize: 12, cursor: 'pointer', opacity: 0.7, padding: '2px 4px' }}
+                    >삭제</button>
+                  )}
+                </div>
               </div>
               <p style={{ margin: 0, fontSize: 14, color: 'var(--kd-text)', lineHeight: 1.6 }}>{comment.content}</p>
             </div>
