@@ -1,86 +1,90 @@
-﻿import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+
+const PROTECTED_PATHS = ['/write', '/payment', '/profile'];
+const PRIVATE_IP_REGEX = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|::1|localhost)/;
+const ALLOWED_APT_DOMAINS = ['applyhome.co.kr', 'land.naver.com', 'hogangnono.com'];
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({ request });
+  const { pathname } = request.nextUrl;
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  // Block apt-proxy SSRF
+  if (pathname.startsWith('/api/apt-proxy')) {
+    const url = request.nextUrl.searchParams.get('url');
+    if (url) {
+      try {
+        const parsed = new URL(url);
+        if (PRIVATE_IP_REGEX.test(parsed.hostname)) {
+          return NextResponse.json({ error: 'SSRF blocked' }, { status: 403 });
+        }
+        const allowed = ALLOWED_APT_DOMAINS.some(d => parsed.hostname.endsWith(d));
+        if (!allowed) {
+          return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
+        }
+      } catch {
+        return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+      }
+    }
+  }
+
+  let response = NextResponse.next({ request });
+
+  // Supabase session refresh
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll(); },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  let session = null;
+  try {
+    const { data } = await supabase.auth.getSession();
+    session = data.session;
+  } catch {
+    // Session fetch failed, treat as unauthenticated
+  }
+
+  // Protected route guard
+  const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
+  if (isProtected && !session) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // CSP Header
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' https://t1.kakaocdn.net https://developers.kakao.com`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://cdn.jsdelivr.net https://va.vercel-scripts.com`,
     `style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net`,
-    `img-src 'self' data: blob: https://tezftxakuwhsclarprlz.supabase.co https://*.kakaocdn.net`,
+    `img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://k.kakaocdn.net`,
     `font-src 'self' https://cdn.jsdelivr.net`,
-    `connect-src 'self' https://tezftxakuwhsclarprlz.supabase.co wss://tezftxakuwhsclarprlz.supabase.co https://api.tosspayments.com https://*.upstash.io https://*.vercel-insights.com https://va.vercel-scripts.com https://*.vercel-analytics.com`,
-    `frame-src https://api.tosspayments.com https://accounts.google.com https://kauth.kakao.com`,
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com`,
     `frame-ancestors 'none'`,
-    `form-action 'self'`,
     `base-uri 'self'`,
-    `object-src 'none'`,
-    `upgrade-insecure-requests`,
-  ].join("; ");
+    `form-action 'self'`,
+  ].join('; ');
 
-  response.headers.set("Content-Security-Policy", csp);
-  response.headers.set("x-nonce", nonce);
-
-  if (request.nextUrl.pathname.includes("stock-debug")) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  if (request.nextUrl.pathname.startsWith("/api/apt-proxy")) {
-    const targetUrl = request.nextUrl.searchParams.get("url") || "";
-    const ALLOWED_DOMAINS = ["api.odcloud.kr", "openapi.molit.go.kr", "www.applyhome.co.kr"];
-    try {
-      const parsed = new URL(targetUrl);
-      if (!ALLOWED_DOMAINS.includes(parsed.hostname)) {
-        return NextResponse.json({ error: "Blocked: domain not in allowlist" }, { status: 403 });
-      }
-      const privatePatterns = /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|0\.|localhost|::1)/;
-      if (privatePatterns.test(parsed.hostname)) {
-        return NextResponse.json({ error: "Blocked: private IP" }, { status: 403 });
-      }
-    } catch {
-      return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
-    }
-  }
-
-  try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => request.cookies.getAll(),
-          setAll: (cookiesToSet) => {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              request.cookies.set(name, value);
-              response.cookies.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    const protectedPaths = ["/write", "/payment", "/profile"];
-    const isProtected = protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p));
-
-    if (isProtected && !user) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  } catch {
-    // Supabase env vars missing — skip auth
-  }
+  response.headers.set('Content-Security-Policy', csp);
+  response.headers.set('x-nonce', nonce);
 
   return response;
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
