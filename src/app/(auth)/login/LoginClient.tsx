@@ -31,18 +31,18 @@ export default function LoginClient() {
     <div style={{ width: '100%', maxWidth: 400 }}>
       {/* Logo */}
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontSize: 36, fontWeight: 900, color: '#3B82F6', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
+        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--kd-primary)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
           KADEORA
         </div>
-        <p style={{ margin: 0, color: '#94A3B8', fontSize: 14 }}>진짜 정보가 오가는 금융 커뮤니티</p>
+        <p style={{ margin: 0, color: 'var(--kd-text-muted)', fontSize: 14 }}>진짜 정보가 오가는 금융 커뮤니티</p>
       </div>
 
       {/* Card */}
-      <div style={{ background: '#111827', border: '1px solid #1E293B', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
-        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: '#F1F5F9', textAlign: 'center' }}>
+      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)', textAlign: 'center' }}>
           로그인
         </h2>
-        <p style={{ margin: '0 0 32px', color: '#64748B', fontSize: 13, textAlign: 'center', lineHeight: 1.5 }}>
+        <p style={{ margin: '0 0 32px', color: 'var(--kd-text-dim)', fontSize: 13, textAlign: 'center', lineHeight: 1.5 }}>
           소셜 계정으로 간편하게 시작하세요
         </p>
 
@@ -78,18 +78,18 @@ export default function LoginClient() {
           disabled={!!loading}
           style={{
             width: '100%', padding: '14px 20px',
-            borderRadius: 12, border: '1px solid #334155', cursor: loading ? 'not-allowed' : 'pointer',
-            background: '#1a2234', color: '#F1F5F9',
+            borderRadius: 12, border: '1px solid var(--kd-border)', cursor: loading ? 'not-allowed' : 'pointer',
+            background: 'var(--kd-surface-2)', color: 'var(--kd-text)',
             fontWeight: 700, fontSize: 15,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             opacity: loading === 'kakao' ? 0.5 : 1,
             transition: 'all 0.15s',
           }}
-          onMouseEnter={e => !loading && ((e.currentTarget as HTMLElement).style.background = '#243044')}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#1a2234'}
+          onMouseEnter={e => !loading && ((e.currentTarget as HTMLElement).style.background = 'var(--kd-border-hover)')}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--kd-surface-2)'}
         >
           {loading === 'google' ? (
-            <div style={{ width: 20, height: 20, border: '2px solid #F1F5F9', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+            <div style={{ width: 20, height: 20, border: '2px solid var(--kd-text)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
           ) : (
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -102,16 +102,16 @@ export default function LoginClient() {
         </button>
 
         {error && (
-          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: 13 }}>
+          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--kd-danger)', fontSize: 13 }}>
             ⚠️ {error}
           </div>
         )}
 
-        <p style={{ margin: '24px 0 0', fontSize: 11, color: '#475569', textAlign: 'center', lineHeight: 1.6 }}>
+        <p style={{ margin: '24px 0 0', fontSize: 11, color: 'var(--kd-text-dim)', textAlign: 'center', lineHeight: 1.6 }}>
           로그인 시{' '}
-          <a href="/terms" style={{ color: '#3B82F6', textDecoration: 'none' }}>이용약관</a>
+          <a href="/terms" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>이용약관</a>
           {' '}및{' '}
-          <a href="/privacy" style={{ color: '#3B82F6', textDecoration: 'none' }}>개인정보처리방침</a>에 동의하게 됩니다
+          <a href="/privacy" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>개인정보처리방침</a>에 동의하게 됩니다
         </p>
       </div>
     </div>
