@@ -24,6 +24,46 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
+  const numId = Number(id);
+  const SITE_URL_META = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
+  try {
+    const sb = await createSupabaseServer();
+    const { data: post } = await sb
+      .from('posts')
+      .select('title, content, created_at, profiles!posts_author_id_fkey(nickname)')
+      .eq('id', numId)
+      .eq('is_deleted', false)
+      .single();
+    if (!post) return {};
+    const author = (post.profiles as { nickname?: string } | null)?.nickname ?? '익명';
+    const description = post.content.slice(0, 160);
+    const ogImageUrl = `${SITE_URL_META}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}`;
+    return {
+      title: post.title,
+      description,
+      openGraph: {
+        title: post.title,
+        description,
+        type: 'article',
+        publishedTime: post.created_at,
+        authors: [author],
+        url: `${SITE_URL_META}/feed/${numId}`,
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: post.title,
+        description,
+        images: [ogImageUrl],
+      },
+    };
+  } catch {
+    return {};
+  }
+}
+
 export default async function FeedDetailPage({ params }: Props) {
   const { id } = await params;
   const numId = Number(id);

@@ -70,7 +70,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 13, fontWeight: 700, flexShrink: 0,
       }}>{ICONS[toast.type]}</span>
-      <span style={{ color: '#F1F5F9', fontSize: 14, lineHeight: 1.4, flex: 1 }}>
+      <span style={{ color: 'var(--kd-text)', fontSize: 14, lineHeight: 1.4, flex: 1 }}>
         {toast.message}
       </span>
     </div>

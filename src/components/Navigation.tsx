@@ -82,7 +82,7 @@ export function Navigation() {
                 style={{
                   padding: '6px 12px', borderRadius: 8,
                   fontSize: 14, fontWeight: 500,
-                  color: isActive(item.href) ? 'var(--kd-primary)' : '#94A3B8',
+                  color: isActive(item.href) ? 'var(--kd-primary)' : 'var(--kd-text-muted)',
                   background: isActive(item.href) ? 'rgba(59,130,246,0.12)' : 'transparent',
                   textDecoration: 'none', transition: 'all 0.15s',
                 }}
@@ -96,14 +96,14 @@ export function Navigation() {
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Link href="/search" style={{
               width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              borderRadius: 8, color: '#94A3B8', textDecoration: 'none', fontSize: 16,
+              borderRadius: 8, color: 'var(--kd-text-muted)', textDecoration: 'none', fontSize: 16,
             }} aria-label="검색">🔍</Link>
 
             {user ? (
               <>
                 <Link href="/notifications" style={{
                   width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: 8, color: '#94A3B8', textDecoration: 'none', fontSize: 16,
+                  borderRadius: 8, color: 'var(--kd-text-muted)', textDecoration: 'none', fontSize: 16,
                 }} aria-label="알림">🔔</Link>
 
                 <Link href="/write" style={{
@@ -193,7 +193,7 @@ export function Navigation() {
             <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               padding: '4px 0', textDecoration: 'none',
-              color: active ? 'var(--kd-primary)' : '#64748B',
+              color: active ? 'var(--kd-primary)' : 'var(--kd-text-dim)',
             }}>
               <span style={{ fontSize: 20 }}>{item.icon}</span>
               <span style={{ fontSize: 10, fontWeight: active ? 700 : 400 }}>{item.label}</span>
