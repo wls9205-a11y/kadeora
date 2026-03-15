@@ -14,9 +14,10 @@ interface Props {
   profile: Profile;
   posts: PostRow[];
   isOwner: boolean;
+  commentCount: number;
 }
 
-export default function ProfileClient({ profile, posts, isOwner }: Props) {
+export default function ProfileClient({ profile, posts, isOwner, commentCount }: Props) {
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState(profile.nickname ?? '');
   const [bio, setBio] = useState(profile.bio ?? '');
@@ -87,7 +88,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
     }
   };
 
-  const totalActivity = (profile.posts_count ?? 0) + (profile.likes_count ?? 0);
+  const totalActivity = (profile.posts_count ?? 0) + commentCount + (profile.likes_count ?? 0);
   const joinDate = new Date(profile.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' });
   const displayName = profile.nickname ?? '익명';
 
@@ -224,7 +225,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 24, background: 'var(--kd-border)', borderRadius: 12, overflow: 'hidden' }}>
           {[
             { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
-            { label: '댓글', value: 0, icon: '💬' },
+            { label: '댓글', value: commentCount, icon: '💬' },
             { label: '받은 좋아요', value: profile.likes_count ?? 0, icon: '❤️' },
             { label: '총 활동', value: totalActivity, icon: '⚡' },
           ].map((stat, i) => (

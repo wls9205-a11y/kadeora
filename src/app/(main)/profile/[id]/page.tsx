@@ -7,7 +7,6 @@ interface Props { params: Promise<{ id: string }> }
 export default async function ProfilePage({ params }: Props) {
   const { id } = await params;
   const sb = await createSupabaseServer();
-
   const { data: { session } } = await sb.auth.getSession();
   const isOwner = session?.user?.id === id;
 
@@ -16,8 +15,22 @@ export default async function ProfilePage({ params }: Props) {
 
   const { data: posts } = await sb.from('posts')
     .select('id,title,category,created_at,view_count,likes_count,comments_count')
-    .eq('user_id', id).eq('is_deleted', false)
-    .order('created_at', { ascending: false }).limit(20);
+    .eq('author_id', id)
+    .eq('is_deleted', false)
+    .order('created_at', { ascending: false })
+    .limit(20);
 
-  return <ProfileClient profile={profile} posts={posts ?? []} isOwner={isOwner} />;
+  const { count: commentCount } = await sb.from('comments')
+    .select('*', { count: 'exact', head: true })
+    .eq('author_id', id)
+    .eq('is_deleted', false);
+
+  return (
+    <ProfileClient
+      profile={profile}
+      posts={posts ?? []}
+      isOwner={isOwner}
+      commentCount={commentCount ?? 0}
+    />
+  );
 }
