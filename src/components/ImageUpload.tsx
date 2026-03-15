@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface ImageUploadProps { images: string[]; onImagesChange: (images: string[]) => void; maxImages?: number; }
 
@@ -8,7 +8,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 5 }: I
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const supabase = createBrowserSupabaseClient();
+  const supabase = createSupabaseBrowser();
   const MAX_FILE_SIZE = 5 * 1024 * 1024;
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
