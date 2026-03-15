@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -19,11 +20,52 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState(profile.nickname ?? '');
   const [bio, setBio] = useState(profile.bio ?? '');
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const { success, error } = useToast();
   const router = useRouter();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const grade = GRADE_INFO[profile.grade ?? '씨앗'] ?? { icon: '🌱', color: 'var(--kd-text-muted)' };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      error('JPG, PNG, WebP 형식만 가능합니다'); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      error('2MB 이하 이미지만 가능합니다'); return;
+    }
+    setAvatarUploading(true);
+    try {
+      const sb = createSupabaseBrowser();
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) { error('로그인이 필요합니다'); return; }
+
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${user.id}/avatar_${Date.now()}.${ext}`;
+
+      const { error: uploadErr } = await sb.storage.from('avatars').upload(fileName, file, { cacheControl: '3600', upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
+      const newUrl = urlData.publicUrl;
+
+      const { error: updateErr } = await sb.from('profiles').update({ avatar_url: newUrl }).eq('id', user.id);
+      if (updateErr) throw updateErr;
+
+      setAvatarUrl(newUrl);
+      success('프로필 사진이 변경되었습니다');
+      router.refresh();
+    } catch {
+      error('업로드 중 오류가 발생했습니다');
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
 
   const handleSave = async () => {
     if (!nickname.trim()) { error('닉네임을 입력해주세요'); return; }
@@ -45,25 +87,72 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
     }
   };
 
-  const totalActivity = (profile.posts_count ?? 0) + (0 ?? 0) + (profile.likes_count ?? 0);
+  const totalActivity = (profile.posts_count ?? 0) + (profile.likes_count ?? 0);
   const joinDate = new Date(profile.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' });
+  const displayName = profile.nickname ?? '익명';
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* Profile card */}
       <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
-        {/* Header */}
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+
           {/* Avatar */}
-          <div style={{
-            width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 28, fontWeight: 800, color: 'white',
-          }}>
-            {(profile.nickname ?? profile.username ?? 'U')[0].toUpperCase()}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            {avatarUrl ? (
+              <div style={{ width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid var(--kd-border)' }}>
+                <Image
+                  src={avatarUrl}
+                  alt={`${displayName} 프로필 사진`}
+                  fill
+                  sizes="72px"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+            ) : (
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 28, fontWeight: 800, color: 'white',
+                border: '2px solid var(--kd-border)',
+              }}>
+                {displayName[0].toUpperCase()}
+              </div>
+            )}
+            {/* 아바타 업로드 버튼 — 본인만 */}
+            {isOwner && (
+              <>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleAvatarUpload}
+                  style={{ display: 'none' }}
+                  id="avatar-upload"
+                  aria-label="프로필 사진 변경"
+                />
+                <label
+                  htmlFor="avatar-upload"
+                  title="프로필 사진 변경"
+                  style={{
+                    position: 'absolute', bottom: 0, right: 0,
+                    width: 24, height: 24, borderRadius: '50%',
+                    background: 'var(--kd-primary)', color: 'white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, cursor: avatarUploading ? 'not-allowed' : 'pointer',
+                    border: '2px solid var(--kd-surface)',
+                    opacity: avatarUploading ? 0.6 : 1,
+                    transition: 'opacity 0.15s',
+                  }}
+                >
+                  {avatarUploading ? '⏳' : '📷'}
+                </label>
+              </>
+            )}
           </div>
 
+          {/* 닉네임 / 소개 */}
           <div style={{ flex: 1, minWidth: 0 }}>
             {editing ? (
               <>
@@ -95,7 +184,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                   <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>
-                    {profile.nickname ?? '익명'}
+                    {displayName}
                   </h1>
                   <span style={{
                     fontSize: 12, padding: '2px 8px', borderRadius: 999, fontWeight: 700,
@@ -112,7 +201,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
             )}
           </div>
 
-          {/* Edit button */}
+          {/* 수정 버튼 */}
           {isOwner && (
             <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
               {editing ? (
@@ -135,7 +224,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 24, background: 'var(--kd-border)', borderRadius: 12, overflow: 'hidden' }}>
           {[
             { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
-            { label: '댓글', value: 0 ?? 0, icon: '💬' },
+            { label: '댓글', value: 0, icon: '💬' },
             { label: '받은 좋아요', value: profile.likes_count ?? 0, icon: '❤️' },
             { label: '총 활동', value: totalActivity, icon: '⚡' },
           ].map((stat, i) => (
@@ -164,8 +253,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
                 <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
                   <div style={{
                     padding: '12px 0', borderBottom: i < posts.length - 1 ? '1px solid var(--kd-border)' : 'none',
-                    display: 'flex', gap: 10, alignItems: 'center',
-                    transition: 'opacity 0.15s',
+                    display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s',
                   }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
