@@ -1,23 +1,23 @@
-import type { Metadata } from "next";
+import { createSupabaseServer } from '@/lib/supabase-server';
+import { notFound } from 'next/navigation';
+import ProfileClient from './ProfileClient';
 
-export const metadata: Metadata = {
-  title: "프로필",
-  description: "카더라 사용자 프로필",
-};
+interface Props { params: Promise<{ id: string }> }
 
-export default function ProfilePage() {
-  return (
-    <div style={{ paddingBottom: 80 }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#F1F5F9", marginBottom: 20 }}>
-        👤 프로필
-      </h1>
-      <div style={{
-        textAlign: "center", padding: 60,
-        background: "var(--kd-surface)", borderRadius: 16, border: "1px solid var(--kd-border)",
-      }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
-        <p style={{ color: "#94A3B8", fontSize: 14 }}>프로필 페이지를 준비 중입니다.</p>
-      </div>
-    </div>
-  );
+export default async function ProfilePage({ params }: Props) {
+  const { id } = await params;
+  const sb = await createSupabaseServer();
+
+  const { data: { session } } = await sb.auth.getSession();
+  const isOwner = session?.user?.id === id;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', id).single();
+  if (!profile) return notFound();
+
+  const { data: posts } = await sb.from('posts')
+    .select('id,title,category,created_at,view_count,likes_count,comments_count')
+    .eq('user_id', id).eq('is_deleted', false)
+    .order('created_at', { ascending: false }).limit(20);
+
+  return <ProfileClient profile={profile} posts={posts ?? []} isOwner={isOwner} />;
 }
