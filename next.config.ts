@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // 빌드 안정성 — TS 타입은 CI의 type-check job에서 검증
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
 
@@ -11,6 +10,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "tezftxakuwhsclarprlz.supabase.co",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "k.kakaocdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "*.kakaocdn.net",
       },
     ],
     formats: ["image/avif", "image/webp"],
