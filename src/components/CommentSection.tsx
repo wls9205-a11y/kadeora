@@ -1,36 +1,184 @@
-﻿"use client";
-import { useState } from "react";
-import { createClient } from "@/lib/supabase-browser";
-interface Comment { id: number; content: string; created_at: string; profiles: { nickname: string; avatar_url: string | null } | null; }
-export function CommentSection({ postId, initialComments }: { postId: number; initialComments: Comment[] }) {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
-  const [content, setContent] = useState("");
+'use client';
+import { useState, useEffect } from 'react';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useToast } from '@/components/Toast';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import type { CommentWithProfile } from '@/types/database';
+import type { User } from '@supabase/supabase-js';
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '방금 전';
+  if (m < 60) return `${m}분 전`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}시간 전`;
+  const d = Math.floor(h / 24);
+  return `${d}일 전`;
+}
+
+interface CommentSectionProps {
+  postId: number;
+  initialComments?: CommentWithProfile[];
+}
+
+export function CommentSection({ postId, initialComments = [] }: CommentSectionProps) {
+  const [comments, setComments] = useState<CommentWithProfile[]>(initialComments);
+  const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const { success, error } = useToast();
+
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    sb.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    const { data: { subscription } } = sb.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleSubmit = async () => {
-    if (!content.trim() || loading) return;
-    setLoading(true); setError(null);
+    if (!user) { error('로그인이 필요합니다'); return; }
+    const trimmed = content.trim();
+    if (!trimmed) { error('댓글 내용을 입력해주세요'); return; }
+    if (trimmed.length > 500) { error('댓글은 500자 이내로 입력해주세요'); return; }
+
+    setLoading(true);
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setError("댓글을 작성하려면 로그인이 필요합니다."); setLoading(false); return; }
-      const { data, error: insertError } = await supabase.from("comments").insert({ post_id: postId, user_id: user.id, content: content.trim() }).select("id, content, created_at, profiles(nickname, avatar_url)").single();
-      if (insertError) throw insertError;
-      if (data) { setComments((prev) => [...prev, data as unknown as Comment]); setContent(""); }
-    } catch { setError("댓글 작성에 실패했습니다."); } finally { setLoading(false); }
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId, content: trimmed }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? '댓글 작성 실패');
+      }
+      const { comment } = await res.json();
+      setComments(prev => [{
+        ...comment,
+        profiles: { id: user.id, nickname: comment.nickname ?? '나', avatar_url: null },
+      }, ...prev]);
+      setContent('');
+      success('댓글이 작성되었습니다');
+    } catch (e: unknown) {
+      error(e instanceof Error ? e.message : '댓글 작성 중 오류가 발생했습니다');
+    } finally {
+      setLoading(false);
+    }
   };
-  const formatDate = (d: string) => { const diff = Date.now() - new Date(d).getTime(); const m = Math.floor(diff/60000); if (m<1) return "방금"; if (m<60) return m+"분 전"; const h = Math.floor(m/60); if (h<24) return h+"시간 전"; return new Date(d).toLocaleDateString("ko-KR"); };
+
+  const handleDelete = async (commentId: number) => {
+    const sb = createSupabaseBrowser();
+    const { error: err } = await sb.from('comments')
+      .update({ is_deleted: true })
+      .eq('id', commentId)
+      .eq('author_id', user!.id);
+    if (err) { error('삭제에 실패했습니다'); return; }
+    setComments(prev => prev.filter(c => c.id !== commentId));
+    setDeleteTarget(null);
+    success('댓글이 삭제되었습니다');
+  };
+
   return (
-    <div className="bg-[#111827] rounded-2xl border border-[#1E293B] p-6">
-      <h2 className="text-base font-bold text-[#F1F5F9] mb-4">💬 댓글 {comments.length}개</h2>
-      <div className="mb-5 p-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
-        <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="댓글을 입력하세요..." maxLength={500} rows={3} className="w-full bg-transparent border-none outline-none resize-none text-[13px] text-[#E2E8F0] placeholder:text-[#475569] leading-relaxed" />
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-[11px] text-[#475569]">{content.length}/500</span>
-          <button onClick={handleSubmit} disabled={!content.trim()||loading} className="px-4 py-1.5 rounded-lg bg-[#3B82F6] text-white text-xs font-bold border-none cursor-pointer disabled:opacity-40 hover:bg-[#2563EB] transition-colors">{loading ? "등록 중..." : "댓글 등록"}</button>
-        </div>
-        {error && <div className="mt-2 text-[12px] text-[#FCA5A5]">⚠️ {error}</div>}
+    <div style={{ marginTop: 32 }}>
+      <h3 style={{ color: '#F1F5F9', fontSize: 16, fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span>💬</span> 댓글 <span style={{ color: '#3B82F6', fontSize: 14, fontWeight: 500 }}>{comments.length}</span>
+      </h3>
+
+      {/* Write area */}
+      <div style={{ background: '#1a2234', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid #1E293B' }}>
+        {user ? (
+          <>
+            <textarea
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              placeholder="댓글을 작성해주세요..."
+              maxLength={500}
+              rows={3}
+              style={{
+                width: '100%', background: '#0A0E17', border: '1px solid #1E293B',
+                borderRadius: 8, color: '#F1F5F9', padding: '10px 12px',
+                fontSize: 14, resize: 'vertical', fontFamily: 'inherit',
+                lineHeight: 1.6,
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit();
+              }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+              <span style={{ fontSize: 12, color: content.length > 450 ? '#EF4444' : '#64748B' }}>
+                {content.length}/500자
+              </span>
+              <button
+                onClick={handleSubmit}
+                disabled={loading || !content.trim()}
+                className="kd-btn kd-btn-primary"
+                style={{ fontSize: 13, padding: '7px 16px' }}
+              >
+                {loading ? '작성 중...' : 'Ctrl+Enter로 작성'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '12px 0', color: '#94A3B8', fontSize: 14 }}>
+            <a href="/login" style={{ color: '#3B82F6', textDecoration: 'none', fontWeight: 600 }}>로그인</a>하시면 댓글을 작성할 수 있습니다
+          </div>
+        )}
       </div>
-      {comments.length === 0 ? <p className="text-center py-8 text-[#64748B] text-sm">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p> : <div className="flex flex-col gap-3">{comments.map((c) => (<div key={c.id} className="p-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)]"><div className="flex items-center gap-2 mb-1.5"><div className="w-5 h-5 rounded-full bg-[#1E293B] flex items-center justify-center text-[9px] font-bold text-[#64748B]">{c.profiles?.nickname?.charAt(0)||"?"}</div><span className="text-xs font-semibold text-[#94A3B8]">{c.profiles?.nickname||"익명"}</span><span className="text-[10px] text-[#475569]">{formatDate(c.created_at)}</span></div><p className="m-0 text-[13px] text-[#CBD5E1] leading-relaxed whitespace-pre-wrap">{c.content}</p></div>))}</div>}
-    </div>);
+
+      {/* Comment list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {comments.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px 0', color: '#64748B', fontSize: 14 }}>
+            아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+          </div>
+        ) : (
+          comments.map(comment => (
+            <div key={comment.id} style={{
+              background: '#111827', borderRadius: 10,
+              border: '1px solid #1E293B', padding: '14px 16px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    background: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0,
+                  }}>
+                    {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#F1F5F9' }}>
+                    {comment.profiles?.nickname ?? '익명'}
+                  </span>
+                  <span style={{ fontSize: 11, color: '#64748B' }}>{timeAgo(comment.created_at)}</span>
+                </div>
+                {user?.id === comment.author_id && (
+                  <button
+                    onClick={() => setDeleteTarget(comment.id)}
+                    style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: 12, cursor: 'pointer', opacity: 0.7 }}
+                  >삭제</button>
+                )}
+              </div>
+              <p style={{ margin: 0, fontSize: 14, color: '#CBD5E1', lineHeight: 1.6 }}>
+                {comment.content}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title="댓글 삭제"
+        message="이 댓글을 삭제하시겠습니까? 삭제 후 복구할 수 없습니다."
+        confirmLabel="삭제"
+        danger
+        onConfirm={() => deleteTarget !== null && handleDelete(deleteTarget)}
+        onCancel={() => setDeleteTarget(null)}
+      />
+    </div>
+  );
 }
