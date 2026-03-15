@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: '청약 정보', description: '최신 아파트 청약 일정 및 분양 정보 — 전국 청약 한눈에 보기' };
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { DEMO_APT } from '@/lib/constants';
 import AptClient from './AptClient';
