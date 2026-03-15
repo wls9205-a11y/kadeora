@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
     const sb = await createSupabaseServer();
     let query = sb.from('posts')
-      .select('*, profiles(id,nickname,avatar_url,grade)', { count: 'exact' })
+      .select('*, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)', { count: 'exact' })
       .eq('is_deleted', false)
       .or(`title.ilike.%${q}%,content.ilike.%${q}%`)
       .order('created_at', { ascending: false })
