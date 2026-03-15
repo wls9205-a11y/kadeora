@@ -7,10 +7,10 @@ import type { Notification } from '@/types/database';
 import type { User } from '@supabase/supabase-js';
 
 const DEMO_NOTIFICATIONS: Notification[] = [
-  { id: 1, user_id: 'demo', type: 'like', content: '주식고수님이 회원님의 글을 좋아합니다', is_read: false, post_id: null, created_at: new Date(Date.now() - 30 * 60000).toISOString() },
-  { id: 2, user_id: 'demo', type: 'comment', content: '마켓워처님이 댓글을 남겼습니다: "좋은 분석이에요!"', is_read: false, post_id: null, created_at: new Date(Date.now() - 2 * 3600000).toISOString() },
-  { id: 3, user_id: 'demo', type: 'system', content: 'KADEORA v6.0 업데이트! 테마 토글 및 이미지 업로드 기능이 추가되었습니다', is_read: true, post_id: null, created_at: new Date(Date.now() - 24 * 3600000).toISOString() },
-  { id: 4, user_id: 'demo', type: 'like', content: '금융인싸님 외 3명이 회원님의 글을 좋아합니다', is_read: true, post_id: null, created_at: new Date(Date.now() - 2 * 24 * 3600000).toISOString() },
+  { id: '1', user_id: 'demo', type: 'like', content: '주식고수님이 회원님의 글을 좋아합니다', is_read: false, post_id: null, created_at: new Date(Date.now() - 30 * 60000).toISOString() },
+  { id: '2', user_id: 'demo', type: 'comment', content: '마켓워처님이 댓글을 남겼습니다: "좋은 분석이에요!"', is_read: false, post_id: null, created_at: new Date(Date.now() - 2 * 3600000).toISOString() },
+  { id: '3', user_id: 'demo', type: 'system', content: 'KADEORA v8.0 업데이트! 아바타 업로드 및 댓글 좋아요 기능이 추가되었습니다', is_read: true, post_id: null, created_at: new Date(Date.now() - 24 * 3600000).toISOString() },
+  { id: '4', user_id: 'demo', type: 'like', content: '금융인싸님 외 3명이 회원님의 글을 좋아합니다', is_read: true, post_id: null, created_at: new Date(Date.now() - 2 * 24 * 3600000).toISOString() },
 ];
 
 const TYPE_ICONS: Record<string, string> = { like: '❤️', comment: '💬', system: '📢', follow: '👤', mention: '💌' };
@@ -52,7 +52,7 @@ export default function NotificationsPage() {
     });
   }, []);
 
-  const markRead = async (id: number) => {
+  const markRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     if (!isDemo) await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
   };
@@ -65,32 +65,43 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '80px 0', color: '#94A3B8' }}>로딩 중...</div>;
+  if (loading) return (
+    <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--kd-text-muted)' }}>
+      <div style={{ width: 32, height: 32, border: '3px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%', margin: '0 auto 12px' }} className="animate-spin" />
+      로딩 중...
+    </div>
+  );
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
+      {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🔔 알림</h1>
-          {unreadCount > 0 && <p style={{ margin: '4px 0 0', fontSize: 13, color: '#94A3B8' }}>읽지 않은 알림 {unreadCount}개</p>}
+          {unreadCount > 0 && (
+            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--kd-text-muted)' }}>
+              읽지 않은 알림 <span style={{ color: 'var(--kd-primary)', fontWeight: 700 }}>{unreadCount}</span>개
+            </p>
+          )}
         </div>
         {unreadCount > 0 && (
-          <button onClick={markAllRead} style={{
-            padding: '7px 14px', borderRadius: 8, background: 'transparent',
-            border: '1px solid var(--kd-border)', color: '#94A3B8', fontSize: 13, cursor: 'pointer',
-          }}>모두 읽음</button>
+          <button onClick={markAllRead} className="kd-btn kd-btn-ghost" style={{ fontSize: 13 }}>
+            ✓ 모두 읽음
+          </button>
         )}
       </div>
 
+      {/* 데모 배너 */}
       {isDemo && (
-        <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: 'var(--kd-primary)' }}>
+        <div style={{ background: 'var(--kd-primary-dim)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: 'var(--kd-primary)' }}>
           💡 {user ? '알림이 없습니다. 미리보기 데이터를 표시합니다.' : '로그인하면 실제 알림을 받아볼 수 있습니다.'}
         </div>
       )}
 
+      {/* 알림 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {notifications.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748B' }}>
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)' }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🔕</div>
             <div>알림이 없습니다</div>
           </div>
@@ -106,16 +117,21 @@ export default function NotificationsPage() {
                   borderRadius: 12, padding: '14px 16px',
                   display: 'flex', gap: 12, alignItems: 'flex-start',
                   cursor: 'pointer', transition: 'border-color 0.15s',
-                }}>
+                }}
+                  onMouseEnter={e => { if (notif.is_read) (e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border-hover)'; }}
+                  onMouseLeave={e => { if (notif.is_read) (e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border)'; }}
+                >
                   <span style={{ fontSize: 24, flexShrink: 0, lineHeight: 1 }}>{TYPE_ICONS[notif.type] ?? '📬'}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                       <p style={{ margin: '0 0 4px', fontSize: 14, color: 'var(--kd-text)', lineHeight: 1.5 }}>
                         {notif.content}
                       </p>
-                      {!notif.is_read && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--kd-primary)', flexShrink: 0, marginTop: 4 }} />}
+                      {!notif.is_read && (
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--kd-primary)', flexShrink: 0, marginTop: 4 }} />
+                      )}
                     </div>
-                    <span style={{ fontSize: 11, color: '#64748B' }}>{timeAgo(notif.created_at)}</span>
+                    <span style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>{timeAgo(notif.created_at)}</span>
                   </div>
                 </div>
               </Wrapper>
