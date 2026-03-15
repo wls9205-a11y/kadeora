@@ -68,7 +68,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
               style={{
                 flex: 1, padding: '8px 0', borderRadius: 8,
                 background: activeCategory === cat.key ? 'var(--kd-primary)' : 'transparent',
-                color: activeCategory === cat.key ? 'white' : '#94A3B8',
+                color: activeCategory === cat.key ? 'white' : 'var(--kd-text-muted)',
                 border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
                 transition: 'all 0.15s',
               }}>
@@ -127,7 +127,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                           fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 600,
                           background: cat.bg, color: cat.color,
                         }}>{cat.label}</span>
-                        <span style={{ fontSize: 11, color: '#64748B', marginLeft: 'auto' }}>
+                        <span style={{ fontSize: 11, color: 'var(--kd-text-dim)', marginLeft: 'auto' }}>
                           {timeAgo(post.created_at)}
                         </span>
                       </div>
@@ -143,20 +143,20 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                   </h2>
 
                   <p style={{
-                    margin: '0 0 12px', fontSize: 13, color: '#94A3B8', lineHeight: 1.5,
+                    margin: '0 0 12px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5,
                     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                   }}>
                     {post.content}
                   </p>
 
-                  <div style={{ display: 'flex', gap: 14, fontSize: 12, color: '#64748B' }}>
+                  <div style={{ display: 'flex', gap: 14, fontSize: 12, color: 'var(--kd-text-dim)' }}>
                     <span>👁 {numFmt(post.view_count ?? 0)}</span>
                     <span>❤️ {numFmt(post.likes_count ?? 0)}</span>
                     <span>💬 {numFmt(post.comments_count ?? 0)}</span>
                     {(post.likes_count ?? 0) > 200 && (
                       <span style={{
                         marginLeft: 'auto', fontSize: 11, padding: '1px 8px', borderRadius: 999,
-                        background: 'rgba(239,68,68,0.15)', color: '#EF4444', fontWeight: 700,
+                        background: 'var(--kd-danger-dim)', color: 'var(--kd-danger)', fontWeight: 700,
                       }}>🔥 HOT</span>
                     )}
                   </div>
@@ -174,7 +174,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
         )}
 
         {posts.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748B' }}>
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)' }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
             <div>게시글이 없습니다</div>
           </div>
@@ -198,14 +198,14 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                 <span style={{
                   width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 11, fontWeight: 800, flexShrink: 0,
-                  color: i < 3 ? '#EF4444' : '#64748B',
+                  color: i < 3 ? 'var(--kd-danger)' : 'var(--kd-text-dim)',
                 }}>{i + 1}</span>
                 <span style={{ flex: 1, fontSize: 13, color: 'var(--kd-text)', fontWeight: 500, transition: 'color 0.15s' }}
                   onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--kd-primary)')}
                   onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--kd-text)')}>
                   {kw.keyword}
                 </span>
-                <span style={{ fontSize: 11, color: '#64748B' }}>
+                <span style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>
                   {kw.heat_score >= 1000 ? (kw.heat_score / 1000).toFixed(1) + 'k' : kw.heat_score}
                 </span>
               </Link>

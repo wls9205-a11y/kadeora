@@ -36,7 +36,7 @@ export default function StockClient({ initialStocks, isDemo }: { initialStocks: 
         {!isDemo && <span style={{fontSize:12,color:'var(--kd-success)',display:'flex',alignItems:'center',gap:4}}><span style={{width:6,height:6,borderRadius:'50%',background:'var(--kd-success)',display:'inline-block'}}/>실시간</span>}
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:20}}>
-        {[{label:'상승',value:rising+'개',color:'var(--kd-success)'},{label:'하락',value:falling+'개',color:'var(--kd-danger)'},{label:'시장',value:rising>falling?'강세':'약세',color:rising>falling?'#10B981':'#EF4444'}].map(i=>(
+        {[{label:'상승',value:rising+'개',color:'var(--kd-success)'},{label:'하락',value:falling+'개',color:'var(--kd-danger)'},{label:'시장',value:rising>falling?'강세':'약세',color:rising>falling?'var(--kd-success)':'var(--kd-danger)'}].map(i=>(
           <div key={i.label} style={{background:'var(--kd-surface)',border:'1px solid var(--kd-border)',borderRadius:12,padding:'14px 16px'}}>
             <div style={{fontSize:12,color:'var(--kd-text-dim)',marginBottom:4}}>{i.label}</div>
             <div style={{fontSize:20,fontWeight:800,color:i.color}}>{i.value}</div>
@@ -56,7 +56,7 @@ export default function StockClient({ initialStocks, isDemo }: { initialStocks: 
             <tbody>
               {filtered.map((s,i)=>{
                 const up=(s.change_pct??0)>0, dn=(s.change_pct??0)<0;
-                const c=up?'#10B981':dn?'#EF4444':'#94A3B8';
+                const c=up?'var(--kd-success)':dn?'var(--kd-danger)':'var(--kd-text-muted)';
                 return (
                   <tr key={s.symbol} style={{borderBottom:i<filtered.length-1?'1px solid var(--kd-border)':'none'}}>
                     <td style={{padding:'14px 16px'}}><div style={{fontWeight:700,color:'var(--kd-text)'}}>{s.name}</div><div style={{fontSize:11,color:'var(--kd-text-dim)'}}>{s.symbol}</div></td>

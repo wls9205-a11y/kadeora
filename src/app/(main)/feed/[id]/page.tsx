@@ -153,7 +153,7 @@ export default async function FeedDetailPage({ params }: Props) {
       />
 
       {/* Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: 'var(--kd-text-muted, #64748B)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: 'var(--kd-text-dim)' }}>
         <Link href="/feed" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>피드</Link>
         <span>›</span>
         <span style={{ padding: '1px 8px', borderRadius: 999, background: cat.bg, color: cat.color, fontSize: 11, fontWeight: 700 }}>
@@ -184,7 +184,7 @@ export default async function FeedDetailPage({ params }: Props) {
                 </span>
               )}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--kd-text-muted, #64748B)', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: 'var(--kd-text-dim)', marginTop: 2 }}>
               {timeAgo(post.created_at)} · 조회 {post.view_count.toLocaleString()}
             </div>
           </div>
@@ -229,7 +229,7 @@ export default async function FeedDetailPage({ params }: Props) {
         {/* Actions */}
         <div style={{ borderTop: '1px solid var(--kd-border)', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
           <LikeButton postId={post.id} initialCount={post.likes_count} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--kd-border)', color: 'var(--kd-text-muted, #94A3B8)', fontSize: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--kd-border)', color: 'var(--kd-text-muted)', fontSize: 14 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
           </div>
         </div>

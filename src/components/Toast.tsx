@@ -27,10 +27,10 @@ const ICONS: Record<ToastType, string> = {
 };
 
 const COLORS: Record<ToastType, { bg: string; border: string; icon: string }> = {
-  success: { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.4)', icon: '#10B981' },
-  error: { bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.4)', icon: '#EF4444' },
-  info: { bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.4)', icon: '#3B82F6' },
-  warning: { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.4)', icon: '#F59E0B' },
+  success: { bg: 'var(--kd-success-dim)', border: 'rgba(16,185,129,0.4)', icon: 'var(--kd-success)' },
+  error: { bg: 'var(--kd-danger-dim)', border: 'rgba(239,68,68,0.4)', icon: 'var(--kd-danger)' },
+  info: { bg: 'var(--kd-primary-dim)', border: 'rgba(59,130,246,0.4)', icon: 'var(--kd-primary)' },
+  warning: { bg: 'var(--kd-warning-dim)', border: 'rgba(245,158,11,0.4)', icon: 'var(--kd-warning)' },
 };
 
 function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {

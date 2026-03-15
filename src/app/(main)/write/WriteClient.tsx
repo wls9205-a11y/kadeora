@@ -158,7 +158,7 @@ export default function WriteClient() {
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>
             내용{' '}
-            <span style={{ color: content.length > 4500 ? 'var(--kd-warning)' : '#64748B', fontWeight: 400 }}>
+            <span style={{ color: content.length > 4500 ? 'var(--kd-warning)' : 'var(--kd-text-dim)', fontWeight: 400 }}>
               ({content.length}/5000)
             </span>
           </label>

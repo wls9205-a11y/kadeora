@@ -17,47 +17,47 @@ export default function FAQPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 0' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#F1F5F9', marginBottom: 8 }}>자주 묻는 질문</h1>
-      <p style={{ color: '#64748B', fontSize: 13, marginBottom: 32 }}>KADEORA 사용에 관해 자주 묻는 질문들을 모았습니다</p>
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--kd-text)', marginBottom: 8 }}>자주 묻는 질문</h1>
+      <p style={{ color: 'var(--kd-text-dim)', fontSize: 13, marginBottom: 32 }}>KADEORA 사용에 관해 자주 묻는 질문들을 모았습니다</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {FAQS.map((faq, i) => (
-          <div key={i} style={{ background: '#111827', border: '1px solid #1E293B', borderRadius: 12, overflow: 'hidden', transition: 'border-color 0.15s' }}>
+          <div key={i} style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 12, overflow: 'hidden', transition: 'border-color 0.15s' }}>
             <button
               onClick={() => setOpen(open === i ? null : i)}
               style={{
                 width: '100%', padding: '16px 20px', background: 'transparent', border: 'none',
-                color: '#F1F5F9', textAlign: 'left', cursor: 'pointer',
+                color: 'var(--kd-text)', textAlign: 'left', cursor: 'pointer',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
                 fontSize: 15, fontWeight: 600, lineHeight: 1.4,
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ color: '#3B82F6', fontWeight: 800, flexShrink: 0 }}>Q</span>
+                <span style={{ color: 'var(--kd-primary)', fontWeight: 800, flexShrink: 0 }}>Q</span>
                 {faq.q}
               </span>
               <span style={{
-                fontSize: 18, flexShrink: 0, color: '#64748B',
+                fontSize: 18, flexShrink: 0, color: 'var(--kd-text-dim)',
                 transform: open === i ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s',
               }}>▾</span>
             </button>
             {open === i && (
               <div style={{ padding: '0 20px 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }} className="animate-slideDown">
-                <span style={{ color: '#10B981', fontWeight: 800, flexShrink: 0, fontSize: 15 }}>A</span>
-                <p style={{ margin: 0, fontSize: 14, color: '#94A3B8', lineHeight: 1.7 }}>{faq.a}</p>
+                <span style={{ color: 'var(--kd-success)', fontWeight: 800, flexShrink: 0, fontSize: 15 }}>A</span>
+                <p style={{ margin: 0, fontSize: 14, color: 'var(--kd-text-muted)', lineHeight: 1.7 }}>{faq.a}</p>
               </div>
             )}
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: 40, padding: '24px', background: '#111827', border: '1px solid #1E293B', borderRadius: 14, textAlign: 'center' }}>
-        <p style={{ margin: '0 0 12px', color: '#94A3B8', fontSize: 14 }}>찾는 답이 없으신가요?</p>
+      <div style={{ marginTop: 40, padding: '24px', background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 14, textAlign: 'center' }}>
+        <p style={{ margin: '0 0 12px', color: 'var(--kd-text-muted)', fontSize: 14 }}>찾는 답이 없으신가요?</p>
         <a href="mailto:support@kadeora.com" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '10px 20px', borderRadius: 8,
-          background: '#3B82F6', color: 'white',
+          background: 'var(--kd-primary)', color: 'white',
           textDecoration: 'none', fontSize: 14, fontWeight: 600,
         }}>📧 문의하기</a>
       </div>

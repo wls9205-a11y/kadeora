@@ -76,7 +76,7 @@ export default function ShopClient() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🛒 커뮤니티 상점</h1>
-          <p style={{ margin: 0, fontSize: 13, color: '#94A3B8' }}>게시글 노출 및 특별 기능을 구매하세요</p>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--kd-text-muted)' }}>게시글 노출 및 특별 기능을 구매하세요</p>
         </div>
         {isDemo && <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: 'var(--kd-primary)', border: '1px solid rgba(59,130,246,0.3)' }}>💡 미리보기</span>}
       </div>
@@ -106,7 +106,7 @@ export default function ShopClient() {
             transition: 'all 0.15s', position: 'relative',
           }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = '#334155';
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border-hover)';
               (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={e => {
@@ -116,11 +116,11 @@ export default function ShopClient() {
           >
             <div style={{ fontSize: 36, marginBottom: 12 }}>{p.icon ?? '🎁'}</div>
             <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>{p.name}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: 12, color: '#94A3B8', lineHeight: 1.5 }}>{p.description}</p>
+            <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--kd-text-muted)', lineHeight: 1.5 }}>{p.description}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--kd-text)' }}>
                 {(p.price_krw ?? 0).toLocaleString()}
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#94A3B8' }}>원</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--kd-text-muted)' }}>원</span>
               </div>
               <button onClick={() => setConfirmProduct(p)} style={{
                 padding: '8px 16px', borderRadius: 8, border: 'none',
@@ -136,7 +136,7 @@ export default function ShopClient() {
         ))}
       </div>
 
-      <p style={{ marginTop: 20, fontSize: 12, color: '#475569', textAlign: 'right' }}>
+      <p style={{ marginTop: 20, fontSize: 12, color: 'var(--kd-text-dim)', textAlign: 'right' }}>
         ※ 결제는 토스페이먼츠로 진행됩니다. 구매 전 이용약관을 확인해주세요.
       </p>
 
