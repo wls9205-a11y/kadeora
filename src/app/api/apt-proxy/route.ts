@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const ALLOWED_HOSTS = ['api.odcloud.kr', 'apis.data.go.kr'];
 
 function isAllowedUrl(urlStr: string): boolean {
-  try { const url = new URL(urlStr); return ALLOWED_HOSTS.includes(url.hostname); }
-  catch { return false; }
+  try { return ALLOWED_HOSTS.includes(new URL(urlStr).hostname); } catch { return false; }
 }
 
-function mapToSubscription(item: Record<string, string>) {
+function mapItem(item: Record<string, string>) {
   return {
     house_manage_no: item.HOUSE_MANAGE_NO || item.houseManageNo || '',
     house_nm: item.HOUSE_NM || item.houseNm || '',
@@ -38,27 +37,30 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
+
     if (!action || action === 'list') {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+      const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
       const { data, error } = await supabase.from('apt_subscriptions').select('*').order('rcept_endde', { ascending: false }).limit(50);
       if (error) throw error;
       return NextResponse.json({ success: true, data, count: data?.length || 0 });
     }
+
     if (action === 'sync') {
       const APT_API_KEY = process.env.APT_DATA_API_KEY;
-      if (!APT_API_KEY) return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY ?袁⑹뒄' }, { status: 500 });
-      const apiUrl = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${encodeURIComponent(APT_API_KEY)}&pageNo=1&numOfRows=30&type=json`;
-      if (!isAllowedUrl(apiUrl.split('?')[0])) return NextResponse.json({ success: false, error: 'SSRF 筌△뫀?? }, { status: 403 });
+      if (!APT_API_KEY) return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY required' }, { status: 500 });
+      const apiUrl = 'https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=' + encodeURIComponent(APT_API_KEY) + '&page=1&perPage=30';
+      if (!isAllowedUrl(apiUrl.split('?')[0])) return NextResponse.json({ success: false, error: 'Blocked' }, { status: 403 });
       const apiRes = await fetch(apiUrl, { next: { revalidate: 3600 } });
-      if (!apiRes.ok) return NextResponse.json({ success: false, error: `API ??살첒: ${apiRes.status}` }, { status: 502 });
+      if (!apiRes.ok) return NextResponse.json({ success: false, error: 'API error: ' + apiRes.status }, { status: 502 });
       const json = await apiRes.json();
-      const items = json?.response?.body?.items?.item || [];
+      const items = json?.data || json?.response?.body?.items?.item || [];
       if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ success: true, synced: 0 });
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-      const { data, error } = await supabase.from('apt_subscriptions').upsert(items.map(mapToSubscription), { onConflict: 'house_manage_no' }).select();
+      const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+      const { data, error } = await supabase.from('apt_subscriptions').upsert(items.map(mapItem), { onConflict: 'house_manage_no' }).select();
       if (error) throw error;
       return NextResponse.json({ success: true, synced: data?.length || 0 });
     }
+
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
   } catch (err) {
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
