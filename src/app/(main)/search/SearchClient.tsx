@@ -1,23 +1,32 @@
 'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { PostWithProfile } from '@/types/database';
-import { CATEGORY_MAP } from '@/lib/constants';
 
-function timeAgo(d: string) {
-  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+const CATEGORY_MAP: Record<string, { label: string; bg: string; color: string }> = {
+  stock:   { label: '주식',  bg: 'rgba(59,130,246,0.15)',  color: '#60A5FA' },
+  apt:     { label: '청약',  bg: 'rgba(16,185,129,0.15)', color: '#34D399' },
+  discuss: { label: '토론',  bg: 'rgba(139,92,246,0.15)', color: '#A78BFA' },
+  free:    { label: '자유',  bg: 'rgba(245,158,11,0.15)', color: '#FBBF24' },
+};
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '방금 전';
   if (m < 60) return `${m}분 전`;
-  if (m < 1440) return `${Math.floor(m / 60)}시간 전`;
-  return `${Math.floor(m / 1440)}일 전`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}시간 전`;
+  return `${Math.floor(h / 24)}일 전`;
 }
 
-function highlight(text: string, query: string) {
+function highlight(text: string, query: string): React.ReactNode {
   if (!query) return text;
   const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
   return parts.map((p, i) =>
     p.toLowerCase() === query.toLowerCase()
-      ? <mark key={i} style={{ background: 'rgba(59,130,246,0.3)', color: '#93C5FD', borderRadius: 2 }}>{p}</mark>
+      ? <mark key={i} style={{ background: 'rgba(59,130,246,0.3)', color: 'var(--kd-primary)', borderRadius: 2 }}>{p}</mark>
       : p
   );
 }
@@ -53,7 +62,6 @@ export default function SearchClient() {
     }
   }, []);
 
-  // Debounced search on input
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -66,7 +74,6 @@ export default function SearchClient() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [inputVal, category, doSearch, router]);
 
-  // Infinite scroll
   useEffect(() => {
     if (!loaderRef.current || !hasMore) return;
     const io = new IntersectionObserver(entries => {
@@ -99,7 +106,7 @@ export default function SearchClient() {
         {inputVal && (
           <button
             onClick={() => { setInputVal(''); setResults([]); setTotal(0); }}
-            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 18 }}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--kd-muted, #64748B)', cursor: 'pointer', fontSize: 18 }}
           >✕</button>
         )}
       </div>
@@ -109,10 +116,10 @@ export default function SearchClient() {
         {[['all', '전체'], ['stock', '주식'], ['apt', '청약'], ['free', '자유']].map(([k, l]) => (
           <button key={k} onClick={() => { setCategory(k); setPage(0); }}
             style={{
-              padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
-              background: category === k ? '#3B82F6' : '#111827',
-              color: category === k ? 'white' : '#94A3B8',
-              border: `1px solid ${category === k ? '#3B82F6' : '#1E293B'}`,
+              padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              background: category === k ? 'var(--kd-primary)' : 'var(--kd-surface)',
+              color: category === k ? 'white' : 'var(--kd-text-muted, #94A3B8)',
+              border: `1px solid ${category === k ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
               transition: 'all 0.15s',
             }}
           >{l}</button>
@@ -121,11 +128,11 @@ export default function SearchClient() {
 
       {/* Results header */}
       {query.length >= 2 && (
-        <div style={{ marginBottom: 14, fontSize: 13, color: '#94A3B8' }}>
+        <div style={{ marginBottom: 14, fontSize: 13, color: 'var(--kd-text-muted, #94A3B8)' }}>
           {loading && results.length === 0
             ? '검색 중...'
             : total > 0
-              ? <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>"{query}"</span> 검색 결과 <span style={{ color: '#3B82F6', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
+              ? <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>"{query}"</span> 검색 결과 <span style={{ color: 'var(--kd-primary)', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
               : <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>"{query}"</span>에 대한 검색 결과가 없습니다</>
           }
         </div>
@@ -141,20 +148,20 @@ export default function SearchClient() {
                 background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 12, padding: '16px 18px',
                 transition: 'border-color 0.15s',
               }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = '#334155')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = '#1E293B')}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                  <span style={{ fontSize: 12, color: '#64748B' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
+                  <span style={{ fontSize: 12, color: 'var(--kd-text-muted, #64748B)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
                 <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>
                   {highlight(post.title, query)}
                 </h3>
-                <p style={{ margin: '0 0 10px', fontSize: 13, color: '#94A3B8', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--kd-text-muted, #94A3B8)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                   {highlight(post.content.slice(0, 200), query)}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#64748B' }}>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--kd-text-muted, #64748B)' }}>
                   <span>👁️ {post.view_count}</span>
                   <span>❤️ {post.likes_count}</span>
                   <span>💬 {post.comments_count}</span>
@@ -166,15 +173,19 @@ export default function SearchClient() {
       </div>
 
       {/* Loader */}
-      {hasMore && <div ref={loaderRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 12 }}>
-        {loading && <div style={{ width: 24, height: 24, border: '2px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%' }} className="animate-spin" />}
-      </div>}
+      {hasMore && (
+        <div ref={loaderRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 12 }}>
+          {loading && (
+            <div style={{ width: 24, height: 24, border: '2px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%' }} className="animate-spin" />
+          )}
+        </div>
+      )}
 
       {/* Empty state */}
       {query.length < 2 && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748B' }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-muted, #64748B)' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>검색어를 입력해주세요</div>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, color: 'var(--kd-text)' }}>검색어를 입력해주세요</div>
           <div style={{ fontSize: 13 }}>주식, 청약, 재테크 관련 글을 검색할 수 있습니다</div>
         </div>
       )}

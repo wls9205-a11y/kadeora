@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PostActions from './PostActions';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
+
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
@@ -36,19 +38,18 @@ export default async function FeedDetailPage({ params }: Props) {
 
     const { data: postData } = await sb
       .from('posts')
-      .select('*, profiles(id,nickname,avatar_url,grade)')
+      .select('*, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
       .eq('id', numId)
       .eq('is_deleted', false)
       .single();
 
     if (postData) {
       post = postData as PostWithProfile;
-      // Increment view count
       await sb.from('posts').update({ view_count: post.view_count + 1 }).eq('id', numId);
 
       const { data: commentsData } = await sb
         .from('comments')
-        .select('*, profiles(id,nickname,avatar_url)')
+        .select('*, profiles!comments_author_id_fkey(id,nickname,avatar_url)')
         .eq('post_id', numId)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
@@ -59,19 +60,18 @@ export default async function FeedDetailPage({ params }: Props) {
     // fallback to demo
   }
 
-  // Demo fallback
   if (!post) {
     const demoPost = DEMO_POSTS.find(p => p.id === numId);
     if (!demoPost) return notFound();
     post = demoPost;
     comments = [
       {
-        id: 1, post_id: numId, user_id: 'demo-a', content: '좋은 정보 감사합니다! 많이 배워갑니다.',
+        id: 1, post_id: numId, author_id: 'demo-a', content: '좋은 정보 감사합니다! 많이 배워갑니다.',
         is_deleted: false, created_at: new Date(Date.now() - 30 * 60000).toISOString(),
         profiles: { id: 'demo-a', nickname: '정보킹', avatar_url: null },
       },
       {
-        id: 2, post_id: numId, user_id: 'demo-b', content: '저도 비슷한 생각이에요. 특히 두 번째 포인트가 핵심이라 봅니다.',
+        id: 2, post_id: numId, author_id: 'demo-b', content: '저도 비슷한 생각이에요. 특히 두 번째 포인트가 핵심이라 봅니다.',
         is_deleted: false, created_at: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
         profiles: { id: 'demo-b', nickname: '투자마니아', avatar_url: null },
       },
@@ -80,11 +80,40 @@ export default async function FeedDetailPage({ params }: Props) {
 
   const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.content.slice(0, 160),
+    datePublished: post.created_at,
+    dateModified: post.updated_at ?? post.created_at,
+    author: {
+      '@type': 'Person',
+      name: post.profiles?.nickname ?? '익명',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '카더라',
+      url: SITE_URL,
+    },
+    url: `${SITE_URL}/feed/${post.id}`,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/feed/${post.id}`,
+    },
+  };
+
   return (
     <div style={{ maxWidth: 780, margin: '0 auto' }}>
+      {/* JSON-LD SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: '#64748B' }}>
-        <Link href="/feed" style={{ color: '#3B82F6', textDecoration: 'none' }}>피드</Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: 'var(--kd-text-muted, #64748B)' }}>
+        <Link href="/feed" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>피드</Link>
         <span>›</span>
         <span style={{ padding: '1px 8px', borderRadius: 999, background: cat.bg, color: cat.color, fontSize: 11, fontWeight: 700 }}>
           {cat.label}
@@ -92,12 +121,12 @@ export default async function FeedDetailPage({ params }: Props) {
       </div>
 
       {/* Post card */}
-      <article style={{ background: '#111827', border: '1px solid #1E293B', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
+      <article style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <div style={{
             width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)',
+            background: 'linear-gradient(135deg, var(--kd-primary), var(--kd-purple))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 16, fontWeight: 700, color: 'white',
           }}>
@@ -105,7 +134,7 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: '#F1F5F9' }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>
                 {post.profiles?.nickname ?? '익명'}
               </span>
               {post.profiles?.grade && (
@@ -114,33 +143,52 @@ export default async function FeedDetailPage({ params }: Props) {
                 </span>
               )}
             </div>
-            <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: 'var(--kd-text-muted, #64748B)', marginTop: 2 }}>
               {timeAgo(post.created_at)} · 조회 {post.view_count.toLocaleString()}
             </div>
           </div>
-          {/* Author actions (edit/delete) */}
           <PostActions postId={post.id} authorId={post.author_id ?? ''} currentUserId={currentUserId} />
         </div>
 
-        <h1 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, color: '#F1F5F9', lineHeight: 1.4 }}>
+        <h1 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)', lineHeight: 1.4 }}>
           {post.title}
         </h1>
 
-        <div style={{ fontSize: 15, color: '#CBD5E1', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
+        <div style={{ fontSize: 15, color: 'var(--kd-text-secondary, #CBD5E1)', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
           {post.content}
         </div>
 
+        {/* Image gallery */}
+        {post.images && post.images.length > 0 && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: post.images.length === 1 ? '1fr' : post.images.length === 2 ? '1fr 1fr' : 'repeat(3, 1fr)',
+            gap: 8,
+            marginBottom: 24,
+          }}>
+            {post.images.map((url: string, i: number) => (
+              <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={url}
+                  alt={`이미지 ${i + 1}`}
+                  style={{ width: '100%', borderRadius: 8, objectFit: 'cover', aspectRatio: post.images!.length === 1 ? 'auto' : '1', cursor: 'pointer' }}
+                />
+              </a>
+            ))}
+          </div>
+        )}
+
         {/* Actions */}
-        <div style={{ borderTop: '1px solid #1E293B', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ borderTop: '1px solid var(--kd-border)', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
           <LikeButton postId={post.id} initialCount={post.likes_count} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid #1E293B', color: '#94A3B8', fontSize: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--kd-border)', color: 'var(--kd-text-muted, #94A3B8)', fontSize: 14 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
           </div>
         </div>
       </article>
 
       {/* Comments */}
-      <div style={{ background: '#111827', border: '1px solid #1E293B', borderRadius: 16, padding: '24px 28px' }}>
+      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '24px 28px' }}>
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
     </div>

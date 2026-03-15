@@ -25,10 +25,15 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/apt-proxy?action=sync",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/trend",
+      "schedule": "0 * * * *"
+    }
   ]
-,
-  "crons": [{
-    "path": "/api/apt-proxy?action=sync",
-    "schedule": "0 9 * * *"
-  }]
 }
