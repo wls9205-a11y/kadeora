@@ -1,4 +1,6 @@
-﻿@import "tailwindcss";
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --kd-bg: #0A0E17;
