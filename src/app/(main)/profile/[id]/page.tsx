@@ -34,6 +34,7 @@ export default async function ProfilePage({ params }: Props) {
   ]);
 
   return (
+    <>
     <ProfileClient
       profile={profile}
       posts={posts ?? []}
@@ -44,5 +45,6 @@ export default async function ProfilePage({ params }: Props) {
       isFollowing={!!(followCheck as { data: unknown }).data}
     />
       {isOwner && <DeleteAccountSection />}
+    </>
   );
 }
