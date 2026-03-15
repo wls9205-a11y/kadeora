@@ -82,7 +82,7 @@ export default function SearchClient() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: '#F1F5F9' }}>🔍 검색</h1>
+      <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🔍 검색</h1>
 
       {/* Search input */}
       <div style={{ position: 'relative', marginBottom: 16 }}>
@@ -125,8 +125,8 @@ export default function SearchClient() {
           {loading && results.length === 0
             ? '검색 중...'
             : total > 0
-              ? <><span style={{ color: '#F1F5F9', fontWeight: 700 }}>"{query}"</span> 검색 결과 <span style={{ color: '#3B82F6', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
-              : <><span style={{ color: '#F1F5F9', fontWeight: 700 }}>"{query}"</span>에 대한 검색 결과가 없습니다</>
+              ? <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>"{query}"</span> 검색 결과 <span style={{ color: '#3B82F6', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
+              : <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>"{query}"</span>에 대한 검색 결과가 없습니다</>
           }
         </div>
       )}
@@ -138,7 +138,7 @@ export default function SearchClient() {
           return (
             <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: '#111827', border: '1px solid #1E293B', borderRadius: 12, padding: '16px 18px',
+                background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 12, padding: '16px 18px',
                 transition: 'border-color 0.15s',
               }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = '#334155')}
@@ -148,7 +148,7 @@ export default function SearchClient() {
                   <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
                   <span style={{ fontSize: 12, color: '#64748B' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
-                <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: '#F1F5F9' }}>
+                <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>
                   {highlight(post.title, query)}
                 </h3>
                 <p style={{ margin: '0 0 10px', fontSize: 13, color: '#94A3B8', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
@@ -167,7 +167,7 @@ export default function SearchClient() {
 
       {/* Loader */}
       {hasMore && <div ref={loaderRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 12 }}>
-        {loading && <div style={{ width: 24, height: 24, border: '2px solid #1E293B', borderTopColor: '#3B82F6', borderRadius: '50%' }} className="animate-spin" />}
+        {loading && <div style={{ width: 24, height: 24, border: '2px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%' }} className="animate-spin" />}
       </div>}
 
       {/* Empty state */}
