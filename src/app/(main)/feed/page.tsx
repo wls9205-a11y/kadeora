@@ -20,31 +20,18 @@ const getPosts = unstable_cache(async (category: string) => {
 
 const getTrending = unstable_cache(async () => {
   const sb = await createSupabaseServer();
-  const { data } = await sb.from('trending_keywords').select('*').order('rank').limit(10);
+  const { data } = await sb.from('trending_keywords').select('*').order('heat_score', { ascending: false }).limit(10);
   return data as TrendingKeyword[] | null;
 }, ['trending'], { revalidate: 300 });
 
-interface Props {
-  searchParams: Promise<{ category?: string }>;
-}
+interface Props { searchParams: Promise<{ category?: string }>; }
 
 export default async function FeedPage({ searchParams }: Props) {
   const { category = 'all' } = await searchParams;
-
-  const [postsData, trendingData] = await Promise.allSettled([
-    getPosts(category),
-    getTrending(),
-  ]);
-
-  const posts = postsData.status === 'fulfilled' && postsData.value
-    ? postsData.value
-    : category === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(p => p.category === category);
-
-  const trending = trendingData.status === 'fulfilled' && trendingData.value
-    ? trendingData.value : DEMO_TRENDING;
-
+  const [postsData, trendingData] = await Promise.allSettled([getPosts(category), getTrending()]);
+  const posts = postsData.status === 'fulfilled' && postsData.value ? postsData.value : category === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(p => p.category === category);
+  const trending = trendingData.status === 'fulfilled' && trendingData.value ? trendingData.value : DEMO_TRENDING;
   const isDemo = postsData.status === 'rejected' || !postsData.value;
-
   return (
     <Suspense>
       <FeedClient posts={posts} trending={trending} activeCategory={category} isDemo={isDemo} />

@@ -1,3 +1,14 @@
+# ============================================================
+# KADEORA 수정 스크립트 3/3
+# middleware.ts CSP 수정 + git push
+# ============================================================
+
+Set-Location "C:\Users\82105\Documents\kadeora"
+$enc = [System.Text.UTF8Encoding]::new($false)
+
+# ── middleware.ts — frame-src와 frame-ancestors 분리 수정 ──
+$f = 'src\middleware.ts'
+$c = @'
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
@@ -8,6 +19,7 @@ const ALLOWED_APT_DOMAINS = ['applyhome.co.kr', 'land.naver.com', 'hogangnono.co
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Block apt-proxy SSRF
   if (pathname.startsWith('/api/apt-proxy')) {
     const url = request.nextUrl.searchParams.get('url');
     if (url) {
@@ -28,6 +40,7 @@ export async function middleware(request: NextRequest) {
 
   let response = NextResponse.next({ request });
 
+  // Supabase session refresh
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -50,9 +63,10 @@ export async function middleware(request: NextRequest) {
     const { data } = await supabase.auth.getSession();
     session = data.session;
   } catch {
-    // ignore
+    // Session fetch failed, treat as unauthenticated
   }
 
+  // Protected route guard
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
   if (isProtected && !session) {
     const loginUrl = new URL('/login', request.url);
@@ -60,6 +74,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // CSP Header — frame-src와 frame-ancestors 분리 (버그 수정)
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
     `default-src 'self'`,
@@ -85,3 +100,16 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
+'@
+[System.IO.File]::WriteAllText("$PWD\$f", $c, $enc)
+Write-Host "✅ middleware.ts CSP 수정 완료 (frame-src/frame-ancestors 분리)"
+
+# ── git push ──────────────────────────────────────────────────
+Write-Host ""
+Write-Host "📤 Git push 시작..."
+git add -A
+git commit -m "fix: Korean encoding + CSP frame-ancestors + heat_score order + CSS variables"
+git push origin main
+Write-Host ""
+Write-Host "🎉 전체 완료! Vercel 자동 배포 중 (약 20초 후 확인)"
+Write-Host "   https://kadeora.vercel.app/feed"
