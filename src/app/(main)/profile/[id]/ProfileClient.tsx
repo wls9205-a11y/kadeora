@@ -23,7 +23,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
   const { success, error } = useToast();
   const router = useRouter();
 
-  const grade = GRADE_INFO[profile.grade ?? '씨앗'] ?? { icon: '🌱', color: '#94A3B8' };
+  const grade = GRADE_INFO[profile.grade ?? '씨앗'] ?? { icon: '🌱', color: 'var(--kd-text-muted)' };
 
   const handleSave = async () => {
     if (!nickname.trim()) { error('닉네임을 입력해주세요'); return; }
@@ -86,10 +86,10 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
                     borderRadius: 8, color: 'var(--kd-text)', padding: '10px 12px',
                     fontSize: 13, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5,
                   }}
-                  onFocus={e => (e.currentTarget.style.borderColor = '#3B82F6')}
-                  onBlur={e => (e.currentTarget.style.borderColor = '#1E293B')}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')}
                 />
-                <div style={{ fontSize: 11, color: '#64748B', textAlign: 'right', marginTop: 4 }}>{bio.length}/200</div>
+                <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', textAlign: 'right', marginTop: 4 }}>{bio.length}/200</div>
               </>
             ) : (
               <>
@@ -104,10 +104,10 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
                     {grade.icon} {profile.grade ?? '씨앗'}
                   </span>
                 </div>
-                <p style={{ margin: '0 0 6px', fontSize: 13, color: '#94A3B8', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5 }}>
                   {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
                 </p>
-                <div style={{ fontSize: 12, color: '#64748B' }}>{joinDate} 가입</div>
+                <div style={{ fontSize: 12, color: 'var(--kd-text-dim)' }}>{joinDate} 가입</div>
               </>
             )}
           </div>
@@ -145,7 +145,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
             }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--kd-text)' }}>{stat.value.toLocaleString()}</div>
-              <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>{stat.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', marginTop: 2 }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -155,7 +155,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
       <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '20px 24px' }}>
         <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--kd-text)' }}>📝 작성한 글 ({posts.length})</h2>
         {posts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 0', color: '#64748B' }}>아직 작성한 글이 없습니다</div>
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--kd-text-dim)' }}>아직 작성한 글이 없습니다</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {posts.map((post, i) => {
@@ -171,8 +171,8 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
                   >
                     <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                    <span style={{ flex: 1, fontSize: 14, color: '#CBD5E1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#64748B', flexShrink: 0 }}>
+                    <span style={{ flex: 1, fontSize: 14, color: 'var(--kd-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--kd-text-dim)', flexShrink: 0 }}>
                       <span>❤️{post.likes_count}</span>
                       <span>💬{post.comments_count}</span>
                       <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>

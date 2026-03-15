@@ -95,14 +95,14 @@ export default function WriteClient() {
   };
 
   if (loadingEdit) return (
-    <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center', padding: '80px 0', color: '#94A3B8' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center', padding: '80px 0', color: 'var(--kd-text-muted)' }}>
       게시글 불러오는 중...
     </div>
   );
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <div style={{ fontSize: 13, color: '#64748B', marginBottom: 24 }}>
+      <div style={{ fontSize: 13, color: 'var(--kd-text-dim)', marginBottom: 24 }}>
         <a href="/feed" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>피드</a>
         <span style={{ margin: '0 6px' }}>›</span>
         <span>{editId ? '게시글 수정' : '새 글 작성'}</span>
@@ -118,7 +118,7 @@ export default function WriteClient() {
 
         {/* 카테고리 */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: '#94A3B8', display: 'block', marginBottom: 8 }}>카테고리</label>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>카테고리</label>
           <div style={{ display: 'flex', gap: 8 }}>
             {CATEGORIES.map(cat => (
               <button
@@ -140,8 +140,8 @@ export default function WriteClient() {
 
         {/* 제목 */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: '#94A3B8', display: 'block', marginBottom: 8 }}>
-            제목 <span style={{ color: '#64748B', fontWeight: 400 }}>({title.length}/100)</span>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>
+            제목 <span style={{ color: 'var(--kd-text-dim)', fontWeight: 400 }}>({title.length}/100)</span>
           </label>
           <input
             type="text"
@@ -156,7 +156,7 @@ export default function WriteClient() {
 
         {/* 내용 */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: '#94A3B8', display: 'block', marginBottom: 8 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>
             내용{' '}
             <span style={{ color: content.length > 4500 ? 'var(--kd-warning)' : '#64748B', fontWeight: 400 }}>
               ({content.length}/5000)
