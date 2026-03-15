@@ -1,12 +1,12 @@
-import ThemeToggle from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
 import { ToastProvider } from '@/components/Toast';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
-  title: { template: '%s | KADEORA', default: 'KADEORA - 吏꾩쭨 ?뺣낫媛 ?ㅺ???湲덉쑖 而ㅻ??덊떚' },
-  description: '二쇱떇, 泥?빟, ?ы뀒???뺣낫瑜?怨듭쑀?섎뒗 ?꾨━誘몄뾼 湲덉쑖 而ㅻ??덊떚',
-  keywords: ['二쇱떇', '泥?빟', '?ы뀒??, '湲덉쑖', '?ъ옄'],
+  title: { template: '%s | KADEORA', default: 'KADEORA' },
+  description: 'Financial community platform',
+  keywords: ['stock', 'apt', 'community', 'finance'],
   openGraph: {
     siteName: 'KADEORA',
     type: 'website',
