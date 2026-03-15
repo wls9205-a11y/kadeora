@@ -4,6 +4,7 @@ import type { PostWithProfile, CommentWithProfile } from '@/types/database';
 import { LikeButton } from '@/components/LikeButton';
 import { CommentSection } from '@/components/CommentSection';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import PostActions from './PostActions';
 
@@ -167,11 +168,18 @@ export default async function FeedDetailPage({ params }: Props) {
             marginBottom: 24,
           }}>
             {post.images.map((url: string, i: number) => (
-              <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                <img
+              <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'block', position: 'relative', borderRadius: 8, overflow: 'hidden',
+                  aspectRatio: post.images!.length === 1 ? '16/9' : '1',
+                  cursor: 'pointer',
+                }}>
+                <Image
                   src={url}
                   alt={`이미지 ${i + 1}`}
-                  style={{ width: '100%', borderRadius: 8, objectFit: 'cover', aspectRatio: post.images!.length === 1 ? 'auto' : '1', cursor: 'pointer' }}
+                  fill
+                  sizes={post.images!.length === 1 ? '(max-width: 780px) 100vw, 780px' : '(max-width: 780px) 33vw, 260px'}
+                  style={{ objectFit: 'cover', borderRadius: 8 }}
+                  priority={i === 0}
                 />
               </a>
             ))}
