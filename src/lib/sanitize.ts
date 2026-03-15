@@ -1,53 +1,28 @@
-import DOMPurify from "isomorphic-dompurify";
-
-// ✅ A-grade Kim Zetter: 강화된 XSS 방어
-
-const ALLOWED_TAGS = [
-  "p", "br", "strong", "em", "u", "s", "a", "ul", "ol", "li",
-  "h1", "h2", "h3", "blockquote", "code", "pre",
-];
-
-const ALLOWED_ATTRS = ["href", "title", "rel"];
-
-export function sanitizeHTML(dirty: string): string {
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR: ALLOWED_ATTRS,
-    ALLOW_DATA_ATTR: false,
-    FORBID_TAGS: ["script", "style", "iframe", "form", "input", "object", "embed", "svg", "math"],
-    FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus", "onblur", "onsubmit"],
-    ADD_ATTR: ["target"],
-    // href must be http/https only (block javascript: protocol)
-    ALLOWED_URI_REGEXP: /^(?:(?:https?):\/\/|mailto:|tel:)/i,
-  });
+const DANGEROUS = [/<script[\s\S]*?>[\s\S]*?<\/script>/gi,/<iframe[\s\S]*?>/gi,/javascript:/gi,/on\w+\s*=/gi,/vbscript:/gi,/<object[\s\S]*?>/gi,/<embed[\s\S]*?>/gi]
+export function sanitizeText(input: unknown): string {
+  if(typeof input!=='string') return ''
+  let s=input.trim(); for(const p of DANGEROUS) s=s.replace(p,''); return s
 }
-
-export function sanitizePlainText(dirty: string): string {
-  return DOMPurify.sanitize(dirty, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"');
+export function sanitizeNickname(input: unknown): string {
+  if(typeof input!=='string') return ''
+  return input.trim().replace(/[^\p{L}\p{N}_\-\s]/gu,'').replace(/\s+/g,' ').slice(0,20)
 }
-
-// Strict URL validation — Open Redirect 방지
-const ALLOWED_HOSTS = new Set([
-  "kadeora.vercel.app",
-  "www.kadeora.vercel.app",
-]);
-
-export function isValidRedirectUrl(url: string): boolean {
-  if (url.startsWith("/") && !url.startsWith("//")) return true; // relative path OK
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:" && ALLOWED_HOSTS.has(parsed.hostname);
-  } catch {
-    return false;
-  }
+export function sanitizeUrl(input: unknown): string {
+  if(typeof input!=='string') return ''
+  const t=input.trim(); if(/^(javascript|vbscript|data):/i.test(t)) return ''; return t
 }
-
-// Input length validation helper
-export function validateLength(input: string, min: number, max: number): boolean {
-  const trimmed = input.trim();
-  return trimmed.length >= min && trimmed.length <= max;
+const CATS=['stock','apt','free','discuss','notice'] as const
+type Category=(typeof CATS)[number]
+export function sanitizeCategory(input: unknown): Category|null {
+  if(typeof input!=='string') return null
+  const l=input.toLowerCase() as Category; return CATS.includes(l)?l:null
+}
+export function sanitizePostInput(data: Record<string,unknown>) {
+  return {title:sanitizeText(data.title).slice(0,100),content:sanitizeText(data.content).slice(0,5000),category:sanitizeCategory(data.category)}
+}
+export function sanitizeCommentInput(data: Record<string,unknown>) {
+  return {content:sanitizeText(data.content).slice(0,1000)}
+}
+export function sanitizeId(input: unknown): number|null {
+  const n=Number(input); if(!Number.isInteger(n)||n<=0) return null; return n
 }

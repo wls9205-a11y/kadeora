@@ -1,72 +1,25 @@
-// ✅ v3.0 — Dr. Kim Zetter 피드백: 인메모리 Map → Upstash Redis
-// 서버리스 환경에서 분산 rate limiting 보장
-// Lazy init: 빌드 타임에 env 없어도 안전
-
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-
-let _redis: Redis | null = null;
-function getRedis(): Redis {
-  if (!_redis) {
-    _redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    });
-  }
-  return _redis;
+interface RateLimitEntry { count: number; resetAt: number }
+const store = new Map<string, RateLimitEntry>()
+function cleanup() { const now=Date.now(); for(const [k,e] of store.entries()) if(e.resetAt<now) store.delete(k) }
+export interface RateLimitConfig { windowMs: number; max: number }
+export interface RateLimitResult { success: boolean; limit: number; remaining: number; resetAt: number }
+export function rateLimit(id: string, cfg: RateLimitConfig): RateLimitResult {
+  if(Math.random()<0.01) cleanup()
+  const now=Date.now(), e=store.get(id)
+  if(!e||e.resetAt<now){const n={count:1,resetAt:now+cfg.windowMs};store.set(id,n);return{success:true,limit:cfg.max,remaining:cfg.max-1,resetAt:n.resetAt}}
+  if(e.count>=cfg.max) return{success:false,limit:cfg.max,remaining:0,resetAt:e.resetAt}
+  e.count++; return{success:true,limit:cfg.max,remaining:cfg.max-e.count,resetAt:e.resetAt}
 }
-
-type LimiterKey = "otp" | "otpHourly" | "chat" | "api" | "bugReport" | "search";
-
-const limiterConfigs: Record<LimiterKey, { window: number; unit: string; limit: number; prefix: string }> = {
-  otp: { window: 60, unit: "s", limit: 3, prefix: "rl:otp" },
-  otpHourly: { window: 3600, unit: "s", limit: 10, prefix: "rl:otp-h" },
-  chat: { window: 60, unit: "s", limit: 30, prefix: "rl:chat" },
-  api: { window: 60, unit: "s", limit: 60, prefix: "rl:api" },
-  bugReport: { window: 60, unit: "s", limit: 5, prefix: "rl:bug" },
-  search: { window: 60, unit: "s", limit: 30, prefix: "rl:search" },
-};
-
-const _limiters: Partial<Record<LimiterKey, Ratelimit>> = {};
-
-function getLimiter(key: LimiterKey): Ratelimit {
-  if (!_limiters[key]) {
-    const cfg = limiterConfigs[key];
-    _limiters[key] = new Ratelimit({
-      redis: getRedis(),
-      limiter: Ratelimit.slidingWindow(cfg.limit, `${cfg.window} ${cfg.unit}`),
-      prefix: cfg.prefix,
-    });
-  }
-  return _limiters[key]!;
+export function getIp(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||req.headers.get('x-real-ip')||'unknown'
 }
-
-export async function checkRateLimit(
-  limiterKey: LimiterKey,
-  identifier: string
-): Promise<{ allowed: boolean; remaining: number }> {
-  try {
-    const { success, remaining } = await getLimiter(limiterKey).limit(identifier);
-    return { allowed: success, remaining };
-  } catch {
-    return { allowed: true, remaining: 999 };
-  }
+export function rateLimitResponse(r: RateLimitResult): Response {
+  return new Response(JSON.stringify({error:'요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'}),{status:429,headers:{'Content-Type':'application/json','Retry-After':Math.ceil((r.resetAt-Date.now())/1000).toString()}})
 }
-
-export async function detectSpam(userId: string, message: string): Promise<boolean> {
-  try {
-    const redis = getRedis();
-    const key = `spam:${userId}`;
-    const raw = await redis.get<string>(key);
-    const recentMessages: string[] = raw ? JSON.parse(raw) : [];
-    const duplicateCount = recentMessages.filter((m) => m === message).length;
-    if (duplicateCount >= 3) return true;
-    if (recentMessages.length >= 10) return true;
-    recentMessages.push(message);
-    if (recentMessages.length > 20) recentMessages.shift();
-    await redis.set(key, JSON.stringify(recentMessages), { ex: 300 });
-    return false;
-  } catch {
-    return false;
-  }
-}
+export const RATE_LIMITS = {
+  write:   {windowMs:60_000, max:10},
+  action:  {windowMs:60_000, max:30},
+  search:  {windowMs:60_000, max:20},
+  auth:    {windowMs:300_000,max:5},
+  default: {windowMs:60_000, max:60},
+} as const
