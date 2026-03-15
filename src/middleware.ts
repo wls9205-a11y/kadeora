@@ -1,3 +1,5 @@
+const BOT_SCAN_PATHS = ['/wp-admin','/wp-login.php','/.env','/.git','/phpmyadmin'];
+
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
@@ -8,6 +10,8 @@ const ALLOWED_APT_DOMAINS = ['applyhome.co.kr', 'land.naver.com', 'hogangnono.co
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (BOT_SCAN_PATHS.some(p => pathname.startsWith(p))) return new NextResponse(null,{status:404});
 
   // SSRF 방어
   if (pathname.startsWith('/api/apt-proxy')) {
@@ -48,7 +52,7 @@ export async function middleware(request: NextRequest) {
     session = data.session;
   } catch { /* ignore */ }
 
-  // 보호된 경로 — 비로그인 시 로그인 페이지로
+  // 보호??경로 ??비로그인 ??로그???�이지�?
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
   if (isProtected && !session) {
     const loginUrl = new URL('/login', request.url);
@@ -56,8 +60,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // 온보딩 가드 — 로그인했지만 온보딩 미완료 시
-  // (공개 경로, API, 온보딩 페이지 자체는 제외)
+  // ?�보??가????로그?�했지�??�보??미완�???
+  // (공개 경로, API, ?�보???�이지 ?�체???�외)
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p)) || pathname.startsWith('/api/') || pathname.startsWith('/_next/');
   if (session && !isPublic && pathname !== '/onboarding') {
     try {
@@ -69,10 +73,10 @@ export async function middleware(request: NextRequest) {
       if (profile && (!profile.onboarded || !profile.nickname_set)) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }
-    } catch { /* ignore, 프로필 없으면 통과 */ }
+    } catch { /* ignore, ?�로???�으�??�과 */ }
   }
 
-  // CSP 헤더
+  // CSP ?�더
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
     `default-src 'self'`,
