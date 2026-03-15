@@ -10,7 +10,7 @@ export default async function AptPage() {
 
   try {
     const sb = await createSupabaseServer();
-    const { data } = await sb.from('apt_subscriptions').select('*').order('application_start', { ascending: true });
+    const { data } = await sb.from('apt_subscriptions').select('*').order('rcept_bgnde', { ascending: true });
     if (data && data.length > 0) { apts = data; isDemo = false; }
   } catch {}
 

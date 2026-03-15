@@ -131,7 +131,7 @@ export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; i
               {/* Timeline */}
               <div style={{ display: 'flex', gap: 0, marginBottom: 14, overflowX: 'auto', paddingBottom: 4 }}>
                 {[
-                  { label: '접수 시작', date: apt.application_start },
+                  { label: '접수 시작', date: apt.rcept_bgnde },
                   { label: '접수 마감', date: apt.application_end },
                   ...(apt.move_in_date ? [{ label: '입주 예정', date: apt.move_in_date }] : []),
                 ].map((step, i, arr) => (
