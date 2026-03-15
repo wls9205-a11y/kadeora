@@ -1,15 +1,12 @@
-import type { MetadataRoute } from "next";
+﻿import { MetadataRoute } from 'next';
 
-// ✅ 마케팅팀 피드백: robots.txt 구현 (관리자 페이지 제외)
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
   return {
     rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-        disallow: ["/api/", "/admin/", "/payment/", "/callback/"],
-      },
+      { userAgent: '*', allow: '/', disallow: ['/api/', '/auth/', '/payment', '/profile/'] },
+      { userAgent: 'Googlebot', allow: '/', disallow: ['/api/', '/auth/'] },
     ],
-    sitemap: "https://kadeora.vercel.app/sitemap.xml",
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

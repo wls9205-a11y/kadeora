@@ -198,3 +198,34 @@ body {
 .kd-badge-stock { background: var(--kd-primary-dim); color: var(--kd-primary); }
 .kd-badge-free { background: rgba(139, 92, 246, 0.15); color: var(--kd-purple); }
 .kd-badge-hot { background: var(--kd-danger-dim); color: var(--kd-danger); }
+
+/* ===== 라이트 테마 ===== */
+:root[data-theme="light"] {
+  --kd-bg: #F8FAFC;
+  --kd-surface: #FFFFFF;
+  --kd-border: #E2E8F0;
+  --kd-text: #0F172A;
+  --kd-text-secondary: #64748B;
+  --kd-primary: #2563EB;
+  --kd-success: #059669;
+  --kd-danger: #DC2626;
+  --kd-warning: #D97706;
+  --kd-purple: #7C3AED;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]):not([data-theme="light"]) {
+    --kd-bg: #F8FAFC;
+    --kd-surface: #FFFFFF;
+    --kd-border: #E2E8F0;
+    --kd-text: #0F172A;
+    --kd-text-secondary: #64748B;
+    --kd-primary: #2563EB;
+    --kd-success: #059669;
+    --kd-danger: #DC2626;
+    --kd-warning: #D97706;
+    --kd-purple: #7C3AED;
+    color-scheme: light;
+  }
+}
