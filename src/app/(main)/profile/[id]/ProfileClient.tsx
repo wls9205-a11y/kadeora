@@ -51,7 +51,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* Profile card */}
-      <div style={{ background: '#111827', border: '1px solid #1E293B', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
         {/* Header */}
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           {/* Avatar */}
@@ -82,8 +82,8 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
                   maxLength={200}
                   rows={3}
                   style={{
-                    width: '100%', background: '#0A0E17', border: '1px solid #1E293B',
-                    borderRadius: 8, color: '#F1F5F9', padding: '10px 12px',
+                    width: '100%', background: 'var(--kd-bg)', border: '1px solid var(--kd-border)',
+                    borderRadius: 8, color: 'var(--kd-text)', padding: '10px 12px',
                     fontSize: 13, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5,
                   }}
                   onFocus={e => (e.currentTarget.style.borderColor = '#3B82F6')}
@@ -94,7 +94,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
             ) : (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                  <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#F1F5F9' }}>
+                  <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>
                     {profile.nickname ?? '익명'}
                   </h1>
                   <span style={{
@@ -132,7 +132,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 24, background: '#1E293B', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 24, background: 'var(--kd-border)', borderRadius: 12, overflow: 'hidden' }}>
           {[
             { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
             { label: '댓글', value: 0 ?? 0, icon: '💬' },
@@ -140,11 +140,11 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
             { label: '총 활동', value: totalActivity, icon: '⚡' },
           ].map((stat, i) => (
             <div key={stat.label} style={{
-              background: '#111827', padding: '16px 12px', textAlign: 'center',
-              borderRight: i < 3 ? '1px solid #1E293B' : 'none',
+              background: 'var(--kd-surface)', padding: '16px 12px', textAlign: 'center',
+              borderRight: i < 3 ? '1px solid var(--kd-border)' : 'none',
             }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: '#F1F5F9' }}>{stat.value.toLocaleString()}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--kd-text)' }}>{stat.value.toLocaleString()}</div>
               <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>{stat.label}</div>
             </div>
           ))}
@@ -152,8 +152,8 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
       </div>
 
       {/* Posts */}
-      <div style={{ background: '#111827', border: '1px solid #1E293B', borderRadius: 16, padding: '20px 24px' }}>
-        <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: '#F1F5F9' }}>📝 작성한 글 ({posts.length})</h2>
+      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '20px 24px' }}>
+        <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--kd-text)' }}>📝 작성한 글 ({posts.length})</h2>
         {posts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0', color: '#64748B' }}>아직 작성한 글이 없습니다</div>
         ) : (
@@ -163,7 +163,7 @@ export default function ProfileClient({ profile, posts, isOwner }: Props) {
               return (
                 <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
                   <div style={{
-                    padding: '12px 0', borderBottom: i < posts.length - 1 ? '1px solid #1E293B' : 'none',
+                    padding: '12px 0', borderBottom: i < posts.length - 1 ? '1px solid var(--kd-border)' : 'none',
                     display: 'flex', gap: 10, alignItems: 'center',
                     transition: 'opacity 0.15s',
                   }}

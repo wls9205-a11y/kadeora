@@ -28,15 +28,15 @@ export default function ShopClient({ products, isDemo }: { products: ShopProduct
   };
 
   const discountRate = (p: ShopProduct) => {
-    if (!p.original_price || p.original_price <= p.price) return 0;
-    return Math.round((1 - p.price / p.original_price) * 100);
+    if (!p.original_price_krw ?? p.original_price || p.original_price_krw ?? p.original_price <= p.price_krw) return 0;
+    return Math.round((1 - p.price_krw / p.original_price_krw ?? p.original_price) * 100);
   };
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: '#F1F5F9' }}>🛒 커뮤니티 상점</h1>
+          <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🛒 커뮤니티 상점</h1>
           <p style={{ margin: 0, fontSize: 13, color: '#94A3B8' }}>게시글 노출 및 특별 기능을 구매하세요</p>
         </div>
         {isDemo && <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.3)' }}>💡 미리보기</span>}
@@ -45,7 +45,7 @@ export default function ShopClient({ products, isDemo }: { products: ShopProduct
       {/* Popular section */}
       {popular.length > 0 && (
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ margin: '0 0 14px', fontSize: 16, fontWeight: 700, color: '#F1F5F9' }}>🔥 인기 상품</h2>
+          <h2 style={{ margin: '0 0 14px', fontSize: 16, fontWeight: 700, color: 'var(--kd-text)' }}>🔥 인기 상품</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 12 }}>
             {popular.map(p => (
               <ProductCard key={p.id} product={p} discount={discountRate(p)} onBuy={setConfirmProduct} featured />
@@ -96,7 +96,7 @@ function ProductCard({ product: p, discount, onBuy, featured }: {
 }) {
   return (
     <div style={{
-      background: '#111827',
+      background: 'var(--kd-surface)',
       border: `1px solid ${featured ? 'rgba(59,130,246,0.4)' : '#1E293B'}`,
       borderRadius: 14, padding: '20px 20px 16px',
       position: 'relative', transition: 'all 0.15s',
@@ -122,18 +122,18 @@ function ProductCard({ product: p, discount, onBuy, featured }: {
       )}
 
       <div style={{ fontSize: 36, marginBottom: 12, marginTop: discount || featured ? 24 : 0 }}>{p.icon ?? '🎁'}</div>
-      <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: '#F1F5F9' }}>{p.name}</h3>
+      <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>{p.name}</h3>
       <p style={{ margin: '0 0 16px', fontSize: 12, color: '#94A3B8', lineHeight: 1.5 }}>{p.description}</p>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          {p.original_price && p.original_price > p.price && (
+          {p.original_price_krw ?? p.original_price && p.original_price_krw ?? p.original_price > p.price_krw && (
             <div style={{ fontSize: 11, color: '#64748B', textDecoration: 'line-through', marginBottom: 2 }}>
-              {p.original_price.toLocaleString()}원
+              {p.original_price_krw ?? p.original_price.toLocaleString()}원
             </div>
           )}
-          <div style={{ fontSize: 18, fontWeight: 800, color: '#F1F5F9' }}>
-            {p.price.toLocaleString()}<span style={{ fontSize: 13, fontWeight: 500, color: '#94A3B8' }}>원</span>
+          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--kd-text)' }}>
+            {p.price_krw.toLocaleString()}<span style={{ fontSize: 13, fontWeight: 500, color: '#94A3B8' }}>원</span>
           </div>
         </div>
         <button
