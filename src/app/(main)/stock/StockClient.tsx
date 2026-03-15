@@ -37,18 +37,18 @@ export default function StockClient({ initialStocks, isDemo }: { initialStocks: 
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:20}}>
         {[{label:'상승',value:rising+'개',color:'#10B981'},{label:'하락',value:falling+'개',color:'#EF4444'},{label:'시장',value:rising>falling?'강세':'약세',color:rising>falling?'#10B981':'#EF4444'}].map(i=>(
-          <div key={i.label} style={{background:'#111827',border:'1px solid #1E293B',borderRadius:12,padding:'14px 16px'}}>
+          <div key={i.label} style={{background:'#111827',border:'1px solid var(--kd-border)',borderRadius:12,padding:'14px 16px'}}>
             <div style={{fontSize:12,color:'#64748B',marginBottom:4}}>{i.label}</div>
             <div style={{fontSize:20,fontWeight:800,color:i.color}}>{i.value}</div>
           </div>
         ))}
       </div>
       <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="종목명 또는 코드 검색..."
-        style={{width:'100%',maxWidth:280,background:'#1a2234',border:'1px solid #1E293B',borderRadius:8,color:'#F1F5F9',padding:'10px 14px',fontSize:14,marginBottom:16,fontFamily:'inherit'}} />
-      <div style={{background:'#111827',border:'1px solid #1E293B',borderRadius:14,overflow:'hidden'}}>
+        style={{width:'100%',maxWidth:280,background:'#1a2234',border:'1px solid var(--kd-border)',borderRadius:8,color:'#F1F5F9',padding:'10px 14px',fontSize:14,marginBottom:16,fontFamily:'inherit'}} />
+      <div style={{background:'#111827',border:'1px solid var(--kd-border)',borderRadius:14,overflow:'hidden'}}>
         <div style={{overflowX:'auto'}}>
           <table style={{width:'100%',borderCollapse:'collapse',fontSize:14}}>
-            <thead><tr style={{borderBottom:'1px solid #1E293B'}}>
+            <thead><tr style={{borderBottom:'1px solid var(--kd-border)'}}>
               {['종목','현재가','등락','등락률','거래량'].map(h=>(
                 <th key={h} style={{padding:'12px 16px',color:'#64748B',fontWeight:600,fontSize:12,textAlign:h==='종목'?'left':'right'}}>{h}</th>
               ))}

@@ -35,3 +35,6 @@ next-env.d.ts
 
 # supabase
 .supabase/
+
+# PowerShell scripts
+*.ps1

@@ -39,7 +39,7 @@ export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; i
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#F1F5F9' }}>🏠 청약 정보</h1>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🏠 청약 정보</h1>
         {isDemo && (
           <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.3)' }}>
             💡 미리보기 데이터
@@ -59,7 +59,7 @@ export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; i
               transition: 'all 0.15s', textAlign: 'left',
             }}>
               <div style={{ fontSize: 11, color: c.color, fontWeight: 700, marginBottom: 4 }}>{c.icon} {c.label}</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#F1F5F9' }}>{counts[s]}</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>{counts[s]}</div>
               <div style={{ fontSize: 11, color: '#64748B' }}>단지</div>
             </button>
           );
@@ -76,7 +76,7 @@ export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; i
           className="kd-input"
           style={{ maxWidth: 260 }}
         />
-        <div style={{ display: 'flex', gap: 4, background: '#111827', borderRadius: 10, padding: 4, border: '1px solid #1E293B' }}>
+        <div style={{ display: 'flex', gap: 4, background: 'var(--kd-surface)', borderRadius: 10, padding: 4, border: '1px solid var(--kd-border)' }}>
           {([['all', '전체'], ['open', '접수중'], ['upcoming', '예정'], ['closed', '마감']] as const).map(([key, label]) => (
             <button key={key} onClick={() => setFilter(key)} style={{
               padding: '6px 12px', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600,
@@ -100,7 +100,7 @@ export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; i
           const dl = daysLeft(apt.application_end);
           return (
             <div key={apt.id} style={{
-              background: '#111827', border: '1px solid #1E293B', borderRadius: 14, padding: '20px 22px',
+              background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 14, padding: '20px 22px',
               transition: 'border-color 0.15s',
             }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = '#334155')}
@@ -109,7 +109,7 @@ export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; i
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#F1F5F9' }}>{apt.name}</h3>
+                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: 'var(--kd-text)' }}>{apt.name}</h3>
                     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: s.bg, color: s.color }}>{s.label}</span>
                   </div>
                   <div style={{ fontSize: 13, color: '#94A3B8' }}>📍 {apt.location} · {apt.total_units.toLocaleString()}세대 · {apt.subscription_type}</div>
@@ -149,7 +149,7 @@ export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; i
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                 <div style={{ fontSize: 13, color: '#94A3B8' }}>
                   💰 분양가{' '}
-                  <span style={{ color: '#F1F5F9', fontWeight: 700 }}>
+                  <span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>
                     {apt.min_price && apt.max_price
                       ? `${fmtPrice(apt.min_price)} ~ ${fmtPrice(apt.max_price)}`
                       : apt.min_price ? `${fmtPrice(apt.min_price)}~` : '미정'}
