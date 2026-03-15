@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     if (action === 'sync') {
       const APT_API_KEY = process.env.APT_DATA_API_KEY;
       if (!APT_API_KEY) return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY 필요' }, { status: 500 });
-      const apiUrl = `https://apis.data.go.kr/1613000/AptBasisInfoService1/getAplusAptListBody?serviceKey=${encodeURIComponent(APT_API_KEY)}&pageNo=1&numOfRows=30&type=json`;
+      const apiUrl = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${encodeURIComponent(APT_API_KEY)}&pageNo=1&numOfRows=30&type=json`;
       if (!isAllowedUrl(apiUrl.split('?')[0])) return NextResponse.json({ success: false, error: 'SSRF 차단' }, { status: 403 });
       const apiRes = await fetch(apiUrl, { next: { revalidate: 3600 } });
       if (!apiRes.ok) return NextResponse.json({ success: false, error: `API 오류: ${apiRes.status}` }, { status: 502 });
