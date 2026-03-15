@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import PostActions from './PostActions';
+import { BookmarkButton } from '@/components/BookmarkButton';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
 
@@ -228,7 +229,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {/* Actions */}
         <div style={{ borderTop: '1px solid var(--kd-border)', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LikeButton postId={post.id} initialCount={post.likes_count} />
+          <LikeButton postId={post.id} initialCount={post.likes_count} />`n          <BookmarkButton postId={post.id} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--kd-border)', color: 'var(--kd-text-muted)', fontSize: 14 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
           </div>
