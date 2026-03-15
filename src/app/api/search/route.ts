@@ -1,32 +1,17 @@
-import { NextResponse } from 'next/server';
-import { createSupabaseServer } from '@/lib/supabase-server';
-
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const q = searchParams.get('q')?.trim() ?? '';
-    const category = searchParams.get('category') ?? 'all';
-    const limit = Math.min(Number(searchParams.get('limit') ?? '20'), 50);
-    const offset = Number(searchParams.get('offset') ?? '0');
-
-    if (!q || q.length < 2) return NextResponse.json({ results: [], total: 0, query: q });
-
-    const sb = await createSupabaseServer();
-    let query = sb.from('posts')
-      .select('*, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)', { count: 'exact' })
-      .eq('is_deleted', false)
-      .or(`title.ilike.%${q}%,content.ilike.%${q}%`)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (category !== 'all') query = query.eq('category', category);
-
-    const { data, error, count } = await query;
-    if (error) throw error;
-
-    return NextResponse.json({ results: data ?? [], total: count ?? 0, query: q });
-  } catch (e: unknown) {
-    console.error('[GET /api/search]', e);
-    return NextResponse.json({ error: '검색 중 오류가 발생했습니다' }, { status: 500 });
-  }
+import{NextRequest,NextResponse}from'next/server'
+import{createClient}from'@/lib/supabase-server'
+import{rateLimit,getIp,rateLimitResponse,RATE_LIMITS}from'@/lib/rate-limit'
+import{sanitizeText}from'@/lib/sanitize'
+export async function GET(request:NextRequest){
+  const ip=getIp(request)
+  const rl=rateLimit('search:'+ip,RATE_LIMITS.search)
+  if(!rl.success) return rateLimitResponse(rl)
+  const{searchParams}=new URL(request.url)
+  const q=sanitizeText(searchParams.get('q')??'').slice(0,100)
+  if(!q) return NextResponse.json([])
+  const supabase=await createClient()
+  const{data,error}=await supabase.from('posts').select('id,title,category,created_at,likes_count,comments_count,profiles!posts_author_id_fkey(nickname)').eq('is_deleted',false).or('title.ilike.%'+q+'%,content.ilike.%'+q+'%').order('created_at',{ascending:false}).limit(20)
+  if(error) return NextResponse.json({error:'검색에 실패했습니다.'},{status:500})
+  supabase.from('search_logs').insert({keyword:q}).then(()=>{})
+  return NextResponse.json(data??[])
 }
