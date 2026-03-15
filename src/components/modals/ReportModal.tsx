@@ -1,50 +1,46 @@
-"use client";
-
-import { useState } from "react";
-import { createClient } from "@/lib/supabase-browser";
+'use client';
+import { useState } from 'react';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface ReportModalProps {
-  targetType: "post" | "comment" | "chat";
+  targetType: 'post' | 'comment' | 'chat';
   targetId: string;
   onClose: () => void;
 }
 
 const REPORT_REASONS = [
-  { value: "spam", label: "스팸/광고" },
-  { value: "abuse", label: "욕설/비방" },
-  { value: "defamation", label: "명예훼손" },
-  { value: "misinformation", label: "허위 정보" },
-  { value: "copyright", label: "저작권 침해" },
-  { value: "privacy", label: "개인정보 노출" },
-  { value: "other", label: "기타" },
+  { value: 'spam',          label: '스팸/광고' },
+  { value: 'abuse',         label: '욕설/비방' },
+  { value: 'defamation',    label: '명예훼손' },
+  { value: 'misinformation',label: '허위 정보' },
+  { value: 'copyright',     label: '저작권 침해' },
+  { value: 'privacy',       label: '개인정보 노출' },
+  { value: 'other',         label: '기타' },
 ];
 
-// ✅ 법무팀 피드백: 콘텐츠 신고/삭제 프로세스 (정통망법 제44조)
+// 콘텐츠 신고/삭제 프로세스 (정통망법 제44조)
 export function ReportModal({ targetType, targetId, onClose }: ReportModalProps) {
-  const [reason, setReason] = useState("");
-  const [detail, setDetail] = useState("");
+  const [reason, setReason] = useState('');
+  const [detail, setDetail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const supabase = createClient();
 
   const handleSubmit = async () => {
     if (!reason) return;
     setSubmitting(true);
-
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { alert("로그인이 필요합니다."); return; }
-
-      await supabase.from("content_reports").insert({
+      const sb = createSupabaseBrowser();
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) { alert('로그인이 필요합니다.'); return; }
+      await sb.from('content_reports').insert({
         reporter_id: user.id,
         target_type: targetType,
         target_id: targetId,
-        reason: `${reason}${detail ? `: ${detail}` : ""}`,
+        reason: `${reason}${detail ? `: ${detail}` : ''}`,
       });
-
       setSubmitted(true);
     } catch {
-      alert("신고 접수에 실패했습니다.");
+      alert('신고 접수에 실패했습니다.');
     } finally {
       setSubmitting(false);
     }
@@ -53,53 +49,53 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
   return (
     <div
       style={{
-        position: "fixed", inset: 0, zIndex: 10000,
-        background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)",
-        display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+        position: 'fixed', inset: 0, zIndex: 10000,
+        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
       }}
       onClick={onClose}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
         style={{
-          background: "#111827", borderRadius: 16, border: "1px solid #1E293B",
-          padding: 28, maxWidth: 440, width: "100%",
+          background: 'var(--kd-surface)', borderRadius: 16, border: '1px solid var(--kd-border)',
+          padding: 28, maxWidth: 440, width: '100%',
         }}
+        className="animate-modalIn"
       >
         {submitted ? (
-          <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#F1F5F9", margin: "0 0 8px" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--kd-text)', margin: '0 0 8px' }}>
               신고가 접수되었습니다
             </h3>
-            <p style={{ fontSize: 13, color: "#94A3B8", margin: "0 0 20px" }}>
+            <p style={{ fontSize: 13, color: 'var(--kd-text-muted)', margin: '0 0 20px', lineHeight: 1.6 }}>
               24시간 내 1차 검토 후 72시간 내 처리 결과를 안내드립니다.
             </p>
             <button
               onClick={onClose}
-              style={{
-                padding: "10px 24px", borderRadius: 8, border: "none",
-                background: "#3B82F6", color: "#FFF", fontSize: 13, fontWeight: 700, cursor: "pointer",
-              }}
+              className="kd-btn kd-btn-primary"
+              style={{ padding: '10px 24px', fontSize: 13 }}
             >
               확인
             </button>
           </div>
         ) : (
           <>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#F1F5F9", margin: "0 0 16px" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--kd-text)', margin: '0 0 16px' }}>
               🚨 콘텐츠 신고
             </h3>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-              {REPORT_REASONS.map((r) => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+              {REPORT_REASONS.map(r => (
                 <label
                   key={r.value}
                   style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    padding: "10px 14px", borderRadius: 10, cursor: "pointer",
-                    border: `1px solid ${reason === r.value ? "#3B82F6" : "#1E293B"}`,
-                    background: reason === r.value ? "rgba(59,130,246,0.08)" : "transparent",
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 14px', borderRadius: 10, cursor: 'pointer',
+                    border: `1px solid ${reason === r.value ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
+                    background: reason === r.value ? 'var(--kd-primary-dim)' : 'transparent',
+                    transition: 'all 0.15s',
                   }}
                 >
                   <input
@@ -107,10 +103,14 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                     name="reason"
                     value={r.value}
                     checked={reason === r.value}
-                    onChange={(e) => setReason(e.target.value)}
-                    style={{ accentColor: "#3B82F6" }}
+                    onChange={e => setReason(e.target.value)}
+                    style={{ accentColor: 'var(--kd-primary)' }}
                   />
-                  <span style={{ fontSize: 13, color: reason === r.value ? "#93C5FD" : "#94A3B8" }}>
+                  <span style={{
+                    fontSize: 13,
+                    color: reason === r.value ? 'var(--kd-primary)' : 'var(--kd-text-muted)',
+                    fontWeight: reason === r.value ? 600 : 400,
+                  }}>
                     {r.label}
                   </span>
                 </label>
@@ -120,38 +120,38 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
             <textarea
               placeholder="상세 내용 (선택사항)"
               value={detail}
-              onChange={(e) => setDetail(e.target.value)}
+              onChange={e => setDetail(e.target.value)}
               maxLength={500}
               rows={3}
               style={{
-                width: "100%", padding: "10px 14px", borderRadius: 10,
-                border: "1px solid #1E293B", background: "rgba(255,255,255,0.03)",
-                color: "#CBD5E1", fontSize: 13, outline: "none", resize: "none", marginBottom: 16,
+                width: '100%', padding: '10px 14px', borderRadius: 10, boxSizing: 'border-box',
+                border: '1px solid var(--kd-border)', background: 'var(--kd-bg)',
+                color: 'var(--kd-text)', fontSize: 13, outline: 'none', resize: 'none',
+                marginBottom: 16, fontFamily: 'inherit', lineHeight: 1.5,
               }}
+              onFocus={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
+              onBlur={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')}
             />
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button
                 onClick={onClose}
-                style={{
-                  padding: "10px 20px", borderRadius: 8, border: "1px solid #334155",
-                  background: "transparent", color: "#94A3B8", fontSize: 13, cursor: "pointer",
-                }}
+                className="kd-btn kd-btn-ghost"
+                style={{ fontSize: 13 }}
               >
                 취소
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!reason || submitting}
+                className="kd-btn kd-btn-danger"
                 style={{
-                  padding: "10px 20px", borderRadius: 8, border: "none",
-                  background: reason ? "#EF4444" : "#334155",
-                  color: "#FFF", fontSize: 13, fontWeight: 700,
-                  cursor: reason ? "pointer" : "not-allowed",
+                  fontSize: 13,
                   opacity: reason ? 1 : 0.5,
+                  cursor: reason ? 'pointer' : 'not-allowed',
                 }}
               >
-                {submitting ? "접수 중..." : "신고하기"}
+                {submitting ? '접수 중...' : '신고하기'}
               </button>
             </div>
           </>
