@@ -1,25 +1,11 @@
-interface RateLimitEntry { count: number; resetAt: number }
-const store = new Map<string, RateLimitEntry>()
-function cleanup() { const now=Date.now(); for(const [k,e] of store.entries()) if(e.resetAt<now) store.delete(k) }
-export interface RateLimitConfig { windowMs: number; max: number }
-export interface RateLimitResult { success: boolean; limit: number; remaining: number; resetAt: number }
-export function rateLimit(id: string, cfg: RateLimitConfig): RateLimitResult {
-  if(Math.random()<0.01) cleanup()
-  const now=Date.now(), e=store.get(id)
-  if(!e||e.resetAt<now){const n={count:1,resetAt:now+cfg.windowMs};store.set(id,n);return{success:true,limit:cfg.max,remaining:cfg.max-1,resetAt:n.resetAt}}
-  if(e.count>=cfg.max) return{success:false,limit:cfg.max,remaining:0,resetAt:e.resetAt}
-  e.count++; return{success:true,limit:cfg.max,remaining:cfg.max-e.count,resetAt:e.resetAt}
-}
-export function getIp(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||req.headers.get('x-real-ip')||'unknown'
-}
-export function rateLimitResponse(r: RateLimitResult): Response {
-  return new Response(JSON.stringify({error:'요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'}),{status:429,headers:{'Content-Type':'application/json','Retry-After':Math.ceil((r.resetAt-Date.now())/1000).toString()}})
-}
-export const RATE_LIMITS = {
-  write:   {windowMs:60_000, max:10},
-  action:  {windowMs:60_000, max:30},
-  search:  {windowMs:60_000, max:20},
-  auth:    {windowMs:300_000,max:5},
-  default: {windowMs:60_000, max:60},
-} as const
+﻿import { NextRequest, NextResponse } from "next/server";
+let upstashLimiter: any = null; let useUpstash = false;
+async function initUpstash() { if (upstashLimiter !== null) return; const url = process.env.UPSTASH_REDIS_REST_URL; const token = process.env.UPSTASH_REDIS_REST_TOKEN; if (url && token) { try { const { Ratelimit } = await import("@upstash/ratelimit"); const { Redis } = await import("@upstash/redis"); const redis = new Redis({ url, token }); upstashLimiter = { api: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "1 m"), prefix: "kd:rl:api" }), auth: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "1 m"), prefix: "kd:rl:auth" }), search: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "1 m"), prefix: "kd:rl:search" }) }; useUpstash = true; } catch (e) { useUpstash = false; } } }
+interface RateLimitEntry { count: number; resetAt: number; }
+const memoryStore = new Map<string, RateLimitEntry>();
+setInterval(() => { const now = Date.now(); for (const [k, v] of memoryStore) { if (v.resetAt < now) memoryStore.delete(k); } }, 300000);
+function memoryRateLimit(id: string, max: number, windowMs: number) { const now = Date.now(); const entry = memoryStore.get(id); if (!entry || entry.resetAt < now) { memoryStore.set(id, { count: 1, resetAt: now + windowMs }); return { success: true, remaining: max - 1, reset: now + windowMs }; } entry.count++; return entry.count > max ? { success: false, remaining: 0, reset: entry.resetAt } : { success: true, remaining: max - entry.count, reset: entry.resetAt }; }
+export type RateLimitTier = "api" | "auth" | "search";
+const TIER: Record<RateLimitTier, { max: number; windowMs: number }> = { api: { max: 30, windowMs: 60000 }, auth: { max: 5, windowMs: 60000 }, search: { max: 20, windowMs: 60000 } };
+function getIP(req: NextRequest): string { return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"; }
+export async function checkRateLimit(req: NextRequest, tier: RateLimitTier = "api"): Promise<{ success: true } | { success: false; response: NextResponse }> { await initUpstash(); const ip = getIP(req); const identifier = `${tier}:${ip}`; if (useUpstash && upstashLimiter) { try { const { success, remaining, reset } = await upstashLimiter[tier].limit(identifier); if (!success) { return { success: false, response: NextResponse.json({ error: "요청이 너무 많습니다." }, { status: 429, headers: { "Retry-After": String(Math.ceil((reset - Date.now()) / 1000)) } }) }; } return { success: true }; } catch { return { success: true }; } } const cfg = TIER[tier]; const result = memoryRateLimit(identifier, cfg.max, cfg.windowMs); if (!result.success) { return { success: false, response: NextResponse.json({ error: "요청이 너무 많습니다." }, { status: 429, headers: { "Retry-After": String(Math.ceil((result.reset - Date.now()) / 1000)) } }) }; } return { success: true }; }

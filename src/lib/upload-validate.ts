@@ -1,11 +1,4 @@
-const ALLOWED=['image/jpeg','image/jpg','image/png','image/gif','image/webp']
-export interface FileValidationResult{valid:boolean;error?:string}
-export async function validateImageFile(file:File,maxSize=10*1024*1024):Promise<FileValidationResult>{
-  if(file.size>maxSize) return{valid:false,error:`파일 크기가 너무 큽니다. 최대 ${Math.floor(maxSize/1024/1024)}MB`}
-  if(!ALLOWED.includes(file.type)) return{valid:false,error:'JPEG, PNG, GIF, WebP만 업로드 가능합니다.'}
-  const buf=await file.slice(0,12).arrayBuffer(); const b=new Uint8Array(buf)
-  const ok=((b[0]===0xFF&&b[1]===0xD8)||(b[0]===0x89&&b[1]===0x50)||(b[0]===0x47&&b[1]===0x49)||(b[8]===0x57&&b[9]===0x45))
-  if(!ok) return{valid:false,error:'파일 내용이 이미지 형식이 아닙니다.'}
-  return{valid:true}
-}
-export async function validateAvatarFile(file:File):Promise<FileValidationResult>{return validateImageFile(file,5*1024*1024)}
+﻿const ALLOWED_TYPES = { image: { mimes: ["image/jpeg", "image/png", "image/gif", "image/webp"], magics: [[0xff, 0xd8, 0xff], [0x89, 0x50, 0x4e, 0x47], [0x47, 0x49, 0x46], [0x52, 0x49, 0x46, 0x46]] } };
+const MAX_SIZE = 5 * 1024 * 1024;
+export interface UploadValidationResult { valid: boolean; error?: string; }
+export async function validateUpload(file: File | null, category: keyof typeof ALLOWED_TYPES = "image", maxSize = MAX_SIZE): Promise<UploadValidationResult> { if (!file) return { valid: false, error: "파일이 없습니다." }; if (file.size > maxSize) return { valid: false, error: `파일 크기는 ${Math.round(maxSize / 1024 / 1024)}MB 이하여야 합니다.` }; if (file.size === 0) return { valid: false, error: "빈 파일입니다." }; const config = ALLOWED_TYPES[category]; if (!config) return { valid: false, error: "지원하지 않는 카테고리입니다." }; if (!config.mimes.includes(file.type)) return { valid: false, error: "허용되지 않는 파일 형식입니다." }; try { const buf = await file.arrayBuffer(); const h = new Uint8Array(buf.slice(0, 12)); const ok = config.magics.some((m) => m.every((b, i) => h[i] === b)); if (!ok) return { valid: false, error: "파일 내용이 확장자와 일치하지 않습니다." }; } catch { return { valid: false, error: "파일을 읽을 수 없습니다." }; } return { valid: true }; }

@@ -1,28 +1,5 @@
-const DANGEROUS = [/<script[\s\S]*?>[\s\S]*?<\/script>/gi,/<iframe[\s\S]*?>/gi,/javascript:/gi,/on\w+\s*=/gi,/vbscript:/gi,/<object[\s\S]*?>/gi,/<embed[\s\S]*?>/gi]
-export function sanitizeText(input: unknown): string {
-  if(typeof input!=='string') return ''
-  let s=input.trim(); for(const p of DANGEROUS) s=s.replace(p,''); return s
-}
-export function sanitizeNickname(input: unknown): string {
-  if(typeof input!=='string') return ''
-  return input.trim().replace(/[^\p{L}\p{N}_\-\s]/gu,'').replace(/\s+/g,' ').slice(0,20)
-}
-export function sanitizeUrl(input: unknown): string {
-  if(typeof input!=='string') return ''
-  const t=input.trim(); if(/^(javascript|vbscript|data):/i.test(t)) return ''; return t
-}
-const CATS=['stock','apt','free','discuss','notice'] as const
-type Category=(typeof CATS)[number]
-export function sanitizeCategory(input: unknown): Category|null {
-  if(typeof input!=='string') return null
-  const l=input.toLowerCase() as Category; return CATS.includes(l)?l:null
-}
-export function sanitizePostInput(data: Record<string,unknown>) {
-  return {title:sanitizeText(data.title).slice(0,100),content:sanitizeText(data.content).slice(0,5000),category:sanitizeCategory(data.category)}
-}
-export function sanitizeCommentInput(data: Record<string,unknown>) {
-  return {content:sanitizeText(data.content).slice(0,1000)}
-}
-export function sanitizeId(input: unknown): number|null {
-  const n=Number(input); if(!Number.isInteger(n)||n<=0) return null; return n
-}
+﻿function escapeHTML(str: string): string { const map: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;", "/": "&#x2F;", "`": "&#96;" }; return str.replace(/[&<>"'\/`]/g, (c) => map[c] || c); }
+function removeDangerous(str: string): string { let s = str; s = s.replace(/<\s*\/?\s*script[^>]*>/gi, ""); s = s.replace(/\bon\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, ""); s = s.replace(/javascript\s*:/gi, ""); s = s.replace(/data\s*:\s*(?:text\/html|application\/xhtml)/gi, ""); s = s.replace(/vbscript\s*:/gi, ""); s = s.replace(/expression\s*\(/gi, ""); s = s.replace(/<\s*\/?\s*(iframe|embed|object|applet|form)\b[^>]*>/gi, ""); return s; }
+export function sanitizeText(input: unknown, maxLen = 5000): string { if (typeof input !== "string") return ""; let s = input.trim(); if (s.length > maxLen) s = s.slice(0, maxLen); s = removeDangerous(s); s = s.replace(/\0/g, ""); s = s.replace(/\n{3,}/g, "\n\n"); return s; }
+export function sanitizeForHTML(input: unknown, maxLen = 5000): string { return escapeHTML(sanitizeText(input, maxLen)); }
+export function sanitizeSearchQuery(input: unknown, maxLen = 200): string { if (typeof input !== "string") return ""; let s = input.trim(); if (s.length > maxLen) s = s.slice(0, maxLen); s = s.replace(/(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|DECLARE)\b)/gi, ""); s = s.replace(/['"`;\\]/g, ""); s = s.replace(/--+/g, "-"); s = s.replace(/\0/g, ""); return s.trim(); }

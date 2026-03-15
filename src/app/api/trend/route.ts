@@ -1,25 +1,13 @@
-import { NextResponse } from 'next/server';
-import { createSupabaseServer } from '@/lib/supabase-server';
-import { createSupabaseAdmin } from '@/lib/supabase-server';
-import { DEMO_TRENDING } from '@/lib/constants';
+﻿import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { checkRateLimit } from "@/lib/rate-limit";
 
-export async function GET() {
-  // service_role로 RPC 호출 (anon 권한 우회)
+export async function POST(req: NextRequest) {
+  const rl = await checkRateLimit(req, "api"); if (!rl.success) return rl.response;
   try {
-    const admin = await createSupabaseAdmin();
-    await admin.rpc('refresh_trending_keywords');
-  } catch (_) {}
-
-  try {
-    const sb = await createSupabaseServer();
-    const { data, error } = await sb
-      .from('trending_keywords')
-      .select('*')
-      .order('rank', { ascending: true })
-      .limit(10);
-    if (error || !data?.length) return NextResponse.json({ keywords: DEMO_TRENDING });
-    return NextResponse.json({ keywords: data });
-  } catch {
-    return NextResponse.json({ keywords: DEMO_TRENDING });
-  }
+    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } });
+    const { error } = await admin.rpc("refresh_trending_keywords");
+    if (error) { console.error("[Trend]", error); return NextResponse.json({ error: "트렌딩 갱신 실패" }, { status: 500 }); }
+    return NextResponse.json({ success: true });
+  } catch (err) { console.error("[Trend]", err); return NextResponse.json({ error: "서버 오류" }, { status: 500 }); }
 }

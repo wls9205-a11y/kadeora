@@ -1,17 +1,20 @@
-import{NextRequest,NextResponse}from'next/server'
-import{createSupabaseServer}from'@/lib/supabase-server'
-import{rateLimit,getIp,rateLimitResponse,RATE_LIMITS}from'@/lib/rate-limit'
-import{sanitizeText}from'@/lib/sanitize'
-export async function GET(request:NextRequest){
-  const ip=getIp(request)
-  const rl=rateLimit('search:'+ip,RATE_LIMITS.search)
-  if(!rl.success) return rateLimitResponse(rl)
-  const{searchParams}=new URL(request.url)
-  const q=sanitizeText(searchParams.get('q')??'').slice(0,100)
-  if(!q) return NextResponse.json([])
-  const supabase=await createSupabaseServer()
-  const{data,error}=await supabase.from('posts').select('id,title,category,created_at,likes_count,comments_count,profiles!posts_author_id_fkey(nickname)').eq('is_deleted',false).or('title.ilike.%'+q+'%,content.ilike.%'+q+'%').order('created_at',{ascending:false}).limit(20)
-  if(error) return NextResponse.json({error:'검색에 실패했습니다.'},{status:500})
-  supabase.from('search_logs').insert({keyword:q}).then(()=>{})
-  return NextResponse.json(data??[])
+﻿import { NextRequest, NextResponse } from "next/server";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { sanitizeSearchQuery } from "@/lib/sanitize";
+
+export async function GET(req: NextRequest) {
+  const rl = await checkRateLimit(req, "search"); if (!rl.success) return rl.response;
+  try {
+    const supabase = createServerComponentClient({ cookies });
+    const { searchParams } = new URL(req.url);
+    const query = sanitizeSearchQuery(searchParams.get("q") || "", 200);
+    if (!query || query.length < 2) return NextResponse.json({ posts: [], total: 0 });
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(30, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
+    const { data, error, count } = await supabase.from("posts").select(`id, title, content, created_at, category, likes_count, comments_count, author:profiles!posts_author_id_fkey(id, nickname, avatar_url)`, { count: "exact" }).eq("is_deleted", false).or(`title.ilike.%${query}%,content.ilike.%${query}%`).order("created_at", { ascending: false }).range((page - 1) * limit, page * limit - 1);
+    if (error) { console.error("[Search GET]", error); return NextResponse.json({ error: "검색에 실패했습니다." }, { status: 500 }); }
+    return NextResponse.json({ posts: data || [], total: count || 0, query, page, hasMore: (count || 0) > page * limit });
+  } catch (err) { console.error("[Search GET]", err); return NextResponse.json({ error: "서버 오류" }, { status: 500 }); }
 }
