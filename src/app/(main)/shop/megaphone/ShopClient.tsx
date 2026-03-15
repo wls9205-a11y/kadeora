@@ -28,8 +28,8 @@ export default function ShopClient({ products, isDemo }: { products: ShopProduct
   };
 
   const discountRate = (p: ShopProduct) => {
-    if (!p.original_price_krw || p.original_price_krw <= p.price_krw) return 0;
-    return Math.round((1 - p.price_krw / p.original_price_krw) * 100);
+    if (!null || null <= p.price_krw) return 0;
+    return Math.round((1 - p.price_krw / null) * 100);
   };
 
   return (
@@ -127,9 +127,9 @@ function ProductCard({ product: p, discount, onBuy, featured }: {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          {p.original_price_krw && p.original_price_krw > p.price_krw && (
+          {null && null > p.price_krw && (
             <div style={{ fontSize: 11, color: '#64748B', textDecoration: 'line-through', marginBottom: 2 }}>
-              {p.original_price_krw.toLocaleString()}원
+              {null.toLocaleString()}원
             </div>
           )}
           <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--kd-text)' }}>
