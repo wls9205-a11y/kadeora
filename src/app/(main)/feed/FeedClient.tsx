@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -110,14 +111,20 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                     (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
                   }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <div style={{
-                      width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                      background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 13, fontWeight: 700, color: 'white',
-                    }}>
-                      {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
-                    </div>
+                    {post.profiles?.avatar_url ? (
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
+                        <Image src={post.profiles.avatar_url} alt={post.profiles.nickname ?? '사용자'} fill sizes="32px" style={{ objectFit: 'cover' }} />
+                      </div>
+                    ) : (
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                        background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 13, fontWeight: 700, color: 'white',
+                      }}>
+                        {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
+                      </div>
+                    )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text)' }}>
