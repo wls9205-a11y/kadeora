@@ -78,6 +78,7 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
                 style={{
                   padding: '6px 12px', borderRadius: 8,
                   fontSize: 14, fontWeight: 500,
@@ -189,7 +190,7 @@ export function Navigation() {
         {NAV_ITEMS.map(item => {
           const active = isActive(item.href);
           return (
-            <Link key={item.href} href={item.href} style={{
+            <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               padding: '4px 0', textDecoration: 'none',
               color: active ? 'var(--kd-primary)' : '#64748B',

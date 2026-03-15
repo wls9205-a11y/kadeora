@@ -42,7 +42,6 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
     const prevLiked = liked;
     const prevCount = count;
 
-    // Optimistic update
     setLiked(!liked);
     setCount(c => liked ? c - 1 : c + 1);
 
@@ -58,7 +57,6 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
         await sb.from('posts').update({ likes_count: Math.max(0, count - 1) }).eq('id', postId);
       }
     } catch {
-      // Rollback
       setLiked(prevLiked);
       setCount(prevCount);
       error('오류가 발생했습니다');
@@ -71,18 +69,19 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
     <button
       onClick={toggle}
       disabled={loading}
+      aria-label={liked ? '좋아요 취소' : '좋아요'}
+      aria-pressed={liked}
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '8px 16px', borderRadius: 20,
-        background: liked ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)',
-        border: `1px solid ${liked ? 'rgba(239,68,68,0.4)' : '#1E293B'}`,
-        color: liked ? '#EF4444' : '#94A3B8',
-        cursor: 'pointer',
+        background: liked ? 'var(--kd-danger-dim)' : 'rgba(255,255,255,0.06)',
+        border: `1px solid ${liked ? 'rgba(239,68,68,0.4)' : 'var(--kd-border)'}`,
+        color: liked ? 'var(--kd-danger)' : 'var(--kd-text-muted)',
+        cursor: loading ? 'not-allowed' : 'pointer',
         transition: 'all 0.2s',
         fontSize: 14, fontWeight: 600,
         transform: loading ? 'scale(0.96)' : 'scale(1)',
       }}
-      aria-label={liked ? '좋아요 취소' : '좋아요'}
     >
       <span style={{
         fontSize: 18, lineHeight: 1,

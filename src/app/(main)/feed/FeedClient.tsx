@@ -63,7 +63,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
           padding: 6, border: '1px solid var(--kd-border)',
         }}>
           {categories.map(cat => (
-            <button key={cat.key}
+            <button key={cat.key} aria-pressed={activeCategory === cat.key}
               onClick={() => router.push(`/feed${cat.key !== 'all' ? `?category=${cat.key}` : ''}`)}
               style={{
                 flex: 1, padding: '8px 0', borderRadius: 8,
@@ -102,7 +102,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                   cursor: 'pointer', animationDelay: `${i * 30}ms`,
                 }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = '#334155';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border-hover)';
                     (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
                   }}
                   onMouseLeave={e => {
