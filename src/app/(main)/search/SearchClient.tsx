@@ -1,29 +1,183 @@
-﻿"use client";
-import { useState, useEffect, useCallback } from "react";
-import { createClient } from "@/lib/supabase-browser";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-const CAT_COLORS: Record<string,string> = { stock:"#3B82F6", apt:"#10B981", community:"#8B5CF6", free:"#F59E0B" };
-const CAT_LABELS: Record<string,string> = { stock:"주식", apt:"청약", community:"커뮤니티", free:"자유" };
-interface Post { id:number; title:string; content:string; category:string; view_count:number; likes_count:number; comments_count:number; created_at:string; profiles:{nickname:string}|null; }
-export default function SearchPage() {
+'use client';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import type { PostWithProfile } from '@/types/database';
+import { CATEGORY_MAP } from '@/lib/constants';
+
+function timeAgo(d: string) {
+  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+  if (m < 60) return `${m}분 전`;
+  if (m < 1440) return `${Math.floor(m / 60)}시간 전`;
+  return `${Math.floor(m / 1440)}일 전`;
+}
+
+function highlight(text: string, query: string) {
+  if (!query) return text;
+  const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+  return parts.map((p, i) =>
+    p.toLowerCase() === query.toLowerCase()
+      ? <mark key={i} style={{ background: 'rgba(59,130,246,0.3)', color: '#93C5FD', borderRadius: 2 }}>{p}</mark>
+      : p
+  );
+}
+
+export default function SearchClient() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("q")||"";
-  const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState<Post[]>([]);
+  const router = useRouter();
+  const initialQ = searchParams.get('q') ?? '';
+
+  const [query, setQuery] = useState(initialQ);
+  const [inputVal, setInputVal] = useState(initialQ);
+  const [results, setResults] = useState<PostWithProfile[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const doSearch = useCallback(async (q:string) => {
-    if (!q.trim()) return; setLoading(true); setSearched(true);
-    try { const supabase = createClient(); const { data } = await supabase.from("posts").select("id,title,content,category,view_count,likes_count,comments_count,created_at,profiles(nickname)").eq("is_deleted",false).or("title.ilike.%"+q+"%,content.ilike.%"+q+"%").order("created_at",{ascending:false}).limit(30); setResults((data||[]) as Post[]); } catch { setResults([]); } finally { setLoading(false); }
+  const [category, setCategory] = useState('all');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const doSearch = useCallback(async (q: string, cat: string, offset: number, append = false) => {
+    if (q.length < 2) { setResults([]); setTotal(0); return; }
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ q, category: cat, limit: '20', offset: String(offset * 20) });
+      const res = await fetch(`/api/search?${params}`);
+      const data = await res.json();
+      setResults(prev => append ? [...prev, ...(data.results ?? [])] : (data.results ?? []));
+      setTotal(data.total ?? 0);
+      setHasMore((data.results?.length ?? 0) === 20);
+    } finally {
+      setLoading(false);
+    }
   }, []);
-  useEffect(() => { if (initialQuery) doSearch(initialQuery); }, [initialQuery, doSearch]);
-  const handleSubmit = (e:React.FormEvent) => { e.preventDefault(); doSearch(query); };
+
+  // Debounced search on input
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setPage(0);
+      setResults([]);
+      doSearch(inputVal, category, 0);
+      setQuery(inputVal);
+      if (inputVal) router.replace(`/search?q=${encodeURIComponent(inputVal)}`, { scroll: false });
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [inputVal, category, doSearch, router]);
+
+  // Infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current || !hasMore) return;
+    const io = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && !loading) {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        doSearch(query, category, nextPage, true);
+      }
+    }, { threshold: 0.1 });
+    io.observe(loaderRef.current);
+    return () => io.disconnect();
+  }, [hasMore, loading, page, query, category, doSearch]);
+
   return (
-    <div className="pb-20">
-      <nav className="text-[11px] text-[#475569] mb-4"><Link href="/feed" className="text-[#3B82F6] no-underline hover:underline">피드</Link><span className="mx-1.5">/</span><span>검색</span></nav>
-      <h1 className="text-xl font-extrabold text-[#F1F5F9] m-0 mb-5">🔍 검색</h1>
-      <form onSubmit={handleSubmit} className="mb-6"><div className="flex gap-2"><input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색어를 입력하세요" className="flex-1 px-4 py-3 rounded-xl bg-[#111827] border border-[#1E293B] text-[14px] text-[#F1F5F9] placeholder:text-[#475569] outline-none focus:border-[#3B82F6]" /><button type="submit" disabled={loading||!query.trim()} className="px-5 py-3 rounded-xl bg-[#3B82F6] text-white text-[13px] font-bold border-none cursor-pointer disabled:opacity-40 hover:bg-[#2563EB]">{loading?"...":"검색"}</button></div></form>
-      {loading ? <div className="flex flex-col gap-2.5">{[1,2,3].map((i) => <div key={i} className="h-[100px] rounded-[14px] bg-[#111827] animate-pulse" />)}</div> : searched ? (results.length===0 ? <div className="text-center py-16 bg-[#111827] rounded-2xl border border-[#1E293B]"><div className="text-[40px] mb-3">🔍</div><p className="text-[#94A3B8] text-sm">검색 결과가 없습니다.</p></div> : <div><p className="text-[12px] text-[#64748B] mb-3">검색 결과 <span className="text-[#93C5FD] font-bold">{results.length}</span>건</p><div className="flex flex-col gap-2.5">{results.map((p) => { const cc=CAT_COLORS[p.category]||"#64748B"; return <Link key={p.id} href={"/feed/"+p.id} className="block rounded-[14px] bg-[#111827] border border-[#1E293B] p-4 no-underline hover:border-[#334155] transition-all"><div className="flex items-center gap-2 mb-1.5"><span className="px-2 py-0.5 rounded-lg text-[10px] font-bold" style={{background:cc+"15",color:cc}}>{CAT_LABELS[p.category]||p.category}</span><span className="text-[11px] text-[#475569]">{p.profiles?.nickname||"익명"}</span></div><h3 className="m-0 mb-1 text-[14px] font-bold text-[#F1F5F9]">{p.title}</h3><p className="m-0 text-[12px] text-[#94A3B8] line-clamp-2">{p.content.replace(/<[^>]*>/g,"").slice(0,120)}</p><div className="flex gap-3 mt-2 text-[11px] text-[#64748B]"><span>👁 {(p.view_count||0).toLocaleString()}</span><span>❤️ {p.likes_count||0}</span><span>💬 {p.comments_count||0}</span></div></Link>; })}</div></div>) : <div className="text-center py-16 text-[#475569] text-sm">키워드를 입력하고 검색해보세요.</div>}
-    </div>);
+    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: '#F1F5F9' }}>🔍 검색</h1>
+
+      {/* Search input */}
+      <div style={{ position: 'relative', marginBottom: 16 }}>
+        <input
+          type="text"
+          value={inputVal}
+          onChange={e => setInputVal(e.target.value)}
+          placeholder="검색어를 입력하세요 (2글자 이상)"
+          className="kd-input"
+          style={{ paddingLeft: 44, fontSize: 16, padding: '14px 14px 14px 44px' }}
+          autoFocus
+        />
+        <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 18, pointerEvents: 'none' }}>🔍</span>
+        {inputVal && (
+          <button
+            onClick={() => { setInputVal(''); setResults([]); setTotal(0); }}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 18 }}
+          >✕</button>
+        )}
+      </div>
+
+      {/* Category filter */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+        {[['all', '전체'], ['stock', '주식'], ['apt', '청약'], ['free', '자유']].map(([k, l]) => (
+          <button key={k} onClick={() => { setCategory(k); setPage(0); }}
+            style={{
+              padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              background: category === k ? '#3B82F6' : '#111827',
+              color: category === k ? 'white' : '#94A3B8',
+              border: `1px solid ${category === k ? '#3B82F6' : '#1E293B'}`,
+              transition: 'all 0.15s',
+            }}
+          >{l}</button>
+        ))}
+      </div>
+
+      {/* Results header */}
+      {query.length >= 2 && (
+        <div style={{ marginBottom: 14, fontSize: 13, color: '#94A3B8' }}>
+          {loading && results.length === 0
+            ? '검색 중...'
+            : total > 0
+              ? <><span style={{ color: '#F1F5F9', fontWeight: 700 }}>"{query}"</span> 검색 결과 <span style={{ color: '#3B82F6', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
+              : <><span style={{ color: '#F1F5F9', fontWeight: 700 }}>"{query}"</span>에 대한 검색 결과가 없습니다</>
+          }
+        </div>
+      )}
+
+      {/* Results */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {results.map(post => {
+          const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
+          return (
+            <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
+              <div style={{
+                background: '#111827', border: '1px solid #1E293B', borderRadius: 12, padding: '16px 18px',
+                transition: 'border-color 0.15s',
+              }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = '#334155')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = '#1E293B')}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                  <span style={{ fontSize: 12, color: '#64748B' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
+                </div>
+                <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: '#F1F5F9' }}>
+                  {highlight(post.title, query)}
+                </h3>
+                <p style={{ margin: '0 0 10px', fontSize: 13, color: '#94A3B8', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                  {highlight(post.content.slice(0, 200), query)}
+                </p>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#64748B' }}>
+                  <span>👁️ {post.view_count}</span>
+                  <span>❤️ {post.likes_count}</span>
+                  <span>💬 {post.comments_count}</span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Loader */}
+      {hasMore && <div ref={loaderRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 12 }}>
+        {loading && <div style={{ width: 24, height: 24, border: '2px solid #1E293B', borderTopColor: '#3B82F6', borderRadius: '50%' }} className="animate-spin" />}
+      </div>}
+
+      {/* Empty state */}
+      {query.length < 2 && (
+        <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748B' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>검색어를 입력해주세요</div>
+          <div style={{ fontSize: 13 }}>주식, 청약, 재테크 관련 글을 검색할 수 있습니다</div>
+        </div>
+      )}
+    </div>
+  );
 }
