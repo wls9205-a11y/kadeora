@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const ALLOWED_HOSTS = ['apis.data.go.kr', 'api.odcloud.kr'];
+const ALLOWED_HOSTS = ['api.odcloud.kr', 'apis.data.go.kr'];
 
 function isAllowedUrl(urlStr: string): boolean {
   try { const url = new URL(urlStr); return ALLOWED_HOSTS.includes(url.hostname); }
@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
     }
     if (action === 'sync') {
       const APT_API_KEY = process.env.APT_DATA_API_KEY;
-      if (!APT_API_KEY) return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY 필요' }, { status: 500 });
+      if (!APT_API_KEY) return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY ?꾩슂' }, { status: 500 });
       const apiUrl = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${encodeURIComponent(APT_API_KEY)}&pageNo=1&numOfRows=30&type=json`;
-      if (!isAllowedUrl(apiUrl.split('?')[0])) return NextResponse.json({ success: false, error: 'SSRF 차단' }, { status: 403 });
+      if (!isAllowedUrl(apiUrl.split('?')[0])) return NextResponse.json({ success: false, error: 'SSRF 李⑤떒' }, { status: 403 });
       const apiRes = await fetch(apiUrl, { next: { revalidate: 3600 } });
-      if (!apiRes.ok) return NextResponse.json({ success: false, error: `API 오류: ${apiRes.status}` }, { status: 502 });
+      if (!apiRes.ok) return NextResponse.json({ success: false, error: `API ?ㅻ쪟: ${apiRes.status}` }, { status: 502 });
       const json = await apiRes.json();
       const items = json?.response?.body?.items?.item || [];
       if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ success: true, synced: 0 });
