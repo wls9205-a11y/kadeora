@@ -1,7 +1,7 @@
+import ThemeToggle from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
 import { ToastProvider } from '@/components/Toast';
-import ThemeToggle from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
   title: { template: '%s | KADEORA', default: 'KADEORA - 吏꾩쭨 ?뺣낫媛 ?ㅺ???湲덉쑖 而ㅻ??덊떚' },
