@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({ request });
@@ -8,15 +9,16 @@ export async function middleware(request: NextRequest) {
   const csp = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' https://t1.kakaocdn.net https://developers.kakao.com`,
-    `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
+    `style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net`,
     `img-src 'self' data: blob: https://tezftxakuwhsclarprlz.supabase.co https://*.kakaocdn.net`,
     `font-src 'self' https://cdn.jsdelivr.net`,
-    `connect-src 'self' https://tezftxakuwhsclarprlz.supabase.co wss://tezftxakuwhsclarprlz.supabase.co https://api.tosspayments.com https://*.upstash.io`,
-    `frame-src https://api.tosspayments.com`,
+    `connect-src 'self' https://tezftxakuwhsclarprlz.supabase.co wss://tezftxakuwhsclarprlz.supabase.co https://api.tosspayments.com https://*.upstash.io https://*.vercel-insights.com https://va.vercel-scripts.com https://*.vercel-analytics.com`,
+    `frame-src https://api.tosspayments.com https://accounts.google.com https://kauth.kakao.com`,
     `frame-ancestors 'none'`,
     `form-action 'self'`,
     `base-uri 'self'`,
     `object-src 'none'`,
+    `upgrade-insecure-requests`,
   ].join("; ");
 
   response.headers.set("Content-Security-Policy", csp);
@@ -32,33 +34,33 @@ export async function middleware(request: NextRequest) {
     try {
       const parsed = new URL(targetUrl);
       if (!ALLOWED_DOMAINS.includes(parsed.hostname)) {
-        return NextResponse.json({ error: "Blocked" }, { status: 403 });
+        return NextResponse.json({ error: "Blocked: domain not in allowlist" }, { status: 403 });
+      }
+      const privatePatterns = /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|0\.|localhost|::1)/;
+      if (privatePatterns.test(parsed.hostname)) {
+        return NextResponse.json({ error: "Blocked: private IP" }, { status: 403 });
       }
     } catch {
       return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
     }
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return response;
-  }
-
   try {
-    const { createServerClient } = await import("@supabase/ssr");
-    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet: Array<{name: string; value: string; options: Record<string, unknown>}>) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value);
-            response.cookies.set(name, value, options);
-          });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => request.cookies.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value);
+              response.cookies.set(name, value, options);
+            });
+          },
         },
-      },
-    });
+      }
+    );
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -70,8 +72,8 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
-  } catch (err) {
-    console.error("[middleware] Auth check failed:", err);
+  } catch {
+    // Supabase env vars missing — skip auth
   }
 
   return response;
