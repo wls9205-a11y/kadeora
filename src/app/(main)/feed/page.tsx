@@ -8,7 +8,7 @@ import FeedClient from './FeedClient';
 const getPosts = unstable_cache(async (category: string) => {
   const sb = await createSupabaseServer();
   let q = sb.from('posts')
-    .select('*, profiles(id,nickname,avatar_url,grade)')
+    .select('*, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
     .limit(30);
