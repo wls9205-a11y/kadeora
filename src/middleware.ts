@@ -1,5 +1,3 @@
-const BOT_SCAN_PATHS = ['/wp-admin','/wp-login.php','/.env','/.git','/phpmyadmin'];
-
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
@@ -7,13 +5,15 @@ const PROTECTED_PATHS = ['/write', '/payment', '/profile', '/notifications', '/a
 const PUBLIC_PATHS = ['/login', '/auth', '/onboarding', '/terms', '/privacy', '/faq'];
 const PRIVATE_IP_REGEX = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|::1|localhost)/;
 const ALLOWED_APT_DOMAINS = ['applyhome.co.kr', 'land.naver.com', 'hogangnono.com'];
+const BOT_PATHS = ['/wp-admin', '/wp-login.php', '/.env', '/.git', '/phpmyadmin'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (BOT_SCAN_PATHS.some(p => pathname.startsWith(p))) return new NextResponse(null,{status:404});
+  if (BOT_PATHS.some(p => pathname.startsWith(p))) {
+    return new NextResponse(null, { status: 404 });
+  }
 
-  // SSRF 방어
   if (pathname.startsWith('/api/apt-proxy')) {
     const url = request.nextUrl.searchParams.get('url');
     if (url) {
@@ -46,49 +46,45 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  let session = null;
+  let user = null;
   try {
-    const { data } = await supabase.auth.getSession();
-    session = data.session;
-  } catch { /* ignore */ }
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch { }
 
-  // 보호??경로 ??비로그인 ??로그???�이지�?
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
-  if (isProtected && !session) {
+  if (isProtected && !user) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // ?�보??가????로그?�했지�??�보??미완�???
-  // (공개 경로, API, ?�보???�이지 ?�체???�외)
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p)) || pathname.startsWith('/api/') || pathname.startsWith('/_next/');
-  if (session && !isPublic && pathname !== '/onboarding') {
+  if (user && !isPublic && pathname !== '/onboarding') {
     try {
       const { data: profile } = await supabase
         .from('profiles')
         .select('onboarded, nickname_set')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
       if (profile && (!profile.onboarded || !profile.nickname_set)) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }
-    } catch { /* ignore, ?�로???�으�??�과 */ }
+    } catch { }
   }
 
-  // CSP ?�더
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
-    `default-src 'self'`,
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://js.tosspayments.com`,
-    `style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net`,
-    `img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://k.kakaocdn.net`,
-    `font-src 'self' https://cdn.jsdelivr.net`,
-    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://kauth.kakao.com https://accounts.google.com https://api.tosspayments.com`,
-    `frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com`,
-    `frame-ancestors 'none'`,
-    `base-uri 'self'`,
-    `form-action 'self' https://kauth.kakao.com https://accounts.google.com`,
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://js.tosspayments.com",
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+    "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://k.kakaocdn.net",
+    "font-src 'self' https://cdn.jsdelivr.net",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://kauth.kakao.com https://accounts.google.com https://api.tosspayments.com",
+    "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self' https://kauth.kakao.com https://accounts.google.com",
   ].join('; ');
 
   response.headers.set('Content-Security-Policy', csp);
