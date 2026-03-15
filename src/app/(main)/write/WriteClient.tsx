@@ -128,7 +128,7 @@ export default function WriteClient() {
                   flex: 1, padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
                   border: `2px solid ${category === cat.value ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
                   background: category === cat.value ? 'rgba(59,130,246,0.12)' : 'transparent',
-                  color: category === cat.value ? 'var(--kd-primary)' : '#94A3B8',
+                  color: category === cat.value ? 'var(--kd-primary)' : 'var(--kd-text-muted)',
                   fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
                 }}
               >

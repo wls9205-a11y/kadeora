@@ -106,7 +106,7 @@ export default function SearchClient() {
         {inputVal && (
           <button
             onClick={() => { setInputVal(''); setResults([]); setTotal(0); }}
-            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--kd-muted, #64748B)', cursor: 'pointer', fontSize: 18 }}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--kd-text-dim)', cursor: 'pointer', fontSize: 18 }}
           >✕</button>
         )}
       </div>
@@ -128,7 +128,7 @@ export default function SearchClient() {
 
       {/* Results header */}
       {query.length >= 2 && (
-        <div style={{ marginBottom: 14, fontSize: 13, color: 'var(--kd-text-muted, #94A3B8)' }}>
+        <div style={{ marginBottom: 14, fontSize: 13, color: 'var(--kd-text-muted)' }}>
           {loading && results.length === 0
             ? '검색 중...'
             : total > 0
@@ -153,15 +153,15 @@ export default function SearchClient() {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                  <span style={{ fontSize: 12, color: 'var(--kd-text-muted, #64748B)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
+                  <span style={{ fontSize: 12, color: 'var(--kd-text-dim)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
                 <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>
                   {highlight(post.title, query)}
                 </h3>
-                <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--kd-text-muted, #94A3B8)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                   {highlight(post.content.slice(0, 200), query)}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--kd-text-muted, #64748B)' }}>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--kd-text-dim)' }}>
                   <span>👁️ {post.view_count}</span>
                   <span>❤️ {post.likes_count}</span>
                   <span>💬 {post.comments_count}</span>
@@ -183,7 +183,7 @@ export default function SearchClient() {
 
       {/* Empty state */}
       {query.length < 2 && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-muted, #64748B)' }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
           <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, color: 'var(--kd-text)' }}>검색어를 입력해주세요</div>
           <div style={{ fontSize: 13 }}>주식, 청약, 재테크 관련 글을 검색할 수 있습니다</div>
