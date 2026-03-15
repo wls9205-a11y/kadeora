@@ -1,68 +1,117 @@
-﻿"use client";
+'use client';
+import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase-browser";
-import Link from "next/link";
-
-export function LoginClient() {
-  const router = useRouter();
+export default function LoginClient() {
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/feed";
-  const supabase = createClient();
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const redirect = searchParams.get('redirect') ?? '/feed';
+  const [loading, setLoading] = useState<'kakao' | 'google' | null>(null);
+  const [error, setError] = useState('');
 
-  const handleOAuth = async (provider: "kakao" | "google") => {
+  const login = async (provider: 'kakao' | 'google') => {
     setLoading(provider);
-    setError(null);
+    setError('');
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const sb = createSupabaseBrowser();
+      const { error: err } = await sb.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
         },
       });
-      if (error) throw error;
-    } catch (err) {
-      setError("로그인 중 오류가 발생했습니다. 다시 시도해주세요.");
+      if (err) throw err;
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : '로그인 중 오류가 발생했습니다');
       setLoading(null);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0A0E17] p-5">
-      <div className="max-w-[400px] w-full bg-[#111827] rounded-[20px] border border-[#1E293B] p-10 text-center">
-        <h1 className="text-[28px] font-black text-[#3B82F6] m-0 mb-1">카더라</h1>
-        <p className="text-xs text-[#64748B] m-0 mb-8">진짜 정보가 오가는 금융 커뮤니티</p>
+    <div style={{ width: '100%', maxWidth: 400 }}>
+      {/* Logo */}
+      <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{ fontSize: 36, fontWeight: 900, color: '#3B82F6', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
+          KADEORA
+        </div>
+        <p style={{ margin: 0, color: '#94A3B8', fontSize: 14 }}>진짜 정보가 오가는 금융 커뮤니티</p>
+      </div>
+
+      {/* Card */}
+      <div style={{ background: '#111827', border: '1px solid #1E293B', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: '#F1F5F9', textAlign: 'center' }}>
+          로그인
+        </h2>
+        <p style={{ margin: '0 0 32px', color: '#64748B', fontSize: 13, textAlign: 'center', lineHeight: 1.5 }}>
+          소셜 계정으로 간편하게 시작하세요
+        </p>
+
+        {/* Kakao */}
+        <button
+          onClick={() => login('kakao')}
+          disabled={!!loading}
+          style={{
+            width: '100%', padding: '14px 20px', marginBottom: 12,
+            borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
+            background: '#FEE500', color: '#191919',
+            fontWeight: 700, fontSize: 15,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            opacity: loading === 'google' ? 0.5 : 1,
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => !loading && ((e.currentTarget as HTMLElement).style.background = '#F5DD00')}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#FEE500'}
+        >
+          {loading === 'kakao' ? (
+            <div style={{ width: 20, height: 20, border: '2px solid #191919', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 512 512" fill="#191919">
+              <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z"/>
+            </svg>
+          )}
+          {loading === 'kakao' ? '로그인 중...' : '카카오로 계속하기'}
+        </button>
+
+        {/* Google */}
+        <button
+          onClick={() => login('google')}
+          disabled={!!loading}
+          style={{
+            width: '100%', padding: '14px 20px',
+            borderRadius: 12, border: '1px solid #334155', cursor: loading ? 'not-allowed' : 'pointer',
+            background: '#1a2234', color: '#F1F5F9',
+            fontWeight: 700, fontSize: 15,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            opacity: loading === 'kakao' ? 0.5 : 1,
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => !loading && ((e.currentTarget as HTMLElement).style.background = '#243044')}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#1a2234'}
+        >
+          {loading === 'google' ? (
+            <div style={{ width: 20, height: 20, border: '2px solid #F1F5F9', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+          )}
+          {loading === 'google' ? '로그인 중...' : 'Google로 계속하기'}
+        </button>
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-xl bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] text-[#FCA5A5] text-[13px]">
+          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: 13 }}>
             ⚠️ {error}
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={() => handleOAuth("kakao")}
-            disabled={loading !== null}
-            className="w-full py-3.5 rounded-xl border-none cursor-pointer bg-[#FEE500] text-[#000] text-sm font-bold disabled:opacity-50 hover:bg-[#F5DC00] transition-colors"
-          >
-            {loading === "kakao" ? "연결 중..." : "🗨️ 카카오로 시작하기"}
-          </button>
-          <button
-            onClick={() => handleOAuth("google")}
-            disabled={loading !== null}
-            className="w-full py-3.5 rounded-xl border border-[#334155] cursor-pointer bg-transparent text-[#E2E8F0] text-sm font-bold disabled:opacity-50 hover:bg-[rgba(255,255,255,0.03)] hover:border-[#475569] transition-colors"
-          >
-            {loading === "google" ? "연결 중..." : "G 구글로 시작하기"}
-          </button>
-        </div>
-
-        <p className="text-[11px] text-[#475569] mt-6 leading-relaxed">
-          시작하면{" "}
-          <Link href="/terms" className="text-[#3B82F6] hover:underline">이용약관</Link> 및{" "}
-          <Link href="/privacy" className="text-[#3B82F6] hover:underline">개인정보처리방침</Link>에 동의하게 됩니다.
+        <p style={{ margin: '24px 0 0', fontSize: 11, color: '#475569', textAlign: 'center', lineHeight: 1.6 }}>
+          로그인 시{' '}
+          <a href="/terms" style={{ color: '#3B82F6', textDecoration: 'none' }}>이용약관</a>
+          {' '}및{' '}
+          <a href="/privacy" style={{ color: '#3B82F6', textDecoration: 'none' }}>개인정보처리방침</a>에 동의하게 됩니다
         </p>
       </div>
     </div>
