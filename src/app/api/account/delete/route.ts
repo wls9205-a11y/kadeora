@@ -1,8 +1,8 @@
 import{NextRequest,NextResponse}from'next/server'
-import{createClient}from'@/lib/supabase-server'
+import{createSupabaseServer}from'@/lib/supabase-server'
 import{createClient as admin}from'@supabase/supabase-js'
 export async function DELETE(request:NextRequest){
-  const supabase=await createClient()
+  const supabase=await createSupabaseServer()
   const{data:{user},error:ae}=await supabase.auth.getUser()
   if(ae||!user) return NextResponse.json({error:'로그인이 필요합니다.'},{status:401})
   let body:{confirm?:string}={}
