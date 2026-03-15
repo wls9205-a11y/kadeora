@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { createBrowserClient } from '@/lib/supabase-browser';
+const createBrowserSupabaseClient = createBrowserClient;
 
 type PaymentStep = 'select' | 'confirm' | 'processing' | 'success' | 'fail';
 interface Product { id: string; name: string; description: string; price_krw: number; icon: string; is_active: boolean; }
