@@ -1,25 +1,24 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
-const PROTECTED_PATHS = ['/write', '/payment', '/profile'];
+const PROTECTED_PATHS = ['/write', '/payment', '/profile', '/notifications'];
+const PUBLIC_PATHS = ['/login', '/auth', '/onboarding', '/terms', '/privacy', '/faq'];
 const PRIVATE_IP_REGEX = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|::1|localhost)/;
 const ALLOWED_APT_DOMAINS = ['applyhome.co.kr', 'land.naver.com', 'hogangnono.com'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // SSRF 방어
   if (pathname.startsWith('/api/apt-proxy')) {
     const url = request.nextUrl.searchParams.get('url');
     if (url) {
       try {
         const parsed = new URL(url);
-        if (PRIVATE_IP_REGEX.test(parsed.hostname)) {
+        if (PRIVATE_IP_REGEX.test(parsed.hostname))
           return NextResponse.json({ error: 'SSRF blocked' }, { status: 403 });
-        }
-        const allowed = ALLOWED_APT_DOMAINS.some(d => parsed.hostname.endsWith(d));
-        if (!allowed) {
+        if (!ALLOWED_APT_DOMAINS.some(d => parsed.hostname.endsWith(d)))
           return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
-        }
       } catch {
         return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
       }
@@ -37,9 +36,7 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
         },
       },
     }
@@ -49,10 +46,9 @@ export async function middleware(request: NextRequest) {
   try {
     const { data } = await supabase.auth.getSession();
     session = data.session;
-  } catch {
-    // ignore
-  }
+  } catch { /* ignore */ }
 
+  // 보호된 경로 — 비로그인 시 로그인 페이지로
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
   if (isProtected && !session) {
     const loginUrl = new URL('/login', request.url);
@@ -60,6 +56,23 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // 온보딩 가드 — 로그인했지만 온보딩 미완료 시
+  // (공개 경로, API, 온보딩 페이지 자체는 제외)
+  const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p)) || pathname.startsWith('/api/') || pathname.startsWith('/_next/');
+  if (session && !isPublic && pathname !== '/onboarding') {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarded, nickname_set')
+        .eq('id', session.user.id)
+        .single();
+      if (profile && (!profile.onboarded || !profile.nickname_set)) {
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      }
+    } catch { /* ignore, 프로필 없으면 통과 */ }
+  }
+
+  // CSP 헤더
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
     `default-src 'self'`,
@@ -76,12 +89,9 @@ export async function middleware(request: NextRequest) {
 
   response.headers.set('Content-Security-Policy', csp);
   response.headers.set('x-nonce', nonce);
-
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };
