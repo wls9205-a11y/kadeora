@@ -22,20 +22,20 @@ export async function DELETE(
 ) {
   try {
     const user = await getUser();
-    if (!user) return NextResponse.json({ success: false, error: '로그인 필요' }, { status: 401 });
+    if (!user) return NextResponse.json({ success: false, error: 'Login required' }, { status: 401 });
     const { id } = await params;
-    if (!id) return NextResponse.json({ success: false, error: '댓글 ID 필요' }, { status: 400 });
+    if (!id) return NextResponse.json({ success: false, error: 'Comment ID required' }, { status: 400 });
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     const { data: comment, error: fetchError } = await supabase.from('comments').select('id, author_id, post_id').eq('id', id).eq('is_deleted', false).single();
-    if (fetchError || !comment) return NextResponse.json({ success: false, error: '댓글 없음' }, { status: 404 });
-    if (comment.author_id !== user.id) return NextResponse.json({ success: false, error: '본인만 삭제 가능' }, { status: 403 });
+    if (fetchError || !comment) return NextResponse.json({ success: false, error: 'Comment not found' }, { status: 404 });
+    if (comment.author_id !== user.id) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
     await supabase.from('comments').update({ is_deleted: true }).eq('id', id);
     const { data: post } = await supabase.from('posts').select('comments_count').eq('id', comment.post_id).single();
     if (post && post.comments_count > 0) {
       await supabase.from('posts').update({ comments_count: post.comments_count - 1 }).eq('id', comment.post_id);
     }
-    return NextResponse.json({ success: true, message: '댓글 삭제 완료' });
+    return NextResponse.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : '서버 오류' }, { status: 500 });
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Server error' }, { status: 500 });
   }
 }
