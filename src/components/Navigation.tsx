@@ -3,15 +3,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import ThemeToggle from '@/components/ThemeToggle';
 import type { User } from '@supabase/supabase-js';
 
 const NAV_ITEMS = [
-  { href: '/feed', label: '?쇰뱶', icon: '?벐' },
-  { href: '/stock', label: '二쇱떇', icon: '?뱢' },
-  { href: '/apt', label: '泥?빟', icon: '?룧' },
-  { href: '/discuss', label: '?좊줎', icon: '?뮠' },
-  { href: '/shop/megaphone', label: '?곸젏', icon: '?썟' },
+  { href: '/feed', label: '피드', icon: '📰' },
+  { href: '/stock', label: '주식', icon: '📈' },
+  { href: '/apt', label: '청약', icon: '🏠' },
+  { href: '/discuss', label: '토론', icon: '💬' },
+  { href: '/shop/megaphone', label: '상점', icon: '🛒' },
 ];
 
 export function Navigation() {
@@ -99,7 +98,7 @@ export function Navigation() {
               borderRadius: 8, background: 'transparent', color: '#94A3B8',
               textDecoration: 'none', fontSize: 16,
               transition: 'all 0.15s',
-            }} aria-label="寃??>?뵇</Link>
+            }} aria-label="검색">🔍</Link>
 
             {user ? (
               <>
@@ -107,12 +106,12 @@ export function Navigation() {
                   width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: 8, background: 'transparent', color: '#94A3B8',
                   textDecoration: 'none', fontSize: 16,
-                }} aria-label="?뚮┝">?뵒</Link>
+                }} aria-label="알림">🔔</Link>
                 <Link href="/write" style={{
                   padding: '6px 14px', borderRadius: 8,
                   background: '#3B82F6', color: 'white',
                   textDecoration: 'none', fontSize: 13, fontWeight: 600,
-                }}>?륅툘 湲?곌린</Link>
+                }}>✏️ 글쓰기</Link>
                 <div style={{ position: 'relative' }}>
                   <button
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -130,8 +129,8 @@ export function Navigation() {
                     }}>
                       {(nickname ?? user.email ?? 'U')[0].toUpperCase()}
                     </span>
-                    <span className="hidden md:inline">{nickname ?? '??}</span>
-                    <span style={{ fontSize: 10 }}>??/span>
+                    <span className="hidden md:inline">{nickname ?? '나'}</span>
+                    <span style={{ fontSize: 10 }}>▼</span>
                   </button>
                   {menuOpen && (
                     <div style={{
@@ -146,7 +145,7 @@ export function Navigation() {
                       }}
                         onMouseEnter={e => (e.currentTarget.style.background = '#1a2234')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                      >?뫀 ?꾨줈??/Link>
+                      >👤 프로필</Link>
                       <button onClick={handleLogout} style={{
                         display: 'block', width: '100%', padding: '10px 14px',
                         color: '#EF4444', fontSize: 14, background: 'transparent',
@@ -155,7 +154,7 @@ export function Navigation() {
                       }}
                         onMouseEnter={e => (e.currentTarget.style.background = '#1a2234')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                      >?슞 濡쒓렇?꾩썐</button>
+                      >🚪 로그아웃</button>
                     </div>
                   )}
                 </div>
@@ -165,11 +164,10 @@ export function Navigation() {
                 padding: '6px 16px', borderRadius: 8,
                 background: '#3B82F6', color: 'white',
                 textDecoration: 'none', fontSize: 13, fontWeight: 600,
-              }}>濡쒓렇??/Link>
+              }}>로그인</Link>
             )}
           </div>
         </div>
-      <ThemeToggle />
       </header>
 
       {/* Mobile Bottom Nav */}
