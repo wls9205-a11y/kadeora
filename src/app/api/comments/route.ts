@@ -1,47 +1,17 @@
+﻿import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { sanitizePlainText } from "@/lib/sanitize";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { parseInput, CommentCreateSchema } from "@/lib/schemas";
-import { createAppError, logError, errorResponse } from "@/lib/errors";
-
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for") || "unknown";
-  const { allowed } = await checkRateLimit("api", ip);
-  if (!allowed) {
-    const err = createAppError("RATE_LIMITED");
-    return NextResponse.json(errorResponse(err).error, { status: err.statusCode });
-  }
-
   try {
     const supabase = await createServerSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      const err = createAppError("AUTH_REQUIRED");
-      return NextResponse.json(errorResponse(err).error, { status: err.statusCode });
-    }
-
+    const { data:{user} } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error:"로그인이 필요합니다." }, { status:401 });
     const body = await request.json();
-    const parsed = parseInput(CommentCreateSchema, body);
-    if (!parsed.success) {
-      const err = createAppError("VALIDATION_ERROR", { errors: parsed.errors });
-      return NextResponse.json({ ...errorResponse(err).error, details: parsed.errors }, { status: err.statusCode });
-    }
-
-    const content = sanitizePlainText(parsed.data.content).trim();
-
-    const { data, error } = await supabase.from("comments").insert({
-      post_id: parsed.data.postId,
-      author_id: user.id,
-      content,
-      parent_id: parsed.data.parentId || null,
-    }).select("*").single();
-
-    if (error) throw error;
-    return NextResponse.json({ comment: data });
-  } catch (err) {
-    logError(err, { route: "POST /api/comments" });
-    const appErr = createAppError("DB_ERROR");
-    return NextResponse.json(errorResponse(appErr).error, { status: appErr.statusCode });
-  }
+    const { post_id, content } = body;
+    if (!post_id||!content?.trim()) return NextResponse.json({ error:"내용을 입력해주세요." }, { status:400 });
+    const { data:comment, error:e } = await supabase.from("comments").insert({ post_id, user_id:user.id, content:content.trim(), is_deleted:false }).select("id,content,created_at,profiles(nickname,avatar_url)").single();
+    if (e) return NextResponse.json({ error:"댓글 작성 실패" }, { status:500 });
+    const { data:cur } = await supabase.from("posts").select("comments_count").eq("id",post_id).single();
+    if (cur) await supabase.from("posts").update({ comments_count:(cur.comments_count||0)+1 }).eq("id",post_id);
+    return NextResponse.json({ data:comment }, { status:201 });
+  } catch { return NextResponse.json({ error:"서버 오류" }, { status:500 }); }
 }

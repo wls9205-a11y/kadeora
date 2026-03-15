@@ -1,265 +1,39 @@
-"use client";
-
-import { useState, useRef } from "react";
+﻿"use client";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
-import { sanitizePlainText } from "@/lib/sanitize";
-
-const CATEGORIES = [
-  { value: "stock", label: "주식", icon: "📈" },
-  { value: "apt", label: "청약/부동산", icon: "🏢" },
-  { value: "community", label: "커뮤니티", icon: "👥" },
-  { value: "free", label: "자유", icon: "💭" },
-  { value: "bug", label: "버그 제보", icon: "🐛" },
-];
-
-const MAX_TITLE = 100;
-const MAX_CONTENT = 5000;
-const MAX_IMAGES = 5;
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB — 보안팀 피드백
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-
+import Link from "next/link";
+const CATEGORIES = [{ value: "stock", label: "주식", icon: "📈" },{ value: "apt", label: "청약", icon: "🏢" },{ value: "community", label: "커뮤니티", icon: "💬" },{ value: "free", label: "자유", icon: "✏️" }];
 export function WriteClient() {
   const router = useRouter();
   const supabase = createClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [category, setCategory] = useState("free");
+  const [user, setUser] = useState<{ id: string }|null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [images, setImages] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setError(null);
-
-    for (const file of files) {
-      // ✅ 보안팀: 파일 유형 + 크기 검증
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        setError("이미지 파일만 업로드 가능합니다 (JPG, PNG, GIF, WebP)");
-        return;
-      }
-      if (file.size > MAX_IMAGE_SIZE) {
-        setError("이미지 크기는 10MB 이하만 가능합니다");
-        return;
-      }
-    }
-
-    if (images.length + files.length > MAX_IMAGES) {
-      setError(`이미지는 최대 ${MAX_IMAGES}장까지 첨부 가능합니다`);
-      return;
-    }
-
-    setImages((prev) => [...prev, ...files]);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviews((prev) => [...prev, e.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
-  };
-
+  const [error, setError] = useState<string|null>(null);
+  useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { setUser(user ? { id: user.id } : null); setAuthLoading(false); }); }, []);
+  if (authLoading) return <div className="text-center py-16 text-[#64748B]">인증 확인 중...</div>;
+  if (!user) return (<div className="max-w-[640px] mx-auto pb-20"><div className="text-center py-16 bg-[#111827] rounded-2xl border border-[#1E293B]"><div className="text-[48px] mb-4">🔒</div><h2 className="text-lg font-bold text-[#F1F5F9] mb-2">로그인이 필요합니다</h2><p className="text-[13px] text-[#64748B] mb-6">글을 작성하려면 먼저 로그인해주세요.</p><Link href="/login?redirect=/write" className="inline-block px-6 py-2.5 rounded-lg bg-[#3B82F6] text-white no-underline text-[13px] font-bold hover:bg-[#2563EB]">로그인하러 가기</Link></div></div>);
   const handleSubmit = async () => {
-    setError(null);
-
-    // Validation
-    const cleanTitle = sanitizePlainText(title).trim();
-    const cleanContent = sanitizePlainText(content).trim();
-
-    if (!cleanTitle) { setError("제목을 입력하세요"); return; }
-    if (cleanTitle.length > MAX_TITLE) { setError(`제목은 ${MAX_TITLE}자 이하로 입력하세요`); return; }
-    if (!cleanContent) { setError("내용을 입력하세요"); return; }
-    if (cleanContent.length > MAX_CONTENT) { setError(`내용은 ${MAX_CONTENT}자 이하로 입력하세요`); return; }
-
-    setSubmitting(true);
-
+    if (!category||!title.trim()||!content.trim()) { setError("카테고리, 제목, 내용을 모두 입력해주세요."); return; }
+    setSubmitting(true); setError(null);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
-
-      // Upload images
-      const imageUrls: string[] = [];
-      for (const image of images) {
-        const ext = image.name.split(".").pop();
-        const path = `posts/${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: uploadError } = await supabase.storage.from("images").upload(path, image);
-        if (!uploadError) {
-          const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(path);
-          imageUrls.push(publicUrl);
-        }
-      }
-
-      // Insert post
-      const { data, error: insertError } = await supabase.from("posts").insert({
-        author_id: user.id,
-        title: cleanTitle,
-        content: cleanContent,
-        category: category,
-        region_id: "",
-        images: imageUrls.length > 0 ? imageUrls : [],
-      }).select("id").single();
-
-      if (insertError) throw insertError;
-      router.push(`/feed/${data.id}`);
-    } catch (err) {
-      setError("게시글 등록에 실패했습니다. 다시 시도해주세요.");
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
+      const { data, error: e } = await supabase.from("posts").insert({ user_id: user.id, category, title: title.trim(), content: content.trim(), view_count: 0, likes_count: 0, comments_count: 0, is_deleted: false }).select("id").single();
+      if (e) throw e;
+      if (data) router.push("/feed/"+data.id);
+    } catch { setError("게시글 작성에 실패했습니다."); setSubmitting(false); }
   };
-
   return (
-    <div style={{ maxWidth: 680, margin: "0 auto", paddingBottom: 100 }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 24, color: "#F1F5F9" }}>
-        ✏️ 새 글 작성
-      </h1>
-
-      {/* Category */}
-      <div style={{ marginBottom: 20 }}>
-        <label style={{ fontSize: 12, fontWeight: 700, color: "#94A3B8", marginBottom: 8, display: "block" }}>
-          카테고리
-        </label>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => setCategory(cat.value)}
-              style={{
-                padding: "8px 16px", borderRadius: 10,
-                border: `1px solid ${category === cat.value ? "#3B82F6" : "#1E293B"}`,
-                background: category === cat.value ? "rgba(59,130,246,0.12)" : "var(--kd-surface)",
-                color: category === cat.value ? "#93C5FD" : "#94A3B8",
-                fontSize: 13, fontWeight: 600, cursor: "pointer",
-              }}
-            >
-              {cat.icon} {cat.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Title */}
-      <div style={{ marginBottom: 16 }}>
-        <input
-          type="text"
-          placeholder="제목을 입력하세요"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          maxLength={MAX_TITLE}
-          style={{
-            width: "100%", padding: "14px 18px", borderRadius: 12,
-            border: "1px solid var(--kd-border)", background: "var(--kd-surface)",
-            color: "#F1F5F9", fontSize: 16, fontWeight: 700, outline: "none",
-          }}
-        />
-        <div style={{ textAlign: "right", fontSize: 11, color: "#475569", marginTop: 4 }}>
-          {title.length}/{MAX_TITLE}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div style={{ marginBottom: 16 }}>
-        <textarea
-          placeholder="내용을 입력하세요..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          maxLength={MAX_CONTENT}
-          rows={12}
-          style={{
-            width: "100%", padding: "14px 18px", borderRadius: 12,
-            border: "1px solid var(--kd-border)", background: "var(--kd-surface)",
-            color: "#F1F5F9", fontSize: 14, lineHeight: 1.7, outline: "none",
-            resize: "vertical", minHeight: 200,
-          }}
-        />
-        <div style={{ textAlign: "right", fontSize: 11, color: "#475569", marginTop: 4 }}>
-          {content.length}/{MAX_CONTENT}
-        </div>
-      </div>
-
-      {/* Image Upload */}
-      <div style={{ marginBottom: 20 }}>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={ALLOWED_TYPES.join(",")}
-          multiple
-          onChange={handleImageAdd}
-          style={{ display: "none" }}
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={images.length >= MAX_IMAGES}
-          style={{
-            padding: "10px 18px", borderRadius: 10,
-            border: "1px dashed #334155", background: "transparent",
-            color: "#64748B", fontSize: 13, cursor: "pointer",
-          }}
-        >
-          📷 이미지 첨부 ({images.length}/{MAX_IMAGES})
-        </button>
-
-        {previews.length > 0 && (
-          <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
-            {previews.map((src, i) => (
-              <div key={i} style={{ position: "relative" }}>
-                <img
-                  src={src}
-                  alt={`미리보기 ${i + 1}`}
-                  style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", border: "1px solid #1E293B" }}
-                />
-                <button
-                  onClick={() => removeImage(i)}
-                  style={{
-                    position: "absolute", top: -6, right: -6,
-                    width: 20, height: 20, borderRadius: "50%",
-                    background: "#EF4444", border: "none", color: "#FFF",
-                    fontSize: 10, cursor: "pointer", display: "flex",
-                    alignItems: "center", justifyContent: "center",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div style={{
-          padding: "12px 16px", borderRadius: 10, marginBottom: 16,
-          background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)",
-          color: "#FCA5A5", fontSize: 13,
-        }}>
-          ⚠️ {error}
-        </div>
-      )}
-
-      {/* Submit */}
-      <button
-        onClick={handleSubmit}
-        disabled={submitting || !title.trim() || !content.trim()}
-        style={{
-          width: "100%", padding: "14px", borderRadius: 12, border: "none",
-          background: submitting ? "#1E3A5F" : "#3B82F6",
-          color: "#FFF", fontSize: 15, fontWeight: 800, cursor: submitting ? "not-allowed" : "pointer",
-          opacity: !title.trim() || !content.trim() ? 0.5 : 1,
-        }}
-      >
-        {submitting ? "등록 중..." : "게시하기"}
-      </button>
-    </div>
-  );
+    <div className="max-w-[640px] mx-auto pb-20">
+      <nav className="text-[11px] text-[#475569] mb-4"><Link href="/feed" className="text-[#3B82F6] no-underline hover:underline">피드</Link><span className="mx-1.5">/</span><span>글쓰기</span></nav>
+      <h1 className="text-xl font-extrabold text-[#F1F5F9] m-0 mb-5">✏️ 새 글 작성</h1>
+      <div className="mb-5"><label className="block text-[13px] font-semibold text-[#94A3B8] mb-2">카테고리</label><div className="flex gap-2 flex-wrap">{CATEGORIES.map((cat) => (<button key={cat.value} onClick={() => setCategory(cat.value)} className={`px-4 py-2 rounded-xl text-[13px] font-semibold border transition-all cursor-pointer bg-transparent ${category === cat.value ? "border-[#3B82F6] bg-[rgba(59,130,246,0.1)] text-[#93C5FD]" : "border-[#1E293B] text-[#64748B]"}`}>{cat.icon} {cat.label}</button>))}</div></div>
+      <div className="mb-5"><label className="block text-[13px] font-semibold text-[#94A3B8] mb-2">제목</label><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목을 입력하세요" maxLength={100} className="w-full px-4 py-3 rounded-xl bg-[#111827] border border-[#1E293B] text-[15px] text-[#F1F5F9] placeholder:text-[#475569] outline-none focus:border-[#3B82F6]" /><div className="text-right text-[11px] text-[#475569] mt-1">{title.length}/100</div></div>
+      <div className="mb-5"><label className="block text-[13px] font-semibold text-[#94A3B8] mb-2">내용</label><textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="내용을 입력하세요..." maxLength={5000} rows={12} className="w-full px-4 py-3 rounded-xl bg-[#111827] border border-[#1E293B] text-[14px] text-[#E2E8F0] placeholder:text-[#475569] outline-none resize-y focus:border-[#3B82F6] leading-[1.8]" /><div className="text-right text-[11px] text-[#475569] mt-1">{content.length}/5000</div></div>
+      {error && <div className="mb-4 px-4 py-3 rounded-xl bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] text-[#FCA5A5] text-[13px]">⚠️ {error}</div>}
+      <div className="flex gap-3"><Link href="/feed" className="px-6 py-3 rounded-xl border border-[#334155] text-[#94A3B8] no-underline text-[13px] font-semibold">취소</Link><button onClick={handleSubmit} disabled={submitting||!category||!title.trim()||!content.trim()} className="flex-1 py-3 rounded-xl bg-[#3B82F6] text-white text-[14px] font-bold border-none cursor-pointer disabled:opacity-40 hover:bg-[#2563EB]">{submitting ? "등록 중..." : "게시글 등록"}</button></div>
+    </div>);
 }

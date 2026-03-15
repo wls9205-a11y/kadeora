@@ -17,58 +17,18 @@
   --kd-danger: #EF4444;
   --kd-warning: #F59E0B;
 }
-
 * { box-sizing: border-box; }
 html { color-scheme: dark; }
-
-body {
-  margin: 0;
-  background: var(--kd-bg);
-  color: var(--kd-text);
-  font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  line-height: 1.6;
-}
-
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--kd-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--kd-text-muted); }
-
-::selection { background: rgba(59, 130, 246, 0.3); color: white; }
-
-:focus-visible { outline: 2px solid var(--kd-primary); outline-offset: 2px; }
-
-a { color: inherit; }
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-none::-webkit-scrollbar { display: none; }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+body { margin:0; background:var(--kd-bg); color:var(--kd-text); font-family:'Pretendard Variable',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; -webkit-font-smoothing:antialiased; line-height:1.6; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--kd-border); border-radius:3px; }
+::selection { background:rgba(59,130,246,0.3); color:white; }
+:focus-visible { outline:2px solid var(--kd-primary); outline-offset:2px; }
+a { color:inherit; }
+.line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.scrollbar-none { -ms-overflow-style:none; scrollbar-width:none; }
+.scrollbar-none::-webkit-scrollbar { display:none; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.animate-fadeIn { animation:fadeIn 0.3s ease-out; }
