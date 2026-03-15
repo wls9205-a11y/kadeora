@@ -1,4 +1,5 @@
 'use client';
+import { StockDataNotice } from '@/components/ComingSoonBanner';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import type { StockQuote } from '@/types/database';
@@ -30,6 +31,7 @@ export default function StockClient({ initialStocks, isDemo }: { initialStocks: 
 
   return (
     <div>
+      <StockDataNotice updatedAt={stocks[0]?.updated_at} />
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20,flexWrap:'wrap',gap:10}}>
         <h1 style={{margin:0,fontSize:22,fontWeight:800,color:'var(--kd-text)'}}>📈 실시간 주식 시세</h1>
         {isDemo && <span style={{fontSize:12,padding:'4px 10px',borderRadius:999,background:'rgba(59,130,246,0.1)',color:'var(--kd-primary)',border:'1px solid rgba(59,130,246,0.3)'}}>💡 미리보기</span>}

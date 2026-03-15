@@ -1,4 +1,5 @@
 'use client';
+import ComingSoonBanner from '@/components/ComingSoonBanner';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { ConfirmModal } from '@/components/ConfirmModal';
@@ -73,6 +74,7 @@ export default function ShopClient() {
 
   return (
     <div>
+      <ComingSoonBanner feature="토스페이먼츠 결제" description="사업자 등록 심사 완료 후 즉시 활성화됩니다." eta="2026년 4월 예정" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🛒 커뮤니티 상점</h1>

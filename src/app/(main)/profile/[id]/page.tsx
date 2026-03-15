@@ -1,6 +1,7 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import ProfileClient from './ProfileClient';
+import DeleteAccountSection from '@/components/DeleteAccountSection';
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -42,5 +43,6 @@ export default async function ProfilePage({ params }: Props) {
       followingCount={followingCount ?? 0}
       isFollowing={!!(followCheck as { data: unknown }).data}
     />
+      {isOwner && <DeleteAccountSection />}
   );
 }
