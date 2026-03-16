@@ -52,7 +52,7 @@ function PostCard({ post, onLike, variant = "default", showAuthor = true }: Post
   const displayName = post.is_anonymous ? "\uC775\uBA85" : post.author?.nickname || "\uC0AC\uC6A9\uC790";
 
   return (
-    <Link href={`/feed/${post.id}`} className="kd-post-card" style={{ display: "block", textDecoration: "none", color: "inherit", padding: isCompact ? "12px 16px" : "16px 20px", borderRadius: "12px", backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "8px", transition: "background-color 0.15s, box-shadow 0.15s, border-color 0.15s" }}>
+    <Link href={`/feed/${post.id}`} className="kd-post-card" style={{ display: "block", textDecoration: "none", color: "inherit", padding: isCompact ? "12px 16px" : "16px 20px", borderRadius: "4px", backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "8px", transition: "background-color 0.15s, box-shadow 0.15s, border-color 0.15s" }}>
       {showAuthor && (
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
           {post.author?.avatar_url && !post.is_anonymous ? (

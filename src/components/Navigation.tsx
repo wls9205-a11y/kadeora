@@ -106,7 +106,7 @@ export function Navigation() {
           <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:7, textDecoration:'none', flexShrink:0, marginRight:4 }}>
             <MonkeyLogo size={30} />
             <span style={{ fontWeight:800, fontSize:17, color:'var(--brand)', letterSpacing:-0.5 }} className="hidden md:inline">
-              kadeora
+              카더라
             </span>
             <span className="hidden lg:inline" style={{ fontSize:11, fontWeight:600, color:'var(--text-tertiary)', background:'var(--bg-hover)', padding:'2px 8px', borderRadius:999, marginLeft:4 }}>
               소리소문 정보

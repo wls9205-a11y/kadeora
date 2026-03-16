@@ -384,6 +384,6 @@ button:active,
    모바일
    ======================================== */
 @media (max-width: 640px) {
-  body { font-size: 15px; }
+  body { font-size: 14px; }
   .main-content { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 }

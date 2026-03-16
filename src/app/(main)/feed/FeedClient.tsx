@@ -152,14 +152,14 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
           <div style={{ background: 'var(--brand)', height: 56, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8 }}>
             {LOGO_SVG}
-            <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-inverse, #fff)', letterSpacing: -0.5 }}>kadeora</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-inverse, #fff)', letterSpacing: -0.5 }}>카더라</span>
           </div>
           <div style={{ padding: '32px 12px 12px', position: 'relative' }}>
             <div style={{ position: 'absolute', top: -22, left: 12, width: 44, height: 44, borderRadius: '50%', border: '3px solid var(--bg-surface)', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {LOGO_SVG}
             </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>r/kadeora</div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 10 }}>대한민국 No.1 커뮤니티 — 주식, 부동산, 청약, 자유게시판</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>카더라 커뮤니티</div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 10 }}>대한민국 소리소문 정보 커뮤니티</div>
             <div style={{ display: 'flex', gap: 14, marginBottom: 10 }}>
               {[['4','멤버'],['10','토론방'],['28','게시글']].map(([n,l]) => (
                 <div key={l} style={{ textAlign: 'center' }}>
@@ -176,7 +176,7 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
 
         {/* 인기 키워드 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{ background: 'var(--brand)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>🔥 인기 키워드</div>
+          <div style={{ background: 'var(--brand)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>🔥 실시간 인기</div>
           <div style={{ padding: '6px 0' }}>
             {trending.map((kw, i) => (
               <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.keyword)}`}

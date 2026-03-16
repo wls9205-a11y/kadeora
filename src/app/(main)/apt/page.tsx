@@ -14,7 +14,7 @@ export default async function AptPage() {
     const { data } = await sb
       .from('apt_subscriptions')
       .select('*')
-      .order('rcept_bgnde', { ascending: true });
+      .order('rcept_bgnde', { ascending: false });
     if (data && data.length > 0) {
       apts = data;
     }
