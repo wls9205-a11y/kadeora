@@ -190,10 +190,10 @@ export async function GET(req: NextRequest) {
 
   // CRON_SECRET 체크
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-    if (token !== cronSecret && process.env.NODE_ENV === 'production') {
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.replace('Bearer ', '');
+  if (!cronSecret || token !== cronSecret) {
+    if (process.env.NODE_ENV === 'production') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }
