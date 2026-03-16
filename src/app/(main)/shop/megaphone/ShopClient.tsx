@@ -90,7 +90,7 @@ export default function ShopClient() {
             padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
             fontSize: 13, fontWeight: 600,
             background: selectedCategory === cat ? 'var(--kd-primary)' : 'var(--kd-surface)',
-            color: selectedCategory === cat ? 'white' : 'var(--kd-text-muted)',
+            color: selectedCategory === cat ? 'var(--text-inverse)' : 'var(--kd-text-muted)',
             outline: `1px solid ${selectedCategory === cat ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
             transition: 'all 0.15s',
           }}>
@@ -126,7 +126,7 @@ export default function ShopClient() {
               </div>
               <button onClick={() => setConfirmProduct(p)} style={{
                 padding: '8px 16px', borderRadius: 8, border: 'none',
-                background: 'var(--kd-primary)', color: 'white',
+                background: 'var(--kd-primary)', color: 'var(--text-inverse)',
                 fontWeight: 700, fontSize: 13, cursor: 'pointer',
                 transition: 'opacity 0.15s',
               }}

@@ -139,7 +139,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
             <div key={comment.id} style={{ background: 'var(--kd-surface)', borderRadius: 10, border: '1px solid var(--kd-border)', padding: '14px 16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--kd-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--kd-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
                     {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text)' }}>{comment.profiles?.nickname ?? '익명'}</span>

@@ -9,7 +9,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         {error.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'}
       </p>
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <button onClick={reset} style={{ padding: '10px 22px', borderRadius: 10, border: 'none', background: 'var(--kd-primary)', color: '#FFF', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={reset} style={{ padding: '10px 22px', borderRadius: 10, border: 'none', background: 'var(--kd-primary)', color: 'var(--text-inverse)', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
           🔄 다시 시도
         </button>
         <Link href="/feed" style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid var(--kd-border)', background: 'transparent', color: 'var(--kd-text-muted)', fontSize: 13, textDecoration: 'none', display: 'inline-block' }}>

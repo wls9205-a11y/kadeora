@@ -20,8 +20,8 @@ export default function AdminClient({ stats, recentUsers, recentPosts, reports }
   const tabStyle = (t: Tab) => ({
     padding: '8px 16px', borderRadius: 20, border: 'none', cursor: 'pointer',
     fontSize: 13, fontWeight: 700,
-    background: tab === t ? '#FF4500' : 'transparent',
-    color: tab === t ? '#fff' : 'var(--kd-text-muted)',
+    background: tab === t ? 'var(--brand)' : 'transparent',
+    color: tab === t ? 'var(--text-inverse)' : 'var(--kd-text-muted)',
     transition: 'all 0.15s',
   });
 
@@ -56,7 +56,7 @@ export default function AdminClient({ stats, recentUsers, recentPosts, reports }
               { label: '총 유저', value: stats.totalUsers.toLocaleString(), icon: '👤', color: '#3B82F6' },
               { label: '총 게시글', value: stats.totalPosts.toLocaleString(), icon: '📝', color: '#10B981' },
               { label: '총 댓글', value: stats.totalComments.toLocaleString(), icon: '💬', color: '#8B5CF6' },
-              { label: '신고 대기', value: reports.length.toString(), icon: '🚩', color: '#FF4500' },
+              { label: '신고 대기', value: reports.length.toString(), icon: '🚩', color: 'var(--brand)' },
             ].map(item => (
               <div key={item.label} style={{
                 background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
@@ -124,7 +124,7 @@ export default function AdminClient({ stats, recentUsers, recentPosts, reports }
               display: 'flex', alignItems: 'center', gap: 12,
               padding: '12px 16px', borderBottom: '1px solid var(--kd-border)',
             }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: 'var(--text-inverse)', flexShrink: 0 }}>
                 {String(u.nickname ?? '?')[0].toUpperCase()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>

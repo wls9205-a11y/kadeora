@@ -148,14 +148,14 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                 <Image src={avatarUrl} alt={`${displayName} 프로필 사진`} fill sizes="72px" style={{ objectFit: 'cover' }} />
               </div>
             ) : (
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'white', border: '2px solid var(--kd-border)' }}>
+              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,var(--info),var(--brand))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'var(--text-inverse)', border: '2px solid var(--kd-border)' }}>
                 {displayName[0].toUpperCase()}
               </div>
             )}
             {isOwner && (
               <>
                 <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} style={{ display: 'none' }} id="avatar-upload" aria-label="프로필 사진 변경" />
-                <label htmlFor="avatar-upload" title="프로필 사진 변경" style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--kd-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, cursor: avatarUploading ? 'not-allowed' : 'pointer', border: '2px solid var(--kd-surface)', opacity: avatarUploading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+                <label htmlFor="avatar-upload" title="프로필 사진 변경" style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--kd-primary)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, cursor: avatarUploading ? 'not-allowed' : 'pointer', border: '2px solid var(--kd-surface)', opacity: avatarUploading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
                   {avatarUploading ? '⏳' : '📷'}
                 </label>
               </>
@@ -257,7 +257,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           <button key={tab} onClick={() => handleTabChange(tab)} style={{
             flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
             background: activeTab === tab ? 'var(--kd-primary)' : 'transparent',
-            color: activeTab === tab ? 'white' : 'var(--kd-text-muted)',
+            color: activeTab === tab ? 'var(--text-inverse)' : 'var(--kd-text-muted)',
             fontWeight: 600, fontSize: 13, transition: 'all 0.15s',
           }}>
             {tab === 'posts' ? `📝 작성한 글 (${posts.length})` : `🔖 북마크`}

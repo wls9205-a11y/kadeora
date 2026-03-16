@@ -70,8 +70,8 @@ export default function AdminPushNotification() {
         </div>
         <button onClick={send} disabled={loading}
           style={{
-            padding: '10px 20px', background: loading ? 'var(--kd-border)' : '#FF4500',
-            color: '#fff', border: 'none', borderRadius: 8,
+            padding: '10px 20px', background: loading ? 'var(--kd-border)' : 'var(--brand)',
+            color: 'var(--text-inverse)', border: 'none', borderRadius: 8,
             fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >

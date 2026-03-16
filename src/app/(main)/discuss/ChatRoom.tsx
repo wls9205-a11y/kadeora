@@ -84,7 +84,7 @@ export default function ChatRoom({ room, user, onClose }: ChatRoomProps) {
             ? <div style={{ textAlign: 'center', color: 'var(--kd-text-dim)', padding: '40px 0' }}>채팅 불러오는 중...</div>
             : display.map(msg => (
               <div key={msg.id} style={{ display: 'flex', gap: 8, flexDirection: user?.id === msg.author_id ? 'row-reverse' : 'row' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: user?.id === msg.author_id ? 'var(--kd-primary)' : 'var(--kd-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: user?.id === msg.author_id ? 'var(--kd-primary)' : 'var(--kd-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
                   {(msg.profiles?.nickname ?? 'U')[0].toUpperCase()}
                 </div>
                 <div style={{ maxWidth: '70%' }}>
@@ -118,7 +118,7 @@ export default function ChatRoom({ room, user, onClose }: ChatRoomProps) {
                 onClick={send}
                 disabled={!input.trim() || sending}
                 aria-label="메시지 전송"
-                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--kd-primary)', color: 'white', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer', opacity: (!input.trim() || sending) ? 0.5 : 1 }}
+                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--kd-primary)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer', opacity: (!input.trim() || sending) ? 0.5 : 1 }}
               >전송</button>
             </>
           ) : (

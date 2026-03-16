@@ -73,7 +73,7 @@ export default function NotificationsPage() {
     <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)' }}>
       <div style={{ fontSize: 40, marginBottom: 12 }}>🔔</div>
       <p>로그인이 필요합니다</p>
-      <a href="/login" style={{ color: '#FF4500', fontWeight: 700 }}>로그인하기 →</a>
+      <a href="/login" style={{ color: 'var(--brand)', fontWeight: 700 }}>로그인하기 →</a>
     </div>
   );
 
@@ -140,7 +140,7 @@ export default function NotificationsPage() {
                 </div>
               </div>
               {!n.is_read && (
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF4500', flexShrink: 0, marginTop: 4 }} />
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, marginTop: 4 }} />
               )}
             </div>
           ))}

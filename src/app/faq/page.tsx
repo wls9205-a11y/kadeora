@@ -57,7 +57,7 @@ export default function FAQPage() {
         <a href="mailto:support@kadeora.com" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '10px 20px', borderRadius: 8,
-          background: 'var(--kd-primary)', color: 'white',
+          background: 'var(--kd-primary)', color: 'var(--text-inverse)',
           textDecoration: 'none', fontSize: 14, fontWeight: 600,
         }}>📧 문의하기</a>
       </div>

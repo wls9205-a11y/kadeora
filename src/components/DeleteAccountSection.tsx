@@ -55,7 +55,7 @@ export function DeleteAccountSection() {
           <button
             onClick={() => setStep('typing')}
             className="text-sm px-4 py-2 rounded-full"
-            style={{ backgroundColor: 'var(--error)', color: '#fff', border: 'none' }}
+            style={{ backgroundColor: 'var(--error)', color: 'var(--text-inverse)', border: 'none' }}
           >
             계속
           </button>
@@ -91,7 +91,7 @@ export function DeleteAccountSection() {
           className="text-sm px-4 py-2 rounded-full"
           style={{
             backgroundColor: inputVal === '탈퇴하겠습니다' ? 'var(--error)' : 'var(--bg-active)',
-            color: inputVal === '탈퇴하겠습니다' ? '#fff' : 'var(--text-disabled)',
+            color: inputVal === '탈퇴하겠습니다' ? 'var(--text-inverse)' : 'var(--text-disabled)',
             border: 'none',
             cursor: inputVal === '탈퇴하겠습니다' ? 'pointer' : 'not-allowed',
           }}

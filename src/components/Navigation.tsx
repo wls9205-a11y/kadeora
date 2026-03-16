@@ -148,7 +148,7 @@ export function Navigation() {
             <ThemeToggle />
 
             {/* 모바일 검색 */}
-            <Link href="/search" className="md:hidden" style={{
+            <Link href="/search" className="md:hidden" aria-label="검색" style={{
               width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
               borderRadius:'50%', color:'var(--kd-text-muted)', textDecoration:'none', fontSize:18,
               background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',
@@ -169,7 +169,7 @@ export function Navigation() {
                 </Link>
 
                 {/* 알림 */}
-                <Link href="/notifications" style={{
+                <Link href="/notifications" aria-label="알림" style={{
                   position:'relative', width:40, height:40,
                   display:'flex', alignItems:'center', justifyContent:'center',
                   borderRadius:'50%',
@@ -185,7 +185,7 @@ export function Navigation() {
                     <span style={{
                       position:'absolute', top:-2, right:-2,
                       width:17, height:17, borderRadius:'50%',
-                      background:'#FF4500', color:'#fff',
+                      background:'var(--brand)', color:'var(--text-inverse)',
                       fontSize:9, fontWeight:800,
                       display:'flex', alignItems:'center', justifyContent:'center',
                       border:'2px solid var(--kd-nav-bg)',
@@ -197,7 +197,7 @@ export function Navigation() {
 
                 {/* 유저 메뉴 */}
                 <div style={{ position:'relative' }}>
-                  <button onClick={() => setMenuOpen(!menuOpen)} style={{
+                  <button onClick={() => setMenuOpen(!menuOpen)} aria-label="사용자 메뉴" style={{
                     display:'flex', alignItems:'center', gap:5,
                     height:34, padding:'0 10px', borderRadius:17,
                     background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',

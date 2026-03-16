@@ -171,7 +171,7 @@ export default async function FeedDetailPage({ params }: Props) {
             width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
             background: 'linear-gradient(135deg, var(--kd-primary), var(--kd-purple))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, fontWeight: 700, color: 'white',
+            fontSize: 16, fontWeight: 700, color: 'var(--text-inverse)',
           }}>
             {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
           </div>

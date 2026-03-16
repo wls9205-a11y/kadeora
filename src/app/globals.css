@@ -10,84 +10,84 @@
 
 /* Light Mode — 배경(중간회색) → 카드(순백) → 인풋(살짝회색) */
 :root {
-  --bg-base:       #ebedf0;
-  --bg-surface:    #ffffff;
-  --bg-elevated:   #ffffff;
-  --bg-sunken:     #f0f2f5;
-  --bg-hover:      #e4e6ea;
-  --bg-active:     #dadde1;
-  --border:        #ccd0d5;
-  --border-strong: #adb3ba;
-  --border-focus:  #ff5b36;
-  --text-primary:   #1c1e21;
-  --text-secondary: #606770;
-  --text-tertiary:  #90949c;
-  --text-disabled:  #bec3c9;
-  --text-inverse:   #ffffff;
-  --text-link:      #ff5b36;
-  --brand:          #ff5b36;
-  --brand-hover:    #e84d2a;
-  --brand-light:    #fff0eb;
-  --brand-dark:     #c93d1e;
-  --success:        #00a854;
-  --success-bg:     #e6f7ee;
-  --warning:        #e6a817;
-  --warning-bg:     #fef9e7;
-  --error:          #d93025;
-  --error-bg:       #fce8e6;
-  --info:           #1a73e8;
-  --info-bg:        #e8f0fe;
-  --stock-up:       #c0392b;
-  --stock-down:     #1565c0;
-  --stock-flat:     #606770;
-  --nav-bg:         #ffffff;
-  --nav-border:     #ccd0d5;
-  --nav-text:       #1c1e21;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.15);
-  --shadow-md: 0 2px 8px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.08);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
-  --shadow-xl: 0 16px 40px rgba(0,0,0,.14);
+  --bg-base:       #DAE0E6;
+  --bg-surface:    #FFFFFF;
+  --bg-elevated:   #FFFFFF;
+  --bg-sunken:     #F6F7F8;
+  --bg-hover:      #EAEDEF;
+  --bg-active:     #DDDFE0;
+  --border:        #EDEFF1;
+  --border-strong: #CACCCD;
+  --border-focus:  #FF5B36;
+  --text-primary:   #1C1C1C;
+  --text-secondary: #878A8C;
+  --text-tertiary:  #9B9FA3;
+  --text-disabled:  #C7CACC;
+  --text-inverse:   #FFFFFF;
+  --text-link:      #FF5B36;
+  --brand:          #FF5B36;
+  --brand-hover:    #E84D2A;
+  --brand-light:    #FFF4F2;
+  --brand-dark:     #CC3B1E;
+  --success:        #46D160;
+  --success-bg:     #E6F9EB;
+  --warning:        #FFB000;
+  --warning-bg:     #FFF8E1;
+  --error:          #FF585B;
+  --error-bg:       #FFF0F0;
+  --info:           #0079D3;
+  --info-bg:        #E8F0FE;
+  --stock-up:       #FF4500;
+  --stock-down:     #0079D3;
+  --stock-flat:     #878A8C;
+  --nav-bg:         #FFFFFF;
+  --nav-border:     #EDEFF1;
+  --nav-text:       #1C1C1C;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,0.14);
 }
 
 /* Dark Mode — 배경(거의검정) → 카드(진회색) → 인풋(더어두움) */
 .dark {
-  --bg-base:       #111213;
-  --bg-surface:    #1e1f20;
-  --bg-elevated:   #2c2d2e;
-  --bg-sunken:     #0a0b0c;
-  --bg-hover:      #2c2d2e;
-  --bg-active:     #3a3b3c;
-  --border:        #2e3033;
-  --border-strong: #3e4042;
-  --border-focus:  #ff6b4a;
-  --text-primary:   #e4e6eb;
-  --text-secondary: #b0b3b8;
-  --text-tertiary:  #8a8d91;
-  --text-disabled:  #4e4f50;
-  --text-inverse:   #111213;
-  --text-link:      #ff6b4a;
-  --brand:          #ff6b4a;
-  --brand-hover:    #ff8468;
-  --brand-light:    #2d1a14;
-  --brand-dark:     #ff5b36;
-  --success:        #36b37e;
-  --success-bg:     #0a1f15;
-  --warning:        #ffab00;
-  --warning-bg:     #1a1200;
-  --error:          #ff5630;
-  --error-bg:       #1a0800;
-  --info:           #4c9aff;
+  --bg-base:       #1A1A1B;
+  --bg-surface:    #272729;
+  --bg-elevated:   #333335;
+  --bg-sunken:     #111112;
+  --bg-hover:      #333335;
+  --bg-active:     #474748;
+  --border:        #343536;
+  --border-strong: #818384;
+  --border-focus:  #FF6314;
+  --text-primary:   #D7DADC;
+  --text-secondary: #818384;
+  --text-tertiary:  #6B6D6F;
+  --text-disabled:  #474748;
+  --text-inverse:   #1A1A1B;
+  --text-link:      #FF6314;
+  --brand:          #FF6314;
+  --brand-hover:    #FF7A38;
+  --brand-light:    #2D1A0A;
+  --brand-dark:     #FF5B36;
+  --success:        #46D160;
+  --success-bg:     #0A1F10;
+  --warning:        #FFB000;
+  --warning-bg:     #1A1200;
+  --error:          #FF585B;
+  --error-bg:       #1A0A0A;
+  --info:           #4C9AFF;
   --info-bg:        #071525;
-  --stock-up:       #ff6b6b;
-  --stock-down:     #4dabf7;
-  --stock-flat:     #8a8d91;
-  --nav-bg:         #1e1f20;
-  --nav-border:     #2e3033;
-  --nav-text:       #e4e6eb;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
-  --shadow-md: 0 2px 8px rgba(0,0,0,.6);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,.7);
-  --shadow-xl: 0 16px 40px rgba(0,0,0,.8);
+  --stock-up:       #FF6314;
+  --stock-down:     #46D160;
+  --stock-flat:     #818384;
+  --nav-bg:         #1A1A1B;
+  --nav-border:     #343536;
+  --nav-text:       #D7DADC;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,0.8);
 }
 
 /* ========================================
@@ -376,6 +376,9 @@ button:active,
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* 포커스 접근성 */
+*:focus-visible { outline: 2px solid var(--brand) !important; outline-offset: 2px !important; }
 
 /* ========================================
    모바일
