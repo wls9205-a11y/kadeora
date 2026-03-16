@@ -1,11 +1,12 @@
 ﻿'use client';
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
-export default function LoginClient() {
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') ?? '/feed';
+interface LoginFormProps {
+  redirect: string;
+}
+
+function LoginForm({ redirect }: LoginFormProps) {
   const [loading, setLoading] = useState<'kakao' | 'google' | null>(null);
   const [error, setError] = useState('');
 
@@ -33,15 +34,11 @@ export default function LoginClient() {
         <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--kd-primary)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
           KADEORA
         </div>
-        <p style={{ margin: 0, color: 'var(--kd-text-muted)', fontSize: 14 }}>
-          실시간 정보가 모이는 커뮤니티
-        </p>
+        <p style={{ margin: 0, color: 'var(--kd-text-muted)', fontSize: 14 }}>실시간 정보가 모이는 커뮤니티</p>
       </div>
 
       <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
-        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)', textAlign: 'center' }}>
-          로그인
-        </h2>
+        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)', textAlign: 'center' }}>로그인</h2>
         <p style={{ margin: '0 0 32px', color: 'var(--kd-text-dim)', fontSize: 13, textAlign: 'center', lineHeight: 1.5 }}>
           소셜 계정으로 간편하게 시작하세요
         </p>
@@ -49,17 +46,7 @@ export default function LoginClient() {
         <button
           onClick={() => login('kakao')}
           disabled={!!loading}
-          style={{
-            width: '100%', padding: '14px 20px', marginBottom: 12,
-            borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
-            background: '#FEE500', color: '#191919',
-            fontWeight: 700, fontSize: 15,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            opacity: loading === 'google' ? 0.5 : 1,
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => !loading && ((e.currentTarget as HTMLElement).style.background = '#F5DD00')}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#FEE500'}
+          style={{ width: '100%', padding: '14px 20px', marginBottom: 12, borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'kakao' ? (
             <div style={{ width: 20, height: 20, border: '2px solid #191919', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -74,17 +61,7 @@ export default function LoginClient() {
         <button
           onClick={() => login('google')}
           disabled={!!loading}
-          style={{
-            width: '100%', padding: '14px 20px',
-            borderRadius: 12, border: '1px solid var(--kd-border)', cursor: loading ? 'not-allowed' : 'pointer',
-            background: 'var(--kd-surface-2)', color: 'var(--kd-text)',
-            fontWeight: 700, fontSize: 15,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            opacity: loading === 'kakao' ? 0.5 : 1,
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => !loading && ((e.currentTarget as HTMLElement).style.background = 'var(--kd-border-hover)')}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--kd-surface-2)'}
+          style={{ width: '100%', padding: '14px 20px', borderRadius: 12, border: '1px solid var(--kd-border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kd-surface-2)', color: 'var(--kd-text)', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'google' ? (
             <div style={{ width: 20, height: 20, border: '2px solid var(--kd-text)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -115,4 +92,8 @@ export default function LoginClient() {
       </div>
     </div>
   );
+}
+
+export default function LoginClient() {
+  return <LoginForm redirect="/feed" />;
 }
