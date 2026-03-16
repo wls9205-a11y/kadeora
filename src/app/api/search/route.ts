@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const postsPromise = supabase.from('posts').select(`id, title, content, created_at, category, likes_count, comments_count, author:profiles!posts_author_id_fkey(id, nickname, avatar_url)`, { count: 'exact' }).eq('is_deleted', false).or(`title.ilike.%${query}%,content.ilike.%${query}%`).order('created_at', { ascending: false }).range((page - 1) * limit, page * limit - 1);
 
     // Stocks search
-    const stocksPromise = supabase.from('stock_quotes').select('symbol, name, market, price, change_pct').or(`name.ilike.%${query}%,symbol.ilike.%${query}%`).limit(5);
+    const stocksPromise = supabase.from('stock_quotes').select('symbol, name, market, price, change_pct, currency').or(`name.ilike.%${query}%,symbol.ilike.%${query}%`).limit(5);
 
     // Apt subscriptions search
     const aptsPromise = supabase.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde').or(`house_nm.ilike.%${query}%,region_nm.ilike.%${query}%`).limit(5);

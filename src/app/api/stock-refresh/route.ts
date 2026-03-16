@@ -211,58 +211,109 @@ export async function GET(req: NextRequest) {
   const isMarketOpen = (hour > 9 || (hour === 9 && min >= 0)) && (hour < 15 || (hour === 15 && min <= 30));
   const isWeekday = kst.getUTCDay() >= 1 && kst.getUTCDay() <= 5;
 
-  if (!isMarketOpen || !isWeekday) {
-    const { data } = await supabase
+  let success = 0;
+  let failed = 0;
+  let domesticSource: 'kis' | 'yahoo' | 'cache' = 'cache';
+
+  // 국내주식 갱신 (장 운영시간에만)
+  if (isMarketOpen && isWeekday) {
+    // 1) KIS API 시도
+    try {
+      const kisResult = await fetchViaKis(supabase);
+      if (kisResult) {
+        success += kisResult.success;
+        failed += kisResult.failed;
+        domesticSource = 'kis';
+      }
+    } catch {
+      // KIS 실패 -> Yahoo 폴백
+    }
+
+    // 2) KIS 실패 시 Yahoo Finance 폴백
+    if (domesticSource === 'cache') {
+      try {
+        const yahooResult = await fetchViaYahoo(supabase);
+        if (yahooResult) {
+          success += yahooResult.success;
+          failed += yahooResult.failed;
+          domesticSource = 'yahoo';
+        }
+      } catch {
+        // Yahoo 실패 -> 캐시 사용
+      }
+    }
+  }
+
+  // 해외주식 갱신 (USD 종목) — 해외 장 시간이 다르므로 항상 시도
+  let usdUpdated = false;
+  try {
+    const { data: usdStocks } = await supabase
       .from('stock_quotes')
-      .select('*')
-      .order('market_cap', { ascending: false });
+      .select('symbol')
+      .eq('currency', 'USD')
+      .order('market_cap', { ascending: false })
+      .limit(50);
 
-    return NextResponse.json({ stocks: data ?? [], updated: 0, source: 'cache', reason: 'market_closed' });
-  }
+    if (usdStocks?.length) {
+      const usdTickers = usdStocks.map((s: any) => s.symbol).join(',');
+      const usdController = new AbortController();
+      const usdTimeout = setTimeout(() => usdController.abort(), 10000);
 
-  // 1) KIS API 시도
-  try {
-    const kisResult = await fetchViaKis(supabase);
-    if (kisResult) {
-      return NextResponse.json({
-        stocks: kisResult.stocks,
-        updated: kisResult.success,
-        source: 'kis' as const,
-        success: kisResult.success,
-        failed: kisResult.failed,
-      });
+      const usdRes = await fetch(
+        `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${usdTickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketVolume,marketCap`,
+        {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+          },
+          signal: usdController.signal,
+        }
+      );
+      clearTimeout(usdTimeout);
+
+      if (usdRes.ok) {
+        const usdJson = await usdRes.json();
+        const usdQuotes = usdJson?.quoteResponse?.result ?? [];
+        let usdSuccess = 0;
+        for (const q of usdQuotes) {
+          if (q.regularMarketPrice && q.symbol) {
+            await supabase.from('stock_quotes')
+              .update({
+                price: q.regularMarketPrice,
+                change_amt: Math.round((q.regularMarketChange ?? 0) * 100) / 100,
+                change_pct: +((q.regularMarketChangePercent ?? 0).toFixed(2)),
+                volume: q.regularMarketVolume ?? 0,
+                market_cap: q.marketCap ?? 0,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('symbol', q.symbol);
+            usdSuccess++;
+          }
+        }
+        success += usdSuccess;
+        if (usdSuccess > 0) usdUpdated = true;
+      }
     }
   } catch {
-    // KIS 실패 -> Yahoo 폴백
+    // USD 갱신 실패 시 무시 — 국내 결과만 반환
   }
 
-  // 2) Yahoo Finance 폴백
-  try {
-    const yahooResult = await fetchViaYahoo(supabase);
-    if (yahooResult) {
-      return NextResponse.json({
-        stocks: yahooResult.stocks,
-        updated: yahooResult.success,
-        source: 'yahoo' as const,
-        success: yahooResult.success,
-        failed: yahooResult.failed,
-      });
-    }
-  } catch {
-    // Yahoo 실패 -> DB 캐시 폴백
-  }
-
-  // 3) 둘 다 실패시 DB 캐시 반환
+  // 최종 DB 조회
   const { data } = await supabase
     .from('stock_quotes')
     .select('*')
     .order('market_cap', { ascending: false });
 
+  const source = usdUpdated
+    ? `${domesticSource}+usd`
+    : domesticSource;
+
   return NextResponse.json({
     stocks: data ?? [],
-    updated: 0,
-    source: 'cache' as const,
-    success: 0,
-    failed: 0,
+    updated: success,
+    source,
+    success,
+    failed,
+    ...(!isMarketOpen || !isWeekday ? { reason: 'domestic_market_closed' } : {}),
   });
 }

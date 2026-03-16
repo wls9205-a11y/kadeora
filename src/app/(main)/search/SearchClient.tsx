@@ -17,6 +17,7 @@ interface StockResult {
   market: string;
   price: number;
   change_pct: number;
+  currency?: string;
 }
 
 interface AptResult {
@@ -256,11 +257,12 @@ export default function SearchClient() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{highlight(stock.name, inputVal)}</span>
+                        {stock.currency === 'USD' && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 2, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, marginLeft: 4 }}>해외</span>}
                         <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{highlight(stock.symbol, inputVal)}</span>
                         <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>{stock.market}</span>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{stock.price?.toLocaleString()}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{stock.currency === 'USD' ? `$${stock.price}` : `₩${stock.price?.toLocaleString()}`}</span>
                         {stock.change_pct != null && (
                           <span style={{ fontSize: 12, marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #EF4444)', fontWeight: 600 }}>
                             {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct.toFixed(2)}%

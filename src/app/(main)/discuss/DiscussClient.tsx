@@ -14,11 +14,12 @@ const ChatRoom = dynamic(() => import('./ChatRoom'), {
   ssr: false,
 });
 
-const CATS = [{ key: 'all', label: '전체' }, { key: 'stock', label: '📈 주식' }, { key: 'apt', label: '🏠 청약' }, { key: 'free', label: '💬 자유' }];
+const CATS = [{ key: 'all', label: '전체' }, { key: 'stock', label: '📈 국내주식' }, { key: 'us_stock', label: '🇺🇸 해외주식' }, { key: 'apt', label: '🏠 청약' }, { key: 'free', label: '💬 자유' }];
 const SORTS = [{ key: 'popular', label: '🔥 인기' }, { key: 'messages', label: '💬 활성' }, { key: 'latest', label: '🕐 최신' }];
 
 const CAT_COLORS: Record<string, string> = {
   stock: 'var(--brand)',
+  us_stock: 'var(--warning)',
   apt: 'var(--success)',
   free: 'var(--info)',
 };
@@ -37,7 +38,7 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
   }, []);
 
   const filtered = rooms
-    .filter(r => cat === 'all' || r.room_type === cat || r.room_key?.startsWith(cat))
+    .filter(r => cat === 'all' || r.room_type === cat || r.room_key?.startsWith(cat) || (cat === 'us_stock' && r.room_type === 'us_stock'))
     .sort((a, b) =>
       sort === 'popular' ? (b.member_count ?? 0) - (a.member_count ?? 0)
       : sort === 'messages' ? (b.post_count ?? 0) - (a.post_count ?? 0)
@@ -85,7 +86,7 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                 <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: catColor + '20', color: catColor }}>
-                  {room.room_type === 'stock' ? '주식' : room.room_type === 'apt' ? '청약' : '자유'}
+                  {room.room_type === 'stock' ? '국내주식' : room.room_type === 'us_stock' ? '해외주식' : room.room_type === 'apt' ? '청약' : '자유'}
                 </span>
                 {room.is_active && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--success)' }}>

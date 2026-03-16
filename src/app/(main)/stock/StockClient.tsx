@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
@@ -12,6 +12,7 @@ interface Stock {
   volume: number;
   market_cap: number;
   updated_at: string;
+  currency?: string; // 'KRW' | 'USD'
 }
 
 interface Props {
@@ -40,13 +41,34 @@ function timeDiff(iso: string) {
   return new Date(iso).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 }
 
+const MARKET_STYLE: Record<string, { bg: string; color: string }> = {
+  KOSPI: { bg: 'var(--info-bg)', color: 'var(--info)' },
+  KOSDAQ: { bg: 'var(--success-bg)', color: 'var(--success)' },
+  NYSE: { bg: 'var(--warning-bg)', color: 'var(--warning)' },
+  NASDAQ: { bg: 'var(--brand-light)', color: 'var(--brand)' },
+};
+
 export default function StockClient({ initialStocks }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(initialStocks);
-  const [market, setMarket] = useState<'ALL' | 'KOSPI' | 'KOSDAQ'>('ALL');
+  const [market, setMarket] = useState<string>('ALL');
   const [sort, setSort] = useState<'cap' | 'change' | 'volume'>('cap');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('');
+  const [showKRW, setShowKRW] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(1380);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('kd_currency');
+    if (saved === 'KRW') setShowKRW(true);
+
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.rates?.KRW) setExchangeRate(data.rates.KRW);
+      })
+      .catch(() => {});
+  }, []);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -79,6 +101,17 @@ export default function StockClient({ initialStocks }: Props) {
   const isUp = (s: Stock) => (s.change_pct ?? 0) > 0;
   const isDown = (s: Stock) => (s.change_pct ?? 0) < 0;
 
+  function fmtPrice(s: Stock) {
+    const isUSD = s.currency === 'USD';
+    if (isUSD && showKRW) {
+      return '₩' + Math.round(s.price * exchangeRate).toLocaleString('ko-KR');
+    }
+    if (isUSD) {
+      return '$' + s.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return '₩' + s.price.toLocaleString('ko-KR');
+  }
+
   return (
     <div>
       {/* 헤더 */}
@@ -86,23 +119,38 @@ export default function StockClient({ initialStocks }: Props) {
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>📈 실시간 주식시세</h1>
           <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>
-            KOSPI · KOSDAQ 주요 100종목
+            국내·해외 주요 종목
             {lastUpdated && <span style={{ marginLeft: 8, color: 'var(--text-secondary)' }}>· 마지막 업데이트: {lastUpdated}</span>}
           </p>
         </div>
-        <button
-          onClick={refresh}
-          disabled={loading}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'var(--brand)', color: 'var(--text-inverse, #fff)', border: 'none',
-            borderRadius: 20, padding: '8px 16px', fontSize: 13,
-            fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
-          {loading ? '⟳ 갱신 중...' : '⟳ 새로고침'}
-        </button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            onClick={() => {
+              const next = !showKRW;
+              setShowKRW(next);
+              localStorage.setItem('kd_currency', next ? 'KRW' : 'USD');
+            }}
+            style={{
+              padding: '6px 12px', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--bg-hover)',
+              color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            }}
+          >
+            {showKRW ? '₩ 원화' : '$ USD'}
+          </button>
+          <button
+            onClick={refresh}
+            disabled={loading}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'var(--brand)', color: 'var(--text-inverse, #fff)', border: 'none',
+              borderRadius: 20, padding: '8px 16px', fontSize: 13,
+              fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
+            }}
+          >
+            {loading ? '⟳ 갱신 중...' : '⟳ 새로고침'}
+          </button>
+        </div>
       </div>
 
       {/* 필터 바 */}
@@ -113,7 +161,7 @@ export default function StockClient({ initialStocks }: Props) {
       }}>
         {/* 시장 필터 */}
         <div style={{ display: 'flex', gap: 4 }}>
-          {(['ALL', 'KOSPI', 'KOSDAQ'] as const).map(m => (
+          {['ALL', 'KOSPI', 'KOSDAQ', 'NYSE', 'NASDAQ'].map(m => (
             <button key={m} onClick={() => setMarket(m)} style={{
               padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
               fontWeight: 700, fontSize: 13,
@@ -173,7 +221,9 @@ export default function StockClient({ initialStocks }: Props) {
           <span style={{ textAlign: 'center' }}>토론</span>
         </div>
 
-        {filtered.map((s, i) => (
+        {filtered.map((s, i) => {
+          const badgeStyle = MARKET_STYLE[s.market] ?? { bg: 'var(--bg-hover)', color: 'var(--text-secondary)' };
+          return (
           <div key={s.symbol} style={{
             display: 'grid',
             gridTemplateColumns: '40px 1fr 100px 100px 70px',
@@ -191,8 +241,8 @@ export default function StockClient({ initialStocks }: Props) {
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
                 <span style={{
-                  background: s.market === 'KOSPI' ? 'var(--info-bg)' : 'var(--success-bg)',
-                  color: s.market === 'KOSPI' ? 'var(--info)' : 'var(--success)',
+                  background: badgeStyle.bg,
+                  color: badgeStyle.color,
                   padding: '1px 5px', borderRadius: 2, fontSize: 10, fontWeight: 700,
                 }}>{s.market}</span>
               </div>
@@ -201,7 +251,7 @@ export default function StockClient({ initialStocks }: Props) {
               textAlign: 'right', fontSize: 14, fontWeight: 700,
               color: isUp(s) ? 'var(--stock-up)' : isDown(s) ? 'var(--stock-down)' : 'var(--text-primary)',
             }}>
-              {fmt(s.price)}
+              {fmtPrice(s)}
             </span>
             <div style={{ textAlign: 'right' }}>
               <div style={{
@@ -230,7 +280,8 @@ export default function StockClient({ initialStocks }: Props) {
               </Link>
             </span>
           </div>
-        ))}
+          );
+        })}
 
         {filtered.length === 0 && (
           <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
@@ -241,7 +292,7 @@ export default function StockClient({ initialStocks }: Props) {
       </div>
 
       <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>
-        * 주가는 Yahoo Finance 기준 · 한국 거래 시간(09:00~15:30) 중 5분마다 자동 갱신
+        * 국내 주가는 KIS/Yahoo Finance 기준 · 해외 주가는 Yahoo Finance 기준 · 환율: 1 USD = ₩{exchangeRate.toLocaleString()}
       </div>
     </div>
   );
