@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -29,15 +29,15 @@ export default function LoginClient() {
 
   return (
     <div style={{ width: '100%', maxWidth: 400 }}>
-      {/* Logo */}
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
         <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--kd-primary)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
           KADEORA
         </div>
-        <p style={{ margin: 0, color: 'var(--kd-text-muted)', fontSize: 14 }}>진짜 정보가 오가는 금융 커뮤니티</p>
+        <p style={{ margin: 0, color: 'var(--kd-text-muted)', fontSize: 14 }}>
+          실시간 정보가 모이는 커뮤니티
+        </p>
       </div>
 
-      {/* Card */}
       <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
         <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)', textAlign: 'center' }}>
           로그인
@@ -46,7 +46,6 @@ export default function LoginClient() {
           소셜 계정으로 간편하게 시작하세요
         </p>
 
-        {/* Kakao */}
         <button
           onClick={() => login('kakao')}
           disabled={!!loading}
@@ -63,7 +62,7 @@ export default function LoginClient() {
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#FEE500'}
         >
           {loading === 'kakao' ? (
-            <div style={{ width: 20, height: 20, border: '2px solid #191919', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+            <div style={{ width: 20, height: 20, border: '2px solid #191919', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
             <svg width="20" height="20" viewBox="0 0 512 512" fill="#191919">
               <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z"/>
@@ -72,7 +71,6 @@ export default function LoginClient() {
           {loading === 'kakao' ? '로그인 중...' : '카카오로 계속하기'}
         </button>
 
-        {/* Google */}
         <button
           onClick={() => login('google')}
           disabled={!!loading}
@@ -89,7 +87,7 @@ export default function LoginClient() {
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--kd-surface-2)'}
         >
           {loading === 'google' ? (
-            <div style={{ width: 20, height: 20, border: '2px solid var(--kd-text)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+            <div style={{ width: 20, height: 20, border: '2px solid var(--kd-text)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -103,7 +101,7 @@ export default function LoginClient() {
 
         {error && (
           <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--kd-danger)', fontSize: 13 }}>
-            ⚠️ {error}
+            ⚠ {error}
           </div>
         )}
 
@@ -111,7 +109,8 @@ export default function LoginClient() {
           로그인 시{' '}
           <a href="/terms" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>이용약관</a>
           {' '}및{' '}
-          <a href="/privacy" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>개인정보처리방침</a>에 동의하게 됩니다
+          <a href="/privacy" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>개인정보처리방침</a>
+          에 동의하게 됩니다
         </p>
       </div>
     </div>
