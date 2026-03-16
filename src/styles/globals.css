@@ -2,118 +2,124 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── 라이트 모드 (기본) ── */
 :root {
-  --kd-bg: #DAE0E6;
-  --kd-bg-rgb: 218,224,230;
-  --kd-surface: #fff;
-  --kd-surface-2: #f6f7f8;
-  --kd-border: #edeff1;
+  color-scheme: light;
+  --kd-bg:         #DAE0E6;
+  --kd-surface:    #FFFFFF;
+  --kd-surface-2:  #F6F7F8;
+  --kd-border:     #EDEFF1;
   --kd-border-hover: #818384;
-  --kd-text: #1c1c1c;
-  --kd-text-muted: #878a8c;
-  --kd-text-dim: #878a8c;
-  --kd-primary: #FF4500;
+  --kd-text:       #1C1C1C;
+  --kd-text-muted: #878A8C;
+  --kd-text-dim:   #878A8C;
+  --kd-primary:    #FF4500;
   --kd-primary-dim: rgba(255,69,0,0.1);
-  --kd-danger: #ff585b;
+  --kd-danger:     #FF585B;
   --kd-danger-dim: rgba(255,88,91,0.12);
-  --kd-success: #46d160;
+  --kd-success:    #46D160;
   --kd-success-dim: rgba(70,209,96,0.12);
-  --kd-warning: #ffd635;
+  --kd-warning:    #FFD635;
   --kd-warning-dim: rgba(255,214,53,0.12);
-  --kd-purple: #a06ef4;
+  --kd-purple:     #A06EF4;
+  --kd-nav-bg:     #FFFFFF;
+  --kd-nav-border: #EDEFF1;
 }
 
-[data-theme="dark"], .dark {
-  --kd-bg: #DAE0E6;
-  --kd-bg-rgb: 218,224,230;
-  --kd-surface: #1A1A1B;
-  --kd-surface-2: #272729;
-  --kd-border: #343536;
+/* ── 다크 모드 (data-theme 수동 전환) ── */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --kd-bg:         #DAE0E6;
+  --kd-surface:    #1A1A1B;
+  --kd-surface-2:  #272729;
+  --kd-border:     #343536;
   --kd-border-hover: #818384;
-  --kd-text: #D7DADC;
+  --kd-text:       #D7DADC;
   --kd-text-muted: #818384;
-  --kd-text-dim: #818384;
-  --kd-primary: #FF4500;
+  --kd-text-dim:   #818384;
+  --kd-primary:    #FF4500;
   --kd-primary-dim: rgba(255,69,0,0.15);
-  --kd-danger: #ff585b;
+  --kd-danger:     #FF585B;
   --kd-danger-dim: rgba(255,88,91,0.15);
-  --kd-success: #46d160;
+  --kd-success:    #46D160;
   --kd-success-dim: rgba(70,209,96,0.15);
-  --kd-warning: #ffd635;
+  --kd-warning:    #FFD635;
   --kd-warning-dim: rgba(255,214,53,0.15);
-  --kd-purple: #a06ef4;
+  --kd-purple:     #A06EF4;
+  --kd-nav-bg:     #1A1A1B;
+  --kd-nav-border: #343536;
 }
 
-/* 기본 다크 모드 적용 */
+/* ── 시스템 다크모드 (data-theme 미설정 시) ── */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --kd-bg: #DAE0E6;
-    --kd-bg-rgb: 218,224,230;
-    --kd-surface: #1A1A1B;
-    --kd-surface-2: #272729;
-    --kd-border: #343536;
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --kd-bg:         #DAE0E6;
+    --kd-surface:    #1A1A1B;
+    --kd-surface-2:  #272729;
+    --kd-border:     #343536;
     --kd-border-hover: #818384;
-    --kd-text: #D7DADC;
+    --kd-text:       #D7DADC;
     --kd-text-muted: #818384;
-    --kd-text-dim: #818384;
+    --kd-text-dim:   #818384;
+    --kd-nav-bg:     #1A1A1B;
+    --kd-nav-border: #343536;
   }
 }
 
-* { box-sizing: border-box; }
+/* ── 베이스 ── */
+*, *::before, *::after { box-sizing: border-box; }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  background: #DAE0E6;
+html {
+  background: var(--kd-bg);
   color: var(--kd-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard Variable',
-    Pretendard, Roboto, sans-serif;
+  font-family: 'Pretendard Variable', Pretendard, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 스크롤바 */
-::-webkit-scrollbar { width: 8px; height: 8px; }
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--kd-bg);
+  color: var(--kd-text);
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ── 스크롤바 ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #343536; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #818384; }
+::-webkit-scrollbar-thumb { background: var(--kd-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--kd-border-hover); }
 
-/* 링크 기본 */
-a { color: inherit; }
+/* ── 링크 ── */
+a { color: inherit; text-decoration: none; }
 
-/* 입력 */
-input, textarea, select {
-  font-family: inherit;
-  outline: none;
-}
-input:focus, textarea:focus {
-  border-color: #FF4500 !important;
-}
+/* ── 폼 요소 ── */
+input, textarea, select, button { font-family: inherit; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--kd-primary) !important; }
 
-/* 버튼 기본 */
-button { font-family: inherit; }
-
-/* 애니메이션 */
+/* ── 애니메이션 ── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.animate-fadeIn { animation: fadeIn 0.2s ease forwards; }
+@keyframes spin  { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+.animate-fadeIn { animation: fadeIn 0.25s ease forwards; }
 .animate-spin   { animation: spin 0.8s linear infinite; }
+.animate-pulse  { animation: pulse 1.8s ease-in-out infinite; }
 
-/* 반응형 유틸 */
-@media (max-width: 768px) {
-  .hidden-mobile { display: none !important; }
-}
-@media (min-width: 769px) {
-  .hidden-desktop { display: none !important; }
-}
+/* ── 반응형 헬퍼 ── */
+@media (max-width: 767px)  { .hidden-mobile  { display: none !important; } }
+@media (min-width: 768px)  { .hidden-desktop { display: none !important; } }
 
-/* kd-input */
+/* ── 공용 인풋 ── */
 .kd-input {
   width: 100%;
   padding: 10px 14px;
@@ -122,6 +128,40 @@ button { font-family: inherit; }
   border-radius: 4px;
   color: var(--kd-text);
   font-size: 14px;
+  transition: border-color 0.15s;
+}
+.kd-input::placeholder { color: var(--kd-text-muted); }
+.kd-input:focus { border-color: var(--kd-primary); }
+
+/* ── 카드 공통 ── */
+.kd-card {
+  background: var(--kd-surface);
+  border: 1px solid var(--kd-border);
+  border-radius: 4px;
   transition: border-color 0.1s;
 }
-.kd-input:focus { border-color: #FF4500; }
+.kd-card:hover { border-color: var(--kd-border-hover); }
+
+/* ── 반응형 레이아웃 ── */
+.feed-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.feed-main  { flex: 1; min-width: 0; }
+
+.feed-sidebar {
+  width: 312px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 68px;
+}
+
+@media (max-width: 1023px) {
+  .feed-sidebar { display: none; }
+}
+
+@media (max-width: 767px) {
+  .feed-layout { gap: 0; }
+}

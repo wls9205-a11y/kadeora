@@ -9,13 +9,27 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="stylesheet" as="style"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+        {/* 테마 깜빡임 방지 — JS 최우선 실행 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(){
+  try{
+    var s=localStorage.getItem('kd-theme');
+    var t=s==='dark'||s==='light'?s:window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+    document.documentElement.setAttribute('data-theme',t);
+  }catch(e){}
+})();
+            `.trim()
+          }}
+        />
       </head>
-      <body style={{ background: '#DAE0E6', margin: 0, padding: 0 }}>
+      <body>
         {children}
       </body>
     </html>
