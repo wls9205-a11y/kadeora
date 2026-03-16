@@ -112,10 +112,10 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
                     <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
                     {(post.likes_count ?? 0) > 200 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: 'var(--kd-danger-dim)', color: 'var(--kd-danger)' }}>🔥 HOT</span>}
                   </div>
-                  <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 500, color: 'var(--kd-text)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                  <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 500, color: 'var(--kd-text)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                     {post.title}
                   </h2>
-                  <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                     {post.content}
                   </p>
                   <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>

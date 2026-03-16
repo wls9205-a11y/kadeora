@@ -235,7 +235,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 16, background: 'var(--kd-border)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 1, marginTop: 16, background: 'var(--kd-border)', borderRadius: 12, overflow: 'hidden' }}>
           {[
             { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
             { label: '댓글', value: commentCount, icon: '💬' },

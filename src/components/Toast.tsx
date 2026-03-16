@@ -27,10 +27,10 @@ const ICONS: Record<ToastType, string> = {
 };
 
 const COLORS: Record<ToastType, { bg: string; border: string; icon: string }> = {
-  success: { bg: 'var(--kd-success-dim)', border: 'rgba(16,185,129,0.4)', icon: 'var(--kd-success)' },
-  error: { bg: 'var(--kd-danger-dim)', border: 'rgba(239,68,68,0.4)', icon: 'var(--kd-danger)' },
-  info: { bg: 'var(--kd-primary-dim)', border: 'rgba(59,130,246,0.4)', icon: 'var(--kd-primary)' },
-  warning: { bg: 'var(--kd-warning-dim)', border: 'rgba(245,158,11,0.4)', icon: 'var(--kd-warning)' },
+  success: { bg: 'var(--kd-success-dim)', border: 'var(--kd-success)', icon: 'var(--kd-success)' },
+  error: { bg: 'var(--kd-danger-dim)', border: 'var(--kd-danger)', icon: 'var(--kd-danger)' },
+  info: { bg: 'var(--kd-primary-dim)', border: 'var(--kd-primary)', icon: 'var(--kd-primary)' },
+  warning: { bg: 'var(--kd-warning-dim)', border: 'var(--kd-warning)', icon: 'var(--kd-warning)' },
 };
 
 function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
@@ -58,7 +58,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
         padding: '12px 16px', borderRadius: 12,
         background: c.bg, border: `1px solid ${c.border}`,
         backdropFilter: 'blur(12px)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        boxShadow: '0 8px 32px var(--shadow-color, rgba(0,0,0,0.4))',
         minWidth: 280, maxWidth: 400,
         cursor: 'pointer',
       }}
