@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -12,9 +12,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link rel="stylesheet" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+        <link rel="stylesheet" as="style"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
       </head>
-      <body>{children}</body>
+      <body style={{ background: '#DAE0E6', margin: 0, padding: 0 }}>
+        {children}
+      </body>
     </html>
   );
 }

@@ -21,7 +21,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         maxWidth: 1200,
         margin: '0 auto',
         padding: '20px 24px 90px',
-        minHeight: 'calc(100vh - 60px)',
+        minHeight: 'calc(100vh - 48px)',
+        background: 'transparent',
       }}>
         {children}
       </main>
