@@ -36,7 +36,10 @@ export default function PaymentClient() {
     if (paymentKey && orderId && amount) {
       setStep('processing');
       try {
-        const res = await fetch('/api/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentKey, orderId, amount: Number(amount), productId: productId || undefined }) });
+        const { data: { session } } = await supabase.auth.getSession();
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (session?.access_token) { headers['Authorization'] = `Bearer ${session.access_token}`; }
+        const res = await fetch('/api/payment', { method: 'POST', headers, body: JSON.stringify({ paymentKey, orderId, amount: Number(amount), productId: productId || undefined }) });
         const data = await res.json();
         if (data.success) { setPaymentResult(data.payment); setStep('success'); } else { setError(data.error || 'Payment failed'); setStep('fail'); }
       } catch { setError('Payment processing error'); setStep('fail'); }
@@ -51,7 +54,7 @@ export default function PaymentClient() {
     if (!tossClientKey) { setError('결제 시스템 준비 중입니다. 잠시 후 다시 시도해주세요.'); setStep('fail'); return; }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/login?redirect=/payment'); return; }
-    const newOrderId = KADEORA_+Date.now()+_+Math.random().toString(36).slice(2, 8);
+    const newOrderId = `KADEORA_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     try {
       // @ts-expect-error TossPayments SDK
       if (typeof window.TossPayments === 'undefined') { await loadTossScript(); }

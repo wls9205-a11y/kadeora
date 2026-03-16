@@ -34,6 +34,25 @@ export async function POST(request: NextRequest) {
         approved_at: tossData.approvedAt, method: tossData.method, raw_response: tossData,
       });
     } catch { console.warn('[payment] shop_orders insert skipped'); }
+
+    // 결제 성공 후 상품별 후처리
+    const productId = body.productId as string | undefined;
+    if (productId && userId) {
+      try {
+        if (productId === 'premium_badge') {
+          await supabase.from('profiles').update({ is_premium: true }).eq('id', userId);
+        }
+        if (productId === 'nickname_change') {
+          // nickname_change_tickets 필드가 있으면 +1 증가
+          const { data: profile } = await supabase.from('profiles').select('nickname_change_tickets').eq('id', userId).single();
+          const current = (profile?.nickname_change_tickets as number) ?? 0;
+          await supabase.from('profiles').update({ nickname_change_tickets: current + 1 }).eq('id', userId);
+        }
+      } catch (e) {
+        console.warn('[payment] post-purchase fulfillment error:', e);
+      }
+    }
+
     return NextResponse.json({
       success: true, message: '결제 완료',
       payment: { orderId: tossData.orderId, amount: tossData.totalAmount, method: tossData.method, status: tossData.status, approvedAt: tossData.approvedAt },

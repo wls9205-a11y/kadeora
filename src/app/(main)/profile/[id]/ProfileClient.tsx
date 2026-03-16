@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { CATEGORY_MAP } from '@/lib/constants';
+import FontSizeToggle from '@/components/FontSizeToggle';
 
 const GRADE_COLORS: Record<number, string> = {
   1:'#4CAF50',2:'#2196F3',3:'#9C27B0',4:'#FF9800',5:'#F44336',
@@ -323,6 +324,14 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           )
         )}
       </div>
+
+      {/* 설정 (본인만) */}
+      {isOwner && (
+        <div style={{ marginTop:24, padding:'16px', backgroundColor:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:8 }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:'var(--text-primary)', marginBottom:12 }}>설정</h3>
+          <FontSizeToggle />
+        </div>
+      )}
     </div>
   );
 }

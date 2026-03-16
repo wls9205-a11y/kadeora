@@ -116,14 +116,14 @@ export const DEMO_APT: AptSubscription[] = [
 ];
 
 export const DEMO_PRODUCTS: ShopProduct[] = [
-  { id: 1, name: '1일 메가폰', description: '24시간 동안 내 게시글을 피드 상단에 고정해드립니다', price: 500, original_price: 700, category: 'megaphone', icon: '📢', is_popular: true, stock_count: 999, created_at: new Date().toISOString() },
-  { id: 2, name: '3일 메가폰', description: '72시간 상단 고정 + HOT 배지 부착', price: 1200, original_price: 1800, category: 'megaphone', icon: '🔥', is_popular: true, stock_count: 999, created_at: new Date().toISOString() },
-  { id: 3, name: '7일 메가폰', description: '7일 상단 고정 + 추천 섹션 등록', price: 2500, original_price: 4000, category: 'megaphone', icon: '🚀', is_popular: false, stock_count: 999, created_at: new Date().toISOString() },
-  { id: 4, name: '골드 등급 뱃지', description: '프로필에 골드 등급 뱃지를 30일간 표시합니다', price: 3000, original_price: null, category: 'badge', icon: '🥇', is_popular: true, stock_count: 999, created_at: new Date().toISOString() },
-  { id: 5, name: '익명 게시글', description: '닉네임 없이 익명으로 게시글을 작성할 수 있습니다 (3회)', price: 800, original_price: 1200, category: 'special', icon: '🕵️', is_popular: false, stock_count: 999, created_at: new Date().toISOString() },
-  { id: 6, name: '프리미엄 닉네임 색상', description: '닉네임에 프리미엄 컬러 효과를 7일간 적용합니다', price: 600, original_price: null, category: 'special', icon: '🎨', is_popular: false, stock_count: 999, created_at: new Date().toISOString() },
-  { id: 7, name: '댓글 고정권', description: '특정 게시글에서 내 댓글을 상단에 고정합니다 (1회)', price: 300, original_price: 500, category: 'special', icon: '📌', is_popular: false, stock_count: 999, created_at: new Date().toISOString() },
-  { id: 8, name: '30일 프리미엄 멤버십', description: '광고 없는 깔끔한 환경 + 전용 채널 접근', price: 9900, original_price: 14900, category: 'membership', icon: '💎', is_popular: true, stock_count: 999, created_at: new Date().toISOString() },
+  { id: 'megaphone-1d', name: '1일 메가폰', description: '24시간 동안 내 게시글을 피드 상단에 고정해드립니다', price_krw: 500, icon: '📢', is_active: true, created_at: new Date().toISOString() },
+  { id: 'megaphone-3d', name: '3일 메가폰', description: '72시간 상단 고정 + HOT 배지 부착', price_krw: 1200, icon: '🔥', is_active: true, created_at: new Date().toISOString() },
+  { id: 'megaphone-7d', name: '7일 메가폰', description: '7일 상단 고정 + 추천 섹션 등록', price_krw: 2500, icon: '🚀', is_active: true, created_at: new Date().toISOString() },
+  { id: 'badge-gold', name: '골드 등급 뱃지', description: '프로필에 골드 등급 뱃지를 30일간 표시합니다', price_krw: 3000, icon: '🥇', is_active: true, created_at: new Date().toISOString() },
+  { id: 'anonymous-post', name: '익명 게시글', description: '닉네임 없이 익명으로 게시글을 작성할 수 있습니다 (3회)', price_krw: 800, icon: '🕵️', is_active: true, created_at: new Date().toISOString() },
+  { id: 'premium-nickname', name: '프리미엄 닉네임 색상', description: '닉네임에 프리미엄 컬러 효과를 7일간 적용합니다', price_krw: 600, icon: '🎨', is_active: true, created_at: new Date().toISOString() },
+  { id: 'pin-comment', name: '댓글 고정권', description: '특정 게시글에서 내 댓글을 상단에 고정합니다 (1회)', price_krw: 300, icon: '📌', is_active: true, created_at: new Date().toISOString() },
+  { id: 'premium-membership', name: '30일 프리미엄 멤버십', description: '광고 없는 깔끔한 환경 + 전용 채널 접근', price_krw: 9900, icon: '💎', is_active: true, created_at: new Date().toISOString() },
 ];
 
 export const CATEGORY_MAP: Record<string, { label: string; color: string; bg: string }> = {
