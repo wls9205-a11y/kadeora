@@ -104,8 +104,7 @@ export default function SearchClient() {
       setAcStocks(data.stocks ?? []);
       setAcApts(data.apts ?? []);
       setAcPosts(data.posts ?? []);
-      const hasResults = (data.stocks?.length > 0) || (data.apts?.length > 0) || (data.posts?.length > 0);
-      setAcOpen(hasResults);
+      setAcOpen(true);
     } catch {
       setAcOpen(false);
     } finally {
@@ -198,7 +197,7 @@ export default function SearchClient() {
           type="text"
           value={inputVal}
           onChange={e => handleInputChange(e.target.value)}
-          onFocus={() => { if (inputVal.length >= 2 && (acStocks.length > 0 || acApts.length > 0 || acPosts.length > 0)) setAcOpen(true); }}
+          onFocus={() => { if (inputVal.length >= 2) setAcOpen(true); }}
           placeholder="검색어를 입력하세요 (2글자 이상)"
           className="kd-input"
           style={{ paddingLeft: 44, fontSize: 16, padding: '14px 14px 14px 44px' }}
@@ -208,6 +207,7 @@ export default function SearchClient() {
         {inputVal && (
           <button
             onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); }}
+            aria-label="검색어 지우기"
             style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--kd-text-dim)', cursor: 'pointer', fontSize: 18 }}
           >✕</button>
         )}
@@ -227,12 +227,18 @@ export default function SearchClient() {
               borderRadius: 8,
               boxShadow: 'var(--shadow-lg)',
               marginTop: 4,
-              maxHeight: '60vh',
-              overflowY: 'auto',
+              maxHeight: 300,
+              overflowY: 'auto' as const,
             }}
           >
             {acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && (
-              <div style={{ padding: '12px', textAlign: 'center', fontSize: 13, color: 'var(--text-tertiary)' }}>검색 중...</div>
+              <div style={{ padding: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ width: 20, height: 20, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+              </div>
+            )}
+
+            {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && (
+              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>검색 결과가 없습니다</div>
             )}
 
             {/* Stocks section */}

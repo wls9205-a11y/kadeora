@@ -203,6 +203,23 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
+  // 장 운영시간 체크 (KST 09:00~15:30)
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const hour = kst.getUTCHours();
+  const min = kst.getUTCMinutes();
+  const isMarketOpen = (hour > 9 || (hour === 9 && min >= 0)) && (hour < 15 || (hour === 15 && min <= 30));
+  const isWeekday = kst.getUTCDay() >= 1 && kst.getUTCDay() <= 5;
+
+  if (!isMarketOpen || !isWeekday) {
+    const { data } = await supabase
+      .from('stock_quotes')
+      .select('*')
+      .order('market_cap', { ascending: false });
+
+    return NextResponse.json({ stocks: data ?? [], updated: 0, source: 'cache', reason: 'market_closed' });
+  }
+
   // 1) KIS API 시도
   try {
     const kisResult = await fetchViaKis(supabase);

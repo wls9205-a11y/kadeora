@@ -59,3 +59,26 @@
 - ThemeToggle, DeleteAccountSection은 named export
 - 빌드 후 push (npm run build 먼저, 성공하면 commit/push)
 - 토스페이먼츠는 현재 테스트 환경 - 결제 관련 코드 수정 시 주의
+
+## 신규 추가 파일 (최근 작업)
+- src/components/GuestGate.tsx: 비회원 5회 페이지뷰 후 모달+블러. cookie 기반(kd_pv, 7일). 크롤러 감지.
+- supabase/functions/stock-scheduler/: 주식시세 자동갱신 Supabase Edge Function
+- APP_STORE_CHECKLIST.md: 앱스토어/플레이스토어/토스 심사 체크리스트
+- AUDIT_REPORT.md: 7개 분야 전문가 감사 보고서 (49/70점, B등급)
+
+## 검색 시스템
+- API: src/app/api/search/route.ts — posts+stocks+apts 병렬 퍼지 검색
+- UI: src/app/(main)/search/SearchClient.tsx — 300ms debounce 자동완성 드롭다운
+- 검색 대상: posts(title,content), stock_quotes(name,symbol), apt_subscriptions(house_nm,region_nm)
+
+## 주식시세 갱신
+- API: src/app/api/stock-refresh/route.ts — KIS API 우선 + Yahoo Finance 폴백
+- 스케줄러: supabase/functions/stock-scheduler/ — Supabase Cron으로 5분마다 호출
+- 환경변수 필요: KIS_APP_KEY, KIS_APP_SECRET, CRON_SECRET
+- 장 운영시간(평일 09:00~15:30 KST)에만 갱신, 그 외 캐시 반환
+
+## 디자인 시스템
+- 스타일: Reddit 스타일 (라이트 #DAE0E6 / 다크 #1A1A1B)
+- 카드: borderRadius:4, border:1px solid var(--border), shadow-sm
+- 버튼: 브랜드(#FF4500) pill 스타일, outline 변형 있음
+- 모든 색상 CSS 변수 기반 — globals.css :root / .dark

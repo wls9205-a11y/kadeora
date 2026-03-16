@@ -102,6 +102,8 @@ export default function PostActions({ postId, authorId, initialLikes, initialCom
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '12px 0', borderTop: '1px solid var(--kd-border)', borderBottom: '1px solid var(--kd-border)' }}>
       {/* 좋아요 */}
       <button onClick={handleLike} disabled={loading.like}
+        aria-label={liked ? '좋아요 취소' : '좋아요'}
+        aria-pressed={liked}
         style={btnStyle(liked)}>
         {liked ? '❤️' : '🤍'} {likes.toLocaleString()}
       </button>
@@ -118,6 +120,8 @@ export default function PostActions({ postId, authorId, initialLikes, initialCom
 
       {/* 북마크 */}
       <button onClick={handleBookmark} disabled={loading.bookmark}
+        aria-label={bookmarked ? '북마크 해제' : '북마크 추가'}
+        aria-pressed={bookmarked}
         style={btnStyle(bookmarked, '#3B82F6')}>
         {bookmarked ? '🔖' : '🏷'} {bookmarked ? '저장됨' : '저장'}
       </button>

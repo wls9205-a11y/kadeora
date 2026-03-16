@@ -99,7 +99,7 @@ export default function DiscussionRoomPage() {
       {/* 헤더 */}
       <header className="sticky top-0 z-10 border-b px-4 py-3" style={{backgroundColor:'var(--nav-bg)',borderColor:'var(--border)'}}>
         <div className="flex items-center gap-3">
-          <button onClick={()=>{haptic();router.back();}} style={{color:'var(--text-secondary)',background:'none',border:'none',cursor:'pointer',padding:4}}>
+          <button onClick={()=>{haptic();router.back();}} aria-label="뒤로가기" style={{color:'var(--text-secondary)',background:'none',border:'none',cursor:'pointer',padding:4}}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           </button>
           <div className="flex-1 min-w-0">
@@ -165,6 +165,7 @@ export default function DiscussionRoomPage() {
                 rows={1} className="flex-1 bg-transparent resize-none outline-none text-sm"
                 style={{color:'var(--text-primary)',minHeight:24,maxHeight:100}}/>
               <button onClick={sendMessage} disabled={!input.trim()}
+                aria-label="메시지 전송"
                 className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all"
                 style={{backgroundColor:input.trim()?'var(--brand)':'var(--bg-active)',color:input.trim()?'#fff':'var(--text-tertiary)',transform:input.trim()?'scale(1)':'scale(0.9)'}}>
                 ↑

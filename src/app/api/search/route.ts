@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const supabase = await createSupabaseServer();
     const { searchParams } = new URL(req.url);
     const query = sanitizeSearchQuery(searchParams.get('q') || '', 200);
-    if (!query || query.length < 2) return NextResponse.json({ posts: [], total: 0, query: query || '', page: 1, hasMore: false, stocks: [], apts: [] });
+    if (!query || query.length < 2) return NextResponse.json({ posts: [], total: 0, query: query || '', page: 1, hasMore: false, stocks: [], apts: [] }, { headers: { 'Cache-Control': 'public, max-age=30' } });
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const limit = Math.min(30, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
 
@@ -34,6 +34,6 @@ export async function GET(req: NextRequest) {
       hasMore: (postsResult.count || 0) > page * limit,
       stocks: stocksResult.data || [],
       apts: aptsResult.data || [],
-    });
+    }, { headers: { 'Cache-Control': 'public, max-age=30' } });
   } catch (err) { console.error('[Search GET]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
