@@ -89,6 +89,11 @@ export async function GET(request: NextRequest) {
     if (!authHeader) {
       return NextResponse.json({ success: false, error: '인증이 필요합니다' }, { status: 401 });
     }
+    const supabaseGet = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const { data: { user: getUser } } = await supabaseGet.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (!getUser) {
+      return NextResponse.json({ success: false, error: '유효하지 않은 인증' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('orderId');
     if (!orderId) return NextResponse.json({ success: false, error: 'orderId 필요' }, { status: 400 });
