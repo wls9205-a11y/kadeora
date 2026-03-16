@@ -1,7 +1,7 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import ProfileClient from './ProfileClient';
-import DeleteAccountSection from '@/components/DeleteAccountSection';
+import { DeleteAccountSection } from '@/components/DeleteAccountSection';
 
 interface Props { params: Promise<{ id: string }> }
 

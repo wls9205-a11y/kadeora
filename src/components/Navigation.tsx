@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import ThemeToggle from '@/components/ThemeToggle';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import type { User } from '@supabase/supabase-js';
 
 const NAV_ITEMS = [
