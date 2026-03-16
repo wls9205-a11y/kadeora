@@ -1,44 +1,92 @@
-﻿import type { Metadata } from 'next';
-import '@/styles/globals.css';
-import Script from 'next/script';
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: '카더라 - 대한민국 No.1 커뮤니티 플랫폼',
-  description: '주식, 부동산, 청약, 자유게시판 — 카더라에서 소통하세요',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kadeora.vercel.app'),
+  metadataBase: new URL('https://kadeora.app'),
+  title: {
+    default: '카더라 — 대한민국 소리소문 정보 커뮤니티',
+    template: '%s | 카더라',
+  },
+  description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론을 하나의 앱에서',
+  keywords: ['카더라','소리소문','금융 커뮤니티','주식 커뮤니티','아파트 청약','부동산 커뮤니티','KOSPI','KOSDAQ'],
+  authors: [{ name: '카더라', url: 'https://kadeora.app' }],
+  creator: '카더라',
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: 'https://kadeora.app',
+    siteName: '카더라',
+    title: '카더라 — 대한민국 소리소문 정보 커뮤니티',
+    description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론',
+    images: [{ url: 'https://kadeora.app/api/og', width: 1200, height: 630, alt: '카더라' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '카더라 — 대한민국 소리소문 정보 커뮤니티',
+    description: '대한민국 소리소문 정보 커뮤니티',
+    images: ['https://kadeora.app/api/og'],
+  },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: '카더라' },
-  formatDetection: { telephone: false },
-  openGraph: {
-    type: 'website', locale: 'ko_KR', siteName: '카더라',
-    title: '카더라', description: '주식, 부동산, 청약, 자유게시판',
+  alternates: { canonical: 'https://kadeora.app' },
+  other: {
+    'application-name': '카더라',
+    'service-type': '금융·부동산 정보 커뮤니티',
+    'service-region': '대한민국',
+    'service-language': 'ko',
+    'contact-email': 'wls9205@gmail.com',
   },
-  other: { 'mobile-web-app-capable': 'yes' },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ff5b36' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0d1117' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#FF4500" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#1A1A1B" media="(prefers-color-scheme: dark)" />
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link rel="stylesheet" as="style"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
-        {/* 테마 깜빡임 방지 */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var s=localStorage.getItem('kd-theme');var t=s==='dark'||s==='light'?s:window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();` }} />
+        {/* 다크모드 플리커 방지 — hydration 전에 즉시 실행 */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){
+  try{
+    var s=localStorage.getItem('kadeora-theme');
+    var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    var t=s||(d?'dark':'light');
+    if(t==='dark'){document.documentElement.classList.add('dark');}
+    else{document.documentElement.classList.remove('dark');}
+  }catch(e){}
+})();` }} />
+        {/* JSON-LD 구조화 데이터 */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: '카더라',
+          alternateName: ['KADEORA', '카더라 커뮤니티'],
+          description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론',
+          url: 'https://kadeora.app',
+          applicationCategory: 'FinanceApplication',
+          operatingSystem: 'Web, iOS, Android',
+          inLanguage: 'ko-KR',
+          provider: {
+            '@type': 'Organization',
+            name: '카더라',
+            url: 'https://kadeora.app',
+            contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'wls9205@gmail.com', availableLanguage: '한국어' },
+          },
+        }) }} />
       </head>
-      <body>
-        {children}
-        {/* Service Worker 등록 */}
-        <Script id="sw-register" strategy="afterInteractive">{`
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(function(e) {
-              console.warn('SW registration failed:', e);
-            });
-          }
-        `}</Script>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

@@ -1,39 +1,104 @@
-'use client'
-import{useState}from'react'
-import{useRouter}from'next/navigation'
-export default function DeleteAccountSection(){
-  const[isOpen,setIsOpen]=useState(false)
-  const[txt,setTxt]=useState('')
-  const[loading,setLoading]=useState(false)
-  const[err,setErr]=useState('')
-  const router=useRouter()
-  const PHRASE='계정을 삭제합니다'
-  const handleDelete=async()=>{
-    if(txt!==PHRASE){setErr('확인 문구를 정확히 입력해주세요.');return}
-    setLoading(true);setErr('')
-    try{
-      const r=await fetch('/api/account/delete',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:txt})})
-      if(!r.ok){const d=await r.json();setErr(d.error??'오류가 발생했습니다.');return}
-      alert('계정이 삭제되었습니다.');router.push('/')
-    }catch{setErr('네트워크 오류가 발생했습니다.')}finally{setLoading(false)}
+'use client';
+import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+
+export function DeleteAccountSection() {
+  const [step, setStep] = useState<'hidden'|'confirm'|'typing'>('hidden');
+  const [inputVal, setInputVal] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleDelete = async () => {
+    if (inputVal !== '탈퇴하겠습니다') return;
+    setLoading(true);
+    try {
+      await fetch('/api/account/delete', { method: 'DELETE' });
+      await supabase.auth.signOut();
+      router.push('/');
+    } catch {
+      setLoading(false);
+    }
+  };
+
+  // 완전히 숨겨진 상태 — 작은 링크 텍스트만 노출
+  if (step === 'hidden') {
+    return (
+      <div className="mt-8 pt-6" style={{ borderTop: '1px solid var(--border)' }}>
+        <button
+          onClick={() => setStep('confirm')}
+          className="text-xs"
+          style={{ color: 'var(--text-tertiary)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          회원 탈퇴
+        </button>
+      </div>
+    );
   }
-  return(
-    <section style={{marginTop:'40px',padding:'20px',border:'1px solid var(--kd-danger)',borderRadius:'12px',background:'var(--kd-danger-dim)'}}>
-      <h3 style={{color:'var(--kd-danger)',fontSize:'15px',fontWeight:700,margin:'0 0 8px'}}>위험 구역 — 계정 삭제</h3>
-      <p style={{fontSize:'13px',color:'var(--kd-text-muted)',margin:'0 0 12px',lineHeight:1.5}}>계정을 삭제하면 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.</p>
-      {!isOpen?(
-        <button onClick={()=>setIsOpen(true)} style={{padding:'8px 16px',background:'transparent',color:'var(--kd-danger)',border:'1px solid var(--kd-danger)',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>계정 삭제하기</button>
-      ):(
-        <div>
-          <p style={{fontSize:'13px',color:'var(--kd-text)',marginBottom:'10px'}}>계속하려면 <strong style={{color:'var(--kd-danger)'}}>"{PHRASE}"</strong>를 입력하세요.</p>
-          <input type="text" value={txt} onChange={e=>setTxt(e.target.value)} placeholder={PHRASE} style={{width:'100%',padding:'10px 12px',border:`1px solid ${err?'var(--kd-danger)':'var(--kd-border)'}`,borderRadius:'8px',background:'var(--kd-surface)',color:'var(--kd-text)',fontSize:'14px',marginBottom:'8px',boxSizing:'border-box'}} />
-          {err&&<p style={{fontSize:'12px',color:'var(--kd-danger)',marginBottom:'8px'}}>{err}</p>}
-          <div style={{display:'flex',gap:'8px'}}>
-            <button onClick={handleDelete} disabled={loading||txt!==PHRASE} style={{padding:'8px 18px',background:txt===PHRASE?'var(--kd-danger)':'rgba(239,68,68,0.3)',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',cursor:txt===PHRASE?'pointer':'not-allowed',fontWeight:600}}>{loading?'삭제 중...':'영구 삭제'}</button>
-            <button onClick={()=>{setIsOpen(false);setTxt('');setErr('')}} style={{padding:'8px 16px',background:'var(--kd-surface)',color:'var(--kd-text-muted)',border:'1px solid var(--kd-border)',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>취소</button>
-          </div>
+
+  if (step === 'confirm') {
+    return (
+      <div className="mt-8 p-4 rounded-xl" style={{ backgroundColor: 'var(--error-bg)', border: '1px solid var(--error)' }}>
+        <p className="font-semibold text-sm mb-2" style={{ color: 'var(--error)' }}>정말 탈퇴하시겠습니까?</p>
+        <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+          탈퇴 시 모든 게시글, 댓글, 포인트가 삭제되며 복구할 수 없습니다.
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setStep('hidden')}
+            className="text-sm px-4 py-2 rounded-full"
+            style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+          >
+            취소
+          </button>
+          <button
+            onClick={() => setStep('typing')}
+            className="text-sm px-4 py-2 rounded-full"
+            style={{ backgroundColor: 'var(--error)', color: '#fff', border: 'none' }}
+          >
+            계속
+          </button>
         </div>
-      )}
-    </section>
-  )
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8 p-4 rounded-xl" style={{ backgroundColor: 'var(--error-bg)', border: '1px solid var(--error)' }}>
+      <p className="font-semibold text-sm mb-1" style={{ color: 'var(--error)' }}>최종 확인</p>
+      <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+        아래 입력창에 <strong>탈퇴하겠습니다</strong>를 정확히 입력하세요.
+      </p>
+      <input
+        value={inputVal}
+        onChange={e => setInputVal(e.target.value)}
+        placeholder="탈퇴하겠습니다"
+        className="w-full text-sm px-3 py-2 rounded-lg mb-3"
+        style={{ backgroundColor: 'var(--bg-sunken)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+      />
+      <div className="flex gap-2">
+        <button
+          onClick={() => { setStep('hidden'); setInputVal(''); }}
+          className="text-sm px-4 py-2 rounded-full"
+          style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+        >
+          취소
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={inputVal !== '탈퇴하겠습니다' || loading}
+          className="text-sm px-4 py-2 rounded-full"
+          style={{
+            backgroundColor: inputVal === '탈퇴하겠습니다' ? 'var(--error)' : 'var(--bg-active)',
+            color: inputVal === '탈퇴하겠습니다' ? '#fff' : 'var(--text-disabled)',
+            border: 'none',
+            cursor: inputVal === '탈퇴하겠습니다' ? 'pointer' : 'not-allowed',
+          }}
+        >
+          {loading ? '처리 중...' : '최종 탈퇴'}
+        </button>
+      </div>
+    </div>
+  );
 }

@@ -1,11 +1,11 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
 import { ToastProvider } from '@/components/Toast';
 
 export const metadata: Metadata = {
-  title: { template: '%s | 카더라', default: '카더라' },
-  description: '주식, 부동산, 청약, 자유게시판 — 카더라에서 소통하세요',
-  keywords: ['카더라', '커뮤니티', '주식', '부동산', '청약', '토론'],
+  title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
+  description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론을 하나의 앱에서',
+  keywords: ['카더라', '소리소문', '커뮤니티', '주식', '부동산', '청약', '토론'],
   openGraph: { siteName: '카더라', type: 'website', locale: 'ko_KR' },
 };
 
@@ -18,6 +18,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         margin: '0 auto',
         padding: 'clamp(12px,3vw,20px) clamp(12px,3vw,24px) 90px',
         minHeight: 'calc(100vh - 48px)',
+        backgroundColor: 'var(--bg-base)',
+        color: 'var(--text-primary)',
       }}>
         {children}
       </main>
