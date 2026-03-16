@@ -77,10 +77,10 @@ export default function ShopClient() {
       <ComingSoonBanner feature="토스페이먼츠 결제" description="사업자 등록 심사 완료 후 즉시 활성화됩니다." eta="2026년 4월 예정" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🛒 커뮤니티 상점</h1>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--kd-text-muted)' }}>게시글 노출 및 특별 기능을 구매하세요</p>
+          <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🛒 커뮤니티 상점</h1>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>게시글 노출 및 특별 기능을 구매하세요</p>
         </div>
-        {isDemo && <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: 'var(--kd-primary)', border: '1px solid rgba(59,130,246,0.3)' }}>💡 미리보기</span>}
+        {isDemo && <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: 'var(--brand)', border: '1px solid rgba(59,130,246,0.3)' }}>💡 미리보기</span>}
       </div>
 
       {/* 카테고리 탭 */}
@@ -89,9 +89,9 @@ export default function ShopClient() {
           <button key={cat} onClick={() => setSelectedCategory(cat)} style={{
             padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
             fontSize: 13, fontWeight: 600,
-            background: selectedCategory === cat ? 'var(--kd-primary)' : 'var(--kd-surface)',
-            color: selectedCategory === cat ? 'var(--text-inverse)' : 'var(--kd-text-muted)',
-            outline: `1px solid ${selectedCategory === cat ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
+            background: selectedCategory === cat ? 'var(--brand)' : 'var(--bg-surface)',
+            color: selectedCategory === cat ? 'var(--text-inverse)' : 'var(--text-secondary)',
+            outline: `1px solid ${selectedCategory === cat ? 'var(--brand)' : 'var(--border)'}`,
             transition: 'all 0.15s',
           }}>
             {cat === 'all' ? '전체' : CATEGORY_LABELS[cat] ?? cat}
@@ -103,30 +103,30 @@ export default function ShopClient() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 12 }}>
         {filtered.map(p => (
           <div key={p.id} style={{
-            background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
             borderRadius: 14, padding: '20px 20px 16px',
             transition: 'all 0.15s', position: 'relative',
           }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border-hover)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)';
               (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
               (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
             }}
           >
             <div style={{ fontSize: 36, marginBottom: 12 }}>{p.icon ?? '🎁'}</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>{p.name}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--kd-text-muted)', lineHeight: 1.5 }}>{p.description}</p>
+            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</h3>
+            <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.description}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--kd-text)' }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
                 {(p.price_krw ?? 0).toLocaleString()}
-                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--kd-text-muted)' }}>원</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>원</span>
               </div>
               <button onClick={() => setConfirmProduct(p)} style={{
                 padding: '8px 16px', borderRadius: 8, border: 'none',
-                background: 'var(--kd-primary)', color: 'var(--text-inverse)',
+                background: 'var(--brand)', color: 'var(--text-inverse)',
                 fontWeight: 700, fontSize: 13, cursor: 'pointer',
                 transition: 'opacity 0.15s',
               }}
@@ -138,7 +138,7 @@ export default function ShopClient() {
         ))}
       </div>
 
-      <p style={{ marginTop: 20, fontSize: 12, color: 'var(--kd-text-dim)', textAlign: 'right' }}>
+      <p style={{ marginTop: 20, fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'right' }}>
         ※ 결제는 토스페이먼츠로 진행됩니다. 구매 전 이용약관을 확인해주세요.
       </p>
 

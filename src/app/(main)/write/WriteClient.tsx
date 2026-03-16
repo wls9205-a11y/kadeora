@@ -97,30 +97,30 @@ export default function WriteClient() {
   };
 
   if (loadingEdit) return (
-    <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center', padding: '80px 0', color: 'var(--kd-text-muted)' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center', padding: '80px 0', color: 'var(--text-secondary)' }}>
       게시글 불러오는 중...
     </div>
   );
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <div style={{ fontSize: 13, color: 'var(--kd-text-dim)', marginBottom: 24 }}>
-        <Link href="/feed" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>피드</Link>
+      <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>
+        <Link href="/feed" style={{ color: 'var(--brand)', textDecoration: 'none' }}>피드</Link>
         <span style={{ margin: '0 6px' }}>›</span>
         <span>{editId ? '게시글 수정' : '새 글 작성'}</span>
       </div>
 
       <div style={{
-        background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 16, padding: '28px 28px 24px',
       }}>
-        <h1 style={{ margin: '0 0 24px', fontSize: 20, fontWeight: 800, color: 'var(--kd-text)' }}>
+        <h1 style={{ margin: '0 0 24px', fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>
           {editId ? '✏️ 게시글 수정' : '✏️ 새 글 작성'}
         </h1>
 
         {/* 카테고리 */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>카테고리</label>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>카테고리</label>
           <div style={{ display: 'flex', gap: 8 }}>
             {CATEGORIES.map(cat => (
               <button
@@ -128,9 +128,9 @@ export default function WriteClient() {
                 onClick={() => setCategory(cat.value)}
                 style={{
                   flex: 1, padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
-                  border: `2px solid ${category === cat.value ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
+                  border: `2px solid ${category === cat.value ? 'var(--brand)' : 'var(--border)'}`,
                   background: category === cat.value ? 'rgba(59,130,246,0.12)' : 'transparent',
-                  color: category === cat.value ? 'var(--kd-primary)' : 'var(--kd-text-muted)',
+                  color: category === cat.value ? 'var(--brand)' : 'var(--text-secondary)',
                   fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
                 }}
               >
@@ -142,8 +142,8 @@ export default function WriteClient() {
 
         {/* 제목 */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>
-            제목 <span style={{ color: 'var(--kd-text-dim)', fontWeight: 400 }}>({title.length}/100)</span>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+            제목 <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>({title.length}/100)</span>
           </label>
           <input
             type="text"
@@ -158,9 +158,9 @@ export default function WriteClient() {
 
         {/* 내용 */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
             내용{' '}
-            <span style={{ color: content.length > 4500 ? 'var(--kd-warning)' : 'var(--kd-text-dim)', fontWeight: 400 }}>
+            <span style={{ color: content.length > 4500 ? 'var(--warning)' : 'var(--text-tertiary)', fontWeight: 400 }}>
               ({content.length}/5000)
             </span>
           </label>
@@ -171,13 +171,13 @@ export default function WriteClient() {
             maxLength={5000}
             rows={14}
             style={{
-              width: '100%', background: 'var(--kd-bg)', border: '1px solid var(--kd-border)',
-              borderRadius: 10, color: 'var(--kd-text)', padding: '14px',
+              width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border)',
+              borderRadius: 10, color: 'var(--text-primary)', padding: '14px',
               fontSize: 14, resize: 'vertical', fontFamily: 'inherit',
               lineHeight: 1.7, transition: 'border-color 0.15s', boxSizing: 'border-box',
             }}
-            onFocus={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
-            onBlur={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')}
+            onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+            onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           />
         </div>
 

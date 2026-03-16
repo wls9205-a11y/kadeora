@@ -58,20 +58,20 @@ export function ConsentBanner() {
       aria-modal="true"
       style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 9999,
-        background: "var(--kd-surface)", borderTop: "1px solid var(--kd-border)",
+        background: "var(--bg-surface)", borderTop: "1px solid var(--border)",
         backdropFilter: "blur(16px)", padding: "18px 20px",
       }}
     >
       <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 260 }}>
-          <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "var(--kd-text)" }}>
+          <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
             개인정보 수집 및 이용 동의
           </p>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--kd-text-muted)", lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
             카더라는 서비스 개선을 위해 검색어, 페이지 열람 기록 등 행태정보를 수집합니다.
             수집된 정보는 익명화 처리됩니다.{" "}
-            <strong style={{ color: "var(--kd-text)" }}>거부하셔도 서비스 이용에 제한이 없습니다.</strong>{" "}
-            <a href="/privacy" style={{ color: "var(--kd-primary)", textDecoration: "underline" }}>개인정보처리방침</a>
+            <strong style={{ color: "var(--text-primary)" }}>거부하셔도 서비스 이용에 제한이 없습니다.</strong>{" "}
+            <a href="/privacy" style={{ color: "var(--brand)", textDecoration: "underline" }}>개인정보처리방침</a>
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>

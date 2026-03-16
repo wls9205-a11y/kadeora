@@ -91,15 +91,15 @@ export default function PostActions({ postId, authorId, initialLikes, initialCom
   const btnStyle = (active = false, color = '#FF4500') => ({
     display: 'flex', alignItems: 'center', gap: 6,
     padding: '8px 14px', borderRadius: 20,
-    border: `1px solid ${active ? color : 'var(--kd-border)'}`,
+    border: `1px solid ${active ? color : 'var(--border)'}`,
     background: active ? `${color}22` : 'transparent',
-    color: active ? color : 'var(--kd-text-dim)',
+    color: active ? color : 'var(--text-tertiary)',
     fontSize: 13, fontWeight: 700, cursor: 'pointer',
     transition: 'all 0.15s',
   });
 
   return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '12px 0', borderTop: '1px solid var(--kd-border)', borderBottom: '1px solid var(--kd-border)' }}>
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '12px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
       {/* 좋아요 */}
       <button onClick={handleLike} disabled={loading.like}
         aria-label={liked ? '좋아요 취소' : '좋아요'}
@@ -135,7 +135,7 @@ export default function PostActions({ postId, authorId, initialLikes, initialCom
             await sb.from('reports').insert({ post_id: postId, reporter_id: user.id, reason: '부적절한 내용' });
             success('신고가 접수됐습니다');
           }}
-          style={{ ...btnStyle(), marginLeft: 'auto', color: 'var(--kd-danger)', borderColor: 'transparent' }}>
+          style={{ ...btnStyle(), marginLeft: 'auto', color: 'var(--error)', borderColor: 'transparent' }}>
           🚩 신고
         </button>
       )}

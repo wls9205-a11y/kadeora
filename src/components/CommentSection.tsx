@@ -91,12 +91,12 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
 
   return (
     <div style={{ marginTop: 32 }}>
-      <h3 style={{ color: 'var(--kd-text)', fontSize: 16, fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span>💬</span> 댓글 <span style={{ color: 'var(--kd-primary)', fontSize: 14, fontWeight: 500 }}>{comments.length}</span>
+      <h3 style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span>💬</span> 댓글 <span style={{ color: 'var(--brand)', fontSize: 14, fontWeight: 500 }}>{comments.length}</span>
       </h3>
 
       {/* 댓글 입력 */}
-      <div style={{ background: 'var(--kd-surface)', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid var(--kd-border)' }}>
+      <div style={{ background: 'var(--bg-surface)', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid var(--border)' }}>
         {user ? (
           <>
             <textarea
@@ -106,24 +106,24 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
               maxLength={500}
               rows={3}
               style={{
-                width: '100%', background: 'var(--kd-bg)', border: '1px solid var(--kd-border)',
-                borderRadius: 8, color: 'var(--kd-text)', padding: '10px 12px',
+                width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border)',
+                borderRadius: 8, color: 'var(--text-primary)', padding: '10px 12px',
                 fontSize: 14, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6, boxSizing: 'border-box',
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
-              onBlur={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')}
+              onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+              onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
               onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit(); }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-              <span style={{ fontSize: 12, color: content.length > 450 ? 'var(--kd-danger)' : 'var(--kd-text-dim)' }}>{content.length}/500자</span>
+              <span style={{ fontSize: 12, color: content.length > 450 ? 'var(--error)' : 'var(--text-tertiary)' }}>{content.length}/500자</span>
               <button onClick={handleSubmit} disabled={loading || !content.trim()} className="kd-btn kd-btn-primary" style={{ fontSize: 13, padding: '7px 16px' }}>
                 {loading ? '작성 중...' : '댓글 작성'}
               </button>
             </div>
           </>
         ) : (
-          <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--kd-text-muted)', fontSize: 14 }}>
-            <a href="/login" style={{ color: 'var(--kd-primary)', textDecoration: 'none', fontWeight: 600 }}>로그인</a>하시면 댓글을 작성할 수 있습니다
+          <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--text-secondary)', fontSize: 14 }}>
+            <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>로그인</a>하시면 댓글을 작성할 수 있습니다
           </div>
         )}
       </div>
@@ -131,19 +131,19 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       {/* 댓글 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {comments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--kd-text-dim)', fontSize: 14 }}>
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
             아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
           </div>
         ) : (
           comments.map(comment => (
-            <div key={comment.id} style={{ background: 'var(--kd-surface)', borderRadius: 10, border: '1px solid var(--kd-border)', padding: '14px 16px' }}>
+            <div key={comment.id} style={{ background: 'var(--bg-surface)', borderRadius: 10, border: '1px solid var(--border)', padding: '14px 16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--kd-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
                     {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
                   </div>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text)' }}>{comment.profiles?.nickname ?? '익명'}</span>
-                  <span style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>{timeAgo(comment.created_at)}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {/* 댓글 좋아요 */}
@@ -154,12 +154,12 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     style={{
                       display: 'flex', alignItems: 'center', gap: 4,
                       background: 'none', border: 'none', cursor: 'pointer',
-                      color: 'var(--kd-text-dim)', fontSize: 12, padding: '2px 6px',
+                      color: 'var(--text-tertiary)', fontSize: 12, padding: '2px 6px',
                       borderRadius: 6, transition: 'all 0.15s',
                       opacity: likingIds.has(comment.id) ? 0.5 : 1,
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--kd-danger)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--kd-text-dim)')}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--error)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')}
                   >
                     🤍 <span>{comment.likes_count ?? 0}</span>
                   </button>
@@ -168,12 +168,12 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     <button
                       onClick={() => setDeleteTarget(comment.id)}
                       aria-label="댓글 삭제"
-                      style={{ background: 'none', border: 'none', color: 'var(--kd-danger)', fontSize: 12, cursor: 'pointer', opacity: 0.7, padding: '2px 4px' }}
+                      style={{ background: 'none', border: 'none', color: 'var(--error)', fontSize: 12, cursor: 'pointer', opacity: 0.7, padding: '2px 4px' }}
                     >삭제</button>
                   )}
                 </div>
               </div>
-              <p style={{ margin: 0, fontSize: 14, color: 'var(--kd-text)', lineHeight: 1.6 }}>{comment.content}</p>
+              <p style={{ margin: 0, fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6 }}>{comment.content}</p>
             </div>
           ))
         )}

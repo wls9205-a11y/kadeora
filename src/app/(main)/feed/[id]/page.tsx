@@ -155,8 +155,8 @@ export default async function FeedDetailPage({ params }: Props) {
       />
 
       {/* Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: 'var(--kd-text-dim)' }}>
-        <Link href="/feed" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>피드</Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: 'var(--text-tertiary)' }}>
+        <Link href="/feed" style={{ color: 'var(--brand)', textDecoration: 'none' }}>피드</Link>
         <span>›</span>
         <span style={{ padding: '1px 8px', borderRadius: 999, background: cat.bg, color: cat.color, fontSize: 11, fontWeight: 700 }}>
           {cat.label}
@@ -164,12 +164,12 @@ export default async function FeedDetailPage({ params }: Props) {
       </div>
 
       {/* Post card */}
-      <article style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
+      <article style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <div style={{
             width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg, var(--kd-primary), var(--kd-purple))',
+            background: 'linear-gradient(135deg, var(--brand), var(--info))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 16, fontWeight: 700, color: 'var(--text-inverse)',
           }}>
@@ -177,7 +177,7 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
                 {post.profiles?.nickname ?? '익명'}
               </span>
               {post.profiles?.grade && (
@@ -186,18 +186,18 @@ export default async function FeedDetailPage({ params }: Props) {
                 </span>
               )}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--kd-text-dim)', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
               {timeAgo(post.created_at)} · 조회 {post.view_count.toLocaleString()}
             </div>
           </div>
           <PostActions postId={post.id} authorId={post.author_id ?? ''} currentUserId={currentUserId} />
         </div>
 
-        <h1 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)', lineHeight: 1.4 }}>
+        <h1 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.4 }}>
           {post.title}
         </h1>
 
-        <div style={{ fontSize: 15, color: 'var(--kd-text)', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
+        <div style={{ fontSize: 15, color: 'var(--text-primary)', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
           {post.content}
         </div>
 
@@ -229,17 +229,17 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
         {/* Actions */}
-        <div style={{ borderTop: '1px solid var(--kd-border)', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
           <LikeButton postId={post.id} initialCount={post.likes_count} />`n          <BookmarkButton postId={post.id} />
           <ShareButtons title={post.title} postId={post.id} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--kd-border)', color: 'var(--kd-text-muted)', fontSize: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 14 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
           </div>
         </div>
       </article>
 
       {/* Comments */}
-      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '24px 28px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
     </div>

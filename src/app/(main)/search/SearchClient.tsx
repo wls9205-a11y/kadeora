@@ -42,7 +42,7 @@ function highlight(text: string, query: string): React.ReactNode {
   const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
   return parts.map((p, i) =>
     p.toLowerCase() === query.toLowerCase()
-      ? <mark key={i} style={{ background: 'var(--info-bg)', color: 'var(--kd-primary)', borderRadius: 2 }}>{p}</mark>
+      ? <mark key={i} style={{ background: 'var(--info-bg)', color: 'var(--brand)', borderRadius: 2 }}>{p}</mark>
       : p
   );
 }
@@ -188,7 +188,7 @@ export default function SearchClient() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🔍 검색</h1>
+      <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
 
       {/* Search input */}
       <div style={{ position: 'relative', marginBottom: 16 }}>
@@ -208,7 +208,7 @@ export default function SearchClient() {
           <button
             onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); }}
             aria-label="검색어 지우기"
-            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--kd-text-dim)', cursor: 'pointer', fontSize: 18 }}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18 }}
           >✕</button>
         )}
 
@@ -255,12 +255,12 @@ export default function SearchClient() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--kd-text)' }}>{highlight(stock.name, inputVal)}</span>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{highlight(stock.name, inputVal)}</span>
                         <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{highlight(stock.symbol, inputVal)}</span>
                         <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>{stock.market}</span>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text)' }}>{stock.price?.toLocaleString()}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{stock.price?.toLocaleString()}</span>
                         {stock.change_pct != null && (
                           <span style={{ fontSize: 12, marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #EF4444)', fontWeight: 600 }}>
                             {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct.toFixed(2)}%
@@ -285,7 +285,7 @@ export default function SearchClient() {
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--kd-text)' }}>{highlight(apt.house_nm, inputVal)}</div>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{highlight(apt.house_nm, inputVal)}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
                       {highlight(apt.region_nm, inputVal)}
                       {apt.rcept_bgnde && <span style={{ marginLeft: 8 }}>{apt.rcept_bgnde} ~ {apt.rcept_endde}</span>}
@@ -311,7 +311,7 @@ export default function SearchClient() {
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--kd-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {highlight(post.title, inputVal)}
                         </span>
                       </div>
@@ -330,9 +330,9 @@ export default function SearchClient() {
           <button key={k} onClick={() => { setCategory(k); setPage(0); }}
             style={{
               padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-              background: category === k ? 'var(--kd-primary)' : 'var(--kd-surface)',
-              color: category === k ? 'white' : 'var(--kd-text-muted, #94A3B8)',
-              border: `1px solid ${category === k ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
+              background: category === k ? 'var(--brand)' : 'var(--bg-surface)',
+              color: category === k ? 'var(--text-inverse)' : 'var(--text-secondary)',
+              border: `1px solid ${category === k ? 'var(--brand)' : 'var(--border)'}`,
               transition: 'all 0.15s',
             }}
           >{l}</button>
@@ -341,12 +341,12 @@ export default function SearchClient() {
 
       {/* Results header */}
       {query.length >= 2 && (
-        <div style={{ marginBottom: 14, fontSize: 13, color: 'var(--kd-text-muted)' }}>
+        <div style={{ marginBottom: 14, fontSize: 13, color: 'var(--text-secondary)' }}>
           {loading && results.length === 0
             ? '검색 중...'
             : total > 0
-              ? <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span> 검색 결과 <span style={{ color: 'var(--kd-primary)', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
-              : <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span>에 대한 검색 결과가 없습니다</>
+              ? <><span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span> 검색 결과 <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
+              : <><span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span>에 대한 검색 결과가 없습니다</>
           }
         </div>
       )}
@@ -358,23 +358,23 @@ export default function SearchClient() {
           return (
             <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 12, padding: '16px 18px',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 18px',
                 transition: 'border-color 0.15s',
               }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                  <span style={{ fontSize: 12, color: 'var(--kd-text-dim)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
-                <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>
+                <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
                   {highlight(post.title, query)}
                 </h3>
-                <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                   {highlight(post.content.slice(0, 200), query)}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--kd-text-dim)' }}>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)' }}>
                   <span>👁️ {post.view_count}</span>
                   <span>❤️ {post.likes_count}</span>
                   <span>💬 {post.comments_count}</span>
@@ -389,16 +389,16 @@ export default function SearchClient() {
       {hasMore && (
         <div ref={loaderRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 12 }}>
           {loading && (
-            <div style={{ width: 24, height: 24, border: '2px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%' }} className="animate-spin" />
+            <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%' }} className="animate-spin" />
           )}
         </div>
       )}
 
       {/* Empty state */}
       {query.length < 2 && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)' }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, color: 'var(--kd-text)' }}>검색어를 입력해주세요</div>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>검색어를 입력해주세요</div>
           <div style={{ fontSize: 13 }}>주식, 청약, 재테크 관련 글을 검색할 수 있습니다</div>
         </div>
       )}

@@ -138,24 +138,24 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 프로필 카드 */}
-      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
           {/* 아바타 */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
             {avatarUrl ? (
-              <div style={{ width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid var(--kd-border)' }}>
+              <div style={{ width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid var(--border)' }}>
                 <Image src={avatarUrl} alt={`${displayName} 프로필 사진`} fill sizes="72px" style={{ objectFit: 'cover' }} />
               </div>
             ) : (
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,var(--info),var(--brand))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'var(--text-inverse)', border: '2px solid var(--kd-border)' }}>
+              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,var(--info),var(--brand))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'var(--text-inverse)', border: '2px solid var(--border)' }}>
                 {displayName[0].toUpperCase()}
               </div>
             )}
             {isOwner && (
               <>
                 <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} style={{ display: 'none' }} id="avatar-upload" aria-label="프로필 사진 변경" />
-                <label htmlFor="avatar-upload" title="프로필 사진 변경" style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--kd-primary)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, cursor: avatarUploading ? 'not-allowed' : 'pointer', border: '2px solid var(--kd-surface)', opacity: avatarUploading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+                <label htmlFor="avatar-upload" title="프로필 사진 변경" style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, cursor: avatarUploading ? 'not-allowed' : 'pointer', border: '2px solid var(--bg-surface)', opacity: avatarUploading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
                   {avatarUploading ? '⏳' : '📷'}
                 </label>
               </>
@@ -168,28 +168,28 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               <>
                 <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="닉네임" maxLength={20} className="kd-input" style={{ marginBottom: 8, fontSize: 15 }} />
                 <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="자기소개를 입력해주세요" maxLength={200} rows={3}
-                  style={{ width: '100%', background: 'var(--kd-bg)', border: '1px solid var(--kd-border)', borderRadius: 8, color: 'var(--kd-text)', padding: '10px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
-                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
-                  onBlur={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')} />
-                <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', textAlign: 'right', marginTop: 4 }}>{bio.length}/200</div>
+                  style={{ width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', padding: '10px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')} />
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4 }}>{bio.length}/200</div>
               </>
             ) : (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                  <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>{displayName}</h1>
+                  <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{displayName}</h1>
                   <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor }}>
                     {gradeEmoji} {gradeTitle} Lv.{gradeNum}
                   </span>
                   {profile.is_premium && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700 }}>👑 PREMIUM</span>}
                 </div>
-                <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--kd-text-dim)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
                   <span>{joinDate} 가입</span>
                   {profile.region_text && <span>📍 {profile.region_text}</span>}
-                  <span>팔로워 <strong style={{ color: 'var(--kd-text)' }}>{followers}</strong></span>
-                  <span>팔로잉 <strong style={{ color: 'var(--kd-text)' }}>{followingCount}</strong></span>
+                  <span>팔로워 <strong style={{ color: 'var(--text-primary)' }}>{followers}</strong></span>
+                  <span>팔로잉 <strong style={{ color: 'var(--text-primary)' }}>{followingCount}</strong></span>
                 </div>
               </>
             )}
@@ -217,47 +217,47 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
         </div>
 
         {/* 등급 진행 바 */}
-        <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--kd-bg)', borderRadius: 10, border: '1px solid var(--kd-border)' }}>
+        <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--bg-base)', borderRadius: 10, border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: gradeColor }}>{gradeEmoji} {gradeTitle}</span>
-            <span style={{ fontSize: 12, color: 'var(--kd-text-muted)' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               {currentPoints.toLocaleString()} / {gradeNum < 10 ? nextPoints.toLocaleString() : '∞'} pts
             </span>
           </div>
-          <div style={{ height: 6, background: 'var(--kd-border)', borderRadius: 3 }}>
+          <div style={{ height: 6, background: 'var(--border)', borderRadius: 3 }}>
             <div style={{ height: '100%', borderRadius: 3, background: gradeColor, width: `${progress}%`, transition: 'width 0.6s ease' }} />
           </div>
           {gradeNum < 10 && (
-            <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', marginTop: 6, textAlign: 'right' }}>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'right' }}>
               다음 등급까지 {(nextPoints - currentPoints).toLocaleString()}pts
             </div>
           )}
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 1, marginTop: 16, background: 'var(--kd-border)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 1, marginTop: 16, background: 'var(--border)', borderRadius: 12, overflow: 'hidden' }}>
           {[
             { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
             { label: '댓글', value: commentCount, icon: '💬' },
             { label: '받은 좋아요', value: profile.likes_count ?? 0, icon: '❤️' },
             { label: '총 활동', value: totalActivity, icon: '⚡' },
           ].map((stat, i) => (
-            <div key={stat.label} style={{ background: 'var(--kd-surface)', padding: '16px 12px', textAlign: 'center', borderRight: i < 3 ? '1px solid var(--kd-border)' : 'none' }}>
+            <div key={stat.label} style={{ background: 'var(--bg-surface)', padding: '16px 12px', textAlign: 'center', borderRight: i < 3 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--kd-text)' }}>{stat.value.toLocaleString()}</div>
-              <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', marginTop: 2 }}>{stat.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{stat.value.toLocaleString()}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* 탭 — 게시글 / 북마크(본인만) */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--kd-surface)', borderRadius: 12, padding: 4, border: '1px solid var(--kd-border)' }}>
+      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 12, padding: 4, border: '1px solid var(--border)' }}>
         {(['posts', ...(isOwner ? ['bookmarks'] : [])] as const).map(tab => (
           <button key={tab} onClick={() => handleTabChange(tab)} style={{
             flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-            background: activeTab === tab ? 'var(--kd-primary)' : 'transparent',
-            color: activeTab === tab ? 'var(--text-inverse)' : 'var(--kd-text-muted)',
+            background: activeTab === tab ? 'var(--brand)' : 'transparent',
+            color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',
             fontWeight: 600, fontSize: 13, transition: 'all 0.15s',
           }}>
             {tab === 'posts' ? `📝 작성한 글 (${posts.length})` : `🔖 북마크`}
@@ -266,22 +266,22 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       </div>
 
       {/* 게시글 목록 */}
-      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, padding: '20px 24px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '20px 24px' }}>
         {activeTab === 'posts' && (
           posts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--kd-text-dim)' }}>아직 작성한 글이 없습니다</div>
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>아직 작성한 글이 없습니다</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {posts.map((post, i) => {
                 const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
                 return (
                   <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ padding: '12px 0', borderBottom: i < posts.length-1 ? '1px solid var(--kd-border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
+                    <div style={{ padding: '12px 0', borderBottom: i < posts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                       <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                      <span style={{ flex: 1, fontSize: 14, color: 'var(--kd-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--kd-text-dim)', flexShrink: 0 }}>
+                      <span style={{ flex: 1, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+                      <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
                         <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                       </div>
@@ -295,23 +295,23 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
 
         {activeTab === 'bookmarks' && (
           !bookmarksLoaded ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--kd-text-muted)' }}>
-              <div style={{ width: 24, height: 24, border: '2px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%', margin: '0 auto 8px' }} className="animate-spin" />
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
+              <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', margin: '0 auto 8px' }} className="animate-spin" />
             </div>
           ) : bookmarkedPosts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--kd-text-dim)' }}>북마크한 글이 없습니다</div>
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>북마크한 글이 없습니다</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {bookmarkedPosts.map((post, i) => {
                 const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
                 return (
                   <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ padding: '12px 0', borderBottom: i < bookmarkedPosts.length-1 ? '1px solid var(--kd-border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
+                    <div style={{ padding: '12px 0', borderBottom: i < bookmarkedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                       <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                      <span style={{ flex: 1, fontSize: 14, color: 'var(--kd-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--kd-text-dim)', flexShrink: 0 }}>
+                      <span style={{ flex: 1, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+                      <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
                         <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                       </div>

@@ -55,18 +55,18 @@ export function ConfirmModal({
       <div
         className="animate-modalIn"
         style={{
-          background: 'var(--kd-surface)',
-          border: '1px solid var(--kd-border)',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border)',
           borderRadius: 16, padding: '28px 24px',
           width: '100%', maxWidth: 400,
           boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
         }}
         onClick={e => e.stopPropagation()}
       >
-        <h3 style={{ margin: '0 0 10px', color: 'var(--kd-text)', fontSize: 18, fontWeight: 700 }}>
+        <h3 style={{ margin: '0 0 10px', color: 'var(--text-primary)', fontSize: 18, fontWeight: 700 }}>
           {title}
         </h3>
-        <p style={{ margin: '0 0 24px', color: 'var(--kd-text-muted)', fontSize: 14, lineHeight: 1.6 }}>
+        <p style={{ margin: '0 0 24px', color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>
           {message}
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>

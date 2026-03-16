@@ -27,10 +27,10 @@ const ICONS: Record<ToastType, string> = {
 };
 
 const COLORS: Record<ToastType, { bg: string; border: string; icon: string }> = {
-  success: { bg: 'var(--kd-success-dim)', border: 'var(--kd-success)', icon: 'var(--kd-success)' },
-  error: { bg: 'var(--kd-danger-dim)', border: 'var(--kd-danger)', icon: 'var(--kd-danger)' },
-  info: { bg: 'var(--kd-primary-dim)', border: 'var(--kd-primary)', icon: 'var(--kd-primary)' },
-  warning: { bg: 'var(--kd-warning-dim)', border: 'var(--kd-warning)', icon: 'var(--kd-warning)' },
+  success: { bg: 'var(--success-bg)', border: 'var(--success)', icon: 'var(--success)' },
+  error: { bg: 'var(--error-bg)', border: 'var(--error)', icon: 'var(--error)' },
+  info: { bg: 'var(--brand-light)', border: 'var(--brand)', icon: 'var(--brand)' },
+  warning: { bg: 'var(--warning-bg)', border: 'var(--warning)', icon: 'var(--warning)' },
 };
 
 function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
@@ -70,7 +70,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 13, fontWeight: 700, flexShrink: 0,
       }}>{ICONS[toast.type]}</span>
-      <span style={{ color: 'var(--kd-text)', fontSize: 14, lineHeight: 1.4, flex: 1 }}>
+      <span style={{ color: 'var(--text-primary)', fontSize: 14, lineHeight: 1.4, flex: 1 }}>
         {toast.message}
       </span>
     </div>

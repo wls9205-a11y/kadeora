@@ -70,7 +70,7 @@ export default function NotificationsPage() {
   const unreadCount = notifs.filter(n => !n.is_read).length;
 
   if (!user && !loading) return (
-    <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)' }}>
+    <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
       <div style={{ fontSize: 40, marginBottom: 12 }}>🔔</div>
       <p>로그인이 필요합니다</p>
       <a href="/login" style={{ color: 'var(--brand)', fontWeight: 700 }}>로그인하기 →</a>
@@ -82,19 +82,19 @@ export default function NotificationsPage() {
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--kd-text)' }}>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>
             🔔 알림
           </h1>
           {unreadCount > 0 && (
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--kd-text-muted)' }}>
+            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>
               읽지 않은 알림 {unreadCount}개
             </p>
           )}
         </div>
         {unreadCount > 0 && (
           <button onClick={markAllRead} style={{
-            padding: '7px 14px', borderRadius: 20, border: '1px solid var(--kd-border)',
-            background: 'transparent', color: 'var(--kd-text-muted)',
+            padding: '7px 14px', borderRadius: 20, border: '1px solid var(--border)',
+            background: 'transparent', color: 'var(--text-secondary)',
             fontSize: 13, fontWeight: 600, cursor: 'pointer',
           }}>
             모두 읽음
@@ -105,11 +105,11 @@ export default function NotificationsPage() {
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[1,2,3].map(i => (
-            <div key={i} style={{ height: 64, background: 'var(--kd-surface)', borderRadius: 4, border: '1px solid var(--kd-border)', animation: 'pulse 1.8s ease-in-out infinite' }} />
+            <div key={i} style={{ height: 64, background: 'var(--bg-surface)', borderRadius: 4, border: '1px solid var(--border)', animation: 'pulse 1.8s ease-in-out infinite' }} />
           ))}
         </div>
       ) : notifs.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)', background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4 }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4 }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>📭</div>
           <div>알림이 없습니다</div>
         </div>
@@ -121,21 +121,21 @@ export default function NotificationsPage() {
               style={{
                 display: 'flex', alignItems: 'flex-start', gap: 12,
                 padding: '14px 16px', borderRadius: 4, cursor: 'pointer',
-                background: n.is_read ? 'var(--kd-surface)' : 'var(--kd-primary-dim)',
-                border: `1px solid ${n.is_read ? 'var(--kd-border)' : 'rgba(255,69,0,0.2)'}`,
+                background: n.is_read ? 'var(--bg-surface)' : 'var(--brand-light)',
+                border: `1px solid ${n.is_read ? 'var(--border)' : 'rgba(255,69,0,0.2)'}`,
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--kd-surface-2)')}
-              onMouseLeave={e => (e.currentTarget.style.background = n.is_read ? 'var(--kd-surface)' : 'var(--kd-primary-dim)')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+              onMouseLeave={e => (e.currentTarget.style.background = n.is_read ? 'var(--bg-surface)' : 'var(--brand-light)')}
             >
               <span style={{ fontSize: 20, flexShrink: 0 }}>
                 {TYPE_ICON[n.type] ?? '🔔'}
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, color: 'var(--kd-text)', lineHeight: 1.4 }}>
+                <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.4 }}>
                   {n.content}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--kd-text-muted)', marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
                   {timeAgo(n.created_at)}
                 </div>
               </div>

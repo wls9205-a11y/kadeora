@@ -31,15 +31,15 @@ function LoginForm({ redirect }: LoginFormProps) {
   return (
     <div style={{ width: '100%', maxWidth: 400 }}>
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--kd-primary)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
+        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
           KADEORA
         </div>
-        <p style={{ margin: 0, color: 'var(--kd-text-muted)', fontSize: 14 }}>실시간 정보가 모이는 커뮤니티</p>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>실시간 정보가 모이는 커뮤니티</p>
       </div>
 
-      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
-        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)', textAlign: 'center' }}>로그인</h2>
-        <p style={{ margin: '0 0 32px', color: 'var(--kd-text-dim)', fontSize: 13, textAlign: 'center', lineHeight: 1.5 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>로그인</h2>
+        <p style={{ margin: '0 0 32px', color: 'var(--text-tertiary)', fontSize: 13, textAlign: 'center', lineHeight: 1.5 }}>
           소셜 계정으로 간편하게 시작하세요
         </p>
 
@@ -61,10 +61,10 @@ function LoginForm({ redirect }: LoginFormProps) {
         <button
           onClick={() => login('google')}
           disabled={!!loading}
-          style={{ width: '100%', padding: '14px 20px', borderRadius: 12, border: '1px solid var(--kd-border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kd-surface-2)', color: 'var(--kd-text)', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', borderRadius: 12, border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'google' ? (
-            <div style={{ width: 20, height: 20, border: '2px solid var(--kd-text)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: 20, height: 20, border: '2px solid var(--text-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -77,16 +77,16 @@ function LoginForm({ redirect }: LoginFormProps) {
         </button>
 
         {error && (
-          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--kd-danger)', fontSize: 13 }}>
+          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--error)', fontSize: 13 }}>
             ⚠ {error}
           </div>
         )}
 
-        <p style={{ margin: '24px 0 0', fontSize: 11, color: 'var(--kd-text-dim)', textAlign: 'center', lineHeight: 1.6 }}>
+        <p style={{ margin: '24px 0 0', fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6 }}>
           로그인 시{' '}
-          <a href="/terms" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>이용약관</a>
+          <a href="/terms" style={{ color: 'var(--brand)', textDecoration: 'none' }}>이용약관</a>
           {' '}및{' '}
-          <a href="/privacy" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>개인정보처리방침</a>
+          <a href="/privacy" style={{ color: 'var(--brand)', textDecoration: 'none' }}>개인정보처리방침</a>
           에 동의하게 됩니다
         </p>
       </div>

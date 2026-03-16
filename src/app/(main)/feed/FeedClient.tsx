@@ -61,7 +61,7 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
       <div className="feed-main">
         {/* 카테고리 바 */}
         <div style={{
-          background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 4, padding: '8px 10px', display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap',
         }}>
           {categories.map(cat => (
@@ -70,8 +70,8 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
               style={{
                 padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer',
                 fontWeight: 700, fontSize: 14,
-                background: activeCategory === cat.key ? 'var(--kd-border)' : 'transparent',
-                color: activeCategory === cat.key ? 'var(--kd-text)' : 'var(--kd-text-muted)',
+                background: activeCategory === cat.key ? 'var(--border)' : 'transparent',
+                color: activeCategory === cat.key ? 'var(--text-primary)' : 'var(--text-secondary)',
                 transition: 'all 0.1s',
               }}>
               {cat.label}
@@ -88,45 +88,45 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
                 style={{ display: 'flex', textDecoration: 'none' }}>
                 {/* 투표 */}
                 <div style={{
-                  width: 40, background: 'var(--kd-surface-2)', borderRadius: '4px 0 0 4px',
+                  width: 40, background: 'var(--bg-hover)', borderRadius: '4px 0 0 4px',
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
                   padding: '10px 4px', gap: 4, flexShrink: 0,
                 }}>
-                  <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: '8px solid var(--kd-primary)' }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--kd-primary)' }}>{numFmt(post.likes_count ?? 0)}</span>
-                  <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '8px solid var(--kd-border)' }} />
+                  <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: '8px solid var(--brand)' }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>{numFmt(post.likes_count ?? 0)}</span>
+                  <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '8px solid var(--border)' }} />
                 </div>
                 {/* 본문 */}
                 <div style={{ flex: 1, padding: '10px 12px', minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kd-text-dim)', marginBottom: 6, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6, flexWrap: 'wrap' }}>
                     {post.profiles?.avatar_url ? (
                       <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
                         <Image src={post.profiles.avatar_url} alt="" fill sizes="18px" style={{ objectFit: 'cover' }} />
                       </div>
                     ) : (
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, background: 'var(--kd-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
+                      <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
                         {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
                       </div>
                     )}
-                    <span>r/<strong style={{ color: 'var(--kd-text)' }}>{cat.label}</strong> · u/<strong style={{ color: 'var(--kd-text)' }}>{post.profiles?.nickname ?? '익명'}</strong> · {timeAgo(post.created_at)}</span>
+                    <span>r/<strong style={{ color: 'var(--text-primary)' }}>{cat.label}</strong> · u/<strong style={{ color: 'var(--text-primary)' }}>{post.profiles?.nickname ?? '익명'}</strong> · {timeAgo(post.created_at)}</span>
                     <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                    {(post.likes_count ?? 0) > 200 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: 'var(--kd-danger-dim)', color: 'var(--kd-danger)' }}>🔥 HOT</span>}
+                    {(post.likes_count ?? 0) > 200 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: 'var(--error-bg)', color: 'var(--error)' }}>🔥 HOT</span>}
                   </div>
-                  <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 500, color: 'var(--kd-text)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                  <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                     {post.title}
                   </h2>
-                  <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                     {post.content}
                   </p>
                   <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                     {[['💬', `댓글 ${numFmt(post.comments_count ?? 0)}`], ['🔗', '공유'], ['🔖', '저장']].map(([icon, label]) => (
-                      <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: 12, fontWeight: 700, color: 'var(--kd-text-dim)', cursor: 'pointer' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--kd-border)'; (e.currentTarget as HTMLElement).style.color = 'var(--kd-text)'; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--kd-text-dim)'; }}>
+                      <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', cursor: 'pointer' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
                         {icon} {label}
                       </div>
                     ))}
-                    <div style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--kd-text-dim)', padding: '5px 4px' }}>👁 {numFmt(post.view_count ?? 0)}</div>
+                    <div style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)', padding: '5px 4px' }}>👁 {numFmt(post.view_count ?? 0)}</div>
                   </div>
                 </div>
               </Link>
@@ -136,11 +136,11 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
 
         {visibleCount < posts.length && (
           <div ref={observerRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
-            <div style={{ width: 22, height: 22, border: '2px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%' }} className="animate-spin" />
+            <div style={{ width: 22, height: 22, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%' }} className="animate-spin" />
           </div>
         )}
         {posts.length === 0 && (
-          <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4, padding: '40px 0', textAlign: 'center', color: 'var(--kd-text-dim)' }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '40px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
             <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>게시글이 없습니다
           </div>
         )}
@@ -149,54 +149,54 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
       {/* ── 사이드바 (1024px+ 에서만 표시) ── */}
       <aside className="feed-sidebar">
         {/* 커뮤니티 카드 */}
-        <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{ background: 'var(--kd-primary)', height: 56, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
+          <div style={{ background: 'var(--brand)', height: 56, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8 }}>
             {LOGO_SVG}
             <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-inverse, #fff)', letterSpacing: -0.5 }}>kadeora</span>
           </div>
           <div style={{ padding: '32px 12px 12px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: -22, left: 12, width: 44, height: 44, borderRadius: '50%', border: '3px solid var(--kd-surface)', background: 'var(--kd-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', top: -22, left: 12, width: 44, height: 44, borderRadius: '50%', border: '3px solid var(--bg-surface)', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {LOGO_SVG}
             </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--kd-text)', marginBottom: 4 }}>r/kadeora</div>
-            <div style={{ fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5, marginBottom: 10 }}>대한민국 No.1 커뮤니티 — 주식, 부동산, 청약, 자유게시판</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>r/kadeora</div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 10 }}>대한민국 No.1 커뮤니티 — 주식, 부동산, 청약, 자유게시판</div>
             <div style={{ display: 'flex', gap: 14, marginBottom: 10 }}>
               {[['4','멤버'],['10','토론방'],['28','게시글']].map(([n,l]) => (
                 <div key={l} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--kd-text)' }}>{n}</div>
-                  <div style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>{l}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{n}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{l}</div>
                 </div>
               ))}
             </div>
-            <Link href="/write" style={{ display: 'block', textAlign: 'center', background: 'var(--kd-primary)', color: 'var(--text-inverse, #fff)', borderRadius: 20, padding: '7px 0', fontSize: 13, fontWeight: 700 }}>
+            <Link href="/write" style={{ display: 'block', textAlign: 'center', background: 'var(--brand)', color: 'var(--text-inverse, #fff)', borderRadius: 20, padding: '7px 0', fontSize: 13, fontWeight: 700 }}>
               + 새 게시글 작성
             </Link>
           </div>
         </div>
 
         {/* 인기 키워드 */}
-        <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{ background: 'var(--kd-primary)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>🔥 인기 키워드</div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
+          <div style={{ background: 'var(--brand)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>🔥 인기 키워드</div>
           <div style={{ padding: '6px 0' }}>
             {trending.map((kw, i) => (
               <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.keyword)}`}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderBottom: '1px solid var(--kd-border)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--kd-surface-2)')}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderBottom: '1px solid var(--border)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <span style={{ width: 20, fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--kd-primary)' : 'var(--kd-text-dim)', flexShrink: 0 }}>{i + 1}</span>
-                <span style={{ flex: 1, fontSize: 13, color: 'var(--kd-text)', fontWeight: 500 }}>#{kw.keyword}</span>
-                <span style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>{kw.heat_score >= 1000 ? (kw.heat_score / 1000).toFixed(1) + 'k' : kw.heat_score}</span>
+                <span style={{ width: 20, fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', flexShrink: 0 }}>{i + 1}</span>
+                <span style={{ flex: 1, fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>#{kw.keyword}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{kw.heat_score >= 1000 ? (kw.heat_score / 1000).toFixed(1) + 'k' : kw.heat_score}</span>
               </Link>
             ))}
           </div>
         </div>
 
         {/* 빠른 메뉴 */}
-        <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4, overflow: 'hidden' }}>
-          <div style={{ background: 'var(--kd-primary)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>빠른 메뉴</div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+          <div style={{ background: 'var(--brand)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>빠른 메뉴</div>
           {[['📝 새 글 작성','/write'],['💬 실시간 토론','/discuss'],['📈 주식 시세','/stock'],['🏠 청약 정보','/apt']].map(([l,h]) => (
-            <Link key={h as string} href={h as string} style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid var(--kd-border)', fontSize: 13, fontWeight: 500, color: 'var(--kd-text)' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--kd-surface-2)')}
+            <Link key={h as string} href={h as string} style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
               {l}
             </Link>

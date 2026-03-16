@@ -60,32 +60,32 @@ export default function OnboardingClient() {
 
   return (
     <div style={{ maxWidth: 480, margin: '40px auto', padding: '0 16px' }}>
-      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 20, padding: '40px 36px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '40px 36px' }}>
         {/* 진행 바 */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--kd-text-dim)' }}>Step {step} / {TOTAL}</span>
-            <span style={{ fontSize: 12, color: 'var(--kd-primary)', fontWeight: 600 }}>{stepLabels[step - 1]}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Step {step} / {TOTAL}</span>
+            <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600 }}>{stepLabels[step - 1]}</span>
           </div>
-          <div style={{ height: 4, background: 'var(--kd-border)', borderRadius: 2 }}>
-            <div style={{ height: '100%', borderRadius: 2, background: 'var(--kd-primary)', width: `${(step / TOTAL) * 100}%`, transition: 'width 0.3s ease' }} />
+          <div style={{ height: 4, background: 'var(--border)', borderRadius: 2 }}>
+            <div style={{ height: '100%', borderRadius: 2, background: 'var(--brand)', width: `${(step / TOTAL) * 100}%`, transition: 'width 0.3s ease' }} />
           </div>
         </div>
 
         {/* Step 1: 닉네임 */}
         {step === 1 && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--kd-text)', margin: '0 0 8px' }}>안녕하세요! 👋</h1>
-            <p style={{ fontSize: 14, color: 'var(--kd-text-muted)', margin: '0 0 32px', lineHeight: 1.6 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>안녕하세요! 👋</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 32px', lineHeight: 1.6 }}>
               카더라에서 사용할 닉네임을 설정해주세요.<br />닉네임은 나중에 프로필에서 변경할 수 있습니다.
             </p>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>
-              닉네임 <span style={{ color: 'var(--kd-danger)' }}>*</span>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+              닉네임 <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="2~20자" maxLength={20}
               className="kd-input" style={{ fontSize: 16, marginBottom: 8 }} autoFocus
               onKeyDown={e => e.key === 'Enter' && nickname.trim().length >= 2 && setStep(2)} />
-            <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', textAlign: 'right' }}>{nickname.length}/20</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
             <button onClick={() => { if (nickname.trim().length < 2) { error('닉네임은 2자 이상이어야 합니다'); return; } setStep(2); }}
               className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 24, padding: '13px', fontSize: 15, fontWeight: 700 }}>
               다음 →
@@ -96,17 +96,17 @@ export default function OnboardingClient() {
         {/* Step 2: 관심 분야 */}
         {step === 2 && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--kd-text)', margin: '0 0 8px' }}>관심 분야를 선택해주세요 📊</h1>
-            <p style={{ fontSize: 14, color: 'var(--kd-text-muted)', margin: '0 0 24px', lineHeight: 1.6 }}>최대 5개 선택 ({selectedInterests.length}/5)</p>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>관심 분야를 선택해주세요 📊</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>최대 5개 선택 ({selectedInterests.length}/5)</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
               {INTERESTS.map(({ key, label }) => {
                 const sel = selectedInterests.includes(key);
                 return (
                   <button key={key} onClick={() => toggleInterest(key)} style={{
                     padding: '12px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 14, fontWeight: 600,
-                    background: sel ? 'var(--kd-primary-dim)' : 'var(--kd-bg)',
-                    border: `1px solid ${sel ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
-                    color: sel ? 'var(--kd-primary)' : 'var(--kd-text-muted)',
+                    background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
+                    border: `1px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
+                    color: sel ? 'var(--brand)' : 'var(--text-secondary)',
                     transition: 'all 0.15s', textAlign: 'left',
                   }}>{label}</button>
                 );
@@ -122,15 +122,15 @@ export default function OnboardingClient() {
         {/* Step 3: 지역 + 마케팅 */}
         {step === 3 && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--kd-text)', margin: '0 0 8px' }}>거의 다 됐어요! 🎯</h1>
-            <p style={{ fontSize: 14, color: 'var(--kd-text-muted)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text-muted)', display: 'block', marginBottom: 8 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>거의 다 됐어요! 🎯</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
               거주 지역 <span style={{ fontSize: 11, fontWeight: 400 }}>(선택)</span>
             </label>
             <select value={region} onChange={e => setRegion(e.target.value)} style={{
               width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 20,
-              background: 'var(--kd-surface-2)', border: '1px solid var(--kd-border)',
-              color: region ? 'var(--kd-text)' : 'var(--kd-text-dim)', fontSize: 14, fontFamily: 'inherit',
+              background: 'var(--bg-hover)', border: '1px solid var(--border)',
+              color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 14, fontFamily: 'inherit',
             }}>
               <option value="">지역 선택 (선택사항)</option>
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
@@ -138,16 +138,16 @@ export default function OnboardingClient() {
             <label style={{
               display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: '14px',
               borderRadius: 10, marginBottom: 24,
-              background: marketing ? 'var(--kd-primary-dim)' : 'var(--kd-bg)',
-              border: `1px solid ${marketing ? 'var(--kd-primary)' : 'var(--kd-border)'}`, transition: 'all 0.15s',
+              background: marketing ? 'var(--brand-light)' : 'var(--bg-base)',
+              border: `1px solid ${marketing ? 'var(--brand)' : 'var(--border)'}`, transition: 'all 0.15s',
             }}>
               <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)}
-                style={{ marginTop: 2, accentColor: 'var(--kd-primary)', flexShrink: 0 }} />
+                style={{ marginTop: 2, accentColor: 'var(--brand)', flexShrink: 0 }} />
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text)', marginBottom: 2 }}>
-                  마케팅 정보 수신 동의 <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--kd-text-dim)' }}>(선택)</span>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
+                  마케팅 정보 수신 동의 <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-tertiary)' }}>(선택)</span>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--kd-text-dim)', lineHeight: 1.5 }}>새 기능, 이벤트, 투자 인사이트 등을 이메일로 받아보세요</div>
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>새 기능, 이벤트, 투자 인사이트 등을 이메일로 받아보세요</div>
               </div>
             </label>
             <div style={{ display: 'flex', gap: 10 }}>

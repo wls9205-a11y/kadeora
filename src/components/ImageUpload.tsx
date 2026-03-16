@@ -46,13 +46,13 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 5 }: I
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-[var(--kd-text)]/70">이미지 첨부 ({images.length}/{maxImages})</label>
+      <label className="block text-sm font-medium text-[var(--text-primary)]/70">이미지 첨부 ({images.length}/{maxImages})</label>
       {images.length > 0 && (
         <div className="flex flex-wrap gap-3">
           {images.map((url, i) => (
-            <div key={i} className="relative group w-24 h-24 rounded-xl overflow-hidden border border-[var(--kd-border)]">
+            <div key={i} className="relative group w-24 h-24 rounded-xl overflow-hidden border border-[var(--border)]">
               <Image src={url} alt={`첨부 ${i + 1}`} fill sizes="96px" className="object-cover" />
-              <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--kd-danger)]" aria-label={`이미지 ${i + 1} 삭제`}>✕</button>
+              <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--error)]" aria-label={`이미지 ${i + 1} 삭제`}>✕</button>
             </div>
           ))}
         </div>
@@ -60,12 +60,12 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 5 }: I
       {images.length < maxImages && (
         <div>
           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple onChange={handleFileSelect} className="hidden" id="image-upload" />
-          <label htmlFor="image-upload" className={`inline-flex items-center gap-2 px-4 py-2 border border-dashed border-[var(--kd-border)] rounded-xl text-sm text-[var(--kd-text)]/60 hover:border-[var(--kd-primary)]/50 hover:text-[var(--kd-primary)] transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+          <label htmlFor="image-upload" className={`inline-flex items-center gap-2 px-4 py-2 border border-dashed border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]/60 hover:border-[var(--brand)]/50 hover:text-[var(--brand)] transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
             {uploading ? (<><span className="animate-spin">⏳</span>업로드 중...</>) : (<><span>📷</span>이미지 추가 (최대 5MB)</>)}
           </label>
         </div>
       )}
-      {error && <p className="text-sm text-[var(--kd-danger)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--error)]">{error}</p>}
     </div>
   );
 }

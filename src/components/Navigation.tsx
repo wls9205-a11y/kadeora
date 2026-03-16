@@ -83,9 +83,9 @@ export function Navigation() {
     alignItems: 'center' as const,
     fontSize: 14,
     fontWeight: 700,
-    color: active ? 'var(--kd-nav-active)' : 'var(--kd-nav-text)',
+    color: active ? 'var(--brand)' : 'var(--nav-text)',
     textDecoration: 'none' as const,
-    borderBottom: active ? '2px solid var(--kd-nav-active)' : '2px solid transparent',
+    borderBottom: active ? '2px solid var(--brand)' : '2px solid transparent',
     transition: 'color 0.1s',
   });
 
@@ -116,19 +116,19 @@ export function Navigation() {
           {/* 검색바 (데스크탑) */}
           <Link href="/search" className="hidden md:flex" style={{
             flex:1, maxWidth:420, height:34,
-            background:'var(--kd-surface-2)',
-            border:'1px solid var(--kd-border)',
+            background:'var(--bg-hover)',
+            border:'1px solid var(--border)',
             borderRadius:17, alignItems:'center', padding:'0 12px', gap:7,
             textDecoration:'none', transition:'border-color 0.15s',
           }}
-            onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
-            onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+            onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
+            onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
           >
             <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7" stroke="var(--kd-text-dim)" strokeWidth="2"/>
-              <path d="M16.5 16.5L21 21" stroke="var(--kd-text-dim)" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="11" cy="11" r="7" stroke="var(--text-tertiary)" strokeWidth="2"/>
+              <path d="M16.5 16.5L21 21" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span style={{ fontSize:13, color:'var(--kd-text-dim)' }}>카더라 검색...</span>
+            <span style={{ fontSize:13, color:'var(--text-tertiary)' }}>카더라 검색...</span>
           </Link>
 
           {/* 데스크탑 네비 */}
@@ -137,8 +137,8 @@ export function Navigation() {
               <Link key={item.href} href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
                 style={navItemStyle(isActive(item.href))}
-                onMouseEnter={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--kd-text)'; }}
-                onMouseLeave={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--kd-nav-text)'; }}
+                onMouseEnter={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--text-primary)'; }}
+                onMouseLeave={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--nav-text)'; }}
               >{item.label}</Link>
             ))}
           </nav>
@@ -150,8 +150,8 @@ export function Navigation() {
             {/* 모바일 검색 */}
             <Link href="/search" className="md:hidden" aria-label="검색" style={{
               width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
-              borderRadius:'50%', color:'var(--kd-text-muted)', textDecoration:'none', fontSize:18,
-              background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',
+              borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:18,
+              background:'var(--bg-hover)', border:'1px solid var(--border)',
             }}>🔍</Link>
 
             {user ? (
@@ -160,7 +160,7 @@ export function Navigation() {
                 <Link href="/write" style={{
                   display:'flex', alignItems:'center', gap:4,
                   height:34, padding:'0 14px', borderRadius:17,
-                  background:'var(--kd-primary)', color:'var(--text-inverse, #fff)',
+                  background:'var(--brand)', color:'var(--text-inverse, #fff)',
                   textDecoration:'none', fontSize:13, fontWeight:700,
                   whiteSpace:'nowrap',
                 }}>
@@ -173,12 +173,12 @@ export function Navigation() {
                   position:'relative', width:40, height:40,
                   display:'flex', alignItems:'center', justifyContent:'center',
                   borderRadius:'50%',
-                  background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',
-                  color:'var(--kd-text)', textDecoration:'none', fontSize:16,
+                  background:'var(--bg-hover)', border:'1px solid var(--border)',
+                  color:'var(--text-primary)', textDecoration:'none', fontSize:16,
                   transition:'border-color 0.12s',
                 }}
-                  onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
-                  onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+                  onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
+                  onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                 >
                   🔔
                   {unread > 0 && (
@@ -188,7 +188,7 @@ export function Navigation() {
                       background:'var(--brand)', color:'var(--text-inverse)',
                       fontSize:9, fontWeight:800,
                       display:'flex', alignItems:'center', justifyContent:'center',
-                      border:'2px solid var(--kd-nav-bg)',
+                      border:'2px solid var(--nav-bg)',
                     }}>
                       {unread > 9 ? '9+' : unread}
                     </span>
@@ -200,15 +200,15 @@ export function Navigation() {
                   <button onClick={() => setMenuOpen(!menuOpen)} aria-label="사용자 메뉴" style={{
                     display:'flex', alignItems:'center', gap:5,
                     height:34, padding:'0 10px', borderRadius:17,
-                    background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',
-                    color:'var(--kd-text)', fontSize:13, cursor:'pointer',
+                    background:'var(--bg-hover)', border:'1px solid var(--border)',
+                    color:'var(--text-primary)', fontSize:13, cursor:'pointer',
                     transition:'border-color 0.12s',
                   }}
-                    onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
-                    onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+                    onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
+                    onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                   >
                     <span style={{
-                      width:22, height:22, borderRadius:'50%', background:'var(--kd-primary)',
+                      width:22, height:22, borderRadius:'50%', background:'var(--brand)',
                       display:'flex', alignItems:'center', justifyContent:'center',
                       fontSize:10, fontWeight:800, color:'#fff', flexShrink:0,
                     }}>
@@ -217,13 +217,13 @@ export function Navigation() {
                     <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                       {nickname ?? '유저'}
                     </span>
-                    <span style={{ fontSize:8, color:'var(--kd-text-dim)' }}>▼</span>
+                    <span style={{ fontSize:8, color:'var(--text-tertiary)' }}>▼</span>
                   </button>
 
                   {menuOpen && (
                     <div style={{
                       position:'absolute', right:0, top:'calc(100% + 6px)',
-                      background:'var(--kd-surface)', border:'1px solid var(--kd-border)',
+                      background:'var(--bg-surface)', border:'1px solid var(--border)',
                       borderRadius:8, overflow:'hidden', minWidth:168,
                       boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex:300,
                     }}>
@@ -234,21 +234,21 @@ export function Navigation() {
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
                           display:'block', padding:'11px 16px',
-                          color:'var(--kd-text)', fontSize:14, textDecoration:'none',
-                          borderBottom:'1px solid var(--kd-border)',
+                          color:'var(--text-primary)', fontSize:14, textDecoration:'none',
+                          borderBottom:'1px solid var(--border)',
                           transition:'background 0.1s',
                         }}
-                          onMouseEnter={e=>(e.currentTarget.style.background='var(--kd-surface-2)')}
+                          onMouseEnter={e=>(e.currentTarget.style.background='var(--bg-hover)')}
                           onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
                         >{item.label}</Link>
                       ))}
                       <button onClick={handleLogout} style={{
                         display:'block', width:'100%', padding:'11px 16px',
-                        color:'var(--kd-danger)', fontSize:14,
+                        color:'var(--error)', fontSize:14,
                         background:'transparent', border:'none',
                         cursor:'pointer', textAlign:'left', transition:'background 0.1s',
                       }}
-                        onMouseEnter={e=>(e.currentTarget.style.background='var(--kd-danger-dim)')}
+                        onMouseEnter={e=>(e.currentTarget.style.background='var(--error-bg)')}
                         onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
                       >🚪 로그아웃</button>
                     </div>
@@ -259,18 +259,18 @@ export function Navigation() {
               <>
                 <Link href="/login" style={{
                   height:34, padding:'0 14px', borderRadius:17,
-                  border:'1px solid var(--kd-border)',
-                  color:'var(--kd-text)', background:'transparent',
+                  border:'1px solid var(--brand)',
+                  color:'var(--brand)', background:'transparent',
                   display:'flex', alignItems:'center',
                   textDecoration:'none', fontSize:13, fontWeight:700,
                   transition:'border-color 0.12s',
                 }}
-                  onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
-                  onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+                  onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
+                  onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                 >로그인</Link>
                 <Link href="/login" className="hidden md:flex" style={{
                   height:34, padding:'0 14px', borderRadius:17,
-                  background:'var(--kd-primary)', color:'var(--text-inverse, #fff)',
+                  background:'var(--brand)', color:'var(--text-inverse, #fff)',
                   alignItems:'center', textDecoration:'none', fontSize:13, fontWeight:700,
                 }}>회원가입</Link>
               </>
@@ -282,8 +282,8 @@ export function Navigation() {
       {/* ── 모바일 하단 탭바 ── */}
       <nav style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex:200,
-        background:'var(--kd-nav-bg)',
-        borderTop:'1px solid var(--kd-nav-border)',
+        background:'var(--nav-bg)',
+        borderTop:'1px solid var(--nav-border)',
         display:'grid', gridTemplateColumns:`repeat(${NAV_ITEMS.length},1fr)`,
         paddingBottom:'max(8px, env(safe-area-inset-bottom))',
         paddingTop:6,
@@ -297,7 +297,7 @@ export function Navigation() {
               style={{
                 display:'flex', flexDirection:'column', alignItems:'center', gap:2,
                 padding:'6px 4px', textDecoration:'none',
-                color: active ? 'var(--kd-nav-active)' : 'var(--kd-text-dim)',
+                color: active ? 'var(--brand)' : 'var(--text-tertiary)',
                 minHeight:44,
               }}>
               <span style={{ fontSize:20, lineHeight:1 }}>{item.icon}</span>

@@ -58,7 +58,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: 'var(--kd-surface)', borderRadius: 16, border: '1px solid var(--kd-border)',
+          background: 'var(--bg-surface)', borderRadius: 16, border: '1px solid var(--border)',
           padding: 28, maxWidth: 440, width: '100%',
         }}
         className="animate-modalIn"
@@ -66,10 +66,10 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
         {submitted ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--kd-text)', margin: '0 0 8px' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
               신고가 접수되었습니다
             </h3>
-            <p style={{ fontSize: 13, color: 'var(--kd-text-muted)', margin: '0 0 20px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.6 }}>
               24시간 내 1차 검토 후 72시간 내 처리 결과를 안내드립니다.
             </p>
             <button
@@ -82,7 +82,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
           </div>
         ) : (
           <>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--kd-text)', margin: '0 0 16px' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
               🚨 콘텐츠 신고
             </h3>
 
@@ -93,8 +93,8 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10,
                     padding: '10px 14px', borderRadius: 10, cursor: 'pointer',
-                    border: `1px solid ${reason === r.value ? 'var(--kd-primary)' : 'var(--kd-border)'}`,
-                    background: reason === r.value ? 'var(--kd-primary-dim)' : 'transparent',
+                    border: `1px solid ${reason === r.value ? 'var(--brand)' : 'var(--border)'}`,
+                    background: reason === r.value ? 'var(--brand-light)' : 'transparent',
                     transition: 'all 0.15s',
                   }}
                 >
@@ -104,11 +104,11 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                     value={r.value}
                     checked={reason === r.value}
                     onChange={e => setReason(e.target.value)}
-                    style={{ accentColor: 'var(--kd-primary)' }}
+                    style={{ accentColor: 'var(--brand)' }}
                   />
                   <span style={{
                     fontSize: 13,
-                    color: reason === r.value ? 'var(--kd-primary)' : 'var(--kd-text-muted)',
+                    color: reason === r.value ? 'var(--brand)' : 'var(--text-secondary)',
                     fontWeight: reason === r.value ? 600 : 400,
                   }}>
                     {r.label}
@@ -125,12 +125,12 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
               rows={3}
               style={{
                 width: '100%', padding: '10px 14px', borderRadius: 10, boxSizing: 'border-box',
-                border: '1px solid var(--kd-border)', background: 'var(--kd-bg)',
-                color: 'var(--kd-text)', fontSize: 13, outline: 'none', resize: 'none',
+                border: '1px solid var(--border)', background: 'var(--bg-base)',
+                color: 'var(--text-primary)', fontSize: 13, outline: 'none', resize: 'none',
                 marginBottom: 16, fontFamily: 'inherit', lineHeight: 1.5,
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = 'var(--kd-primary)')}
-              onBlur={e => (e.currentTarget.style.borderColor = 'var(--kd-border)')}
+              onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+              onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
             />
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>

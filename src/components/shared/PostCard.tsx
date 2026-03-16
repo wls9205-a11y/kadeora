@@ -62,15 +62,15 @@ function PostCard({ post, onLike, variant = "default", showAuthor = true }: Post
               {displayName[0]}
             </div>
           )}
-          <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--kd-text-primary)" }}>{displayName}</span>
-          <span style={{ fontSize: "12px", color: "var(--kd-text-tertiary, #888)" }}>{timeAgo(post.created_at)}</span>
+          <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-primary)" }}>{displayName}</span>
+          <span style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>{timeAgo(post.created_at)}</span>
         </div>
       )}
-      {post.category && <span style={{ display: "inline-block", fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "4px", backgroundColor: "var(--kd-bg-tag, rgba(128,128,128,0.1))", color: "var(--kd-text-secondary, #666)", marginBottom: "6px" }}>{post.category}</span>}
-      <h3 style={{ fontSize: isCompact ? "14px" : "16px", fontWeight: 600, margin: "0 0 4px", lineHeight: 1.4, color: "var(--kd-text-primary)" }}>{truncate(post.title, isCompact ? 40 : 80)}</h3>
-      {!isCompact && <p style={{ fontSize: "14px", color: "var(--kd-text-secondary, #666)", lineHeight: 1.5, margin: "0 0 12px" }}>{truncate(post.content, 120)}</p>}
-      <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "13px", color: "var(--kd-text-tertiary, #888)" }}>
-        <button onClick={handleLike} disabled={isLiking || !onLike} style={{ display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", padding: 0, cursor: onLike ? "pointer" : "default", color: isLiked ? "var(--kd-like-active, #E24B4A)" : "var(--kd-text-tertiary, #888)", fontSize: "13px" }} aria-label={isLiked ? "\uC88B\uC544\uC694 \uCDE8\uC18C" : "\uC88B\uC544\uC694"}>
+      {post.category && <span style={{ display: "inline-block", fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "4px", backgroundColor: "var(--bg-hover)", color: "var(--text-secondary)", marginBottom: "6px" }}>{post.category}</span>}
+      <h3 style={{ fontSize: isCompact ? "14px" : "16px", fontWeight: 600, margin: "0 0 4px", lineHeight: 1.4, color: "var(--text-primary)" }}>{truncate(post.title, isCompact ? 40 : 80)}</h3>
+      {!isCompact && <p style={{ fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.5, margin: "0 0 12px" }}>{truncate(post.content, 120)}</p>}
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "13px", color: "var(--text-tertiary)" }}>
+        <button onClick={handleLike} disabled={isLiking || !onLike} style={{ display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", padding: 0, cursor: onLike ? "pointer" : "default", color: isLiked ? "var(--brand)" : "var(--text-tertiary)", fontSize: "13px" }} aria-label={isLiked ? "\uC88B\uC544\uC694 \uCDE8\uC18C" : "\uC88B\uC544\uC694"}>
           <span style={{ fontSize: "15px" }}>{isLiked ? "\u2665" : "\u2661"}</span>
           {likesCount > 0 && <span>{likesCount}</span>}
         </button>

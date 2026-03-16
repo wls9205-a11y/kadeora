@@ -79,9 +79,9 @@ export default function PushNotificationSetup() {
       style={{
         display: 'flex', alignItems: 'center', gap: 8,
         padding: '10px 16px', borderRadius: 8, cursor: loading ? 'not-allowed' : 'pointer',
-        border: subscribed ? '1px solid var(--kd-success)' : '1px solid var(--kd-border)',
-        background: subscribed ? 'var(--kd-success-dim)' : 'var(--kd-surface-2)',
-        color: subscribed ? 'var(--kd-success)' : 'var(--kd-text)',
+        border: subscribed ? '1px solid var(--success)' : '1px solid var(--border)',
+        background: subscribed ? 'var(--success-bg)' : 'var(--bg-hover)',
+        color: subscribed ? 'var(--success)' : 'var(--text-primary)',
         fontSize: 14, fontWeight: 600, opacity: loading ? 0.6 : 1,
         transition: 'all 0.15s', width: '100%',
       }}

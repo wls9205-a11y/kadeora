@@ -68,30 +68,30 @@ export default function ChatRoom({ room, user, onClose }: ChatRoomProps) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 16, width: '100%', maxWidth: 640, height: '80vh', maxHeight: 700, display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }} className="animate-modalIn">
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, width: '100%', maxWidth: 640, height: '80vh', maxHeight: 700, display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }} className="animate-modalIn">
         {/* Header */}
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--kd-border)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--kd-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{room.display_name}</h2>
-            <p style={{ margin: 0, fontSize: 12, color: 'var(--kd-text-dim)', marginTop: 2 }}>참여자 {(room.member_count ?? 0).toLocaleString()}명</p>
+            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{room.display_name}</h2>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>참여자 {(room.member_count ?? 0).toLocaleString()}명</p>
           </div>
-          <button onClick={onClose} aria-label="토론방 닫기" style={{ background: 'none', border: 'none', color: 'var(--kd-text-dim)', fontSize: 20, cursor: 'pointer', padding: '4px 8px' }}>✕</button>
+          <button onClick={onClose} aria-label="토론방 닫기" style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 20, cursor: 'pointer', padding: '4px 8px' }}>✕</button>
         </div>
 
         {/* Messages */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {loading
-            ? <div style={{ textAlign: 'center', color: 'var(--kd-text-dim)', padding: '40px 0' }}>채팅 불러오는 중...</div>
+            ? <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '40px 0' }}>채팅 불러오는 중...</div>
             : display.map(msg => (
               <div key={msg.id} style={{ display: 'flex', gap: 8, flexDirection: user?.id === msg.author_id ? 'row-reverse' : 'row' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: user?.id === msg.author_id ? 'var(--kd-primary)' : 'var(--kd-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: user?.id === msg.author_id ? 'var(--brand)' : 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
                   {(msg.profiles?.nickname ?? 'U')[0].toUpperCase()}
                 </div>
                 <div style={{ maxWidth: '70%' }}>
-                  <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', marginBottom: 3, textAlign: user?.id === msg.author_id ? 'right' : 'left' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 3, textAlign: user?.id === msg.author_id ? 'right' : 'left' }}>
                     {msg.is_anonymous ? '익명' : (msg.profiles?.nickname ?? '사용자')} · {timeAgo(msg.created_at)}
                   </div>
-                  <div style={{ background: user?.id === msg.author_id ? 'var(--kd-primary)' : 'var(--kd-surface-2)', border: '1px solid ' + (user?.id === msg.author_id ? 'transparent' : 'var(--kd-border)'), borderRadius: 12, padding: '8px 12px', fontSize: 14, color: 'var(--kd-text)', lineHeight: 1.5, wordBreak: 'break-word' }}>
+                  <div style={{ background: user?.id === msg.author_id ? 'var(--brand)' : 'var(--bg-hover)', border: '1px solid ' + (user?.id === msg.author_id ? 'transparent' : 'var(--border)'), borderRadius: 12, padding: '8px 12px', fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.5, wordBreak: 'break-word' }}>
                     {msg.content}
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export default function ChatRoom({ room, user, onClose }: ChatRoomProps) {
         </div>
 
         {/* Input */}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--kd-border)', display: 'flex', gap: 8 }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
           {user ? (
             <>
               <input
@@ -112,18 +112,18 @@ export default function ChatRoom({ room, user, onClose }: ChatRoomProps) {
                 placeholder="메시지를 입력하세요 (Enter 전송)"
                 maxLength={500}
                 aria-label="메시지 입력"
-                style={{ flex: 1, background: 'var(--kd-bg)', border: '1px solid var(--kd-border)', borderRadius: 8, color: 'var(--kd-text)', padding: '10px 12px', fontSize: 14, fontFamily: 'inherit' }}
+                style={{ flex: 1, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', padding: '10px 12px', fontSize: 14, fontFamily: 'inherit' }}
               />
               <button
                 onClick={send}
                 disabled={!input.trim() || sending}
                 aria-label="메시지 전송"
-                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--kd-primary)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer', opacity: (!input.trim() || sending) ? 0.5 : 1 }}
+                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer', opacity: (!input.trim() || sending) ? 0.5 : 1 }}
               >전송</button>
             </>
           ) : (
-            <div style={{ flex: 1, textAlign: 'center', color: 'var(--kd-text-dim)', fontSize: 13, padding: '10px 0' }}>
-              <a href="/login" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>로그인</a>하면 채팅에 참여할 수 있습니다
+            <div style={{ flex: 1, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13, padding: '10px 0' }}>
+              <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 채팅에 참여할 수 있습니다
             </div>
           )}
         </div>
