@@ -1,185 +1,257 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
-import type { AptSubscription } from '@/types/database';
 
-const STATUS_CONFIG = {
-  open:     { label: '접수중', color: 'var(--kd-success)', bg: 'var(--kd-success-dim)', icon: '✅' },
-  upcoming: { label: '예정',   color: 'var(--kd-warning)', bg: 'var(--kd-warning-dim)', icon: '📅' },
-  closed:   { label: '마감',   color: 'var(--kd-text-dim)', bg: 'rgba(100,116,139,0.15)', icon: '🔒' },
-};
-
-function fmtPrice(n: number | null) {
-  if (!n) return '-';
-  return (n / 10000).toFixed(0) + '억';
+interface Apt {
+  id: number;
+  house_manage_no: string;
+  house_nm: string;
+  region_cd: string;
+  region_nm: string;
+  supply_addr: string;
+  tot_supply_hshld_co: number;
+  rcept_bgnde: string;
+  rcept_endde: string;
+  spsply_rcept_bgnde: string;
+  spsply_rcept_endde: string;
+  przwner_presnatn_de: string;
+  cntrct_cncls_bgnde: string;
+  cntrct_cncls_endde: string;
+  mdatrgbn_nm: string;
+  hssply_adres: string;
+  mvn_prearnge_ym: string;
+  pblanc_url: string;
+  fetched_at: string;
 }
 
-function daysLeft(dateStr: string) {
-  const diff = new Date(dateStr).getTime() - Date.now();
-  const d = Math.ceil(diff / 86400000);
-  if (d < 0) return null;
-  if (d === 0) return '오늘 마감';
-  return `D-${d}`;
+interface Props {
+  apts: Apt[];
+  isDemo: boolean;
 }
 
-export default function AptClient({ apts, isDemo }: { apts: AptSubscription[]; isDemo: boolean }) {
-  const [filter, setFilter] = useState<'all' | 'open' | 'upcoming' | 'closed'>('all');
+const REGIONS = ['전체','서울','경기','인천','부산','대구','광주','대전','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'];
+
+function fmtDate(d: string | null) {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+}
+
+function statusBadge(apt: Apt) {
+  const today = new Date();
+  const start = new Date(apt.rcept_bgnde);
+  const end = new Date(apt.rcept_endde);
+  if (today < start) {
+    const days = Math.ceil((start.getTime() - today.getTime()) / 86400000);
+    return { label: `D-${days}`, color: '#FF4500', bg: 'rgba(255,69,0,0.12)' };
+  }
+  if (today <= end) return { label: '접수중', color: '#10B981', bg: 'rgba(16,185,129,0.12)' };
+  return { label: '마감', color: '#818384', bg: 'rgba(129,131,132,0.12)' };
+}
+
+export default function AptClient({ apts, isDemo }: Props) {
+  const [region, setRegion] = useState('전체');
+  const [filter, setFilter] = useState<'all' | 'upcoming' | 'open' | 'closed'>('all');
   const [search, setSearch] = useState('');
+  const [expanded, setExpanded] = useState<number | null>(null);
+
+  const today = new Date();
 
   const filtered = apts
-    .filter(a => filter === 'all' || a.status === filter)
-    .filter(a => !search || a.name.includes(search) || a.location.includes(search));
+    .filter(a => region === '전체' || a.region_nm === region)
+    .filter(a => {
+      if (filter === 'upcoming') return new Date(a.rcept_bgnde) > today;
+      if (filter === 'open') return new Date(a.rcept_bgnde) <= today && new Date(a.rcept_endde) >= today;
+      if (filter === 'closed') return new Date(a.rcept_endde) < today;
+      return true;
+    })
+    .filter(a => !search || a.house_nm.includes(search) || a.supply_addr?.includes(search))
+    .sort((a, b) => new Date(a.rcept_bgnde).getTime() - new Date(b.rcept_bgnde).getTime());
 
-  const counts = {
-    all: apts.length,
-    open: apts.filter(a => a.status === 'open').length,
-    upcoming: apts.filter(a => a.status === 'upcoming').length,
-    closed: apts.filter(a => a.status === 'closed').length,
-  };
+  const openCount = apts.filter(a => new Date(a.rcept_bgnde) <= today && new Date(a.rcept_endde) >= today).length;
+  const upcomingCount = apts.filter(a => new Date(a.rcept_bgnde) > today).length;
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🏠 청약 정보</h1>
-        {isDemo && (
-          <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'var(--kd-primary-dim)', color: 'var(--kd-primary)', border: '1px solid rgba(59,130,246,0.3)' }}>
-            💡 미리보기 데이터
-          </span>
-        )}
+      {/* 헤더 */}
+      <div style={{ marginBottom: 16 }}>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🏠 아파트 청약 정보</h1>
+        <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--kd-text-dim)' }}>
+          실시간 청약 일정 · 전국 {apts.length}건
+          <span style={{ marginLeft: 12, color: '#10B981', fontWeight: 700 }}>● 접수중 {openCount}건</span>
+          <span style={{ marginLeft: 8, color: '#FF4500', fontWeight: 700 }}>◆ 예정 {upcomingCount}건</span>
+        </p>
       </div>
 
-      {/* Summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
-        {(['open', 'upcoming', 'closed'] as const).map(s => {
-          const c = STATUS_CONFIG[s];
-          return (
-            <button key={s} onClick={() => setFilter(filter === s ? 'all' : s)}
-              aria-pressed={filter === s}
-              style={{
-                background: filter === s ? c.bg : 'var(--kd-surface)',
-                border: `1px solid ${filter === s ? c.color : 'var(--kd-border)'}`,
-                borderRadius: 12, padding: '14px 16px', cursor: 'pointer',
-                transition: 'all 0.15s', textAlign: 'left',
-              }}>
-              <div style={{ fontSize: 11, color: c.color, fontWeight: 700, marginBottom: 4 }}>{c.icon} {c.label}</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>{counts[s]}</div>
-              <div style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>단지</div>
-            </button>
-          );
-        })}
-      </div>
+      {isDemo && (
+        <div style={{
+          background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)',
+          borderRadius: 4, padding: '10px 14px', marginBottom: 12,
+          fontSize: 13, color: 'var(--kd-primary)',
+        }}>
+          ℹ 데모 데이터를 표시 중입니다. 실제 데이터는 공공데이터 API에서 자동으로 갱신됩니다.
+        </div>
+      )}
 
-      {/* Search + filter */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="단지명 또는 지역 검색..."
-          className="kd-input"
-          style={{ maxWidth: 260 }}
-        />
-        <div style={{ display: 'flex', gap: 4, background: 'var(--kd-surface)', borderRadius: 10, padding: 4, border: '1px solid var(--kd-border)' }}>
-          {([['all', '전체'], ['open', '접수중'], ['upcoming', '예정'], ['closed', '마감']] as const).map(([key, label]) => (
-            <button key={key} onClick={() => setFilter(key)}
-              aria-pressed={filter === key}
-              style={{
-                padding: '6px 12px', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600,
-                background: filter === key ? 'var(--kd-primary)' : 'transparent',
-                color: filter === key ? 'white' : 'var(--kd-text-muted)',
-                transition: 'all 0.15s',
-              }}>{label}</button>
+      {/* 필터 */}
+      <div style={{
+        background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
+        borderRadius: 4, padding: '10px 12px', marginBottom: 10,
+        display: 'flex', flexDirection: 'column', gap: 10,
+      }}>
+        {/* 지역 필터 */}
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {REGIONS.map(r => (
+            <button key={r} onClick={() => setRegion(r)} style={{
+              padding: '5px 10px', borderRadius: 2, border: 'none', cursor: 'pointer',
+              fontSize: 12, fontWeight: 700,
+              background: region === r ? '#FF4500' : 'transparent',
+              color: region === r ? '#fff' : 'var(--kd-text-dim)',
+            }}>{r}</button>
           ))}
+        </div>
+        {/* 상태 + 검색 */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {([['all','전체'],['upcoming','예정'],['open','접수중'],['closed','마감']] as const).map(([k, l]) => (
+            <button key={k} onClick={() => setFilter(k)} style={{
+              padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
+              fontSize: 13, fontWeight: 700,
+              background: filter === k ? 'var(--kd-border)' : 'transparent',
+              color: filter === k ? 'var(--kd-text)' : 'var(--kd-text-dim)',
+            }}>{l}</button>
+          ))}
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="단지명 · 주소 검색"
+            style={{
+              marginLeft: 'auto', padding: '6px 12px', fontSize: 13,
+              background: 'var(--kd-surface-2, var(--kd-border))',
+              border: '1px solid var(--kd-border)', borderRadius: 4,
+              color: 'var(--kd-text)', width: 200,
+            }}
+          />
         </div>
       </div>
 
-      {/* List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--kd-text-dim)' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🏗️</div>
-            <div>조건에 맞는 청약이 없습니다</div>
-          </div>
-        ) : filtered.map(apt => {
-          const s = STATUS_CONFIG[apt.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.closed;
-          const dl = daysLeft(apt.application_end);
+      {/* 목록 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filtered.map(apt => {
+          const badge = statusBadge(apt);
+          const isOpen = expanded === apt.id;
           return (
             <div key={apt.id} style={{
-              background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 14, padding: '20px 22px',
-              transition: 'border-color 0.15s',
-            }}
-              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border-hover)')}
-              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--kd-border)')}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: 'var(--kd-text)' }}>{apt.name}</h3>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: s.bg, color: s.color }}>{s.label}</span>
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--kd-text-muted)' }}>📍 {apt.location} · {apt.total_units.toLocaleString()}세대 · {apt.subscription_type}</div>
+              background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
+              borderRadius: 4, overflow: 'hidden',
+            }}>
+              {/* 요약 행 */}
+              <div
+                onClick={() => setExpanded(isOpen ? null : apt.id)}
+                style={{
+                  padding: '14px 16px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'flex-start', gap: 12,
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--kd-border)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+              >
+                {/* 지역 배지 */}
+                <div style={{
+                  flexShrink: 0, width: 44, height: 44, borderRadius: 4,
+                  background: '#FF4500', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: '#fff' }}>{apt.region_nm}</span>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  {dl && apt.status === 'open' && (
-                    <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--kd-danger)', background: 'var(--kd-danger-dim)', padding: '4px 10px', borderRadius: 8 }}>{dl}</div>
-                  )}
-                  {apt.competition_rate && (
-                    <div style={{ fontSize: 12, color: 'var(--kd-warning)', marginTop: 4 }}>경쟁률 {apt.competition_rate}:1</div>
-                  )}
-                </div>
-              </div>
 
-              {/* Timeline */}
-              <div style={{ display: 'flex', gap: 0, marginBottom: 14, overflowX: 'auto', paddingBottom: 4 }}>
-                {[
-                  { label: '접수 시작', date: apt.rcept_bgnde },
-                  { label: '접수 마감', date: apt.application_end },
-                  ...(apt.move_in_date ? [{ label: '입주 예정', date: apt.move_in_date }] : []),
-                ].map((step, i, arr) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 10, color: 'var(--kd-text-dim)', marginBottom: 4, whiteSpace: 'nowrap' }}>{step.label}</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--kd-text)', whiteSpace: 'nowrap' }}>
-                        {new Date(step.date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
-                      </div>
-                    </div>
-                    {i < arr.length - 1 && (
-                      <div style={{ width: 40, height: 1, background: 'var(--kd-border)', margin: '12px 8px 0', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--kd-text)' }}>{apt.house_nm}</span>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 2,
+                      background: badge.bg, color: badge.color,
+                    }}>{badge.label}</span>
+                    {apt.mdatrgbn_nm && (
+                      <span style={{
+                        fontSize: 11, padding: '2px 6px', borderRadius: 2,
+                        background: 'rgba(59,130,246,0.1)', color: '#3B82F6', fontWeight: 600,
+                      }}>{apt.mdatrgbn_nm}</span>
                     )}
                   </div>
-                ))}
+                  <div style={{ fontSize: 13, color: 'var(--kd-text-dim)', marginBottom: 6 }}>
+                    {apt.supply_addr || apt.hssply_adres}
+                  </div>
+                  <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--kd-text-dim)', flexWrap: 'wrap' }}>
+                    <span>🏘 총 <strong style={{ color: 'var(--kd-text)' }}>{(apt.tot_supply_hshld_co ?? 0).toLocaleString()}세대</strong></span>
+                    <span>📅 청약 <strong style={{ color: 'var(--kd-text)' }}>{fmtDate(apt.rcept_bgnde)} ~ {fmtDate(apt.rcept_endde)}</strong></span>
+                    {apt.mvn_prearnge_ym && <span>🔑 입주 <strong style={{ color: 'var(--kd-text)' }}>{apt.mvn_prearnge_ym}</strong></span>}
+                  </div>
+                </div>
+
+                <span style={{ fontSize: 18, color: 'var(--kd-text-dim)', flexShrink: 0, marginLeft: 8 }}>
+                  {isOpen ? '▲' : '▼'}
+                </span>
               </div>
 
-              {/* Price & action */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                <div style={{ fontSize: 13, color: 'var(--kd-text-muted)' }}>
-                  💰 분양가{' '}
-                  <span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>
-                    {apt.min_price && apt.max_price
-                      ? `${fmtPrice(apt.min_price)} ~ ${fmtPrice(apt.max_price)}`
-                      : apt.min_price ? `${fmtPrice(apt.min_price)}~` : '미정'}
-                  </span>
-                </div>
-                {apt.homepage_url && apt.status !== 'closed' && (
-                  <a href={apt.homepage_url} target="_blank" rel="noopener noreferrer" style={{
-                    padding: '7px 14px', borderRadius: 8,
-                    background: apt.status === 'open' ? 'var(--kd-success)' : 'transparent',
-                    border: `1px solid ${apt.status === 'open' ? 'var(--kd-success)' : 'var(--kd-border)'}`,
-                    color: apt.status === 'open' ? 'white' : 'var(--kd-text-muted)',
-                    textDecoration: 'none', fontSize: 13, fontWeight: 600,
-                    transition: 'all 0.15s',
+              {/* 상세 정보 (펼치기) */}
+              {isOpen && (
+                <div style={{
+                  borderTop: '1px solid var(--kd-border)',
+                  padding: '14px 16px',
+                  background: 'var(--kd-surface)',
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                    gap: 12, marginBottom: 14,
                   }}>
-                    {apt.status === 'open' ? '청약 신청하기 →' : '청약 예약 보기 →'}
-                  </a>
-                )}
-              </div>
+                    {[
+                      { label: '특별공급 접수', value: apt.spsply_rcept_bgnde ? `${fmtDate(apt.spsply_rcept_bgnde)} ~ ${fmtDate(apt.spsply_rcept_endde)}` : '-' },
+                      { label: '당첨자 발표', value: fmtDate(apt.przwner_presnatn_de) },
+                      { label: '계약 기간', value: apt.cntrct_cncls_bgnde ? `${fmtDate(apt.cntrct_cncls_bgnde)} ~ ${fmtDate(apt.cntrct_cncls_endde)}` : '-' },
+                      { label: '입주 예정', value: apt.mvn_prearnge_ym || '-' },
+                      { label: '공급 유형', value: apt.mdatrgbn_nm || '-' },
+                      { label: '총 공급 세대', value: (apt.tot_supply_hshld_co ?? 0).toLocaleString() + '세대' },
+                    ].map(item => (
+                      <div key={item.label} style={{
+                        background: 'var(--kd-border)', borderRadius: 4, padding: '10px 12px',
+                      }}>
+                        <div style={{ fontSize: 11, color: 'var(--kd-text-dim)', marginBottom: 4, fontWeight: 600 }}>
+                          {item.label}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--kd-text)' }}>
+                          {item.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {apt.pblanc_url && (
+                    <a href={apt.pblanc_url} target="_blank" rel="noopener noreferrer" style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      background: '#FF4500', color: '#fff',
+                      padding: '8px 16px', borderRadius: 20,
+                      fontSize: 13, fontWeight: 700, textDecoration: 'none',
+                    }}>
+                      청약홈에서 자세히 보기 →
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
+
+        {filtered.length === 0 && (
+          <div style={{
+            background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
+            borderRadius: 4, padding: '40px 0', textAlign: 'center', color: 'var(--kd-text-dim)',
+          }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🏠</div>
+            <div>해당 조건의 청약 정보가 없습니다</div>
+          </div>
+        )}
       </div>
 
-      <p style={{ marginTop: 16, fontSize: 12, color: 'var(--kd-text-dim)', textAlign: 'right' }}>
-        ※ 청약 일정은 변경될 수 있습니다. 반드시 청약홈에서 최종 확인 바랍니다.
-      </p>
+      <div style={{ marginTop: 10, fontSize: 11, color: 'var(--kd-text-dim)', textAlign: 'right' }}>
+        * 국토교통부 청약홈 공공데이터 기준 · 매일 자동 갱신
+      </div>
     </div>
   );
 }
