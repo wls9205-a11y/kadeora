@@ -2,72 +2,122 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── 라이트 모드 (기본) ── */
+/* ════════════════════════════════════════
+   라이트 모드 (기본)
+════════════════════════════════════════ */
 :root {
   color-scheme: light;
-  --kd-bg:         #DAE0E6;
-  --kd-surface:    #FFFFFF;
-  --kd-surface-2:  #F6F7F8;
-  --kd-border:     #EDEFF1;
-  --kd-border-hover: #818384;
-  --kd-text:       #1C1C1C;
-  --kd-text-muted: #878A8C;
-  --kd-text-dim:   #878A8C;
-  --kd-primary:    #FF4500;
-  --kd-primary-dim: rgba(255,69,0,0.1);
-  --kd-danger:     #FF585B;
-  --kd-danger-dim: rgba(255,88,91,0.12);
-  --kd-success:    #46D160;
-  --kd-success-dim: rgba(70,209,96,0.12);
-  --kd-warning:    #FFD635;
-  --kd-warning-dim: rgba(255,214,53,0.12);
-  --kd-purple:     #A06EF4;
-  --kd-nav-bg:     #FFFFFF;
-  --kd-nav-border: #EDEFF1;
+
+  /* 배경 계층 */
+  --kd-bg:          #DAE0E6;
+  --kd-surface:     #FFFFFF;
+  --kd-surface-2:   #F6F7F8;
+  --kd-surface-3:   #EDEFF1;
+
+  /* 테두리 */
+  --kd-border:      #EDEFF1;
+  --kd-border-hover:#818384;
+
+  /* 텍스트 */
+  --kd-text:        #1C1C1C;
+  --kd-text-muted:  #5F6368;
+  --kd-text-dim:    #878A8C;
+  --kd-text-link:   #0045AC;
+
+  /* 네비게이션 */
+  --kd-nav-bg:      #FFFFFF;
+  --kd-nav-border:  #EDEFF1;
+  --kd-nav-text:    #1C1C1C;
+  --kd-nav-active:  #FF4500;
+
+  /* 브랜드 */
+  --kd-primary:     #FF4500;
+  --kd-primary-dim: rgba(255,69,0,0.08);
+  --kd-primary-hover: #E03D00;
+
+  /* 상태 */
+  --kd-danger:      #D93025;
+  --kd-danger-dim:  rgba(217,48,37,0.08);
+  --kd-success:     #1E8C3A;
+  --kd-success-dim: rgba(30,140,58,0.08);
+  --kd-warning:     #C77700;
+  --kd-warning-dim: rgba(199,119,0,0.08);
+
+  /* 버튼 높이 토큰 */
+  --btn-h-sm:  32px;
+  --btn-h-md:  40px;
+  --btn-h-lg:  48px;
+  --btn-r:     20px;
+  --btn-r-sm:  4px;
 }
 
-/* ── 다크 모드 (data-theme 수동 전환) ── */
+/* ════════════════════════════════════════
+   다크 모드
+════════════════════════════════════════ */
 [data-theme="dark"] {
   color-scheme: dark;
-  --kd-bg:         #DAE0E6;
-  --kd-surface:    #1A1A1B;
-  --kd-surface-2:  #272729;
-  --kd-border:     #343536;
-  --kd-border-hover: #818384;
-  --kd-text:       #D7DADC;
-  --kd-text-muted: #818384;
-  --kd-text-dim:   #818384;
-  --kd-primary:    #FF4500;
+
+  --kd-bg:          #DAE0E6;
+  --kd-surface:     #1A1A1B;
+  --kd-surface-2:   #272729;
+  --kd-surface-3:   #313134;
+
+  --kd-border:      #343536;
+  --kd-border-hover:#818384;
+
+  --kd-text:        #D7DADC;
+  --kd-text-muted:  #9EAAB4;
+  --kd-text-dim:    #818384;
+  --kd-text-link:   #6FA3EF;
+
+  --kd-nav-bg:      #1A1A1B;
+  --kd-nav-border:  #343536;
+  --kd-nav-text:    #D7DADC;
+  --kd-nav-active:  #FF4500;
+
+  --kd-primary:     #FF4500;
   --kd-primary-dim: rgba(255,69,0,0.15);
-  --kd-danger:     #FF585B;
-  --kd-danger-dim: rgba(255,88,91,0.15);
-  --kd-success:    #46D160;
+  --kd-primary-hover: #FF5722;
+
+  --kd-danger:      #FF585B;
+  --kd-danger-dim:  rgba(255,88,91,0.15);
+  --kd-success:     #46D160;
   --kd-success-dim: rgba(70,209,96,0.15);
-  --kd-warning:    #FFD635;
+  --kd-warning:     #FFD635;
   --kd-warning-dim: rgba(255,214,53,0.15);
-  --kd-purple:     #A06EF4;
-  --kd-nav-bg:     #1A1A1B;
-  --kd-nav-border: #343536;
 }
 
-/* ── 시스템 다크모드 (data-theme 미설정 시) ── */
+/* 시스템 다크 미설정 시 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --kd-bg:         #DAE0E6;
-    --kd-surface:    #1A1A1B;
-    --kd-surface-2:  #272729;
-    --kd-border:     #343536;
+    --kd-bg: #DAE0E6;
+    --kd-surface: #1A1A1B;
+    --kd-surface-2: #272729;
+    --kd-surface-3: #313134;
+    --kd-border: #343536;
     --kd-border-hover: #818384;
-    --kd-text:       #D7DADC;
-    --kd-text-muted: #818384;
-    --kd-text-dim:   #818384;
-    --kd-nav-bg:     #1A1A1B;
+    --kd-text: #D7DADC;
+    --kd-text-muted: #9EAAB4;
+    --kd-text-dim: #818384;
+    --kd-text-link: #6FA3EF;
+    --kd-nav-bg: #1A1A1B;
     --kd-nav-border: #343536;
+    --kd-nav-text: #D7DADC;
+    --kd-nav-active: #FF4500;
+    --kd-primary-dim: rgba(255,69,0,0.15);
+    --kd-danger: #FF585B;
+    --kd-danger-dim: rgba(255,88,91,0.15);
+    --kd-success: #46D160;
+    --kd-success-dim: rgba(70,209,96,0.15);
+    --kd-warning: #FFD635;
+    --kd-warning-dim: rgba(255,214,53,0.15);
   }
 }
 
-/* ── 베이스 ── */
+/* ════════════════════════════════════════
+   베이스
+════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -82,86 +132,168 @@ html {
 }
 
 body {
-  margin: 0;
-  padding: 0;
+  margin: 0; padding: 0;
   background: var(--kd-bg);
   color: var(--kd-text);
   min-height: 100vh;
   transition: background 0.2s, color 0.2s;
 }
 
-/* ── 스크롤바 ── */
+/* ════════════════════════════════════════
+   스크롤바
+════════════════════════════════════════ */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--kd-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--kd-border-hover); }
 
-/* ── 링크 ── */
+/* ════════════════════════════════════════
+   링크 & 폼
+════════════════════════════════════════ */
 a { color: inherit; text-decoration: none; }
-
-/* ── 폼 요소 ── */
 input, textarea, select, button { font-family: inherit; }
-input:focus, textarea:focus, select:focus { outline: none; border-color: var(--kd-primary) !important; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--kd-primary) !important; box-shadow: 0 0 0 2px var(--kd-primary-dim); }
 
-/* ── 애니메이션 ── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes spin  { to { transform: rotate(360deg); } }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+/* ════════════════════════════════════════
+   애니메이션
+════════════════════════════════════════ */
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin   { to { transform: rotate(360deg); } }
+@keyframes pulse  { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+@keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
-.animate-fadeIn { animation: fadeIn 0.25s ease forwards; }
-.animate-spin   { animation: spin 0.8s linear infinite; }
-.animate-pulse  { animation: pulse 1.8s ease-in-out infinite; }
+.animate-fadeIn  { animation: fadeIn  0.25s ease forwards; }
+.animate-spin    { animation: spin    0.8s  linear infinite; }
+.animate-pulse   { animation: pulse   1.8s  ease-in-out infinite; }
+.animate-slideUp { animation: slideUp 0.3s  ease forwards; }
 
-/* ── 반응형 헬퍼 ── */
-@media (max-width: 767px)  { .hidden-mobile  { display: none !important; } }
-@media (min-width: 768px)  { .hidden-desktop { display: none !important; } }
+/* ════════════════════════════════════════
+   공용 컴포넌트
+════════════════════════════════════════ */
 
-/* ── 공용 인풋 ── */
+/* 인풋 */
 .kd-input {
   width: 100%;
-  padding: 10px 14px;
+  height: var(--btn-h-md);
+  padding: 0 14px;
   background: var(--kd-surface-2);
   border: 1px solid var(--kd-border);
-  border-radius: 4px;
+  border-radius: var(--btn-r-sm);
   color: var(--kd-text);
   font-size: 14px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.kd-input::placeholder { color: var(--kd-text-muted); }
-.kd-input:focus { border-color: var(--kd-primary); }
+.kd-input::placeholder { color: var(--kd-text-dim); }
+.kd-input:focus { border-color: var(--kd-primary); box-shadow: 0 0 0 2px var(--kd-primary-dim); }
 
-/* ── 카드 공통 ── */
+/* 카드 */
 .kd-card {
   background: var(--kd-surface);
   border: 1px solid var(--kd-border);
-  border-radius: 4px;
-  transition: border-color 0.1s;
+  border-radius: var(--btn-r-sm);
+  transition: border-color 0.12s;
 }
 .kd-card:hover { border-color: var(--kd-border-hover); }
 
-/* ── 반응형 레이아웃 ── */
+/* ── 버튼 시스템 ── */
+/* 기본 (outline) */
+.kd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--btn-h-md);
+  padding: 0 16px;
+  border-radius: var(--btn-r);
+  border: 1px solid var(--kd-border);
+  background: transparent;
+  color: var(--kd-text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 44px; /* 모바일 터치 최소 */
+}
+.kd-btn:hover  { border-color: var(--kd-border-hover); background: var(--kd-surface-2); }
+.kd-btn:active { transform: scale(0.97); }
+.kd-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Primary */
+.kd-btn-primary {
+  background: var(--kd-primary);
+  border-color: var(--kd-primary);
+  color: #FFFFFF !important;
+}
+.kd-btn-primary:hover  { background: var(--kd-primary-hover); border-color: var(--kd-primary-hover); }
+
+/* Danger */
+.kd-btn-danger  { border-color: var(--kd-danger); color: var(--kd-danger); }
+.kd-btn-danger:hover { background: var(--kd-danger-dim); }
+
+/* 크기 변형 */
+.kd-btn-sm { height: var(--btn-h-sm); padding: 0 12px; font-size: 12px; border-radius: 16px; }
+.kd-btn-lg { height: var(--btn-h-lg); padding: 0 24px; font-size: 15px; }
+.kd-btn-icon { width: var(--btn-h-md); padding: 0; border-radius: 50%; }
+.kd-btn-icon.kd-btn-sm { width: var(--btn-h-sm); }
+
+/* ── 피드 레이아웃 ── */
 .feed-layout {
   display: flex;
   gap: 24px;
   align-items: flex-start;
 }
-
-.feed-main  { flex: 1; min-width: 0; }
-
+.feed-main    { flex: 1; min-width: 0; }
 .feed-sidebar {
   width: 312px;
   flex-shrink: 0;
   position: sticky;
   top: 68px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
+.feed-sidebar::-webkit-scrollbar { display: none; }
 
-@media (max-width: 1023px) {
-  .feed-sidebar { display: none; }
+@media (max-width: 1023px) { .feed-sidebar { display: none; } }
+@media (max-width: 767px)  { .feed-layout  { gap: 0; } }
+
+/* ── 반응형 헬퍼 ── */
+@media (max-width: 767px)  { .hidden-mobile  { display: none !important; } }
+@media (min-width: 768px)  { .hidden-desktop { display: none !important; } }
+
+/* ── 유틸리티 ── */
+.text-primary  { color: var(--kd-primary) !important; }
+.text-danger   { color: var(--kd-danger)  !important; }
+.text-success  { color: var(--kd-success) !important; }
+.text-muted    { color: var(--kd-text-muted) !important; }
+.text-dim      { color: var(--kd-text-dim)   !important; }
+.bg-surface    { background: var(--kd-surface)  !important; }
+.bg-surface-2  { background: var(--kd-surface-2)!important; }
+
+/* ── 뱃지 ── */
+.kd-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 2px;
+  font-size: 11px; font-weight: 700;
+  white-space: nowrap;
 }
+.kd-badge-stock  { background:rgba(59,130,246,0.15);  color:#3B82F6; }
+.kd-badge-apt    { background:rgba(16,185,129,0.15);  color:#10B981; }
+.kd-badge-free   { background:rgba(139,92,246,0.15);  color:#8B5CF6; }
+.kd-badge-hot    { background:var(--kd-danger-dim);   color:var(--kd-danger); }
+.kd-badge-new    { background:var(--kd-success-dim);  color:var(--kd-success); }
+.kd-badge-kospi  { background:rgba(59,130,246,0.15);  color:#3B82F6; }
+.kd-badge-kosdaq { background:rgba(16,185,129,0.15);  color:#10B981; }
 
-@media (max-width: 767px) {
-  .feed-layout { gap: 0; }
+/* ── 토스트 ── */
+.kd-toast {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  min-width: 200px;
+  max-width: 320px;
 }

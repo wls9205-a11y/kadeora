@@ -7,15 +7,15 @@ import ThemeToggle from '@/components/ThemeToggle';
 import type { User } from '@supabase/supabase-js';
 
 const NAV_ITEMS = [
-  { href: '/feed',          label: '피드',   icon: '🏠' },
-  { href: '/stock',         label: '주식',   icon: '📈' },
-  { href: '/apt',           label: '부동산', icon: '🏘' },
-  { href: '/discuss',       label: '토론',   icon: '💬' },
-  { href: '/shop/megaphone',label: '상점',   icon: '🛒' },
+  { href: '/feed',           label: '피드',   icon: '🏠' },
+  { href: '/stock',          label: '주식',   icon: '📈' },
+  { href: '/apt',            label: '부동산', icon: '🏘' },
+  { href: '/discuss',        label: '토론',   icon: '💬' },
+  { href: '/shop/megaphone', label: '상점',   icon: '🛒' },
 ];
 
 const MonkeyLogo = ({ size = 28 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 64 64" style={{ flexShrink: 0 }}>
+  <svg width={size} height={size} viewBox="0 0 64 64" style={{ flexShrink:0, display:'block' }}>
     <rect width="64" height="64" rx="14" fill="#FF4500"/>
     <circle cx="11" cy="32" r="8.5" fill="#CC3700"/>
     <circle cx="53" cy="32" r="8.5" fill="#CC3700"/>
@@ -35,12 +35,12 @@ const MonkeyLogo = ({ size = 28 }: { size?: number }) => (
 );
 
 export function Navigation() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const pathname  = usePathname();
+  const router    = useRouter();
+  const [user, setUser]         = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [nickname, setNickname] = useState<string | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unread, setUnread]     = useState(0);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -48,138 +48,204 @@ export function Navigation() {
       const u = data.session?.user ?? null;
       setUser(u);
       if (u) {
-        const [profRes, notifRes] = await Promise.all([
+        const [pr, nr] = await Promise.all([
           sb.from('profiles').select('nickname').eq('id', u.id).single(),
-          sb.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', u.id).eq('is_read', false),
+          sb.from('notifications').select('id', { count:'exact', head:true }).eq('user_id', u.id).eq('is_read', false),
         ]);
-        setNickname(profRes.data?.nickname ?? null);
-        setUnreadCount(notifRes.count ?? 0);
+        setNickname(pr.data?.nickname ?? null);
+        setUnread(nr.count ?? 0);
       }
     });
-    const { data: { subscription } } = sb.auth.onAuthStateChange((_e, session) => {
+    const { data:{ subscription } } = sb.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        const sb2 = createSupabaseBrowser();
-        sb2.from('profiles').select('nickname').eq('id', session.user.id).single()
-          .then(({ data: p }) => setNickname(p?.nickname ?? null));
-      } else { setNickname(null); setUnreadCount(0); }
+        const s = createSupabaseBrowser();
+        s.from('profiles').select('nickname').eq('id', session.user.id).single()
+          .then(({ data:p }) => setNickname(p?.nickname ?? null));
+      } else { setNickname(null); setUnread(0); }
     });
     return () => subscription.unsubscribe();
   }, []);
 
   const handleLogout = async () => {
-    const sb = createSupabaseBrowser();
-    await sb.auth.signOut();
-    router.push('/login');
-    setMenuOpen(false);
+    await createSupabaseBrowser().auth.signOut();
+    router.push('/login'); setMenuOpen(false);
   };
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
+  /* 공통 스타일 헬퍼 */
+  const navItemStyle = (active: boolean) => ({
+    padding: '0 10px',
+    height: 48,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    fontSize: 14,
+    fontWeight: 700,
+    color: active ? 'var(--kd-nav-active)' : 'var(--kd-nav-text)',
+    textDecoration: 'none' as const,
+    borderBottom: active ? '2px solid var(--kd-nav-active)' : '2px solid transparent',
+    transition: 'color 0.1s',
+  });
+
   return (
     <>
+      {/* ── 헤더 ── */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'var(--kd-nav-bg, #1A1A1B)',
-        borderBottom: '1px solid var(--kd-nav-border, #343536)',
+        position: 'sticky', top: 0, zIndex: 200,
+        background: 'var(--kd-nav-bg)',
+        borderBottom: '1px solid var(--kd-nav-border)',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
       }}>
         <div style={{
           maxWidth: 1200, margin: '0 auto', padding: '0 16px',
           height: 48, display: 'flex', alignItems: 'center', gap: 8,
         }}>
           {/* 로고 */}
-          <Link href="/feed" style={{ display: 'flex', alignItems: 'center', gap: 7, textDecoration: 'none', flexShrink: 0, marginRight: 4 }}>
+          <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:7, textDecoration:'none', flexShrink:0, marginRight:4 }}>
             <MonkeyLogo size={30} />
-            <span style={{ fontWeight: 800, fontSize: 17, color: 'var(--kd-text, #fff)', letterSpacing: -0.5 }} className="hidden md:inline">kadeora</span>
+            <span style={{ fontWeight:800, fontSize:17, color:'var(--kd-nav-active)', letterSpacing:-0.5 }} className="hidden md:inline">
+              kadeora
+            </span>
           </Link>
 
-          {/* 검색 */}
+          {/* 검색바 (데스크탑) */}
           <Link href="/search" className="hidden md:flex" style={{
-            flex: 1, maxWidth: 440, height: 32,
-            background: 'var(--kd-surface-2, #272729)',
-            border: '1px solid var(--kd-border, #343536)', borderRadius: 16,
-            alignItems: 'center', padding: '0 12px', gap: 7, textDecoration: 'none',
-          }}>
+            flex:1, maxWidth:420, height:34,
+            background:'var(--kd-surface-2)',
+            border:'1px solid var(--kd-border)',
+            borderRadius:17, alignItems:'center', padding:'0 12px', gap:7,
+            textDecoration:'none', transition:'border-color 0.15s',
+          }}
+            onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
+            onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+          >
             <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7" stroke="var(--kd-text-muted,#818384)" strokeWidth="2"/>
-              <path d="M16.5 16.5L21 21" stroke="var(--kd-text-muted,#818384)" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="11" cy="11" r="7" stroke="var(--kd-text-dim)" strokeWidth="2"/>
+              <path d="M16.5 16.5L21 21" stroke="var(--kd-text-dim)" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span style={{ fontSize: 13, color: 'var(--kd-text-muted, #818384)' }}>카더라 검색...</span>
+            <span style={{ fontSize:13, color:'var(--kd-text-dim)' }}>카더라 검색...</span>
           </Link>
 
           {/* 데스크탑 네비 */}
-          <nav className="hidden md:flex" style={{ gap: 0 }}>
+          <nav className="hidden md:flex" style={{ gap:0, marginLeft:4 }}>
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
-                style={{
-                  padding: '0 10px', height: 48, display: 'flex', alignItems: 'center',
-                  fontSize: 14, fontWeight: 700,
-                  color: isActive(item.href) ? '#FF4500' : 'var(--kd-text, #D7DADC)',
-                  textDecoration: 'none',
-                  borderBottom: isActive(item.href) ? '2px solid #FF4500' : '2px solid transparent',
-                  transition: 'color 0.1s',
-                }}
+                style={navItemStyle(isActive(item.href))}
+                onMouseEnter={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--kd-text)'; }}
+                onMouseLeave={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--kd-nav-text)'; }}
               >{item.label}</Link>
             ))}
           </nav>
 
-          {/* 우측 */}
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* 우측 액션 */}
+          <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
             <ThemeToggle />
+
+            {/* 모바일 검색 */}
+            <Link href="/search" className="md:hidden" style={{
+              width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
+              borderRadius:'50%', color:'var(--kd-text-muted)', textDecoration:'none', fontSize:18,
+              background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',
+            }}>🔍</Link>
 
             {user ? (
               <>
+                {/* 글쓰기 */}
                 <Link href="/write" style={{
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '5px 12px', borderRadius: 20,
-                  background: '#FF4500', color: '#fff',
-                  textDecoration: 'none', fontSize: 13, fontWeight: 700,
+                  display:'flex', alignItems:'center', gap:4,
+                  height:34, padding:'0 14px', borderRadius:17,
+                  background:'var(--kd-primary)', color:'#FFFFFF',
+                  textDecoration:'none', fontSize:13, fontWeight:700,
+                  whiteSpace:'nowrap',
                 }}>
                   <span className="hidden md:inline">+ 글쓰기</span>
-                  <span className="md:hidden">✏</span>
+                  <span className="md:hidden" style={{fontSize:16}}>✏️</span>
                 </Link>
 
-                <Link href="/notifications" style={{ position: 'relative', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 20, background: 'var(--kd-surface-2, #272729)', border: '1px solid var(--kd-border, #343536)', color: 'var(--kd-text, #D7DADC)', textDecoration: 'none', fontSize: 15 }}>
+                {/* 알림 */}
+                <Link href="/notifications" style={{
+                  position:'relative', width:40, height:40,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  borderRadius:'50%',
+                  background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',
+                  color:'var(--kd-text)', textDecoration:'none', fontSize:16,
+                  transition:'border-color 0.12s',
+                }}
+                  onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
+                  onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+                >
                   🔔
-                  {unreadCount > 0 && (
-                    <span style={{ position: 'absolute', top: -3, right: -3, width: 16, height: 16, borderRadius: '50%', background: '#FF4500', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {unreadCount > 9 ? '9+' : unreadCount}
+                  {unread > 0 && (
+                    <span style={{
+                      position:'absolute', top:-2, right:-2,
+                      width:17, height:17, borderRadius:'50%',
+                      background:'#FF4500', color:'#fff',
+                      fontSize:9, fontWeight:800,
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      border:'2px solid var(--kd-nav-bg)',
+                    }}>
+                      {unread > 9 ? '9+' : unread}
                     </span>
                   )}
                 </Link>
 
-                <div style={{ position: 'relative' }}>
+                {/* 유저 메뉴 */}
+                <div style={{ position:'relative' }}>
                   <button onClick={() => setMenuOpen(!menuOpen)} style={{
-                    display: 'flex', alignItems: 'center', gap: 5,
-                    padding: '4px 8px', borderRadius: 20,
-                    background: 'var(--kd-surface-2, #272729)', border: '1px solid var(--kd-border, #343536)',
-                    color: 'var(--kd-text, #D7DADC)', fontSize: 13, cursor: 'pointer',
-                  }}>
-                    <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff' }}>
+                    display:'flex', alignItems:'center', gap:5,
+                    height:34, padding:'0 10px', borderRadius:17,
+                    background:'var(--kd-surface-2)', border:'1px solid var(--kd-border)',
+                    color:'var(--kd-text)', fontSize:13, cursor:'pointer',
+                    transition:'border-color 0.12s',
+                  }}
+                    onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
+                    onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+                  >
+                    <span style={{
+                      width:22, height:22, borderRadius:'50%', background:'var(--kd-primary)',
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      fontSize:10, fontWeight:800, color:'#fff', flexShrink:0,
+                    }}>
                       {(nickname ?? user.email ?? 'U')[0].toUpperCase()}
                     </span>
-                    <span className="hidden md:inline" style={{ fontSize: 13, fontWeight: 600, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                       {nickname ?? '유저'}
                     </span>
-                    <span style={{ fontSize: 9 }}>▼</span>
+                    <span style={{ fontSize:8, color:'var(--kd-text-dim)' }}>▼</span>
                   </button>
+
                   {menuOpen && (
-                    <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4, background: 'var(--kd-surface, #1A1A1B)', border: '1px solid var(--kd-border, #343536)', borderRadius: 4, overflow: 'hidden', minWidth: 160, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', zIndex: 200 }}>
+                    <div style={{
+                      position:'absolute', right:0, top:'calc(100% + 6px)',
+                      background:'var(--kd-surface)', border:'1px solid var(--kd-border)',
+                      borderRadius:8, overflow:'hidden', minWidth:168,
+                      boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex:300,
+                    }}>
                       {[
-                        { href: `/profile/${user.id}`, label: '👤 내 프로필' },
-                        { href: '/write', label: '✏️ 글쓰기' },
-                        { href: '/notifications', label: `🔔 알림${unreadCount > 0 ? ` (${unreadCount})` : ''}` },
+                        { href:`/profile/${user.id}`, label:'👤 내 프로필' },
+                        { href:'/write',              label:'✏️ 글쓰기' },
+                        { href:'/notifications',      label:`🔔 알림${unread>0?` (${unread})`:''}` },
                       ].map(item => (
-                        <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
-                          style={{ display: 'block', padding: '10px 14px', color: 'var(--kd-text, #D7DADC)', fontSize: 14, textDecoration: 'none', borderBottom: '1px solid var(--kd-border, #343536)' }}
-                          onMouseEnter={e => (e.currentTarget.style.background = 'var(--kd-surface-2, #272729)')}
-                          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                        <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
+                          display:'block', padding:'11px 16px',
+                          color:'var(--kd-text)', fontSize:14, textDecoration:'none',
+                          borderBottom:'1px solid var(--kd-border)',
+                          transition:'background 0.1s',
+                        }}
+                          onMouseEnter={e=>(e.currentTarget.style.background='var(--kd-surface-2)')}
+                          onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
                         >{item.label}</Link>
                       ))}
-                      <button onClick={handleLogout} style={{ display: 'block', width: '100%', padding: '10px 14px', color: '#FF585B', fontSize: 14, background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--kd-surface-2, #272729)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      <button onClick={handleLogout} style={{
+                        display:'block', width:'100%', padding:'11px 16px',
+                        color:'var(--kd-danger)', fontSize:14,
+                        background:'transparent', border:'none',
+                        cursor:'pointer', textAlign:'left', transition:'background 0.1s',
+                      }}
+                        onMouseEnter={e=>(e.currentTarget.style.background='var(--kd-danger-dim)')}
+                        onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
                       >🚪 로그아웃</button>
                     </div>
                   )}
@@ -187,21 +253,37 @@ export function Navigation() {
               </>
             ) : (
               <>
-                <Link href="/login" style={{ padding: '5px 14px', borderRadius: 20, border: '1px solid var(--kd-border, #343536)', color: 'var(--kd-text, #D7DADC)', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>로그인</Link>
-                <Link href="/login" className="hidden md:block" style={{ padding: '5px 14px', borderRadius: 20, background: '#FF4500', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>회원가입</Link>
+                <Link href="/login" style={{
+                  height:34, padding:'0 14px', borderRadius:17,
+                  border:'1px solid var(--kd-border)',
+                  color:'var(--kd-text)', background:'transparent',
+                  display:'flex', alignItems:'center',
+                  textDecoration:'none', fontSize:13, fontWeight:700,
+                  transition:'border-color 0.12s',
+                }}
+                  onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--kd-border-hover)')}
+                  onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--kd-border)')}
+                >로그인</Link>
+                <Link href="/login" className="hidden md:flex" style={{
+                  height:34, padding:'0 14px', borderRadius:17,
+                  background:'var(--kd-primary)', color:'#FFFFFF',
+                  alignItems:'center', textDecoration:'none', fontSize:13, fontWeight:700,
+                }}>회원가입</Link>
               </>
             )}
           </div>
         </div>
       </header>
 
-      {/* 모바일 하단 탭바 */}
+      {/* ── 모바일 하단 탭바 ── */}
       <nav style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-        background: 'var(--kd-nav-bg, #1A1A1B)',
-        borderTop: '1px solid var(--kd-nav-border, #343536)',
-        display: 'grid', gridTemplateColumns: 'repeat(5,1fr)',
-        padding: 'clamp(4px,1vw,8px) 0 max(clamp(4px,1vw,8px), env(safe-area-inset-bottom))',
+        position:'fixed', bottom:0, left:0, right:0, zIndex:200,
+        background:'var(--kd-nav-bg)',
+        borderTop:'1px solid var(--kd-nav-border)',
+        display:'grid', gridTemplateColumns:'repeat(5,1fr)',
+        paddingBottom:'max(8px, env(safe-area-inset-bottom))',
+        paddingTop:6,
+        boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',
       }} className="md:hidden">
         {NAV_ITEMS.map(item => {
           const active = isActive(item.href);
@@ -209,18 +291,19 @@ export function Navigation() {
             <Link key={item.href} href={item.href}
               aria-current={active ? 'page' : undefined}
               style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                padding: '4px 0', textDecoration: 'none',
-                color: active ? '#FF4500' : 'var(--kd-text-muted, #818384)',
+                display:'flex', flexDirection:'column', alignItems:'center', gap:2,
+                padding:'6px 4px', textDecoration:'none',
+                color: active ? 'var(--kd-nav-active)' : 'var(--kd-text-dim)',
+                minHeight:44,
               }}>
-              <span style={{ fontSize: 18 }}>{item.icon}</span>
-              <span style={{ fontSize: 10, fontWeight: active ? 700 : 400 }}>{item.label}</span>
+              <span style={{ fontSize:20, lineHeight:1 }}>{item.icon}</span>
+              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      {menuOpen && <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setMenuOpen(false)} />}
+      {menuOpen && <div style={{ position:'fixed', inset:0, zIndex:199 }} onClick={()=>setMenuOpen(false)} />}
     </>
   );
 }
