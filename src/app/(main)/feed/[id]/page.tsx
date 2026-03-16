@@ -181,7 +181,7 @@ export default async function FeedDetailPage({ params }: Props) {
                 {post.profiles?.nickname ?? '익명'}
               </span>
               {post.profiles?.grade && (
-                <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 999, background: 'rgba(255,215,0,0.15)', color: '#FFD700', fontWeight: 600 }}>
+                <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 600 }}>
                   {post.profiles.grade}
                 </span>
               )}

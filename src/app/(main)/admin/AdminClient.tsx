@@ -53,9 +53,9 @@ export default function AdminClient({ stats, recentUsers, recentPosts, reports }
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
             {[
-              { label: '총 유저', value: stats.totalUsers.toLocaleString(), icon: '👤', color: '#3B82F6' },
-              { label: '총 게시글', value: stats.totalPosts.toLocaleString(), icon: '📝', color: '#10B981' },
-              { label: '총 댓글', value: stats.totalComments.toLocaleString(), icon: '💬', color: '#8B5CF6' },
+              { label: '총 유저', value: stats.totalUsers.toLocaleString(), icon: '👤', color: 'var(--info)' },
+              { label: '총 게시글', value: stats.totalPosts.toLocaleString(), icon: '📝', color: 'var(--success)' },
+              { label: '총 댓글', value: stats.totalComments.toLocaleString(), icon: '💬', color: 'var(--brand)' },
               { label: '신고 대기', value: reports.length.toString(), icon: '🚩', color: 'var(--brand)' },
             ].map(item => (
               <div key={item.label} style={{

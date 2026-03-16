@@ -5,11 +5,27 @@ import Link from 'next/link';
 import type { PostWithProfile } from '@/types/database';
 
 const CATEGORY_MAP: Record<string, { label: string; bg: string; color: string }> = {
-  stock:   { label: '주식',  bg: 'rgba(59,130,246,0.15)',  color: '#60A5FA' },
-  apt:     { label: '청약',  bg: 'rgba(16,185,129,0.15)', color: '#34D399' },
-  discuss: { label: '토론',  bg: 'rgba(139,92,246,0.15)', color: '#A78BFA' },
-  free:    { label: '자유',  bg: 'rgba(245,158,11,0.15)', color: '#FBBF24' },
+  stock:   { label: '주식',  bg: 'var(--info-bg)',      color: 'var(--info)' },
+  apt:     { label: '청약',  bg: 'var(--success-bg)',   color: 'var(--success)' },
+  discuss: { label: '토론',  bg: 'var(--brand-light)',  color: 'var(--brand)' },
+  free:    { label: '자유',  bg: 'var(--warning-bg)',   color: 'var(--warning)' },
 };
+
+interface StockResult {
+  symbol: string;
+  name: string;
+  market: string;
+  price: number;
+  change_pct: number;
+}
+
+interface AptResult {
+  id: string;
+  house_nm: string;
+  region_nm: string;
+  rcept_bgnde: string;
+  rcept_endde: string;
+}
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -26,7 +42,7 @@ function highlight(text: string, query: string): React.ReactNode {
   const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
   return parts.map((p, i) =>
     p.toLowerCase() === query.toLowerCase()
-      ? <mark key={i} style={{ background: 'rgba(59,130,246,0.3)', color: 'var(--kd-primary)', borderRadius: 2 }}>{p}</mark>
+      ? <mark key={i} style={{ background: 'var(--info-bg)', color: 'var(--kd-primary)', borderRadius: 2 }}>{p}</mark>
       : p
   );
 }
@@ -47,6 +63,16 @@ export default function SearchClient() {
   const loaderRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Autocomplete state
+  const [acOpen, setAcOpen] = useState(false);
+  const [acStocks, setAcStocks] = useState<StockResult[]>([]);
+  const [acApts, setAcApts] = useState<AptResult[]>([]);
+  const [acPosts, setAcPosts] = useState<PostWithProfile[]>([]);
+  const [acLoading, setAcLoading] = useState(false);
+  const acDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const doSearch = useCallback(async (q: string, cat: string, offset: number, append = false) => {
     if (q.length < 2) { setResults([]); setTotal(0); return; }
     setLoading(true);
@@ -60,6 +86,63 @@ export default function SearchClient() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Autocomplete fetch
+  const fetchAutocomplete = useCallback(async (q: string) => {
+    if (q.length < 2) {
+      setAcStocks([]);
+      setAcApts([]);
+      setAcPosts([]);
+      setAcOpen(false);
+      return;
+    }
+    setAcLoading(true);
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=5`);
+      const data = await res.json();
+      setAcStocks(data.stocks ?? []);
+      setAcApts(data.apts ?? []);
+      setAcPosts(data.posts ?? []);
+      const hasResults = (data.stocks?.length > 0) || (data.apts?.length > 0) || (data.posts?.length > 0);
+      setAcOpen(hasResults);
+    } catch {
+      setAcOpen(false);
+    } finally {
+      setAcLoading(false);
+    }
+  }, []);
+
+  // Handle input change: trigger autocomplete with 300ms debounce
+  const handleInputChange = useCallback((val: string) => {
+    setInputVal(val);
+    if (acDebounceRef.current) clearTimeout(acDebounceRef.current);
+    acDebounceRef.current = setTimeout(() => {
+      fetchAutocomplete(val);
+    }, 300);
+  }, [fetchAutocomplete]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current && !inputRef.current.contains(e.target as Node)
+      ) {
+        setAcOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close dropdown on ESC
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setAcOpen(false);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   useEffect(() => {
@@ -87,6 +170,23 @@ export default function SearchClient() {
     return () => io.disconnect();
   }, [hasMore, loading, page, query, category, doSearch]);
 
+  const handleAcNavigate = (href: string) => {
+    setAcOpen(false);
+    router.push(href);
+  };
+
+  const acSectionHeader = (label: string) => (
+    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', padding: '8px 12px', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+      {label}
+    </div>
+  );
+
+  const acItemStyle: React.CSSProperties = {
+    padding: '10px 12px',
+    cursor: 'pointer',
+    transition: 'background 0.1s',
+  };
+
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>🔍 검색</h1>
@@ -94,9 +194,11 @@ export default function SearchClient() {
       {/* Search input */}
       <div style={{ position: 'relative', marginBottom: 16 }}>
         <input
+          ref={inputRef}
           type="text"
           value={inputVal}
-          onChange={e => setInputVal(e.target.value)}
+          onChange={e => handleInputChange(e.target.value)}
+          onFocus={() => { if (inputVal.length >= 2 && (acStocks.length > 0 || acApts.length > 0 || acPosts.length > 0)) setAcOpen(true); }}
           placeholder="검색어를 입력하세요 (2글자 이상)"
           className="kd-input"
           style={{ paddingLeft: 44, fontSize: 16, padding: '14px 14px 14px 44px' }}
@@ -105,9 +207,114 @@ export default function SearchClient() {
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 18, pointerEvents: 'none' }}>🔍</span>
         {inputVal && (
           <button
-            onClick={() => { setInputVal(''); setResults([]); setTotal(0); }}
+            onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); }}
             style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--kd-text-dim)', cursor: 'pointer', fontSize: 18 }}
           >✕</button>
+        )}
+
+        {/* Autocomplete dropdown */}
+        {acOpen && (
+          <div
+            ref={dropdownRef}
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              width: '100%',
+              zIndex: 500,
+              backgroundColor: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              boxShadow: 'var(--shadow-lg)',
+              marginTop: 4,
+              maxHeight: '60vh',
+              overflowY: 'auto',
+            }}
+          >
+            {acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && (
+              <div style={{ padding: '12px', textAlign: 'center', fontSize: 13, color: 'var(--text-tertiary)' }}>검색 중...</div>
+            )}
+
+            {/* Stocks section */}
+            {acStocks.length > 0 && (
+              <div>
+                {acSectionHeader('종목')}
+                {acStocks.map(stock => (
+                  <div
+                    key={stock.symbol}
+                    style={acItemStyle}
+                    onClick={() => handleAcNavigate(`/discussion/stock/${stock.symbol}`)}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--kd-text)' }}>{highlight(stock.name, inputVal)}</span>
+                        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{highlight(stock.symbol, inputVal)}</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>{stock.market}</span>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kd-text)' }}>{stock.price?.toLocaleString()}</span>
+                        {stock.change_pct != null && (
+                          <span style={{ fontSize: 12, marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #EF4444)', fontWeight: 600 }}>
+                            {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct.toFixed(2)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Apts section */}
+            {acApts.length > 0 && (
+              <div>
+                {acSectionHeader('청약')}
+                {acApts.map(apt => (
+                  <div
+                    key={apt.id}
+                    style={acItemStyle}
+                    onClick={() => handleAcNavigate(`/discussion/apt/${apt.id}`)}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--kd-text)' }}>{highlight(apt.house_nm, inputVal)}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                      {highlight(apt.region_nm, inputVal)}
+                      {apt.rcept_bgnde && <span style={{ marginLeft: 8 }}>{apt.rcept_bgnde} ~ {apt.rcept_endde}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Posts section */}
+            {acPosts.length > 0 && (
+              <div>
+                {acSectionHeader('게시글')}
+                {acPosts.map(post => {
+                  const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
+                  return (
+                    <div
+                      key={post.id}
+                      style={acItemStyle}
+                      onClick={() => handleAcNavigate(`/feed/${post.id}`)}
+                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--kd-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {highlight(post.title, inputVal)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

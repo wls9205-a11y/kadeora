@@ -180,7 +180,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                   <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor }}>
                     {gradeEmoji} {gradeTitle} Lv.{gradeNum}
                   </span>
-                  {profile.is_premium && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(255,215,0,0.15)', color: '#FFD700', fontWeight: 700 }}>👑 PREMIUM</span>}
+                  {profile.is_premium && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700 }}>👑 PREMIUM</span>}
                 </div>
                 <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--kd-text-muted)', lineHeight: 1.5 }}>
                   {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
