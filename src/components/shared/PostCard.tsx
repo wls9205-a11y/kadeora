@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; }
 export interface Post {
@@ -30,7 +31,7 @@ function truncate(text: string, max: number): string {
   return text.length <= max ? text : text.slice(0, max).trimEnd() + "\u2026";
 }
 
-export default function PostCard({ post, onLike, variant = "default", showAuthor = true }: PostCardProps) {
+function PostCard({ post, onLike, variant = "default", showAuthor = true }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked ?? false);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [isLiking, setIsLiking] = useState(false);
@@ -55,7 +56,7 @@ export default function PostCard({ post, onLike, variant = "default", showAuthor
       {showAuthor && (
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
           {post.author?.avatar_url && !post.is_anonymous ? (
-            <img src={post.author.avatar_url} alt="" width={24} height={24} style={{ borderRadius: "50%", objectFit: "cover" }} />
+            <Image src={post.author.avatar_url} alt="" width={24} height={24} style={{ borderRadius: "50%", objectFit: "cover" }} />
           ) : (
             <div style={{ width: 24, height: 24, borderRadius: "50%", backgroundColor: "var(--brand)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 500, color: "var(--text-inverse, #fff)" }}>
               {displayName[0]}
@@ -79,3 +80,5 @@ export default function PostCard({ post, onLike, variant = "default", showAuthor
     </Link>
   );
 }
+
+export default React.memo(PostCard);

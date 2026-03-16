@@ -153,9 +153,10 @@ export default function StockClient({ initialStocks }: Props) {
       </div>
 
       {/* 종목 테이블 헤더 */}
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       <div style={{
         background: 'var(--kd-surface)', border: '1px solid var(--kd-border)',
-        borderRadius: 4, overflow: 'hidden',
+        borderRadius: 4, overflow: 'hidden', minWidth: 800,
       }}>
         <div style={{
           display: 'grid',
@@ -246,6 +247,7 @@ export default function StockClient({ initialStocks }: Props) {
             검색 결과가 없습니다
           </div>
         )}
+      </div>
       </div>
 
       <div style={{ marginTop: 10, fontSize: 11, color: 'var(--kd-text-dim)', textAlign: 'right' }}>

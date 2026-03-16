@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { DEMO_PRODUCTS } from '@/lib/constants';
 import ShopClient from './ShopClient';
+
+export const metadata: Metadata = { title: '샵 | 카더라', description: '카더라 아이템 샵' };
 
 export default async function ShopPage() {
   let products = DEMO_PRODUCTS;

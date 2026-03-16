@@ -1,9 +1,20 @@
+import type { Metadata } from 'next';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import ProfileClient from './ProfileClient';
 import { DeleteAccountSection } from '@/components/DeleteAccountSection';
 
 interface Props { params: Promise<{ id: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const sb = await createSupabaseServer();
+  const { data: profile } = await sb.from('profiles').select('nickname').eq('id', id).single();
+  return {
+    title: `${profile?.nickname ?? '프로필'} | 카더라`,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function ProfilePage({ params }: Props) {
   const { id } = await params;

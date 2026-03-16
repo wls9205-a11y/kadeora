@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
 import { ToastProvider } from '@/components/Toast';
+import { GuestGate } from '@/components/GuestGate';
+import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
@@ -9,7 +11,10 @@ export const metadata: Metadata = {
   openGraph: { siteName: '카더라', type: 'website', locale: 'ko_KR' },
 };
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default async function MainLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <ToastProvider>
       <Navigation />
@@ -21,7 +26,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         backgroundColor: 'var(--bg-base)',
         color: 'var(--text-primary)',
       }}>
-        {children}
+        <GuestGate isLoggedIn={!!user}>
+          {children}
+        </GuestGate>
       </main>
     </ToastProvider>
   );

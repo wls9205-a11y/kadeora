@@ -95,7 +95,7 @@ export default function DiscussionRoomPage() {
   const changeColor=stockInfo?(stockInfo.change_pct>0?'var(--stock-up)':stockInfo.change_pct<0?'var(--stock-down)':'var(--text-tertiary)'):'var(--text-tertiary)';
 
   return (
-    <div className="flex flex-col h-screen" style={{backgroundColor:'var(--bg-base)'}}>
+    <div className="flex flex-col" style={{backgroundColor:'var(--bg-base)', height:'100dvh'}}>
       {/* 헤더 */}
       <header className="sticky top-0 z-10 border-b px-4 py-3" style={{backgroundColor:'var(--nav-bg)',borderColor:'var(--border)'}}>
         <div className="flex items-center gap-3">
