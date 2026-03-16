@@ -41,9 +41,9 @@ export function BookmarkButton({ postId }: Props) {
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '8px 14px', borderRadius: 20, fontSize: 14, cursor: 'pointer',
-        background: bookmarked ? 'var(--kd-warning-dim)' : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${bookmarked ? 'var(--kd-warning)' : 'var(--kd-border)'}`,
-        color: bookmarked ? 'var(--kd-warning)' : 'var(--kd-text-muted)',
+        background: bookmarked ? 'var(--warning-bg)' : 'var(--bg-hover)',
+        border: `1px solid ${bookmarked ? 'var(--warning)' : 'var(--border)'}`,
+        color: bookmarked ? 'var(--warning)' : 'var(--text-secondary)',
         transition: 'all 0.15s', fontWeight: bookmarked ? 700 : 400,
       }}
     >

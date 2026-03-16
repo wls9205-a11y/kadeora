@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface ImageUploadProps { images: string[]; onImagesChange: (images: string[]) => void; maxImages?: number; }
@@ -50,7 +51,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 5 }: I
         <div className="flex flex-wrap gap-3">
           {images.map((url, i) => (
             <div key={i} className="relative group w-24 h-24 rounded-xl overflow-hidden border border-[var(--kd-border)]">
-              <img src={url} alt={`첨부 ${i + 1}`} className="w-full h-full object-cover" />
+              <Image src={url} alt={`첨부 ${i + 1}`} fill sizes="96px" className="object-cover" />
               <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--kd-danger)]" aria-label={`이미지 ${i + 1} 삭제`}>✕</button>
             </div>
           ))}

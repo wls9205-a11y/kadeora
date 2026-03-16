@@ -74,9 +74,9 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '8px 16px', borderRadius: 20,
-        background: liked ? 'var(--kd-danger-dim)' : 'rgba(255,255,255,0.06)',
-        border: `1px solid ${liked ? 'rgba(239,68,68,0.4)' : 'var(--kd-border)'}`,
-        color: liked ? 'var(--kd-danger)' : 'var(--kd-text-muted)',
+        background: liked ? 'var(--brand-light)' : 'var(--bg-hover)',
+        border: `1px solid ${liked ? 'var(--brand)' : 'var(--border)'}`,
+        color: liked ? 'var(--brand)' : 'var(--text-secondary)',
         cursor: loading ? 'not-allowed' : 'pointer',
         transition: 'all 0.2s',
         fontSize: 14, fontWeight: 600,

@@ -51,13 +51,13 @@ export default function PostCard({ post, onLike, variant = "default", showAuthor
   const displayName = post.is_anonymous ? "\uC775\uBA85" : post.author?.nickname || "\uC0AC\uC6A9\uC790";
 
   return (
-    <Link href={`/feed/${post.id}`} className="kd-post-card" style={{ display: "block", textDecoration: "none", color: "inherit", padding: isCompact ? "12px 16px" : "16px 20px", borderRadius: "var(--kd-radius, 12px)", border: "1px solid var(--kd-border, rgba(128,128,128,0.15))", transition: "background-color 0.15s" }}>
+    <Link href={`/feed/${post.id}`} className="kd-post-card" style={{ display: "block", textDecoration: "none", color: "inherit", padding: isCompact ? "12px 16px" : "16px 20px", borderRadius: "12px", backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "8px", transition: "background-color 0.15s, box-shadow 0.15s, border-color 0.15s" }}>
       {showAuthor && (
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
           {post.author?.avatar_url && !post.is_anonymous ? (
             <img src={post.author.avatar_url} alt="" width={24} height={24} style={{ borderRadius: "50%", objectFit: "cover" }} />
           ) : (
-            <div style={{ width: 24, height: 24, borderRadius: "50%", backgroundColor: "var(--kd-accent, #534AB7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 500, color: "#fff" }}>
+            <div style={{ width: 24, height: 24, borderRadius: "50%", backgroundColor: "var(--brand)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 500, color: "var(--text-inverse, #fff)" }}>
               {displayName[0]}
             </div>
           )}

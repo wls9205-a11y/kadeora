@@ -5,22 +5,23 @@
 /* ========================================
    카더라 — 완전한 다크모드 CSS 변수 시스템
    슬로건: 대한민국 소리소문 정보 커뮤니티
+   핵심: 배경-카드-인풋 3단계 명도차 + 경계선 + 그림자
    ======================================== */
 
-/* Light Mode — 배경(회색) → 카드(흰색) → 인풋(연회색) 3단계 */
+/* Light Mode — 배경(중간회색) → 카드(순백) → 인풋(살짝회색) */
 :root {
-  --bg-base:       #f0f2f5;
+  --bg-base:       #ebedf0;
   --bg-surface:    #ffffff;
   --bg-elevated:   #ffffff;
-  --bg-sunken:     #e4e6ea;
+  --bg-sunken:     #f0f2f5;
   --bg-hover:      #e4e6ea;
-  --bg-active:     #d8dadf;
+  --bg-active:     #dadde1;
   --border:        #ccd0d5;
-  --border-strong: #bec3c9;
+  --border-strong: #adb3ba;
   --border-focus:  #ff5b36;
   --text-primary:   #1c1e21;
-  --text-secondary: #65676b;
-  --text-tertiary:  #8a8d91;
+  --text-secondary: #606770;
+  --text-tertiary:  #90949c;
   --text-disabled:  #bec3c9;
   --text-inverse:   #ffffff;
   --text-link:      #ff5b36;
@@ -38,55 +39,55 @@
   --info-bg:        #e8f0fe;
   --stock-up:       #c0392b;
   --stock-down:     #1565c0;
-  --stock-flat:     #65676b;
+  --stock-flat:     #606770;
   --nav-bg:         #ffffff;
   --nav-border:     #ccd0d5;
   --nav-text:       #1c1e21;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
-  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,.07), 0 4px 6px rgba(0,0,0,.05);
-  --shadow-xl: 0 20px 25px rgba(0,0,0,.08), 0 10px 10px rgba(0,0,0,.04);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.15);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,.14);
 }
 
-/* Dark Mode — 배경(거의검정) → 카드(진회색) → 인풋(중간회색) 3단계 */
+/* Dark Mode — 배경(거의검정) → 카드(진회색) → 인풋(더어두움) */
 .dark {
-  --bg-base:       #18191a;
-  --bg-surface:    #242526;
-  --bg-elevated:   #3a3b3c;
-  --bg-sunken:     #0d0e0f;
-  --bg-hover:      #3a3b3c;
-  --bg-active:     #4e4f50;
-  --border:        #3e4042;
-  --border-strong: #4e4f50;
+  --bg-base:       #111213;
+  --bg-surface:    #1e1f20;
+  --bg-elevated:   #2c2d2e;
+  --bg-sunken:     #0a0b0c;
+  --bg-hover:      #2c2d2e;
+  --bg-active:     #3a3b3c;
+  --border:        #2e3033;
+  --border-strong: #3e4042;
   --border-focus:  #ff6b4a;
   --text-primary:   #e4e6eb;
   --text-secondary: #b0b3b8;
   --text-tertiary:  #8a8d91;
   --text-disabled:  #4e4f50;
-  --text-inverse:   #18191a;
+  --text-inverse:   #111213;
   --text-link:      #ff6b4a;
   --brand:          #ff6b4a;
   --brand-hover:    #ff8468;
   --brand-light:    #2d1a14;
   --brand-dark:     #ff5b36;
   --success:        #36b37e;
-  --success-bg:     #0d2118;
+  --success-bg:     #0a1f15;
   --warning:        #ffab00;
-  --warning-bg:     #1f1500;
+  --warning-bg:     #1a1200;
   --error:          #ff5630;
-  --error-bg:       #1f0a00;
+  --error-bg:       #1a0800;
   --info:           #4c9aff;
-  --info-bg:        #0a1929;
+  --info-bg:        #071525;
   --stock-up:       #ff6b6b;
   --stock-down:     #4dabf7;
   --stock-flat:     #8a8d91;
-  --nav-bg:         #242526;
-  --nav-border:     #3e4042;
+  --nav-bg:         #1e1f20;
+  --nav-border:     #2e3033;
   --nav-text:       #e4e6eb;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-  --shadow-md: 0 4px 6px rgba(0,0,0,.5);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,.6);
-  --shadow-xl: 0 20px 25px rgba(0,0,0,.7);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.6);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.7);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,.8);
 }
 
 /* ========================================
@@ -106,7 +107,6 @@ body {
 
 /* ========================================
    다크모드 강제 오버라이드
-   — 하드코딩된 흰색/검정 모두 덮어쓰기
    ======================================== */
 .dark [style*="background-color: white"],
 .dark [style*="background-color: #fff"],
@@ -170,7 +170,7 @@ body {
   outline-offset: 2px;
 }
 
-/* 카드/패널 공통 */
+/* 카드/패널 다크모드 border */
 .dark .rounded-lg,
 .dark .rounded-xl,
 .dark .rounded-2xl {
@@ -214,7 +214,7 @@ body {
   border-color: var(--text-secondary);
 }
 
-/* 카드 */
+/* 카드 — 배경과 확실한 구분 */
 .card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
@@ -225,6 +225,24 @@ body {
 .card:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--border-strong);
+}
+
+/* 카드/패널 구분감 강화 — 라이트/다크 공통 */
+.card,
+.feed-card,
+[class*="rounded-xl"],
+[class*="rounded-2xl"],
+[class*="rounded-lg"] {
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+.dark .card,
+.dark .feed-card,
+.dark [class*="rounded-xl"],
+.dark [class*="rounded-2xl"],
+.dark [class*="rounded-lg"] {
+  background-color: var(--bg-surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,.5);
 }
 
 /* ========================================
@@ -243,24 +261,33 @@ button:active,
 [data-haptic]:active { transform: scale(0.97); }
 
 /* ========================================
-   내비게이션
+   헤더/네비 — 명확한 경계선 + 그림자
    ======================================== */
 .nav-bar {
   background-color: var(--nav-bg);
-  border-bottom: 1px solid var(--nav-border);
+  border-bottom: 2px solid var(--border);
   color: var(--nav-text);
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 4px rgba(0,0,0,.08);
 }
-.dark .nav-bar { background-color: rgba(36,37,38,0.92); }
+.dark .nav-bar {
+  background-color: var(--nav-bg);
+  border-bottom: 2px solid var(--border-strong);
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
 
+/* 탭바/푸터 — 상단 경계선 명확화 */
 .tab-bar {
   background-color: var(--bg-elevated);
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -2px 8px rgba(0,0,0,.06);
+}
+.dark .tab-bar {
+  border-top: 2px solid var(--border-strong);
+  box-shadow: 0 -2px 12px rgba(0,0,0,.4);
 }
 .tab-bar-item { color: var(--text-tertiary); transition: color 0.15s; }
 .tab-bar-item.active { color: var(--brand); }
@@ -273,7 +300,7 @@ button:active,
   border: 1px solid var(--border);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.feed-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.feed-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
 
 .badge-hot {
   background: linear-gradient(135deg, #ff5b36, #ff8c00);
@@ -282,6 +309,21 @@ button:active,
   font-weight: 700;
   padding: 0.15rem 0.45rem;
   border-radius: 9999px;
+}
+
+/* ========================================
+   액션 버튼 — 배경색으로 구분
+   ======================================== */
+.action-btn {
+  background-color: var(--bg-hover);
+  border-radius: 9999px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.action-btn:hover {
+  background-color: var(--bg-active);
+  border-color: var(--border-strong);
 }
 
 /* ========================================
@@ -295,6 +337,17 @@ button:active,
    토론방
    ======================================== */
 .discussion-room { background-color: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; }
+
+/* ========================================
+   섹션 구분선
+   ======================================== */
+.section-divider {
+  height: 8px;
+  background-color: var(--bg-base);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 0 -16px;
+}
 
 /* ========================================
    스켈레톤 로딩
@@ -323,16 +376,6 @@ button:active,
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
-
-/* ========================================
-   카드/패널 구분감 강화
-   ======================================== */
-.card, [class*="rounded-xl"], [class*="rounded-2xl"] {
-  box-shadow: var(--shadow-sm);
-}
-.dark .card, .dark [class*="rounded-xl"], .dark [class*="rounded-2xl"] {
-  box-shadow: 0 1px 0 var(--border), 0 0 0 1px var(--border);
-}
 
 /* ========================================
    모바일

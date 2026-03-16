@@ -94,9 +94,9 @@ export function Navigation() {
       {/* ── 헤더 ── */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 200,
-        background: 'var(--kd-nav-bg)',
-        borderBottom: '1px solid var(--kd-nav-border)',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        background: 'var(--nav-bg)',
+        borderBottom: '2px solid var(--border)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       }}>
         <div style={{
           maxWidth: 1200, margin: '0 auto', padding: '0 16px',
@@ -105,8 +105,11 @@ export function Navigation() {
           {/* 로고 */}
           <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:7, textDecoration:'none', flexShrink:0, marginRight:4 }}>
             <MonkeyLogo size={30} />
-            <span style={{ fontWeight:800, fontSize:17, color:'var(--kd-nav-active)', letterSpacing:-0.5 }} className="hidden md:inline">
+            <span style={{ fontWeight:800, fontSize:17, color:'var(--brand)', letterSpacing:-0.5 }} className="hidden md:inline">
               kadeora
+            </span>
+            <span className="hidden lg:inline" style={{ fontSize:11, fontWeight:600, color:'var(--text-tertiary)', background:'var(--bg-hover)', padding:'2px 8px', borderRadius:999, marginLeft:4 }}>
+              소리소문 정보
             </span>
           </Link>
 
