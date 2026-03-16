@@ -7,16 +7,16 @@
    슬로건: 대한민국 소리소문 정보 커뮤니티
    ======================================== */
 
-/* Light Mode */
+/* Light Mode — Reddit/카카오 스타일: 밝지만 섹션 구분감 */
 :root {
-  --bg-base:       #f6f7f9;
+  --bg-base:       #f0f2f5;
   --bg-surface:    #ffffff;
   --bg-elevated:   #ffffff;
-  --bg-sunken:     #eef0f4;
-  --bg-hover:      #f0f2f5;
-  --bg-active:     #e6e9ef;
-  --border:        #dde1e8;
-  --border-strong: #c4c9d4;
+  --bg-sunken:     #e4e6ea;
+  --bg-hover:      #e4e6ea;
+  --bg-active:     #d8dadf;
+  --border:        #ccd0d5;
+  --border-strong: #bec3c9;
   --border-focus:  #ff5b36;
   --text-primary:   #0f1419;
   --text-secondary: #536471;
@@ -48,22 +48,22 @@
   --shadow-xl: 0 8px 32px rgba(0,0,0,.15);
 }
 
-/* Dark Mode — GitHub Dark 수준 완전한 다크 */
+/* Dark Mode — Discord/Facebook Dark 스타일: 어둡지만 섹션 구분감 */
 .dark {
-  --bg-base:       #0d1117;
-  --bg-surface:    #161b22;
-  --bg-elevated:   #1c2128;
-  --bg-sunken:     #0d1117;
-  --bg-hover:      #21262d;
-  --bg-active:     #2d333b;
-  --border:        #30363d;
-  --border-strong: #484f58;
+  --bg-base:       #18191a;
+  --bg-surface:    #242526;
+  --bg-elevated:   #3a3b3c;
+  --bg-sunken:     #111213;
+  --bg-hover:      #3a3b3c;
+  --bg-active:     #4e4f50;
+  --border:        #3e4042;
+  --border-strong: #4e4f50;
   --border-focus:  #ff6b4a;
-  --text-primary:   #e6edf3;
-  --text-secondary: #8b949e;
-  --text-tertiary:  #6e7681;
-  --text-disabled:  #484f58;
-  --text-inverse:   #0d1117;
+  --text-primary:   #e4e6eb;
+  --text-secondary: #b0b3b8;
+  --text-tertiary:  #8a8d91;
+  --text-disabled:  #4e4f50;
+  --text-inverse:   #18191a;
   --text-link:      #ff6b4a;
   --brand:          #ff6b4a;
   --brand-hover:    #ff8468;
@@ -80,9 +80,9 @@
   --stock-up:       #f85149;
   --stock-down:     #58a6ff;
   --stock-flat:     #8b949e;
-  --nav-bg:         #161b22;
-  --nav-border:     #30363d;
-  --nav-text:       #e6edf3;
+  --nav-bg:         #242526;
+  --nav-border:     #3e4042;
+  --nav-text:       #e4e6eb;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
   --shadow-md: 0 2px 8px rgba(0,0,0,.4);
   --shadow-lg: 0 4px 20px rgba(0,0,0,.5);
@@ -255,7 +255,7 @@ button:active,
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
-.dark .nav-bar { background-color: rgba(22,27,34,0.92); }
+.dark .nav-bar { background-color: rgba(36,37,38,0.92); }
 
 .tab-bar {
   background-color: var(--bg-elevated);

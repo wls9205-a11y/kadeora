@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
+
+export const metadata: Metadata = {
+  title: '토론방 | 카더라',
+  description: '주식·아파트 실시간 토론 — 카더라 커뮤니티',
+};
 import { DEMO_DISCUSS } from '@/lib/constants';
 import DiscussClient from './DiscussClient';
 

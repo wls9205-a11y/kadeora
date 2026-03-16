@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: '이용약관 | 카더라',
+  description: '카더라 서비스 이용약관',
+};
+
 export default function TermsPage() {
   const sections = [
     ['제1조 (목적)', '이 약관은 카더라(이하 "서비스")가 제공하는 금융정보 커뮤니티 서비스의 이용과 관련하여 회원과 서비스 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.'],

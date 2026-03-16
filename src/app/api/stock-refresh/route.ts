@@ -1,7 +1,9 @@
-﻿import { NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await rateLimit(req, 'auth'))) return rateLimitResponse();
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

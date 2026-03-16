@@ -44,8 +44,11 @@ export default function PaymentClient() {
   }, [paymentKey, orderId, amount, productId]);
   useEffect(() => { handlePaymentCallback(); }, [handlePaymentCallback]);
 
+  const tossClientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+
   async function startPayment(selectedProduct: Product) {
     setProduct(selectedProduct);
+    if (!tossClientKey) { setError('결제 시스템 준비 중입니다. 잠시 후 다시 시도해주세요.'); setStep('fail'); return; }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/login?redirect=/payment'); return; }
     const newOrderId = KADEORA_+Date.now()+_+Math.random().toString(36).slice(2, 8);
@@ -53,7 +56,7 @@ export default function PaymentClient() {
       // @ts-expect-error TossPayments SDK
       if (typeof window.TossPayments === 'undefined') { await loadTossScript(); }
       // @ts-expect-error TossPayments SDK
-      const tp = window.TossPayments(process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq');
+      const tp = window.TossPayments(tossClientKey);
       const payment = tp.payment({ customerKey: user.id });
       await payment.requestPayment({ method: 'CARD', amount: { currency: 'KRW', value: selectedProduct.price_krw }, orderId: newOrderId, orderName: selectedProduct.name, successUrl: window.location.origin+'/payment?product='+selectedProduct.id, failUrl: window.location.origin+'/payment?fail=true', customerEmail: user.email || undefined });
     } catch (err) { console.error(err); setError('Payment init failed'); setStep('fail'); }

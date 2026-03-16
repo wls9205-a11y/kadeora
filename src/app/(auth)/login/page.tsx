@@ -1,8 +1,14 @@
-﻿import { Suspense } from 'react';
+﻿import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@supabase/ssr';
 import LoginClient from './LoginClient';
+
+export const metadata: Metadata = {
+  title: '로그인 | 카더라',
+  robots: { index: false, follow: false },
+};
 
 export default async function LoginPage({
   searchParams,
