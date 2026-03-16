@@ -52,6 +52,7 @@ export default function StockClient({ initialStocks }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(initialStocks);
   const [market, setMarket] = useState<string>('ALL');
   const [sort, setSort] = useState<'cap' | 'change' | 'volume'>('cap');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('');
@@ -93,9 +94,10 @@ export default function StockClient({ initialStocks }: Props) {
     .filter(s => market === 'ALL' || s.market === market)
     .filter(s => !search || s.name.includes(search) || s.symbol.includes(search))
     .sort((a, b) => {
-      if (sort === 'cap') return (b.market_cap ?? 0) - (a.market_cap ?? 0);
-      if (sort === 'change') return (b.change_pct ?? 0) - (a.change_pct ?? 0);
-      return (b.volume ?? 0) - (a.volume ?? 0);
+      const dirMul = sortDir === 'asc' ? 1 : -1;
+      if (sort === 'cap') return dirMul * ((b.market_cap ?? 0) - (a.market_cap ?? 0));
+      if (sort === 'change') return dirMul * ((b.change_pct ?? 0) - (a.change_pct ?? 0));
+      return dirMul * ((b.volume ?? 0) - (a.volume ?? 0));
     });
 
   const isUp = (s: Stock) => (s.change_pct ?? 0) > 0;
@@ -176,7 +178,10 @@ export default function StockClient({ initialStocks }: Props) {
         {/* 정렬 */}
         <div style={{ display: 'flex', gap: 4 }}>
           {([['cap', '시가총액'], ['change', '등락률'], ['volume', '거래량']] as const).map(([k, l]) => (
-            <button key={k} onClick={() => setSort(k)} style={{
+            <button key={k} onClick={() => {
+              if (sort === k) { setSortDir(d => d === 'desc' ? 'asc' : 'desc'); }
+              else { setSort(k); setSortDir('desc'); }
+            }} style={{
               padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
               fontWeight: 700, fontSize: 13,
               background: sort === k ? 'var(--border)' : 'transparent',
@@ -216,8 +221,18 @@ export default function StockClient({ initialStocks }: Props) {
         }}>
           <span>#</span>
           <span>종목</span>
-          <span style={{ textAlign: 'right' }}>현재가</span>
-          <span style={{ textAlign: 'right' }}>등락</span>
+          <span style={{ textAlign: 'right', cursor: 'pointer' }} onClick={() => {
+            if (sort === 'cap') { setSortDir(d => d === 'desc' ? 'asc' : 'desc'); }
+            else { setSort('cap'); setSortDir('desc'); }
+          }}>
+            현재가 {sort === 'cap' ? (sortDir === 'desc' ? '▼' : '▲') : ''}
+          </span>
+          <span style={{ textAlign: 'right', cursor: 'pointer' }} onClick={() => {
+            if (sort === 'change') { setSortDir(d => d === 'desc' ? 'asc' : 'desc'); }
+            else { setSort('change'); setSortDir('desc'); }
+          }}>
+            등락 {sort === 'change' ? (sortDir === 'desc' ? '▼' : '▲') : ''}
+          </span>
           <span style={{ textAlign: 'center' }}>토론</span>
         </div>
 

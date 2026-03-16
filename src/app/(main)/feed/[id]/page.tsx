@@ -230,9 +230,10 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {/* Actions */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LikeButton postId={post.id} initialCount={post.likes_count} />`n          <BookmarkButton postId={post.id} />
+          <LikeButton postId={post.id} initialCount={post.likes_count} />
+          <BookmarkButton postId={post.id} />
           <ShareButtons title={post.title} postId={post.id} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 14 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
           </div>
         </div>

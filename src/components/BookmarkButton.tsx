@@ -17,6 +17,7 @@ export function BookmarkButton({ postId }: Props) {
   }, [postId]);
 
   const toggle = async () => {
+    try { if ('vibrate' in navigator) navigator.vibrate(10); } catch {}
     setLoading(true);
     try {
       const res = await fetch('/api/bookmarks', {

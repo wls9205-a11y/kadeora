@@ -34,6 +34,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
   }, [postId]);
 
   const toggle = async () => {
+    try { if ('vibrate' in navigator) navigator.vibrate(10); } catch {}
     if (!userId) { info('로그인이 필요합니다'); return; }
     if (loading) return;
     setLoading(true);
