@@ -34,7 +34,7 @@ export default function ShopClient() {
   const [isDemo, setIsDemo] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [confirmProduct, setConfirmProduct] = useState<ShopProduct | null>(null);
-  const { success, error } = useToast();
+  const { error } = useToast();
   const router = useRouter();
 
   useEffect(() => {

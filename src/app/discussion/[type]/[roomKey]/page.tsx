@@ -61,7 +61,7 @@ export default function DiscussionRoomPage() {
       .eq('room_id',room.id).eq('is_deleted',false)
       .order('created_at',{ascending:true}).limit(100)
       .then(({data}) => {
-        if (data) { setMessages(data.map((m:any)=>({...m,is_mine:m.author_id===currentUser?.id}))); setTimeout(scrollToBottom,100); }
+        if (data) { setMessages(data.map((m: Record<string, unknown>)=>({...m,is_mine:(m as { author_id?: string }).author_id===currentUser?.id}))); setTimeout(scrollToBottom,100); }
         setIsLoading(false);
       });
   }, [room, currentUser]);
@@ -71,7 +71,7 @@ export default function DiscussionRoomPage() {
     const ch = supabase.channel(`room-${room.id}`)
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'discussion_messages',filter:`room_id=eq.${room.id}`},
         async (payload) => {
-          const m = payload.new as any;
+          const m = payload.new as Record<string, unknown>;
           const {data:p} = await supabase.from('profiles').select('username,avatar_url').eq('id',m.author_id).single();
           setMessages(prev=>[...prev,{id:m.id,author_id:m.author_id,content:m.content,created_at:m.created_at,is_anonymous:m.is_anonymous,profiles:p,is_mine:m.author_id===currentUser?.id}]);
           setTimeout(scrollToBottom,50);

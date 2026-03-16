@@ -15,7 +15,6 @@ interface Stock {
 
 interface Props {
   initialStocks: Stock[];
-  isDemo: boolean;
 }
 
 function fmt(n: number) {
@@ -40,9 +39,8 @@ function timeDiff(iso: string) {
   return new Date(iso).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 }
 
-export default function StockClient({ initialStocks, isDemo: initialIsDemo }: Props) {
+export default function StockClient({ initialStocks }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(initialStocks);
-  const [isDemo, setIsDemo] = useState(initialIsDemo);
   const [market, setMarket] = useState<'ALL' | 'KOSPI' | 'KOSDAQ'>('ALL');
   const [sort, setSort] = useState<'cap' | 'change' | 'volume'>('cap');
   const [search, setSearch] = useState('');
@@ -56,7 +54,6 @@ export default function StockClient({ initialStocks, isDemo: initialIsDemo }: Pr
       const data = await res.json();
       if (data.stocks?.length) {
         setStocks(data.stocks);
-        setIsDemo(false);
         setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
       }
     } catch {}
@@ -97,7 +94,7 @@ export default function StockClient({ initialStocks, isDemo: initialIsDemo }: Pr
           disabled={loading}
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
-            background: '#FF4500', color: '#fff', border: 'none',
+            background: 'var(--kd-primary)', color: 'var(--text-inverse, #fff)', border: 'none',
             borderRadius: 20, padding: '8px 16px', fontSize: 13,
             fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
@@ -106,16 +103,6 @@ export default function StockClient({ initialStocks, isDemo: initialIsDemo }: Pr
           {loading ? '⟳ 갱신 중...' : '⟳ 새로고침'}
         </button>
       </div>
-
-      {isDemo && (
-        <div style={{
-          background: 'rgba(255,165,0,0.1)', border: '1px solid rgba(255,165,0,0.3)',
-          borderRadius: 4, padding: '10px 14px', marginBottom: 12,
-          fontSize: 13, color: '#FF8C00',
-        }}>
-          ⚠ 현재 저장된 시세를 표시합니다. 새로고침 버튼을 눌러 실시간 데이터를 불러오세요.
-        </div>
-      )}
 
       {/* 필터 바 */}
       <div style={{
@@ -129,8 +116,8 @@ export default function StockClient({ initialStocks, isDemo: initialIsDemo }: Pr
             <button key={m} onClick={() => setMarket(m)} style={{
               padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
               fontWeight: 700, fontSize: 13,
-              background: market === m ? '#FF4500' : 'transparent',
-              color: market === m ? '#fff' : 'var(--kd-text-dim)',
+              background: market === m ? 'var(--kd-primary)' : 'transparent',
+              color: market === m ? 'var(--text-inverse, #fff)' : 'var(--kd-text-dim)',
             }}>
               {m === 'ALL' ? '전체' : m}
             </button>
@@ -213,14 +200,14 @@ export default function StockClient({ initialStocks, isDemo: initialIsDemo }: Pr
             <span style={{ textAlign: 'right', fontSize: 12, color: 'var(--kd-text-dim)', fontFamily: 'monospace' }}>{s.symbol}</span>
             <span style={{
               textAlign: 'right', fontSize: 14, fontWeight: 700,
-              color: isUp(s) ? '#EF4444' : isDown(s) ? '#3B82F6' : 'var(--kd-text)',
+              color: isUp(s) ? 'var(--stock-up)' : isDown(s) ? 'var(--stock-down)' : 'var(--kd-text)',
             }}>
               {fmt(s.price)}
             </span>
             <div style={{ textAlign: 'right' }}>
               <div style={{
                 fontSize: 13, fontWeight: 700,
-                color: isUp(s) ? '#EF4444' : isDown(s) ? '#3B82F6' : 'var(--kd-text-dim)',
+                color: isUp(s) ? 'var(--stock-up)' : isDown(s) ? 'var(--stock-down)' : 'var(--kd-text-dim)',
               }}>
                 {isUp(s) ? '▲' : isDown(s) ? '▼' : '–'} {Math.abs(s.change_pct ?? 0).toFixed(2)}%
               </div>

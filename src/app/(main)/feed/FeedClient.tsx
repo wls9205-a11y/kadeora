@@ -34,9 +34,9 @@ const LOGO_SVG = (
   </svg>
 );
 
-interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeCategory: string; isDemo: boolean; }
+interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeCategory: string; }
 
-export default function FeedClient({ posts, trending, activeCategory, isDemo }: Props) {
+export default function FeedClient({ posts, trending, activeCategory }: Props) {
   const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(10);
   const observerRef = useCallback((node: HTMLDivElement | null) => {
@@ -79,16 +79,6 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
           ))}
         </div>
 
-        {isDemo && (
-          <div style={{
-            background: 'var(--kd-primary-dim)', border: '1px solid rgba(255,69,0,0.25)',
-            borderRadius: 4, padding: '10px 14px', marginBottom: 10,
-            fontSize: 13, color: 'var(--kd-primary)', display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            ℹ <span>데모 데이터를 표시 중입니다.</span>
-          </div>
-        )}
-
         {/* 게시글 목록 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {visiblePosts.map((post, i) => {
@@ -102,8 +92,8 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
                   padding: '10px 4px', gap: 4, flexShrink: 0,
                 }}>
-                  <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: '8px solid #FF4500' }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#FF4500' }}>{numFmt(post.likes_count ?? 0)}</span>
+                  <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: '8px solid var(--kd-primary)' }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--kd-primary)' }}>{numFmt(post.likes_count ?? 0)}</span>
                   <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '8px solid var(--kd-border)' }} />
                 </div>
                 {/* 본문 */}
@@ -114,7 +104,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                         <Image src={post.profiles.avatar_url} alt="" fill sizes="18px" style={{ objectFit: 'cover' }} />
                       </div>
                     ) : (
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>
+                      <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, background: 'var(--kd-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
                         {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
                       </div>
                     )}
@@ -146,7 +136,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
 
         {visibleCount < posts.length && (
           <div ref={observerRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
-            <div style={{ width: 22, height: 22, border: '2px solid var(--kd-border)', borderTopColor: '#FF4500', borderRadius: '50%' }} className="animate-spin" />
+            <div style={{ width: 22, height: 22, border: '2px solid var(--kd-border)', borderTopColor: 'var(--kd-primary)', borderRadius: '50%' }} className="animate-spin" />
           </div>
         )}
         {posts.length === 0 && (
@@ -160,12 +150,12 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
       <aside className="feed-sidebar">
         {/* 커뮤니티 카드 */}
         <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{ background: '#FF4500', height: 56, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8 }}>
+          <div style={{ background: 'var(--kd-primary)', height: 56, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8 }}>
             {LOGO_SVG}
-            <span style={{ fontSize: 16, fontWeight: 800, color: '#fff', letterSpacing: -0.5 }}>kadeora</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-inverse, #fff)', letterSpacing: -0.5 }}>kadeora</span>
           </div>
           <div style={{ padding: '32px 12px 12px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: -22, left: 12, width: 44, height: 44, borderRadius: '50%', border: '3px solid var(--kd-surface)', background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', top: -22, left: 12, width: 44, height: 44, borderRadius: '50%', border: '3px solid var(--kd-surface)', background: 'var(--kd-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {LOGO_SVG}
             </div>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--kd-text)', marginBottom: 4 }}>r/kadeora</div>
@@ -178,7 +168,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
                 </div>
               ))}
             </div>
-            <Link href="/write" style={{ display: 'block', textAlign: 'center', background: '#FF4500', color: '#fff', borderRadius: 20, padding: '7px 0', fontSize: 13, fontWeight: 700 }}>
+            <Link href="/write" style={{ display: 'block', textAlign: 'center', background: 'var(--kd-primary)', color: 'var(--text-inverse, #fff)', borderRadius: 20, padding: '7px 0', fontSize: 13, fontWeight: 700 }}>
               + 새 게시글 작성
             </Link>
           </div>
@@ -186,14 +176,14 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
 
         {/* 인기 키워드 */}
         <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{ background: '#FF4500', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: '#fff' }}>🔥 인기 키워드</div>
+          <div style={{ background: 'var(--kd-primary)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>🔥 인기 키워드</div>
           <div style={{ padding: '6px 0' }}>
             {trending.map((kw, i) => (
               <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.keyword)}`}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderBottom: '1px solid var(--kd-border)' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--kd-surface-2)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <span style={{ width: 20, fontSize: 12, fontWeight: 800, color: i < 3 ? '#FF4500' : 'var(--kd-text-dim)', flexShrink: 0 }}>{i + 1}</span>
+                <span style={{ width: 20, fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--kd-primary)' : 'var(--kd-text-dim)', flexShrink: 0 }}>{i + 1}</span>
                 <span style={{ flex: 1, fontSize: 13, color: 'var(--kd-text)', fontWeight: 500 }}>#{kw.keyword}</span>
                 <span style={{ fontSize: 11, color: 'var(--kd-text-dim)' }}>{kw.heat_score >= 1000 ? (kw.heat_score / 1000).toFixed(1) + 'k' : kw.heat_score}</span>
               </Link>
@@ -203,7 +193,7 @@ export default function FeedClient({ posts, trending, activeCategory, isDemo }: 
 
         {/* 빠른 메뉴 */}
         <div style={{ background: 'var(--kd-surface)', border: '1px solid var(--kd-border)', borderRadius: 4, overflow: 'hidden' }}>
-          <div style={{ background: '#FF4500', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: '#fff' }}>빠른 메뉴</div>
+          <div style={{ background: 'var(--kd-primary)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>빠른 메뉴</div>
           {[['📝 새 글 작성','/write'],['💬 실시간 토론','/discuss'],['📈 주식 시세','/stock'],['🏠 청약 정보','/apt']].map(([l,h]) => (
             <Link key={h as string} href={h as string} style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid var(--kd-border)', fontSize: 13, fontWeight: 500, color: 'var(--kd-text)' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--kd-surface-2)')}

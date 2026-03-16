@@ -7,8 +7,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
 
 export default async function AptPage() {
-  let apts: any[] = [];
-  let isDemo = true;
+  let apts: { id: number; house_nm: string; region_nm: string; hssply_adres: string; tot_supply_hshld_co: number; rcept_bgnde: string; rcept_endde: string; spsply_rcept_bgnde: string; spsply_rcept_endde: string; przwner_presnatn_de: string; cntrct_cncls_bgnde: string; cntrct_cncls_endde: string; mvn_prearnge_ym: string; pblanc_url: string; mdatrgbn_nm: string }[] = [];
 
   try {
     const sb = await createSupabaseServer();
@@ -18,9 +17,8 @@ export default async function AptPage() {
       .order('rcept_bgnde', { ascending: true });
     if (data && data.length > 0) {
       apts = data;
-      isDemo = false;
     }
   } catch {}
 
-  return <AptClient apts={apts} isDemo={isDemo} />;
+  return <AptClient apts={apts} />;
 }

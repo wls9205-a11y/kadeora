@@ -93,7 +93,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
             className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
             style={{
               backgroundColor: region === r ? 'var(--brand)' : 'var(--bg-hover)',
-              color: region === r ? '#fff' : 'var(--text-secondary)',
+              color: region === r ? 'var(--text-inverse, #fff)' : 'var(--text-secondary)',
               border: region === r ? 'none' : '1px solid var(--border)',
             }}
           >
@@ -111,7 +111,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
             className="px-3 py-1 rounded-full text-xs font-semibold"
             style={{
               backgroundColor: statusFilter === s ? 'var(--brand)' : 'var(--bg-hover)',
-              color: statusFilter === s ? '#fff' : 'var(--text-secondary)',
+              color: statusFilter === s ? 'var(--text-inverse, #fff)' : 'var(--text-secondary)',
               border: statusFilter === s ? 'none' : '1px solid var(--border)',
             }}
           >

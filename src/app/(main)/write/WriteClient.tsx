@@ -1,6 +1,7 @@
 // draft support added
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
@@ -104,7 +105,7 @@ export default function WriteClient() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ fontSize: 13, color: 'var(--kd-text-dim)', marginBottom: 24 }}>
-        <a href="/feed" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>피드</a>
+        <Link href="/feed" style={{ color: 'var(--kd-primary)', textDecoration: 'none' }}>피드</Link>
         <span style={{ margin: '0 6px' }}>›</span>
         <span>{editId ? '게시글 수정' : '새 글 작성'}</span>
       </div>

@@ -25,7 +25,7 @@ export default function AdminPushNotification() {
       } else {
         setResult(`❌ 오류: ${data.error}`);
       }
-    } catch (e) { setResult('❌ 네트워크 오류'); }
+    } catch { setResult('❌ 네트워크 오류'); }
     setLoading(false);
   }
 

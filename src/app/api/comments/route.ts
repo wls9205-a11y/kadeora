@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
-import { sanitizeComment, sanitizeId } from '@/lib/sanitize'
+import { sanitizeComment } from '@/lib/sanitize'
 
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();

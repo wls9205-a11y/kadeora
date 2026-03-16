@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_req: NextRequest) {
+export async function DELETE() {
   const sb = await createSupabaseServer();
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

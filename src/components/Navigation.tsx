@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/apt',            label: '부동산', icon: '🏘' },
   { href: '/discuss',        label: '토론',   icon: '💬' },
   { href: '/shop/megaphone', label: '상점',   icon: '🛒' },
+  { href: '/grades',         label: '등급 안내', icon: '🏆' },
 ];
 
 const MonkeyLogo = ({ size = 28 }: { size?: number }) => (
@@ -156,7 +157,7 @@ export function Navigation() {
                 <Link href="/write" style={{
                   display:'flex', alignItems:'center', gap:4,
                   height:34, padding:'0 14px', borderRadius:17,
-                  background:'var(--kd-primary)', color:'#FFFFFF',
+                  background:'var(--kd-primary)', color:'var(--text-inverse, #fff)',
                   textDecoration:'none', fontSize:13, fontWeight:700,
                   whiteSpace:'nowrap',
                 }}>
@@ -266,7 +267,7 @@ export function Navigation() {
                 >로그인</Link>
                 <Link href="/login" className="hidden md:flex" style={{
                   height:34, padding:'0 14px', borderRadius:17,
-                  background:'var(--kd-primary)', color:'#FFFFFF',
+                  background:'var(--kd-primary)', color:'var(--text-inverse, #fff)',
                   alignItems:'center', textDecoration:'none', fontSize:13, fontWeight:700,
                 }}>회원가입</Link>
               </>
@@ -280,7 +281,7 @@ export function Navigation() {
         position:'fixed', bottom:0, left:0, right:0, zIndex:200,
         background:'var(--kd-nav-bg)',
         borderTop:'1px solid var(--kd-nav-border)',
-        display:'grid', gridTemplateColumns:'repeat(5,1fr)',
+        display:'grid', gridTemplateColumns:`repeat(${NAV_ITEMS.length},1fr)`,
         paddingBottom:'max(8px, env(safe-area-inset-bottom))',
         paddingTop:6,
         boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',

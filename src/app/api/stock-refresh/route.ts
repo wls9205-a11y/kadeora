@@ -49,8 +49,8 @@ export async function GET() {
 
       if (quotes.length > 0) {
         const updates = quotes
-          .filter((q: any) => q.regularMarketPrice)
-          .map((q: any) => ({
+          .filter((q: { regularMarketPrice?: number; symbol?: string; regularMarketChange?: number; regularMarketChangePercent?: number; regularMarketVolume?: number; marketCap?: number }) => q.regularMarketPrice)
+          .map((q: { regularMarketPrice?: number; symbol?: string; regularMarketChange?: number; regularMarketChangePercent?: number; regularMarketVolume?: number; marketCap?: number }) => ({
             symbol: q.symbol?.replace(/\.(KS|KQ)$/, ''),
             price: q.regularMarketPrice,
             change_amt: Math.round(q.regularMarketChange ?? 0),

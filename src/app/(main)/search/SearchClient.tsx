@@ -132,8 +132,8 @@ export default function SearchClient() {
           {loading && results.length === 0
             ? '검색 중...'
             : total > 0
-              ? <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>"{query}"</span> 검색 결과 <span style={{ color: 'var(--kd-primary)', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
-              : <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>"{query}"</span>에 대한 검색 결과가 없습니다</>
+              ? <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span> 검색 결과 <span style={{ color: 'var(--kd-primary)', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
+              : <><span style={{ color: 'var(--kd-text)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span>에 대한 검색 결과가 없습니다</>
           }
         </div>
       )}

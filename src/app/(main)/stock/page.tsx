@@ -7,8 +7,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import StockClient from './StockClient';
 
 export default async function StockPage() {
-  let stocks: any[] = [];
-  let isDemo = true;
+  let stocks: { symbol: string; name: string; market: string; price: number; change_amt: number; change_pct: number; volume: number; market_cap: number; updated_at: string }[] = [];
 
   try {
     const sb = await createSupabaseServer();
@@ -18,9 +17,8 @@ export default async function StockPage() {
       .order('market_cap', { ascending: false });
     if (data && data.length > 0) {
       stocks = data;
-      isDemo = false;
     }
   } catch {}
 
-  return <StockClient initialStocks={stocks} isDemo={isDemo} />;
+  return <StockClient initialStocks={stocks} />;
 }

@@ -1,6 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
-import { rateLimit, getIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizePostInput } from '@/lib/sanitize'
 
 export async function GET(req: NextRequest) {

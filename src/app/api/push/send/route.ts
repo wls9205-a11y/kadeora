@@ -65,9 +65,10 @@ export async function POST(req: NextRequest) {
             { TTL: 86400 }
           );
           sent++;
-        } catch (e: any) {
+        } catch (e: unknown) {
           // 만료된 구독 삭제
-          if (e.statusCode === 410 || e.statusCode === 404) {
+          const err = e as { statusCode?: number };
+          if (err.statusCode === 410 || err.statusCode === 404) {
             await admin.from('push_subscriptions').delete().eq('id', sub.id);
           }
           failed.push(sub.id);
