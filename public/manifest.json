@@ -1,11 +1,11 @@
 ﻿{
   "name": "카더라",
   "short_name": "카더라",
-  "description": "대한민국 No.1 커뮤니티 — 주식, 부동산, 청약, 자유게시판",
+  "description": "대한민국 소리소문 정보 커뮤니티",
   "start_url": "/feed",
   "display": "standalone",
-  "background_color": "#DAE0E6",
-  "theme_color": "#FF4500",
+  "background_color": "#0d1117",
+  "theme_color": "#ff5b36",
   "orientation": "portrait-primary",
   "icons": [
     { "src": "/icons/icon-72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },

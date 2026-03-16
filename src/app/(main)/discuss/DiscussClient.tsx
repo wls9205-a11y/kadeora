@@ -23,7 +23,7 @@ const CAT_COLORS: Record<string, string> = {
   free: 'var(--kd-purple)',
 };
 
-export default function DiscussClient({ rooms, isDemo }: { rooms: DiscussionRoom[]; isDemo: boolean }) {
+export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
   const [cat, setCat] = useState('all');
   const [sort, setSort] = useState('popular');
   const [active, setActive] = useState<DiscussionRoom | null>(null);
@@ -49,11 +49,6 @@ export default function DiscussClient({ rooms, isDemo }: { rooms: DiscussionRoom
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--kd-text)' }}>💬 토론방</h1>
-        {isDemo && (
-          <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'var(--kd-primary-dim)', color: 'var(--kd-primary)', border: '1px solid rgba(59,130,246,0.3)' }}>
-            💡 미리보기
-          </span>
-        )}
       </div>
 
       {/* 필터 바 */}
@@ -62,7 +57,7 @@ export default function DiscussClient({ rooms, isDemo }: { rooms: DiscussionRoom
           {CATS.map(f => (
             <button key={f.key} onClick={() => setCat(f.key)}
               aria-pressed={cat === f.key}
-              style={{ padding: '6px 14px', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: cat === f.key ? 'var(--kd-primary)' : 'transparent', color: cat === f.key ? 'white' : 'var(--kd-text-muted)', transition: 'all 0.15s' }}
+              style={{ padding: '6px 14px', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: cat === f.key ? 'var(--kd-primary)' : 'transparent', color: cat === f.key ? 'var(--text-inverse, #fff)' : 'var(--kd-text-muted)', transition: 'all 0.15s' }}
             >{f.label}</button>
           ))}
         </div>

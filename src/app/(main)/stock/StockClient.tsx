@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 
 interface Stock {
   symbol: string;
@@ -158,7 +159,7 @@ export default function StockClient({ initialStocks }: Props) {
       }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '40px 1fr 80px 110px 100px 100px 90px',
+          gridTemplateColumns: '40px 1fr 80px 110px 100px 100px 90px 80px',
           padding: '10px 14px',
           borderBottom: '1px solid var(--kd-border)',
           fontSize: 11, fontWeight: 700, color: 'var(--kd-text-dim)',
@@ -171,12 +172,13 @@ export default function StockClient({ initialStocks }: Props) {
           <span style={{ textAlign: 'right' }}>등락</span>
           <span style={{ textAlign: 'right' }}>시가총액</span>
           <span style={{ textAlign: 'right' }}>갱신</span>
+          <span style={{ textAlign: 'center' }}>토론</span>
         </div>
 
         {filtered.map((s, i) => (
           <div key={s.symbol} style={{
             display: 'grid',
-            gridTemplateColumns: '40px 1fr 80px 110px 100px 100px 90px',
+            gridTemplateColumns: '40px 1fr 80px 110px 100px 100px 90px 80px',
             padding: '10px 14px',
             borderBottom: '1px solid var(--kd-border)',
             alignItems: 'center',
@@ -220,6 +222,21 @@ export default function StockClient({ initialStocks }: Props) {
             </span>
             <span style={{ textAlign: 'right', fontSize: 11, color: 'var(--kd-text-dim)' }}>
               {s.updated_at && s.updated_at !== '2000-01-01T00:00:00+00:00' ? timeDiff(s.updated_at) : '-'}
+            </span>
+            <span style={{ textAlign: 'center' }}>
+              <Link
+                href={`/discussion/stock/${s.symbol}`}
+                onClick={e => e.stopPropagation()}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
+                  padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600,
+                  backgroundColor: 'var(--success-bg)', color: 'var(--success)',
+                  border: '1px solid var(--success)', textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                💬 토론
+              </Link>
             </span>
           </div>
         ))}

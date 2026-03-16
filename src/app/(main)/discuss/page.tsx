@@ -5,17 +5,16 @@ import DiscussClient from './DiscussClient';
 
 export default async function DiscussPage() {
   let rooms = DEMO_DISCUSS;
-  let isDemo = true;
 
   try {
     const sb = await createSupabaseServer();
     const { data } = await sb.from('discussion_rooms').select('*').eq('is_active', true).order('messages_count', { ascending: false });
-    if (data && data.length > 0) { rooms = data; isDemo = false; }
+    if (data && data.length > 0) { rooms = data; }
   } catch {}
 
   return (
     <Suspense>
-      <DiscussClient rooms={rooms} isDemo={isDemo} />
+      <DiscussClient rooms={rooms} />
     </Suspense>
   );
 }
