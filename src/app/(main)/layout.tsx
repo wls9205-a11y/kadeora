@@ -1,7 +1,6 @@
 ﻿import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
 import { ToastProvider } from '@/components/Toast';
-import ThemeToggle from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라' },
@@ -14,13 +13,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <ToastProvider>
       <Navigation />
-      <div style={{ position: 'fixed', top: 8, right: 60, zIndex: 200 }}>
-        <ThemeToggle />
-      </div>
       <main style={{
         maxWidth: 1200,
         margin: '0 auto',
-        padding: 'clamp(12px, 3vw, 24px) clamp(12px, 3vw, 24px) 100px',
+        padding: 'clamp(12px,3vw,20px) clamp(12px,3vw,24px) 90px',
         minHeight: 'calc(100vh - 48px)',
       }}>
         {children}

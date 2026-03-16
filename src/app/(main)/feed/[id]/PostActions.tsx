@@ -1,74 +1,140 @@
-'use client';
-import { useState } from 'react';
+﻿'use client';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ConfirmModal } from '@/components/ConfirmModal';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
+import type { User } from '@supabase/supabase-js';
 
 interface Props {
   postId: number;
   authorId: string;
-  currentUserId: string | null;
+  initialLikes: number;
+  initialComments: number;
 }
 
-export default function PostActions({ postId, authorId, currentUserId }: Props) {
-  const [showDelete, setShowDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+export default function PostActions({ postId, authorId, initialLikes, initialComments }: Props) {
   const router = useRouter();
   const { success, error } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+  const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [likes, setLikes] = useState(initialLikes);
+  const [loading, setLoading] = useState({ like: false, bookmark: false });
 
-  if (!currentUserId || currentUserId !== authorId) return null;
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    sb.auth.getSession().then(async ({ data }) => {
+      const u = data.session?.user ?? null;
+      setUser(u);
+      if (u) {
+        const [likeRes, bmRes] = await Promise.all([
+          sb.from('post_likes').select('post_id').eq('post_id', postId).eq('user_id', u.id).maybeSingle(),
+          sb.from('bookmarks').select('post_id').eq('post_id', postId).eq('user_id', u.id).maybeSingle(),
+        ]);
+        setLiked(!!likeRes.data);
+        setBookmarked(!!bmRes.data);
+      }
+    });
+  }, [postId]);
 
-  const handleDelete = async () => {
-    setDeleting(true);
-    try {
-      const res = await fetch('/api/posts', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId }),
-      });
-      if (!res.ok) throw new Error('삭제 실패');
-      success('게시글이 삭제되었습니다');
-      router.push('/feed');
-      router.refresh();
-    } catch {
-      error('삭제 중 오류가 발생했습니다');
-    } finally {
-      setDeleting(false);
-      setShowDelete(false);
+  async function handleLike() {
+    if (!user) { router.push('/login'); return; }
+    if (loading.like) return;
+    setLoading(p => ({ ...p, like: true }));
+    const sb = createSupabaseBrowser();
+    if (liked) {
+      await sb.from('post_likes').delete().eq('post_id', postId).eq('user_id', user.id);
+      await sb.from('posts').update({ likes_count: likes - 1 }).eq('id', postId);
+      setLiked(false); setLikes(p => p - 1);
+    } else {
+      await sb.from('post_likes').insert({ post_id: postId, user_id: user.id });
+      await sb.from('posts').update({ likes_count: likes + 1 }).eq('id', postId);
+      setLiked(true); setLikes(p => p + 1);
     }
-  };
+    setLoading(p => ({ ...p, like: false }));
+  }
+
+  async function handleBookmark() {
+    if (!user) { router.push('/login'); return; }
+    if (loading.bookmark) return;
+    setLoading(p => ({ ...p, bookmark: true }));
+    const sb = createSupabaseBrowser();
+    if (bookmarked) {
+      await sb.from('bookmarks').delete().eq('post_id', postId).eq('user_id', user.id);
+      setBookmarked(false); success('북마크를 해제했습니다');
+    } else {
+      await sb.from('bookmarks').insert({ post_id: postId, user_id: user.id });
+      setBookmarked(true); success('북마크에 저장됐습니다');
+    }
+    setLoading(p => ({ ...p, bookmark: false }));
+  }
+
+  async function handleShare() {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title, url });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        success('링크가 복사됐습니다');
+      } else {
+        const el = document.createElement('textarea');
+        el.value = url; el.style.position = 'fixed'; el.style.opacity = '0';
+        document.body.appendChild(el); el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        success('링크가 복사됐습니다');
+      }
+    } catch { error('공유에 실패했습니다'); }
+  }
+
+  const btnStyle = (active = false, color = '#FF4500') => ({
+    display: 'flex', alignItems: 'center', gap: 6,
+    padding: '8px 14px', borderRadius: 20,
+    border: `1px solid ${active ? color : 'var(--kd-border)'}`,
+    background: active ? `${color}22` : 'transparent',
+    color: active ? color : 'var(--kd-text-dim)',
+    fontSize: 13, fontWeight: 700, cursor: 'pointer',
+    transition: 'all 0.15s',
+  });
 
   return (
-    <>
-      <div style={{ display: 'flex', gap: 6 }}>
-        <button
-          onClick={() => router.push(`/write?edit=${postId}`)}
-          style={{
-            padding: '5px 12px', borderRadius: 7,
-            background: 'transparent', border: '1px solid #1E293B',
-            color: '#94A3B8', fontSize: 12, cursor: 'pointer',
-          }}
-        >수정</button>
-        <button
-          onClick={() => setShowDelete(true)}
-          disabled={deleting}
-          style={{
-            padding: '5px 12px', borderRadius: 7,
-            background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
-            color: '#EF4444', fontSize: 12, cursor: 'pointer',
-          }}
-        >삭제</button>
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '12px 0', borderTop: '1px solid var(--kd-border)', borderBottom: '1px solid var(--kd-border)' }}>
+      {/* 좋아요 */}
+      <button onClick={handleLike} disabled={loading.like}
+        style={btnStyle(liked)}>
+        {liked ? '❤️' : '🤍'} {likes.toLocaleString()}
+      </button>
+
+      {/* 댓글 수 표시 */}
+      <div style={btnStyle()}>
+        💬 {initialComments.toLocaleString()}
       </div>
 
-      <ConfirmModal
-        isOpen={showDelete}
-        title="게시글 삭제"
-        message="이 게시글을 삭제하시겠습니까? 삭제 후 복구할 수 없습니다."
-        confirmLabel="삭제"
-        danger
-        onConfirm={handleDelete}
-        onCancel={() => setShowDelete(false)}
-      />
-    </>
+      {/* 공유 */}
+      <button onClick={handleShare} style={btnStyle()}>
+        🔗 공유
+      </button>
+
+      {/* 북마크 */}
+      <button onClick={handleBookmark} disabled={loading.bookmark}
+        style={btnStyle(bookmarked, '#3B82F6')}>
+        {bookmarked ? '🔖' : '🏷'} {bookmarked ? '저장됨' : '저장'}
+      </button>
+
+      {/* 신고 (로그인 시만) */}
+      {user && user.id !== authorId && (
+        <button
+          onClick={async () => {
+            if (!confirm('이 게시글을 신고하시겠습니까?')) return;
+            const sb = createSupabaseBrowser();
+            await sb.from('reports').insert({ post_id: postId, reporter_id: user.id, reason: '부적절한 내용' });
+            success('신고가 접수됐습니다');
+          }}
+          style={{ ...btnStyle(), marginLeft: 'auto', color: 'var(--kd-danger)', borderColor: 'transparent' }}>
+          🚩 신고
+        </button>
+      )}
+    </div>
   );
 }
