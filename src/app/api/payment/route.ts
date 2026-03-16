@@ -10,6 +10,36 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { paymentKey, orderId, amount } = body;
     if (!paymentKey || !orderId || !amount) return NextResponse.json({ success: false, error: '필수 파라미터 누락' }, { status: 400 });
+
+    // 인증 필수
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return NextResponse.json({ success: false, error: '인증이 필요합니다' }, { status: 401 });
+    }
+    const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user } } = await supabaseAuth.auth.getUser(token);
+    if (!user) {
+      return NextResponse.json({ success: false, error: '유효하지 않은 인증' }, { status: 401 });
+    }
+    const userId = user.id;
+
+    // 금액 서버 검증
+    const productId = body.productId as string | undefined;
+    if (productId) {
+      const { data: product } = await supabaseAuth
+        .from('shop_products')
+        .select('price_krw')
+        .eq('id', productId)
+        .single();
+      if (!product) {
+        return NextResponse.json({ success: false, error: '상품을 찾을 수 없습니다' }, { status: 400 });
+      }
+      if (product.price_krw !== Number(amount)) {
+        return NextResponse.json({ success: false, error: '결제 금액이 일치하지 않습니다' }, { status: 400 });
+      }
+    }
+
     if (!TOSS_SECRET_KEY) return NextResponse.json({ success: false, error: 'TOSS_SECRET_KEY 환경변수를 설정하세요' }, { status: 500 });
     const encryptedKey = Buffer.from(`${TOSS_SECRET_KEY}:`).toString('base64');
     const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
@@ -19,16 +49,8 @@ export async function POST(request: NextRequest) {
     });
     const tossData = await tossRes.json();
     if (!tossRes.ok) return NextResponse.json({ success: false, error: tossData.message || '결제 승인 실패', code: tossData.code }, { status: tossRes.status });
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-    const authHeader = request.headers.get('Authorization');
-    let userId: string | null = null;
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
-    }
     try {
-      await supabase.from('shop_orders').insert({
+      await supabaseAuth.from('shop_orders').insert({
         user_id: userId, order_id: orderId, payment_key: paymentKey,
         amount: amount, status: tossData.status, product_id: body.productId || null,
         approved_at: tossData.approvedAt, method: tossData.method, raw_response: tossData,
@@ -36,17 +58,16 @@ export async function POST(request: NextRequest) {
     } catch { console.warn('[payment] shop_orders insert skipped'); }
 
     // 결제 성공 후 상품별 후처리
-    const productId = body.productId as string | undefined;
     if (productId && userId) {
       try {
         if (productId === 'premium_badge') {
-          await supabase.from('profiles').update({ is_premium: true }).eq('id', userId);
+          await supabaseAuth.from('profiles').update({ is_premium: true }).eq('id', userId);
         }
         if (productId === 'nickname_change') {
           // nickname_change_tickets 필드가 있으면 +1 증가
-          const { data: profile } = await supabase.from('profiles').select('nickname_change_tickets').eq('id', userId).single();
+          const { data: profile } = await supabaseAuth.from('profiles').select('nickname_change_tickets').eq('id', userId).single();
           const current = (profile?.nickname_change_tickets as number) ?? 0;
-          await supabase.from('profiles').update({ nickname_change_tickets: current + 1 }).eq('id', userId);
+          await supabaseAuth.from('profiles').update({ nickname_change_tickets: current + 1 }).eq('id', userId);
         }
       } catch (e) {
         console.warn('[payment] post-purchase fulfillment error:', e);
@@ -64,6 +85,10 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return NextResponse.json({ success: false, error: '인증이 필요합니다' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('orderId');
     if (!orderId) return NextResponse.json({ success: false, error: 'orderId 필요' }, { status: 400 });
