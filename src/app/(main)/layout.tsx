@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
 import { ToastProvider } from '@/components/Toast';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -17,7 +17,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <div style={{ position: 'fixed', top: 12, right: 16, zIndex: 50 }}>
         <ThemeToggle />
       </div>
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 90px', minHeight: 'calc(100vh - 60px)' }}>
+      <main style={{
+        maxWidth: 1200,
+        margin: '0 auto',
+        padding: '20px 24px 90px',
+        minHeight: 'calc(100vh - 60px)',
+      }}>
         {children}
       </main>
     </ToastProvider>
