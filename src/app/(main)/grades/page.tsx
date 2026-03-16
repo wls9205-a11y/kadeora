@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
   title: '회원 등급 안내',

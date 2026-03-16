@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import { createClient } from '@/lib/supabase-browser';
 import { useHaptic } from '@/hooks/useHaptic';
 
 interface Message { id: number; author_id: string; content: string; created_at: string; is_anonymous: boolean; is_mine?: boolean; profiles?: {username:string;avatar_url?:string}|null; }

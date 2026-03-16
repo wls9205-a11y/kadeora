@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { createClient } from '@/lib/supabase-browser';
 import { useRouter } from 'next/navigation';
 
 export function DeleteAccountSection() {
