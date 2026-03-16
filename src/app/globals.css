@@ -7,7 +7,7 @@
    슬로건: 대한민국 소리소문 정보 커뮤니티
    ======================================== */
 
-/* Light Mode — Reddit/카카오 스타일: 밝지만 섹션 구분감 */
+/* Light Mode — 배경(회색) → 카드(흰색) → 인풋(연회색) 3단계 */
 :root {
   --bg-base:       #f0f2f5;
   --bg-surface:    #ffffff;
@@ -18,42 +18,42 @@
   --border:        #ccd0d5;
   --border-strong: #bec3c9;
   --border-focus:  #ff5b36;
-  --text-primary:   #0f1419;
-  --text-secondary: #536471;
-  --text-tertiary:  #8b98a5;
-  --text-disabled:  #b9c1cc;
+  --text-primary:   #1c1e21;
+  --text-secondary: #65676b;
+  --text-tertiary:  #8a8d91;
+  --text-disabled:  #bec3c9;
   --text-inverse:   #ffffff;
   --text-link:      #ff5b36;
   --brand:          #ff5b36;
   --brand-hover:    #e84d2a;
-  --brand-light:    #fff3f0;
+  --brand-light:    #fff0eb;
   --brand-dark:     #c93d1e;
-  --success:        #00ba7c;
-  --success-bg:     #f0fdf6;
-  --warning:        #f59e0b;
-  --warning-bg:     #fffbeb;
-  --error:          #e0245e;
-  --error-bg:       #fff1f5;
-  --info:           #1d9bf0;
-  --info-bg:        #eff9ff;
-  --stock-up:       #d62728;
-  --stock-down:     #1f77b4;
-  --stock-flat:     #536471;
+  --success:        #00a854;
+  --success-bg:     #e6f7ee;
+  --warning:        #e6a817;
+  --warning-bg:     #fef9e7;
+  --error:          #d93025;
+  --error-bg:       #fce8e6;
+  --info:           #1a73e8;
+  --info-bg:        #e8f0fe;
+  --stock-up:       #c0392b;
+  --stock-down:     #1565c0;
+  --stock-flat:     #65676b;
   --nav-bg:         #ffffff;
-  --nav-border:     #dde1e8;
-  --nav-text:       #0f1419;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
-  --shadow-md: 0 2px 8px rgba(0,0,0,.09);
-  --shadow-lg: 0 4px 20px rgba(0,0,0,.12);
-  --shadow-xl: 0 8px 32px rgba(0,0,0,.15);
+  --nav-border:     #ccd0d5;
+  --nav-text:       #1c1e21;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,.07), 0 4px 6px rgba(0,0,0,.05);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,.08), 0 10px 10px rgba(0,0,0,.04);
 }
 
-/* Dark Mode — Discord/Facebook Dark 스타일: 어둡지만 섹션 구분감 */
+/* Dark Mode — 배경(거의검정) → 카드(진회색) → 인풋(중간회색) 3단계 */
 .dark {
   --bg-base:       #18191a;
   --bg-surface:    #242526;
   --bg-elevated:   #3a3b3c;
-  --bg-sunken:     #111213;
+  --bg-sunken:     #0d0e0f;
   --bg-hover:      #3a3b3c;
   --bg-active:     #4e4f50;
   --border:        #3e4042;
@@ -69,24 +69,24 @@
   --brand-hover:    #ff8468;
   --brand-light:    #2d1a14;
   --brand-dark:     #ff5b36;
-  --success:        #3fb950;
-  --success-bg:     #0d2119;
-  --warning:        #d29922;
-  --warning-bg:     #2b1f0a;
-  --error:          #f85149;
-  --error-bg:       #2d0a0a;
-  --info:           #58a6ff;
-  --info-bg:        #0c1c32;
-  --stock-up:       #f85149;
-  --stock-down:     #58a6ff;
-  --stock-flat:     #8b949e;
+  --success:        #36b37e;
+  --success-bg:     #0d2118;
+  --warning:        #ffab00;
+  --warning-bg:     #1f1500;
+  --error:          #ff5630;
+  --error-bg:       #1f0a00;
+  --info:           #4c9aff;
+  --info-bg:        #0a1929;
+  --stock-up:       #ff6b6b;
+  --stock-down:     #4dabf7;
+  --stock-flat:     #8a8d91;
   --nav-bg:         #242526;
   --nav-border:     #3e4042;
   --nav-text:       #e4e6eb;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
-  --shadow-md: 0 2px 8px rgba(0,0,0,.4);
-  --shadow-lg: 0 4px 20px rgba(0,0,0,.5);
-  --shadow-xl: 0 8px 32px rgba(0,0,0,.6);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.5);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,.6);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,.7);
 }
 
 /* ========================================
@@ -323,6 +323,16 @@ button:active,
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* ========================================
+   카드/패널 구분감 강화
+   ======================================== */
+.card, [class*="rounded-xl"], [class*="rounded-2xl"] {
+  box-shadow: var(--shadow-sm);
+}
+.dark .card, .dark [class*="rounded-xl"], .dark [class*="rounded-2xl"] {
+  box-shadow: 0 1px 0 var(--border), 0 0 0 1px var(--border);
+}
 
 /* ========================================
    모바일
