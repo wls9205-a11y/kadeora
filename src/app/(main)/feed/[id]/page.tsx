@@ -187,7 +187,7 @@ export default async function FeedDetailPage({ params }: Props) {
               )}
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
-              {timeAgo(post.created_at)} · 조회 {post.view_count.toLocaleString()}
+              {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
           </div>
           <PostActions postId={post.id} authorId={post.author_id ?? ''} currentUserId={currentUserId} />

@@ -110,7 +110,7 @@ export default function PaymentClient() {
       {step === 'confirm' && product && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"><div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-sm w-full">
           <div className="text-center mb-4"><span className="text-4xl">{product.icon}</span><h3 className="text-lg font-bold text-[var(--text-primary)] mt-2">{product.name}</h3><p className="text-sm text-[var(--text-primary)]/60 mt-1">{product.description}</p></div>
-          <div className="bg-[var(--bg-base)] rounded-xl p-4 mb-4 text-center"><span className="text-2xl font-bold text-[var(--brand)]">{product.price_krw.toLocaleString()} KRW</span></div>
+          <div className="bg-[var(--bg-base)] rounded-xl p-4 mb-4 text-center"><span className="text-2xl font-bold text-[var(--brand)]">{(product.price_krw ?? 0).toLocaleString()} KRW</span></div>
           <div className="flex gap-3">
             <button onClick={() => { setStep('select'); setProduct(null); }} className="flex-1 py-3 border border-[var(--border)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--bg-base)] transition-colors">Cancel</button>
             <button onClick={() => startPayment(product)} className="flex-1 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity font-bold">Pay</button>
@@ -124,7 +124,7 @@ export default function PaymentClient() {
             <div className="flex items-start gap-3"><span className="text-3xl">{p.icon}</span><div className="flex-1 min-w-0">
               <h3 className="font-bold text-[var(--text-primary)] group-hover:text-[var(--brand)] transition-colors">{p.name}</h3>
               <p className="text-sm text-[var(--text-primary)]/50 mt-1 line-clamp-2">{p.description}</p>
-              <p className="text-lg font-bold text-[var(--brand)] mt-2">{p.price_krw.toLocaleString()} KRW</p>
+              <p className="text-lg font-bold text-[var(--brand)] mt-2">{(p.price_krw ?? 0).toLocaleString()} KRW</p>
             </div></div>
           </button>
         ))}

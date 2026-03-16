@@ -265,7 +265,7 @@ export default function SearchClient() {
                         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{stock.currency === 'USD' ? `$${stock.price}` : `₩${stock.price?.toLocaleString()}`}</span>
                         {stock.change_pct != null && (
                           <span style={{ fontSize: 12, marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #EF4444)', fontWeight: 600 }}>
-                            {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct.toFixed(2)}%
+                            {stock.change_pct >= 0 ? '+' : ''}{(stock.change_pct ?? 0).toFixed(2)}%
                           </span>
                         )}
                       </div>

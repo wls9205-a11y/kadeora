@@ -73,7 +73,7 @@ export default async function GradesPage() {
                   className="text-xs px-2 py-0.5 rounded-full font-semibold"
                   style={{ backgroundColor: GRADE_COLORS[g.grade] + '22', color: GRADE_COLORS[g.grade] }}
                 >
-                  {g.min_score.toLocaleString()}점~
+                  {(g.min_score ?? 0).toLocaleString()}점~
                 </span>
               </div>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-tertiary)' }}>

@@ -105,7 +105,7 @@ export default function DiscussionRoomPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="font-bold text-base truncate" style={{color:'var(--text-primary)'}}>{displayName}</h1>
-              {stockInfo&&<span className="font-semibold text-sm" style={{color:changeColor}}>{stockInfo.price.toLocaleString()}원 ({stockInfo.change_pct>0?'+':''}{stockInfo.change_pct?.toFixed(2)}%)</span>}
+              {stockInfo&&<span className="font-semibold text-sm" style={{color:changeColor}}>{(stockInfo.price ?? 0).toLocaleString()}원 ({stockInfo.change_pct>0?'+':''}{stockInfo.change_pct?.toFixed(2)}%)</span>}
             </div>
             <p className="text-xs" style={{color:'var(--text-tertiary)'}}>{room?.description} · 🟢 {onlineCount}명 접속 중</p>
           </div>

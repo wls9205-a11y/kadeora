@@ -222,7 +222,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: gradeColor }}>{gradeEmoji} {gradeTitle}</span>
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-              {currentPoints.toLocaleString()} / {gradeNum < 10 ? nextPoints.toLocaleString() : '∞'} pts
+              {(currentPoints ?? 0).toLocaleString()} / {gradeNum < 10 ? (nextPoints ?? 0).toLocaleString() : '∞'} pts
             </span>
           </div>
           <div style={{ height: 6, background: 'var(--border)', borderRadius: 3 }}>
@@ -230,7 +230,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           </div>
           {gradeNum < 10 && (
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'right' }}>
-              다음 등급까지 {(nextPoints - currentPoints).toLocaleString()}pts
+              다음 등급까지 {((nextPoints ?? 0) - (currentPoints ?? 0)).toLocaleString()}pts
             </div>
           )}
         </div>
@@ -245,7 +245,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           ].map((stat, i) => (
             <div key={stat.label} style={{ background: 'var(--bg-surface)', padding: '16px 12px', textAlign: 'center', borderRight: i < 3 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{stat.value.toLocaleString()}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
             </div>
           ))}

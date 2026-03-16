@@ -105,12 +105,12 @@ export default function PostActions({ postId, authorId, initialLikes, initialCom
         aria-label={liked ? '좋아요 취소' : '좋아요'}
         aria-pressed={liked}
         style={btnStyle(liked)}>
-        {liked ? '❤️' : '🤍'} {likes.toLocaleString()}
+        {liked ? '❤️' : '🤍'} {(likes ?? 0).toLocaleString()}
       </button>
 
       {/* 댓글 수 표시 */}
       <div style={btnStyle()}>
-        💬 {initialComments.toLocaleString()}
+        💬 {(initialComments ?? 0).toLocaleString()}
       </div>
 
       {/* 공유 */}
