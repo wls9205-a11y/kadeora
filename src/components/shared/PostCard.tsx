@@ -10,6 +10,7 @@ export interface Post {
   category?: string; likes_count: number; comments_count: number; view_count?: number;
   author?: PostAuthor; author_id?: string; is_liked?: boolean; images?: string[] | null;
   is_anonymous?: boolean; tag?: string | null; slug?: string | null;
+  hashtags?: string[] | null;
 }
 export interface PostCardProps {
   post: Post;
@@ -69,6 +70,17 @@ function PostCard({ post, onLike, variant = "default", showAuthor = true }: Post
       {post.category && <span style={{ display: "inline-block", fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "4px", backgroundColor: "var(--bg-hover)", color: "var(--text-secondary)", marginBottom: "6px" }}>{post.category}</span>}
       <h3 style={{ fontSize: isCompact ? "14px" : "16px", fontWeight: 600, margin: "0 0 4px", lineHeight: 1.4, color: "var(--text-primary)" }}>{truncate(post.title, isCompact ? 40 : 80)}</h3>
       {!isCompact && <p style={{ fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.5, margin: "0 0 12px" }}>{truncate(post.content, 120)}</p>}
+      {(post.hashtags && post.hashtags.length > 0) && (
+        <div style={{ display:'flex', flexWrap:'wrap', gap:4, marginTop:8, marginBottom:4 }}>
+          {post.hashtags.slice(0, 3).map((tag: string) => (
+            <span key={tag} style={{
+              fontSize:11, padding:'2px 8px', borderRadius:10,
+              background:'var(--brand-light)', color:'var(--brand)',
+              fontWeight:600,
+            }}>#{tag}</span>
+          ))}
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "13px", color: "var(--text-tertiary)" }}>
         <button onClick={handleLike} disabled={isLiking || !onLike} style={{ display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", padding: 0, cursor: onLike ? "pointer" : "default", color: isLiked ? "var(--brand)" : "var(--text-tertiary)", fontSize: "13px" }} aria-label={isLiked ? "\uC88B\uC544\uC694 \uCDE8\uC18C" : "\uC88B\uC544\uC694"}>
           <span style={{ fontSize: "15px" }}>{isLiked ? "\u2665" : "\u2661"}</span>

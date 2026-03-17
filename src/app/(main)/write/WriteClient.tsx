@@ -25,6 +25,8 @@ export default function WriteClient() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [hashtags, setHashtags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -55,6 +57,17 @@ export default function WriteClient() {
       });
   }, [editId, error]);
 
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const tag = tagInput.trim().replace(/^#/, '');
+      if (tag && !hashtags.includes(tag) && hashtags.length < 5) {
+        setHashtags(prev => [...prev, tag]);
+      }
+      setTagInput('');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!userId) { error('로그인이 필요합니다'); return; }
     if (!title.trim()) { error('제목을 입력해주세요'); return; }
@@ -73,7 +86,7 @@ export default function WriteClient() {
         const res = await fetch(`/api/posts/${editId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, hashtags }),
         });
         if (!res.ok) {
           const e = await res.json();
@@ -85,7 +98,7 @@ export default function WriteClient() {
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, hashtags }),
         });
         if (!res.ok) {
           const e = await res.json();
@@ -191,6 +204,43 @@ export default function WriteClient() {
         {/* 이미지 업로드 */}
         <div style={{ marginBottom: 24 }}>
           <ImageUpload images={images} onImagesChange={setImages} />
+        </div>
+
+        {/* 해시태그 */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+            태그 <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>({hashtags.length}/5)</span>
+          </label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+            {hashtags.map(h => (
+              <span key={h} style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: 'var(--brand-light)', color: 'var(--brand)',
+                border: '1px solid var(--brand)', borderRadius: 20,
+                padding: '3px 10px', fontSize: 13, fontWeight: 600,
+              }}>
+                #{h}
+                <button onClick={() => setHashtags(prev => prev.filter(t => t !== h))}
+                  type="button" aria-label={`${h} 태그 삭제`}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: 14, padding: 0 }}>
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+          {hashtags.length < 5 && (
+            <input
+              value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              placeholder="#태그 입력 후 엔터 (예: 재개발, 갭투자)"
+              style={{
+                width: '100%', padding: '10px 14px', fontSize: 14,
+                background: 'var(--bg-base)', border: '1px solid var(--border)',
+                borderRadius: 10, color: 'var(--text-primary)', boxSizing: 'border-box',
+              }}
+            />
+          )}
         </div>
 
         {/* 익명 토글 */}
