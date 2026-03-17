@@ -145,7 +145,7 @@ export default function FeedClient({ posts, activeCategory }: Props) {
                     )}
                     <span>r/<strong style={{ color: 'var(--text-primary)' }}>{cat.label}</strong> · u/<strong style={{ color: 'var(--text-primary)' }}>{post.profiles?.nickname ?? '익명'}</strong> · {timeAgo(post.created_at)}</span>
                     <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                    {(post.likes_count ?? 0) > 200 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: 'var(--error-bg)', color: 'var(--error)' }}>🔥 HOT</span>}
+                    {((post.likes_count ?? 0) >= 100 || (post.view_count ?? 0) >= 1000) && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: 'var(--error-bg)', color: 'var(--error)' }}>🔥 HOT</span>}
                   </div>
                   <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                     {post.title}

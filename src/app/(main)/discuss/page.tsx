@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 };
 import { DEMO_DISCUSS } from '@/lib/constants';
 import DiscussClient from './DiscussClient';
+import Disclaimer from '@/components/Disclaimer';
 
 export default async function DiscussPage() {
   let rooms = DEMO_DISCUSS;
@@ -21,6 +22,7 @@ export default async function DiscussPage() {
   return (
     <Suspense>
       <DiscussClient rooms={rooms} />
+      <Disclaimer />
     </Suspense>
   );
 }

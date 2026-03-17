@@ -132,7 +132,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {comments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
-            아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+            💬 첫 댓글을 남겨보세요
           </div>
         ) : (
           comments.map(comment => (

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
 import StockClient from './StockClient';
+import Disclaimer from '@/components/Disclaimer';
 
 export default async function StockPage() {
   let stocks: { symbol: string; name: string; market: string; price: number; change_amt: number; change_pct: number; volume: number; market_cap: number; updated_at: string }[] = [];
@@ -32,6 +33,7 @@ export default async function StockPage() {
         "provider": { "@type": "Organization", "name": "카더라", "url": "https://kadeora.app" }
       }) }} />
       <StockClient initialStocks={stocks} />
+      <Disclaimer />
     </>
   );
 }

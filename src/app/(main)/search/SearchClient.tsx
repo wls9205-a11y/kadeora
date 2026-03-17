@@ -239,7 +239,7 @@ export default function SearchClient() {
             )}
 
             {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && (
-              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>검색 결과가 없습니다</div>
+              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>🔍 검색 결과가 없어요</div>
             )}
 
             {/* Stocks section */}
@@ -348,7 +348,7 @@ export default function SearchClient() {
             ? '검색 중...'
             : total > 0
               ? <><span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span> 검색 결과 <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
-              : <><span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span>에 대한 검색 결과가 없습니다</>
+              : <>🔍 <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span>에 대한 검색 결과가 없어요</>
           }
         </div>
       )}

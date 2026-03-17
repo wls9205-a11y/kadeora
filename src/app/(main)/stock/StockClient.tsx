@@ -145,7 +145,7 @@ export default function StockClient({ initialStocks }: Props) {
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>📈 실시간 주식시세</h1>
           <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>
             국내·해외 주요 종목
-            {lastUpdated && <span style={{ marginLeft: 8, color: 'var(--text-secondary)' }}>· 마지막 업데이트: {lastUpdated}</span>}
+            <span style={{ marginLeft: 8, color: 'var(--text-secondary)' }}>· {lastUpdated ? `마지막 업데이트: ${lastUpdated}` : '장 마감 기준'}</span>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -303,7 +303,7 @@ export default function StockClient({ initialStocks }: Props) {
                 fontSize: 13, fontWeight: 700,
                 color: isUp(s) ? 'var(--stock-up)' : isDown(s) ? 'var(--stock-down)' : 'var(--text-tertiary)',
               }}>
-                {isUp(s) ? '▲' : isDown(s) ? '▼' : '–'} {Math.abs(s.change_pct ?? 0).toFixed(2)}%
+                {(s.change_pct ?? 0) === 0 ? '–' : <>{isUp(s) ? '▲' : '▼'} {Math.abs(s.change_pct).toFixed(2)}%</>}
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
                 {isUp(s) ? '+' : ''}{fmt(s.change_amt)}
@@ -333,7 +333,7 @@ export default function StockClient({ initialStocks }: Props) {
 
         {filtered.length === 0 && (
           <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-            검색 결과가 없습니다
+            🔍 검색 결과가 없어요
           </div>
         )}
       </div>
@@ -363,7 +363,7 @@ export default function StockClient({ initialStocks }: Props) {
               <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:12 }}>
                 <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>등락률</div>
                 <div style={{ fontSize:18, fontWeight:800, color: (selectedStock.change_pct ?? 0) >= 0 ? 'var(--stock-up)' : 'var(--stock-down)' }}>
-                  {(selectedStock.change_pct ?? 0) >= 0 ? '▲' : '▼'} {Math.abs(selectedStock.change_pct ?? 0).toFixed(2)}%
+                  {(selectedStock.change_pct ?? 0) === 0 ? '–' : <>{(selectedStock.change_pct ?? 0) >= 0 ? '▲' : '▼'} {Math.abs(selectedStock.change_pct ?? 0).toFixed(2)}%</>}
                 </div>
               </div>
             </div>

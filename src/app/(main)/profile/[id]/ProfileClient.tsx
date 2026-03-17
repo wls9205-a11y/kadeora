@@ -294,7 +294,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                     <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>❤️ {p.likes_count ?? 0} · 💬 {p.comments_count ?? 0}</div>
                   </a>
                 ))}
-                {myPosts.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>작성한 글이 없습니다</p>}
+                {myPosts.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>✏️ 첫 글을 작성해보세요</p>}
               </div>
             )}
             {activityTab === 'comments' && (
@@ -305,7 +305,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                     <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</div>
                   </a>
                 ))}
-                {myComments.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>작성한 댓글이 없습니다</p>}
+                {myComments.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>💬 첫 댓글을 남겨보세요</p>}
               </div>
             )}
           </>
@@ -330,7 +330,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '20px 24px' }}>
         {activeTab === 'posts' && (
           posts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>아직 작성한 글이 없습니다</div>
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>✏️ 첫 글을 작성해보세요</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {posts.map((post, i) => {
@@ -360,7 +360,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', margin: '0 auto 8px' }} className="animate-spin" />
             </div>
           ) : bookmarkedPosts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>북마크한 글이 없습니다</div>
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>🔖 저장한 글이 없어요</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {bookmarkedPosts.map((post, i) => {

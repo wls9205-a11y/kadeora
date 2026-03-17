@@ -5,6 +5,7 @@ export const metadata: Metadata = {
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
+import Disclaimer from '@/components/Disclaimer';
 
 export default async function AptPage() {
   let apts: { id: number; house_nm: string; region_nm: string; hssply_adres: string; tot_supply_hshld_co: number; rcept_bgnde: string; rcept_endde: string; spsply_rcept_bgnde: string; spsply_rcept_endde: string; przwner_presnatn_de: string; cntrct_cncls_bgnde: string; cntrct_cncls_endde: string; mvn_prearnge_ym: string; pblanc_url: string; mdatrgbn_nm: string }[] = [];
@@ -20,5 +21,5 @@ export default async function AptPage() {
     }
   } catch {}
 
-  return <AptClient apts={apts} />;
+  return <><AptClient apts={apts} /><Disclaimer /></>;
 }

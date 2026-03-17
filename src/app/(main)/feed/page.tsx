@@ -7,6 +7,7 @@ import { CACHE_TTL } from '@/lib/cache-config';
 import { DEMO_POSTS, DEMO_TRENDING } from '@/lib/constants';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import FeedClient from './FeedClient';
+import Disclaimer from '@/components/Disclaimer';
 
 const getPosts = unstable_cache(async (category: string) => {
   const sb = await createSupabaseServer();
@@ -37,6 +38,7 @@ export default async function FeedPage({ searchParams }: Props) {
   return (
     <Suspense>
       <FeedClient posts={posts} trending={trending} activeCategory={category} />
+      <Disclaimer />
     </Suspense>
   );
 }
