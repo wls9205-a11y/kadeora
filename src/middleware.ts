@@ -95,6 +95,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // 어드민 경로: is_admin 체크 (로그인은 위에서 보장)
+  if (pathname.startsWith('/admin') && user) {
+    try {
+      const { data: adminProfile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+      if (!adminProfile?.is_admin) {
+        return NextResponse.redirect(new URL('/feed', request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL('/feed', request.url));
+    }
+  }
+
   // 온보딩 체크: 인증된 사용자 + 일반 페이지만 (public 경로 제외)
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p));
   if (user && !isPublic && pathname !== '/onboarding') {
