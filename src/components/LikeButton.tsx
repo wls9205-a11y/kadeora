@@ -27,9 +27,10 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
     });
   }, [postId]);
 
-  const toggle = async () => {
+  const toggle = async (e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
     try { if ('vibrate' in navigator) navigator.vibrate(10); } catch {}
-    if (!userId) return;
+    if (!userId) { window.location.href = '/login'; return; }
     if (loading) return;
     setLoading(true);
 
@@ -59,7 +60,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
 
   return (
     <button
-      onClick={toggle}
+      onClick={(e) => toggle(e)}
       disabled={loading}
       aria-label={liked ? '좋아요 취소' : '좋아요'}
       aria-pressed={liked}
