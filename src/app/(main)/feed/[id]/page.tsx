@@ -88,7 +88,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
     if (postData) {
       post = postData as PostWithProfile;
-      await sb.from('posts').update({ view_count: post.view_count + 1 }).eq('id', numId);
+      await sb.from('posts').update({ view_count: (post.view_count ?? 0) + 1 }).eq('id', numId);
 
       const { data: commentsData } = await sb
         .from('comments')
