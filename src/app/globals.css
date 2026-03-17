@@ -353,4 +353,7 @@ button:active,
 @media (max-width: 640px) {
   body { font-size: 14px; }
   .main-content { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  input, textarea, select {
+    font-size: 16px !important;
+  }
 }
