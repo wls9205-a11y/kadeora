@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 export const metadata = {
-  title: '관리자 대시보드 | 카더라',
+  title: '관리자 대시보드',
   robots: { index: false, follow: false },
 };
 

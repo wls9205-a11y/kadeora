@@ -292,7 +292,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
         </div>
 
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: '8px 0' }}>
-          포인트 사용처: 상점 오픈 후 메가폰·닉네임변경권 등과 교환 가능
+          포인트는 회원 등급 산정에 사용됩니다. 활동 포인트를 모아 등급을 올려보세요!
         </div>
 
         {/* 활동 내역 탭 (본인만) */}

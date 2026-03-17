@@ -1,5 +1,5 @@
 export const metadata = {
-  title: '관리자 | 카더라',
+  title: '유저 관리',
   robots: { index: false, follow: false },
 };
 
