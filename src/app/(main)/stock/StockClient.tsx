@@ -71,7 +71,7 @@ function getMarketStatus(market: string): string {
 }
 
 export default function StockClient({ initialStocks }: Props) {
-  const [stocks, setStocks] = useState<Stock[]>(initialStocks);
+  const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [market, setMarket] = useState<string>('ALL');
   const [sort, setSort] = useState<'cap' | 'change' | 'volume'>('cap');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');

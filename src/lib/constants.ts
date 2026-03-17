@@ -129,6 +129,7 @@ export const DEMO_PRODUCTS: ShopProduct[] = [
 export const CATEGORY_MAP: Record<string, { label: string; color: string; bg: string }> = {
   apt: { label: '청약', color: '#10B981', bg: 'rgba(16,185,129,0.15)' },
   stock: { label: '주식', color: '#3B82F6', bg: 'rgba(59,130,246,0.15)' },
+  local: { label: '우리동네', color: '#F59E0B', bg: 'rgba(245,158,11,0.15)' },
   free: { label: '자유', color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)' },
   all: { label: '전체', color: '#94A3B8', bg: 'transparent' },
 };

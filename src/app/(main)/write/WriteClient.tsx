@@ -11,6 +11,7 @@ import { filterContent } from '@/lib/filter';
 const CATEGORIES = [
   { value: 'apt', label: '🏠 부동산', desc: '부동산 정보, 청약, 투자 이야기' },
   { value: 'stock', label: '📈 주식', desc: '주식 시세, 투자 종목 이야기' },
+  { value: 'local', label: '🏘 우리동네', desc: '우리 동네 소식과 정보' },
   { value: 'free', label: '💬 자유', desc: '자유롭게 이야기해요' },
 ];
 
