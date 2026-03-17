@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       if (!APT_API_KEY) return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY required' }, { status: 500 });
       const apiUrl = 'https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=' + encodeURIComponent(APT_API_KEY) + '&page=1&perPage=30';
       if (!isAllowedUrl(apiUrl.split('?')[0])) return NextResponse.json({ success: false, error: 'Blocked' }, { status: 403 });
-      const apiRes = await fetch(apiUrl, { next: { revalidate: 3600 } });
+      const apiRes = await fetch(apiUrl, { next: { revalidate: 3600 /* CACHE_TTL.long */ } });
       if (!apiRes.ok) return NextResponse.json({ success: false, error: 'API error: ' + apiRes.status }, { status: 502 });
       const json = await apiRes.json();
       const items = json?.data || json?.response?.body?.items?.item || [];

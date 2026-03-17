@@ -3,6 +3,7 @@ export const metadata: Metadata = { title: '피드', description: '카더라 커
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';
+import { CACHE_TTL } from '@/lib/cache-config';
 import { DEMO_POSTS, DEMO_TRENDING } from '@/lib/constants';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import FeedClient from './FeedClient';
@@ -18,13 +19,13 @@ const getPosts = unstable_cache(async (category: string) => {
   const { data, error } = await q;
   if (error || !data || data.length === 0) return null;
   return data as PostWithProfile[];
-}, ['posts'], { revalidate: 60 });
+}, ['posts'], { revalidate: CACHE_TTL.short });
 
 const getTrending = unstable_cache(async () => {
   const sb = await createSupabaseServer();
   const { data } = await sb.from('trending_keywords').select('*').order('heat_score', { ascending: false }).limit(10);
   return data as TrendingKeyword[] | null;
-}, ['trending'], { revalidate: 300 });
+}, ['trending'], { revalidate: CACHE_TTL.medium });
 
 interface Props { searchParams: Promise<{ category?: string }>; }
 

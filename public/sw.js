@@ -1,12 +1,20 @@
-﻿// Kadeora Service Worker v1.0
-const CACHE_NAME = 'kadeora-v20260318';
+// Kadeora Service Worker — CACHE_VERSION은 빌드 스크립트가 주입
+const CACHE_VERSION = '20260318';
+const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
 
 self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
+// activate 시 이전 버전 캐시 삭제
 self.addEventListener('activate', e => {
-  e.waitUntil(clients.claim());
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(k => k.startsWith('kadeora-') && k !== CACHE_NAME).map(k => caches.delete(k))
+      )
+    ).then(() => clients.claim())
+  );
 });
 
 // Web Push 수신
