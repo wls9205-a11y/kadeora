@@ -20,7 +20,7 @@ export default async function GradesPage() {
     .order('grade');
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 헤더 */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>

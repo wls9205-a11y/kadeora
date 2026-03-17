@@ -149,7 +149,7 @@ export default function StockClient({ initialStocks }: Props) {
   const MARKET_LABEL: Record<string, string> = { ALL: '전체', KOSPI: '코스피', KOSDAQ: '코스닥', NYSE: '뉴욕', NASDAQ: '나스닥' };
 
   return (
-    <div>
+    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>

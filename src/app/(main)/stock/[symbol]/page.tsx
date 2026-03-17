@@ -42,7 +42,7 @@ export default async function StockDetailPage({ params }: Props) {
   ];
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '20px 16px 100px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <Link href="/stock" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 20, display: 'inline-block' }}>← 주식 시세</Link>
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>

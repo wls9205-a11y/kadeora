@@ -46,7 +46,7 @@ export default async function AptDetailPage({ params }: Props) {
   ];
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '20px 16px 100px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <Link href="/apt" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 20, display: 'inline-block' }}>← 청약 목록</Link>
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>

@@ -68,7 +68,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
   const haptic = () => { try { if ('vibrate' in navigator) navigator.vibrate(10); } catch {} };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 헤더 */}
       <div className="mb-6">
         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>🏠 아파트 청약 정보</h1>
