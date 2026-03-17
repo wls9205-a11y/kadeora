@@ -281,6 +281,34 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                     )}
                   </div>
 
+                  {/* D-day 배지 */}
+                  {(() => {
+                    const today = new Date().toISOString().slice(0,10);
+                    const start = apt.rcept_bgnde;
+                    const end = apt.rcept_endde;
+                    if (!start) return null;
+                    const diffStart = Math.ceil((new Date(start).getTime() - Date.now()) / 86400000);
+                    let badge = ''; let badgeColor = 'var(--text-tertiary)';
+                    if (today >= start && today <= end) { badge = '📢 청약 진행 중!'; badgeColor = 'var(--success)'; }
+                    else if (diffStart > 0 && diffStart <= 7) { badge = `⏰ D-${diffStart} 곧 시작`; badgeColor = 'var(--brand)'; }
+                    else if (diffStart > 7) { badge = `📅 D-${diffStart}`; badgeColor = 'var(--info)'; }
+                    else { badge = '✅ 청약 마감'; }
+                    return (
+                      <div style={{ textAlign:'center', padding:8, borderRadius:8, background:'var(--bg-hover)', color:badgeColor, fontWeight:800, fontSize:14, marginBottom:12 }}>
+                        {badge}
+                      </div>
+                    );
+                  })()}
+
+                  {/* 현장 정보 안내 */}
+                  <div style={{
+                    background:'var(--info-bg)', border:'1px solid var(--info)',
+                    borderRadius:8, padding:10, marginBottom:12, fontSize:12,
+                    color:'var(--text-secondary)', lineHeight:1.6,
+                  }}>
+                    🏫 배정학교, 🚇 근처 교통, 🏪 편의시설 등은 <strong>현장 토론방</strong>에서 실거주 경험자에게 물어보세요!
+                  </div>
+
                   {/* 바로가기 버튼 */}
                   <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                     {apt.pblanc_url && (
