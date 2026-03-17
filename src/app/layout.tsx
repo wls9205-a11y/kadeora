@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: '%s | 카더라',
   },
   description: '아는 사람만 아는 그 정보 — 주식 시세, 아파트 청약, 우리동네 소식을 가장 빠르게',
-  keywords: ['카더라','소리소문','금융 커뮤니티','주식 커뮤니티','아파트 청약','부동산 커뮤니티','KOSPI','KOSDAQ'],
+  keywords: ['청약', '아파트 청약', '주식', '부동산', '카더라', '청약 일정', '국내주식', '코스피', '코스닥', '실시간 시세', '소문', '커뮤니티'],
   authors: [{ name: '카더라', url: 'https://kadeora.app' }],
   creator: '카더라',
   openGraph: {

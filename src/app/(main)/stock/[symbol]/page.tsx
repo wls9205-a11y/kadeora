@@ -64,12 +64,12 @@ export default async function StockDetailPage({ params }: Props) {
           </div>
         ))}
       </div>
-      {s.description && (
-        <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>🏢 회사 소개</div>
-          <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.75 }}>{s.description}</p>
-        </div>
-      )}
+      <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>🏢 회사 소개</div>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.75 }}>
+          {s.description ?? `${s.name}은(는) ${s.market} 상장 종목입니다. 자세한 기업 정보는 공식 홈페이지나 증권사 앱에서 확인해보세요.`}
+        </p>
+      </div>
       <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 10, padding: 12, marginBottom: 20, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
         ⚠️ 투자 참고용이며 투자 권유가 아닙니다. 투자 손실 책임은 본인에게 있습니다.
       </div>

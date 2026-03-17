@@ -1,11 +1,24 @@
 import type { MetadataRoute } from 'next';
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      { userAgent: '*', allow: '/', disallow: ['/api/', '/admin/', '/onboarding', '/payment', '/write', '/profile/'] },
+      {
+        userAgent: '*',
+        allow: ['/', '/feed/', '/stock/', '/apt/', '/discuss'],
+        disallow: ['/admin/', '/payment/', '/api/', '/profile/', '/write', '/onboarding', '/shop/'],
+      },
+      {
+        userAgent: 'Googlebot',
+        allow: ['/', '/feed/', '/stock/', '/apt/'],
+        disallow: ['/admin/', '/api/'],
+      },
+      {
+        userAgent: 'Yeti',
+        allow: ['/', '/feed/', '/stock/', '/apt/'],
+        disallow: ['/admin/', '/api/'],
+      },
     ],
-    sitemap: `${SITE}/sitemap.xml`,
-    host: SITE,
+    sitemap: 'https://kadeora.app/sitemap.xml',
+    host: 'https://kadeora.app',
   };
 }

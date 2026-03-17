@@ -35,7 +35,7 @@ export default async function AptDetailPage({ params }: Props) {
   const mvnText = apt.mvn_prearnge_ym ? `${apt.mvn_prearnge_ym.slice(0,4)}년 ${apt.mvn_prearnge_ym.slice(4)}월` : '-';
   const infoItems = [
     { label: '📍 위치', value: apt.hssply_adres ?? '-' },
-    { label: '🏠 공급세대', value: apt.tot_supply_hshld_co ? `${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : '-' },
+    { label: '🏠 공급세대', value: apt.tot_supply_hshld_co && Number(apt.tot_supply_hshld_co) > 0 ? Number(apt.tot_supply_hshld_co).toLocaleString() + '세대' : '정보 업데이트 예정' },
     { label: '📅 청약 시작', value: apt.rcept_bgnde ?? '-' },
     { label: '📅 청약 마감', value: apt.rcept_endde ?? '-' },
     { label: '🏆 당첨자 발표', value: apt.przwner_presnatn_de ?? '-' },
@@ -63,6 +63,11 @@ export default async function AptDetailPage({ params }: Props) {
           </div>
         ))}
       </div>
+      {(!apt.tot_supply_hshld_co || Number(apt.tot_supply_hshld_co) === 0) && (
+        <div style={{ background:'var(--warning-bg)', border:'1px solid var(--warning)', borderRadius:8, padding:'10px 14px', marginBottom:16, fontSize:12, color:'var(--text-secondary)', lineHeight:1.6 }}>
+          ⏳ 공급세대 수는 청약홈 공고문 게시 후 자동 업데이트됩니다.
+        </div>
+      )}
       <div style={{ background: 'var(--info-bg)', border: '1px solid var(--info)', borderRadius: 10, padding: 14, marginBottom: 20, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
         🏫 배정학교, 🚇 주변 교통 등은 <strong>청약홈 공고문</strong>이나 <strong>부동산 토론방</strong>에서 확인하세요.
       </div>

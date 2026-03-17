@@ -44,6 +44,11 @@ const STATUS_STYLE = {
   closed:   { label: '마감', bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' },
 };
 
+function fmtSupply(v: number | null | undefined): string {
+  if (!v || v === 0) return '정보 업데이트 예정';
+  return `${v.toLocaleString()}세대`;
+}
+
 export default function AptClient({ apts }: { apts: Apt[] }) {
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
@@ -174,9 +179,8 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                   {/* 공급 세대 */}
                   <div className="text-right shrink-0">
                     <p className="text-lg font-black" style={{ color: 'var(--brand)' }}>
-                      {apt.tot_supply_hshld_co?.toLocaleString()}
+                      {fmtSupply(apt.tot_supply_hshld_co)}
                     </p>
-                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>세대</p>
                   </div>
                 </div>
 
@@ -248,7 +252,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                     <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
                       <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>공급세대</div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand)' }}>
-                        {(apt.tot_supply_hshld_co ?? 0).toLocaleString()}세대
+                        {fmtSupply(apt.tot_supply_hshld_co)}
                       </div>
                     </div>
                     <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
