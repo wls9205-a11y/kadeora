@@ -115,7 +115,11 @@ export default function StockClient({ initialStocks }: Props) {
 
   const filtered = stocks
     .filter(s => market === 'ALL' || s.market === market)
-    .filter(s => !search || s.name.includes(search) || s.symbol.includes(search))
+    .filter(s => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return s.name.toLowerCase().includes(q) || s.symbol.toLowerCase().includes(q);
+    })
     .sort((a, b) => {
       const dirMul = sortDir === 'asc' ? 1 : -1;
       if (sort === 'cap') {
