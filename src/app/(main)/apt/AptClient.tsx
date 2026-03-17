@@ -161,9 +161,11 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                       )}
                       <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
                     </div>
-                    <h2 className="font-bold text-base mt-1 leading-snug" style={{ color: 'var(--text-primary)' }}>
-                      {apt.house_nm}
-                    </h2>
+                    <Link href={`/apt/${apt.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <h2 className="font-bold text-base mt-1 leading-snug" style={{ color: 'var(--text-primary)' }}>
+                        {apt.house_nm}
+                      </h2>
+                    </Link>
                     <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-tertiary)' }}>
                       {apt.hssply_adres}
                     </p>

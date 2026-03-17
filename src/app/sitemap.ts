@@ -21,12 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
-    const { data: posts } = await sb
-      .from('posts')
-      .select('id, updated_at')
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: false })
-      .limit(200);
+
+    const [{ data: posts }, { data: stocks }, { data: apts }] = await Promise.all([
+      sb.from('posts').select('id, updated_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(200),
+      sb.from('stock_quotes').select('symbol, updated_at'),
+      sb.from('apt_subscriptions').select('id, updated_at'),
+    ]);
 
     const feedRoutes: MetadataRoute.Sitemap = (posts ?? []).map(p => ({
       url: `${SITE}/feed/${p.id}`,
@@ -35,7 +35,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    return [...staticRoutes, ...feedRoutes];
+    const stockRoutes: MetadataRoute.Sitemap = (stocks ?? []).map(s => ({
+      url: `${SITE}/stock/${s.symbol}`,
+      lastModified: new Date(s.updated_at ?? Date.now()),
+      changeFrequency: 'hourly',
+      priority: 0.7,
+    }));
+
+    const aptRoutes: MetadataRoute.Sitemap = (apts ?? []).map(a => ({
+      url: `${SITE}/apt/${a.id}`,
+      lastModified: new Date(a.updated_at ?? Date.now()),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    }));
+
+    return [...staticRoutes, ...feedRoutes, ...stockRoutes, ...aptRoutes];
   } catch {
     return staticRoutes;
   }
