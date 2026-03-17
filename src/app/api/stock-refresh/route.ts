@@ -107,10 +107,103 @@ async function fetchViaKis(supabase: any): Promise<{ stocks: any[]; success: num
   return { stocks: data ?? [], success, failed };
 }
 
+// Naver Finance API — 국내 주식용 (가장 안정적)
+async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_amt: number; change_pct: number; volume: number } | null> {
+  try {
+    // 1순위: Naver 폴링 API
+    const res = await fetch(`https://polling.finance.naver.com/api/realtime/domestic/stock/${symbol}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': 'https://finance.naver.com/',
+      },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const d = json?.result?.datas?.[0];
+      if (d) {
+        const price = parseInt(String(d.closePriceRaw ?? '0'));
+        if (price) {
+          return {
+            price,
+            change_amt: parseInt(String(d.compareToPreviousClosePriceRaw ?? '0')),
+            change_pct: parseFloat(String(d.fluctuationsRatioRaw ?? '0')),
+            volume: parseInt(String(d.accumulatedTradingVolumeRaw ?? d.accumulatedTradingVolume ?? '0')),
+          };
+        }
+      }
+    }
+  } catch { /* fallthrough */ }
+
+  try {
+    // 2순위: Naver 모바일 API
+    const res = await fetch(`https://m.stock.naver.com/api/stock/${symbol}/basic`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
+        'Referer': 'https://m.stock.naver.com/',
+      },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const price = parseInt(String(json?.closePrice ?? '0').replace(/,/g, ''));
+      if (price) {
+        return {
+          price,
+          change_amt: parseInt(String(json?.compareToPreviousClosePrice ?? '0').replace(/,/g, '')),
+          change_pct: parseFloat(String(json?.fluctuationsRatio ?? '0')),
+          volume: parseInt(String(json?.accumulatedTradingVolume ?? '0').replace(/,/g, '')),
+        };
+      }
+    }
+  } catch { /* fallthrough */ }
+
+  return null;
+}
+
+async function fetchViaNaver(supabase: any): Promise<{ stocks: any[]; success: number; failed: number } | null> {
+  const { data: allStocks } = await supabase
+    .from('stock_quotes')
+    .select('symbol')
+    .neq('currency', 'USD')
+    .order('market_cap', { ascending: false })
+    .limit(50);
+
+  if (!allStocks?.length) return null;
+
+  let success = 0;
+  let failed = 0;
+
+  for (const stock of allStocks) {
+    const quote = await fetchNaverQuote(stock.symbol);
+    if (quote) {
+      await supabase.from('stock_quotes')
+        .update({
+          price: quote.price,
+          change_amt: quote.change_amt,
+          change_pct: quote.change_pct,
+          volume: quote.volume,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('symbol', stock.symbol);
+      success++;
+    } else {
+      failed++;
+    }
+    await sleep(30);
+  }
+
+  const { data } = await supabase
+    .from('stock_quotes')
+    .select('*')
+    .order('market_cap', { ascending: false });
+
+  return { stocks: data ?? [], success, failed };
+}
+
 async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: number; failed: number } | null> {
   const { data: allStocks } = await supabase
     .from('stock_quotes')
     .select('symbol')
+    .neq('currency', 'USD')
     .order('market_cap', { ascending: false })
     .limit(50);
 
@@ -152,7 +245,6 @@ async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: n
       const prevClose = q.regularMarketPreviousClose;
       const rawChange = q.regularMarketChange;
       const rawChangePct = q.regularMarketChangePercent;
-      // Yahoo sometimes omits change fields — calculate from previousClose
       const change_amt = (rawChange != null && rawChange !== 0)
         ? Math.round(rawChange)
         : (prevClose ? Math.round(price - prevClose) : 0);
@@ -226,7 +318,7 @@ export async function GET(req: NextRequest) {
 
   let success = 0;
   let failed = 0;
-  let domesticSource: 'kis' | 'yahoo' | 'cache' = 'cache';
+  let domesticSource: 'kis' | 'naver' | 'yahoo' | 'cache' = 'cache';
 
   // 국내주식 갱신 (장 운영시간에만)
   if (isMarketOpen && isWeekday) {
@@ -239,10 +331,24 @@ export async function GET(req: NextRequest) {
         domesticSource = 'kis';
       }
     } catch {
-      // KIS 실패 -> Yahoo 폴백
+      // KIS 실패 -> Naver 폴백
     }
 
-    // 2) KIS 실패 시 Yahoo Finance 폴백
+    // 2) KIS 실패 시 Naver Finance 폴백 (가장 안정적)
+    if (domesticSource === 'cache') {
+      try {
+        const naverResult = await fetchViaNaver(supabase);
+        if (naverResult) {
+          success += naverResult.success;
+          failed += naverResult.failed;
+          domesticSource = 'naver';
+        }
+      } catch {
+        // Naver 실패 -> Yahoo 폴백
+      }
+    }
+
+    // 3) Naver도 실패 시 Yahoo Finance 폴백
     if (domesticSource === 'cache') {
       try {
         const yahooResult = await fetchViaYahoo(supabase);
