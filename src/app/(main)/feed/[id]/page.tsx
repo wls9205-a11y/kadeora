@@ -215,6 +215,20 @@ export default async function FeedDetailPage({ params }: Props) {
           {post.content}
         </div>
 
+        {(post.category === 'stock' || post.category === 'apt') && (
+          <div style={{
+            marginTop: 16, marginBottom: 16,
+            padding: '8px 12px',
+            background: 'var(--bg-hover)',
+            borderRadius: 6,
+            fontSize: 11,
+            color: 'var(--text-tertiary)',
+            borderLeft: '2px solid var(--text-tertiary)'
+          }}>
+            📌 이 게시글은 개인의 의견이며 투자 권유가 아닙니다. 모든 투자 판단과 손익은 투자자 본인에게 귀속됩니다.
+          </div>
+        )}
+
         {/* Image gallery */}
         {post.images && post.images.length > 0 && (
           <div style={{

@@ -23,6 +23,18 @@ const GRADE_TITLES: Record<number, string> = {
 const NEXT_GRADE_POINTS: Record<number, number> = {
   1:100,2:300,3:700,4:1500,5:3000,6:6000,7:12000,8:25000,9:50000,10:99999,
 };
+const GRADE_BENEFITS: Record<number, string> = {
+  1: '기본 기능 이용',
+  2: '댓글 무제한',
+  3: '토론방 자유 입장',
+  4: '게시글 이미지 첨부',
+  5: '검색 고급 필터',
+  6: '주간 인기 노출',
+  7: 'HOT 배지 우선 노출',
+  8: '프로필 특별 테두리',
+  9: '모든 기능 무제한',
+  10: '명예의 전당 등록',
+};
 
 interface Profile {
   id: string; nickname: string | null; bio: string | null; avatar_url: string | null;
@@ -252,6 +264,14 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               다음 등급까지 {((nextPoints ?? 0) - (currentPoints ?? 0)).toLocaleString()}pts
             </div>
           )}
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 8 }}>
+            현재 혜택: {GRADE_BENEFITS[gradeNum] || '기본 기능 이용'}
+            {gradeNum < 10 && (
+              <span style={{ marginLeft: 8, color: 'var(--text-secondary)' }}>
+                · 다음: {GRADE_BENEFITS[(gradeNum + 1) as number] || ''}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Stats */}
@@ -269,6 +289,10 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
             </div>
           ))}
+        </div>
+
+        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: '8px 0' }}>
+          포인트 사용처: 상점 오픈 후 메가폰·닉네임변경권 등과 교환 가능
         </div>
 
         {/* 활동 내역 탭 (본인만) */}

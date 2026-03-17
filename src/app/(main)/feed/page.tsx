@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: '피드', description: '카더라 커뮤니티 피드 — 주식, 부동산, 청약, 자유게시판' };
+export const metadata: Metadata = {
+  title: '피드',
+  description: '주식, 부동산, 청약 관련 소문과 정보를 나누는 카더라 커뮤니티 피드',
+  openGraph: { title: '피드 | 카더라', description: '주식, 부동산, 청약 정보 커뮤니티' },
+};
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';

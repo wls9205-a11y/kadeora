@@ -37,6 +37,24 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         </ErrorBoundary>
         <FeedbackButton />
       </main>
+      <footer className="hidden md:block" style={{
+        maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
+      }}>
+        <div style={{
+          borderTop: '1px solid var(--border)',
+          paddingTop: 16,
+          fontSize: 11,
+          color: 'var(--text-tertiary)',
+          lineHeight: 1.8,
+        }}>
+          <p style={{fontWeight:600, marginBottom:4}}>카더라 사업자 정보</p>
+          <p>상호: 카더라 | 대표자: 노영진 | 사업자등록번호: 278-57-00801</p>
+          <p>주소: 부산광역시 연제구 연동로 27, B동 405호(연산동, 삼성맨션)</p>
+          <p>통신판매업 신고번호: 신고 준비중 | 이메일: kadeora.app@gmail.com</p>
+          <p>전화: 051-860-2224 | 호스팅 서비스: Vercel Inc.</p>
+          <p style={{marginTop:4}}>© 2026 카더라. All rights reserved.</p>
+        </div>
+      </footer>
     </ToastProvider>
   );
 }

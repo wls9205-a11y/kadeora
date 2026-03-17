@@ -24,7 +24,7 @@ export default function PaymentClient() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const { data } = await supabase.from('shop_products').select('*').eq('is_active', true).order('price_krw', { ascending: true });
+        const { data } = await supabase.from('shop_products').select('*').order('price_krw', { ascending: true });
         setProducts(data || []);
         if (productId && data) { const found = data.find((p: Product) => p.id === productId); if (found) { setProduct(found); setStep('confirm'); } }
       } catch { setError('상품을 불러오는데 실패했습니다'); } finally { setLoading(false); }
@@ -120,16 +120,23 @@ export default function PaymentClient() {
       {error && <div className="bg-[var(--error)]/10 border border-[var(--error)]/30 text-[var(--error)] rounded-xl p-4 mb-4">{error}</div>}
       <div className="grid gap-4 sm:grid-cols-2">
         {products.map((p) => (
-          <button key={p.id} onClick={() => { setProduct(p); setStep('confirm'); }} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 text-left hover:border-[var(--brand)]/50 transition-colors group">
+          <button key={p.id} onClick={() => { if (p.is_active) { setProduct(p); setStep('confirm'); } }} disabled={!p.is_active} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 text-left hover:border-[var(--brand)]/50 transition-colors group" style={!p.is_active ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}>
             <div className="flex items-start gap-3"><span className="text-3xl">{p.icon}</span><div className="flex-1 min-w-0">
               <h3 className="font-bold text-[var(--text-primary)] group-hover:text-[var(--brand)] transition-colors">{p.name}</h3>
               <p className="text-sm text-[var(--text-primary)]/50 mt-1 line-clamp-2">{p.description}</p>
               <p className="text-lg font-bold text-[var(--brand)] mt-2">{(p.price_krw ?? 0).toLocaleString()}원</p>
+              {!p.is_active && <p className="text-sm font-bold mt-1" style={{ color: 'var(--text-tertiary)' }}>준비중</p>}
             </div></div>
           </button>
         ))}
       </div>
-      {products.length === 0 && <div className="text-center py-12 text-[var(--text-primary)]/40">상품이 없습니다</div>}
+      {(products.length === 0 || products.every(p => !p.is_active)) && (
+        <div style={{textAlign:'center', padding:'60px 20px'}}>
+          <div style={{fontSize:48, marginBottom:16}}>🏗️</div>
+          <h2 style={{fontSize:20, fontWeight:700, color:'var(--text-primary)', marginBottom:8}}>상점 준비중입니다</h2>
+          <p style={{fontSize:14, color:'var(--text-secondary)', lineHeight:1.6}}>더 나은 서비스를 위해 준비중입니다.<br/>빠른 시일 내에 오픈할 예정입니다.</p>
+        </div>
+      )}
     </div>
   );
 }

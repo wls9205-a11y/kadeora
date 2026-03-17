@@ -46,6 +46,15 @@ export async function GET(request: NextRequest) {
     }
 
     if (action === 'sync') {
+      // Auth check — sync writes to DB, so require CRON_SECRET
+      const cronSecret = process.env.CRON_SECRET;
+      const authToken = request.headers.get('authorization')?.replace('Bearer ', '');
+      if (!cronSecret || authToken !== cronSecret) {
+        if (process.env.NODE_ENV === 'production') {
+          return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+        }
+      }
+
       const APT_API_KEY = process.env.APT_DATA_API_KEY;
       if (!APT_API_KEY) return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY required' }, { status: 500 });
       const apiUrl = 'https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=' + encodeURIComponent(APT_API_KEY) + '&page=1&perPage=30';

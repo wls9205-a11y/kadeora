@@ -56,6 +56,20 @@ const MARKET_STYLE: Record<string, { bg: string; color: string }> = {
   NASDAQ: { bg: 'var(--brand-light)', color: 'var(--brand)' },
 };
 
+function getMarketStatus(market: string): string {
+  const now = new Date();
+  const kst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+  const hour = kst.getHours();
+  const min = kst.getMinutes();
+  const day = kst.getDay();
+  const totalMin = hour * 60 + min;
+  if (day === 0 || day === 6) return '📅 주말';
+  if (market === 'KOSPI' || market === 'KOSDAQ') {
+    return (totalMin >= 540 && totalMin <= 930) ? '🟢 장중' : '🔴 장 마감';
+  }
+  return (totalMin >= 1350 || totalMin <= 300) ? '🟢 장중' : '🔴 장 마감';
+}
+
 export default function StockClient({ initialStocks }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(initialStocks);
   const [market, setMarket] = useState<string>('ALL');
@@ -201,6 +215,9 @@ export default function StockClient({ initialStocks }: Props) {
               {m === 'ALL' ? '전체' : m}
             </button>
           ))}
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 4 }}>
+            {getMarketStatus(market === 'ALL' ? 'KOSPI' : market)}
+          </span>
         </div>
         <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 4px' }} />
         {/* 정렬 */}

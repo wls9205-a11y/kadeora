@@ -1,7 +1,7 @@
 ﻿import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '청약 정보',
-  description: '전국 아파트 청약 일정 및 지역별 청약 정보 조회',
+  title: '아파트 청약 일정',
+  description: '2026년 전국 아파트 청약 일정과 분양 정보를 한눈에 확인하세요.',
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
