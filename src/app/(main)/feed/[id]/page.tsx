@@ -144,6 +144,11 @@ export default async function FeedDetailPage({ params }: Props) {
       '@type': 'WebPage',
       '@id': `${SITE_URL}/feed/${post.id}`,
     },
+    interactionStatistic: [
+      { '@type': 'InteractionCounter', interactionType: 'https://schema.org/LikeAction', userInteractionCount: post.likes_count ?? 0 },
+      { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: post.comments_count ?? 0 },
+    ],
+    inLanguage: 'ko-KR',
   };
 
   return (

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
 import { ToastProvider } from '@/components/Toast';
 import { GuestGate } from '@/components/GuestGate';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
@@ -26,9 +27,11 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         backgroundColor: 'var(--bg-base)',
         color: 'var(--text-primary)',
       }}>
-        <GuestGate isLoggedIn={!!user}>
-          {children}
-        </GuestGate>
+        <ErrorBoundary>
+          <GuestGate isLoggedIn={!!user}>
+            {children}
+          </GuestGate>
+        </ErrorBoundary>
       </main>
     </ToastProvider>
   );

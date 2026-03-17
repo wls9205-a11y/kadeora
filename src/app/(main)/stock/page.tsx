@@ -20,5 +20,18 @@ export default async function StockPage() {
     }
   } catch {}
 
-  return <StockClient initialStocks={stocks} />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "DataCatalog",
+        "name": "카더라 실시간 주식 시세",
+        "description": "KOSPI, KOSDAQ, NYSE, NASDAQ 주요 종목 실시간 시세",
+        "url": "https://kadeora.app/stock",
+        "inLanguage": "ko-KR",
+        "provider": { "@type": "Organization", "name": "카더라", "url": "https://kadeora.app" }
+      }) }} />
+      <StockClient initialStocks={stocks} />
+    </>
+  );
 }

@@ -33,7 +33,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: '카더라' },
-  alternates: { canonical: 'https://kadeora.app' },
+  category: '금융, 부동산, 커뮤니티',
+  alternates: { canonical: 'https://kadeora.app', languages: { 'ko-KR': 'https://kadeora.app' } },
   other: {
     'application-name': '카더라',
     'service-type': '금융·부동산 정보 커뮤니티',
