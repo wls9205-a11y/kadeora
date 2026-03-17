@@ -70,6 +70,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.classList.add('dark');})();` }} />
         {/* 글씨크기 SSR 적용 */}
         <script dangerouslySetInnerHTML={{ __html: `try{var fs=localStorage.getItem('kd_font_size');var sizes={small:'13px',medium:'15px',large:'17px'};if(fs&&sizes[fs])document.documentElement.style.setProperty('--font-base',sizes[fs]);}catch(e){}` }} />
+        {/* Kakao SDK */}
+        <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" async />
         {/* JSON-LD 구조화 데이터 */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',

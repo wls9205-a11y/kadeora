@@ -14,7 +14,7 @@ const GRADE_COLORS: Record<number, string> = {
   6:'#E91E63',7:'#00BCD4',8:'#FFD700',9:'#FF6B35',10:'#7B2FBE',
 };
 const GRADE_EMOJIS: Record<number, string> = {
-  1:'🌱',2:'📡',3:'🏘️',4:'🏠',5:'⚡',6:'🔥',7:'💎',8:'🌟',9:'👑',10:'🚀',
+  1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀',
 };
 const GRADE_TITLES: Record<number, string> = {
   1:'새싹',2:'정보통',3:'동네어른',4:'소문난집',5:'인플루언서',
@@ -197,14 +197,20 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           {/* 닉네임/소개 */}
           <div style={{ flex: 1, minWidth: 0 }}>
             {editing ? (
-              <>
-                <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="닉네임" maxLength={20} className="kd-input" style={{ marginBottom: 8, fontSize: 15 }} />
-                <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="자기소개를 입력해주세요" maxLength={200} rows={3}
-                  style={{ width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', padding: '10px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
-                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
-                  onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')} />
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4 }}>{bio.length}/200</div>
-              </>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>닉네임</label>
+                  <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="닉네임" maxLength={20} className="kd-input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 15, padding: '10px 16px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>자기소개</label>
+                  <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="자기소개를 입력해주세요" maxLength={200} rows={3}
+                    style={{ width: '100%', boxSizing: 'border-box', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', padding: '10px 16px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+                    onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')} />
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4, padding: '0 4px' }}>{bio.length}/200</div>
+                </div>
+              </div>
             ) : (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
@@ -276,23 +282,25 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
 
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 1, marginTop: 16, background: 'var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-          {[
-            { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
-            { label: '댓글', value: commentCount, icon: '💬' },
-            { label: '받은 좋아요', value: profile.likes_count ?? 0, icon: '❤️' },
-            { label: '총 활동', value: totalActivity, icon: '⚡' },
-            { label: '포인트', value: profile.points ?? 0, icon: '💰' },
-          ].map((stat, i) => (
-            <div key={stat.label} style={{ background: 'var(--bg-surface)', padding: '16px 12px', textAlign: 'center' }}>
-              <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: '8px 0' }}>
-          포인트는 회원 등급 산정에 사용됩니다. 활동 포인트를 모아 등급을 올려보세요!
+          {(() => {
+            const stats = [
+              { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
+              { label: '댓글', value: commentCount, icon: '💬' },
+              { label: '받은 좋아요', value: profile.likes_count ?? 0, icon: '❤️' },
+              { label: '총 활동', value: totalActivity, icon: '⚡' },
+              { label: '포인트', value: profile.points ?? 0, icon: '💰' },
+            ];
+            return stats.map((stat, i) => (
+              <div key={stat.label} style={{ background: 'var(--bg-surface)', padding: '16px 12px', textAlign: 'center', gridColumn: i === stats.length - 1 && stats.length % 2 !== 0 ? '1 / -1' : undefined }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
+                {stat.label === '포인트' && (
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>등급 산정 기준</div>
+                )}
+              </div>
+            ));
+          })()}
         </div>
 
         {/* 활동 내역 탭 (본인만) */}

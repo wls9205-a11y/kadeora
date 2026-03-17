@@ -191,10 +191,10 @@ export default function StockClient({ initialStocks }: Props) {
         display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center',
       }}>
         {/* 시장 필터 */}
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 4, flex: 1 }}>
           {['ALL', 'KOSPI', 'KOSDAQ', 'NYSE', 'NASDAQ'].map(m => (
             <button key={m} onClick={() => setMarket(m)} style={{
-              padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
+              flex: 1, padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
               fontWeight: 700, fontSize: 13,
               background: market === m ? 'var(--brand)' : 'transparent',
               color: market === m ? 'var(--text-inverse, #fff)' : 'var(--text-tertiary)',
@@ -220,16 +220,18 @@ export default function StockClient({ initialStocks }: Props) {
             </button>
           ))}
         </div>
-        {/* 검색 */}
+      </div>
+      {/* 검색 */}
+      <div style={{ marginBottom: 10 }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="종목명 또는 코드 검색"
           style={{
-            marginLeft: 'auto', padding: '6px 12px', fontSize: 13,
+            padding: '6px 12px', fontSize: 13,
             background: 'var(--bg-hover)',
             border: '1px solid var(--border)', borderRadius: 4,
-            color: 'var(--text-primary)', width: 220, minWidth: 220,
+            color: 'var(--text-primary)', width: '100%', boxSizing: 'border-box',
           }}
         />
       </div>

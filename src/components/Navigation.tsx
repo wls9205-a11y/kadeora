@@ -100,7 +100,7 @@ export function Navigation() {
           {/* 로고 */}
           <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:7, textDecoration:'none', flexShrink:0, marginRight:4 }}>
             <KadeoraLogo size={30} />
-            <span style={{ fontWeight:800, fontSize:17, color:'var(--brand)', letterSpacing:-0.5 }} className="hidden md:inline">
+            <span style={{ fontWeight:800, fontSize:17, color:'var(--brand)', letterSpacing:-0.5 }}>
               카더라
             </span>
           </Link>
