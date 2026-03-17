@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface Props { roomKey: string; roomTitle: string }
@@ -13,12 +13,26 @@ export default function MiniDiscuss({ roomKey, roomTitle }: Props) {
   const [input, setInput] = useState('');
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const supabase = createSupabaseBrowser();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
     loadMessages();
+
+    // Realtime 구독
+    const channel = supabase
+      .channel(`mini-${roomKey}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'discussion_messages' }, () => {
+        loadMessages();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [roomKey]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const loadMessages = async () => {
     const { data: room } = await supabase.from('discussion_rooms').select('id').eq('room_key', roomKey).maybeSingle();
@@ -67,6 +81,7 @@ export default function MiniDiscuss({ roomKey, roomTitle }: Props) {
             </div>
           </div>
         ))}
+        <div ref={bottomRef} />
       </div>
       {user ? (
         <div style={{ display: 'flex', gap: 8 }}>

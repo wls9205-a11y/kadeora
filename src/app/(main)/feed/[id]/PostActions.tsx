@@ -88,7 +88,7 @@ export default function PostActions({ postId, authorId, initialLikes, initialCom
     } catch { error('공유에 실패했습니다'); }
   }
 
-  const btnStyle = (active = false, color = '#FF4500') => ({
+  const btnStyle = (active = false, color = 'var(--brand)') => ({
     display: 'flex', alignItems: 'center', gap: 6,
     padding: '8px 14px', borderRadius: 20,
     border: `1px solid ${active ? color : 'var(--border)'}`,

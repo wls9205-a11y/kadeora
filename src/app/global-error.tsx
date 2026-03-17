@@ -15,10 +15,10 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <h1 style={{ fontSize:24, fontWeight:800, marginBottom:12 }}>서비스에 문제가 발생했습니다</h1>
           <p style={{ color:'var(--text-secondary, #818384)', marginBottom:8 }}>잠시 후 다시 시도해주세요</p>
           {error.digest && <p style={{ fontSize:12, color:'var(--text-tertiary, #6B6D6F)', marginBottom:24 }}>오류 코드: {error.digest}</p>}
-          <button onClick={reset} style={{ background:'var(--brand, #FF4500)', color:'var(--text-inverse, #fff)', border:'none', borderRadius:20, padding:'12px 32px', cursor:'pointer', fontWeight:700, fontSize:16, marginRight:12 }}>
+          <button onClick={reset} style={{ background:'var(--brand)', color:'var(--text-inverse, #fff)', border:'none', borderRadius:20, padding:'12px 32px', cursor:'pointer', fontWeight:700, fontSize:16, marginRight:12 }}>
             다시 시도
           </button>
-          <a href="/feed" style={{ color:'var(--brand, #FF4500)', textDecoration:'none', fontSize:15 }}>홈으로</a>
+          <a href="/feed" style={{ color:'var(--brand)', textDecoration:'none', fontSize:15 }}>홈으로</a>
         </div>
       </body>
     </html>
