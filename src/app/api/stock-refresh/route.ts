@@ -124,7 +124,7 @@ async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: n
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   const res = await fetch(
-    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketVolume,marketCap`,
+    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketPreviousClose,regularMarketVolume,marketCap`,
     {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -147,15 +147,28 @@ async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: n
 
   const updates = quotes
     .filter((q: any) => q.regularMarketPrice)
-    .map((q: any) => ({
-      symbol: q.symbol?.replace(/\.(KS|KQ)$/, ''),
-      price: q.regularMarketPrice,
-      change_amt: Math.round(q.regularMarketChange ?? 0),
-      change_pct: +((q.regularMarketChangePercent ?? 0).toFixed(2)),
-      volume: q.regularMarketVolume ?? 0,
-      market_cap: q.marketCap ?? 0,
-      updated_at: new Date().toISOString(),
-    }));
+    .map((q: any) => {
+      const price = q.regularMarketPrice;
+      const prevClose = q.regularMarketPreviousClose;
+      const rawChange = q.regularMarketChange;
+      const rawChangePct = q.regularMarketChangePercent;
+      // Yahoo sometimes omits change fields — calculate from previousClose
+      const change_amt = (rawChange != null && rawChange !== 0)
+        ? Math.round(rawChange)
+        : (prevClose ? Math.round(price - prevClose) : 0);
+      const change_pct = (rawChangePct != null && rawChangePct !== 0)
+        ? +(rawChangePct.toFixed(2))
+        : (prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0);
+      return {
+        symbol: q.symbol?.replace(/\.(KS|KQ)$/, ''),
+        price,
+        change_amt,
+        change_pct,
+        volume: q.regularMarketVolume ?? 0,
+        market_cap: q.marketCap ?? 0,
+        updated_at: new Date().toISOString(),
+      };
+    });
 
   for (const u of updates) {
     if (u.symbol) {
@@ -260,7 +273,7 @@ export async function GET(req: NextRequest) {
       const usdTimeout = setTimeout(() => usdController.abort(), 10000);
 
       const usdRes = await fetch(
-        `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${usdTickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketVolume,marketCap`,
+        `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${usdTickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketPreviousClose,regularMarketVolume,marketCap`,
         {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -277,11 +290,21 @@ export async function GET(req: NextRequest) {
         let usdSuccess = 0;
         for (const q of usdQuotes) {
           if (q.regularMarketPrice && q.symbol) {
+            const price = q.regularMarketPrice;
+            const prevClose = q.regularMarketPreviousClose;
+            const rawChange = q.regularMarketChange;
+            const rawChangePct = q.regularMarketChangePercent;
+            const change_amt = (rawChange != null && rawChange !== 0)
+              ? Math.round(rawChange * 100) / 100
+              : (prevClose ? Math.round((price - prevClose) * 100) / 100 : 0);
+            const change_pct = (rawChangePct != null && rawChangePct !== 0)
+              ? +(rawChangePct.toFixed(2))
+              : (prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0);
             await supabase.from('stock_quotes')
               .update({
-                price: q.regularMarketPrice,
-                change_amt: Math.round((q.regularMarketChange ?? 0) * 100) / 100,
-                change_pct: +((q.regularMarketChangePercent ?? 0).toFixed(2)),
+                price,
+                change_amt,
+                change_pct,
                 volume: q.regularMarketVolume ?? 0,
                 market_cap: q.marketCap ?? 0,
                 updated_at: new Date().toISOString(),
