@@ -30,7 +30,9 @@ export default async function StockPage() {
     } else {
       stocks = await fetchStocks();
     }
-  } catch {}
+  } catch {
+    try { stocks = await fetchStocks(); } catch {}
+  }
 
   return (
     <>

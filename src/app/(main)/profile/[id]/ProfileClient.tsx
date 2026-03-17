@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
-import { CATEGORY_MAP } from '@/lib/constants';
+import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
 import FontSizeToggle from '@/components/FontSizeToggle';
 
 const GRADE_COLORS: Record<number, string> = {
@@ -66,6 +66,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [activityTab, setActivityTab] = useState<'posts'|'comments'|null>(null);
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [myComments, setMyComments] = useState<any[]>([]);
+  const [postsPage, setPostsPage] = useState(1);
+  const [commentsPage, setCommentsPage] = useState(1);
+  const [regionText, setRegionText] = useState(profile.region_text ?? '');
   const { success, error } = useToast();
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +114,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
-      const { error: err } = await sb.from('profiles').update({ nickname: nickname.trim(), bio: bio.trim(), updated_at: new Date().toISOString() }).eq('id', profile.id);
+      const { error: err } = await sb.from('profiles').update({ nickname: nickname.trim(), bio: bio.trim(), region_text: regionText || null, updated_at: new Date().toISOString() }).eq('id', profile.id);
       if (err) throw err;
       success('프로필이 수정되었습니다'); setEditing(false); router.refresh();
     } catch { error('프로필 수정 중 오류가 발생했습니다'); }
@@ -214,6 +217,16 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                     onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')} />
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4, padding: '0 4px' }}>{bio.length}/200</div>
                 </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>📍 지역</label>
+                  <select value={regionText} onChange={e => setRegionText(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 13, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                    <option value="">미설정</option>
+                    {REGIONS.filter(r => r.value !== 'all').map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             ) : (
               <>
@@ -312,7 +325,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           <>
             <div style={{ display:'flex', gap:4, marginTop:16, borderBottom:'1px solid var(--border)', paddingBottom:0 }}>
               {(['posts', 'comments'] as const).map(tab => (
-                <button key={tab} onClick={() => { setActivityTab(activityTab === tab ? null : tab); if (tab === 'posts') loadMyPosts(); else loadMyComments(); }}
+                <button key={tab} onClick={() => { const next = activityTab === tab ? null : tab; setActivityTab(next); if (tab === 'posts') { setPostsPage(1); loadMyPosts(); } else { setCommentsPage(1); loadMyComments(); } }}
                   style={{
                     padding:'10px 16px', border:'none', cursor:'pointer', fontSize:14, fontWeight:600,
                     background:'transparent', borderBottom: activityTab === tab ? '2px solid var(--brand)' : '2px solid transparent',
@@ -322,28 +335,56 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                 </button>
               ))}
             </div>
-            {activityTab === 'posts' && (
-              <div style={{ marginTop:12 }}>
-                {myPosts.map(p => (
-                  <a key={p.id} href={`/feed/${p.id}`} style={{ display:'block', padding:'12px 0', borderBottom:'1px solid var(--border)', textDecoration:'none' }}>
-                    <div style={{ fontSize:14, fontWeight:600, color:'var(--text-primary)' }}>{p.title}</div>
-                    <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>❤️ {p.likes_count ?? 0} · 💬 {p.comments_count ?? 0}</div>
-                  </a>
-                ))}
-                {myPosts.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>✏️ 첫 글을 작성해보세요</p>}
-              </div>
-            )}
-            {activityTab === 'comments' && (
-              <div style={{ marginTop:12 }}>
-                {myComments.map(c => (
-                  <a key={c.id} href={`/feed/${c.post_id}`} style={{ display:'block', padding:'12px 0', borderBottom:'1px solid var(--border)', textDecoration:'none' }}>
-                    <div style={{ fontSize:14, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.content}</div>
-                    <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</div>
-                  </a>
-                ))}
-                {myComments.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>💬 첫 댓글을 남겨보세요</p>}
-              </div>
-            )}
+            {activityTab === 'posts' && (() => {
+              const perPage = 5;
+              const totalPages = Math.max(1, Math.ceil(myPosts.length / perPage));
+              const paged = myPosts.slice((postsPage - 1) * perPage, postsPage * perPage);
+              return (
+                <div style={{ marginTop:12 }}>
+                  {paged.map(p => (
+                    <a key={p.id} href={`/feed/${p.id}`} style={{ display:'block', padding:'12px 0', borderBottom:'1px solid var(--border)', textDecoration:'none' }}>
+                      <div style={{ fontSize:14, fontWeight:600, color:'var(--text-primary)' }}>{p.title}</div>
+                      <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>❤️ {p.likes_count ?? 0} · 💬 {p.comments_count ?? 0}</div>
+                    </a>
+                  ))}
+                  {myPosts.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>✏️ 첫 글을 작성해보세요</p>}
+                  {myPosts.length > perPage && (
+                    <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:8, marginTop:12 }}>
+                      <button onClick={() => setPostsPage(p => Math.max(1, p - 1))} disabled={postsPage <= 1}
+                        style={{ padding:'6px 14px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-hover)', color:'var(--text-secondary)', fontSize:12, cursor: postsPage <= 1 ? 'default' : 'pointer', opacity: postsPage <= 1 ? 0.4 : 1 }}>이전</button>
+                      <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>{postsPage} / {totalPages}</span>
+                      <button onClick={() => setPostsPage(p => Math.min(totalPages, p + 1))} disabled={postsPage >= totalPages}
+                        style={{ padding:'6px 14px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-hover)', color:'var(--text-secondary)', fontSize:12, cursor: postsPage >= totalPages ? 'default' : 'pointer', opacity: postsPage >= totalPages ? 0.4 : 1 }}>다음</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+            {activityTab === 'comments' && (() => {
+              const perPage = 5;
+              const totalPages = Math.max(1, Math.ceil(myComments.length / perPage));
+              const paged = myComments.slice((commentsPage - 1) * perPage, commentsPage * perPage);
+              return (
+                <div style={{ marginTop:12 }}>
+                  {paged.map(c => (
+                    <a key={c.id} href={`/feed/${c.post_id}`} style={{ display:'block', padding:'12px 0', borderBottom:'1px solid var(--border)', textDecoration:'none' }}>
+                      <div style={{ fontSize:14, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.content}</div>
+                      <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</div>
+                    </a>
+                  ))}
+                  {myComments.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>💬 첫 댓글을 남겨보세요</p>}
+                  {myComments.length > perPage && (
+                    <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:8, marginTop:12 }}>
+                      <button onClick={() => setCommentsPage(p => Math.max(1, p - 1))} disabled={commentsPage <= 1}
+                        style={{ padding:'6px 14px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-hover)', color:'var(--text-secondary)', fontSize:12, cursor: commentsPage <= 1 ? 'default' : 'pointer', opacity: commentsPage <= 1 ? 0.4 : 1 }}>이전</button>
+                      <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>{commentsPage} / {totalPages}</span>
+                      <button onClick={() => setCommentsPage(p => Math.min(totalPages, p + 1))} disabled={commentsPage >= totalPages}
+                        style={{ padding:'6px 14px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-hover)', color:'var(--text-secondary)', fontSize:12, cursor: commentsPage >= totalPages ? 'default' : 'pointer', opacity: commentsPage >= totalPages ? 0.4 : 1 }}>다음</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </>
         )}
       </div>
