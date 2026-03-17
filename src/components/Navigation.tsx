@@ -37,6 +37,19 @@ export function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [nickname, setNickname] = useState<string | null>(null);
   const [unread, setUnread]     = useState(0);
+  const [fontSize, setFontSize] = useState('medium');
+
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('kd_font_size') : null;
+    if (saved && ['small','medium','large'].includes(saved)) setFontSize(saved);
+  }, []);
+
+  const handleFontSize = (val: string) => {
+    const sizes: Record<string, string> = { small: '13px', medium: '15px', large: '17px' };
+    setFontSize(val);
+    localStorage.setItem('kd_font_size', val);
+    document.documentElement.style.setProperty('--font-base', sizes[val] || '15px');
+  };
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -217,6 +230,20 @@ export function Navigation() {
                           onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
                         >{item.label}</Link>
                       ))}
+                      {/* 글씨 크기 */}
+                      <div style={{ padding:'9px 16px', borderBottom:'1px solid var(--border)' }}>
+                        <div style={{ fontSize:12, color:'var(--text-tertiary)', marginBottom:6, fontWeight:600 }}>글씨 크기</div>
+                        <div style={{ display:'flex', gap:4 }}>
+                          {([['small','작게'],['medium','보통'],['large','크게']] as const).map(([val, label]) => (
+                            <button key={val} onClick={() => handleFontSize(val)} style={{
+                              flex:1, padding:'4px 0', borderRadius:6, fontSize: val === 'small' ? 11 : val === 'large' ? 15 : 13,
+                              fontWeight: fontSize === val ? 700 : 400, border:'none', cursor:'pointer',
+                              background: fontSize === val ? 'var(--brand)' : 'var(--bg-hover)',
+                              color: fontSize === val ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                            }}>{label}</button>
+                          ))}
+                        </div>
+                      </div>
                       <button onClick={handleLogout} style={{
                         display:'block', width:'100%', padding:'11px 16px',
                         color:'var(--error)', fontSize:14,
