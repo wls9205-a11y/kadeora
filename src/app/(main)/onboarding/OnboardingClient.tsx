@@ -35,6 +35,7 @@ export default function OnboardingClient() {
   const handleComplete = async () => {
     if (!nickname.trim() || nickname.trim().length < 2) { error('닉네임은 2자 이상이어야 합니다'); return; }
     if (nickname.trim().length > 20) { error('닉네임은 20자 이하여야 합니다'); return; }
+    if (!region) { error('지역을 선택해주세요'); return; }
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
@@ -125,14 +126,14 @@ export default function OnboardingClient() {
             <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>거의 다 됐어요! 🎯</h1>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
-              거주 지역 <span style={{ fontSize: 11, fontWeight: 400 }}>(선택)</span>
+              거주 지역 <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <select value={region} onChange={e => setRegion(e.target.value)} style={{
               width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 20,
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 14, fontFamily: 'inherit',
             }}>
-              <option value="">지역 선택 (선택사항)</option>
+              <option value="">지역을 선택해주세요</option>
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
             <label style={{

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import AdminPushNotification from '@/components/AdminPushNotification';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface Stats { totalUsers: number; totalPosts: number; totalComments: number; }
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
   reports: Record<string, unknown>[];
 }
 
-const TABS = ['대시보드', '공지발송', '최근 유저', '최근 게시글', '신고 목록'] as const;
+const TABS = ['대시보드', '공지발송', '마케팅 발송', '최근 유저', '최근 게시글', '신고 목록'] as const;
 type Tab = typeof TABS[number];
 
 export default function AdminClient({ stats, recentUsers, recentPosts, reports }: Props) {
@@ -111,6 +112,11 @@ export default function AdminClient({ stats, recentUsers, recentPosts, reports }
         </div>
       )}
 
+      {/* ── 마케팅 발송 ── */}
+      {tab === '마케팅 발송' && (
+        <MarketingPanel />
+      )}
+
       {/* ── 최근 유저 ── */}
       {tab === '최근 유저' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
@@ -198,6 +204,75 @@ export default function AdminClient({ stats, recentUsers, recentPosts, reports }
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function MarketingPanel() {
+  const [targetType, setTargetType] = useState<'all'|'city'>('all');
+  const [targetCity, setTargetCity] = useState('');
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [url, setUrl] = useState('/feed');
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const CITIES = ['서울','경기','인천','부산','대구','광주','대전','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'];
+
+  const send = async () => {
+    if (!title || !body) return;
+    setSending(true);
+    setResult(null);
+    try {
+      const sb = createSupabaseBrowser();
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch('/api/admin/push-broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ title, body, url, target_all: targetType === 'all', target_city: targetCity }),
+      });
+      const data = await res.json();
+      if (data.success) setResult(`${data.targeted}명 타겟, ${data.notifications_created}개 알림 생성 완료`);
+      else setResult(`오류: ${data.error}`);
+    } catch { setResult('네트워크 오류'); }
+    setSending(false);
+  };
+
+  return (
+    <div style={{ maxWidth: 600 }}>
+      <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>지역 타겟 마케팅 발송</h3>
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>발송 대상</label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => setTargetType('all')} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', background: targetType === 'all' ? 'var(--brand)' : 'var(--bg-hover)', color: targetType === 'all' ? 'var(--text-inverse)' : 'var(--text-secondary)', fontWeight: 600, fontSize: 13 }}>전체</button>
+          <button onClick={() => setTargetType('city')} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', background: targetType === 'city' ? 'var(--brand)' : 'var(--bg-hover)', color: targetType === 'city' ? 'var(--text-inverse)' : 'var(--text-secondary)', fontWeight: 600, fontSize: 13 }}>지역별</button>
+        </div>
+      </div>
+      {targetType === 'city' && (
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>지역 선택</label>
+          <select value={targetCity} onChange={e => setTargetCity(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }}>
+            <option value="">선택</option>
+            {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      )}
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>제목</label>
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="알림 제목" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }} />
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>내용 ({body.length}/200)</label>
+        <textarea value={body} onChange={e => setBody(e.target.value.slice(0, 200))} placeholder="알림 내용" rows={3} style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14, resize: 'vertical' }} />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>랜딩 URL</label>
+        <input value={url} onChange={e => setUrl(e.target.value)} placeholder="/feed" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }} />
+      </div>
+      <button onClick={send} disabled={sending || !title || !body} style={{ padding: '10px 20px', background: sending ? 'var(--border)' : 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer' }}>
+        {sending ? '발송 중...' : '마케팅 메시지 발송'}
+      </button>
+      {result && <p style={{ marginTop: 12, fontSize: 13, color: result.includes('완료') ? 'var(--success)' : 'var(--error)' }}>{result}</p>}
     </div>
   );
 }
