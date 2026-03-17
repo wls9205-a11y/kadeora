@@ -314,7 +314,7 @@ export default function StockClient({ initialStocks }: Props) {
             </span>
             <span style={{ textAlign: 'center' }}>
               <Link
-                href={`/discussion/stock/${s.symbol}`}
+                href="/discuss"
                 onClick={e => e.stopPropagation()}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 3,
@@ -385,7 +385,7 @@ export default function StockClient({ initialStocks }: Props) {
               💡 <strong>초보자 팁:</strong> 시가총액은 회사의 전체 가치입니다.
               1조 이상이면 대형주, 1000억~1조는 중형주, 1000억 미만은 소형주로 봅니다.
             </div>
-            <a href={`/discussion/stock/${selectedStock.symbol}`} style={{ display:'block', textAlign:'center', background:'var(--brand)', color:'var(--text-inverse)', padding:12, borderRadius:8, textDecoration:'none', fontWeight:700, fontSize:14 }}>
+            <a href="/discuss" style={{ display:'block', textAlign:'center', background:'var(--brand)', color:'var(--text-inverse)', padding:12, borderRadius:8, textDecoration:'none', fontWeight:700, fontSize:14 }}>
               💬 종목 토론방 입장
             </a>
           </div>

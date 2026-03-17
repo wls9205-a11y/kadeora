@@ -192,7 +192,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                 <div className="flex gap-2 mt-3 flex-wrap">
                   {/* ★ 현장토론방 버튼 — 청약 일정과 연동 */}
                   <Link
-                    href={`/discussion/apt/${apt.id}`}
+                    href="/discuss"
                     onClick={haptic}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
                     style={{
@@ -326,7 +326,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                       </a>
                     )}
                     <Link
-                      href={`/discussion/apt/${apt.id}`}
+                      href="/discuss"
                       style={{
                         flex: 1, textAlign: 'center', padding: 12, borderRadius: 8,
                         background: 'var(--brand)', color: 'var(--text-inverse)',
