@@ -168,8 +168,8 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                 <Image src={avatarUrl} alt={`${displayName} 프로필 사진`} fill sizes="72px" style={{ objectFit: 'cover' }} />
               </div>
             ) : (
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,var(--info),var(--brand))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'var(--text-inverse)', border: '2px solid var(--border)' }}>
-                {displayName[0].toUpperCase()}
+              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, var(--brand), var(--info))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, border: '2px solid var(--border)' }}>
+                {GRADE_EMOJIS[profile.grade ?? 1] ?? '🌱'}
               </div>
             )}
             {isOwner && (
@@ -261,8 +261,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             { label: '댓글', value: commentCount, icon: '💬' },
             { label: '받은 좋아요', value: profile.likes_count ?? 0, icon: '❤️' },
             { label: '총 활동', value: totalActivity, icon: '⚡' },
+            { label: '포인트', value: profile.points ?? 0, icon: '💰' },
           ].map((stat, i) => (
-            <div key={stat.label} style={{ background: 'var(--bg-surface)', padding: '16px 12px', textAlign: 'center', borderRight: i < 3 ? '1px solid var(--border)' : 'none' }}>
+            <div key={stat.label} style={{ background: 'var(--bg-surface)', padding: '16px 12px', textAlign: 'center' }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>

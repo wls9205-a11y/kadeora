@@ -250,7 +250,12 @@ export default function StockClient({ initialStocks }: Props) {
           }}>
             등락 {sort === 'change' ? (sortDir === 'desc' ? '▼' : '▲') : ''}
           </span>
-          <span style={{ textAlign: 'right' }}>시총</span>
+          <span style={{ textAlign: 'right', cursor: 'pointer' }} onClick={() => {
+            if (sort === 'cap') { setSortDir(d => d === 'desc' ? 'asc' : 'desc'); }
+            else { setSort('cap'); setSortDir('desc'); }
+          }}>
+            시총 {sort === 'cap' ? (sortDir === 'desc' ? '▼' : '▲') : ''}
+          </span>
           <span style={{ textAlign: 'center' }}>토론</span>
         </div>
 
