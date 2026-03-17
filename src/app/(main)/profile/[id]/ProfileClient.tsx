@@ -367,6 +367,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                     color: activityTab === tab ? 'var(--brand)' : 'var(--text-secondary)',
                   }}>
                   {tab === 'posts' ? '내 게시글' : '내 댓글'}
+                  <span style={{ background:'var(--bg-hover)', color:'var(--text-tertiary)', fontSize:11, borderRadius:10, padding:'1px 6px', marginLeft:4 }}>
+                    {tab === 'posts' ? (profile.posts_count ?? 0) : commentCount}
+                  </span>
                 </button>
               ))}
             </div>

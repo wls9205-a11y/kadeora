@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
@@ -33,11 +33,25 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
   const [userRegion, setUserRegion] = useState<string | null>(null);
+  const [showHotBanner, setShowHotBanner] = useState(false);
+  const [hotPosts, setHotPosts] = useState<any[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setTipSeen(!!localStorage.getItem('kd_tip_seen'));
+      setShowHotBanner(!sessionStorage.getItem('kd_hot_banner_closed'));
     }
+  }, []);
+
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    sb.from('posts')
+      .select('id,title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
+      .eq('is_deleted', false)
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .order('likes_count', { ascending: false })
+      .limit(3)
+      .then(({ data }) => { if (data && data.length > 0) setHotPosts(data); });
   }, []);
 
   // Initialize like counts from posts data
@@ -212,6 +226,22 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
         </div>
       )}
 
+      {/* HOT 배너 */}
+      {showHotBanner && (
+        <div onClick={() => router.push('/hot')} style={{
+          background:'linear-gradient(135deg, #FF4500, #FF6B35)',
+          borderRadius:8, padding:'10px 14px', marginBottom:10,
+          display:'flex', alignItems:'center', justifyContent:'space-between', cursor:'pointer',
+        }}>
+          <span style={{ fontSize:13, fontWeight:700, color:'#fff' }}>🔥 이번 주 카더라 HOT</span>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <span style={{ fontSize:12, color:'rgba(255,255,255,0.8)' }}>보러가기 →</span>
+            <button onClick={(e) => { e.stopPropagation(); setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed','1'); }}
+              style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', fontSize:14, cursor:'pointer', padding:0 }}>✕</button>
+          </div>
+        </div>
+      )}
+
       {/* 카테고리 바 */}
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
@@ -263,14 +293,32 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
 
       {/* 게시글 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {visiblePosts.map((post) => {
+        {visiblePosts.map((post, postIndex) => {
           const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
           const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
           const isLiked = likedPosts.has(post.id);
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           const isBookmarked = bookmarkedPosts.has(post.id);
           return (
-            <Link key={post.id} href={`/feed/${post.id}`} className="animate-fadeIn kd-card"
+            <React.Fragment key={post.id}>
+            {postIndex === 5 && hotPosts.length > 0 && (
+              <div style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:8, padding:'12px 14px', marginBottom:2 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+                  <span style={{ fontSize:14, fontWeight:700, color:'var(--text-primary)' }}>🔥 이번 주 HOT</span>
+                  <Link href="/hot" style={{ fontSize:12, color:'var(--brand)', textDecoration:'none' }}>전체보기 →</Link>
+                </div>
+                <div style={{ display:'flex', gap:8, overflowX:'auto', paddingBottom:4 }}>
+                  {hotPosts.map((hp: any) => (
+                    <Link key={hp.id} href={`/feed/${hp.id}`} style={{ width:180, flexShrink:0, background:'var(--bg-hover)', border:'1px solid var(--border)', borderRadius:8, padding:10, textDecoration:'none' }}>
+                      <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>{CATEGORY_MAP[hp.category]?.label ?? '자유'}</div>
+                      <div style={{ fontSize:13, fontWeight:600, color:'var(--text-primary)', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', lineHeight:1.4, marginBottom:6 }}>{hp.title}</div>
+                      <div style={{ fontSize:11, color:'var(--brand)', fontWeight:600 }}>❤ {hp.likes_count ?? 0}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            <Link href={`/feed/${post.id}`} className="animate-fadeIn kd-card"
               style={{ display: 'flex', textDecoration: 'none' }}>
               {/* 투표 */}
               <div
@@ -328,6 +376,7 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
                 </div>
               </div>
             </Link>
+            </React.Fragment>
           );
         })}
       </div>

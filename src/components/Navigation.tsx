@@ -11,13 +11,14 @@ const NAV_ITEMS = [
   { href: '/stock',          label: '주식',   icon: '📈' },
   { href: '/apt',            label: '부동산', icon: '🏘' },
   { href: '/discuss',        label: '토론',   icon: '💬' },
+  { href: '/hot',            label: 'HOT',    icon: '🔥' },
 ];
 
 const MOBILE_TABS = [
   { href: '/feed', label: '피드', icon: '🏠' },
   { href: '/stock', label: '주식', icon: '📈' },
   { href: '/apt', label: '부동산', icon: '🏘' },
-  { href: '/discuss', label: '토론', icon: '💬' },
+  { href: '/hot', label: 'HOT', icon: '🔥' },
   { href: '/profile', label: '내정보', icon: '👤' },
 ];
 
