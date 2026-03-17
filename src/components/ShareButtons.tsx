@@ -7,7 +7,7 @@ export default function ShareButtons({title,url,postId}:ShareButtonsProps){
   const handleCopy=async()=>{try{await navigator.clipboard.writeText(shareUrl)}catch{const el=document.createElement('textarea');el.value=shareUrl;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el)};setCopied(true);setTimeout(()=>setCopied(false),2000)}
   const handleKakao=()=>window.open(`https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`,'_blank','width=500,height=400')
   const handleTwitter=()=>window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title+' | 카더라')}&url=${encodeURIComponent(shareUrl)}`,'_blank','width=550,height=420')
-  const btn:React.CSSProperties={display:'flex',alignItems:'center',gap:'6px',padding:'7px 14px',borderRadius:'8px',border:'1px solid var(--border)',background:'var(--bg-surface)',color:'var(--text-secondary)',fontSize:'13px',fontWeight:500,cursor:'pointer',transition:'all 0.15s'}
+  const btn:React.CSSProperties={display:'flex',alignItems:'center',gap:'6px',padding:'7px 16px',borderRadius:'8px',border:'1px solid var(--border)',background:'var(--bg-surface)',color:'var(--text-secondary)',fontSize:'13px',fontWeight:500,cursor:'pointer',transition:'all 0.15s',whiteSpace:'nowrap',minWidth:'80px',justifyContent:'center'}
   return(
     <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap',marginTop:'16px',paddingTop:'16px',borderTop:'1px solid var(--border)'}}>
       <span style={{fontSize:'12px',color:'var(--text-tertiary)',marginRight:'4px'}}>공유하기</span>

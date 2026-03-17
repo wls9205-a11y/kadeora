@@ -156,19 +156,6 @@ export function Navigation() {
 
             {user ? (
               <>
-                {/* 글쓰기 */}
-                <Link href="/write" style={{
-                  display:'flex', alignItems:'center', gap:4,
-                  height:34, padding:'0 14px', borderRadius:17,
-                  background:'var(--brand)', color:'var(--text-inverse, #fff)',
-                  textDecoration:'none', fontSize:13, fontWeight:700,
-                  whiteSpace:'nowrap',
-                  boxShadow:'0 2px 8px rgba(255,69,0,0.3)',
-                }}>
-                  <span className="hidden md:inline">+ 글쓰기</span>
-                  <span className="md:hidden" style={{fontSize:16}}>✏️</span>
-                </Link>
-
                 {/* 알림 */}
                 <Link href="/notifications" aria-label="알림" style={{
                   position:'relative', width:40, height:40,
