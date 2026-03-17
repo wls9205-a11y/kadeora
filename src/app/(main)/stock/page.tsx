@@ -9,20 +9,27 @@ import { CACHE_TTL } from '@/lib/cache-config';
 import StockClient from './StockClient';
 import Disclaimer from '@/components/Disclaimer';
 
-const getStocks = unstable_cache(async () => {
+async function fetchStocks() {
   const sb = await createSupabaseServer();
   const { data } = await sb
     .from('stock_quotes')
     .select('*')
     .order('market_cap', { ascending: false });
   return data ?? [];
-}, ['stock-quotes'], { revalidate: CACHE_TTL.medium });
+}
+
+const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v2'], { revalidate: CACHE_TTL.medium });
 
 export default async function StockPage() {
   let stocks: { symbol: string; name: string; market: string; price: number; change_amt: number; change_pct: number; volume: number; market_cap: number; updated_at: string }[] = [];
 
   try {
-    stocks = await getStocks();
+    const data = await getCachedStocks();
+    if (data.length > 0) {
+      stocks = data;
+    } else {
+      stocks = await fetchStocks();
+    }
   } catch {}
 
   return (
