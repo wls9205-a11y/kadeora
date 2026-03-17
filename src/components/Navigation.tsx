@@ -139,21 +139,6 @@ export function Navigation() {
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
             <ThemeToggle />
 
-            {/* 상점 */}
-            <Link href="/shop/megaphone" aria-label="상점" style={{
-              width:36, height:36, borderRadius:'50%',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              background:'var(--bg-hover)', border:'1px solid var(--border)',
-              fontSize:16, textDecoration:'none', color:'var(--text-secondary)',
-            }}>🛒</Link>
-
-            {/* 모바일 검색 */}
-            <Link href="/search" className="md:hidden" aria-label="검색" style={{
-              width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
-              borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:18,
-              background:'var(--bg-hover)', border:'1px solid var(--border)',
-            }}>🔍</Link>
-
             {user ? (
               <>
                 {/* 알림 */}
@@ -216,6 +201,8 @@ export function Navigation() {
                       boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex:300,
                     }}>
                       {[
+                        { href:'/search',             label:'🔍 검색' },
+                        { href:'/shop/megaphone',     label:'🛒 상점' },
                         { href:`/profile/${user.id}`, label:'👤 내 프로필' },
                         { href:'/write',              label:'✏️ 글쓰기' },
                         { href:'/notifications',      label:`🔔 알림${unread>0?` (${unread})`:''}` },
@@ -245,6 +232,12 @@ export function Navigation() {
               </>
             ) : (
               <>
+                {/* 모바일 검색 (비로그인) */}
+                <Link href="/search" className="md:hidden" aria-label="검색" style={{
+                  width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
+                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:16,
+                  background:'var(--bg-hover)', border:'1px solid var(--border)',
+                }}>🔍</Link>
                 <Link href="/login" style={{
                   height:34, padding:'0 14px', borderRadius:17,
                   border:'1px solid var(--brand)',

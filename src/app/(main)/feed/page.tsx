@@ -6,14 +6,14 @@ export const metadata: Metadata = {
 };
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
-import { unstable_cache } from 'next/cache';
-import { CACHE_TTL } from '@/lib/cache-config';
 import { DEMO_POSTS, DEMO_TRENDING } from '@/lib/constants';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import FeedClient from './FeedClient';
 import Disclaimer from '@/components/Disclaimer';
 
-const getPosts = unstable_cache(async (category: string) => {
+export const dynamic = 'force-dynamic';
+
+async function getPosts(category: string) {
   const sb = await createSupabaseServer();
   let q = sb.from('posts')
     .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,images,author_id, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
@@ -24,13 +24,13 @@ const getPosts = unstable_cache(async (category: string) => {
   const { data, error } = await q;
   if (error || !data || data.length === 0) return null;
   return data as PostWithProfile[];
-}, ['posts'], { revalidate: CACHE_TTL.short });
+}
 
-const getTrending = unstable_cache(async () => {
+async function getTrending() {
   const sb = await createSupabaseServer();
   const { data } = await sb.from('trending_keywords').select('*').order('heat_score', { ascending: false }).limit(10);
   return data as TrendingKeyword[] | null;
-}, ['trending'], { revalidate: CACHE_TTL.medium });
+}
 
 interface Props { searchParams: Promise<{ category?: string }>; }
 
