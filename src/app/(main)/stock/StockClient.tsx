@@ -27,15 +27,16 @@ function fmt(n: number) {
 }
 
 function fmtCap(n: number, currency?: string) {
-  if (!n) return '-';
+  if (!n || n === 0) return '-';
   if (currency === 'USD') {
-    if (n >= 1e12) return `$${(n/1e12).toFixed(2)}T`;
-    if (n >= 1e9) return `$${(n/1e9).toFixed(1)}B`;
-    return `$${(n/1e6).toFixed(0)}M`;
+    if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
+    if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
+    if (n >= 1e6) return `$${(n / 1e6).toFixed(0)}M`;
+    return `$${n.toLocaleString()}`;
   }
-  if (n >= 1e12) return `${(n/1e12).toFixed(1)}조`;
-  if (n >= 1e8) return `${(n/1e8).toFixed(0)}억`;
-  return n.toLocaleString();
+  if (n >= 1e12) return `${(n / 1e12).toFixed(1)}조`;
+  if (n >= 1e8) return `${Math.round(n / 1e8)}억`;
+  return `${n.toLocaleString()}원`;
 }
 
 function timeDiff(iso: string) {
@@ -103,7 +104,12 @@ export default function StockClient({ initialStocks }: Props) {
     .filter(s => !search || s.name.includes(search) || s.symbol.includes(search))
     .sort((a, b) => {
       const dirMul = sortDir === 'asc' ? 1 : -1;
-      if (sort === 'cap') return dirMul * ((b.market_cap ?? 0) - (a.market_cap ?? 0));
+      if (sort === 'cap') {
+        const rate = exchangeRate || 1380;
+        const aUSD = (a.currency === 'KRW' ? (a.market_cap ?? 0) / rate : (a.market_cap ?? 0));
+        const bUSD = (b.currency === 'KRW' ? (b.market_cap ?? 0) / rate : (b.market_cap ?? 0));
+        return dirMul * (bUSD - aUSD);
+      }
       if (sort === 'change') return dirMul * ((b.change_pct ?? 0) - (a.change_pct ?? 0));
       return dirMul * ((b.volume ?? 0) - (a.volume ?? 0));
     });

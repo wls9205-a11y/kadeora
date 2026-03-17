@@ -73,14 +73,14 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
       </div>
 
       {/* 방 목록 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 8 }}>
         {filtered.map(room => {
           const catColor = CAT_COLORS[room.room_type] ?? 'var(--text-secondary)';
           return (
             <div key={room.id} onClick={() => setActive(room)} role="button" tabIndex={0}
               onKeyDown={e => e.key === 'Enter' && setActive(room)}
               aria-label={`${room.display_name} 토론방 열기`}
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '18px 20px', cursor: 'pointer', transition: 'all 0.15s' }}
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 14px', cursor: 'pointer', transition: 'all 0.15s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
             >
@@ -95,9 +95,9 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
                   </span>
                 )}
               </div>
-              <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>{room.display_name}</h3>
+              <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>{room.display_name}</h3>
               {room.description && (
-                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
                   {room.description}
                 </p>
               )}

@@ -26,6 +26,13 @@ export default function FeedClient({ posts, activeCategory }: Props) {
   const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(20);
   const [showRegionBanner, setShowRegionBanner] = useState(false);
+  const [tipSeen, setTipSeen] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setTipSeen(!!localStorage.getItem('kd_tip_seen'));
+    }
+  }, []);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -89,6 +96,21 @@ export default function FeedClient({ posts, activeCategory }: Props) {
             작성
           </span>
         </div>
+
+        {/* 안내 배너 */}
+        {!tipSeen && (
+          <div style={{
+            background:'var(--bg-surface)', border:'1px solid var(--border)',
+            borderRadius:8, padding:'10px 14px', marginBottom:8,
+            display:'flex', justifyContent:'space-between', alignItems:'center',
+            fontSize:13, color:'var(--text-secondary)',
+          }}>
+            <span>💡 <strong>▲ 숫자</strong>는 추천 수예요. 클릭하면 좋은 글에 투표할 수 있어요!</span>
+            <button onClick={() => { setTipSeen(true); localStorage.setItem('kd_tip_seen','1'); }}
+              aria-label="닫기"
+              style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-tertiary)', fontSize:16, flexShrink:0, marginLeft:8 }}>✕</button>
+          </div>
+        )}
 
         {/* 카테고리 바 */}
         <div style={{
