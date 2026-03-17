@@ -2,6 +2,7 @@
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  generateBuildId: () => 'build-20260318',
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
 

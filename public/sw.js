@@ -1,5 +1,5 @@
 ﻿// Kadeora Service Worker v1.0
-const CACHE_NAME = 'kadeora-v1';
+const CACHE_NAME = 'kadeora-v20260318';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

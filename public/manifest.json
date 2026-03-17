@@ -19,5 +19,6 @@
     { "name": "피드", "url": "/feed" },
     { "name": "주식", "url": "/stock" },
     { "name": "청약", "url": "/apt" }
-  ]
+  ],
+  "version": "20260318"
 }
