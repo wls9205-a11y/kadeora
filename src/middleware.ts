@@ -10,12 +10,14 @@ const BOT_PATHS = ['/wp-admin', '/wp-login.php', '/.env', '/.git', '/phpmyadmin'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ── 봇 차단 ──
   if (BOT_PATHS.some(p => pathname.startsWith(p))) {
     return new NextResponse(null, { status: 404 });
   }
 
-  // Redis Rate Limiting (API 라우트만)
+  // ── API 라우트: rate limit + SSRF 검사만, auth 불필요 ──
   if (pathname.startsWith('/api/')) {
+    // Redis Rate Limiting
     const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
     const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
     if (redisUrl && redisToken) {
@@ -40,23 +42,28 @@ export async function middleware(request: NextRequest) {
         }
       } catch { /* Redis 장애 시 통과 */ }
     }
-  }
 
-  if (pathname.startsWith('/api/apt-proxy')) {
-    const url = request.nextUrl.searchParams.get('url');
-    if (url) {
-      try {
-        const parsed = new URL(url);
-        if (PRIVATE_IP_REGEX.test(parsed.hostname))
-          return NextResponse.json({ error: 'SSRF blocked' }, { status: 403 });
-        if (!ALLOWED_APT_DOMAINS.some(d => parsed.hostname.endsWith(d)))
-          return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
-      } catch {
-        return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    // SSRF 차단 (apt-proxy)
+    if (pathname.startsWith('/api/apt-proxy')) {
+      const url = request.nextUrl.searchParams.get('url');
+      if (url) {
+        try {
+          const parsed = new URL(url);
+          if (PRIVATE_IP_REGEX.test(parsed.hostname))
+            return NextResponse.json({ error: 'SSRF blocked' }, { status: 403 });
+          if (!ALLOWED_APT_DOMAINS.some(d => parsed.hostname.endsWith(d)))
+            return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
+        } catch {
+          return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+        }
       }
     }
+
+    // API는 자체 auth 처리 → middleware auth/profile 쿼리 스킵
+    return NextResponse.next();
   }
 
+  // ── 페이지 요청만: Supabase auth + 보호 경로 + 온보딩 체크 ──
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -80,6 +87,7 @@ export async function middleware(request: NextRequest) {
     user = data.user;
   } catch { }
 
+  // 보호 경로: 미인증 → 로그인 리다이렉트
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
   if (isProtected && !user) {
     const loginUrl = new URL('/login', request.url);
@@ -87,7 +95,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p)) || pathname.startsWith('/api/') || pathname.startsWith('/_next/');
+  // 온보딩 체크: 인증된 사용자 + 일반 페이지만 (public 경로 제외)
+  const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p));
   if (user && !isPublic && pathname !== '/onboarding') {
     try {
       const { data: profile } = await supabase
@@ -101,6 +110,7 @@ export async function middleware(request: NextRequest) {
     } catch { }
   }
 
+  // ── CSP 헤더 ──
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
     "default-src 'self'",
@@ -120,6 +130,9 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+// 정적 파일, 이미지, PWA 에셋 완전 제외 → middleware 자체가 실행되지 않음
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|_next/data|favicon|icons/|manifest\\.json|sw\\.js|og-image|robots\\.txt|sitemap\\.xml|\\.well-known/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
+  ],
 };
