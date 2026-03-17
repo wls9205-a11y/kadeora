@@ -18,6 +18,7 @@ interface Apt {
   mvn_prearnge_ym: string;
   pblanc_url: string;
   mdatrgbn_nm: string;
+  competition_rate_1st: number | null;
 }
 
 const REGIONS = ['전체','서울','경기','인천','부산','대구','광주','대전','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'];
@@ -162,6 +163,14 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                           style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
                         >
                           D-{dday}
+                        </span>
+                      )}
+                      {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
+                        <span
+                          className="text-xs font-bold px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
+                        >
+                          🏆 {Number(apt.competition_rate_1st).toFixed(1)}:1
                         </span>
                       )}
                       <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>

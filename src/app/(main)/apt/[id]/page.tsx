@@ -63,6 +63,27 @@ export default async function AptDetailPage({ params }: Props) {
           </div>
         ))}
       </div>
+      {(apt.competition_rate_1st) && (
+        <div style={{ background:'var(--bg-hover)', borderRadius:12, padding:16, marginBottom:16, border:'1px solid var(--border)' }}>
+          <div style={{ fontSize:13, fontWeight:700, color:'var(--text-secondary)', marginBottom:12 }}>🏆 청약 경쟁률</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            <div style={{ background:'var(--brand-light)', borderRadius:8, padding:'10px 14px', border:'1px solid var(--brand)' }}>
+              <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>1순위 경쟁률</div>
+              <div style={{ fontSize:22, fontWeight:800, color:'var(--brand)' }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1</div>
+            </div>
+          </div>
+          {apt.competition_updated_at && (
+            <div style={{ fontSize:11, color:'var(--text-tertiary)', marginTop:8, textAlign:'right' }}>
+              업데이트: {new Date(apt.competition_updated_at).toLocaleDateString('ko-KR')}
+            </div>
+          )}
+        </div>
+      )}
+      {!apt.competition_rate_1st && apt.rcept_endde && new Date(apt.rcept_endde) > new Date() && (
+        <div style={{ background:'var(--success-bg)', border:'1px solid var(--success)', borderRadius:10, padding:12, marginBottom:16, fontSize:13, color:'var(--text-secondary)', lineHeight:1.6 }}>
+          📊 청약 마감 후 경쟁률이 자동 업데이트됩니다.
+        </div>
+      )}
       {(!apt.tot_supply_hshld_co || Number(apt.tot_supply_hshld_co) === 0) && (
         <div style={{ background:'var(--warning-bg)', border:'1px solid var(--warning)', borderRadius:8, padding:'10px 14px', marginBottom:16, fontSize:12, color:'var(--text-secondary)', lineHeight:1.6 }}>
           ⏳ 공급세대 수는 청약홈 공고문 게시 후 자동 업데이트됩니다.
