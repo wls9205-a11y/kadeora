@@ -16,7 +16,7 @@ import Disclaimer from '@/components/Disclaimer';
 const getPosts = unstable_cache(async (category: string) => {
   const sb = await createSupabaseServer();
   let q = sb.from('posts')
-    .select('*, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+    .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,images,author_id, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
     .limit(30);

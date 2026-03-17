@@ -4,7 +4,7 @@ import './globals.css';
 import OfflineBanner from '@/components/OfflineBanner';
 import CookieBanner from '@/components/CookieBanner';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kadeora.app'),

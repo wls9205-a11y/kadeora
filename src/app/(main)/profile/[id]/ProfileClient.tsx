@@ -151,20 +151,27 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
     if (tab === 'bookmarks') loadBookmarks();
   };
 
+  const [postsLoaded, setPostsLoaded] = useState(false);
+  const [commentsLoaded, setCommentsLoaded] = useState(false);
+
   const loadMyPosts = async () => {
+    if (postsLoaded) return;
     const sb = createSupabaseBrowser();
     const { data } = await sb.from('posts').select('id,title,created_at,likes_count,comments_count')
       .eq('author_id', profile.id).eq('is_deleted', false)
       .order('created_at', { ascending: false }).limit(20);
     setMyPosts(data ?? []);
+    setPostsLoaded(true);
   };
 
   const loadMyComments = async () => {
+    if (commentsLoaded) return;
     const sb = createSupabaseBrowser();
     const { data } = await sb.from('comments').select('id,content,created_at,post_id')
       .eq('author_id', profile.id).eq('is_deleted', false)
       .order('created_at', { ascending: false }).limit(20);
     setMyComments(data ?? []);
+    setCommentsLoaded(true);
   };
 
   return (

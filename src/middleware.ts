@@ -149,6 +149,6 @@ export async function middleware(request: NextRequest) {
 // 정적 파일, 이미지, PWA 에셋 완전 제외 → middleware 자체가 실행되지 않음
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|_next/data|favicon|icons/|manifest\\.json|sw\\.js|og-image|robots\\.txt|sitemap\\.xml|\\.well-known/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
+    '/((?!_next/static|_next/image|_next/data|favicon|icons/|manifest\\.json|sw\\.js|og-image|robots\\.txt|sitemap\\.xml|\\.well-known/|api/cron|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
   ],
 };

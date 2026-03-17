@@ -4,21 +4,25 @@ export const metadata: Metadata = {
   description: '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.',
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { unstable_cache } from 'next/cache';
+import { CACHE_TTL } from '@/lib/cache-config';
 import StockClient from './StockClient';
 import Disclaimer from '@/components/Disclaimer';
+
+const getStocks = unstable_cache(async () => {
+  const sb = await createSupabaseServer();
+  const { data } = await sb
+    .from('stock_quotes')
+    .select('*')
+    .order('market_cap', { ascending: false });
+  return data ?? [];
+}, ['stock-quotes'], { revalidate: CACHE_TTL.medium });
 
 export default async function StockPage() {
   let stocks: { symbol: string; name: string; market: string; price: number; change_amt: number; change_pct: number; volume: number; market_cap: number; updated_at: string }[] = [];
 
   try {
-    const sb = await createSupabaseServer();
-    const { data } = await sb
-      .from('stock_quotes')
-      .select('*')
-      .order('market_cap', { ascending: false });
-    if (data && data.length > 0) {
-      stocks = data;
-    }
+    stocks = await getStocks();
   } catch {}
 
   return (

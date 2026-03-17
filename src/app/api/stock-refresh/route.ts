@@ -326,19 +326,21 @@ export async function GET(req: NextRequest) {
 
   // 국내주식 갱신 (장 운영시간에만)
   if (isMarketOpen && isWeekday) {
-    // 1) KIS API 시도
-    try {
-      const kisResult = await fetchViaKis(supabase);
-      if (kisResult) {
-        success += kisResult.success;
-        failed += kisResult.failed;
-        domesticSource = 'kis';
+    // 1) KIS API 시도 — 환경변수 없으면 스킵
+    if (process.env.KIS_APP_KEY && process.env.KIS_APP_SECRET) {
+      try {
+        const kisResult = await fetchViaKis(supabase);
+        if (kisResult) {
+          success += kisResult.success;
+          failed += kisResult.failed;
+          domesticSource = 'kis';
+        }
+      } catch {
+        // KIS 실패 -> Naver 폴백
       }
-    } catch {
-      // KIS 실패 -> Naver 폴백
     }
 
-    // 2) KIS 실패 시 Naver Finance 폴백 (가장 안정적)
+    // 2) KIS 실패/스킵 시 Naver Finance 폴백 (가장 안정적)
     if (domesticSource === 'cache') {
       try {
         const naverResult = await fetchViaNaver(supabase);
@@ -448,5 +450,7 @@ export async function GET(req: NextRequest) {
     success,
     failed,
     ...(!isMarketOpen || !isWeekday ? { reason: 'domestic_market_closed' } : {}),
+  }, {
+    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30' },
   });
 }

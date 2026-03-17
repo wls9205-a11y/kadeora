@@ -22,20 +22,16 @@ export default async function ProfilePage({ params }: Props) {
   const { data: { session } } = await sb.auth.getSession();
   const isOwner = session?.user?.id === id;
 
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', id).single();
-  if (!profile) return notFound();
-
-  const { data: posts } = await sb.from('posts')
-    .select('id,title,category,created_at,view_count,likes_count,comments_count')
-    .eq('author_id', id).eq('is_deleted', false)
-    .order('created_at', { ascending: false }).limit(20);
-
   const [
+    { data: profile },
+    { data: posts },
     { count: commentCount },
     { count: followersCount },
     { count: followingCount },
     followCheck,
   ] = await Promise.all([
+    sb.from('profiles').select('*').eq('id', id).single(),
+    sb.from('posts').select('id,title,category,created_at,view_count,likes_count,comments_count').eq('author_id', id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(20),
     sb.from('comments').select('*', { count: 'exact', head: true }).eq('author_id', id).eq('is_deleted', false),
     sb.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', id),
     sb.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', id),
