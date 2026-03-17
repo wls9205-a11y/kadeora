@@ -79,24 +79,6 @@ export default function FeedClient({ posts, activeCategory }: Props) {
           </div>
         )}
 
-        {/* 글쓰기 유도 카드 */}
-        <div style={{
-          background:'var(--bg-surface)', border:'1px solid var(--border)',
-          borderRadius:8, padding:'12px 16px', marginBottom:12,
-          display:'flex', alignItems:'center', gap:12, cursor:'pointer',
-        }} onClick={() => router.push('/write')}>
-          <div style={{ width:36, height:36, borderRadius:'50%', background:'var(--bg-hover)',
-            display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>✏️</div>
-          <div style={{ flex:1, background:'var(--bg-hover)', borderRadius:20,
-            padding:'8px 16px', color:'var(--text-tertiary)', fontSize:14 }}>
-            오늘 어떤 소문 들으셨나요? 🤫
-          </div>
-          <span style={{ background:'var(--brand)', color:'var(--text-inverse)', border:'none',
-            borderRadius:20, padding:'6px 16px', fontSize:13, fontWeight:700 }}>
-            작성
-          </span>
-        </div>
-
         {/* 안내 배너 */}
         {!tipSeen && (
           <div style={{
