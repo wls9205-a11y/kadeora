@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ShareButtons from '@/components/ShareButtons'
-import PostActions from './PostActions';
+
 import { BookmarkButton } from '@/components/BookmarkButton';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props) {
       .select('title, content, created_at, profiles!posts_author_id_fkey(nickname)')
       .eq('id', numId)
       .eq('is_deleted', false)
-      .single();
+      .maybeSingle();
     if (!post) return {};
     const author = (post.profiles as { nickname?: string } | null)?.nickname ?? '익명';
     const description = post.content.slice(0, 160);
@@ -84,7 +84,7 @@ export default async function FeedDetailPage({ params }: Props) {
       .select('*, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
       .eq('id', numId)
       .eq('is_deleted', false)
-      .single();
+      .maybeSingle();
 
     if (postData) {
       post = postData as PostWithProfile;
@@ -195,7 +195,6 @@ export default async function FeedDetailPage({ params }: Props) {
               {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
           </div>
-          <PostActions postId={post.id} authorId={post.author_id ?? ''} currentUserId={currentUserId} />
         </div>
 
         <h1 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.4 }}>

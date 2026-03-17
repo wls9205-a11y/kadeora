@@ -21,7 +21,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
       setUserId(uid);
       if (uid) {
         const { data: like } = await sb.from('post_likes')
-          .select('id').eq('post_id', postId).eq('user_id', uid).maybeSingle();
+          .select('post_id').eq('post_id', postId).eq('user_id', uid).maybeSingle();
         setLiked(!!like);
       }
     });
