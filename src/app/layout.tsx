@@ -31,6 +31,10 @@ export const metadata: Metadata = {
     images: ['https://kadeora.app/og-image.svg'],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
+  verification: {
+    google: 'ozIZYKHPCsd47yk_paPH5mbsSNSCpc-hzLGgQw0lhyU',
+    other: { 'naver-site-verification': '0d8703ac50ef51c3c2feb0ee48784069936492f5' },
+  },
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: '카더라' },
   category: '금융, 부동산, 커뮤니티',
