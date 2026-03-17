@@ -74,6 +74,9 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>🏠 아파트 청약 정보</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>전국 청약 일정을 한눈에 확인하세요</p>
         <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>📅 청약홈 기준 · 매일 자동 갱신</p>
+        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+          청약 정보: 청약홈(applyhome.co.kr) 공공 데이터 기반 · 정확한 일정은 청약홈에서 반드시 확인하세요
+        </p>
       </div>
 
       {/* 검색 */}

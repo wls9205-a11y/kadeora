@@ -1,3 +1,7 @@
+// Data source: Naver Finance API (finance.naver.com) + Yahoo Finance API (finance.yahoo.com)
+// Naver: Korean domestic stocks (KOSPI/KOSDAQ) - polling + mobile API
+// Yahoo: US stocks (NYSE/NASDAQ) - v7 quote API with previousClose fallback
+// Usage: Personal/non-commercial display only
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';

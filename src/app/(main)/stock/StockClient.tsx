@@ -139,6 +139,11 @@ export default function StockClient({ initialStocks }: Props) {
         ⚠️ 본 서비스의 주식 정보는 투자 참고용이며 투자 권유가 아닙니다. 투자 손실에 대한 책임은 투자자 본인에게 있습니다.
       </div>
 
+      {/* 데이터 출처 */}
+      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+        시세 데이터: Naver Finance / Yahoo Finance API · 20분 지연 · 투자 참고용 제공 · 실제 거래 시 증권사 데이터 확인 필요
+      </p>
+
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>
