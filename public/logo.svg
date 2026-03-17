@@ -1,0 +1,7 @@
+<svg width="280" height="72" viewBox="0 0 280 72" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="72" height="72" rx="18" fill="#FF4500"/>
+  <circle cx="18" cy="36" r="7" fill="white"/>
+  <circle cx="36" cy="36" r="7" fill="white"/>
+  <circle cx="54" cy="36" r="7" fill="white"/>
+  <text x="88" y="50" font-family="Georgia, serif" font-size="38" font-weight="700" fill="white" letter-spacing="-1">카더라</text>
+</svg>

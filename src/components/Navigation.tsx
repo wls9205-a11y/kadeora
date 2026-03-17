@@ -21,23 +21,12 @@ const MOBILE_TABS = [
   { href: '/profile', label: '내정보', icon: '👤' },
 ];
 
-const MonkeyLogo = ({ size = 28 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 64 64" style={{ flexShrink:0, display:'block' }}>
-    <rect width="64" height="64" rx="14" fill="#FF4500"/>
-    <circle cx="11" cy="32" r="8.5" fill="#CC3700"/>
-    <circle cx="53" cy="32" r="8.5" fill="#CC3700"/>
-    <circle cx="11" cy="32" r="5.5" fill="#FF7A50"/>
-    <circle cx="53" cy="32" r="5.5" fill="#FF7A50"/>
-    <ellipse cx="32" cy="29" rx="19" ry="18" fill="#FF4500"/>
-    <ellipse cx="32" cy="32" rx="15" ry="14" fill="#FF7A50"/>
-    <circle cx="25" cy="27" r="6" fill="#fff"/>
-    <circle cx="39" cy="27" r="6" fill="#fff"/>
-    <circle cx="25.5" cy="27.5" r="4" fill="#1A0800"/>
-    <circle cx="39.5" cy="27.5" r="4" fill="#1A0800"/>
-    <circle cx="27" cy="26" r="1.6" fill="#fff"/>
-    <circle cx="41" cy="26" r="1.6" fill="#fff"/>
-    <ellipse cx="32" cy="36" rx="5.5" ry="4" fill="#CC3700"/>
-    <path d="M27 40.5 Q32 44.5 37 40.5" stroke="#CC3700" strokeWidth="2" fill="none" strokeLinecap="round"/>
+const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 72 72" style={{ flexShrink:0, display:'block' }}>
+    <rect width="72" height="72" rx="18" fill="#FF4500"/>
+    <circle cx="18" cy="36" r="7" fill="white"/>
+    <circle cx="36" cy="36" r="7" fill="white"/>
+    <circle cx="54" cy="36" r="7" fill="white"/>
   </svg>
 );
 
@@ -110,12 +99,9 @@ export function Navigation() {
         }}>
           {/* 로고 */}
           <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:7, textDecoration:'none', flexShrink:0, marginRight:4 }}>
-            <MonkeyLogo size={30} />
+            <KadeoraLogo size={30} />
             <span style={{ fontWeight:800, fontSize:17, color:'var(--brand)', letterSpacing:-0.5 }} className="hidden md:inline">
               카더라
-            </span>
-            <span className="hidden lg:inline" style={{ fontSize:11, fontWeight:600, color:'var(--text-tertiary)', background:'var(--bg-hover)', padding:'2px 8px', borderRadius:999, marginLeft:4 }}>
-              소리소문 정보
             </span>
           </Link>
 

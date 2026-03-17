@@ -1,10 +1,11 @@
 ﻿'use client';
 import Image from 'next/image';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import { CATEGORY_MAP } from '@/lib/constants';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -24,6 +25,18 @@ interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeC
 export default function FeedClient({ posts, activeCategory }: Props) {
   const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(20);
+  const [showRegionBanner, setShowRegionBanner] = useState(false);
+
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    sb.auth.getSession().then(async ({ data }) => {
+      if (data.session?.user) {
+        const { data: profile } = await sb.from('profiles')
+          .select('residence_city').eq('id', data.session.user.id).single();
+        if (profile && !profile.residence_city) setShowRegionBanner(true);
+      }
+    });
+  }, []);
   const observerRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
     const io = new IntersectionObserver(
@@ -44,6 +57,21 @@ export default function FeedClient({ posts, activeCategory }: Props) {
     <div className="feed-layout">
       {/* ── 메인 피드 ── */}
       <div className="feed-main">
+        {/* 지역 미설정 배너 */}
+        {showRegionBanner && (
+          <div style={{
+            background:'var(--brand)', color:'var(--text-inverse)',
+            padding:'10px 16px', borderRadius:4, marginBottom:10,
+            display:'flex', alignItems:'center', justifyContent:'space-between',
+            fontSize:13, fontWeight:600,
+          }}>
+            <span>📍 지역을 설정하면 우리동네 소식을 볼 수 있어요!</span>
+            <a href="/onboarding" style={{
+              color:'var(--text-inverse)', textDecoration:'underline', fontWeight:700, marginLeft:8,
+            }}>설정하기</a>
+          </div>
+        )}
+
         {/* 카테고리 바 */}
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
