@@ -266,7 +266,7 @@ export default async function FeedDetailPage({ params }: Props) {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'6px 12px', borderRadius:20, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', fontSize:13 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
           </div>
-          <ShareButtons title={post.title} postId={post.id} />
+          <ShareButtons title={post.title} postId={post.id} content={post.content} />
           <div style={{ display:'flex', justifyContent:'center', padding:'6px 12px' }}>
             <BookmarkButton postId={post.id} />
           </div>

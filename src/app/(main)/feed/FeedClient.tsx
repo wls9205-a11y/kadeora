@@ -321,7 +321,10 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; if (!bookmarkedPosts.has(post.id)) (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
                     {isBookmarked ? '🔖' : '🔖'} {isBookmarked ? '저장됨' : '저장'}
                   </div>
-                  <div style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)', padding: '5px 4px' }}>👁 {numFmt(post.view_count ?? 0)}</div>
+                  <div style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)', padding: '5px 4px', display:'flex', alignItems:'center', gap:4 }}>
+                    👁 {numFmt(post.view_count ?? 0)}
+                    <span style={{ fontSize:10, color:'var(--text-tertiary)', opacity:0.5 }}>kadeora.app</span>
+                  </div>
                 </div>
               </div>
             </Link>

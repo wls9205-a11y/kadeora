@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface LoginFormProps {
@@ -9,6 +9,12 @@ interface LoginFormProps {
 function LoginForm({ redirect }: LoginFormProps) {
   const [loading, setLoading] = useState<'kakao' | 'google' | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const invite = params.get('invite');
+    if (invite) localStorage.setItem('kd_invite_code', invite);
+  }, []);
 
   const login = async (provider: 'kakao' | 'google') => {
     setLoading(provider);

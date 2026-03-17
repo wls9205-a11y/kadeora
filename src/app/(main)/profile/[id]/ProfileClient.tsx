@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
@@ -69,6 +69,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [postsPage, setPostsPage] = useState(1);
   const [commentsPage, setCommentsPage] = useState(1);
   const [regionText, setRegionText] = useState(profile.region_text ?? '');
+  const [inviteCode, setInviteCode] = useState('');
   const { success, error } = useToast();
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -165,6 +166,11 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
     setMyPosts(data ?? []);
     setPostsLoaded(true);
   };
+
+  useEffect(() => {
+    if (!isOwner) return;
+    fetch('/api/invite').then(r => r.ok ? r.json() : null).then(d => { if (d?.code) setInviteCode(d.code); }).catch(() => {});
+  }, [isOwner]);
 
   const loadMyComments = async () => {
     if (commentsLoaded) return;
@@ -319,6 +325,35 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             ));
           })()}
         </div>
+
+        {/* 친구 초대 (본인만) */}
+        {isOwner && inviteCode && (
+          <div style={{ marginTop:16, background:'var(--bg-base)', border:'1px solid var(--border)', borderRadius:12, padding:16 }}>
+            <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)', marginBottom:4 }}>👥 친구 초대</div>
+            <div style={{ fontSize:12, color:'var(--text-secondary)', marginBottom:12 }}>친구가 이 코드로 가입하면 둘 다 +50 포인트!</div>
+            <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:12, fontSize:22, fontWeight:800, letterSpacing:4, color:'var(--brand)', textAlign:'center', marginBottom:12 }}>
+              {inviteCode}
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={() => { navigator.clipboard.writeText(`https://kadeora.app/login?invite=${inviteCode}`); success('초대 링크가 복사됐어요!'); }}
+                style={{ flex:1, padding:'10px 0', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-hover)', color:'var(--text-primary)', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+                🔗 링크복사
+              </button>
+              <button onClick={() => {
+                if (typeof window !== 'undefined' && window.Kakao?.isInitialized?.()) {
+                  window.Kakao.Share.sendDefault({
+                    objectType: 'feed',
+                    content: { title: '카더라에서 동네/주식/부동산 소식 같이 봐요! 🏘', description: `초대코드: ${inviteCode}`, imageUrl: 'https://kadeora.app/og-image.png', link: { mobileWebUrl: `https://kadeora.app/login?invite=${inviteCode}`, webUrl: `https://kadeora.app/login?invite=${inviteCode}` } },
+                    buttons: [{ title: '카더라 가입하기', link: { mobileWebUrl: `https://kadeora.app/login?invite=${inviteCode}`, webUrl: `https://kadeora.app/login?invite=${inviteCode}` } }],
+                  });
+                } else { navigator.clipboard.writeText(`https://kadeora.app/login?invite=${inviteCode}`); success('초대 링크가 복사됐어요!'); }
+              }}
+                style={{ flex:1, padding:'10px 0', borderRadius:8, border:'none', background:'#FEE500', color:'#000', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+                💬 카카오톡 공유
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 활동 내역 탭 (본인만) */}
         {isOwner && (

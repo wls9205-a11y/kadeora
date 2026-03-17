@@ -219,6 +219,7 @@ export function Navigation() {
                         { href:`/profile/${user.id}`, label:'👤 내 프로필' },
                         { href:'/write',              label:'✏️ 글쓰기' },
                         { href:'/notifications',      label:`🔔 알림${unread>0?` (${unread})`:''}` },
+                        { href:'/hot',                label:'🔥 이번주 HOT' },
                         { href:'/guide',              label:'📖 가이드북' },
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
