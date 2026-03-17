@@ -50,12 +50,23 @@ export async function POST(request: NextRequest) {
     const tossData = await tossRes.json();
     if (!tossRes.ok) return NextResponse.json({ success: false, error: tossData.message || '결제 승인 실패', code: tossData.code }, { status: tossRes.status });
     try {
-      await supabaseAuth.from('shop_orders').insert({
+      const { error: insertError } = await supabaseAuth.from('shop_orders').insert({
         user_id: userId, order_id: orderId, payment_key: paymentKey,
-        amount: amount, status: tossData.status, product_id: body.productId || null,
+        amount: amount, status: tossData.status, product_id: productId || null,
         approved_at: tossData.approvedAt, method: tossData.method, raw_response: tossData,
       });
-    } catch { console.warn('[payment] shop_orders insert skipped'); }
+      if (insertError) throw insertError;
+    } catch (dbErr) {
+      // DB 저장 실패 시 토스 결제 취소
+      try {
+        await fetch(`https://api.tosspayments.com/v1/payments/${paymentKey}/cancel`, {
+          method: 'POST',
+          headers: { Authorization: `Basic ${encryptedKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cancelReason: '서버 오류로 인한 자동 취소' }),
+        });
+      } catch {}
+      return NextResponse.json({ success: false, error: '결제 처리 중 오류가 발생했습니다. 결제가 자동 취소됩니다.' }, { status: 500 });
+    }
 
     // 결제 성공 후 상품별 후처리
     if (productId && userId) {

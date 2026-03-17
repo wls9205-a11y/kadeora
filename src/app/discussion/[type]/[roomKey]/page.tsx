@@ -118,6 +118,16 @@ export default function DiscussionRoomPage() {
         )}
       </header>
 
+      {roomType === 'stock' && (
+        <div style={{
+          background:'var(--warning-bg)', border:'1px solid var(--warning)',
+          borderRadius:6, padding:'6px 12px', margin:'0 16px 8px',
+          fontSize:11, color:'var(--text-secondary)', lineHeight:1.4,
+        }}>
+          ⚠️ 투자 참고용 정보입니다. 투자 손실 책임은 본인에게 있습니다.
+        </div>
+      )}
+
       {/* 메시지 목록 */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
         {isLoading?(

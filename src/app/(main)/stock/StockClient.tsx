@@ -124,6 +124,15 @@ export default function StockClient({ initialStocks }: Props) {
 
   return (
     <div>
+      {/* 투자 면책 고지 */}
+      <div style={{
+        background:'var(--warning-bg)', border:'1px solid var(--warning)',
+        borderRadius:6, padding:'8px 14px', marginBottom:12,
+        fontSize:12, color:'var(--text-secondary)', lineHeight:1.5,
+      }}>
+        ⚠️ 본 서비스의 주식 정보는 투자 참고용이며 투자 권유가 아닙니다. 투자 손실에 대한 책임은 투자자 본인에게 있습니다.
+      </div>
+
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>
