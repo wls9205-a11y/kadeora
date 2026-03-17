@@ -55,8 +55,8 @@ export default function FeedClient({ posts, activeCategory }: Props) {
         setCurrentUserId(userId);
 
         const { data: profile } = await sb.from('profiles')
-          .select('residence_city').eq('id', userId).single();
-        if (profile && !profile.residence_city) setShowRegionBanner(true);
+          .select('region_text').eq('id', userId).single();
+        if (profile && !profile.region_text) setShowRegionBanner(true);
 
         // Load user's liked posts
         const { data: likes } = await sb.from('post_likes')

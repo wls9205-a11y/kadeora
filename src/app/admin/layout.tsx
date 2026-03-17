@@ -14,9 +14,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
-      {/* Desktop Sidebar */}
-      <aside className="hidden sm:flex" style={{
+    <div className="flex flex-col md:flex-row" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
+      {/* Desktop Sidebar - hidden on mobile, visible on md+ */}
+      <aside className="hidden md:flex" style={{
         width: 200, flexShrink: 0, flexDirection: 'column',
         background: 'var(--bg-surface)', borderRight: '1px solid var(--border)',
         position: 'sticky', top: 0, height: '100vh', overflowY: 'auto',
@@ -39,12 +39,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
         <div style={{ marginTop: 'auto', padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
-          <Link href="/feed" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 서비스로 돌아가기</Link>
+          <Link href="/feed" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
+            ← 서비스로 돌아가기
+          </Link>
         </div>
       </aside>
 
-      {/* Mobile Top Tabs */}
-      <div className="sm:hidden" style={{
+      {/* Mobile Top Tabs - visible on mobile, hidden on md+ */}
+      <div className="md:hidden" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)',
         display: 'flex', overflowX: 'auto', padding: '8px 8px', gap: 4,
@@ -55,15 +57,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link key={m.href} href={m.href} style={{
               padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
               textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-              background: active ? 'var(--brand)' : 'var(--bg-hover)',
-              color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
+              background: active ? 'var(--bg-hover)' : 'transparent',
+              color: active ? 'var(--brand)' : 'var(--text-secondary)',
             }}>{m.label}</Link>
           );
         })}
       </div>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: 24, maxWidth: 1100 }} className="sm:pt-0 pt-14">
+      <main className="pt-14 md:pt-0" style={{ flex: 1, padding: 24, maxWidth: 1100 }}>
         {children}
       </main>
     </div>

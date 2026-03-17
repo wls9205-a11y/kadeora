@@ -2,6 +2,10 @@
 export default function MainLoading() {
   return (
     <div style={{ paddingBottom: 80 }}>
+      <div style={{textAlign:'center', padding:'60px 20px'}}>
+        <div style={{fontSize:48, marginBottom:16}}>📡</div>
+        <p style={{color:'var(--text-secondary)', fontSize:14}}>잠시만요...</p>
+      </div>
       <div style={{ height: 16, width: 100, borderRadius: 4, background: "var(--bg-surface)", marginBottom: 16 }} />
       <div style={{ height: 72, borderRadius: 14, background: "var(--bg-surface)", marginBottom: 18, animation: "pulse 2s infinite" }} />
       <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>

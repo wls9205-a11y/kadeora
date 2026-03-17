@@ -142,29 +142,16 @@ export default function StockClient({ initialStocks }: Props) {
     return '₩' + s.price.toLocaleString('ko-KR');
   }
 
+  const MARKET_LABEL: Record<string, string> = { ALL: '전체', KOSPI: '코스피', KOSDAQ: '코스닥', NYSE: '뉴욕', NASDAQ: '나스닥' };
+
   return (
     <div>
-      {/* 투자 면책 고지 */}
-      <div style={{
-        background:'var(--warning-bg)', border:'1px solid var(--warning)',
-        borderRadius:6, padding:'8px 14px', marginBottom:12,
-        fontSize:12, color:'var(--text-secondary)', lineHeight:1.5,
-      }}>
-        ⚠️ 본 서비스의 주식 정보는 투자 참고용이며 투자 권유가 아닙니다. 투자 손실에 대한 책임은 투자자 본인에게 있습니다.
-      </div>
-
-      {/* 데이터 출처 */}
-      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>
-        시세 데이터: Naver Finance / Yahoo Finance API · 20분 지연 · 투자 참고용 제공 · 실제 거래 시 증권사 데이터 확인 필요
-      </p>
-
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>📈 실시간 주식시세</h1>
           <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>
             국내·해외 주요 종목
-            <span style={{ marginLeft: 8, color: 'var(--text-secondary)' }}>· {lastUpdated ? `마지막 업데이트: ${lastUpdated}` : '장 마감 기준'}</span>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -212,12 +199,9 @@ export default function StockClient({ initialStocks }: Props) {
               background: market === m ? 'var(--brand)' : 'transparent',
               color: market === m ? 'var(--text-inverse, #fff)' : 'var(--text-tertiary)',
             }}>
-              {m === 'ALL' ? '전체' : m}
+              {MARKET_LABEL[m]}
             </button>
           ))}
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 4 }}>
-            {getMarketStatus(market === 'ALL' ? 'KOSPI' : market)}
-          </span>
         </div>
         <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 4px' }} />
         {/* 정렬 */}
@@ -248,6 +232,11 @@ export default function StockClient({ initialStocks }: Props) {
             color: 'var(--text-primary)', width: 220, minWidth: 220,
           }}
         />
+      </div>
+
+      {/* 시장 상태 */}
+      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8, textAlign: 'right' }}>
+        {getMarketStatus(market === 'ALL' ? 'KOSPI' : market)} · {lastUpdated ? `마지막 업데이트: ${lastUpdated}` : '장 마감 기준'}
       </div>
 
       {/* 종목 테이블 헤더 */}
@@ -366,6 +355,20 @@ export default function StockClient({ initialStocks }: Props) {
       <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>
         * 국내 주가는 KIS/Yahoo Finance 기준 · 해외 주가는 Yahoo Finance 기준 · 환율: 1 USD = ₩{exchangeRate.toLocaleString()}
       </div>
+
+      {/* 투자 면책 고지 */}
+      <div style={{
+        background:'var(--warning-bg)', border:'1px solid var(--warning)',
+        borderRadius:6, padding:'8px 14px', marginTop:12,
+        fontSize:12, color:'var(--text-secondary)', lineHeight:1.5,
+      }}>
+        ⚠️ 본 서비스의 주식 정보는 투자 참고용이며 투자 권유가 아닙니다. 투자 손실에 대한 책임은 투자자 본인에게 있습니다.
+      </div>
+
+      {/* 데이터 출처 */}
+      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8 }}>
+        시세 데이터: Naver Finance / Yahoo Finance API · 20분 지연 · 투자 참고용 제공 · 실제 거래 시 증권사 데이터 확인 필요
+      </p>
 
       {selectedStock && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
