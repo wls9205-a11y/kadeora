@@ -21,6 +21,10 @@ const ROOM_META: Record<string, { bg: string; emoji: string; desc: string }> = {
   free: { bg: 'var(--brand-light)', emoji: '💬', desc: '자유 주제 소문 공유' },
 };
 
+const ROOM_KEY_EMOJI: Record<string, string> = {
+  general_us_stock: '🌍',
+};
+
 export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
   const [active, setActive] = useState<DiscussionRoom | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -39,9 +43,10 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
         <p style={{ margin: '4px 0 0', fontSize: 14, color: 'var(--text-secondary)' }}>소문을 나누고 함께 분석해요</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
         {rooms.map(room => {
           const meta = ROOM_META[room.room_type] ?? { bg: 'var(--bg-hover)', emoji: '💬', desc: '' };
+          const emoji = (room.room_key && ROOM_KEY_EMOJI[room.room_key]) ? ROOM_KEY_EMOJI[room.room_key] : meta.emoji;
           return (
             <div key={room.id} onClick={() => setActive(room)} role="button" tabIndex={0}
               onKeyDown={e => e.key === 'Enter' && setActive(room)}
@@ -55,12 +60,12 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
             >
-              <div style={{ fontSize: 48 }}>{meta.emoji}</div>
+              <div style={{ fontSize: 48 }}>{emoji}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>
                   {room.display_name}
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                   {room.description ?? meta.desc}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6 }}>

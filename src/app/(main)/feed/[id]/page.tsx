@@ -11,7 +11,9 @@ import ShareButtons from '@/components/ShareButtons'
 import { BookmarkButton } from '@/components/BookmarkButton';
 import ReportButton from '@/components/ReportButton';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+
+const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -30,7 +32,7 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const numId = Number(id);
-  const SITE_URL_META = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
+  const SITE_URL_META = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
   try {
     const sb = await createSupabaseServer();
     const { data: post } = await sb
@@ -53,7 +55,10 @@ export async function generateMetadata({ params }: Props) {
         publishedTime: post.created_at,
         authors: [author],
         url: `${SITE_URL_META}/feed/${numId}`,
-        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+        images: [
+          { url: ogImageUrl, width: 1200, height: 630, alt: post.title },
+          { url: `${SITE_URL_META}/og-image.png`, width: 1200, height: 628, alt: '카더라' },
+        ],
       },
       twitter: {
         card: 'summary_large_image',
@@ -63,7 +68,11 @@ export async function generateMetadata({ params }: Props) {
       },
     };
   } catch {
-    return {};
+    return {
+      openGraph: {
+        images: [{ url: `${SITE_URL_META}/og-image.png`, width: 1200, height: 628, alt: '카더라' }],
+      },
+    };
   }
 }
 
@@ -184,7 +193,7 @@ export default async function FeedDetailPage({ params }: Props) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>
-                {post.profiles?.nickname ?? '익명'}
+                {GRADE_EMOJI[post.profiles?.grade as number] || '🌱'} {post.profiles?.nickname ?? '익명'}
               </span>
               {post.profiles?.grade && (
                 <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>

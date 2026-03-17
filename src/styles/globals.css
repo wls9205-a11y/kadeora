@@ -238,25 +238,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--k
 .kd-btn-icon { width: var(--btn-h-md); padding: 0; border-radius: 50%; }
 .kd-btn-icon.kd-btn-sm { width: var(--btn-h-sm); }
 
-/* ── 피드 레이아웃 ── */
-.feed-layout {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-}
-.feed-main    { flex: 1; min-width: 0; }
-.feed-sidebar {
-  width: 312px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 68px;
-  max-height: calc(100vh - 80px);
-  overflow-y: auto;
-}
-.feed-sidebar::-webkit-scrollbar { display: none; }
-
-@media (max-width: 1023px) { .feed-sidebar { display: none; } }
-@media (max-width: 767px)  { .feed-layout  { gap: 0; } }
+/* ── 피드 레이아웃 (removed sidebar, now single-column) ── */
 
 /* ── 반응형 헬퍼 ── */
 @media (max-width: 767px)  { .hidden-mobile  { display: none !important; } }

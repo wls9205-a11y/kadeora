@@ -2,7 +2,10 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
-export const metadata = { title: '관리자 대시보드 | 카더라' };
+export const metadata = {
+  title: '관리자 대시보드 | 카더라',
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminDashboard() {
   const supabase = await createSupabaseServer();

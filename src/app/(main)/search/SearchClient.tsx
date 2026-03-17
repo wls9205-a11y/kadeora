@@ -48,6 +48,30 @@ function highlight(text: string, query: string): React.ReactNode {
   );
 }
 
+const POPULAR = ['삼성전자', '엔비디아', '둔촌주공', 'SK하이닉스', '청약가점', '코스피', '아파트', '테슬라'];
+const LS_KEY = 'kd_recent_searches';
+
+function getRecentSearches(): string[] {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.slice(0, 5) : [];
+  } catch { return []; }
+}
+
+function saveRecentSearch(q: string) {
+  try {
+    const prev = getRecentSearches();
+    const deduped = [q, ...prev.filter(s => s !== q)].slice(0, 5);
+    localStorage.setItem(LS_KEY, JSON.stringify(deduped));
+  } catch {}
+}
+
+function clearRecentSearches() {
+  try { localStorage.removeItem(LS_KEY); } catch {}
+}
+
 export default function SearchClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -55,6 +79,7 @@ export default function SearchClient() {
 
   const [query, setQuery] = useState(initialQ);
   const [inputVal, setInputVal] = useState(initialQ);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [results, setResults] = useState<PostWithProfile[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -73,6 +98,10 @@ export default function SearchClient() {
   const acDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setRecentSearches(getRecentSearches());
+  }, []);
 
   const doSearch = useCallback(async (q: string, cat: string, offset: number, append = false) => {
     if (q.length < 2) { setResults([]); setTotal(0); return; }
@@ -152,7 +181,11 @@ export default function SearchClient() {
       setResults([]);
       doSearch(inputVal, category, 0);
       setQuery(inputVal);
-      if (inputVal) router.replace(`/search?q=${encodeURIComponent(inputVal)}`, { scroll: false });
+      if (inputVal && inputVal.length >= 2) {
+        saveRecentSearch(inputVal);
+        setRecentSearches(getRecentSearches());
+        router.replace(`/search?q=${encodeURIComponent(inputVal)}`, { scroll: false });
+      }
     }, 400);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [inputVal, category, doSearch, router]);
@@ -396,12 +429,57 @@ export default function SearchClient() {
         </div>
       )}
 
-      {/* Empty state */}
+      {/* Empty state with recent & popular searches */}
       {query.length < 2 && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>검색어를 입력해주세요</div>
-          <div style={{ fontSize: 13 }}>주식, 청약, 재테크 관련 글을 검색할 수 있습니다</div>
+        <div style={{ padding: '24px 0' }}>
+          {/* Recent searches */}
+          {recentSearches.length > 0 && (
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>최근 검색어</span>
+                <button
+                  onClick={() => { clearRecentSearches(); setRecentSearches([]); }}
+                  style={{ background: 'none', border: 'none', fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer' }}
+                >전체 삭제</button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {recentSearches.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => { setInputVal(s); handleInputChange(s); }}
+                    style={{
+                      padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      background: 'var(--bg-surface)', color: 'var(--text-secondary)',
+                      border: '1px solid var(--border)', transition: 'all 0.15s',
+                    }}
+                  >{s}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Popular searches */}
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>인기 검색어</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {POPULAR.map((s, i) => (
+                <button
+                  key={s}
+                  onClick={() => { setInputVal(s); handleInputChange(s); }}
+                  style={{
+                    padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    background: 'var(--bg-surface)', color: 'var(--text-secondary)',
+                    border: '1px solid var(--border)', transition: 'all 0.15s',
+                  }}
+                ><span style={{ color: 'var(--brand)', fontWeight: 700, marginRight: 4 }}>{i + 1}.</span>{s}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Hint */}
+          <div style={{ textAlign: 'center', padding: '32px 0 0', color: 'var(--text-tertiary)', fontSize: 13 }}>
+            주식, 청약, 재테크 관련 글을 검색할 수 있습니다
+          </div>
         </div>
       )}
     </div>

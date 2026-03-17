@@ -1,7 +1,10 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 
-export const metadata = { title: '결제 내역 | 카더라 어드민' };
+export const metadata = {
+  title: '결제 내역 | 카더라 어드민',
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminPaymentsPage() {
   const supabase = await createSupabaseServer();

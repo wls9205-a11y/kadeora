@@ -223,12 +223,12 @@ export default function StockClient({ initialStocks }: Props) {
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="종목명 · 코드 검색"
+          placeholder="종목명 또는 코드 검색"
           style={{
             marginLeft: 'auto', padding: '6px 12px', fontSize: 13,
             background: 'var(--bg-hover)',
             border: '1px solid var(--border)', borderRadius: 4,
-            color: 'var(--text-primary)', width: 180,
+            color: 'var(--text-primary)', width: 220, minWidth: 220,
           }}
         />
       </div>
@@ -287,8 +287,8 @@ export default function StockClient({ initialStocks }: Props) {
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
           >
             <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 700 }}>{i + 1}</span>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
+            <div style={{ minWidth: 100 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
                 <span style={{
                   background: badgeStyle.bg,
@@ -299,6 +299,7 @@ export default function StockClient({ initialStocks }: Props) {
             </div>
             <span style={{
               textAlign: 'right', fontSize: 14, fontWeight: 700,
+              fontVariantNumeric: 'tabular-nums',
               color: isUp(s) ? 'var(--stock-up)' : isDown(s) ? 'var(--stock-down)' : 'var(--text-primary)',
             }}>
               {fmtPrice(s)}
@@ -306,11 +307,12 @@ export default function StockClient({ initialStocks }: Props) {
             <div style={{ textAlign: 'right' }}>
               <div style={{
                 fontSize: 13, fontWeight: 700,
+                fontVariantNumeric: 'tabular-nums',
                 color: isUp(s) ? 'var(--stock-up)' : isDown(s) ? 'var(--stock-down)' : 'var(--text-tertiary)',
               }}>
                 {(s.change_pct ?? 0) === 0 ? '–' : <>{isUp(s) ? '▲' : '▼'} {Math.abs(s.change_pct).toFixed(2)}%</>}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
                 {isUp(s) ? '+' : ''}{fmt(s.change_amt)}
               </div>
             </div>

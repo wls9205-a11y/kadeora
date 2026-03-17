@@ -168,7 +168,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                 <Image src={avatarUrl} alt={`${displayName} 프로필 사진`} fill sizes="72px" style={{ objectFit: 'cover' }} />
               </div>
             ) : (
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, var(--brand), var(--info))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, border: '2px solid var(--border)' }}>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
                 {GRADE_EMOJIS[profile.grade ?? 1] ?? '🌱'}
               </div>
             )}
@@ -255,7 +255,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 1, marginTop: 16, background: 'var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 1, marginTop: 16, background: 'var(--border)', borderRadius: 12, overflow: 'hidden' }}>
           {[
             { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
             { label: '댓글', value: commentCount, icon: '💬' },

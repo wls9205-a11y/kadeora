@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: '주식 시세, 아파트 청약, 우리동네 소식을 가장 빠르게. 소리소문 정보 커뮤니티.',
     url: 'https://kadeora.app',
     siteName: '카더라',
-    images: [{ url: 'https://kadeora.app/og-image.svg', width: 1200, height: 628, alt: '카더라 — 소리소문 정보 커뮤니티' }],
+    images: [{ url: 'https://kadeora.app/og-image.png', width: 1200, height: 628, alt: '카더라 — 소리소문 정보 커뮤니티' }],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '카더라 — 아는 사람만 아는 그 정보',
     description: '주식 시세, 아파트 청약, 우리동네 소식을 가장 빠르게.',
-    images: ['https://kadeora.app/og-image.svg'],
+    images: ['https://kadeora.app/og-image.png'],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   verification: {

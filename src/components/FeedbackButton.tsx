@@ -21,7 +21,7 @@ export default function FeedbackButton() {
       aria-label="글쓰기"
       style={{
         position: 'fixed',
-        bottom: 24,
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
         right: 24,
         zIndex: 999,
         width: 56,
