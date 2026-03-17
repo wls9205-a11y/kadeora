@@ -12,7 +12,9 @@ interface Stock {
   volume: number;
   market_cap: number;
   updated_at: string;
-  currency?: string; // 'KRW' | 'USD'
+  currency?: string;
+  sector?: string;
+  description?: string;
 }
 
 interface Props {
@@ -24,11 +26,16 @@ function fmt(n: number) {
   return n.toLocaleString('ko-KR');
 }
 
-function fmtCap(n: number) {
+function fmtCap(n: number, currency?: string) {
   if (!n) return '-';
-  if (n >= 1e12) return (n / 1e12).toFixed(1) + '조';
-  if (n >= 1e8) return (n / 1e8).toFixed(0) + '억';
-  return fmt(n);
+  if (currency === 'USD') {
+    if (n >= 1e12) return `$${(n/1e12).toFixed(2)}T`;
+    if (n >= 1e9) return `$${(n/1e9).toFixed(1)}B`;
+    return `$${(n/1e6).toFixed(0)}M`;
+  }
+  if (n >= 1e12) return `${(n/1e12).toFixed(1)}조`;
+  if (n >= 1e8) return `${(n/1e8).toFixed(0)}억`;
+  return n.toLocaleString();
 }
 
 function timeDiff(iso: string) {
@@ -58,6 +65,7 @@ export default function StockClient({ initialStocks }: Props) {
   const [lastUpdated, setLastUpdated] = useState('');
   const [showKRW, setShowKRW] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(1380);
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('kd_currency');
@@ -213,7 +221,7 @@ export default function StockClient({ initialStocks }: Props) {
       }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '40px 1fr 100px 100px 70px',
+          gridTemplateColumns: '40px 1fr 100px 100px 80px 70px',
           padding: '10px 14px',
           borderBottom: '1px solid var(--border)',
           fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
@@ -233,6 +241,7 @@ export default function StockClient({ initialStocks }: Props) {
           }}>
             등락 {sort === 'change' ? (sortDir === 'desc' ? '▼' : '▲') : ''}
           </span>
+          <span style={{ textAlign: 'right' }}>시총</span>
           <span style={{ textAlign: 'center' }}>토론</span>
         </div>
 
@@ -241,13 +250,14 @@ export default function StockClient({ initialStocks }: Props) {
           return (
           <div key={s.symbol} style={{
             display: 'grid',
-            gridTemplateColumns: '40px 1fr 100px 100px 70px',
+            gridTemplateColumns: '40px 1fr 100px 100px 80px 70px',
             padding: '10px 14px',
             borderBottom: '1px solid var(--border)',
             alignItems: 'center',
             transition: 'background 0.1s',
             cursor: 'pointer',
           }}
+            onClick={() => setSelectedStock(s)}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--border)'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
           >
@@ -279,6 +289,9 @@ export default function StockClient({ initialStocks }: Props) {
                 {isUp(s) ? '+' : ''}{fmt(s.change_amt)}
               </div>
             </div>
+            <span style={{ textAlign: 'right', fontSize: 12, color: 'var(--text-tertiary)' }}>
+              {fmtCap(s.market_cap, s.currency)}
+            </span>
             <span style={{ textAlign: 'center' }}>
               <Link
                 href={`/discussion/stock/${s.symbol}`}
@@ -309,6 +322,47 @@ export default function StockClient({ initialStocks }: Props) {
       <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>
         * 국내 주가는 KIS/Yahoo Finance 기준 · 해외 주가는 Yahoo Finance 기준 · 환율: 1 USD = ₩{exchangeRate.toLocaleString()}
       </div>
+
+      {selectedStock && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+          onClick={() => setSelectedStock(null)}>
+          <div style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:12, padding:24, maxWidth:480, width:'100%' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:16 }}>
+              <div>
+                <h2 style={{ margin:0, fontSize:20, fontWeight:800, color:'var(--text-primary)' }}>{selectedStock.name}</h2>
+                <span style={{ fontSize:13, color:'var(--text-tertiary)' }}>{selectedStock.symbol} · {selectedStock.market}</span>
+              </div>
+              <button onClick={() => setSelectedStock(null)} aria-label="닫기" style={{ background:'none', border:'none', fontSize:20, cursor:'pointer', color:'var(--text-secondary)' }}>✕</button>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
+              <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:12 }}>
+                <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>현재가</div>
+                <div style={{ fontSize:18, fontWeight:800, color:'var(--text-primary)' }}>{fmtPrice(selectedStock)}</div>
+              </div>
+              <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:12 }}>
+                <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>등락률</div>
+                <div style={{ fontSize:18, fontWeight:800, color: (selectedStock.change_pct ?? 0) >= 0 ? 'var(--stock-up)' : 'var(--stock-down)' }}>
+                  {(selectedStock.change_pct ?? 0) >= 0 ? '▲' : '▼'} {Math.abs(selectedStock.change_pct ?? 0).toFixed(2)}%
+                </div>
+              </div>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
+              <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:12 }}>
+                <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>시가총액</div>
+                <div style={{ fontSize:16, fontWeight:700, color:'var(--text-primary)' }}>{fmtCap(selectedStock.market_cap, selectedStock.currency)}</div>
+              </div>
+              <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:12 }}>
+                <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>거래량</div>
+                <div style={{ fontSize:16, fontWeight:700, color:'var(--text-primary)' }}>{(selectedStock.volume ?? 0).toLocaleString()}</div>
+              </div>
+            </div>
+            <a href={`/discussion/stock/${selectedStock.symbol}`} style={{ display:'block', textAlign:'center', background:'var(--brand)', color:'var(--text-inverse)', padding:12, borderRadius:8, textDecoration:'none', fontWeight:700, fontSize:14 }}>
+              💬 종목 토론방 입장
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -57,18 +57,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" className="dark" suppressHydrationWarning>
       <head>
-        {/* 다크모드 플리커 방지 — hydration 전에 즉시 실행 */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){
-  try{
-    var s=localStorage.getItem('kadeora-theme');
-    var d=window.matchMedia('(prefers-color-scheme:dark)').matches;
-    var t=s||(d?'dark':'light');
-    if(t==='dark'){document.documentElement.classList.add('dark');}
-    else{document.documentElement.classList.remove('dark');}
-  }catch(e){}
-})();` }} />
+        {/* 다크모드 강제 적용 */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.classList.add('dark');})();` }} />
         {/* JSON-LD 구조화 데이터 */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',

@@ -241,7 +241,24 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                   className="px-4 pb-4 border-t"
                   style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-sunken)' }}
                 >
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-3 text-xs">
+                  {/* 요약 카드 */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, paddingTop: 12, marginBottom: 12 }}>
+                    <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>공급세대</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand)' }}>
+                        {(apt.tot_supply_hshld_co ?? 0).toLocaleString()}세대
+                      </div>
+                    </div>
+                    <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>청약기간</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {apt.rcept_bgnde} ~ {apt.rcept_endde}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 상세 일정 */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     {apt.spsply_rcept_bgnde && (
                       <><dt style={{ color: 'var(--text-tertiary)' }}>특별공급</dt>
                       <dd style={{ color: 'var(--text-primary)' }}>{apt.spsply_rcept_bgnde} ~ {apt.spsply_rcept_endde}</dd></>
@@ -262,6 +279,34 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
                       <><dt style={{ color: 'var(--text-tertiary)' }}>공급지역</dt>
                       <dd style={{ color: 'var(--text-primary)' }}>{apt.mdatrgbn_nm}</dd></>
                     )}
+                  </div>
+
+                  {/* 바로가기 버튼 */}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                    {apt.pblanc_url && (
+                      <a
+                        href={apt.pblanc_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1, textAlign: 'center', padding: 12, borderRadius: 8,
+                          background: 'var(--info)', color: 'var(--text-inverse)',
+                          textDecoration: 'none', fontWeight: 700, fontSize: 14,
+                        }}
+                      >
+                        🏠 청약홈 바로가기
+                      </a>
+                    )}
+                    <Link
+                      href={`/discussion/apt/${apt.id}`}
+                      style={{
+                        flex: 1, textAlign: 'center', padding: 12, borderRadius: 8,
+                        background: 'var(--brand)', color: 'var(--text-inverse)',
+                        textDecoration: 'none', fontWeight: 700, fontSize: 14,
+                      }}
+                    >
+                      💬 현장 토론방
+                    </Link>
                   </div>
                 </div>
               )}

@@ -11,7 +11,7 @@ interface LikeButtonProps {
 
 export function LikeButton({ postId, initialCount, initialLiked = false }: LikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
-  const [count, setCount] = useState(initialCount);
+  const [count, setCount] = useState(Number(initialCount) || 0);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const { error, info } = useToast();
@@ -43,21 +43,21 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
     const prevLiked = liked;
     const prevCount = count;
 
+    // 낙관적 업데이트
     setLiked(!liked);
-    setCount(c => liked ? c - 1 : c + 1);
+    setCount(c => liked ? Math.max(0, (c ?? 0) - 1) : (c ?? 0) + 1);
 
     try {
       if (!liked) {
         const { error: err } = await sb.from('post_likes').insert({ post_id: postId, user_id: userId });
         if (err) throw err;
-        await sb.from('posts').update({ likes_count: count + 1 }).eq('id', postId);
       } else {
         const { error: err } = await sb.from('post_likes')
           .delete().eq('post_id', postId).eq('user_id', userId);
         if (err) throw err;
-        await sb.from('posts').update({ likes_count: Math.max(0, count - 1) }).eq('id', postId);
       }
     } catch {
+      // 실패 시 롤백
       setLiked(prevLiked);
       setCount(prevCount);
       error('오류가 발생했습니다');
@@ -92,7 +92,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
       }}>
         {liked ? '❤️' : '🤍'}
       </span>
-      <span>{count.toLocaleString()}</span>
+      <span>{(count ?? 0).toLocaleString()}</span>
     </button>
   );
 }

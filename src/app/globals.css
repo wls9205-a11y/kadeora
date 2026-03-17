@@ -8,87 +8,46 @@
    핵심: 배경-카드-인풋 3단계 명도차 + 경계선 + 그림자
    ======================================== */
 
-/* Light Mode — 배경(중간회색) → 카드(순백) → 인풋(살짝회색) */
+/* Dark Mode Only — 다크모드 전용 */
 :root {
-  --bg-base:       #DAE0E6;
-  --bg-surface:    #FFFFFF;
-  --bg-elevated:   #FFFFFF;
-  --bg-sunken:     #F6F7F8;
-  --bg-hover:      #F6F7F8;
-  --bg-active:     #EDEFF1;
-  --border:        #EDEFF1;
-  --border-strong: #CACCCD;
-  --border-focus:  #FF4500;
-  --text-primary:   #1C1C1C;
-  --text-secondary: #878A8C;
-  --text-tertiary:  #9B9FA3;
-  --text-disabled:  #C7CACC;
-  --text-inverse:   #FFFFFF;
-  --text-link:      #0079D3;
-  --brand:          #FF4500;
-  --brand-hover:    #E03D00;
-  --brand-light:    #FFF4F2;
-  --brand-dark:     #CC3300;
-  --success:        #46D160;
-  --success-bg:     #E8FAF0;
-  --warning:        #FFB000;
-  --warning-bg:     #FFF8E6;
-  --error:          #FF585B;
-  --error-bg:       #FFF0F0;
-  --info:           #0079D3;
-  --info-bg:        #E8F0FE;
-  --font-base:      15px;
-  --stock-up:       #FF4500;
-  --stock-down:     #0079D3;
-  --stock-flat:     #878A8C;
-  --nav-bg:         #FFFFFF;
-  --nav-border:     #EDEFF1;
-  --nav-text:       #1C1C1C;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-  --shadow-xl: 0 16px 40px rgba(0,0,0,0.14);
-}
-
-/* Dark Mode — 배경(거의검정) → 카드(진회색) → 인풋(더어두움) */
-.dark {
-  --bg-base:       #1A1A1B;
-  --bg-surface:    #272729;
-  --bg-elevated:   #3C3C3C;
-  --bg-sunken:     #111112;
-  --bg-hover:      #2D2D2E;
-  --bg-active:     #3C3C3C;
-  --border:        #343536;
-  --border-strong: #818384;
+  --bg-base:       #0d1117;
+  --bg-surface:    #161b22;
+  --bg-elevated:   #21262d;
+  --bg-sunken:     #010409;
+  --bg-hover:      #21262d;
+  --bg-active:     #30363d;
+  --border:        #30363d;
+  --border-strong: #484f58;
   --border-focus:  #FF6314;
-  --text-primary:   #D7DADC;
-  --text-secondary: #818384;
-  --text-tertiary:  #6B6D6F;
-  --text-disabled:  #474748;
-  --text-inverse:   #1A1A1B;
-  --text-link:      #4FBDFF;
-  --brand:          #FF6314;
-  --brand-hover:    #FF7A38;
-  --brand-light:    #2D1A0A;
-  --brand-dark:     #FF4500;
-  --success:        #46D160;
-  --success-bg:     #0A1F10;
-  --warning:        #FFB000;
-  --warning-bg:     #1A1200;
-  --error:          #FF585B;
-  --error-bg:       #1A0A0A;
-  --info:           #4FBDFF;
-  --info-bg:        #071525;
-  --stock-up:       #FF6314;
-  --stock-down:     #4FBDFF;
-  --stock-flat:     #818384;
-  --nav-bg:         #1A1A1B;
-  --nav-border:     #343536;
-  --nav-text:       #D7DADC;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
-  --shadow-xl: 0 16px 40px rgba(0,0,0,0.8);
+  --text-primary:   #e6edf3;
+  --text-secondary: #8b949e;
+  --text-tertiary:  #6e7681;
+  --text-disabled:  #484f58;
+  --text-inverse:   #0d1117;
+  --text-link:      #58a6ff;
+  --brand:          #FF4500;
+  --brand-hover:    #FF6314;
+  --brand-light:    #2d1a0a;
+  --brand-dark:     #CC3300;
+  --success:        #3fb950;
+  --success-bg:     #0d2119;
+  --warning:        #d29922;
+  --warning-bg:     #2b1f0a;
+  --error:          #f85149;
+  --error-bg:       #2d0a0a;
+  --info:           #58a6ff;
+  --info-bg:        #0c1c32;
+  --font-base:      15px;
+  --stock-up:       #f85149;
+  --stock-down:     #58a6ff;
+  --stock-flat:     #8b949e;
+  --nav-bg:         #161b22;
+  --nav-border:     #30363d;
+  --nav-text:       #e6edf3;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.6);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,0.7);
 }
 
 /* ========================================

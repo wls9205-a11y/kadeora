@@ -235,7 +235,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {/* Actions */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LikeButton postId={post.id} initialCount={post.likes_count} />
+          <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
           <BookmarkButton postId={post.id} />
           <ShareButtons title={post.title} postId={post.id} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 14 }}>
