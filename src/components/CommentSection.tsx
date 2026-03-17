@@ -5,6 +5,7 @@ import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import type { CommentWithProfile } from '@/types/database';
 import type { User } from '@supabase/supabase-js';
+import ReportButton from '@/components/ReportButton';
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -171,6 +172,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                       style={{ background: 'none', border: 'none', color: 'var(--error)', fontSize: 12, cursor: 'pointer', opacity: 0.7, padding: '2px 4px' }}
                     >삭제</button>
                   )}
+                  <ReportButton commentId={comment.id} />
                 </div>
               </div>
               <p style={{ margin: 0, fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6 }}>{comment.content}</p>

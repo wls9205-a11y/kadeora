@@ -138,6 +138,20 @@ export default function WriteClient() {
           {editId ? '✏️ 게시글 수정' : '✏️ 새 글 작성'}
         </h1>
 
+        {/* 투자 정보 경고 배너 */}
+        <div style={{
+          background: 'var(--bg-hover)',
+          borderLeft: '3px solid var(--brand)',
+          borderRadius: 8,
+          padding: '10px 14px',
+          fontSize: 13,
+          color: 'var(--text-secondary)',
+          marginBottom: 16,
+          lineHeight: 1.6,
+        }}>
+          ⚠️ 투자 정보 공유 주의사항 — 허위사실·과장된 수익 정보 유포는 자본시장법 제178조에 의거 처벌받을 수 있습니다.
+        </div>
+
         {/* 카테고리 */}
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>카테고리</label>

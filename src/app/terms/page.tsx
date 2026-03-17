@@ -34,6 +34,17 @@ export default function TermsPage() {
           본 약관에 대한 문의는 서비스 내 고객센터를 이용해 주시기 바랍니다.
         </p>
       </div>
+      <div style={{ marginTop: 24, padding: '16px 20px', borderRadius: 12, backgroundColor: 'var(--bg-sunken)', border: '1px solid var(--border)' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: 0 }}>
+          본 약관과 관련된 분쟁은 서울중앙지방법원을 제1심 관할법원으로 합니다.
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '8px 0 0' }}>
+          본 약관은 대한민국 법령에 따라 해석되고 적용됩니다.
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '8px 0 0' }}>
+          주식 시세: Naver Finance / Yahoo Finance API · 청약 정보: 청약홈(applyhome.co.kr) 공공데이터
+        </p>
+      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import ShareButtons from '@/components/ShareButtons'
 
 import { BookmarkButton } from '@/components/BookmarkButton';
+import ReportButton from '@/components/ReportButton';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
 
@@ -233,7 +234,7 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
         {/* Actions */}
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:8, alignItems:'center', position:'static' }}>
+        <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, display:'grid', gridTemplateColumns:'repeat(5, 1fr)', gap:8, alignItems:'center', position:'static' }}>
           <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'6px 10px', borderRadius:20, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', fontSize:13 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
@@ -241,6 +242,9 @@ export default async function FeedDetailPage({ params }: Props) {
           <ShareButtons title={post.title} postId={post.id} />
           <div style={{ display:'flex', justifyContent:'center' }}>
             <BookmarkButton postId={post.id} />
+          </div>
+          <div style={{ display:'flex', justifyContent:'center' }}>
+            <ReportButton postId={post.id} />
           </div>
         </div>
       </article>
