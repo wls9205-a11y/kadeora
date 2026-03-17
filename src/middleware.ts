@@ -14,6 +14,34 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // Redis Rate Limiting (API 라우트만)
+  if (pathname.startsWith('/api/')) {
+    const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (redisUrl && redisToken) {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous';
+      try {
+        const key = `kd_rl:${ip}`;
+        const res = await fetch(`${redisUrl}/incr/${key}`, {
+          headers: { Authorization: `Bearer ${redisToken}` },
+        });
+        const data = await res.json();
+        const count = data.result ?? 0;
+        if (count === 1) {
+          await fetch(`${redisUrl}/expire/${key}/60`, {
+            headers: { Authorization: `Bearer ${redisToken}` },
+          });
+        }
+        if (count > 120) {
+          return new NextResponse(
+            JSON.stringify({ error: '요청이 너무 많습니다' }),
+            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '60' } }
+          );
+        }
+      } catch { /* Redis 장애 시 통과 */ }
+    }
+  }
+
   if (pathname.startsWith('/api/apt-proxy')) {
     const url = request.nextUrl.searchParams.get('url');
     if (url) {

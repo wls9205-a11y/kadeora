@@ -13,6 +13,14 @@ const NAV_ITEMS = [
   { href: '/discuss',        label: '토론',   icon: '💬' },
 ];
 
+const MOBILE_TABS = [
+  { href: '/feed', label: '피드', icon: '🏠' },
+  { href: '/stock', label: '주식', icon: '📈' },
+  { href: '/apt', label: '부동산', icon: '🏘' },
+  { href: '/discuss', label: '토론', icon: '💬' },
+  { href: '/profile', label: '내정보', icon: '👤' },
+];
+
 const MonkeyLogo = ({ size = 28 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" style={{ flexShrink:0, display:'block' }}>
     <rect width="64" height="64" rx="14" fill="#FF4500"/>
@@ -144,6 +152,14 @@ export function Navigation() {
           {/* 우측 액션 */}
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
             <ThemeToggle />
+
+            {/* 상점 */}
+            <Link href="/shop/megaphone" aria-label="상점" style={{
+              width:36, height:36, borderRadius:'50%',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              background:'var(--bg-hover)', border:'1px solid var(--border)',
+              fontSize:16, textDecoration:'none', color:'var(--text-secondary)',
+            }}>🛒</Link>
 
             {/* 모바일 검색 */}
             <Link href="/search" className="md:hidden" aria-label="검색" style={{
@@ -282,12 +298,12 @@ export function Navigation() {
         position:'fixed', bottom:0, left:0, right:0, zIndex:200,
         background:'var(--nav-bg)',
         borderTop:'1px solid var(--nav-border)',
-        display:'grid', gridTemplateColumns:`repeat(${NAV_ITEMS.length},1fr)`,
+        display:'grid', gridTemplateColumns:'repeat(5,1fr)',
         paddingBottom:'max(8px, env(safe-area-inset-bottom))',
         paddingTop:6,
         boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',
       }} className="md:hidden">
-        {NAV_ITEMS.map(item => {
+        {MOBILE_TABS.map(item => {
           const active = isActive(item.href);
           return (
             <Link key={item.href} href={item.href}

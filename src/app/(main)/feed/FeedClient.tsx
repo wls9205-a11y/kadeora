@@ -35,8 +35,8 @@ export default function FeedClient({ posts, activeCategory }: Props) {
   }, [posts.length]);
 
   const categories = [
-    { key: 'all', label: '전체' }, { key: 'stock', label: '주식' },
-    { key: 'apt', label: '부동산' }, { key: 'free', label: '자유' },
+    { key: 'all', label: '전체' }, { key: 'local', label: '🏘 우리동네' },
+    { key: 'stock', label: '주식' }, { key: 'apt', label: '부동산' }, { key: 'free', label: '자유' },
   ];
   const visiblePosts = posts.slice(0, visibleCount);
 
@@ -47,13 +47,13 @@ export default function FeedClient({ posts, activeCategory }: Props) {
         {/* 카테고리 바 */}
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 4, padding: '8px 10px', display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap',
+          borderRadius: 4, padding: '8px 10px', display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'nowrap', overflowX: 'auto',
         }}>
           {categories.map(cat => (
             <button key={cat.key} aria-pressed={activeCategory === cat.key}
               onClick={() => router.push(`/feed${cat.key !== 'all' ? `?category=${cat.key}` : ''}`)}
               style={{
-                padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer',
+                padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
                 fontWeight: 700, fontSize: 14,
                 background: activeCategory === cat.key ? 'var(--border)' : 'transparent',
                 color: activeCategory === cat.key ? 'var(--text-primary)' : 'var(--text-secondary)',
