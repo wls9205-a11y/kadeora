@@ -139,6 +139,9 @@ export function Navigation() {
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
             <ThemeToggle />
 
+            {/* 베타 신청 */}
+            <a href="/beta" style={{ fontSize:11, color:'var(--brand)', fontWeight:700, border:'1px solid var(--brand)', borderRadius:20, padding:'3px 10px', textDecoration:'none', flexShrink:0 }}>베타 신청</a>
+
             {/* 상점 */}
             <Link href="/shop/megaphone" aria-label="상점" style={{
               width:36, height:36, borderRadius:'50%',

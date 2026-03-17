@@ -4,6 +4,7 @@ import TrendingTicker from '@/components/TrendingTicker';
 import { ToastProvider } from '@/components/Toast';
 import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import FeedbackButton from '@/components/FeedbackButton';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
@@ -34,6 +35,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
             {children}
           </GuestGate>
         </ErrorBoundary>
+        <FeedbackButton />
       </main>
     </ToastProvider>
   );
