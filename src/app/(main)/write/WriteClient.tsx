@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import ImageUpload from '@/components/ImageUpload';
+import { filterContent } from '@/lib/filter';
 
 const CATEGORIES = [
   { value: 'apt', label: '🏠 부동산', desc: '부동산 정보, 청약, 투자 이야기' },
@@ -23,6 +24,7 @@ export default function WriteClient() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -60,13 +62,18 @@ export default function WriteClient() {
     if (title.length > 100) { error('제목은 100자 이하로 입력해주세요'); return; }
     if (content.length > 5000) { error('내용은 5000자 이하로 입력해주세요'); return; }
 
+    const titleCheck = filterContent(title);
+    if (titleCheck.isBlocked) { error(titleCheck.reason ?? '제목을 확인해주세요'); return; }
+    const contentCheck = filterContent(content);
+    if (contentCheck.isBlocked) { error(contentCheck.reason ?? '내용을 확인해주세요'); return; }
+
     setLoading(true);
     try {
       if (editId) {
         const res = await fetch(`/api/posts/${editId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous }),
         });
         if (!res.ok) {
           const e = await res.json();
@@ -78,7 +85,7 @@ export default function WriteClient() {
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous }),
         });
         if (!res.ok) {
           const e = await res.json();
@@ -184,6 +191,16 @@ export default function WriteClient() {
         {/* 이미지 업로드 */}
         <div style={{ marginBottom: 24 }}>
           <ImageUpload images={images} onImagesChange={setImages} />
+        </div>
+
+        {/* 익명 토글 */}
+        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'12px 0', borderTop:'1px solid var(--border)' }}>
+          <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontSize:14, color:'var(--text-secondary)' }}>
+            <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)}
+              style={{ width:16, height:16, accentColor:'var(--brand)', cursor:'pointer' }} />
+            익명으로 작성
+          </label>
+          <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>작성자 정보가 표시되지 않습니다</span>
         </div>
 
         {/* 버튼 */}

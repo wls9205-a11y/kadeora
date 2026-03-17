@@ -19,24 +19,9 @@ function timeAgo(dateStr: string) {
 }
 function numFmt(n: number) { return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n); }
 
-const LOGO_SVG = (
-  <svg width="32" height="32" viewBox="0 0 64 64" style={{ flexShrink: 0 }}>
-    <rect width="64" height="64" rx="14" fill="#FF4500"/>
-    <circle cx="11" cy="32" r="8.5" fill="#CC3700"/><circle cx="53" cy="32" r="8.5" fill="#CC3700"/>
-    <circle cx="11" cy="32" r="5.5" fill="#FF7A50"/><circle cx="53" cy="32" r="5.5" fill="#FF7A50"/>
-    <ellipse cx="32" cy="29" rx="19" ry="18" fill="#FF4500"/>
-    <ellipse cx="32" cy="32" rx="15" ry="14" fill="#FF7A50"/>
-    <circle cx="25" cy="27" r="6" fill="#fff"/><circle cx="39" cy="27" r="6" fill="#fff"/>
-    <circle cx="25.5" cy="27.5" r="4" fill="#1A0800"/><circle cx="39.5" cy="27.5" r="4" fill="#1A0800"/>
-    <circle cx="27" cy="26" r="1.6" fill="#fff"/><circle cx="41" cy="26" r="1.6" fill="#fff"/>
-    <ellipse cx="32" cy="36" rx="5.5" ry="4" fill="#CC3700"/>
-    <path d="M27 40.5 Q32 44.5 37 40.5" stroke="#CC3700" strokeWidth="2" fill="none" strokeLinecap="round"/>
-  </svg>
-);
-
 interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeCategory: string; }
 
-export default function FeedClient({ posts, trending, activeCategory }: Props) {
+export default function FeedClient({ posts, activeCategory }: Props) {
   const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(10);
   const observerRef = useCallback((node: HTMLDivElement | null) => {
@@ -148,53 +133,10 @@ export default function FeedClient({ posts, trending, activeCategory }: Props) {
 
       {/* ── 사이드바 (1024px+ 에서만 표시) ── */}
       <aside className="feed-sidebar">
-        {/* 커뮤니티 카드 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{ background: 'var(--brand)', height: 56, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8 }}>
-            {LOGO_SVG}
-            <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-inverse, #fff)', letterSpacing: -0.5 }}>카더라</span>
-          </div>
-          <div style={{ padding: '32px 12px 12px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: -22, left: 12, width: 44, height: 44, borderRadius: '50%', border: '3px solid var(--bg-surface)', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {LOGO_SVG}
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>카더라 커뮤니티</div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 10 }}>대한민국 소리소문 정보 커뮤니티</div>
-            <div style={{ display: 'flex', gap: 14, marginBottom: 10 }}>
-              {[['4','멤버'],['10','토론방'],['28','게시글']].map(([n,l]) => (
-                <div key={l} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{n}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{l}</div>
-                </div>
-              ))}
-            </div>
-            <Link href="/write" style={{ display: 'block', textAlign: 'center', background: 'var(--brand)', color: 'var(--text-inverse, #fff)', borderRadius: 20, padding: '7px 0', fontSize: 13, fontWeight: 700 }}>
-              + 새 게시글 작성
-            </Link>
-          </div>
-        </div>
-
-        {/* 인기 키워드 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{ background: 'var(--brand)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>🔥 실시간 인기</div>
-          <div style={{ padding: '6px 0' }}>
-            {trending.map((kw, i) => (
-              <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.keyword)}`}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderBottom: '1px solid var(--border)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <span style={{ width: 20, fontSize: 12, fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', flexShrink: 0 }}>{i + 1}</span>
-                <span style={{ flex: 1, fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>#{kw.keyword}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{kw.heat_score >= 1000 ? (kw.heat_score / 1000).toFixed(1) + 'k' : kw.heat_score}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
         {/* 빠른 메뉴 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
           <div style={{ background: 'var(--brand)', padding: '10px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>빠른 메뉴</div>
-          {[['📝 새 글 작성','/write'],['💬 실시간 토론','/discuss'],['📈 주식 시세','/stock'],['🏠 청약 정보','/apt']].map(([l,h]) => (
+          {[['📝 새 글 작성','/write'],['📈 주식 시세','/stock'],['🏠 청약 정보','/apt']].map(([l,h]) => (
             <Link key={h as string} href={h as string} style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>

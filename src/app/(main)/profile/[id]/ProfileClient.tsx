@@ -52,6 +52,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [activeTab, setActiveTab] = useState<'posts'|'bookmarks'>('posts');
   const [bookmarkedPosts, setBookmarkedPosts] = useState<PostRow[]>([]);
   const [bookmarksLoaded, setBookmarksLoaded] = useState(false);
+  const [activityTab, setActivityTab] = useState<'posts'|'comments'|null>(null);
+  const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [myComments, setMyComments] = useState<any[]>([]);
   const { success, error } = useToast();
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -134,6 +137,22 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const handleTabChange = (tab: 'posts'|'bookmarks') => {
     setActiveTab(tab);
     if (tab === 'bookmarks') loadBookmarks();
+  };
+
+  const loadMyPosts = async () => {
+    const sb = createSupabaseBrowser();
+    const { data } = await sb.from('posts').select('id,title,created_at,likes_count,comments_count')
+      .eq('author_id', profile.id).eq('is_deleted', false)
+      .order('created_at', { ascending: false }).limit(20);
+    setMyPosts(data ?? []);
+  };
+
+  const loadMyComments = async () => {
+    const sb = createSupabaseBrowser();
+    const { data } = await sb.from('comments').select('id,content,created_at,post_id')
+      .eq('author_id', profile.id).eq('is_deleted', false)
+      .order('created_at', { ascending: false }).limit(20);
+    setMyComments(data ?? []);
   };
 
   return (
@@ -250,6 +269,46 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             </div>
           ))}
         </div>
+
+        {/* 활동 내역 탭 (본인만) */}
+        {isOwner && (
+          <>
+            <div style={{ display:'flex', gap:4, marginTop:16, borderBottom:'1px solid var(--border)', paddingBottom:0 }}>
+              {(['posts', 'comments'] as const).map(tab => (
+                <button key={tab} onClick={() => { setActivityTab(activityTab === tab ? null : tab); if (tab === 'posts') loadMyPosts(); else loadMyComments(); }}
+                  style={{
+                    padding:'10px 16px', border:'none', cursor:'pointer', fontSize:14, fontWeight:600,
+                    background:'transparent', borderBottom: activityTab === tab ? '2px solid var(--brand)' : '2px solid transparent',
+                    color: activityTab === tab ? 'var(--brand)' : 'var(--text-secondary)',
+                  }}>
+                  {tab === 'posts' ? '내 게시글' : '내 댓글'}
+                </button>
+              ))}
+            </div>
+            {activityTab === 'posts' && (
+              <div style={{ marginTop:12 }}>
+                {myPosts.map(p => (
+                  <a key={p.id} href={`/feed/${p.id}`} style={{ display:'block', padding:'12px 0', borderBottom:'1px solid var(--border)', textDecoration:'none' }}>
+                    <div style={{ fontSize:14, fontWeight:600, color:'var(--text-primary)' }}>{p.title}</div>
+                    <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>❤️ {p.likes_count ?? 0} · 💬 {p.comments_count ?? 0}</div>
+                  </a>
+                ))}
+                {myPosts.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>작성한 글이 없습니다</p>}
+              </div>
+            )}
+            {activityTab === 'comments' && (
+              <div style={{ marginTop:12 }}>
+                {myComments.map(c => (
+                  <a key={c.id} href={`/feed/${c.post_id}`} style={{ display:'block', padding:'12px 0', borderBottom:'1px solid var(--border)', textDecoration:'none' }}>
+                    <div style={{ fontSize:14, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.content}</div>
+                    <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:4 }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</div>
+                  </a>
+                ))}
+                {myComments.length === 0 && <p style={{ color:'var(--text-tertiary)', padding:20, textAlign:'center' }}>작성한 댓글이 없습니다</p>}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* 탭 — 게시글 / 북마크(본인만) */}

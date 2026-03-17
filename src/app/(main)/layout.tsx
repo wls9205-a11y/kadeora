@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/Navigation';
+import TrendingTicker from '@/components/TrendingTicker';
 import { ToastProvider } from '@/components/Toast';
 import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -19,6 +20,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   return (
     <ToastProvider>
       <Navigation />
+      <TrendingTicker />
       <main style={{
         maxWidth: 1200,
         margin: '0 auto',

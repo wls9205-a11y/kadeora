@@ -11,8 +11,6 @@ const NAV_ITEMS = [
   { href: '/stock',          label: '주식',   icon: '📈' },
   { href: '/apt',            label: '부동산', icon: '🏘' },
   { href: '/discuss',        label: '토론',   icon: '💬' },
-  { href: '/shop/megaphone', label: '상점',   icon: '🛒' },
-  { href: '/grades',         label: '등급 안내', icon: '🏆' },
 ];
 
 const MonkeyLogo = ({ size = 28 }: { size?: number }) => (
