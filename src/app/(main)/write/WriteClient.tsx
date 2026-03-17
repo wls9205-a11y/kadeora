@@ -86,7 +86,7 @@ export default function WriteClient() {
         const res = await fetch(`/api/posts/${editId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, hashtags }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, tag: hashtags }),
         });
         if (!res.ok) {
           const e = await res.json();
@@ -98,7 +98,7 @@ export default function WriteClient() {
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, hashtags }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, tag: hashtags }),
         });
         if (!res.ok) {
           const e = await res.json();

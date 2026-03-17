@@ -60,7 +60,7 @@ body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
-  font-size: var(--font-base);
+  font-size: var(--font-base, 15px);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -351,9 +351,9 @@ button:active,
 }
 
 @media (max-width: 640px) {
-  body { font-size: 14px; }
+  body { font-size: var(--font-base, 14px); }
   .main-content { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
-  input, textarea, select {
-    font-size: 16px !important;
-  }
+}
+input, textarea, select {
+  font-size: 16px !important;
 }

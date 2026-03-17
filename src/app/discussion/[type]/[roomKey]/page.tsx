@@ -145,7 +145,7 @@ export default function DiscussionRoomPage() {
               {!msg.is_mine&&<div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{backgroundColor:roomType==='stock'?'var(--brand)':'var(--success)',color:'var(--text-inverse)'}}>{username[0]}</div>}
               <div className={`flex flex-col gap-0.5 max-w-[76%] ${msg.is_mine?'items-end':'items-start'}`}>
                 {!msg.is_mine&&<span className="text-xs px-1" style={{color:'var(--text-tertiary)'}}>{username}</span>}
-                <div className="px-3 py-2 text-sm leading-relaxed break-words" style={msg.is_mine?{backgroundColor:'var(--brand)',color:'#fff',borderRadius:'16px 16px 4px 16px'}:{backgroundColor:'var(--bg-hover)',color:'var(--text-primary)',borderRadius:'16px 16px 16px 4px'}}>{msg.content}</div>
+                <div className="px-3 py-2 text-sm leading-relaxed break-words" style={msg.is_mine?{backgroundColor:'var(--brand)',color:'var(--text-inverse)',borderRadius:'16px 16px 4px 16px'}:{backgroundColor:'var(--bg-hover)',color:'var(--text-primary)',borderRadius:'16px 16px 16px 4px'}}>{msg.content}</div>
                 <span className="text-xs px-1" style={{color:'var(--text-tertiary)'}}>{fmtTime(msg.created_at)}</span>
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function DiscussionRoomPage() {
               <button onClick={sendMessage} disabled={!input.trim()}
                 aria-label="메시지 전송"
                 className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all"
-                style={{backgroundColor:input.trim()?'var(--brand)':'var(--bg-active)',color:input.trim()?'#fff':'var(--text-tertiary)',transform:input.trim()?'scale(1)':'scale(0.9)'}}>
+                style={{backgroundColor:input.trim()?'var(--brand)':'var(--bg-active)',color:input.trim()?'var(--text-inverse)':'var(--text-tertiary)',transform:input.trim()?'scale(1)':'scale(0.9)'}}>
                 ↑
               </button>
             </div>

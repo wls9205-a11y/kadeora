@@ -211,7 +211,7 @@ export function Navigation() {
                     <span style={{
                       width:22, height:22, borderRadius:'50%', background:'var(--brand)',
                       display:'flex', alignItems:'center', justifyContent:'center',
-                      fontSize:10, fontWeight:800, color:'#fff', flexShrink:0,
+                      fontSize:10, fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
                     }}>
                       {(nickname ?? user.email ?? 'U')[0].toUpperCase()}
                     </span>

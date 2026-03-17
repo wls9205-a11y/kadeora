@@ -27,7 +27,7 @@ export async function PATCH(req: Request, { params }: Params) {
     if (!parsed.success) return NextResponse.json({ error: '입력값이 올바르지 않습니다', details: parsed.error.flatten() }, { status: 422 });
 
     // Verify ownership
-    const { data: post } = await sb.from('posts').select('user_id').eq('id', postId).single();
+    const { data: post } = await sb.from('posts').select('author_id').eq('id', postId).single();
     if (!post) return NextResponse.json({ error: '게시글을 찾을 수 없습니다' }, { status: 404 });
     if (post.author_id !== session.user.id) return NextResponse.json({ error: '수정 권한이 없습니다' }, { status: 403 });
 

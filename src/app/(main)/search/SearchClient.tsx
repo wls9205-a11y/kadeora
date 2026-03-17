@@ -78,12 +78,12 @@ export default function SearchClient() {
     if (q.length < 2) { setResults([]); setTotal(0); return; }
     setLoading(true);
     try {
-      const params = new URLSearchParams({ q, category: cat, limit: '20', offset: String(offset * 20) });
+      const params = new URLSearchParams({ q, category: cat, limit: '20', page: String(offset + 1) });
       const res = await fetch(`/api/search?${params}`);
       const data = await res.json();
-      setResults(prev => append ? [...prev, ...(data.results ?? [])] : (data.results ?? []));
+      setResults(prev => append ? [...prev, ...(data.posts ?? [])] : (data.posts ?? []));
       setTotal(data.total ?? 0);
-      setHasMore((data.results?.length ?? 0) === 20);
+      setHasMore((data.posts?.length ?? 0) === 20);
     } finally {
       setLoading(false);
     }
@@ -250,7 +250,7 @@ export default function SearchClient() {
                   <div
                     key={stock.symbol}
                     style={acItemStyle}
-                    onClick={() => handleAcNavigate(`/discussion/stock/${stock.symbol}`)}
+                    onClick={() => handleAcNavigate(`/stock/${stock.symbol}`)}
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
@@ -283,7 +283,7 @@ export default function SearchClient() {
                   <div
                     key={apt.id}
                     style={acItemStyle}
-                    onClick={() => handleAcNavigate(`/discussion/apt/${apt.id}`)}
+                    onClick={() => handleAcNavigate(`/apt/${apt.id}`)}
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >

@@ -27,7 +27,7 @@ export default function PaymentClient() {
         const { data } = await supabase.from('shop_products').select('*').eq('is_active', true).order('price_krw', { ascending: true });
         setProducts(data || []);
         if (productId && data) { const found = data.find((p: Product) => p.id === productId); if (found) { setProduct(found); setStep('confirm'); } }
-      } catch { setError('Failed to load products'); } finally { setLoading(false); }
+      } catch { setError('상품을 불러오는데 실패했습니다'); } finally { setLoading(false); }
     }
     loadProducts();
   }, [productId]);
@@ -41,8 +41,8 @@ export default function PaymentClient() {
         if (session?.access_token) { headers['Authorization'] = `Bearer ${session.access_token}`; }
         const res = await fetch('/api/payment', { method: 'POST', headers, body: JSON.stringify({ paymentKey, orderId, amount: Number(amount), productId: productId || undefined }) });
         const data = await res.json();
-        if (data.success) { setPaymentResult(data.payment); setStep('success'); } else { setError(data.error || 'Payment failed'); setStep('fail'); }
-      } catch { setError('Payment processing error'); setStep('fail'); }
+        if (data.success) { setPaymentResult(data.payment); setStep('success'); } else { setError(data.error || '결제에 실패했습니다'); setStep('fail'); }
+      } catch { setError('결제 처리 중 오류가 발생했습니다'); setStep('fail'); }
     }
   }, [paymentKey, orderId, amount, productId]);
   useEffect(() => { handlePaymentCallback(); }, [handlePaymentCallback]);
@@ -62,14 +62,14 @@ export default function PaymentClient() {
       const tp = window.TossPayments(tossClientKey);
       const payment = tp.payment({ customerKey: user.id });
       await payment.requestPayment({ method: 'CARD', amount: { currency: 'KRW', value: selectedProduct.price_krw }, orderId: newOrderId, orderName: selectedProduct.name, successUrl: window.location.origin+'/payment?product='+selectedProduct.id, failUrl: window.location.origin+'/payment?fail=true', customerEmail: user.email || undefined });
-    } catch (err) { console.error(err); setError('Payment init failed'); setStep('fail'); }
+    } catch (err) { console.error(err); setError('결제 초기화에 실패했습니다'); setStep('fail'); }
   }
 
   function loadTossScript(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (document.querySelector('script[src*="tosspayments"]')) { resolve(); return; }
       const s = document.createElement('script'); s.src = 'https://js.tosspayments.com/v2/standard';
-      s.onload = () => resolve(); s.onerror = () => reject(new Error('SDK load failed')); document.head.appendChild(s);
+      s.onload = () => resolve(); s.onerror = () => reject(new Error('결제 SDK 로드 실패')); document.head.appendChild(s);
     });
   }
 
@@ -77,43 +77,43 @@ export default function PaymentClient() {
 
   if (step === 'fail' || searchParams.get('fail')) return (
     <div className="min-h-screen flex items-center justify-center p-4"><div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 max-w-md w-full text-center">
-      <div className="text-5xl mb-4">{'\uD83D\uDE22'}</div><h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">Payment Failed</h2>
-      <p className="text-[var(--text-primary)]/60 mb-6">{error || 'Payment was cancelled or an error occurred.'}</p>
-      <button onClick={() => { setStep('select'); setError(''); router.push('/payment'); }} className="px-6 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity">Try Again</button>
+      <div className="text-5xl mb-4">{'\uD83D\uDE22'}</div><h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">결제 실패</h2>
+      <p className="text-[var(--text-primary)]/60 mb-6">{error || '결제가 취소되었거나 오류가 발생했습니다.'}</p>
+      <button onClick={() => { setStep('select'); setError(''); router.push('/payment'); }} className="px-6 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity">다시 시도</button>
     </div></div>
   );
 
   if (step === 'processing') return (
     <div className="min-h-screen flex items-center justify-center p-4"><div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 max-w-md w-full text-center">
       <div className="animate-spin w-12 h-12 border-3 border-[var(--brand)] border-t-transparent rounded-full mx-auto mb-4" />
-      <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">Processing...</h2>
+      <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">처리 중...</h2>
     </div></div>
   );
 
   if (step === 'success' && paymentResult) return (
     <div className="min-h-screen flex items-center justify-center p-4"><div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 max-w-md w-full text-center">
-      <div className="text-5xl mb-4">{'\uD83C\uDF89'}</div><h2 className="text-xl font-bold text-[var(--success)] mb-2">Payment Complete!</h2>
-      <p className="text-[var(--text-primary)]/60 mb-4">{product?.name || 'Item'} purchased</p>
+      <div className="text-5xl mb-4">{'\uD83C\uDF89'}</div><h2 className="text-xl font-bold text-[var(--success)] mb-2">결제 완료!</h2>
+      <p className="text-[var(--text-primary)]/60 mb-4">{product?.name || '상품'} 구매 완료</p>
       <div className="bg-[var(--bg-base)] rounded-xl p-4 mb-6 text-left text-sm space-y-2">
-        <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">Order ID</span><span className="text-[var(--text-primary)] font-mono text-xs">{paymentResult.orderId}</span></div>
-        <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">Amount</span><span className="text-[var(--text-primary)] font-bold">{Number(paymentResult.amount).toLocaleString()} KRW</span></div>
-        <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">Method</span><span className="text-[var(--text-primary)]">{paymentResult.method}</span></div>
+        <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">주문번호</span><span className="text-[var(--text-primary)] font-mono text-xs">{paymentResult.orderId}</span></div>
+        <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">결제금액</span><span className="text-[var(--text-primary)] font-bold">{Number(paymentResult.amount).toLocaleString()}원</span></div>
+        <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">결제수단</span><span className="text-[var(--text-primary)]">{paymentResult.method}</span></div>
       </div>
-      <button onClick={() => router.push('/feed')} className="px-6 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity">Back to Feed</button>
+      <button onClick={() => router.push('/feed')} className="px-6 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity">피드로 돌아가기</button>
     </div></div>
   );
 
   return (
     <div className="max-w-2xl mx-auto p-4 py-8">
       <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">상점</h1>
-      <p className="text-[var(--text-primary)]/60 mb-6">Browse and purchase items</p>
+      <p className="text-[var(--text-primary)]/60 mb-6">아이템을 둘러보고 구매하세요</p>
       {step === 'confirm' && product && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"><div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-sm w-full">
           <div className="text-center mb-4"><span className="text-4xl">{product.icon}</span><h3 className="text-lg font-bold text-[var(--text-primary)] mt-2">{product.name}</h3><p className="text-sm text-[var(--text-primary)]/60 mt-1">{product.description}</p></div>
-          <div className="bg-[var(--bg-base)] rounded-xl p-4 mb-4 text-center"><span className="text-2xl font-bold text-[var(--brand)]">{(product.price_krw ?? 0).toLocaleString()} KRW</span></div>
+          <div className="bg-[var(--bg-base)] rounded-xl p-4 mb-4 text-center"><span className="text-2xl font-bold text-[var(--brand)]">{(product.price_krw ?? 0).toLocaleString()}원</span></div>
           <div className="flex gap-3">
-            <button onClick={() => { setStep('select'); setProduct(null); }} className="flex-1 py-3 border border-[var(--border)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--bg-base)] transition-colors">Cancel</button>
-            <button onClick={() => startPayment(product)} className="flex-1 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity font-bold">Pay</button>
+            <button onClick={() => { setStep('select'); setProduct(null); }} className="flex-1 py-3 border border-[var(--border)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--bg-base)] transition-colors">취소</button>
+            <button onClick={() => startPayment(product)} className="flex-1 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity font-bold">결제하기</button>
           </div>
         </div></div>
       )}
@@ -124,12 +124,12 @@ export default function PaymentClient() {
             <div className="flex items-start gap-3"><span className="text-3xl">{p.icon}</span><div className="flex-1 min-w-0">
               <h3 className="font-bold text-[var(--text-primary)] group-hover:text-[var(--brand)] transition-colors">{p.name}</h3>
               <p className="text-sm text-[var(--text-primary)]/50 mt-1 line-clamp-2">{p.description}</p>
-              <p className="text-lg font-bold text-[var(--brand)] mt-2">{(p.price_krw ?? 0).toLocaleString()} KRW</p>
+              <p className="text-lg font-bold text-[var(--brand)] mt-2">{(p.price_krw ?? 0).toLocaleString()}원</p>
             </div></div>
           </button>
         ))}
       </div>
-      {products.length === 0 && <div className="text-center py-12 text-[var(--text-primary)]/40">No products available</div>}
+      {products.length === 0 && <div className="text-center py-12 text-[var(--text-primary)]/40">상품이 없습니다</div>}
     </div>
   );
 }
