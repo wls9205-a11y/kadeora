@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const { title, content, category, tag } = sanitizePostInput(body);
     if (!title || title.length < 2) return NextResponse.json({ error: '제목은 2자 이상이어야 합니다.' }, { status: 400 });
     if (!content || content.length < 5) return NextResponse.json({ error: '내용은 5자 이상이어야 합니다.' }, { status: 400 });
-    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag }).select().single();
+    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: 'all' }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
     return NextResponse.json({ post: data }, { status: 201 });
   } catch (err) { console.error('[Posts POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
