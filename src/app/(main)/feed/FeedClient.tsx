@@ -24,7 +24,7 @@ interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeC
 
 export default function FeedClient({ posts, activeCategory }: Props) {
   const router = useRouter();
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [visibleCount, setVisibleCount] = useState(40);
   const [showRegionBanner, setShowRegionBanner] = useState(false);
   const [tipSeen, setTipSeen] = useState(true);
 
@@ -47,7 +47,7 @@ export default function FeedClient({ posts, activeCategory }: Props) {
   const observerRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
     const io = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting) setVisibleCount(c => Math.min(c + 20, posts.length)); },
+      entries => { if (entries[0].isIntersecting) setVisibleCount(c => Math.min(c + 40, posts.length)); },
       { threshold: 0.1 }
     );
     io.observe(node);

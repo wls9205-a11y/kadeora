@@ -15,9 +15,9 @@ const ChatRoom = dynamic(() => import('./ChatRoom'), {
 });
 
 const ROOM_META: Record<string, { bg: string; emoji: string; desc: string }> = {
-  stock: { bg: 'var(--info-bg)', emoji: '🇰🇷', desc: 'KOSPI · KOSDAQ 국내 주식 소문' },
-  us_stock: { bg: 'var(--success-bg)', emoji: '🌎', desc: 'NYSE · NASDAQ 해외 주식 정보' },
-  apt: { bg: 'var(--warning-bg)', emoji: '🏠', desc: '청약 · 분양 · 재건축 소식' },
+  stock: { bg: 'var(--info-bg)', emoji: '🇰🇷', desc: 'KOSPI·KOSDAQ 종목 토론' },
+  us_stock: { bg: 'var(--success-bg)', emoji: '🌎', desc: 'NYSE·NASDAQ 종목 토론' },
+  apt: { bg: 'var(--warning-bg)', emoji: '🏠', desc: '청약·분양·재건축 정보' },
   free: { bg: 'var(--brand-light)', emoji: '💬', desc: '자유 주제 소문 공유' },
 };
 

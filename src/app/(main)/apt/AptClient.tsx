@@ -187,7 +187,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
 
                   {/* 공급 세대 */}
                   <div className="text-right shrink-0">
-                    <p className="text-lg font-black" style={{ color: 'var(--brand)' }}>
+                    <p className="text-sm font-bold" style={{ color: 'var(--brand)' }}>
                       {fmtSupply(apt.tot_supply_hshld_co)}
                     </p>
                   </div>

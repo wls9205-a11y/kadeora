@@ -2,6 +2,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import MiniDiscuss from '@/components/MiniDiscuss';
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -101,6 +102,7 @@ export default async function AptDetailPage({ params }: Props) {
           💬 토론방
         </Link>
       </div>
+      <MiniDiscuss roomKey={`apt_${id}`} roomTitle={`${apt.house_nm} 토론`} />
     </div>
   );
 }

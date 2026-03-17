@@ -2,6 +2,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import MiniDiscuss from '@/components/MiniDiscuss';
 
 function fmtPrice(p: number, c: string) { return c === 'KRW' ? `₩${p.toLocaleString()}` : `$${p.toFixed(2)}`; }
 function fmtCap(v: number | null, c: string) {
@@ -76,6 +77,7 @@ export default async function StockDetailPage({ params }: Props) {
       <Link href="/discuss" style={{ display: 'block', textAlign: 'center', padding: 14, background: 'var(--brand)', borderRadius: 12, textDecoration: 'none', fontSize: 14, fontWeight: 700, color: 'var(--text-inverse)' }}>
         💬 토론방 입장
       </Link>
+      <MiniDiscuss roomKey={`stock_${symbol}`} roomTitle={`${s.name} 토론`} />
     </div>
   );
 }
