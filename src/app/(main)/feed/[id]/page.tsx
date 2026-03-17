@@ -171,7 +171,7 @@ export default async function FeedDetailPage({ params }: Props) {
       {/* Post card */}
       <article style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
           <div style={{
             width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
             background: 'linear-gradient(135deg, var(--brand), var(--info))',
@@ -180,18 +180,18 @@ export default async function FeedDetailPage({ params }: Props) {
           }}>
             {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>
                 {post.profiles?.nickname ?? '익명'}
               </span>
               {post.profiles?.grade && (
-                <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 600 }}>
+                <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {post.profiles.grade}
                 </span>
               )}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2, whiteSpace: 'nowrap' }}>
               {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
           </div>
@@ -234,13 +234,13 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
         {/* Actions */}
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, display:'flex', alignItems:'center', gap:6, flexWrap:'nowrap', overflowX:'auto' }}>
+        <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:8, alignItems:'center' }}>
           <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-          <div style={{ display:'flex', alignItems:'center', gap:4, padding:'6px 10px', borderRadius:20, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', fontSize:13, flexShrink:0 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'6px 10px', borderRadius:20, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', fontSize:13 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
           </div>
           <ShareButtons title={post.title} postId={post.id} />
-          <div style={{ marginLeft:'auto', flexShrink:0 }}>
+          <div style={{ display:'flex', justifyContent:'center' }}>
             <BookmarkButton postId={post.id} />
           </div>
         </div>

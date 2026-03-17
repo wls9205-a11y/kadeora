@@ -47,7 +47,7 @@ export function useKakaoShare() {
       content: {
         title,
         description,
-        imageUrl: imageUrl || "https://kadeora.app/og-image.png",
+        imageUrl: imageUrl || "https://kadeora.app/og-image-kakao.png",
         link: { webUrl: linkUrl, mobileWebUrl: linkUrl },
       },
       buttons: [

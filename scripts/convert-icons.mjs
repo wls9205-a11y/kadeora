@@ -11,6 +11,7 @@ const pub = (p) => resolve(root, 'public', p);
 
 const conversions = [
   { src: 'og-image.svg',         dst: 'og-image.png',         w: 1200, h: 628 },
+  { src: 'og-image-kakao.svg',   dst: 'og-image-kakao.png',   w: 800,  h: 400 },
   { src: 'icons/icon-192.svg',   dst: 'icons/icon-192.png',   w: 192,  h: 192 },
   { src: 'icons/icon-72.svg',    dst: 'icons/icon-72.png',    w: 72,   h: 72 },
   { src: 'favicon.svg',          dst: 'favicon.png',          w: 512,  h: 512 },

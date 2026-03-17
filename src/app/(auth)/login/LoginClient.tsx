@@ -32,9 +32,9 @@ function LoginForm({ redirect }: LoginFormProps) {
     <div style={{ width: '100%', maxWidth: 400 }}>
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
         <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
-          KADEORA
+          카더라
         </div>
-        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>실시간 정보가 모이는 커뮤니티</p>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>아는 사람만 아는 그 정보</p>
       </div>
 
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>

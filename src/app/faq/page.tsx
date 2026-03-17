@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 const FAQS = [
-  { q: 'KADEORA는 어떤 서비스인가요?', a: 'KADEORA는 주식, 청약, 재테크 정보를 공유하는 금융 커뮤니티입니다. 실제 투자자들이 직접 경험한 정보와 분석을 공유합니다.' },
+  { q: '카더라는 어떤 서비스인가요?', a: '카더라는 주식, 청약, 재테크 정보를 공유하는 금융 커뮤니티입니다. 실제 투자자들이 직접 경험한 정보와 분석을 공유합니다.' },
   { q: '회원가입은 어떻게 하나요?', a: '별도의 회원가입 절차 없이 카카오 또는 Google 계정으로 바로 로그인하실 수 있습니다. 첫 로그인 시 자동으로 계정이 생성됩니다.' },
   { q: '게시글 작성은 누구나 가능한가요?', a: '로그인한 회원이라면 누구나 게시글을 작성할 수 있습니다. 단, 허위 정보나 투자사기, 타인 비방 등의 내용은 삭제 및 계정 정지 조치가 취해질 수 있습니다.' },
   { q: '등급 시스템은 어떻게 작동하나요?', a: '게시글 작성, 댓글, 좋아요 활동에 따라 점수가 쌓이며 씨앗 → 새싹 → 브론즈 → 실버 → 골드 → 플래티넘 → 다이아 순으로 등급이 올라갑니다.' },
@@ -18,7 +18,7 @@ export default function FAQPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 0' }}>
       <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>자주 묻는 질문</h1>
-      <p style={{ color: 'var(--text-tertiary)', fontSize: 13, marginBottom: 32 }}>KADEORA 사용에 관해 자주 묻는 질문들을 모았습니다</p>
+      <p style={{ color: 'var(--text-tertiary)', fontSize: 13, marginBottom: 32 }}>카더라 사용에 관해 자주 묻는 질문들을 모았습니다</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {FAQS.map((faq, i) => (
