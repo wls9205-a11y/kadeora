@@ -16,10 +16,10 @@ export const dynamic = 'force-dynamic';
 async function getPosts(category: string, region: string = 'all') {
   const sb = await createSupabaseServer();
   let q = sb.from('posts')
-    .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,images,author_id,region_id, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+    .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
-    .limit(30);
+    .limit(20);
   if (category !== 'all') q = q.eq('category', category);
   if (category === 'local' && region !== 'all') q = q.eq('region_id', region);
   const { data, error } = await q;

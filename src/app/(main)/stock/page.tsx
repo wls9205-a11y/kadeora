@@ -18,7 +18,7 @@ async function fetchStocks() {
   return data ?? [];
 }
 
-const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v2'], { revalidate: CACHE_TTL.medium });
+const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v3'], { revalidate: 600 });
 
 export default async function StockPage() {
   let stocks: { symbol: string; name: string; market: string; price: number; change_amt: number; change_pct: number; volume: number; market_cap: number; updated_at: string }[] = [];
