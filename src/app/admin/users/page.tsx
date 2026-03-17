@@ -1,12 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-interface User { id: string; nickname: string; grade_title: string; created_at: string; posts_count: number; is_deleted: boolean }
+interface User { id: string; nickname: string; grade_title: string; created_at: string; posts_count: number; is_deleted: boolean; region_text: string | null }
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all'|'active'|'suspended'>('all');
+  const [regionFilter, setRegionFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -24,8 +25,15 @@ export default function AdminUsersPage() {
     load();
   };
 
+  const regions = Array.from(new Set(users.map(u => u.region_text).filter(Boolean) as string[])).sort();
+  const totalUsers = users.length;
+  const regionSetCount = users.filter(u => u.region_text).length;
+  const regionUnsetCount = totalUsers - regionSetCount;
+  const regionPct = totalUsers > 0 ? Math.round((regionSetCount / totalUsers) * 100) : 0;
+
   const filtered = users
     .filter(u => filter === 'all' || (filter === 'active' ? !u.is_deleted : u.is_deleted))
+    .filter(u => regionFilter === 'all' || u.region_text === regionFilter)
     .filter(u => !search || (u.nickname || '').includes(search));
 
   const tab = (v: string, l: string) => ({
@@ -37,10 +45,33 @@ export default function AdminUsersPage() {
   return (
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>👥 유저 관리</h1>
+      {/* 지역 통계 카드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{totalUsers}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>전체 유저</div>
+        </div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--success)' }}>{regionSetCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>지역 설정 완료 · {regionPct}%</div>
+        </div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--warning)' }}>{regionUnsetCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>미설정</div>
+        </div>
+      </div>
+
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={() => setFilter('all')} style={tab('all', '전체')}>전체</button>
         <button onClick={() => setFilter('active')} style={tab('active', '정상')}>정상</button>
         <button onClick={() => setFilter('suspended')} style={tab('suspended', '정지됨')}>정지됨</button>
+        <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)} style={{
+          padding: '6px 10px', fontSize: 12, background: 'var(--bg-hover)',
+          border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', cursor: 'pointer',
+        }}>
+          <option value="all">지역: 전체</option>
+          {regions.map(r => <option key={r} value={r}>{r}</option>)}
+        </select>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="닉네임 검색" style={{
           marginLeft: 'auto', padding: '6px 12px', fontSize: 13, background: 'var(--bg-hover)',
           border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', width: 180,
@@ -55,6 +86,7 @@ export default function AdminUsersPage() {
               <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 12px' }}>닉네임</th>
                 <th style={{ padding: '10px 12px' }}>등급</th>
+                <th style={{ padding: '10px 12px' }}>지역</th>
                 <th style={{ padding: '10px 12px' }}>가입일</th>
                 <th style={{ padding: '10px 12px' }}>게시글</th>
                 <th style={{ padding: '10px 12px' }}>상태</th>
@@ -66,6 +98,7 @@ export default function AdminUsersPage() {
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--border)', opacity: u.is_deleted ? 0.5 : 1 }}>
                   <td style={{ padding: '10px 12px', color: 'var(--text-primary)', fontWeight: 600 }}>{u.nickname || '미설정'}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.grade_title || '-'}</td>
+                  <td style={{ padding: '10px 12px', color: u.region_text ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>{u.region_text || '미설정'}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.posts_count ?? 0}</td>
                   <td style={{ padding: '10px 12px' }}>

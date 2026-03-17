@@ -8,7 +8,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, nickname, grade_title, created_at, posts_count, is_deleted')
+    .select('id, nickname, grade_title, created_at, posts_count, is_deleted, region_text')
     .order('created_at', { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
