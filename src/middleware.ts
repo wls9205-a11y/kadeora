@@ -132,7 +132,7 @@ export async function middleware(request: NextRequest) {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://js.tosspayments.com",
     "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-    "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://k.kakaocdn.net",
+    "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://k.kakaocdn.net https://*.kakaocdn.net https://img1.kakaocdn.net https://t1.kakaocdn.net",
     "font-src 'self' https://cdn.jsdelivr.net",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://kauth.kakao.com https://accounts.google.com https://api.tosspayments.com",
     "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",

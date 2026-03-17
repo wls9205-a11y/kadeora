@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
@@ -183,9 +182,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           {/* 아바타 */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
             {avatarUrl ? (
-              <div style={{ width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid var(--border)' }}>
-                <Image src={avatarUrl} alt={`${displayName} 프로필 사진`} fill sizes="72px" style={{ objectFit: 'cover' }} />
-              </div>
+              <img src={avatarUrl} alt={`${displayName} 프로필 사진`} style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }} />
             ) : (
               <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
                 {GRADE_EMOJIS[profile.grade ?? 1] ?? '🌱'}

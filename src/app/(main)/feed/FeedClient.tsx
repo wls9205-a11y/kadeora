@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -290,9 +289,7 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
               <div style={{ flex: 1, padding: '10px 12px', minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6, flexWrap: 'wrap' }}>
                   {post.profiles?.avatar_url ? (
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-                      <Image src={post.profiles.avatar_url} alt="" fill sizes="18px" style={{ objectFit: 'cover' }} />
-                    </div>
+                    <img src={post.profiles.avatar_url} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                   ) : (
                     <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
                       {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
@@ -305,7 +302,7 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
                 <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                   {post.title}
                 </h2>
-                <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
                   {post.content}
                 </p>
                 <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
