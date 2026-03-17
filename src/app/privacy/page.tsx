@@ -45,7 +45,7 @@ export default function PrivacyPage() {
         <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>5. 개인정보 보호 책임자</h2>
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           이메일:{' '}
-          <a href="mailto:wls9205@gmail.com" style={{ color: 'var(--brand)' }}>wls9205@gmail.com</a>
+          <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)' }}>kadeora.app@gmail.com</a>
         </p>
         {/* 주소, 전화번호, 대표자 실명은 개인정보 보호를 위해 게재하지 않습니다 */}
       </section>

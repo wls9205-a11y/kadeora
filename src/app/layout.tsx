@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     'service-type': '금융·부동산 정보 커뮤니티',
     'service-region': '대한민국',
     'service-language': 'ko',
-    'contact-email': 'wls9205@gmail.com',
+    'contact-email': 'kadeora.app@gmail.com',
   },
 };
 
@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             '@type': 'Organization',
             name: '카더라',
             url: 'https://kadeora.app',
-            contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'wls9205@gmail.com', availableLanguage: '한국어' },
+            contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', availableLanguage: '한국어' },
           },
         }) }} />
       </head>
