@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
-import { CATEGORY_MAP } from '@/lib/constants';
+import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
@@ -22,9 +22,9 @@ function timeAgo(dateStr: string) {
 }
 function numFmt(n: number) { return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n); }
 
-interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeCategory: string; }
+interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeCategory: string; activeRegion?: string; }
 
-export default function FeedClient({ posts, activeCategory }: Props) {
+export default function FeedClient({ posts, activeCategory, activeRegion = 'all' }: Props) {
   const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(40);
   const [showRegionBanner, setShowRegionBanner] = useState(false);
@@ -33,6 +33,7 @@ export default function FeedClient({ posts, activeCategory }: Props) {
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
+  const [userRegion, setUserRegion] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -57,6 +58,10 @@ export default function FeedClient({ posts, activeCategory }: Props) {
         const { data: profile } = await sb.from('profiles')
           .select('region_text').eq('id', userId).single();
         if (profile && !profile.region_text) setShowRegionBanner(true);
+        if (profile?.region_text) {
+          const matched = REGIONS.find(r => r.value !== 'all' && profile.region_text.startsWith(r.value));
+          if (matched) setUserRegion(matched.value);
+        }
 
         // Load user's liked posts
         const { data: likes } = await sb.from('post_likes')
@@ -227,6 +232,35 @@ export default function FeedClient({ posts, activeCategory }: Props) {
           </button>
         ))}
       </div>
+
+      {/* 지역 탭 (우리동네 카테고리일 때만) */}
+      {activeCategory === 'local' && (
+        <div style={{
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: 4, padding: '6px 8px', display: 'flex', gap: 3, marginBottom: 10,
+          flexWrap: 'nowrap', overflowX: 'auto',
+        }}>
+          {REGIONS.map(r => {
+            const isActive = activeRegion === r.value || (activeRegion === 'all' && r.value === 'all');
+            return (
+              <button key={r.value}
+                onClick={() => {
+                  const params = r.value === 'all' ? '?category=local' : `?category=local&region=${r.value}`;
+                  router.push(`/feed${params}`);
+                }}
+                style={{
+                  padding: '5px 10px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
+                  fontWeight: 600, fontSize: 12,
+                  background: isActive ? 'var(--brand)' : 'transparent',
+                  color: isActive ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+                  transition: 'all 0.1s',
+                }}>
+                {r.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* 게시글 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

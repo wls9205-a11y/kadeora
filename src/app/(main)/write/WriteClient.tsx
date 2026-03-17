@@ -7,6 +7,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import ImageUpload from '@/components/ImageUpload';
 import { filterContent } from '@/lib/filter';
+import { REGIONS } from '@/lib/constants';
 
 const CATEGORIES = [
   { value: 'apt', label: '🏠 부동산', desc: '부동산 정보, 청약, 투자 이야기' },
@@ -28,18 +29,26 @@ export default function WriteClient() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [regionId, setRegionId] = useState('서울');
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(({ data }) => {
+    sb.auth.getSession().then(async ({ data }) => {
       if (!data.session) {
         router.push('/login?redirect=/write');
         return;
       }
       setUserId(data.session.user.id);
+      const { data: profile } = await sb.from('profiles')
+        .select('region_text').eq('id', data.session.user.id).single();
+      if (profile?.region_text) {
+        const regionOptions = REGIONS.filter(r => r.value !== 'all');
+        const matched = regionOptions.find(r => profile.region_text.startsWith(r.value));
+        if (matched) setRegionId(matched.value);
+      }
     });
   }, [router]);
 
@@ -87,7 +96,7 @@ export default function WriteClient() {
         const res = await fetch(`/api/posts/${editId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, tag: hashtags }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, tag: hashtags, ...(category === 'local' ? { region_id: regionId } : {}) }),
         });
         if (!res.ok) {
           const e = await res.json();
@@ -99,7 +108,7 @@ export default function WriteClient() {
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, tag: hashtags }),
+          body: JSON.stringify({ category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, tag: hashtags, ...(category === 'local' ? { region_id: regionId } : {}) }),
         });
         if (!res.ok) {
           const e = await res.json();
@@ -174,6 +183,27 @@ export default function WriteClient() {
             ))}
           </div>
         </div>
+
+        {/* 지역 선택 (우리동네 카테고리일 때만) */}
+        {category === 'local' && (
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>📍 지역 선택</label>
+            <select
+              value={regionId}
+              onChange={e => setRegionId(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 14px', fontSize: 14,
+                background: 'var(--bg-base)', border: '1px solid var(--border)',
+                borderRadius: 10, color: 'var(--text-primary)', cursor: 'pointer',
+                boxSizing: 'border-box',
+              }}
+            >
+              {REGIONS.filter(r => r.value !== 'all').map(r => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* 제목 */}
         <div style={{ marginBottom: 16 }}>

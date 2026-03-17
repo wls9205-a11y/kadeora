@@ -13,14 +13,15 @@ import Disclaimer from '@/components/Disclaimer';
 
 export const dynamic = 'force-dynamic';
 
-async function getPosts(category: string) {
+async function getPosts(category: string, region: string = 'all') {
   const sb = await createSupabaseServer();
   let q = sb.from('posts')
-    .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,images,author_id, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+    .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,images,author_id,region_id, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
     .limit(30);
   if (category !== 'all') q = q.eq('category', category);
+  if (category === 'local' && region !== 'all') q = q.eq('region_id', region);
   const { data, error } = await q;
   if (error || !data || data.length === 0) return null;
   return data as PostWithProfile[];
@@ -32,16 +33,16 @@ async function getTrending() {
   return data as TrendingKeyword[] | null;
 }
 
-interface Props { searchParams: Promise<{ category?: string }>; }
+interface Props { searchParams: Promise<{ category?: string; region?: string }>; }
 
 export default async function FeedPage({ searchParams }: Props) {
-  const { category = 'all' } = await searchParams;
-  const [postsData, trendingData] = await Promise.allSettled([getPosts(category), getTrending()]);
+  const { category = 'all', region = 'all' } = await searchParams;
+  const [postsData, trendingData] = await Promise.allSettled([getPosts(category, region), getTrending()]);
   const posts = postsData.status === 'fulfilled' && postsData.value ? postsData.value : category === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(p => p.category === category);
   const trending = trendingData.status === 'fulfilled' && trendingData.value ? trendingData.value : DEMO_TRENDING;
   return (
     <Suspense>
-      <FeedClient posts={posts} trending={trending} activeCategory={category} />
+      <FeedClient posts={posts} trending={trending} activeCategory={category} activeRegion={region} />
       <Disclaimer />
     </Suspense>
   );
