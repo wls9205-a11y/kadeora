@@ -14,10 +14,11 @@ const NAV_ITEMS = [
   { href: '/hot',            label: 'HOT',    icon: '🔥' },
 ];
 
-const MOBILE_TABS = [
+const MOBILE_TABS_LEFT = [
   { href: '/feed', label: '피드', icon: '📋' },
   { href: '/stock', label: '주식', icon: '📊' },
-  { href: '/apt', label: '부동산', icon: '🏢' },
+];
+const MOBILE_TABS_RIGHT = [
   { href: '/hot', label: 'HOT', icon: '🔥' },
   { href: '/discuss', label: '토론', icon: '💭' },
 ];
@@ -303,24 +304,37 @@ export function Navigation() {
         position:'fixed', bottom:0, left:0, right:0, zIndex:200,
         background:'var(--nav-bg)',
         borderTop:'1px solid var(--nav-border)',
-        display:'grid', gridTemplateColumns:'repeat(5,1fr)',
+        display:'flex', alignItems:'flex-end', justifyContent:'space-around',
         paddingBottom:'max(8px, env(safe-area-inset-bottom))',
-        paddingTop:8,
+        paddingTop:0,
         boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',
       }} className="md:hidden">
-        {MOBILE_TABS.map(item => {
+        {[...MOBILE_TABS_LEFT, { href: '/write', label: '', icon: '' }, ...MOBILE_TABS_RIGHT].map(item => {
+          if (item.href === '/write') {
+            return (
+              <Link key="write" href="/write" aria-label="글쓰기" style={{
+                display:'flex', alignItems:'center', justifyContent:'center',
+                width:48, height:48, borderRadius:14,
+                background:'var(--brand)', color:'#fff',
+                marginTop:-10, flexShrink:0, textDecoration:'none',
+              }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </Link>
+            );
+          }
           const active = isActive(item.href);
           return (
             <Link key={item.href} href={item.href}
               aria-current={active ? 'page' : undefined}
               style={{
                 display:'flex', flexDirection:'column', alignItems:'center', gap:3,
-                padding:'8px 4px', textDecoration:'none', minHeight:52,
-                justifyContent:'center',
+                padding:'10px 4px', textDecoration:'none', minHeight:56,
+                justifyContent:'center', flex:1,
                 color: active ? 'var(--brand)' : 'var(--text-tertiary)',
-                minHeight:44,
               }}>
-              <span style={{ fontSize:20, lineHeight:1 }}>{item.icon}</span>
+              <span style={{ fontSize:22, lineHeight:1 }}>{item.icon}</span>
               <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );

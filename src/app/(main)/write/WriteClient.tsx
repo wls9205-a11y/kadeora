@@ -133,8 +133,8 @@ export default function WriteClient() {
   );
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>
+    <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
         <Link href="/feed" style={{ color: 'var(--brand)', textDecoration: 'none' }}>피드</Link>
         <span style={{ margin: '0 6px' }}>›</span>
         <span>{editId ? '게시글 수정' : '새 글 작성'}</span>
@@ -142,25 +142,25 @@ export default function WriteClient() {
 
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 16, padding: '28px 28px 24px',
+        borderRadius: 14, padding: '20px 20px 16px',
       }}>
-        <h1 style={{ margin: '0 0 24px', fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>
+        <h1 style={{ margin: '0 0 16px', fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
           {editId ? '✏️ 게시글 수정' : '✏️ 새 글 작성'}
         </h1>
 
         {/* 카테고리 */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {CATEGORIES.map(cat => (
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value)}
                 style={{
-                  padding: '8px 18px', borderRadius: 24, cursor: 'pointer',
+                  padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
                   border: `1px solid ${category === cat.value ? 'var(--brand)' : 'var(--border)'}`,
                   background: category === cat.value ? 'var(--brand)' : 'var(--bg-hover)',
                   color: category === cat.value ? '#fff' : 'var(--text-secondary)',
-                  fontSize: 14, fontWeight: 600, transition: 'all 0.15s',
+                  fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
                 }}
               >
                 {cat.label}
@@ -219,12 +219,13 @@ export default function WriteClient() {
             onChange={e => setContent(e.target.value)}
             placeholder="내용을 입력해주세요"
             maxLength={5000}
-            rows={14}
+            rows={10}
             style={{
               width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border)',
-              borderRadius: 10, color: 'var(--text-primary)', padding: '14px',
+              borderRadius: 10, color: 'var(--text-primary)', padding: '10px 14px',
               fontSize: 14, resize: 'vertical', fontFamily: 'inherit',
               lineHeight: 1.7, transition: 'border-color 0.15s', boxSizing: 'border-box',
+              minHeight: 200,
             }}
             onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
             onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
@@ -282,6 +283,11 @@ export default function WriteClient() {
           </label>
           <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>작성자 정보가 표시되지 않습니다</span>
         </div>
+
+        <details style={{ marginTop: 4, marginBottom: 8 }}>
+          <summary style={{ fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer' }}>⚠ 투자 정보 유의사항</summary>
+          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4, lineHeight: 1.5 }}>허위사실·과장된 수익 정보 유포는 자본시장법 제178조에 의거 처벌받을 수 있습니다.</p>
+        </details>
 
         {/* 버튼 */}
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
