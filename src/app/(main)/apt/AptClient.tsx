@@ -1,10 +1,12 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface Apt {
   id: number;
   house_nm: string;
+  house_manage_no?: string;
   region_nm: string;
   hssply_adres: string;
   tot_supply_hshld_co: number;
@@ -19,6 +21,8 @@ interface Apt {
   pblanc_url: string;
   mdatrgbn_nm: string;
   competition_rate_1st: number | null;
+  competition_rate_2nd?: number | null;
+  view_count?: number;
 }
 
 const REGIONS = ['전체','서울','경기','인천','부산','대구','광주','대전','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'];
@@ -39,11 +43,11 @@ function getDday(apt: Apt): number | null {
   return diff;
 }
 
-const STATUS_STYLE = {
-  open:     { label: '접수중 🔥', bg: 'var(--success-bg)', color: 'var(--success)', border: 'var(--success)' },
-  upcoming: { label: '접수예정', bg: 'var(--warning-bg)', color: 'var(--warning)', border: 'var(--warning)' },
-  closed:   { label: '마감', bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' },
-};
+const STATUS_BADGE = {
+  open:     { label: '접수중',   bg: '#dcfce7', color: '#166534', border: '#86efac' },
+  upcoming: { label: '접수예정', bg: '#dbeafe', color: '#1e3a8a', border: '#93c5fd' },
+  closed:   { label: '마감',     bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' },
+} as const;
 
 function fmtSupply(v: number | null | undefined): string {
   if (!v || v === 0) return '정보 업데이트 예정';
@@ -56,6 +60,32 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
   const [statusFilter, setStatusFilter] = useState('전체');
   const [expandedId, setExpandedId] = useState<number|null>(null);
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
+  const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
+  const [aptUser, setAptUser] = useState<any>(null);
+
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    sb.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        setAptUser(data.session.user);
+        sb.from('apt_alerts').select('house_manage_no').eq('user_id', data.session.user.id)
+          .then(({ data: alerts }) => { if (alerts) setMyAlerts(new Set(alerts.map(a => a.house_manage_no))); });
+      }
+    });
+  }, []);
+
+  const toggleAlert = async (apt: Apt) => {
+    if (!aptUser) return;
+    const sb = createSupabaseBrowser();
+    const houseNo = apt.house_manage_no || String(apt.id);
+    if (myAlerts.has(houseNo)) {
+      await sb.from('apt_alerts').delete().eq('user_id', aptUser.id).eq('house_manage_no', houseNo);
+      setMyAlerts(prev => { const s = new Set(prev); s.delete(houseNo); return s; });
+    } else {
+      await sb.from('apt_alerts').insert({ user_id: aptUser.id, house_manage_no: houseNo, house_nm: apt.house_nm });
+      setMyAlerts(prev => new Set([...prev, houseNo]));
+    }
+  };
 
   const filtered = useMemo(() => {
     return apts.filter(apt => {
@@ -91,11 +121,25 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
 
       {activeTab === 'unsold' && (() => {
         if (unsold.length === 0) return <div style={{ textAlign:'center', padding:40, color:'var(--text-tertiary)' }}>미분양 데이터가 없습니다</div>;
+        const totalUnsold = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const regions = Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타')));
         const filteredU = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
         const grouped = filteredU.reduce((a: any, u: any) => { const r = u.region_nm || '기타'; if (!a[r]) a[r] = []; a[r].push(u); return a; }, {} as Record<string, any[]>);
         return (
           <div style={{ marginBottom:16 }}>
+            {/* 미분양 요약 배너 */}
+            <div style={{ background:'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(220,38,38,0.05))', border:'1px solid rgba(239,68,68,0.2)', borderRadius:12, padding:'12px 16px', marginBottom:16, display:'flex', gap:20, alignItems:'center', flexWrap:'wrap' }}>
+              <div>
+                <div style={{ fontSize:10, color:'var(--text-tertiary)' }}>전국 미분양</div>
+                <div style={{ fontSize:20, fontWeight:800, color:'#dc2626' }}>{totalUnsold.toLocaleString()}세대</div>
+              </div>
+              <div>
+                <div style={{ fontSize:10, color:'var(--text-tertiary)' }}>현장 수</div>
+                <div style={{ fontSize:20, fontWeight:800, color:'var(--text-primary)' }}>{unsold.length}곳</div>
+              </div>
+              <div style={{ fontSize:11, color:'var(--text-tertiary)', flex:1, textAlign:'right' }}>국토교통부 기준 · 매월 갱신</div>
+            </div>
+
             <div style={{ display:'flex', gap:6, overflowX:'auto', marginBottom:16, paddingBottom:4 }}>
               {['전체', ...regions].map(r => (
                 <button key={r} onClick={() => setUnsoldRegion(r)} style={{
@@ -171,231 +215,93 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
       </div>
 
       {/* 리스트 */}
-      <div className="space-y-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filtered.length === 0 && (
-          <div className="text-center py-16" style={{ color: 'var(--text-tertiary)' }}>
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
             조건에 맞는 청약 정보가 없습니다
           </div>
         )}
         {filtered.map(apt => {
           const status = getStatus(apt);
-          const ss = STATUS_STYLE[status];
+          const badge = STATUS_BADGE[status];
           const dday = getDday(apt);
-          const isOpen = expandedId === apt.id;
+          const isClosed = status === 'closed';
+          const houseNo = apt.house_manage_no || String(apt.id);
 
           return (
-            <div
-              key={apt.id}
-              className="rounded-xl overflow-hidden"
-              style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}
-            >
-              {/* 카드 헤더 */}
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: ss.bg, color: ss.color, border: `1px solid ${ss.border}` }}
-                      >
-                        {ss.label}
-                      </span>
-                      {status === 'upcoming' && dday !== null && dday >= 0 && (
-                        <span
-                          className="text-xs font-bold px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
-                        >
-                          D-{dday}
-                        </span>
-                      )}
-                      {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
-                        <span
-                          className="text-xs font-bold px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
-                        >
-                          🏆 {Number(apt.competition_rate_1st).toFixed(1)}:1
-                        </span>
-                      )}
-                      <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
-                    </div>
-                    <Link href={`/apt/${apt.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <h2 className="font-bold text-base mt-1 leading-snug" style={{ color: 'var(--text-primary)' }}>
-                        {apt.house_nm}
-                      </h2>
-                    </Link>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-tertiary)' }}>
-                      {apt.hssply_adres}
-                    </p>
+            <div key={apt.id} style={{
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              borderRadius: 14, padding: '14px 16px', opacity: isClosed ? 0.75 : 1,
+            }}>
+              {/* 상단: 현장명 + 상태 배지 */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{apt.house_nm}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: badge.bg, color: badge.color, border: `1px solid ${badge.border}`, flexShrink: 0 }}>{badge.label}</span>
+                    {status === 'upcoming' && dday !== null && dday >= 0 && (
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'var(--brand-light)', color: 'var(--brand)' }}>D-{dday}</span>
+                    )}
                   </div>
-
-                  {/* 공급 세대 */}
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold" style={{ color: 'var(--brand)' }}>
-                      {fmtSupply(apt.tot_supply_hshld_co)}
-                    </p>
-                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 3 }}>{apt.region_nm} {apt.hssply_adres ? `· ${apt.hssply_adres}` : ''}</div>
                 </div>
-
-                {/* 접수 기간 */}
-                {apt.rcept_bgnde && (
-                  <div
-                    className="mt-3 px-3 py-2 rounded-lg text-xs"
-                    style={{ backgroundColor: 'var(--bg-sunken)', color: 'var(--text-secondary)' }}
-                  >
-                    📅 {apt.rcept_bgnde} ~ {apt.rcept_endde}
-                  </div>
+                {apt.pblanc_url && (
+                  <a href={apt.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none', flexShrink: 0, marginLeft: 8, fontWeight: 600 }}>자세히 →</a>
                 )}
-
-                {/* 액션 버튼 행 */}
-                <div className="flex gap-2 mt-3 flex-wrap">
-                  {/* ★ 현장토론방 버튼 — 청약 일정과 연동 */}
-                  <Link
-                    href="/discuss"
-                    onClick={haptic}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
-                    style={{
-                      backgroundColor: 'var(--success-bg)',
-                      color: 'var(--success)',
-                      border: '1px solid var(--success)',
-                    }}
-                  >
-                    🏠 현장토론방
-                  </Link>
-
-                  {apt.pblanc_url && (
-                    <a
-                      href={apt.pblanc_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={haptic}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
-                      style={{
-                        backgroundColor: 'var(--info-bg)',
-                        color: 'var(--info)',
-                        border: '1px solid var(--info)',
-                      }}
-                    >
-                      청약홈 →
-                    </a>
-                  )}
-
-                  <button
-                    onClick={() => { haptic(); setExpandedId(isOpen ? null : apt.id); }}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
-                    style={{
-                      backgroundColor: 'var(--bg-hover)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border)',
-                    }}
-                  >
-                    {isOpen ? '접기 ▲' : '상세보기 ▼'}
-                  </button>
-                </div>
               </div>
 
-              {/* 상세 펼침 */}
-              {isOpen && (
-                <div
-                  className="px-4 pb-4 border-t"
-                  style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-sunken)' }}
-                >
-                  {/* 요약 카드 */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, paddingTop: 12, marginBottom: 12 }}>
-                    <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>공급세대</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand)' }}>
-                        {fmtSupply(apt.tot_supply_hshld_co)}
-                      </div>
-                    </div>
-                    <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>청약기간</div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {apt.rcept_bgnde} ~ {apt.rcept_endde}
-                      </div>
-                    </div>
+              {/* 청약 일정 그리드 */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '7px 10px' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>청약 접수</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {apt.rcept_bgnde ? String(apt.rcept_bgnde).slice(5).replace('-', '/') : '-'} ~ {apt.rcept_endde ? String(apt.rcept_endde).slice(5).replace('-', '/') : '-'}
                   </div>
-
-                  {/* 상세 일정 */}
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                    {apt.spsply_rcept_bgnde && (
-                      <><dt style={{ color: 'var(--text-tertiary)' }}>특별공급</dt>
-                      <dd style={{ color: 'var(--text-primary)' }}>{apt.spsply_rcept_bgnde} ~ {apt.spsply_rcept_endde}</dd></>
-                    )}
-                    {apt.przwner_presnatn_de && (
-                      <><dt style={{ color: 'var(--text-tertiary)' }}>당첨자발표</dt>
-                      <dd style={{ color: 'var(--text-primary)' }}>{apt.przwner_presnatn_de}</dd></>
-                    )}
-                    {apt.cntrct_cncls_bgnde && (
-                      <><dt style={{ color: 'var(--text-tertiary)' }}>계약</dt>
-                      <dd style={{ color: 'var(--text-primary)' }}>{apt.cntrct_cncls_bgnde} ~ {apt.cntrct_cncls_endde}</dd></>
-                    )}
-                    {apt.mvn_prearnge_ym && (
-                      <><dt style={{ color: 'var(--text-tertiary)' }}>입주예정</dt>
-                      <dd style={{ color: 'var(--text-primary)' }}>{apt.mvn_prearnge_ym}</dd></>
-                    )}
-                    {apt.mdatrgbn_nm && (
-                      <><dt style={{ color: 'var(--text-tertiary)' }}>공급지역</dt>
-                      <dd style={{ color: 'var(--text-primary)' }}>{apt.mdatrgbn_nm}</dd></>
-                    )}
+                </div>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '7px 10px' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>당첨자 발표</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{apt.przwner_presnatn_de ? String(apt.przwner_presnatn_de).slice(5).replace('-', '/') : '-'}</div>
+                </div>
+                {apt.tot_supply_hshld_co > 0 && (
+                  <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '7px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>총 공급</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{apt.tot_supply_hshld_co.toLocaleString()}세대</div>
                   </div>
-
-                  {/* D-day 배지 */}
-                  {(() => {
-                    const today = new Date().toISOString().slice(0,10);
-                    const start = apt.rcept_bgnde;
-                    const end = apt.rcept_endde;
-                    if (!start) return null;
-                    const diffStart = Math.ceil((new Date(start).getTime() - Date.now()) / 86400000);
-                    let badge = ''; let badgeColor = 'var(--text-tertiary)';
-                    if (today >= start && today <= end) { badge = '📢 청약 진행 중!'; badgeColor = 'var(--success)'; }
-                    else if (diffStart > 0 && diffStart <= 7) { badge = `⏰ D-${diffStart} 곧 시작`; badgeColor = 'var(--brand)'; }
-                    else if (diffStart > 7) { badge = `📅 D-${diffStart}`; badgeColor = 'var(--info)'; }
-                    else { badge = '✅ 청약 마감'; }
-                    return (
-                      <div style={{ textAlign:'center', padding:8, borderRadius:8, background:'var(--bg-hover)', color:badgeColor, fontWeight:800, fontSize:14, marginBottom:12 }}>
-                        {badge}
-                      </div>
-                    );
-                  })()}
-
-                  {/* 현장 정보 안내 */}
-                  <div style={{
-                    background:'var(--info-bg)', border:'1px solid var(--info)',
-                    borderRadius:8, padding:10, marginBottom:12, fontSize:12,
-                    color:'var(--text-secondary)', lineHeight:1.6,
-                  }}>
-                    🏫 배정학교, 🚇 근처 교통, 🏪 편의시설 등은 <strong>현장 토론방</strong>에서 실거주 경험자에게 물어보세요!
+                )}
+                {apt.cntrct_cncls_bgnde && (
+                  <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '7px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>계약</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{String(apt.cntrct_cncls_bgnde).slice(5).replace('-', '/')} ~ {apt.cntrct_cncls_endde ? String(apt.cntrct_cncls_endde).slice(5).replace('-', '/') : ''}</div>
                   </div>
+                )}
+              </div>
 
-                  {/* 바로가기 버튼 */}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                    {apt.pblanc_url && (
-                      <a
-                        href={apt.pblanc_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          flex: 1, textAlign: 'center', padding: 12, borderRadius: 8,
-                          background: 'var(--info)', color: 'var(--text-inverse)',
-                          textDecoration: 'none', fontWeight: 700, fontSize: 14,
-                        }}
-                      >
-                        🏠 청약홈 바로가기
-                      </a>
-                    )}
-                    <Link
-                      href="/discuss"
-                      style={{
-                        flex: 1, textAlign: 'center', padding: 12, borderRadius: 8,
-                        background: 'var(--brand)', color: 'var(--text-inverse)',
-                        textDecoration: 'none', fontWeight: 700, fontSize: 14,
-                      }}
-                    >
-                      💬 현장 토론방
-                    </Link>
+              {/* 경쟁률 (마감 현장) */}
+              {isClosed && apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
+                <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.08))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '8px 12px', marginBottom: 10, display: 'flex', gap: 16, alignItems: 'center' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>경쟁률</div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>1순위</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: '#6366f1' }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1</div>
                   </div>
                 </div>
               )}
+
+              {/* 조회수 + 알림 + 버튼 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>👁 {(apt.view_count || 0).toLocaleString()}</span>
+                <div style={{ flex: 1 }} />
+                <button onClick={() => toggleAlert(apt)} style={{
+                  fontSize: 12, padding: '5px 12px', borderRadius: 8, cursor: 'pointer',
+                  background: myAlerts.has(houseNo) ? 'rgba(255,69,0,0.1)' : 'var(--bg-hover)',
+                  color: myAlerts.has(houseNo) ? 'var(--brand)' : 'var(--text-secondary)',
+                  border: `1px solid ${myAlerts.has(houseNo) ? 'var(--brand)' : 'var(--border)'}`, fontWeight: 600,
+                }}>{myAlerts.has(houseNo) ? '🔔 알림중' : '🔕 알림받기'}</button>
+                <a href={`/discussion/field_discussion?apt=${encodeURIComponent(apt.house_nm || '')}`} style={{
+                  fontSize: 12, padding: '5px 12px', borderRadius: 8, background: 'var(--bg-hover)',
+                  color: 'var(--text-secondary)', border: '1px solid var(--border)', textDecoration: 'none', fontWeight: 600,
+                }}>✏️ 한줄평</a>
+              </div>
             </div>
           );
         })}

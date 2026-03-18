@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 
 const MOBILE_TABS_LEFT = [
   { href: '/feed', label: '피드', icon: '📋' },
-  { href: '/stock', label: '주식', icon: '📊' },
+  { href: '/apt', label: '부동산', icon: '🏢' },
 ];
 const MOBILE_TABS_RIGHT = [
   { href: '/hot', label: 'HOT', icon: '🔥' },

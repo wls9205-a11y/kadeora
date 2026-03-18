@@ -1,0 +1,152 @@
+# 카더라(KADEORA) 개발 저널
+# 마지막 업데이트: 2026-03-19
+
+## 프로젝트 기본 정보
+- 서비스: 카더라 (kadeora.app) — 대한민국 소리소문 정보 커뮤니티
+- 스택: Next.js 15, Supabase PostgreSQL, Vercel, TypeScript, Tailwind CSS
+- Supabase 프로젝트 ID: tezftxakuwhsclarprlz (Pro 플랜 업그레이드 완료)
+- Vercel: prj_2nDcTjEcgAEew1wYdvVF57VljxJQ / team: wls9205-5665s-projects
+- 리전: 서울 icn1 (2026-03-19 설정 완료)
+- GitHub: wls9205-a11y/kadeora (main branch)
+- 프로젝트 경로: C:\Users\82105\Documents\kadeora
+- 어드민: 카더라(265d8c3b-bd40-40c1-b7d2-bdde16a88204), 어드민2(b7b4dd42-4685-4ca6-9ee3-dfedf82e86f2)
+
+## 도메인
+- kadeora.app (Vercel에서 구매 — Cloudflare 프록시 불가, 서울 리전으로 대체)
+
+## CLAUDE.md 핵심 규칙
+- 하드코딩 색상 금지 → CSS 변수만
+- Supabase: createSupabaseBrowser() / createSupabaseServer()
+- profiles 컬럼: nickname (username 아님)
+- posts 컬럼: author_id (user_id 아님), region_id NOT NULL (기본값 'all')
+- discussion_messages 컬럼: author_id (user_id 아님)
+- shop_products 가격: price_krw (price 아님)
+- follows 컬럼: follower_id, followee_id (following_id 아님!)
+- 빌드 후 push (npm run build 먼저)
+- 다크모드 전용
+
+## 로고
+- 현재 카더라 로고: 주황(#FF4500) 라운드 사각형 + 흰 원 3개 가로 배열
+- SVG: <rect width="32" height="32" rx="8" fill="#FF4500"/> + 3개 circle fill="white"
+
+## DB 현황 (2026-03-19 기준)
+- posts: 3,338개 (is_deleted=false)
+- profiles: 21명 (시드 유저 10명 포함)
+- comments: 1,479개
+- post_likes: 2,298개
+- pwa_installs: 12건
+- push_subscriptions: 1개
+- attendance: 오늘 0명
+
+## 테스트 유저 ID
+- 부산갈매기: aaaaaaaa-0001-0001-0001-000000000001
+- 서울강남녀: aaaaaaaa-0002-0002-0002-000000000002
+- 판교개발자김씨: aaaaaaaa-0003-0003-0003-000000000003
+- 인천항공덕후: aaaaaaaa-0004-0004-0004-000000000004
+- 대구막창마스터: aaaaaaaa-0005-0005-0005-000000000005
+- 광주청약준비생: aaaaaaaa-0006-0006-0006-000000000006
+- 대전유성구민: aaaaaaaa-0007-0007-0007-000000000007
+- 제주이주3년차: aaaaaaaa-0008-0008-0008-000000000008
+- 울산조선소옆집: aaaaaaaa-0009-0009-0009-000000000009
+- 수원반도체주주: aaaaaaaa-0010-0010-0010-000000000010
+
+## DB 테이블 주요 구조
+### discussion_rooms
+- id, room_type, room_key, display_name, description, is_active
+- 활성 방: stock_discussion(주식), field_discussion(현장)
+- 비활성: general_domestic_stock, general_us_stock, general_realestate, general_free
+
+### comments
+- comment_type 컬럼 추가됨: 'comment' | 'oneliner'
+
+### pwa_installs
+- user_id, platform (android/ios/desktop), installed_at, user_agent, region_text
+
+### site_notices
+- content, is_active, link_url, created_at
+
+### unsold_apts (미분양)
+- region_nm, sigungu_nm, house_nm, tot_unsold_hshld_co, sale_price_min, sale_price_max, completion_ym
+
+### apt_alerts
+- user_id, house_manage_no, house_nm (청약 알림 구독)
+
+### attendance
+- user_id, streak, last_date, total_days, updated_at
+
+## 인프라 현황
+### Supabase Pro (2026-03-19 업그레이드)
+- DB 슬립 없음 (always on)
+- 대역폭 250GB/월
+- 일별 자동 백업
+- 동시 연결 대폭 증가
+
+### Vercel 서울 리전 icn1 (2026-03-19 설정)
+- 한국 사용자 응답속도 300~500ms 단축
+- Function Region: Seoul, South Korea (icn1)
+
+### 캐싱 (2026-03-19 적용)
+- 게시글 상세: revalidate = 60
+- 부동산: revalidate = 300
+- 토론방: revalidate = 60
+- 가이드북/상점: revalidate = 3600
+- 피드/HOT: force-dynamic (매 요청)
+- /icons/*: immutable 1년
+- /api/og: s-maxage 1시간
+- SW: 정적 자산 Cache First
+
+### DB 인덱스 최적화 (2026-03-19)
+- posts 중복 인덱스 9개 제거 (27개 → 17개 → 실제 write 속도 향상)
+
+## 완료된 주요 기능
+### 코드
+- NoticeBanner: 헤더 아래 초록 텍스트 전광판 (site_notices 테이블)
+- GuestCTA: 비로그인 유저 회원가입 유도 배너
+- OneLinerSection: 게시글 한줄평 (comment_type='oneliner')
+- PWAInstallTracker: standalone 모드 자동 설치 기록
+- RefreshButton: 피드 새로고침 버튼 + 햅틱
+- lib/haptic.ts: iOS AudioContext + Android vibrate 통합 햅틱
+- AdminCharts.tsx: SVG 라인차트 + 도넛차트 (외부 라이브러리 없음)
+- AptClient: 청약/미분양 탭 전환, 미분양 지역별 섹션, 상태 배지 색상
+- 청약 가점 진단 페이지: /apt/diagnose
+- 하단 탭바 중앙 글쓰기 플로팅 버튼 (주황 +버튼)
+- 공유 API: /api/share (share_logs 기록)
+- 공지 미리보기: NoticeManager 실시간 미리보기
+- 푸시 발송: 전체/웹/앱 구분 + 4기기 미리보기(Android/iPhone/Chrome/Safari) + 이미지 첨부
+
+### 어드민 페이지 구성
+- 통계 카드 (가입자/게시글/오늘 신규)
+- PWA 설치 현황 (전체/Android/iOS/데스크탑)
+- 출석체크 현황 (오늘/전체/TOP5 연속출석)
+- 데이터 차트 (일별 가입자, 일별 게시글, 카테고리 도넛)
+- 공지 전광판 관리 (미리보기 포함)
+- 푸시 알림 발송 (전체/웹/앱, 4기기 미리보기, 이미지)
+
+### TWA / PWA
+- VAPID 키: Vercel 환경변수 등록 완료
+- assetlinks.json: SHA256 실제값 적용
+- Android APK/AAB: 빌드 완료 (키스토어 보관)
+- Play Console: 카더라 앱 생성, AAB 1.0.0 내부 테스트 업로드
+- iOS: 미진행 (Mac 필요)
+
+## PENDING - 직접 처리 필요
+### 즉시
+1. Google Play 신원 확인 이메일 대기 → 전화번호 인증 → 프로덕션 출시
+2. 토스페이먼츠 라이브키 심사 신청
+3. Apple Developer Program $99 결제
+
+### 대기 중
+4. 통신판매업 신고번호 수령 → Vercel NEXT_PUBLIC_BUSINESS_REPORT_NUMBER 등록
+5. iOS 빌드 (Macly.io 또는 Mac 필요)
+6. KIS API 키 (apiportal.koreainvestment.com)
+7. 토스 미니앱 신청 (partners.toss.im)
+
+### 나중에
+8. 광고 집행 (카카오/메타/구글 — 시안 완성됨)
+9. Supabase Compute 업그레이드 시점: MAU 1만 돌파 시 Small($10/월 추가)
+
+## 중요 환경변수 (Vercel)
+- NEXT_PUBLIC_VAPID_PUBLIC_KEY: BGIrm2Vq7YV0OzUycYhKtKRobBwPablvzSgducfLiGslFH4sgPJIZjtCrFUTe9a0ggqdDz_C1e62r3ND0LWscPU
+- VAPID_EMAIL: mailto:kadeora.app@gmail.com
+- NEXT_PUBLIC_SITE_URL: https://kadeora.app
+- NEXT_PUBLIC_BUSINESS_REPORT_NUMBER: (미등록 - 신고번호 대기 중)

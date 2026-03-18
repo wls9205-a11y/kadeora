@@ -233,18 +233,20 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
         </div>
       )}
 
-      {/* HOT 배너 */}
-      {showHotBanner && (
-        <div onClick={() => router.push('/hot')} style={{
-          background:'linear-gradient(135deg, #FF4500, #FF6B35)',
-          borderRadius:8, padding:'10px 14px', marginBottom:10,
-          display:'flex', alignItems:'center', justifyContent:'space-between', cursor:'pointer',
-        }}>
-          <span style={{ fontSize:13, fontWeight:700, color:'#fff' }}>🔥 이번 주 카더라 HOT</span>
-          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <span style={{ fontSize:12, color:'rgba(255,255,255,0.8)' }}>보러가기 →</span>
-            <button onClick={(e) => { e.stopPropagation(); setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed','1'); }}
-              style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', fontSize:14, cursor:'pointer', padding:0 }}>✕</button>
+      {/* 이번주 HOT — 항상 맨 위 */}
+      {hotPosts.length > 0 && (
+        <div style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:14, padding:'12px 14px', marginBottom:14 }}>
+          <div style={{ fontSize:13, fontWeight:700, color:'var(--text-primary)', marginBottom:10, display:'flex', alignItems:'center', gap:6 }}>
+            🔥 이번 주 HOT
+            <Link href="/hot" style={{ fontSize:11, color:'var(--brand)', marginLeft:'auto', textDecoration:'none' }}>전체 보기 →</Link>
+          </div>
+          <div style={{ display:'flex', gap:10, overflowX:'auto', scrollbarWidth:'none' as any }}>
+            {hotPosts.slice(0, 3).map((hp: any) => (
+              <Link key={hp.id} href={`/feed/${hp.id}`} style={{ minWidth:180, maxWidth:200, flexShrink:0, background:'var(--bg-hover)', borderRadius:10, padding:'10px 12px', textDecoration:'none' }}>
+                <div style={{ fontSize:12, color:'var(--brand)', fontWeight:700, marginBottom:4 }}>❤️ {hp.likes_count}</div>
+                <div style={{ fontSize:13, fontWeight:600, color:'var(--text-primary)', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' as any }}>{hp.title}</div>
+              </Link>
+            ))}
           </div>
         </div>
       )}
@@ -308,23 +310,6 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
           const isBookmarked = bookmarkedPosts.has(post.id);
           return (
             <React.Fragment key={post.id}>
-            {postIndex === 5 && hotPosts.length > 0 && (
-              <div style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:8, padding:'12px 14px', marginBottom:2 }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
-                  <span style={{ fontSize:14, fontWeight:700, color:'var(--text-primary)' }}>🔥 이번 주 HOT</span>
-                  <Link href="/hot" style={{ fontSize:12, color:'var(--brand)', textDecoration:'none' }}>전체보기 →</Link>
-                </div>
-                <div style={{ display:'flex', gap:8, overflowX:'auto', paddingBottom:4 }}>
-                  {hotPosts.map((hp: any) => (
-                    <Link key={hp.id} href={`/feed/${hp.id}`} style={{ width:180, flexShrink:0, background:'var(--bg-hover)', border:'1px solid var(--border)', borderRadius:8, padding:10, textDecoration:'none' }}>
-                      <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>{CATEGORY_MAP[hp.category]?.label ?? '자유'}</div>
-                      <div style={{ fontSize:13, fontWeight:600, color:'var(--text-primary)', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', lineHeight:1.4, marginBottom:6 }}>{hp.title}</div>
-                      <div style={{ fontSize:11, color:'var(--brand)', fontWeight:600 }}>❤ {hp.likes_count ?? 0}</div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
             <Link href={`/feed/${post.id}`} className="animate-fadeIn kd-card"
               style={{ display: 'flex', textDecoration: 'none' }}>
               {/* 투표 */}
