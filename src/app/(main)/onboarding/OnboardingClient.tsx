@@ -51,6 +51,16 @@ export default function OnboardingClient() {
       }).eq('id', user.id);
       if (updateErr) throw updateErr;
       success('환영합니다! 카더라를 시작해볼까요 🎉');
+      try {
+        if ('Notification' in window && Notification.permission === 'default' && 'serviceWorker' in navigator) {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY });
+            await fetch('/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON() }) });
+          }
+        }
+      } catch {}
       router.replace('/feed');
     } catch { error('설정 저장 중 오류가 발생했습니다'); }
     finally { setSaving(false); }
@@ -151,6 +161,9 @@ export default function OnboardingClient() {
                 <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>새 기능, 이벤트, 투자 인사이트 등을 이메일로 받아보세요</div>
               </div>
             </label>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12, textAlign: 'center' as const }}>
+              🔔 버튼을 누르면 알림 허용 여부를 물어봐요. 허용하면 새 소식을 바로 받을 수 있어요!
+            </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(2)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
               <button onClick={handleComplete} disabled={saving}

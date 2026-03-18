@@ -20,11 +20,23 @@ export default function InstallBanner() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  const requestPush = async () => {
+    try {
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+      if (Notification.permission !== 'default') return;
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') return;
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY });
+      await fetch('/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON() }) });
+    } catch {}
+  };
+
   const handleInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') setShow(false);
+      if (outcome === 'accepted') { setShow(false); setTimeout(requestPush, 1500); }
       setDeferredPrompt(null);
     } else if (isIOS) {
       setShowIOSGuide(true);
@@ -84,7 +96,7 @@ export default function InstallBanner() {
                 <span style={{ fontSize: 14, color: 'var(--text-primary)' }}>{s.text}</span>
               </div>
             ))}
-            <button onClick={() => { setShowIOSGuide(false); setShow(false); handleDismiss(); }}
+            <button onClick={() => { setShowIOSGuide(false); handleDismiss(); setTimeout(requestPush, 1000); }}
               style={{ marginTop: 20, width: '100%', padding: '14px 0', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
               알겠어요!
             </button>

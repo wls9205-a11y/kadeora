@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import PushSubscribeButton from './PushSubscribeButton';
 import { useState, useEffect } from 'react';
 
 const MENU = [
@@ -113,6 +114,10 @@ export default function Sidebar() {
       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
         <span>📖</span> 가이드북
       </Link>
+
+      <div style={{ padding: '0 8px', marginTop: 4 }}>
+        <PushSubscribeButton />
+      </div>
     </aside>
   );
 }

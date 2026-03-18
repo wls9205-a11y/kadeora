@@ -116,7 +116,7 @@ export function Navigation() {
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       }}>
         <div style={{
-          maxWidth: 1200, margin: '0 auto', padding: '0 16px',
+          maxWidth: 1340, margin: '0 auto', padding: '0 16px',
           height: 48, display: 'flex', alignItems: 'center', gap: 8,
         }}>
           {/* 로고 */}
@@ -129,7 +129,7 @@ export function Navigation() {
 
           {/* 검색바 (데스크탑) */}
           <Link href="/search" className="hidden md:flex" style={{
-            flex:1, maxWidth:420, height:34,
+            flex:1, maxWidth:360, minWidth:160, height:34,
             background:'var(--bg-hover)',
             border:'1px solid var(--border)',
             borderRadius:17, alignItems:'center', padding:'0 12px', gap:7,
