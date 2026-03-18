@@ -63,7 +63,7 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
       if (statusFilter !== '전체' && getStatus(apt) !== statusFilter) return false;
       return true;
     });
-  }, [apts, region, statusFilter, search]);
+  }, [apts, region, statusFilter]);
 
   const haptic = () => { try { if ('vibrate' in navigator) navigator.vibrate(10); } catch {} };
 

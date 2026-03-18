@@ -305,7 +305,7 @@ export function Navigation() {
         borderTop:'1px solid var(--nav-border)',
         display:'grid', gridTemplateColumns:'repeat(5,1fr)',
         paddingBottom:'max(8px, env(safe-area-inset-bottom))',
-        paddingTop:6,
+        paddingTop:8,
         boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',
       }} className="md:hidden">
         {MOBILE_TABS.map(item => {
@@ -314,8 +314,9 @@ export function Navigation() {
             <Link key={item.href} href={item.href}
               aria-current={active ? 'page' : undefined}
               style={{
-                display:'flex', flexDirection:'column', alignItems:'center', gap:2,
-                padding:'6px 4px', textDecoration:'none',
+                display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+                padding:'8px 4px', textDecoration:'none', minHeight:52,
+                justifyContent:'center',
                 color: active ? 'var(--brand)' : 'var(--text-tertiary)',
                 minHeight:44,
               }}>
