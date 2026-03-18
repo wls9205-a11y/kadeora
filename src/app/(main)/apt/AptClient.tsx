@@ -214,7 +214,8 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
               <div style={{ flex: 1, textAlign: 'right' as const, fontSize: 11, color: 'var(--text-tertiary)', alignSelf: 'flex-end' }}>국토교통부 기준</div>
             </div>
 
-            {/* 필터 */}
+            {/* 안내 + 필터 */}
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>최근 1년 기준 · 국토교통부 미분양주택현황 및 청약홈 공공데이터</div>
             <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>
               {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
             </div>
@@ -227,26 +228,24 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
               const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
 
               return (
-                <div key={u.id} style={{ padding: '14px 0', borderBottom: i < fu.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  {/* 줄1: 현장명 + 분양가 */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <div style={{ flex: 1 }}>
-                      <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm || '미분양 단지'}</Link>
-                    </div>
-                    {priceStr && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)', flexShrink: 0, marginLeft: 8 }}>{priceStr}</span>}
+                <div key={u.id} style={{ padding: '16px 16px', borderBottom: i < fu.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                  {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm || '미분양 단지'}</Link>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
+                    {priceStr && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
                   </div>
 
                   {/* 줄2: 지역 + 세대 */}
                   <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
                     {u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}
                     {u.tot_supply_hshld_co && <span> · 총 {u.tot_supply_hshld_co.toLocaleString()}세대</span>}
-                    <span style={{ color: '#f87171', fontWeight: 600 }}> · 미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
                     {u.completion_ym && <span> · 준공 {u.completion_ym.slice(0, 4)}.{u.completion_ym.slice(4, 6)}</span>}
                   </div>
 
                   {/* 미분양률 바 */}
                   {rate !== null && (
-                    <div style={{ position: 'relative', height: 4, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 8 }}>
+                    <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 10 }}>
                       <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#ef4444' : rate > 40 ? '#f97316' : '#eab308' }} />
                       <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 10, fontWeight: 700, color: '#f87171' }}>{rate}%</span>
                     </div>
@@ -257,7 +256,6 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
                     <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
                       style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
                     <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
-                    {u.contact_tel && <a href={`tel:${u.contact_tel}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>📞 전화문의</a>}
                     {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
                   </div>
                 </div>
@@ -265,7 +263,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
             })}
 
             {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>해당 지역 데이터가 없습니다</div>}
-            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>데이터는 주기적으로 업데이트됩니다 · 국토교통부 기준</p>
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>최근 1년 미분양 현황 · 국토교통부 미분양주택현황 및 청약홈 공공데이터 기반 · 매월 갱신</p>
           </div>
         );
       })()}

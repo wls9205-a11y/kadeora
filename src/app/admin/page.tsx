@@ -1,4 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PushBroadcast from './PushBroadcast';
@@ -58,6 +59,14 @@ export default async function AdminDashboard() {
   const pwaAndroid = pwaStats.filter((p: any) => p.platform === 'android').length;
   const pwaIOS = pwaStats.filter((p: any) => p.platform === 'ios').length;
 
+  // 소셜 가입 통계
+  let providerStats: Record<string, number> = {};
+  try {
+    const adminSb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const { data: ps } = await adminSb.from('social_provider_stats').select('provider, count');
+    (ps || []).forEach((p: any) => { providerStats[p.provider || 'email'] = Number(p.count) || 0; });
+  } catch {}
+
   const totalRevenue = paymentsR.data?.reduce((s: number, p: { amount: number }) => s + (p.amount || 0), 0) || 0;
   const pendingCount = pendingReportsR.count ?? 0;
 
@@ -76,6 +85,11 @@ export default async function AdminDashboard() {
           <div style={label}>총 가입자</div>
           <div style={big}>{(usersR.count ?? 0).toLocaleString()}명</div>
           <div style={sub}>오늘 +{todayUsersR.count ?? 0}명</div>
+          <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 16, fontWeight: 600, background: 'rgba(247,191,0,0.15)', color: '#b8860b', border: '1px solid rgba(247,191,0,0.3)' }}>카카오 {providerStats['kakao'] ?? 0}명</span>
+            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 16, fontWeight: 600, background: 'rgba(66,133,244,0.15)', color: '#4285f4', border: '1px solid rgba(66,133,244,0.3)' }}>구글 {providerStats['google'] ?? 0}명</span>
+            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 16, fontWeight: 600, background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>이메일 {providerStats['email'] ?? 0}명</span>
+          </div>
         </div>
         <div style={card}>
           <div style={label}>총 게시글</div>

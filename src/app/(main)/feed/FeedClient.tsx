@@ -6,6 +6,7 @@ import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import RefreshButton from '@/components/RefreshButton';
+import PushNudgeBanner from '@/components/PushNudgeBanner';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
@@ -247,23 +248,45 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
         </div>
       )}
 
-      {/* 이번주 HOT — 항상 맨 위 */}
-      {hotPosts.length > 0 && (
-        <div style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:14, padding:'12px 14px', marginBottom:14 }}>
-          <div style={{ fontSize:13, fontWeight:700, color:'var(--text-primary)', marginBottom:10, display:'flex', alignItems:'center', gap:6 }}>
-            🔥 이번 주 HOT
-            <Link href="/hot" style={{ fontSize:11, color:'var(--brand)', marginLeft:'auto', textDecoration:'none' }}>전체 보기 →</Link>
-          </div>
-          <div style={{ display:'flex', gap:10, overflowX:'auto', scrollbarWidth:'none' as any }}>
-            {hotPosts.slice(0, 3).map((hp: any) => (
-              <Link key={hp.id} href={`/feed/${hp.id}`} style={{ minWidth:180, maxWidth:200, flexShrink:0, background:'var(--bg-hover)', borderRadius:10, padding:'10px 12px', textDecoration:'none' }}>
-                <div style={{ fontSize:12, color:'var(--brand)', fontWeight:700, marginBottom:4 }}>❤️ {hp.likes_count}</div>
-                <div style={{ fontSize:13, fontWeight:600, color:'var(--text-primary)', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' as any }}>{hp.title}</div>
+      {/* 알림 설정 유도 */}
+      <PushNudgeBanner />
+
+      {/* 이번주 HOT */}
+      {hotPosts.length > 0 && (() => {
+        const RANK_COLORS = ['#FF4500', '#FF8C00', '#FFA500'];
+        return (
+          <div style={{ background: 'linear-gradient(135deg, rgba(255,69,0,0.05), transparent)', border: '1px solid var(--border)', borderRadius: 16, padding: '14px 16px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 18, animation: 'hotFlame 1.5s ease-in-out infinite' }}>🔥</span>
+                <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>이번주 HOT</span>
+              </div>
+              <Link href="/hot" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>전체보기 →</Link>
+            </div>
+            {hotPosts.slice(0, 3).map((hp: any, i: number) => (
+              <Link key={hp.id} href={`/feed/${hp.id}`} style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', marginBottom: 8,
+                borderLeft: `3px solid ${RANK_COLORS[i]}`, borderRadius: 10,
+                background: i === 0 ? 'rgba(255,69,0,0.06)' : 'transparent', textDecoration: 'none',
+              }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', background: RANK_COLORS[i], color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>❤ {hp.likes_count ?? 0} · 💬 {hp.comments_count ?? 0}</div>
+                </div>
               </Link>
             ))}
+            {hotPosts.slice(3, 5).map((hp: any, i: number) => (
+              <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < Math.min(hotPosts.length - 3, 2) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-tertiary)', width: 18, textAlign: 'center' as any }}>{i + 4}</span>
+                <span style={{ flex: 1, fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>❤ {hp.likes_count ?? 0}</span>
+              </Link>
+            ))}
+            <style>{`@keyframes hotFlame { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }`}</style>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 카테고리 바 */}
       <div style={{
