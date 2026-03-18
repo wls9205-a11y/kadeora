@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
   if (!profile?.is_admin) redirect('/feed');
 
-  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR] = await Promise.all([
+  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
@@ -25,7 +25,13 @@ export default async function AdminDashboard() {
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('profiles').select('nickname, grade_title, created_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('reports').select('id, reason, content_type, created_at, status').eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
+    supabase.from('pwa_installs').select('platform, installed_at, region_text').order('installed_at', { ascending: false }).limit(30),
   ]);
+
+  const pwaStats = pwaStatsR.data ?? [];
+  const pwaTotal = pwaStats.length;
+  const pwaAndroid = pwaStats.filter((p: any) => p.platform === 'android').length;
+  const pwaIOS = pwaStats.filter((p: any) => p.platform === 'ios').length;
 
   const totalRevenue = paymentsR.data?.reduce((s: number, p: { amount: number }) => s + (p.amount || 0), 0) || 0;
   const pendingCount = pendingReportsR.count ?? 0;
@@ -101,6 +107,24 @@ export default async function AdminDashboard() {
           ))
         )}
       </div>
+      {/* PWA 설치 현황 */}
+      <div style={{ ...card, marginTop: 16 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📲 홈화면 추가 현황</h2>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          {[
+            { label: '전체', value: pwaTotal, icon: '📱' },
+            { label: 'Android', value: pwaAndroid, icon: '🤖' },
+            { label: 'iOS', value: pwaIOS, icon: '🍎' },
+          ].map(s => (
+            <div key={s.label} style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
+              <div style={{ fontSize: 18 }}>{s.icon}</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Push Broadcast */}
       <div style={{ ...card, marginTop: 16 }}>
         <PushBroadcast />
