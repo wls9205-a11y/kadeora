@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 type PreviewDevice = 'android' | 'iphone' | 'chrome' | null;
 
@@ -12,6 +13,12 @@ export default function PushBroadcast() {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState('');
   const [_preview] = useState<PreviewDevice>(null);
+  const [logs, setLogs] = useState<any[]>([]);
+
+  useEffect(() => {
+    createSupabaseBrowser().from('push_logs').select('*').order('created_at', { ascending: false }).limit(20)
+      .then(({ data }) => setLogs(data || []));
+  }, []);
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) return;
@@ -121,6 +128,25 @@ export default function PushBroadcast() {
           {sending ? '발송 중...' : `🚀 ${sendTarget === 'all' ? '전체' : sendTarget === 'web' ? '웹' : '앱'} 발송`}
         </button>
         {result && <div style={{ fontSize: 13, color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', padding: '4px 0' }}>{result}</div>}
+
+        {/* 발송 내역 */}
+        {logs.length > 0 && (
+          <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>📊 발송 내역</div>
+            {logs.map((l: any) => {
+              const ctr = l.sent_count > 0 ? Math.round((l.click_count / l.sent_count) * 100) : 0;
+              return (
+                <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
+                  <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{new Date(l.created_at).toLocaleDateString('ko-KR')}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>발송 {l.sent_count}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>클릭 {l.click_count}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, flexShrink: 0, color: ctr >= 10 ? 'var(--success)' : ctr >= 5 ? 'var(--warning)' : 'var(--text-tertiary)' }}>{ctr}%</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

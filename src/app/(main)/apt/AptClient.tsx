@@ -148,31 +148,37 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
                   )}
                 </div>
 
-                {/* 줄2: 주소 */}
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
-                  {apt.region_nm}{apt.hssply_adres ? ` · ${apt.hssply_adres}` : ''}
-                  {apt.tot_supply_hshld_co > 0 && <span> · {apt.tot_supply_hshld_co.toLocaleString()}세대</span>}
+                {/* 줄2: 주소 + 현장 정보 */}
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>
+                  📍 {apt.region_nm}{apt.hssply_adres ? ` ${apt.hssply_adres}` : ''}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {apt.tot_supply_hshld_co > 0 && <span>🏠 {apt.tot_supply_hshld_co.toLocaleString()}세대</span>}
+                  {apt.mvn_prearnge_ym && <span>🔑 {apt.mvn_prearnge_ym.slice(0,4)}년 {parseInt(apt.mvn_prearnge_ym.slice(4,6))}월 입주</span>}
+                  {apt.mdatrgbn_nm && <span>📋 {apt.mdatrgbn_nm}</span>}
                 </div>
 
                 {/* 줄3: 날짜 한줄 */}
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>
                   청약 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)} · 당첨 {fmtD(apt.przwner_presnatn_de)}
                   {apt.cntrct_cncls_bgnde && <span> · 계약 {fmtD(apt.cntrct_cncls_bgnde)}~{fmtD(apt.cntrct_cncls_endde)}</span>}
                 </div>
 
-                {/* 줄4: 조회/알림 + 버튼 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>👁 {(apt.view_count || 0).toLocaleString()}</span>
-                  {ac > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>🔔 {ac}</span>}
-                  <button onClick={() => setCommentTarget({ houseKey: h, houseNm: apt.house_nm, houseType: 'sub' })} style={{ fontSize: 11, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0 }}>✏️ 한줄평</button>
-                  <Link href={`/apt/${apt.house_manage_no || apt.id}`} style={{ fontSize: 11, color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
+                {/* 줄4: pill 버튼 행 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>
+                    👁 {(apt.view_count || 0).toLocaleString()}
+                  </span>
+                  {ac > 0 && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>🔔 {ac}</span>}
+                  <button onClick={() => setCommentTarget({ houseKey: h, houseNm: apt.house_nm, houseType: 'sub' })}
+                    style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
                   <div style={{ flex: 1 }} />
                   {aptUser && (
                     <button onClick={() => toggleAlert(apt)} style={{
-                      width: 32, height: 32, borderRadius: '50%', border: `1px solid ${my ? 'var(--brand)' : 'var(--border)'}`,
+                      width: 30, height: 30, borderRadius: '50%', border: `1px solid ${my ? 'var(--brand)' : 'var(--border)'}`,
                       background: my ? 'rgba(255,69,0,0.12)' : 'transparent',
                       color: my ? 'var(--brand)' : 'var(--text-tertiary)',
-                      cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>{my ? '🔔' : '🔕'}</button>
                   )}
                 </div>
@@ -246,12 +252,13 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
                     </div>
                   )}
 
-                  {/* 줄3: 링크 */}
-                  <div style={{ display: 'flex', gap: 10, fontSize: 11 }}>
-                    <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })} style={{ color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0, fontSize: 11 }}>✏️ 한줄평</button>
-                    <Link href={`/apt/unsold/${u.id}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
-                    {u.contact_tel && <a href={`tel:${u.contact_tel}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>📞 전화문의</a>}
-                    {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
+                  {/* 줄3: pill 버튼 */}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
+                      style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
+                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
+                    {u.contact_tel && <a href={`tel:${u.contact_tel}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>📞 전화문의</a>}
+                    {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
                   </div>
                 </div>
               );

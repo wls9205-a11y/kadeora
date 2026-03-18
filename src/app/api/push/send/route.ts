@@ -86,11 +86,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 발송 로그 기록
+  let logId = null;
+  try {
+    const { data: logData } = await admin.from('push_logs').insert({ title, body, url, target, sent_count: sent }).select('id').single();
+    logId = logData?.id;
+  } catch {}
+
   return NextResponse.json({
     ok: true,
     app_notif: allProfiles?.length ?? 0,
     push_sent: sent,
     push_failed: failed.length,
     push_total: subs?.length ?? 0,
+    log_id: logId,
   });
 }
