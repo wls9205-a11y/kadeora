@@ -4,7 +4,6 @@ import TrendingTicker from '@/components/TrendingTicker';
 import { ToastProvider } from '@/components/Toast';
 import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import FeedbackButton from '@/components/FeedbackButton';
 import Sidebar from '@/components/Sidebar';
 import RightPanel from '@/components/RightPanel';
 import InstallBanner from '@/components/InstallBanner';
@@ -46,7 +45,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
               {children}
             </GuestGate>
           </ErrorBoundary>
-          <FeedbackButton />
         </main>
         <div className="right-panel-wrapper">
           <RightPanel />

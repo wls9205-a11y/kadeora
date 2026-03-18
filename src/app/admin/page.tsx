@@ -4,6 +4,7 @@ import Link from 'next/link';
 import PushBroadcast from './PushBroadcast';
 import NoticeManager from './NoticeManager';
 import { AdminLineChart, AdminDonutChart } from './AdminCharts';
+import SeedDataManager from './SeedDataManager';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -192,6 +193,11 @@ export default async function AdminDashboard() {
       {/* Push Broadcast */}
       <div style={{ ...card, marginTop: 16 }}>
         <PushBroadcast />
+      </div>
+
+      {/* 시드 데이터 관리 */}
+      <div style={{ ...card, marginTop: 16 }}>
+        <SeedDataManager />
       </div>
     </div>
   );

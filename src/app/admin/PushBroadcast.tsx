@@ -11,7 +11,7 @@ export default function PushBroadcast() {
   const [sendTarget, setSendTarget] = useState<'all'|'web'|'app'>('all');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState('');
-  const [preview, setPreview] = useState<PreviewDevice>(null);
+  const [_preview] = useState<PreviewDevice>(null);
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) return;
@@ -64,54 +64,53 @@ export default function PushBroadcast() {
         <input value={url} onChange={e => setUrl(e.target.value)} placeholder="URL (기본: /feed)" style={inp} />
         <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="이미지 URL (선택) — https://..." style={inp} />
 
-        {/* 미리보기 */}
-        <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-          {DEVICES.map(d => (
-            <button key={d.key} onClick={() => setPreview(preview === d.key ? null : d.key)}
-              style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, border: `1px solid ${preview === d.key ? 'var(--brand)' : 'var(--border)'}`, background: preview === d.key ? 'rgba(255,69,0,0.1)' : 'var(--bg-hover)', color: preview === d.key ? 'var(--brand)' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
-              {d.label}
-            </button>
-          ))}
-        </div>
-
-        {preview === 'android' && (
-          <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 16, maxWidth: 340 }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>Android 알림</div>
-            <div style={{ background: '#2a2a3e', borderRadius: 10, padding: '10px 12px', display: 'flex', gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={20} /></div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{title || '제목'}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.4 }}>{body || '내용'}</div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>카더라 · 지금</div>
+        {/* 미리보기 2×2 그리드 */}
+        {(title.trim() || body.trim()) && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
+            {/* Android */}
+            <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>🤖 Android</div>
+              <div style={{ background: '#2a2a3e', borderRadius: 8, padding: '8px 10px', display: 'flex', gap: 8 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 6, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={16} /></div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{title || '제목'}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', lineHeight: 1.3 }}>{body || '내용'}</div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {preview === 'iphone' && (
-          <div style={{ background: '#1c1c1e', borderRadius: 20, padding: 20, maxWidth: 320 }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 10, textAlign: 'center' }}>iPhone 잠금화면</div>
-            <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '12px 14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 7, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={16} /></div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>카더라</span>
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginLeft: 'auto' }}>지금</span>
+            {/* iPhone */}
+            <div style={{ background: '#1c1c1e', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>🍎 iPhone</div>
+              <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 5, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={12} /></div>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>카더라</span>
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#fff' }}>{title || '제목'}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>{body || '내용'}</div>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>{title || '제목'}</div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>{body || '내용'}</div>
             </div>
-          </div>
-        )}
-
-        {preview === 'chrome' && (
-          <div style={{ background: '#292a2d', borderRadius: 12, padding: 16, maxWidth: 380 }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>Chrome 데스크탑</div>
-            <div style={{ background: '#3c4043', borderRadius: 8, padding: '10px 12px', display: 'flex', gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 6, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={18} /></div>
+            {/* Chrome */}
+            <div style={{ background: '#292a2d', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>💻 Chrome</div>
+              <div style={{ background: '#3c4043', borderRadius: 8, padding: '8px 10px', display: 'flex', gap: 8 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 5, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={14} /></div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#e8eaed', marginBottom: 2 }}>{title || '제목'}</div>
-                <div style={{ fontSize: 12, color: 'rgba(232,234,237,0.7)', lineHeight: 1.4 }}>{body || '내용'}</div>
-                <div style={{ fontSize: 10, color: 'rgba(232,234,237,0.4)', marginTop: 4 }}>kadeora.app</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#e8eaed' }}>{title || '제목'}</div>
+                <div style={{ fontSize: 10, color: 'rgba(232,234,237,0.65)', lineHeight: 1.3 }}>{body || '내용'}</div>
+              </div>
+            </div>
+            </div>
+            {/* Safari */}
+            <div style={{ background: '#1e1e1e', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>🧭 Safari</div>
+              <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 10px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 5, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={12} /></div>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>카더라</span>
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#fff' }}>{title || '제목'}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', lineHeight: 1.3 }}>{body || '내용'}</div>
               </div>
             </div>
           </div>

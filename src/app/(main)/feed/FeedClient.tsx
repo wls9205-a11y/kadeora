@@ -27,6 +27,9 @@ interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeC
 export default function FeedClient({ posts, activeCategory, activeRegion = 'all' }: Props) {
   const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(40);
+  const [pullY, setPullY] = useState(0);
+  const [pulling, setPulling] = useState(false);
+  const touchStartY = React.useRef(0);
   const [showRegionBanner, setShowRegionBanner] = useState(false);
   const [tipSeen, setTipSeen] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -196,7 +199,18 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto' }}
+      onTouchStart={e => { if (window.scrollY < 5) touchStartY.current = e.touches[0].clientY; else touchStartY.current = 0; }}
+      onTouchMove={e => { if (!touchStartY.current) return; const dy = e.touches[0].clientY - touchStartY.current; if (dy > 0 && dy < 120 && window.scrollY < 5) setPullY(dy); }}
+      onTouchEnd={() => { if (pullY > 70) { setPulling(true); router.refresh(); setTimeout(() => { setPulling(false); setPullY(0); }, 800); } else { setPullY(0); } touchStartY.current = 0; }}
+    >
+      {/* Pull-to-refresh indicator */}
+      {(pullY > 10 || pulling) && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: `${Math.min(pullY / 2, 30)}px 0`, transition: pulling ? 'padding 0.3s' : 'none' }}>
+          <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: pulling ? 'spin 0.8s linear infinite' : 'none', transform: `rotate(${pullY * 3}deg)` }} />
+        </div>
+      )}
+
       {/* 피드 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>피드</h1>

@@ -131,6 +131,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
         const filteredU = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
         const grouped = filteredU.reduce((a: any, u: any) => { const r = u.region_nm || '기타'; if (!a[r]) a[r] = []; a[r].push(u); return a; }, {} as Record<string, any[]>);
         return (
+          <>
           <div style={{ marginBottom:16 }}>
             {/* 미분양 요약 배너 */}
             <div style={{ background:'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(220,38,38,0.05))', border:'1px solid rgba(239,68,68,0.2)', borderRadius:12, padding:'12px 16px', marginBottom:16, display:'flex', gap:20, alignItems:'center', flexWrap:'wrap' }}>
@@ -227,6 +228,10 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
               </div>
             ))}
           </div>
+          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 16, textAlign: 'center' as const }}>
+            데이터는 주기적으로 업데이트됩니다 · 국토교통부 기준
+          </p>
+          </>
         );
       })()}
 
