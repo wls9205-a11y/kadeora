@@ -65,7 +65,7 @@ self.addEventListener('fetch', e => {
   if (url.pathname.startsWith('/api/')) return;
 
   // 정적 자산: Cache First
-  if (url.pathname.startsWith('/_next/static/') || url.pathname.match(/\.(png|jpg|svg|ico|woff2?)$/)) {
+  if (url.pathname.startsWith('/_next/static/') || url.pathname.match(/\.(png|jpg|svg|ico|woff2?|css|js)$/)) {
     e.respondWith(
       caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
         if (res.ok) {

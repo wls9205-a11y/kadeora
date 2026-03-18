@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: '가이드북',
   description: '카더라 앱 사용 가이드',

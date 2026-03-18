@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: '토론방',
   description: '주식·아파트 실시간 토론 — 카더라 커뮤니티',
