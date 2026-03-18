@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import type { User } from '@supabase/supabase-js';
@@ -28,11 +29,19 @@ const TYPE_ICON: Record<string, string> = {
   like: '❤️', invite: '🎁', mention: '@',
 };
 
+function getNotifLink(n: Notif): string {
+  if (n.type === 'comment' || n.type === 'like' || n.type === 'post_like' || n.type === 'reply' || n.type === 'comment_like') return '/feed';
+  if (n.type === 'follow') return '/feed';
+  if (n.type === 'invite') return '/feed';
+  return '/feed';
+}
+
 export default function NotificationsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [loading, setLoading] = useState(true);
   const { success } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -109,15 +118,16 @@ export default function NotificationsPage() {
           ))}
         </div>
       ) : notifs.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4 }}>
-          <div style={{ fontSize: 36, marginBottom: 8 }}>📭</div>
-          <div>알림이 없습니다</div>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
+          <div style={{ fontSize: 40, marginBottom: 10 }}>🔔</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>아직 알림이 없어요</div>
+          <div style={{ fontSize: 13 }}>댓글, 좋아요, 팔로우 알림이 여기 표시돼요</div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {notifs.map(n => (
             <div key={n.id}
-              onClick={() => !n.is_read && markOneRead(n.id)}
+              onClick={() => { if (!n.is_read) markOneRead(n.id); router.push(getNotifLink(n)); }}
               style={{
                 display: 'flex', alignItems: 'flex-start', gap: 12,
                 padding: '14px 16px', borderRadius: 4, cursor: 'pointer',
