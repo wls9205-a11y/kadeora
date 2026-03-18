@@ -6,6 +6,7 @@ import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import FeedbackButton from '@/components/FeedbackButton';
 import Sidebar from '@/components/Sidebar';
+import RightPanel from '@/components/RightPanel';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     <ToastProvider>
       <Navigation />
       <TrendingTicker />
-      <div style={{ display: 'flex', maxWidth: 1120, margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', maxWidth: 1340, margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
         <div className="sidebar-wrapper">
           <Sidebar />
         </div>
@@ -42,6 +43,9 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           </ErrorBoundary>
           <FeedbackButton />
         </main>
+        <div className="right-panel-wrapper">
+          <RightPanel />
+        </div>
       </div>
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',

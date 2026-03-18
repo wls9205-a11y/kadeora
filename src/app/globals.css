@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 사이드바 (데스크탑 only) */
+/* 사이드바 + 오른쪽 패널 (데스크탑 only) */
 .sidebar-wrapper { display: none; }
+.right-panel-wrapper { display: none; }
 @media (min-width: 900px) { .sidebar-wrapper { display: block; } }
+@media (min-width: 1200px) { .right-panel-wrapper { display: block; } }
 
 /* 카드 호버 효과 */
 .kd-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
