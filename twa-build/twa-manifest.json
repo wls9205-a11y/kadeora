@@ -1,0 +1,64 @@
+{
+  "packageId": "app.kadeora.twa",
+  "host": "kadeora.app",
+  "name": "카더라",
+  "launcherName": "카더라",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#FF4500",
+  "themeColorDark": "#0d1117",
+  "navigationColor": "#0d1117",
+  "navigationColorDark": "#0d1117",
+  "navigationDividerColor": "#0d1117",
+  "navigationDividerColorDark": "#0d1117",
+  "backgroundColor": "#0d1117",
+  "enableNotifications": true,
+  "startUrl": "/feed",
+  "iconUrl": "https://kadeora.app/icons/icon-512.png",
+  "maskableIconUrl": "https://kadeora.app/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "kadeora"
+  },
+  "appVersionCode": 1,
+  "appVersionName": "1.0.0",
+  "shortcuts": [
+    {
+      "name": "피드 보기",
+      "shortName": "피드",
+      "url": "/feed",
+      "chosenIconUrl": "https://kadeora.app/icons/icon-96.png"
+    },
+    {
+      "name": "주식 시세",
+      "shortName": "주식",
+      "url": "/stock",
+      "chosenIconUrl": "https://kadeora.app/icons/icon-96.png"
+    },
+    {
+      "name": "이번주 HOT",
+      "shortName": "HOT",
+      "url": "/hot",
+      "chosenIconUrl": "https://kadeora.app/icons/icon-96.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://kadeora.app/manifest.json",
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://kadeora.app/",
+  "minSdkVersion": 19,
+  "playBilling": {
+    "enabled": false
+  },
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableGooglePlayBilling": false,
+  "serviceAccountJsonFile": "",
+  "additionalTrustedOrigins": []
+}
