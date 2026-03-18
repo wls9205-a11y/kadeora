@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "app.kadeora",
+      "package_name": "app.kadeora.twa",
       "sha256_cert_fingerprints": [
-        "TODO:REPLACE_WITH_YOUR_SHA256_CERT_FINGERPRINT"
+        "PLACEHOLDER_SHA256_REPLACE_AFTER_KEYSTORE_GENERATION"
       ]
     }
   }

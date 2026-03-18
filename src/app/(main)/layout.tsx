@@ -43,7 +43,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize:11, color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.9}}>
           <p style={{fontWeight:600, color:'var(--text-secondary)', marginBottom:4}}>사업자 정보</p>
           <p>업체명: 카더라 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801 &nbsp;|&nbsp; 대표자: 노영진</p>
-          <p>이메일: kadeora.app@gmail.com &nbsp;|&nbsp; 통신판매업 신고번호: 준비중</p>
+          <p>이메일: kadeora.app@gmail.com &nbsp;|&nbsp; 통신판매업 신고번호: {process.env.NEXT_PUBLIC_BUSINESS_REPORT_NUMBER || '준비중'}</p>
           <p style={{marginTop:4}}>© 2026 카더라. All rights reserved.</p>
         </div>
       </footer>

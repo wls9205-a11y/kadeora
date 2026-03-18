@@ -1,9 +1,13 @@
 // Kadeora Service Worker — CACHE_VERSION은 빌드 스크립트가 주입
 const CACHE_VERSION = '20260318';
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
+const PRECACHE = ['/feed', '/offline.html', '/icons/icon-192.png'];
+const OFFLINE_PAGES = ['/feed', '/stock', '/hot', '/apt'];
 
 self.addEventListener('install', e => {
-  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE)).then(() => self.skipWaiting())
+  );
 });
 
 // activate 시 이전 버전 캐시 삭제
@@ -52,12 +56,38 @@ self.addEventListener('notificationclick', e => {
   );
 });
 
-// 오프라인 캐시 (피드 페이지)
+// 캐시 전략
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  if (e.request.url.includes('/api/')) return;
-  // 네트워크 우선, 실패 시 캐시
+  const url = new URL(e.request.url);
+
+  // API: Network only (no cache)
+  if (url.pathname.startsWith('/api/')) return;
+
+  // 정적 자산: Cache First
+  if (url.pathname.startsWith('/_next/static/') || url.pathname.match(/\.(png|jpg|svg|ico|woff2?)$/)) {
+    e.respondWith(
+      caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
+        return res;
+      }))
+    );
+    return;
+  }
+
+  // 페이지: Network First, 오프라인 시 캐시 또는 offline.html
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    fetch(e.request).then(res => {
+      if (res.ok && OFFLINE_PAGES.some(p => url.pathname === p || url.pathname.startsWith(p + '/'))) {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+      }
+      return res;
+    }).catch(() =>
+      caches.match(e.request).then(cached => cached || caches.match('/offline.html'))
+    )
   );
 });
