@@ -20,7 +20,7 @@ export default function InstallBanner() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const haptic = (p: number | number[] = 50) => { try { if ('vibrate' in navigator) navigator.vibrate(p); } catch {} };
+  const hap = (s: 'light' | 'medium' | 'heavy' = 'light') => { try { if ('vibrate' in navigator) navigator.vibrate(s === 'heavy' ? [15, 5, 15] : s === 'medium' ? 12 : 6); } catch {} };
 
   const logInstall = (platform: string) => {
     fetch('/api/pwa/install', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform }) }).catch(() => {});
@@ -42,7 +42,7 @@ export default function InstallBanner() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') { setShow(false); haptic([100, 50, 100]); logInstall('android'); setTimeout(requestPush, 1500); }
+      if (outcome === 'accepted') { setShow(false); hap('heavy'); logInstall('android'); setTimeout(requestPush, 1500); }
       setDeferredPrompt(null);
     } else if (isIOS) {
       setShowIOSGuide(true);
@@ -71,7 +71,7 @@ export default function InstallBanner() {
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)' }}>홈화면에 추가하면 푸시 알림도 받을 수 있어요!</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
-          <button onClick={() => { haptic(50); handleInstall(); }} style={{
+          <button onClick={() => { hap('light'); handleInstall(); }} style={{
             padding: '8px 14px', background: '#fff', color: '#FF4500',
             border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer',
           }}>{isIOS ? '방법 보기' : '📲 설치하기'}</button>
@@ -102,7 +102,7 @@ export default function InstallBanner() {
                 <span style={{ fontSize: 14, color: 'var(--text-primary)' }}>{s.text}</span>
               </div>
             ))}
-            <button onClick={() => { haptic(50); setShowIOSGuide(false); handleDismiss(); logInstall('ios'); setTimeout(requestPush, 1000); }}
+            <button onClick={() => { hap('light'); setShowIOSGuide(false); handleDismiss(); logInstall('ios'); setTimeout(requestPush, 1000); }}
               style={{ marginTop: 20, width: '100%', padding: '14px 0', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
               알겠어요!
             </button>

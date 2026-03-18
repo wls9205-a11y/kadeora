@@ -33,7 +33,16 @@ export async function POST(req: NextRequest) {
   if (target === 'specific' && user_ids?.length) {
     query = query.in('user_id', user_ids);
   }
-  const { data: subs } = await query;
+  const { data: rawSubs } = await query;
+
+  // target=web/app 필터링
+  let subs = rawSubs ?? [];
+  if (target === 'app' || target === 'web') {
+    const { data: appInstalls } = await admin.from('pwa_installs').select('user_id').not('user_id', 'is', null);
+    const appIds = new Set((appInstalls || []).map((u: any) => u.user_id));
+    if (target === 'app') subs = subs.filter((s: any) => s.user_id && appIds.has(s.user_id));
+    else subs = subs.filter((s: any) => !s.user_id || !appIds.has(s.user_id));
+  }
 
   // 앱 내 알림 저장 (notifications 테이블)
   const { data: allProfiles } = target === 'all'

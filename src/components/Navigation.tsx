@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { haptic } from '@/lib/haptic';
 import type { User } from '@supabase/supabase-js';
 
 const NAV_ITEMS = [
@@ -312,7 +313,7 @@ export function Navigation() {
         {[...MOBILE_TABS_LEFT, { href: '/write', label: '', icon: '' }, ...MOBILE_TABS_RIGHT].map(item => {
           if (item.href === '/write') {
             return (
-              <Link key="write" href="/write" aria-label="글쓰기" style={{
+              <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
                 display:'flex', alignItems:'center', justifyContent:'center',
                 width:48, height:48, borderRadius:14,
                 background:'var(--brand)', color:'#fff',

@@ -8,6 +8,7 @@ export default function PushBroadcast() {
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('/feed');
   const [imageUrl, setImageUrl] = useState('');
+  const [sendTarget, setSendTarget] = useState<'all'|'web'|'app'>('all');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState('');
   const [preview, setPreview] = useState<PreviewDevice>(null);
@@ -19,7 +20,7 @@ export default function PushBroadcast() {
       const res = await fetch('/api/push/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), body: body.trim(), url, ...(imageUrl ? { image: imageUrl } : {}) }),
+        body: JSON.stringify({ title: title.trim(), body: body.trim(), url, target: sendTarget, ...(imageUrl ? { image: imageUrl } : {}) }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -45,6 +46,19 @@ export default function PushBroadcast() {
     <div>
       <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📣 푸시 알림 발송</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>발송 대상</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {([{ key: 'all' as const, label: '📡 전체' }, { key: 'web' as const, label: '🌐 웹' }, { key: 'app' as const, label: '📱 앱' }]).map(t => (
+              <button key={t.key} onClick={() => setSendTarget(t.key)} style={{
+                flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                border: `1.5px solid ${sendTarget === t.key ? 'var(--brand)' : 'var(--border)'}`,
+                background: sendTarget === t.key ? 'var(--brand)' : 'var(--bg-hover)',
+                color: sendTarget === t.key ? '#fff' : 'var(--text-secondary)', cursor: 'pointer',
+              }}>{t.label}</button>
+            ))}
+          </div>
+        </div>
         <input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목" style={inp} />
         <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="내용" rows={3} style={{ ...inp, resize: 'vertical' as const, fontFamily: 'inherit' }} />
         <input value={url} onChange={e => setUrl(e.target.value)} placeholder="URL (기본: /feed)" style={inp} />
@@ -105,7 +119,7 @@ export default function PushBroadcast() {
 
         <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()}
           style={{ padding: '12px 0', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer', opacity: sending ? 0.7 : 1 }}>
-          {sending ? '발송 중...' : '🚀 전체 발송'}
+          {sending ? '발송 중...' : `🚀 ${sendTarget === 'all' ? '전체' : sendTarget === 'web' ? '웹' : '앱'} 발송`}
         </button>
         {result && <div style={{ fontSize: 13, color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', padding: '4px 0' }}>{result}</div>}
       </div>

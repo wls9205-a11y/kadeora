@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import RefreshButton from '@/components/RefreshButton';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
@@ -196,6 +197,12 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      {/* 피드 헤더 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>피드</h1>
+        <RefreshButton />
+      </div>
+
       {/* 지역 미설정 배너 */}
       {showRegionBanner && (
         <div style={{
