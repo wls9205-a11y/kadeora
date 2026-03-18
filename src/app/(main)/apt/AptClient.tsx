@@ -54,14 +54,13 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
   const [activeTab, setActiveTab] = useState<'sub'|'unsold'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
-  const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<number|null>(null);
+  const [unsoldRegion, setUnsoldRegion] = useState('전체');
 
   const filtered = useMemo(() => {
     return apts.filter(apt => {
       if (region !== '전체' && apt.region_nm !== region) return false;
       if (statusFilter !== '전체' && getStatus(apt) !== statusFilter) return false;
-      if (search && !apt.house_nm?.includes(search) && !apt.hssply_adres?.includes(search)) return false;
       return true;
     });
   }, [apts, region, statusFilter, search]);
@@ -90,38 +89,50 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
         ))}
       </div>
 
-      {activeTab === 'unsold' && (
-        <div style={{ marginBottom:16 }}>
-          {unsold.length === 0 ? (
-            <div style={{ textAlign:'center', padding:40, color:'var(--text-tertiary)' }}>미분양 데이터가 없습니다</div>
-          ) : unsold.map((u: any) => (
-            <div key={u.id} style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:8 }}>
-              <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)', marginBottom:4 }}>{u.house_nm || u.apt_name || '미분양 단지'}</div>
-              <div style={{ fontSize:12, color:'var(--text-tertiary)', marginBottom:6 }}>{u.region_nm || u.city || ''} {u.district || ''}</div>
-              <div style={{ fontSize:14, fontWeight:700, color:'var(--error)' }}>{(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대 미분양</div>
-              {u.price_range && <div style={{ fontSize:12, color:'var(--text-secondary)', marginTop:4 }}>{u.price_range}</div>}
+      {activeTab === 'unsold' && (() => {
+        if (unsold.length === 0) return <div style={{ textAlign:'center', padding:40, color:'var(--text-tertiary)' }}>미분양 데이터가 없습니다</div>;
+        const regions = Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타')));
+        const filteredU = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
+        const grouped = filteredU.reduce((a: any, u: any) => { const r = u.region_nm || '기타'; if (!a[r]) a[r] = []; a[r].push(u); return a; }, {} as Record<string, any[]>);
+        return (
+          <div style={{ marginBottom:16 }}>
+            <div style={{ display:'flex', gap:6, overflowX:'auto', marginBottom:16, paddingBottom:4 }}>
+              {['전체', ...regions].map(r => (
+                <button key={r} onClick={() => setUnsoldRegion(r)} style={{
+                  padding:'6px 14px', borderRadius:20, border:'1px solid',
+                  borderColor: unsoldRegion === r ? 'var(--brand)' : 'var(--border)',
+                  background: unsoldRegion === r ? 'var(--brand)' : 'var(--bg-hover)',
+                  color: unsoldRegion === r ? '#fff' : 'var(--text-secondary)',
+                  fontSize:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0,
+                }}>{r}</button>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+            {Object.entries(grouped).map(([region, items]) => (
+              <div key={region} style={{ marginBottom:20 }}>
+                <div style={{ fontSize:14, fontWeight:700, color:'var(--text-primary)', marginBottom:8, borderBottom:'1px solid var(--border)', paddingBottom:6, display:'flex', alignItems:'center', gap:6 }}>
+                  📍 {region}
+                  <span style={{ fontSize:11, color:'var(--text-tertiary)', background:'var(--bg-hover)', borderRadius:10, padding:'1px 6px' }}>{(items as any[]).length}개</span>
+                </div>
+                {(items as any[]).map((u: any) => (
+                  <div key={u.id} style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:12, padding:14, marginBottom:8 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
+                      <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)' }}>{u.house_nm || u.apt_name || '미분양 단지'}</div>
+                      <span style={{ fontSize:13, fontWeight:700, color:'#dc2626', background:'#fef2f2', border:'1px solid #fca5a5', padding:'2px 8px', borderRadius:10, flexShrink:0, marginLeft:8 }}>
+                        {(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대
+                      </span>
+                    </div>
+                    <div style={{ fontSize:12, color:'var(--text-tertiary)' }}>{u.sigungu_nm || u.district || ''}</div>
+                    {u.completion_ym && <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:2 }}>준공: {u.completion_ym.slice(0,4)}년 {u.completion_ym.slice(4,6)}월</div>}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {activeTab === 'sub' && (<>
       <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>📅 청약홈 기준 · 매일 자동 갱신</p>
-
-      {/* 검색 */}
-      <div className="mb-4">
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="단지명 또는 주소 검색"
-          className="w-full px-4 py-2.5 rounded-xl text-sm"
-          style={{
-            backgroundColor: 'var(--bg-sunken)',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border)',
-          }}
-        />
-      </div>
 
       {/* 지역 필터 */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-3 no-scrollbar">

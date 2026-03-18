@@ -26,8 +26,8 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <ToastProvider>
-      <NoticeBanner />
       <Navigation />
+      <NoticeBanner />
       <TrendingTicker />
       <div style={{ display: 'flex', maxWidth: 1340, margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
         <div className="sidebar-wrapper">

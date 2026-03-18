@@ -44,6 +44,7 @@ export default async function AdminDashboard() {
   const CAT_C: Record<string, { label: string; color: string }> = { stock: { label: '주식', color: '#3b82f6' }, apt: { label: '부동산', color: '#10b981' }, local: { label: '우리동네', color: '#f59e0b' }, free: { label: '자유', color: '#8b5cf6' } };
   const catStats = Object.entries(catRaw.reduce((a: any, r: any) => { const k = r.category || 'free'; a[k] = (a[k] || 0) + 1; return a; }, {} as Record<string, number>)).map(([key, count]) => ({ key, count: count as number, label: CAT_C[key]?.label || key, color: CAT_C[key]?.color || '#888' }));
   const pwaTotal = pwaStats.length;
+  const pwaDesktop = pwaStats.filter((p: any) => p.platform === 'desktop').length;
   const pwaAndroid = pwaStats.filter((p: any) => p.platform === 'android').length;
   const pwaIOS = pwaStats.filter((p: any) => p.platform === 'ios').length;
 
@@ -129,6 +130,7 @@ export default async function AdminDashboard() {
             { label: '전체', value: pwaTotal, icon: '📱' },
             { label: 'Android', value: pwaAndroid, icon: '🤖' },
             { label: 'iOS', value: pwaIOS, icon: '🍎' },
+            { label: '데스크탑', value: pwaDesktop, icon: '💻' },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 10, padding: 12, textAlign: 'center' }}>
               <div style={{ fontSize: 18 }}>{s.icon}</div>
