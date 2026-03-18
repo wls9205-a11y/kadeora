@@ -7,6 +7,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import FeedbackButton from '@/components/FeedbackButton';
 import Sidebar from '@/components/Sidebar';
 import RightPanel from '@/components/RightPanel';
+import InstallBanner from '@/components/InstallBanner';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           <RightPanel />
         </div>
       </div>
+      <InstallBanner />
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>
