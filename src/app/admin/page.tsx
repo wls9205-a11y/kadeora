@@ -18,7 +18,7 @@ export default async function AdminDashboard() {
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
   if (!profile?.is_admin) redirect('/feed');
 
-  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR, signupRawR, postRawR, catRawR] = await Promise.all([
+  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR, signupRawR, postRawR, catRawR, todayAttR, totalAttR, topAttR] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
@@ -31,6 +31,9 @@ export default async function AdminDashboard() {
     supabase.from('profiles').select('created_at').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).eq('is_deleted', false),
     supabase.from('posts').select('created_at, category').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).eq('is_deleted', false),
     supabase.from('posts').select('category').eq('is_deleted', false),
+    supabase.from('attendance').select('user_id', { count: 'exact', head: true }).eq('last_date', new Date().toISOString().slice(0, 10)),
+    supabase.from('attendance').select('user_id', { count: 'exact', head: true }),
+    supabase.from('attendance').select('user_id, streak, total_days, last_date, profiles(nickname)').order('streak', { ascending: false }).limit(5),
   ]);
 
   const pwaStats = pwaStatsR.data ?? [];
@@ -45,6 +48,10 @@ export default async function AdminDashboard() {
   const catStats = Object.entries(catRaw.reduce((a: any, r: any) => { const k = r.category || 'free'; a[k] = (a[k] || 0) + 1; return a; }, {} as Record<string, number>)).map(([key, count]) => ({ key, count: count as number, label: CAT_C[key]?.label || key, color: CAT_C[key]?.color || '#888' }));
   const pwaTotal = pwaStats.length;
   const pwaDesktop = pwaStats.filter((p: any) => p.platform === 'desktop').length;
+
+  const todayAtt = todayAttR.count ?? 0;
+  const totalAtt = totalAttR.count ?? 0;
+  const topAtt = topAttR.data ?? [];
   const pwaAndroid = pwaStats.filter((p: any) => p.platform === 'android').length;
   const pwaIOS = pwaStats.filter((p: any) => p.platform === 'ios').length;
 
@@ -139,6 +146,32 @@ export default async function AdminDashboard() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 출석체크 현황 */}
+      <div style={{ ...card, marginTop: 16 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📅 출석체크 현황</h2>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+          {[
+            { label: '오늘 출석', value: todayAtt, icon: '✅' },
+            { label: '전체 출석 유저', value: totalAtt, icon: '👥' },
+          ].map(s => (
+            <div key={s.label} style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 10, padding: 14, textAlign: 'center' as const }}>
+              <div style={{ fontSize: 20 }}>{s.icon}</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--brand)', margin: '4px 0' }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>🔥 연속 출석 TOP 5</div>
+        {topAtt.map((a: any, i: number) => (
+          <div key={a.user_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+            <span style={{ color: 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
+            <span style={{ flex: 1, color: 'var(--text-primary)', fontWeight: 600 }}>{(a.profiles as any)?.nickname || '(알 수 없음)'}</span>
+            <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{a.streak}일 연속</span>
+            <span style={{ color: 'var(--text-tertiary)', marginLeft: 12 }}>누적 {a.total_days}일</span>
+          </div>
+        ))}
       </div>
 
       {/* 데이터 차트 */}
