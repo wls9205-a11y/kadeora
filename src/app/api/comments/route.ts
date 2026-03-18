@@ -21,6 +21,20 @@ export async function POST(req: NextRequest) {
     if (!postId) return NextResponse.json({ error: '게시글 ID가 필요합니다.' }, { status: 400 });
     const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select(`*, author:profiles!comments_author_id_fkey(id, nickname, avatar_url)`).single();
     if (error) { console.error('[Comments POST]', error); return NextResponse.json({ error: '댓글 작성에 실패했습니다.' }, { status: 500 }); }
+
+    // 댓글 알림: 글 작성자에게 (본인 댓글 제외)
+    try {
+      const { data: post } = await supabase.from('posts').select('author_id').eq('id', postId).single();
+      if (post?.author_id && post.author_id !== user.id) {
+        const nickname = (data as any)?.author?.nickname ?? '누군가';
+        const preview = content.length > 30 ? content.slice(0, 30) + '...' : content;
+        await supabase.from('notifications').insert({
+          user_id: post.author_id, type: 'comment',
+          content: `${nickname}님이 댓글을 달았어요: ${preview}`,
+        });
+      }
+    } catch {}
+
     return NextResponse.json({ comment: data }, { status: 201 });
   } catch (err) { console.error('[Comments POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }

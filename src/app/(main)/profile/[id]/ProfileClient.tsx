@@ -70,6 +70,8 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [commentsPage, setCommentsPage] = useState(1);
   const [regionText, setRegionText] = useState(profile.region_text ?? '');
   const [inviteCode, setInviteCode] = useState('');
+  const [attendance, setAttendance] = useState<{ streak: number; total_days: number; already_today: boolean } | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
   const { success, error } = useToast();
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -170,7 +172,24 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   useEffect(() => {
     if (!isOwner) return;
     fetch('/api/invite').then(r => r.ok ? r.json() : null).then(d => { if (d?.code) setInviteCode(d.code); }).catch(() => {});
+    fetch('/api/attendance').then(r => r.ok ? r.json() : null).then(d => { if (d) setAttendance(d); }).catch(() => {});
   }, [isOwner]);
+
+  const handleCheckIn = async () => {
+    setCheckingIn(true);
+    try {
+      const res = await fetch('/api/attendance', { method: 'POST' });
+      if (res.ok) {
+        const d = await res.json();
+        if (d.already) { success('이미 오늘 출석했어요!'); }
+        else {
+          setAttendance({ streak: d.streak, total_days: d.total_days, already_today: true });
+          success(d.bonus ? `출석 완료! +${d.points_earned}P (${d.bonus})` : '출석 체크 완료! +10P');
+        }
+      }
+    } catch { error('출석 체크 실패'); }
+    finally { setCheckingIn(false); }
+  };
 
   const loadMyComments = async () => {
     if (commentsLoaded) return;
@@ -325,6 +344,30 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             ));
           })()}
         </div>
+
+        {/* 출석 체크 (본인만) */}
+        {isOwner && attendance && (
+          <div style={{ marginTop:16, background:'var(--bg-base)', border:'1px solid var(--border)', borderRadius:12, padding:16 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+              <div>
+                <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)' }}>📅 출석 체크</div>
+                <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:2 }}>
+                  🔥 {attendance.streak}일 연속 · 총 {attendance.total_days}일 출석
+                </div>
+              </div>
+              {attendance.already_today ? (
+                <span style={{ padding:'8px 16px', borderRadius:20, background:'var(--bg-hover)', color:'var(--text-tertiary)', fontSize:13, fontWeight:600 }}>
+                  ✅ 출석 완료
+                </span>
+              ) : (
+                <button onClick={handleCheckIn} disabled={checkingIn}
+                  style={{ padding:'8px 16px', borderRadius:20, border:'none', background:'var(--brand)', color:'var(--text-inverse)', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+                  {checkingIn ? '...' : '📅 출석 +10P'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* 친구 초대 (본인만) */}
         {isOwner && inviteCode && (

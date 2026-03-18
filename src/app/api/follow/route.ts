@@ -44,6 +44,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ following: false });
   } else {
     await sb.from('follows').insert({ follower_id: user.id, followee_id: targetId });
+
+    // 팔로우 알림
+    try {
+      const { data: profile } = await sb.from('profiles').select('nickname').eq('id', user.id).single();
+      await sb.from('notifications').insert({
+        user_id: targetId, type: 'follow',
+        content: `${profile?.nickname ?? '누군가'}님이 팔로우했어요`,
+      });
+    } catch {}
+
     return NextResponse.json({ following: true });
   }
 }

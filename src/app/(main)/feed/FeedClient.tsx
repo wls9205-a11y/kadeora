@@ -334,7 +334,8 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
                 <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `8px solid ${isLiked ? 'var(--text-inverse)' : 'var(--border)'}` }} />
               </div>
               {/* 본문 */}
-              <div style={{ flex: 1, padding: '10px 12px', minWidth: 0 }}>
+              <div style={{ flex: 1, padding: '10px 12px', minWidth: 0, display:'flex', gap:10 }}>
+              <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6, flexWrap: 'wrap' }}>
                   {post.profiles?.avatar_url ? (
                     <img src={post.profiles.avatar_url} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
@@ -374,6 +375,10 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
                     <span style={{ fontSize:10, color:'var(--text-tertiary)', opacity:0.5 }}>kadeora.app</span>
                   </div>
                 </div>
+              </div>
+              {(post as any).images && (post as any).images.length > 0 && (
+                <img src={(post as any).images[0]} alt="" style={{ width:48, height:48, borderRadius:4, objectFit:'cover', flexShrink:0, alignSelf:'center' }} />
+              )}
               </div>
             </Link>
             </React.Fragment>
