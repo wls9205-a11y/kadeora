@@ -12,15 +12,19 @@ export default async function AptPage() {
   let apts: any[] = [];
   let unsold: any[] = [];
 
+  let alertCounts: Record<string, number> = {};
+
   try {
     const sb = await createSupabaseServer();
-    const [aptsR, unsoldR] = await Promise.all([
+    const [aptsR, unsoldR, alertsR] = await Promise.all([
       sb.from('apt_subscriptions').select('*').order('rcept_bgnde', { ascending: false }),
       sb.from('unsold_apts').select('*').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
+      sb.from('apt_alerts').select('house_manage_no'),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
+    (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
   } catch {}
 
-  return <><AptClient apts={apts} unsold={unsold} /><Disclaimer /></>;
+  return <><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} /><Disclaimer /></>;
 }

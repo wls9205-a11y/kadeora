@@ -44,9 +44,9 @@ function getDday(apt: Apt): number | null {
 }
 
 const STATUS_BADGE = {
-  open:     { label: '접수중',   bg: '#dcfce7', color: '#166534', border: '#86efac' },
-  upcoming: { label: '접수예정', bg: '#dbeafe', color: '#1e3a8a', border: '#93c5fd' },
-  closed:   { label: '마감',     bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' },
+  open:     { label: '접수중',   bg: '#14532d', color: '#86efac', border: '#166534' },
+  upcoming: { label: '접수예정', bg: '#1e3a5f', color: '#93c5fd', border: '#1e40af' },
+  closed:   { label: '마감',     bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
 function fmtSupply(v: number | null | undefined): string {
@@ -54,7 +54,7 @@ function fmtSupply(v: number | null | undefined): string {
   return `${v.toLocaleString()}세대`;
 }
 
-export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?: any[] }) {
+export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apts: Apt[]; unsold?: any[]; alertCounts?: Record<string, number> }) {
   const [activeTab, setActiveTab] = useState<'sub'|'unsold'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
@@ -157,18 +157,68 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
                   📍 {region}
                   <span style={{ fontSize:11, color:'var(--text-tertiary)', background:'var(--bg-hover)', borderRadius:10, padding:'1px 6px' }}>{(items as any[]).length}개</span>
                 </div>
-                {(items as any[]).map((u: any) => (
-                  <div key={u.id} style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:12, padding:14, marginBottom:8 }}>
-                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
-                      <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)' }}>{u.house_nm || u.apt_name || '미분양 단지'}</div>
-                      <span style={{ fontSize:13, fontWeight:700, color:'#dc2626', background:'#fef2f2', border:'1px solid #fca5a5', padding:'2px 8px', borderRadius:10, flexShrink:0, marginLeft:8 }}>
-                        {(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대
-                      </span>
+                {(items as any[]).map((u: any) => {
+                  const unsoldRate = u.tot_supply_hshld_co ? Math.round((u.tot_unsold_hshld_co / u.tot_supply_hshld_co) * 100) : null;
+                  const priceMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
+                  const priceMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
+                  return (
+                  <div key={u.id} style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:14, padding:16, marginBottom:10 }}>
+                    <div style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:6 }}>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', marginBottom:4 }}>
+                          <span style={{ fontSize:11, fontWeight:700, padding:'3px 9px', borderRadius:20, background:'rgba(239,68,68,0.15)', color:'#f87171', border:'1px solid rgba(239,68,68,0.3)', flexShrink:0 }}>
+                            미분양 {(u.tot_unsold_hshld_co||0).toLocaleString()}세대
+                          </span>
+                          <span style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)' }}>{u.house_nm || '미분양 단지'}</span>
+                        </div>
+                        <div style={{ fontSize:12, color:'var(--text-tertiary)' }}>{u.sigungu_nm || ''}{u.supply_addr ? ` · ${u.supply_addr}` : ''}</div>
+                      </div>
+                      {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:'var(--brand)', textDecoration:'none', fontWeight:600, flexShrink:0 }}>자세히 →</a>}
                     </div>
-                    <div style={{ fontSize:12, color:'var(--text-tertiary)' }}>{u.sigungu_nm || u.district || ''}</div>
-                    {u.completion_ym && <div style={{ fontSize:12, color:'var(--text-tertiary)', marginTop:2 }}>준공: {u.completion_ym.slice(0,4)}년 {u.completion_ym.slice(4,6)}월</div>}
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:10 }}>
+                      {(priceMin || priceMax) && (
+                        <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:'8px 10px' }}>
+                          <div style={{ fontSize:10, color:'var(--text-tertiary)', marginBottom:3 }}>분양가</div>
+                          <div style={{ fontSize:12, fontWeight:600, color:'var(--text-primary)' }}>{priceMin}억{priceMax && priceMax !== priceMin ? `~${priceMax}억` : ''} 원</div>
+                        </div>
+                      )}
+                      {u.tot_supply_hshld_co && (
+                        <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:'8px 10px' }}>
+                          <div style={{ fontSize:10, color:'var(--text-tertiary)', marginBottom:3 }}>총 공급</div>
+                          <div style={{ fontSize:12, fontWeight:600, color:'var(--text-primary)' }}>{u.tot_supply_hshld_co.toLocaleString()}세대</div>
+                        </div>
+                      )}
+                      {u.completion_ym && (
+                        <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:'8px 10px' }}>
+                          <div style={{ fontSize:10, color:'var(--text-tertiary)', marginBottom:3 }}>준공예정</div>
+                          <div style={{ fontSize:12, fontWeight:600, color:'var(--text-primary)' }}>{u.completion_ym.slice(0,4)}년 {u.completion_ym.slice(4,6)}월</div>
+                        </div>
+                      )}
+                      {u.contact_tel && (
+                        <div style={{ background:'var(--bg-hover)', borderRadius:8, padding:'8px 10px' }}>
+                          <div style={{ fontSize:10, color:'var(--text-tertiary)', marginBottom:3 }}>문의처</div>
+                          <div style={{ fontSize:12, fontWeight:600, color:'var(--text-primary)' }}>{u.contact_tel}</div>
+                        </div>
+                      )}
+                    </div>
+                    {unsoldRate !== null && (
+                      <div style={{ marginBottom:10 }}>
+                        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+                          <span style={{ fontSize:10, color:'var(--text-tertiary)' }}>미분양률</span>
+                          <span style={{ fontSize:10, fontWeight:700, color:'#f87171' }}>{unsoldRate}%</span>
+                        </div>
+                        <div style={{ height:4, background:'var(--bg-hover)', borderRadius:2 }}>
+                          <div style={{ height:'100%', borderRadius:2, width:`${Math.min(unsoldRate,100)}%`, background: unsoldRate > 70 ? '#ef4444' : unsoldRate > 40 ? '#f97316' : '#eab308' }} />
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ display:'flex', gap:8 }}>
+                      <a href="/discussion/field_discussion" style={{ fontSize:12, padding:'5px 11px', borderRadius:8, background:'var(--bg-hover)', color:'var(--text-secondary)', border:'1px solid var(--border)', textDecoration:'none', fontWeight:600 }}>📍 현장토론방</a>
+                      <a href={`/discussion/field_discussion?apt=${encodeURIComponent(u.house_nm||'')}`} style={{ fontSize:12, padding:'5px 11px', borderRadius:8, background:'var(--bg-hover)', color:'var(--text-secondary)', border:'1px solid var(--border)', textDecoration:'none', fontWeight:600 }}>✏️ 한줄평</a>
+                    </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -290,6 +340,9 @@ export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?:
               {/* 조회수 + 알림 + 버튼 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>👁 {(apt.view_count || 0).toLocaleString()}</span>
+                {(alertCounts[houseNo] || 0) > 0 && (
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>🔔 {alertCounts[houseNo]}명 알림</span>
+                )}
                 <div style={{ flex: 1 }} />
                 <button onClick={() => toggleAlert(apt)} style={{
                   fontSize: 12, padding: '5px 12px', borderRadius: 8, cursor: 'pointer',
