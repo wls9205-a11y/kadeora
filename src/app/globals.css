@@ -10,6 +10,11 @@
 .kd-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
 .kd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
 
+/* 글씨 크기 (CSS 클래스 방식) */
+html.font-small { font-size: 14px; }
+html.font-medium { font-size: 16px; }
+html.font-large { font-size: 18px; }
+
 /* ========================================
    카더라 — 완전한 다크모드 CSS 변수 시스템
    슬로건: 대한민국 소리소문 정보 커뮤니티
@@ -68,7 +73,7 @@ body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
-  font-size: var(--font-base, 15px);
+  font-size: 1rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -359,7 +364,7 @@ button:active,
 }
 
 @media (max-width: 640px) {
-  body { font-size: var(--font-base, 14px); }
+  body { font-size: 1rem; }
   .main-content { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 }
 input, textarea, select {

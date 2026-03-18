@@ -72,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* 다크모드 강제 적용 */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.classList.add('dark');})();` }} />
         {/* 글씨크기 SSR 적용 */}
-        <script dangerouslySetInnerHTML={{ __html: `try{var fs=localStorage.getItem('kd_font_size');var m={small:'14px',medium:'16px',large:'18px'};if(fs&&m[fs]){document.documentElement.style.fontSize=m[fs];document.documentElement.style.setProperty('--font-base',m[fs]);}}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var fs=localStorage.getItem('kd_font_size');if(fs&&['small','medium','large'].indexOf(fs)>=0){var cl=document.documentElement.classList;cl.remove('font-small','font-medium','font-large');cl.add('font-'+fs);}}catch(e){}` }} />
         {/* Kakao SDK */}
         <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" async />
         {/* JSON-LD 구조화 데이터 */}

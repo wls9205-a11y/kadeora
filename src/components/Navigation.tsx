@@ -19,7 +19,7 @@ const MOBILE_TABS = [
   { href: '/stock', label: '주식', icon: '📊' },
   { href: '/apt', label: '부동산', icon: '🏢' },
   { href: '/hot', label: 'HOT', icon: '🔥' },
-  { href: '/profile', label: '내정보', icon: '👤' },
+  { href: '/discuss', label: '토론', icon: '💭' },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
@@ -40,21 +40,24 @@ export function Navigation() {
   const [unread, setUnread]     = useState(0);
   const [fontSize, setFontSize] = useState('medium');
 
+  const applyFontClass = (val: string) => {
+    const el = document.documentElement;
+    el.classList.remove('font-small', 'font-medium', 'font-large');
+    el.classList.add(`font-${val}`);
+  };
+
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('kd_font_size') : null;
     if (saved && ['small','medium','large'].includes(saved)) {
       setFontSize(saved);
-      const scales: Record<string, string> = { small: '14px', medium: '16px', large: '18px' };
-      document.documentElement.style.fontSize = scales[saved] || '16px';
+      applyFontClass(saved);
     }
   }, []);
 
   const handleFontSize = (val: string) => {
-    const scales: Record<string, string> = { small: '14px', medium: '16px', large: '18px' };
     setFontSize(val);
     localStorage.setItem('kd_font_size', val);
-    document.documentElement.style.fontSize = scales[val] || '16px';
-    document.documentElement.style.setProperty('--font-base', scales[val] || '16px');
+    applyFontClass(val);
   };
 
   useEffect(() => {
