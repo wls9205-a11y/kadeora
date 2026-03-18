@@ -148,34 +148,19 @@ export default function WriteClient() {
           {editId ? '✏️ 게시글 수정' : '✏️ 새 글 작성'}
         </h1>
 
-        {/* 투자 정보 경고 배너 */}
-        <div style={{
-          background: 'var(--bg-hover)',
-          borderLeft: '3px solid var(--brand)',
-          borderRadius: 8,
-          padding: '10px 14px',
-          fontSize: 13,
-          color: 'var(--text-secondary)',
-          marginBottom: 16,
-          lineHeight: 1.6,
-        }}>
-          ⚠️ 투자 정보 공유 주의사항 — 허위사실·과장된 수익 정보 유포는 자본시장법 제178조에 의거 처벌받을 수 있습니다.
-        </div>
-
         {/* 카테고리 */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>카테고리</label>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {CATEGORIES.map(cat => (
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value)}
                 style={{
-                  flex: 1, padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
-                  border: `2px solid ${category === cat.value ? 'var(--brand)' : 'var(--border)'}`,
-                  background: category === cat.value ? 'rgba(59,130,246,0.12)' : 'transparent',
-                  color: category === cat.value ? 'var(--brand)' : 'var(--text-secondary)',
-                  fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
+                  padding: '8px 18px', borderRadius: 24, cursor: 'pointer',
+                  border: `1px solid ${category === cat.value ? 'var(--brand)' : 'var(--border)'}`,
+                  background: category === cat.value ? 'var(--brand)' : 'var(--bg-hover)',
+                  color: category === cat.value ? '#fff' : 'var(--text-secondary)',
+                  fontSize: 14, fontWeight: 600, transition: 'all 0.15s',
                 }}
               >
                 {cat.label}

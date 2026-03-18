@@ -18,6 +18,11 @@
   .right-panel-wrapper { display: none; }
 }
 
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .kd-card { padding: 12px 14px !important; }
+}
+
 /* 글씨 크기 (CSS 클래스 방식) */
 html.font-small { font-size: 14px; }
 html.font-medium { font-size: 16px; }

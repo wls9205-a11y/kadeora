@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PushBroadcast from './PushBroadcast';
 import NoticeManager from './NoticeManager';
+import { AdminLineChart, AdminDonutChart } from './AdminCharts';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -17,7 +18,7 @@ export default async function AdminDashboard() {
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
   if (!profile?.is_admin) redirect('/feed');
 
-  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR] = await Promise.all([
+  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR, signupRawR, postRawR, catRawR] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
@@ -27,9 +28,21 @@ export default async function AdminDashboard() {
     supabase.from('profiles').select('nickname, grade_title, created_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('reports').select('id, reason, content_type, created_at, status').eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
     supabase.from('pwa_installs').select('platform, installed_at, region_text').order('installed_at', { ascending: false }).limit(30),
+    supabase.from('profiles').select('created_at').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).eq('is_deleted', false),
+    supabase.from('posts').select('created_at, category').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).eq('is_deleted', false),
+    supabase.from('posts').select('category').eq('is_deleted', false),
   ]);
 
   const pwaStats = pwaStatsR.data ?? [];
+  const signupRaw = signupRawR.data ?? [];
+  const postRaw = postRawR.data ?? [];
+  const catRaw = catRawR.data ?? [];
+
+  const days14 = Array.from({ length: 14 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - (13 - i)); return d.toISOString().slice(0, 10); });
+  const signupByDay = days14.map(date => ({ date, count: signupRaw.filter((r: any) => r.created_at?.slice(0, 10) === date).length }));
+  const postByDay = days14.map(date => ({ date, count: postRaw.filter((r: any) => r.created_at?.slice(0, 10) === date).length }));
+  const CAT_C: Record<string, { label: string; color: string }> = { stock: { label: '주식', color: '#3b82f6' }, apt: { label: '부동산', color: '#10b981' }, local: { label: '우리동네', color: '#f59e0b' }, free: { label: '자유', color: '#8b5cf6' } };
+  const catStats = Object.entries(catRaw.reduce((a: any, r: any) => { const k = r.category || 'free'; a[k] = (a[k] || 0) + 1; return a; }, {} as Record<string, number>)).map(([key, count]) => ({ key, count: count as number, label: CAT_C[key]?.label || key, color: CAT_C[key]?.color || '#888' }));
   const pwaTotal = pwaStats.length;
   const pwaAndroid = pwaStats.filter((p: any) => p.platform === 'android').length;
   const pwaIOS = pwaStats.filter((p: any) => p.platform === 'ios').length;
@@ -123,6 +136,16 @@ export default async function AdminDashboard() {
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{s.label}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* 데이터 차트 */}
+      <div style={{ ...card, marginTop: 16 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>📈 데이터 현황</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <AdminLineChart data={signupByDay} label="일별 신규 가입자 (14일)" />
+          <AdminLineChart data={postByDay} label="일별 게시글 수 (14일)" color="var(--success)" />
+          <AdminDonutChart data={catStats} label="카테고리별 게시글 분포" />
         </div>
       </div>
 
