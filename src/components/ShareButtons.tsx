@@ -20,6 +20,12 @@ export default function ShareButtons({ postId, title, content }: Props) {
     setHasNativeShare(typeof navigator !== 'undefined' && !!navigator.share);
   }, []);
 
+  useEffect(() => {
+    if (open) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
   const url = `https://kadeora.app/feed/${postId}`;
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);

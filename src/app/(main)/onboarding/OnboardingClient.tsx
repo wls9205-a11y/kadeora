@@ -153,8 +153,8 @@ export default function OnboardingClient() {
             </label>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(2)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={handleComplete} disabled={saving} className="kd-btn kd-btn-primary"
-                style={{ flex: 2, padding: '13px', fontSize: 15, fontWeight: 700 }}>
+              <button onClick={handleComplete} disabled={saving}
+                style={{ flex: 2, padding: '16px', fontSize: 16, fontWeight: 800, border: 'none', borderRadius: 12, cursor: saving ? 'not-allowed' : 'pointer', color: '#fff', background: 'linear-gradient(135deg, #FF4500, #FF6B35)', boxShadow: '0 4px 16px rgba(255,69,0,0.3)', opacity: saving ? 0.7 : 1 }}>
                 {saving ? '저장 중...' : '카더라 시작하기 🚀'}
               </button>
             </div>

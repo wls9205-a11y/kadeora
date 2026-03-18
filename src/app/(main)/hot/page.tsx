@@ -25,13 +25,23 @@ export default async function HotPage() {
   const sb = await createSupabaseServer();
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const { data: topPosts } = await sb
+  let { data: topPosts } = await sb
     .from('posts')
     .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
     .eq('is_deleted', false)
     .gte('created_at', weekAgo)
     .order('likes_count', { ascending: false })
     .limit(5);
+
+  // 7일 데이터 없으면 30일로 fallback
+  if (!topPosts || topPosts.length === 0) {
+    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await sb.from('posts')
+      .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
+      .eq('is_deleted', false).gte('created_at', monthAgo)
+      .order('likes_count', { ascending: false }).limit(5);
+    topPosts = data;
+  }
 
   const regionPosts: Record<string, any[]> = {};
   for (const region of REGION_SECTIONS) {

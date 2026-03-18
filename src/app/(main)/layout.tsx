@@ -5,6 +5,7 @@ import { ToastProvider } from '@/components/Toast';
 import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import FeedbackButton from '@/components/FeedbackButton';
+import Sidebar from '@/components/Sidebar';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
@@ -22,21 +23,26 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     <ToastProvider>
       <Navigation />
       <TrendingTicker />
-      <main style={{
-        maxWidth: 1200,
-        margin: '0 auto',
-        padding: 'clamp(12px,3vw,20px) clamp(12px,3vw,24px) 90px',
-        minHeight: 'calc(100vh - 48px)',
-        backgroundColor: 'var(--bg-base)',
-        color: 'var(--text-primary)',
-      }}>
-        <ErrorBoundary>
-          <GuestGate isLoggedIn={!!user}>
-            {children}
-          </GuestGate>
-        </ErrorBoundary>
-        <FeedbackButton />
-      </main>
+      <div style={{ display: 'flex', maxWidth: 1120, margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
+        <div className="sidebar-wrapper">
+          <Sidebar />
+        </div>
+        <main style={{
+          flex: 1, minWidth: 0,
+          paddingTop: 'clamp(12px,3vw,20px)',
+          paddingBottom: 90,
+          minHeight: 'calc(100vh - 48px)',
+          backgroundColor: 'var(--bg-base)',
+          color: 'var(--text-primary)',
+        }}>
+          <ErrorBoundary>
+            <GuestGate isLoggedIn={!!user}>
+              {children}
+            </GuestGate>
+          </ErrorBoundary>
+          <FeedbackButton />
+        </main>
+      </div>
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>
