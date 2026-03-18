@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: '가이드북',
-  description: '카더라 앱 사용 가이드와 업데이트 노트',
+  description: '카더라 앱 사용 가이드',
 };
 
 const FEATURES = [
@@ -18,33 +18,6 @@ const FEATURES = [
   { icon: '👤', title: '프로필', desc: '지역 설정, 자기소개, 내 게시글/댓글 히스토리' },
 ];
 
-const UPDATES = [
-  {
-    version: 'v1.4',
-    date: '2026.03.18',
-    items: ['공유 바텀시트 6개 플랫폼', '동적 OG 이미지', '친구 초대 시스템', '주간 HOT 랭킹', 'PWA 스토어 출시 준비', '오프라인 페이지'],
-  },
-  {
-    version: 'v1.3',
-    date: '2026.03.18',
-    items: ['우리동네 시 단위 지역 필터', '글씨 크기 헤더 드롭다운 이동', '페이지 레이아웃 통일', '가이드북 페이지 추가'],
-  },
-  {
-    version: 'v1.2',
-    date: '2026.03.18',
-    items: ['카카오톡 공유 버튼', '프로필 아바타 수정', '주식 탭 한글화', '헤더 카더라 텍스트'],
-  },
-  {
-    version: 'v1.1',
-    date: '2026.03.18',
-    items: ['어드민 페이지', '신고 시스템', '쿠키 동의 배너', '투자 면책 워터마크'],
-  },
-  {
-    version: 'v1.0',
-    date: '2026.03.18',
-    items: ['카더라 서비스 오픈 — 피드/주식/부동산/토론/프로필'],
-  },
-];
 
 export default function GuidePage() {
   return (
@@ -65,24 +38,6 @@ export default function GuidePage() {
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{f.title}</div>
               <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.5 }}>{f.desc}</div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 업데이트 노트 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>업데이트 노트</h2>
-        {UPDATES.map((u, i) => (
-          <div key={u.version} style={{ padding: '12px 0', borderBottom: i < UPDATES.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 11, fontWeight: 700, borderRadius: 4, padding: '2px 8px' }}>{u.version}</span>
-              <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{u.date}</span>
-            </div>
-            <ul style={{ margin: '6px 0 0', paddingLeft: 18, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-              {u.items.map(item => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
           </div>
         ))}
       </div>
