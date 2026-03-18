@@ -7,6 +7,7 @@ import NoticeManager from './NoticeManager';
 import { AdminLineChart, AdminDonutChart } from './AdminCharts';
 import SeedDataManager from './SeedDataManager';
 import UnsoldFetchButton from './UnsoldFetchButton';
+import TrafficStats from './TrafficStats';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -163,6 +164,11 @@ export default async function AdminDashboard() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 트래픽 현황 */}
+      <div style={{ ...card, marginTop: 16 }}>
+        <TrafficStats />
       </div>
 
       {/* 출석체크 현황 */}
