@@ -189,8 +189,8 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
   }, [posts.length]);
 
   const categories = [
-    { key: 'all', label: '전체' }, { key: 'local', label: '🏘 우리동네' },
-    { key: 'stock', label: '📈 주식' }, { key: 'apt', label: '🏠 부동산' }, { key: 'free', label: '💬 자유' },
+    { key: 'all', label: '전체' }, { key: 'local', label: '📍 우리동네' },
+    { key: 'stock', label: '📊 주식' }, { key: 'apt', label: '🏢 부동산' }, { key: 'free', label: '✏️ 자유' },
   ];
   const visiblePosts = posts.slice(0, visibleCount);
 

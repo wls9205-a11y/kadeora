@@ -5,10 +5,10 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useState, useEffect } from 'react';
 
 const MENU = [
-  { href: '/feed', icon: '🏠', label: '피드' },
-  { href: '/stock', icon: '📈', label: '주식' },
-  { href: '/apt', icon: '🏘', label: '부동산' },
-  { href: '/discuss', icon: '💬', label: '토론' },
+  { href: '/feed', icon: '📋', label: '피드' },
+  { href: '/stock', icon: '📊', label: '주식' },
+  { href: '/apt', icon: '🏢', label: '부동산' },
+  { href: '/discuss', icon: '💭', label: '토론' },
   { href: '/hot', icon: '🔥', label: '이번주 HOT' },
 ];
 
