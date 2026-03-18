@@ -5,6 +5,7 @@ import PushBroadcast from './PushBroadcast';
 import NoticeManager from './NoticeManager';
 import { AdminLineChart, AdminDonutChart } from './AdminCharts';
 import SeedDataManager from './SeedDataManager';
+import UnsoldFetchButton from './UnsoldFetchButton';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -203,9 +204,7 @@ export default async function AdminDashboard() {
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, lineHeight: 1.6 }}>
           data.go.kr에서 미분양주택현황 API 키 발급 후 Vercel 환경변수 UNSOLD_API_KEY에 등록하면 전국 미분양 데이터를 자동 수집합니다
         </div>
-        <button disabled style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 13, fontWeight: 600, cursor: 'not-allowed' }}>
-          API 키 미등록 — 수집 비활성
-        </button>
+        <UnsoldFetchButton hasKey={!!process.env.UNSOLD_API_KEY} />
       </div>
 
       {/* 시드 데이터 관리 */}
