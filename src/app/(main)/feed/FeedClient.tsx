@@ -336,7 +336,7 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
               {/* 본문 */}
               <div style={{ flex: 1, padding: '10px 12px', minWidth: 0, display:'flex', gap:10 }}>
               <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 6, flexWrap: 'wrap' }}>
                   {post.profiles?.avatar_url ? (
                     <img src={post.profiles.avatar_url} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                   ) : (
@@ -348,29 +348,29 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
                   <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
                   {((post.likes_count ?? 0) >= 100 || (post.view_count ?? 0) >= 1000) && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: 'var(--error-bg)', color: 'var(--error)' }}>🔥 HOT</span>}
                 </div>
-                <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                <h2 style={{ margin: '0 0 4px', fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                   {post.title}
                 </h2>
-                <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
+                <p style={{ margin: '0 0 8px', fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
                   {post.content}
                 </p>
                 <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <div onClick={(e) => handleComment(e, post.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', cursor: 'pointer' }}
+                  <div onClick={(e) => handleComment(e, post.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', cursor: 'pointer' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
                     💬 댓글 {numFmt(post.comments_count ?? 0)}
                   </div>
-                  <div onClick={(e) => handleShare(e, post)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', cursor: 'pointer' }}
+                  <div onClick={(e) => handleShare(e, post)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', cursor: 'pointer' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
                     🔗 공유
                   </div>
-                  <div onClick={(e) => handleBookmark(e, post.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: 12, fontWeight: 700, color: isBookmarked ? 'var(--brand)' : 'var(--text-tertiary)', cursor: 'pointer' }}
+                  <div onClick={(e) => handleBookmark(e, post.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: '0.75rem', fontWeight: 700, color: isBookmarked ? 'var(--brand)' : 'var(--text-tertiary)', cursor: 'pointer' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border)'; if (!bookmarkedPosts.has(post.id)) (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; if (!bookmarkedPosts.has(post.id)) (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
                     {isBookmarked ? '🔖' : '🔖'} {isBookmarked ? '저장됨' : '저장'}
                   </div>
-                  <div style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)', padding: '5px 4px', display:'flex', alignItems:'center', gap:4 }}>
+                  <div style={{ marginLeft: 'auto', fontSize: '0.6875rem', color: 'var(--text-tertiary)', padding: '5px 4px', display:'flex', alignItems:'center', gap:4 }}>
                     👁 {numFmt(post.view_count ?? 0)}
                     <span style={{ fontSize:10, color:'var(--text-tertiary)', opacity:0.5 }}>kadeora.app</span>
                   </div>
