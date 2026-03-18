@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import AptCommentSheet from '@/components/AptCommentSheet';
 
 interface Apt {
   id: number; house_nm: string; house_manage_no?: string; region_nm: string;
@@ -41,6 +43,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
+  const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -137,7 +140,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
                   {st === 'upcoming' && dday !== null && dday >= 0 && (
                     <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>D-{dday}</span>
                   )}
-                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{apt.house_nm}</span>
+                  <Link href={`/apt/${apt.house_manage_no || apt.id}`} style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{apt.house_nm}</Link>
                   {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 7px', borderRadius: 10 }}>
                       {Number(apt.competition_rate_1st).toFixed(1)}:1
@@ -161,9 +164,8 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>👁 {(apt.view_count || 0).toLocaleString()}</span>
                   {ac > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>🔔 {ac}</span>}
-                  {apt.pblanc_url && (
-                    <a href={apt.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>분양 홈페이지 →</a>
-                  )}
+                  <button onClick={() => setCommentTarget({ houseKey: h, houseNm: apt.house_nm, houseType: 'sub' })} style={{ fontSize: 11, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0 }}>✏️ 한줄평</button>
+                  <Link href={`/apt/${apt.house_manage_no || apt.id}`} style={{ fontSize: 11, color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
                   <div style={{ flex: 1 }} />
                   {aptUser && (
                     <button onClick={() => toggleAlert(apt)} style={{
@@ -223,7 +225,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
                   {/* 줄1: 현장명 + 분양가 */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
                     <div style={{ flex: 1 }}>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{u.house_nm || '미분양 단지'}</span>
+                      <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm || '미분양 단지'}</Link>
                     </div>
                     {priceStr && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)', flexShrink: 0, marginLeft: 8 }}>{priceStr}</span>}
                   </div>
@@ -246,12 +248,10 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
 
                   {/* 줄3: 링크 */}
                   <div style={{ display: 'flex', gap: 10, fontSize: 11 }}>
-                    {u.contact_tel && (
-                      <a href={`tel:${u.contact_tel}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>📞 전화문의</a>
-                    )}
-                    {u.pblanc_url && (
-                      <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>
-                    )}
+                    <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })} style={{ color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0, fontSize: 11 }}>✏️ 한줄평</button>
+                    <Link href={`/apt/unsold/${u.id}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
+                    {u.contact_tel && <a href={`tel:${u.contact_tel}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>📞 전화문의</a>}
+                    {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
                   </div>
                 </div>
               );
@@ -262,6 +262,17 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
           </div>
         );
       })()}
+
+      {/* 한줄평 바텀시트 */}
+      {commentTarget && (
+        <AptCommentSheet
+          houseKey={commentTarget.houseKey}
+          houseNm={commentTarget.houseNm}
+          houseType={commentTarget.houseType}
+          open={!!commentTarget}
+          onClose={() => setCommentTarget(null)}
+        />
+      )}
     </div>
   );
 }

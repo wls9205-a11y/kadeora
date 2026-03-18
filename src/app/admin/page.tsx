@@ -19,7 +19,7 @@ export default async function AdminDashboard() {
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
   if (!profile?.is_admin) redirect('/feed');
 
-  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR, signupRawR, postRawR, catRawR, todayAttR, totalAttR, topAttR] = await Promise.all([
+  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR, signupRawR, postRawR, catRawR, todayAttR, totalAttR, topAttR, unsoldCountR] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
@@ -35,6 +35,7 @@ export default async function AdminDashboard() {
     supabase.from('attendance').select('user_id', { count: 'exact', head: true }).eq('last_date', new Date().toISOString().slice(0, 10)),
     supabase.from('attendance').select('user_id', { count: 'exact', head: true }),
     supabase.from('attendance').select('user_id, streak, total_days, last_date, profiles(nickname)').order('streak', { ascending: false }).limit(5),
+    supabase.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true),
   ]);
 
   const pwaStats = pwaStatsR.data ?? [];
@@ -193,6 +194,18 @@ export default async function AdminDashboard() {
       {/* Push Broadcast */}
       <div style={{ ...card, marginTop: 16 }}>
         <PushBroadcast />
+      </div>
+
+      {/* 미분양 데이터 수집 */}
+      <div style={{ ...card, marginTop: 16 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏗️ 미분양 데이터 수집</h2>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>현재 unsold_apts: <strong>{unsoldCountR.count ?? 0}건</strong></div>
+        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, lineHeight: 1.6 }}>
+          data.go.kr에서 미분양주택현황 API 키 발급 후 Vercel 환경변수 UNSOLD_API_KEY에 등록하면 전국 미분양 데이터를 자동 수집합니다
+        </div>
+        <button disabled style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 13, fontWeight: 600, cursor: 'not-allowed' }}>
+          API 키 미등록 — 수집 비활성
+        </button>
       </div>
 
       {/* 시드 데이터 관리 */}

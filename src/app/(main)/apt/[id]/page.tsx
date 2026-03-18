@@ -2,107 +2,105 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import MiniDiscuss from '@/components/MiniDiscuss';
+import AptCommentInline from '@/components/AptCommentInline';
 
 interface Props { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const supabase = await createSupabaseServer();
-  const { data: apt } = await supabase.from('apt_subscriptions').select('house_nm, region_nm, hssply_adres, rcept_bgnde, rcept_endde, tot_supply_hshld_co').eq('id', Number(id)).single();
-  if (!apt) return { title: '카더라' };
-  return {
-    title: `${apt.house_nm} 청약 정보 | 카더라`,
-    description: `${apt.house_nm} 청약 ${apt.rcept_bgnde}~${apt.rcept_endde}. ${apt.region_nm}. 공급 ${apt.tot_supply_hshld_co ?? '-'}세대.`,
-    openGraph: { title: `${apt.house_nm} 청약`, description: `${apt.region_nm} · 공급 ${apt.tot_supply_hshld_co ?? '-'}세대`, images: [{ url: 'https://kadeora.app/og-image.svg', width: 1200, height: 628 }] },
-  };
+  const sb = await createSupabaseServer();
+  const { data: apt } = await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', Number(id)).single();
+  if (!apt) return {};
+  return { title: `${apt.house_nm} 청약 | 카더라`, description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대` };
 }
+
+function fmtYM(s: string | null) { if (!s) return null; return `${s.slice(0, 4)}년 ${parseInt(s.slice(4, 6))}월`; }
 
 export default async function AptDetailPage({ params }: Props) {
   const { id } = await params;
-  const supabase = await createSupabaseServer();
-  const { data: apt } = await supabase.from('apt_subscriptions').select('*').eq('id', Number(id)).single();
+  const sb = await createSupabaseServer();
+  const { data: apt } = await sb.from('apt_subscriptions').select('*').eq('id', Number(id)).single();
   if (!apt) notFound();
 
   const today = new Date().toISOString().slice(0, 10);
-  const isActive = apt.rcept_bgnde && apt.rcept_endde && today >= apt.rcept_bgnde && today <= apt.rcept_endde;
-  const isPast = apt.rcept_endde && today > apt.rcept_endde;
-  const daysLeft = apt.rcept_bgnde ? Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000) : null;
-  const badge = isActive ? { text: '📢 청약 진행 중', color: 'var(--success)' }
-    : isPast ? { text: '✅ 청약 마감', color: 'var(--text-tertiary)' }
-    : daysLeft !== null && daysLeft <= 7 ? { text: `⏰ D-${daysLeft} 청약 임박`, color: 'var(--brand)' }
-    : { text: `📅 D-${daysLeft ?? '?'} 청약 예정`, color: 'var(--info)' };
+  const status = !apt.rcept_bgnde ? 'upcoming' : today >= apt.rcept_bgnde && today <= apt.rcept_endde ? 'open' : today < apt.rcept_bgnde ? 'upcoming' : 'closed';
+  const dday = apt.rcept_bgnde ? Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000) : null;
+  const SB: Record<string, { label: string; bg: string; color: string; border: string }> = {
+    open: { label: '접수중', bg: '#14532d', color: '#86efac', border: '#166534' },
+    upcoming: { label: '접수예정', bg: '#1e3a5f', color: '#93c5fd', border: '#1e40af' },
+    closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
+  };
+  const badge = SB[status];
+  const rows = [
+    ['청약접수', apt.rcept_bgnde && apt.rcept_endde ? `${apt.rcept_bgnde} ~ ${apt.rcept_endde}` : null],
+    ['특별공급', apt.spsply_rcept_bgnde ? `${apt.spsply_rcept_bgnde} ~ ${apt.spsply_rcept_endde}` : null],
+    ['당첨자발표', apt.przwner_presnatn_de],
+    ['계약', apt.cntrct_cncls_bgnde ? `${apt.cntrct_cncls_bgnde} ~ ${apt.cntrct_cncls_endde}` : null],
+    ['입주예정', fmtYM(apt.mvn_prearnge_ym)],
+    ['총공급', apt.tot_supply_hshld_co ? `${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : null],
+  ].filter(r => r[1]);
 
-  const mvnText = apt.mvn_prearnge_ym ? `${apt.mvn_prearnge_ym.slice(0,4)}년 ${apt.mvn_prearnge_ym.slice(4)}월` : '-';
-  const infoItems = [
-    { label: '📍 위치', value: apt.hssply_adres ?? '-' },
-    { label: '🏠 공급세대', value: apt.tot_supply_hshld_co && Number(apt.tot_supply_hshld_co) > 0 ? Number(apt.tot_supply_hshld_co).toLocaleString() + '세대' : '정보 업데이트 예정' },
-    { label: '📅 청약 시작', value: apt.rcept_bgnde ?? '-' },
-    { label: '📅 청약 마감', value: apt.rcept_endde ?? '-' },
-    { label: '🏆 당첨자 발표', value: apt.przwner_presnatn_de ?? '-' },
-    { label: '📝 계약', value: apt.cntrct_cncls_bgnde ? `${apt.cntrct_cncls_bgnde}~${apt.cntrct_cncls_endde}` : '-' },
-    { label: '🔑 입주 예정', value: mvnText },
-    { label: '🏗️ 지역', value: apt.region_nm ?? '-' },
-  ];
+  const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <Link href="/apt" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 20, display: 'inline-block' }}>← 청약 목록</Link>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: badge.color, background: 'var(--bg-hover)', padding: '4px 12px', borderRadius: 20 }}>{badge.text}</span>
-          <span style={{ fontSize: 12, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '4px 10px', borderRadius: 20 }}>{apt.region_nm}</span>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      {/* 헤더 */}
+      <Link href="/apt" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>← 부동산</Link>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}>{badge.label}</span>
+          {status === 'upcoming' && dday !== null && dday >= 0 && <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)' }}>D-{dday}</span>}
+          {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 10 }}>{Number(apt.competition_rate_1st).toFixed(1)}:1</span>
+          )}
         </div>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.3 }}>{apt.house_nm}</h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>📍 {apt.hssply_adres ?? '-'}</p>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{apt.house_nm}</h1>
+        <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{apt.region_nm} · {apt.hssply_adres}{apt.tot_supply_hshld_co ? ` · ${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : ''}</div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-        {infoItems.map(({ label, value }) => (
-          <div key={label} style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>{label}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>{value}</div>
+
+      {/* 분양 일정 */}
+      <div style={card}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📅 분양 일정</div>
+        {rows.map(([label, value], i) => (
+          <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{label}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{value}</span>
           </div>
         ))}
       </div>
-      {(apt.competition_rate_1st) && (
-        <div style={{ background:'var(--bg-hover)', borderRadius:12, padding:16, marginBottom:16, border:'1px solid var(--border)' }}>
-          <div style={{ fontSize:13, fontWeight:700, color:'var(--text-secondary)', marginBottom:12 }}>🏆 청약 경쟁률</div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-            <div style={{ background:'var(--brand-light)', borderRadius:8, padding:'10px 14px', border:'1px solid var(--brand)' }}>
-              <div style={{ fontSize:11, color:'var(--text-tertiary)', marginBottom:4 }}>1순위 경쟁률</div>
-              <div style={{ fontSize:22, fontWeight:800, color:'var(--brand)' }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1</div>
-            </div>
-          </div>
-          {apt.competition_updated_at && (
-            <div style={{ fontSize:11, color:'var(--text-tertiary)', marginTop:8, textAlign:'right' }}>
-              업데이트: {new Date(apt.competition_updated_at).toLocaleDateString('ko-KR')}
-            </div>
-          )}
+
+      {/* 경쟁률 */}
+      {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
+        <div style={{ ...card, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏆 청약 경쟁률</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#818cf8' }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 13, color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
         </div>
       )}
-      {!apt.competition_rate_1st && apt.rcept_endde && new Date(apt.rcept_endde) > new Date() && (
-        <div style={{ background:'var(--success-bg)', border:'1px solid var(--success)', borderRadius:10, padding:12, marginBottom:16, fontSize:13, color:'var(--text-secondary)', lineHeight:1.6 }}>
-          📊 청약 마감 후 경쟁률이 자동 업데이트됩니다.
+
+      {/* 위치 */}
+      <div style={card}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 교통</div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 10 }}>{apt.hssply_adres}</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <a href={`https://map.kakao.com/?q=${encodeURIComponent(apt.hssply_adres || apt.house_nm)}`} target="_blank" rel="noopener noreferrer"
+            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>카카오맵</a>
+          <a href={`https://map.naver.com/search/${encodeURIComponent(apt.hssply_adres || apt.house_nm)}`} target="_blank" rel="noopener noreferrer"
+            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>네이버지도</a>
         </div>
-      )}
-      {(!apt.tot_supply_hshld_co || Number(apt.tot_supply_hshld_co) === 0) && (
-        <div style={{ background:'var(--warning-bg)', border:'1px solid var(--warning)', borderRadius:8, padding:'10px 14px', marginBottom:16, fontSize:12, color:'var(--text-secondary)', lineHeight:1.6 }}>
-          ⏳ 공급세대 수는 청약홈 공고문 게시 후 자동 업데이트됩니다.
-        </div>
-      )}
-      <div style={{ background: 'var(--info-bg)', border: '1px solid var(--info)', borderRadius: 10, padding: 14, marginBottom: 20, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-        🏫 배정학교, 🚇 주변 교통 등은 <strong>청약홈 공고문</strong>이나 <strong>부동산 토론방</strong>에서 확인하세요.
       </div>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <a href={apt.pblanc_url ?? 'https://www.applyhome.co.kr'} target="_blank" rel="noopener noreferrer"
-          style={{ flex: 1, textAlign: 'center', padding: 14, background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
-          🏠 청약홈
-        </a>
-        <Link href="/discuss" style={{ flex: 1, textAlign: 'center', padding: 14, background: 'var(--brand)', borderRadius: 12, textDecoration: 'none', fontSize: 14, fontWeight: 700, color: 'var(--text-inverse)' }}>
-          💬 토론방
-        </Link>
+
+      {/* 한줄평 */}
+      <div style={card}>
+        <AptCommentInline houseKey={apt.house_manage_no || String(apt.id)} houseNm={apt.house_nm} houseType="sub" />
       </div>
-      <MiniDiscuss roomKey={`apt_${id}`} roomTitle={`${apt.house_nm} 토론`} />
+
+      {/* 외부 링크 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+        {apt.pblanc_url && (
+          <a href={apt.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--brand)', color: 'var(--brand)', textDecoration: 'none', fontSize: 14, fontWeight: 700, textAlign: 'center' }}>분양 홈페이지 바로가기 →</a>
+        )}
+        <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 14, fontWeight: 600, textAlign: 'center' }}>청약홈에서 확인하기 →</a>
+      </div>
     </div>
   );
 }
