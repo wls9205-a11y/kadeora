@@ -50,7 +50,8 @@ function fmtSupply(v: number | null | undefined): string {
   return `${v.toLocaleString()}세대`;
 }
 
-export default function AptClient({ apts }: { apts: Apt[] }) {
+export default function AptClient({ apts, unsold = [] }: { apts: Apt[]; unsold?: any[] }) {
+  const [activeTab, setActiveTab] = useState<'sub'|'unsold'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [search, setSearch] = useState('');
@@ -71,10 +72,41 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 헤더 */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>🏠 아파트 청약 정보</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>전국 청약 일정을 한눈에 확인하세요</p>
-        <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>📅 청약홈 기준 · 매일 자동 갱신</p>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>🏢 부동산</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>전국 청약 일정과 미분양 현황을 한눈에</p>
+        <div style={{ display:'flex', gap:8, marginTop:8 }}>
+          <a href="/apt/diagnose" style={{ fontSize:12, color:'var(--brand)', textDecoration:'none', fontWeight:600 }}>🎯 청약 가점 진단 →</a>
+        </div>
       </div>
+
+      {/* 탭 */}
+      <div style={{ display:'flex', gap:0, marginBottom:12, background:'var(--bg-surface)', borderRadius:8, padding:4, border:'1px solid var(--border)' }}>
+        {([['sub','청약 일정'],['unsold','미분양']] as const).map(([key, label]) => (
+          <button key={key} onClick={() => setActiveTab(key)} style={{
+            flex:1, padding:'8px 0', borderRadius:6, border:'none', cursor:'pointer',
+            background: activeTab === key ? 'var(--brand)' : 'transparent',
+            color: activeTab === key ? '#fff' : 'var(--text-secondary)', fontWeight:600, fontSize:13,
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {activeTab === 'unsold' && (
+        <div style={{ marginBottom:16 }}>
+          {unsold.length === 0 ? (
+            <div style={{ textAlign:'center', padding:40, color:'var(--text-tertiary)' }}>미분양 데이터가 없습니다</div>
+          ) : unsold.map((u: any) => (
+            <div key={u.id} style={{ background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:12, padding:16, marginBottom:8 }}>
+              <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)', marginBottom:4 }}>{u.house_nm || u.apt_name || '미분양 단지'}</div>
+              <div style={{ fontSize:12, color:'var(--text-tertiary)', marginBottom:6 }}>{u.region_nm || u.city || ''} {u.district || ''}</div>
+              <div style={{ fontSize:14, fontWeight:700, color:'var(--error)' }}>{(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대 미분양</div>
+              {u.price_range && <div style={{ fontSize:12, color:'var(--text-secondary)', marginTop:4 }}>{u.price_range}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'sub' && (<>
+      <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>📅 청약홈 기준 · 매일 자동 갱신</p>
 
       {/* 검색 */}
       <div className="mb-4">
@@ -361,6 +393,7 @@ export default function AptClient({ apts }: { apts: Apt[] }) {
       <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 16 }}>
         청약 정보: 청약홈(applyhome.co.kr) 공공 데이터 기반 · 정확한 일정은 청약홈에서 반드시 확인하세요
       </p>
+      </>)}
     </div>
   );
 }

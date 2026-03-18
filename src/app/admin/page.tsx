@@ -2,6 +2,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PushBroadcast from './PushBroadcast';
+import NoticeManager from './NoticeManager';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -123,6 +124,11 @@ export default async function AdminDashboard() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 공지 전광판 */}
+      <div style={{ ...card, marginTop: 16 }}>
+        <NoticeManager />
       </div>
 
       {/* Push Broadcast */}

@@ -71,6 +71,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="geo.region" content="KR" />
+        <meta name="geo.placename" content="대한민국" />
+        <meta name="geo.position" content="37.5665;126.9780" />
+        <meta name="ICBM" content="37.5665, 126.9780" />
+        <link rel="canonical" href="https://kadeora.app" />
         {/* 다크모드 강제 적용 */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.classList.add('dark');})();` }} />
         {/* 글씨크기 SSR 적용 */}

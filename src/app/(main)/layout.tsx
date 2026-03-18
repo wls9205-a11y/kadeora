@@ -9,6 +9,8 @@ import Sidebar from '@/components/Sidebar';
 import RightPanel from '@/components/RightPanel';
 import InstallBanner from '@/components/InstallBanner';
 import PWAInstallTracker from '@/components/PWAInstallTracker';
+import NoticeBanner from '@/components/NoticeBanner';
+import GuestCTA from '@/components/GuestCTA';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
@@ -24,6 +26,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <ToastProvider>
+      <NoticeBanner />
       <Navigation />
       <TrendingTicker />
       <div style={{ display: 'flex', maxWidth: 1340, margin: '0 auto', gap: 24, padding: '0 clamp(12px, 3vw, 24px)', alignItems: 'flex-start' }}>
@@ -51,6 +54,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       </div>
       <InstallBanner />
       <PWAInstallTracker />
+      <GuestCTA />
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>
