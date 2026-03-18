@@ -48,7 +48,7 @@ function highlight(text: string, query: string): React.ReactNode {
   );
 }
 
-const POPULAR = ['삼성전자', '엔비디아', '둔촌주공', 'SK하이닉스', '청약가점', '코스피', '아파트', '테슬라'];
+const POPULAR_FALLBACK = ['삼성전자', '엔비디아', '둔촌주공', 'SK하이닉스', '청약가점', '코스피', '아파트', '테슬라'];
 const LS_KEY = 'kd_recent_searches';
 
 function getRecentSearches(): string[] {
@@ -80,6 +80,7 @@ export default function SearchClient() {
   const [query, setQuery] = useState(initialQ);
   const [inputVal, setInputVal] = useState(initialQ);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [POPULAR, setPOPULAR] = useState<string[]>(POPULAR_FALLBACK);
   const [results, setResults] = useState<PostWithProfile[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -101,6 +102,9 @@ export default function SearchClient() {
 
   useEffect(() => {
     setRecentSearches(getRecentSearches());
+    fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.keywords?.length) setPOPULAR(d.keywords.map((k: any) => k.keyword)); })
+      .catch(() => {});
   }, []);
 
   const doSearch = useCallback(async (q: string, cat: string, offset: number, append = false) => {
@@ -185,6 +189,7 @@ export default function SearchClient() {
         saveRecentSearch(inputVal);
         setRecentSearches(getRecentSearches());
         router.replace(`/search?q=${encodeURIComponent(inputVal)}`, { scroll: false });
+        fetch('/api/search/log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: inputVal }) }).catch(() => {});
       }
     }, 400);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };

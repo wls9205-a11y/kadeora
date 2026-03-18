@@ -82,6 +82,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
   let post: PostWithProfile | null = null;
   let comments: CommentWithProfile[] = [];
+  let related: any[] = [];
   let currentUserId: string | null = null;
 
   try {
@@ -98,16 +99,25 @@ export default async function FeedDetailPage({ params }: Props) {
 
     if (postData) {
       post = postData as PostWithProfile;
-      await sb.from('posts').update({ view_count: (post.view_count ?? 0) + 1 }).eq('id', numId);
+      sb.from('posts').update({ view_count: (post.view_count ?? 0) + 1 }).eq('id', numId).then(() => {});
 
-      const { data: commentsData } = await sb
-        .from('comments')
-        .select('*, profiles!comments_author_id_fkey(id,nickname,avatar_url)')
-        .eq('post_id', numId)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false })
-        .limit(100);
+      const [{ data: commentsData }, { data: relatedData }] = await Promise.all([
+        sb.from('comments')
+          .select('*, profiles!comments_author_id_fkey(id,nickname,avatar_url)')
+          .eq('post_id', numId)
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false })
+          .limit(100),
+        sb.from('posts')
+          .select('id,title,likes_count,comments_count')
+          .eq('category', postData.category)
+          .eq('is_deleted', false)
+          .neq('id', numId)
+          .order('created_at', { ascending: false })
+          .limit(3),
+      ]);
       if (commentsData) comments = commentsData as CommentWithProfile[];
+      if (relatedData) related = relatedData;
     }
   } catch {
     // fallback to demo
@@ -275,6 +285,19 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         </div>
       </article>
+
+      {/* 관련 글 */}
+      {related.length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px', marginBottom: 16 }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>관련 글</h3>
+          {related.map((r: any, i: number) => (
+            <Link key={r.id} href={`/feed/${r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < related.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
+              <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>❤ {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Comments */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>

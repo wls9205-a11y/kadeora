@@ -25,7 +25,7 @@ const TYPE_ICON: Record<string, string> = {
   post_like: '❤️', comment: '💬', reply: '↩️',
   follow: '👤', badge: '🏅', new_post: '📝',
   comment_like: '👍', system: '🔔',
-  like: '❤️', // 레거시 호환
+  like: '❤️', invite: '🎁', mention: '@',
 };
 
 export default function NotificationsPage() {
