@@ -25,7 +25,7 @@ interface Apt {
   view_count?: number;
 }
 
-const REGIONS = ['전체','서울','경기','인천','부산','대구','광주','대전','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'];
+// 동적 지역 목록은 useMemo로 apts에서 추출
 
 function getStatus(apt: Apt): 'open'|'upcoming'|'closed' {
   const today = new Date().toISOString().slice(0,10);
@@ -86,6 +86,11 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
       setMyAlerts(prev => new Set([...prev, houseNo]));
     }
   };
+
+  const availableRegions = useMemo(() => {
+    const rs = Array.from(new Set(apts.map(a => a.region_nm).filter(Boolean)));
+    return ['전체', ...rs.sort()];
+  }, [apts]);
 
   const filtered = useMemo(() => {
     return apts.filter(apt => {
@@ -230,7 +235,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
 
       {/* 지역 필터 */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-3 no-scrollbar">
-        {REGIONS.map(r => (
+        {availableRegions.map(r => (
           <button
             key={r}
             onClick={() => { haptic(); setRegion(r); }}
