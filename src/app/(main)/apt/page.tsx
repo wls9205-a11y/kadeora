@@ -18,9 +18,8 @@ export default async function AptPage() {
     const sb = await createSupabaseServer();
     const [aptsR, unsoldR, alertsR] = await Promise.all([
       sb.from('apt_subscriptions').select('*')
-        .gte('rcept_bgnde', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
-        .lte('rcept_bgnde', new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
-        .order('rcept_bgnde', { ascending: false }).limit(200),
+        .or(`rcept_endde.gte.${new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
+        .order('rcept_bgnde', { ascending: false }).limit(300),
       sb.from('unsold_apts').select('*').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
       sb.from('apt_alerts').select('house_manage_no'),
     ]);

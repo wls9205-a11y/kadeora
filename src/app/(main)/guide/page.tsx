@@ -90,6 +90,48 @@ export default function GuidePage() {
           </div>
         ))}
       </div>
+
+      {/* 등급 안내 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+        <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>🏅 회원 등급 안내</h2>
+        <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-secondary)' }}>활동 포인트에 따라 등급이 올라갑니다</p>
+        {[
+          { lv: 1, name: '새싹', pts: '0P', emoji: '🌱' },
+          { lv: 2, name: '소문쟁이', pts: '100P', emoji: '🌿' },
+          { lv: 3, name: '동네방네', pts: '300P', emoji: '🍀' },
+          { lv: 4, name: '소문난집', pts: '600P', emoji: '🌸' },
+          { lv: 5, name: '핫이슈', pts: '1,000P', emoji: '🌻' },
+          { lv: 6, name: '빅마우스', pts: '2,000P', emoji: '⭐' },
+          { lv: 7, name: '인플루언서', pts: '5,000P', emoji: '🔥' },
+          { lv: 8, name: '전설', pts: '10,000P', emoji: '💎' },
+          { lv: 9, name: '레전드', pts: '30,000P', emoji: '👑' },
+          { lv: 10, name: '카더라신', pts: '100,000P', emoji: '🚀' },
+        ].map((g, i, arr) => (
+          <div key={g.lv} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <span style={{ fontSize: 18, width: 28, textAlign: 'center' as const }}>{g.emoji}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>Lv.{g.lv} {g.name}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{g.pts}~</span>
+          </div>
+        ))}
+      </div>
+
+      {/* 포인트 획득 방법 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
+        <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>💰 포인트 획득 방법</h2>
+        {[
+          { action: '출석체크', pts: '+10P', note: '7일 연속 +30P, 30일 연속 +100P' },
+          { action: '게시글 작성', pts: '+5P', note: '' },
+          { action: '댓글 작성', pts: '+2P', note: '' },
+          { action: '좋아요 받기', pts: '+1P', note: '' },
+          { action: '친구 초대', pts: '+50P', note: '초대한 친구도 +50P' },
+        ].map((p, i, arr) => (
+          <div key={p.action} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>{p.action}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)' }}>{p.pts}</span>
+            {p.note && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{p.note}</span>}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

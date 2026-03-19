@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import RefreshButton from '@/components/RefreshButton';
+import PullToRefresh from '@/components/PullToRefresh';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
@@ -28,9 +28,6 @@ interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeC
 export default function FeedClient({ posts, activeCategory, activeRegion = 'all' }: Props) {
   const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(40);
-  const [pullY, setPullY] = useState(0);
-  const [pulling, setPulling] = useState(false);
-  const touchStartY = React.useRef(0);
   const [showRegionBanner, setShowRegionBanner] = useState(false);
   const [tipSeen, setTipSeen] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -200,22 +197,11 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}
-      onTouchStart={e => { if (window.scrollY < 5) touchStartY.current = e.touches[0].clientY; else touchStartY.current = 0; }}
-      onTouchMove={e => { if (!touchStartY.current) return; const dy = e.touches[0].clientY - touchStartY.current; if (dy > 0 && dy < 120 && window.scrollY < 5) setPullY(dy); }}
-      onTouchEnd={() => { if (pullY > 70) { setPulling(true); router.refresh(); setTimeout(() => { setPulling(false); setPullY(0); }, 800); } else { setPullY(0); } touchStartY.current = 0; }}
-    >
-      {/* Pull-to-refresh indicator */}
-      {(pullY > 10 || pulling) && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: `${Math.min(pullY / 2, 30)}px 0`, transition: pulling ? 'padding 0.3s' : 'none' }}>
-          <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: pulling ? 'spin 0.8s linear infinite' : 'none', transform: `rotate(${pullY * 3}deg)` }} />
-        </div>
-      )}
-
+    <PullToRefresh>
+    <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 피드 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+      <div style={{ marginBottom: 10 }}>
         <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>피드</h1>
-        <RefreshButton />
       </div>
 
       {/* 지역 미설정 배너 */}
@@ -253,37 +239,53 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
 
       {/* 이번주 HOT */}
       {hotPosts.length > 0 && (() => {
-        const RANK_COLORS = ['#FF4500', '#FF8C00', '#FFA500'];
         return (
-          <div style={{ background: 'linear-gradient(135deg, rgba(255,69,0,0.05), transparent)', border: '1px solid var(--border)', borderRadius: 16, padding: '14px 16px', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div style={{ marginBottom: 16, borderRadius: 16, background: 'linear-gradient(160deg, rgba(255,69,0,0.1) 0%, rgba(20,20,20,0) 60%)', border: '1px solid rgba(255,69,0,0.2)', overflow: 'hidden' }}>
+            {/* 헤더 */}
+            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 18, animation: 'hotFlame 1.5s ease-in-out infinite' }}>🔥</span>
-                <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>이번주 HOT</span>
+                <span style={{ fontSize: 18, display: 'inline-block', animation: 'hotFlame 1.5s ease-in-out infinite' }}>🔥</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>이번주 HOT</span>
               </div>
-              <Link href="/hot" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>전체보기 →</Link>
+              <Link href="/hot" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>더보기 →</Link>
             </div>
-            {hotPosts.slice(0, 3).map((hp: any, i: number) => (
-              <Link key={hp.id} href={`/feed/${hp.id}`} style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', marginBottom: 8,
-                borderLeft: `3px solid ${RANK_COLORS[i]}`, borderRadius: 10,
-                background: i === 0 ? 'rgba(255,69,0,0.06)' : 'transparent', textDecoration: 'none',
-              }}>
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: RANK_COLORS[i], color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>❤ {hp.likes_count ?? 0} · 💬 {hp.comments_count ?? 0}</div>
-                </div>
+
+            {/* 1위 */}
+            {hotPosts[0] && (
+              <Link href={`/feed/${hotPosts[0].id}`} style={{ display: 'block', margin: '0 12px 10px', padding: '12px 14px', background: 'linear-gradient(135deg, rgba(255,69,0,0.08), rgba(255,140,0,0.04))', borderRadius: 12, border: '1px solid rgba(255,69,0,0.15)', textDecoration: 'none' }}>
+                <span style={{ display: 'inline-block', background: 'rgba(255,69,0,0.15)', color: '#FF4500', fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 8, marginBottom: 6 }}>👑 1위</span>
+                <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any, lineHeight: 1.4, marginBottom: 6 }}>{hotPosts[0].title}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>❤ {hotPosts[0].likes_count ?? 0} · 💬 {hotPosts[0].comments_count ?? 0}</div>
               </Link>
-            ))}
-            {hotPosts.slice(3, 5).map((hp: any, i: number) => (
-              <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < Math.min(hotPosts.length - 3, 2) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-tertiary)', width: 18, textAlign: 'center' as any }}>{i + 4}</span>
-                <span style={{ flex: 1, fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>❤ {hp.likes_count ?? 0}</span>
-              </Link>
-            ))}
-            <style>{`@keyframes hotFlame { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }`}</style>
+            )}
+
+            {/* 2~3위 */}
+            {hotPosts.length > 1 && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '0 12px 10px' }}>
+                {hotPosts.slice(1, 3).map((hp: any, i: number) => (
+                  <Link key={hp.id} href={`/feed/${hp.id}`} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 10, textDecoration: 'none' }}>
+                    <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 6, marginBottom: 4, background: i === 0 ? 'rgba(192,192,192,0.15)' : 'rgba(205,127,50,0.15)', color: i === 0 ? '#a0a0a0' : '#cd7f32' }}>{i === 0 ? '🥈 2위' : '🥉 3위'}</span>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any, lineHeight: 1.4, marginBottom: 4 }}>{hp.title}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>❤ {hp.likes_count ?? 0}</div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* 4~5위 */}
+            {hotPosts.length > 3 && (
+              <div style={{ padding: '0 16px 12px' }}>
+                {hotPosts.slice(3, 5).map((hp: any, i: number) => (
+                  <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', borderBottom: i === 0 && hotPosts.length > 4 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-tertiary)', width: 16 }}>{i + 4}</span>
+                    <span style={{ flex: 1, fontSize: 12, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>❤ {hp.likes_count ?? 0}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            <style>{`@keyframes hotFlame { 0%,100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.3) rotate(3deg); } }`}</style>
           </div>
         );
       })()}
@@ -426,5 +428,6 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
         </div>
       )}
     </div>
+    </PullToRefresh>
   );
 }

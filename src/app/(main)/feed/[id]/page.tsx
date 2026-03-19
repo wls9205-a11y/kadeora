@@ -12,7 +12,6 @@ import ShareButtons from '@/components/ShareButtons'
 
 import { BookmarkButton } from '@/components/BookmarkButton';
 import ReportButton from '@/components/ReportButton';
-import OneLinerSection from '@/components/OneLinerSection';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
@@ -301,11 +300,6 @@ export default async function FeedDetailPage({ params }: Props) {
           ))}
         </div>
       )}
-
-      {/* 한줄평 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px', marginBottom: 16 }}>
-        <OneLinerSection postId={post.id} />
-      </div>
 
       {/* Comments */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>
