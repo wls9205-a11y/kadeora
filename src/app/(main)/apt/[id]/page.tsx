@@ -10,10 +10,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { id } = await params;
     const sb = await createSupabaseServer();
+    const isHouseManageNo = /^\d{7,}$/.test(id) && id.length >= 7;
     const numId = Number(id);
-    const { data: apt } = numId > 0 && !isNaN(numId)
-      ? await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', numId).single()
-      : await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('house_manage_no', id).single();
+    const { data: apt } = isHouseManageNo
+      ? await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('house_manage_no', id).single()
+      : (numId > 0 && !isNaN(numId))
+        ? await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', numId).single()
+        : await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('house_manage_no', id).single();
     if (!apt) return {};
     return { title: `${apt.house_nm} 청약 | 카더라`, description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대` };
   } catch { return {}; }
@@ -26,10 +29,13 @@ export default async function AptDetailPage({ params }: Props) {
   let apt: any = null;
   try {
     const sb = await createSupabaseServer();
+    const isHouseManageNo = /^\d{7,}$/.test(id) && id.length >= 7;
     const numId = Number(id);
-    const { data } = numId > 0 && !isNaN(numId)
-      ? await sb.from('apt_subscriptions').select('*').eq('id', numId).single()
-      : await sb.from('apt_subscriptions').select('*').eq('house_manage_no', id).single();
+    const { data } = isHouseManageNo
+      ? await sb.from('apt_subscriptions').select('*').eq('house_manage_no', id).single()
+      : (numId > 0 && !isNaN(numId))
+        ? await sb.from('apt_subscriptions').select('*').eq('id', numId).single()
+        : await sb.from('apt_subscriptions').select('*').eq('house_manage_no', id).single();
     apt = data;
   } catch {}
   if (!apt) notFound();
