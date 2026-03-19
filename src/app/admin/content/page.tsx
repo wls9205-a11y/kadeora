@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react';
 
 interface Post { id: number; title: string; category: string; is_deleted: boolean; created_at: string; likes_count: number; comments_count: number; view_count: number; profiles: { nickname: string } | null }
 
+const ITEMS_PER_PAGE = 30;
+
 export default function AdminContentPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all'|'active'|'hidden'>('all');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const load = async () => {
     setLoading(true);
@@ -19,6 +22,7 @@ export default function AdminContentPage() {
   useEffect(() => { load(); }, []);
 
   const action = async (id: number, act: string) => {
+    if (act === 'hide' && !confirm('이 게시글을 숨김 처리하시겠습니까?')) return;
     await fetch(`/api/admin/posts/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: act }) });
     load();
   };
@@ -27,6 +31,12 @@ export default function AdminContentPage() {
     .filter(p => catFilter === 'all' || p.category === catFilter)
     .filter(p => statusFilter === 'all' || (statusFilter === 'active' ? !p.is_deleted : p.is_deleted))
     .filter(p => !search || p.title.includes(search));
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedPosts = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  // Reset to page 1 when filters change
+  useEffect(() => { setCurrentPage(1); }, [search, catFilter, statusFilter]);
 
   const cats = ['all', 'stock', 'apt', 'free'];
   const tab = (v: string, cur: string) => ({
@@ -67,7 +77,7 @@ export default function AdminContentPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(p => (
+              {paginatedPosts.map(p => (
                 <tr key={p.id} style={{ borderBottom: '1px solid var(--border)', opacity: p.is_deleted ? 0.5 : 1 }}>
                   <td style={{ padding: '10px 12px', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <a href={`/feed/${p.id}`} target="_blank" rel="noopener" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>{p.title}</a>
@@ -96,6 +106,26 @@ export default function AdminContentPage() {
           </table>
         )}
       </div>
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 16 }}>
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: currentPage === 1 ? 'var(--bg-hover)' : 'var(--bg-surface)', color: currentPage === 1 ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}
+          >
+            ← 이전
+          </button>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>{currentPage} / {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: currentPage === totalPages ? 'var(--bg-hover)' : 'var(--bg-surface)', color: currentPage === totalPages ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}
+          >
+            다음 →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -27,7 +27,7 @@ function SeedSection() {
   const [deleting, setDeleting] = useState('');
   const [confirmAll, setConfirmAll] = useState(false);
   const [result, setResult] = useState('');
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(true);
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
 
   const load = () => {

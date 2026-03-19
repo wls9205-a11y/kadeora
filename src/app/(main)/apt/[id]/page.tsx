@@ -58,6 +58,15 @@ export default async function AptDetailPage({ params }: Props) {
     ['총공급', apt.tot_supply_hshld_co ? `${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : null],
   ].filter(r => r[1]);
 
+  let relatedPosts: any[] = [];
+  try {
+    const sbRel = await createSupabaseServer();
+    const { data: rp } = await sbRel.from('posts').select('id,title,created_at')
+      .eq('is_deleted', false).ilike('title', `%${apt.house_nm.slice(0,4)}%`)
+      .order('created_at', { ascending: false }).limit(3);
+    relatedPosts = rp || [];
+  } catch { relatedPosts = []; }
+
   const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
 
   return (
@@ -111,6 +120,19 @@ export default async function AptDetailPage({ params }: Props) {
       <div style={card}>
         <AptCommentInline houseKey={apt.house_manage_no || String(apt.id)} houseNm={apt.house_nm} houseType="sub" />
       </div>
+
+      {/* 관련 게시글 */}
+      {relatedPosts.length > 0 && (
+        <div style={card}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
+          {relatedPosts.map((rp: any) => (
+            <Link key={rp.id} href={`/feed/${rp.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{rp.title}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{new Date(rp.created_at).toLocaleDateString('ko-KR')}</div>
+            </Link>
+          ))}
+        </div>
+      )}
 
       <div style={{ height: 24 }} />
     </div>

@@ -34,7 +34,7 @@ function UnsoldSection() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [unsoldCount, setUnsoldCount] = useState<number | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(true);
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
   const [recentUnsold, setRecentUnsold] = useState<any[]>([]);
 

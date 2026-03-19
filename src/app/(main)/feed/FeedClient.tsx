@@ -146,14 +146,33 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     e.preventDefault();
     e.stopPropagation();
     const url = `${window.location.origin}/feed/${post.id}`;
-    if (navigator.share) {
-      try { await navigator.share({ title: post.title, url }); } catch {}
-    } else {
+
+    // Try Kakao Share first
+    if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
       try {
-        await navigator.clipboard.writeText(url);
-        alert('링크가 복사되었습니다!');
+        (window as any).Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: post.title,
+            description: (post.content || '').slice(0, 100),
+            imageUrl: 'https://kadeora.app/og-image.svg',
+            link: { mobileWebUrl: url, webUrl: url },
+          },
+        });
+        return;
       } catch {}
     }
+
+    // Try Web Share API
+    if (navigator.share) {
+      try { await navigator.share({ title: post.title, url }); return; } catch {}
+    }
+
+    // Fallback: clipboard
+    try {
+      await navigator.clipboard.writeText(url);
+      alert('링크가 복사되었습니다!');
+    } catch {}
   };
 
   const handleBookmark = async (e: React.MouseEvent, postId: number) => {

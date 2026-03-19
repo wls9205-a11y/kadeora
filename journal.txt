@@ -29,9 +29,11 @@
 - 현재 카더라 로고: 주황(#FF4500) 라운드 사각형 + 흰 원 3개 가로 배열
 - SVG: <rect width="32" height="32" rx="8" fill="#FF4500"/> + 3개 circle fill="white"
 
-## DB 현황 (2026-03-19 기준)
-- posts: 3,338개 (is_deleted=false)
-- profiles: 21명 (시드 유저 10명 포함)
+## DB 현황 (2026-03-20 기준)
+- profiles: 100명 (시드 89명 + 실제 11명)
+- posts: ~3,400개 (is_deleted=false)
+- 신규 테이블: chat_messages, apt_cache, stock_comments
+- site_notices: author_id, is_paid, display_start/end, linked_post_id 컬럼 추가
 - comments: 1,479개
 - post_likes: 2,298개
 - pwa_installs: 12건

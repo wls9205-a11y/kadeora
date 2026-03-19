@@ -50,7 +50,7 @@ function NoticeSection() {
   const [result, setResult] = useState('');
   const [preview, setPreview] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(true);
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
 
   const loadHistory = () => {
@@ -169,7 +169,7 @@ function PushSection() {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState('');
   const [logs, setLogs] = useState<any[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(true);
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
 
   useEffect(() => {

@@ -37,10 +37,9 @@ export default function NoticeBanner() {
       .eq('is_active', true)
       .order('id', { ascending: false })
       .limit(5)
-      .then(({ data }) => {
-        if (!data || data.length === 0) return;
+      .then(({ data, error }) => {
+        if (error || !data || data.length === 0) return;
 
-        // Filter: non-paid always show, paid only within display window
         const valid = data.find((n: any) => {
           if (!n.is_paid) return true;
           const start = n.display_start ? new Date(n.display_start).getTime() : 0;
@@ -55,7 +54,8 @@ export default function NoticeBanner() {
             author: Array.isArray(valid.profiles) ? valid.profiles[0] : valid.profiles,
           } as NoticeData);
         }
-      });
+      })
+      .catch(() => {});
   }, []);
 
   if (!notice || dismissed) return null;

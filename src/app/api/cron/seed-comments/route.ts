@@ -43,11 +43,9 @@ export async function GET(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    // Update comment count
-    await admin.rpc('increment_comment_count', { post_id_input: post.id }).catch(() => {
-      // fallback: direct update
-      admin.from('posts').update({ comments_count: posts.length }).eq('id', post.id);
-    });
+    // Update comment count directly
+    const { count } = await admin.from('comments').select('id', { count: 'exact', head: true }).eq('post_id', post.id);
+    await admin.from('posts').update({ comments_count: count ?? 0 }).eq('id', post.id);
 
     return NextResponse.json({ ok: true, post_id: post.id });
   } catch (err) {

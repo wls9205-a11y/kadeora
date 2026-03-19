@@ -23,6 +23,28 @@ export default async function UnsoldDetailPage({ params }: Props) {
   const rate = u.tot_supply_hshld_co ? Math.round((u.tot_unsold_hshld_co / u.tot_supply_hshld_co) * 100) : null;
   const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
   const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
+
+  let relatedPosts: any[] = [];
+  try {
+    const searchTerm = (u.house_nm || '').slice(0, 4);
+    if (searchTerm) {
+      const { data: rp } = await sb.from('posts').select('id,title,created_at')
+        .eq('is_deleted', false).ilike('title', `%${searchTerm}%`)
+        .order('created_at', { ascending: false }).limit(3);
+      relatedPosts = rp || [];
+    }
+  } catch { relatedPosts = []; }
+
+  let nearbySubscriptions: any[] = [];
+  try {
+    if (u.region_nm) {
+      const { data: ns } = await sb.from('apt_subscriptions').select('id,house_nm,region_nm,rcept_bgnde,rcept_endde')
+        .eq('region_nm', u.region_nm)
+        .order('created_at', { ascending: false }).limit(3);
+      nearbySubscriptions = ns || [];
+    }
+  } catch { nearbySubscriptions = []; }
+
   const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
 
   return (
@@ -95,6 +117,32 @@ export default async function UnsoldDetailPage({ params }: Props) {
       <div style={card}>
         <AptCommentInline houseKey={`unsold_${u.id}`} houseNm={u.house_nm || '미분양 단지'} houseType="unsold" />
       </div>
+
+      {/* 관련 게시글 */}
+      {relatedPosts.length > 0 && (
+        <div style={card}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
+          {relatedPosts.map((rp: any) => (
+            <Link key={rp.id} href={`/feed/${rp.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{rp.title}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{new Date(rp.created_at).toLocaleDateString('ko-KR')}</div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* 근처 청약 */}
+      {nearbySubscriptions.length > 0 && (
+        <div style={card}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏠 근처 청약</div>
+          {nearbySubscriptions.map((ns: any) => (
+            <Link key={ns.id} href={`/apt/${ns.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{ns.house_nm}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{ns.region_nm}{ns.rcept_bgnde ? ` · ${ns.rcept_bgnde} ~ ${ns.rcept_endde}` : ''}</div>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* 외부 링크 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
