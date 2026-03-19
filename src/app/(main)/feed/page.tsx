@@ -12,6 +12,7 @@ import FeedClient from './FeedClient';
 import Disclaimer from '@/components/Disclaimer';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function getPosts(category: string, region: string = 'all') {
   const sb = await createSupabaseServer();

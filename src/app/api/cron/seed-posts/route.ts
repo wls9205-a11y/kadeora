@@ -94,17 +94,27 @@ export async function GET(req: NextRequest) {
       } catch {}
     }
 
+    // 템플릿에 category가 있으면 사용, 없으면 랜덤 카테고리
+    const finalCategory = template.category || category;
+    const finalRegion = finalCategory === 'local' ? regionId : 'all';
+
     const { error } = await admin.from('posts').insert({
       author_id: userId,
       title,
       content,
-      category,
-      region_id: category === 'local' ? regionId : 'all',
+      category: finalCategory,
+      region_id: finalRegion,
+      is_anonymous: false,
     });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true, title, category, region: regionId });
+    if (error) {
+      console.error('[seed-posts] Failed:', error.message, { title, userId });
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    console.log('[seed-posts] Created:', title, 'by', userId, 'category:', finalCategory);
+    return NextResponse.json({ ok: true, title, category: finalCategory, region: finalRegion });
   } catch (e: any) {
+    console.error('[seed-posts] Exception:', e.message);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
