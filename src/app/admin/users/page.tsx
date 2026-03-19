@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
         </select>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="닉네임 검색" style={{
           marginLeft: 'auto', padding: '6px 12px', fontSize: 13, background: 'var(--bg-hover)',
-          border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', width: 180,
+          border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', width: '100%', maxWidth: 180, boxSizing: 'border-box' as const,
         }} />
       </div>
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'auto' }}>

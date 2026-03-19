@@ -10,10 +10,8 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-const MEDAL: Record<number, { emoji: string; color: string }> = {
-  1: { emoji: '🥇', color: '#FFD700' },
-  2: { emoji: '🥈', color: '#C0C0C0' },
-  3: { emoji: '🥉', color: '#CD7F32' },
+const MEDAL: Record<number, string> = {
+  1: '🥇', 2: '🥈', 3: '🥉', 4: '4️⃣', 5: '5️⃣',
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -75,12 +73,10 @@ export default async function HotPage() {
         {(topPosts ?? []).length === 0 ? (
           <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 20 }}>이번 주 데이터가 아직 없어요</p>
         ) : (
-          (topPosts ?? []).map((post: any, i: number) => {
-            const medal = MEDAL[i + 1];
-            return (
+          (topPosts ?? []).map((post: any, i: number) => (
               <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < (topPosts?.length ?? 0) - 1 ? '1px solid var(--border)' : 'none' }}>
-                <span style={{ fontSize: medal ? 20 : 14, fontWeight: 700, color: medal?.color ?? 'var(--text-tertiary)', width: 28, textAlign: 'center', flexShrink: 0 }}>
-                  {medal?.emoji ?? `${i + 1}`}
+                <span style={{ fontSize: 20, width: 28, textAlign: 'center', flexShrink: 0 }}>
+                  {MEDAL[i + 1] ?? `${i + 1}`}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
@@ -90,8 +86,7 @@ export default async function HotPage() {
                 </div>
                 <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>
               </Link>
-            );
-          })
+            ))
         )}
       </div>
 
@@ -102,12 +97,10 @@ export default async function HotPage() {
         return (
           <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
             <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>📍 {region} TOP 3</h2>
-            {posts.map((post: any, i: number) => {
-              const medal = MEDAL[i + 1];
-              return (
+            {posts.map((post: any, i: number) => (
                 <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  <span style={{ fontSize: medal ? 18 : 14, fontWeight: 700, color: medal?.color ?? 'var(--text-tertiary)', width: 28, textAlign: 'center', flexShrink: 0 }}>
-                    {medal?.emoji ?? `${i + 1}`}
+                  <span style={{ fontSize: 20, width: 28, textAlign: 'center', flexShrink: 0 }}>
+                    {MEDAL[i + 1] ?? `${i + 1}`}
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
@@ -115,8 +108,7 @@ export default async function HotPage() {
                   </div>
                   <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>
                 </Link>
-              );
-            })}
+              ))}
           </div>
         );
       })}

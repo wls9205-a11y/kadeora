@@ -5,13 +5,13 @@ import { createClient } from '@supabase/supabase-js';
 // CRON_SECRET 헤더 검증
 // ANTHROPIC_API_KEY 필요 — 없으면 하드코딩 템플릿 사용
 
-const SEED_USERS = Array.from({ length: 10 }, (_, i) => {
+const SEED_USERS = Array.from({ length: 100 }, (_, i) => {
   const n = String(i + 1).padStart(4, '0');
   return `aaaaaaaa-${n}-${n}-${n}-${String(i + 1).padStart(12, '0')}`;
 });
 
 const CATEGORIES = ['stock', 'apt', 'free', 'local'];
-const REGIONS = ['서울', '부산', '인천', '경기', '대구', '광주', '대전', '울산', '제주'];
+const REGIONS = ['서울', '부산', '경기', '인천', '대구', '광주', '대전', '울산', '세종', '제주', '강원', '충북', '충남', '전북', '전남', '경북', '경남'];
 
 const TEMPLATES = [
   { title: '요즘 부동산 시장 전망 어떻게 보시나요?', content: '최근 금리 동결 이후로 거래량이 소폭 늘고 있다고 하는데, 실거주 입장에서 지금 들어가도 괜찮을지 고민입니다. 특히 수도권 외곽 지역 가격이 많이 빠진 곳이 기회일 수도 있다는 의견도 있는데, 여러분 생각은 어떠신가요?' },
@@ -42,7 +42,7 @@ const TEMPLATES = [
 export async function GET(req: NextRequest) {
   // CRON_SECRET 검증 (CRON_SECRETT 또는 CRON_SECRET 모두 허용)
   const auth = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET;
+  const cronSecret = process.env.CRON_SECRET;
   if (cronSecret && auth !== `Bearer ${cronSecret}`) {
     console.error('[seed-posts] Unauthorized: header mismatch');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001',
             max_tokens: 300,
-            messages: [{ role: 'user', content: `한국 커뮤니티 앱 "카더라"에 올릴 자연스러운 게시글을 써주세요. 카테고리: ${category}. 지역: ${regionId}. JSON으로 응답: {"title":"제목(30자이내)","content":"내용(200자이내)"}. JSON만 출력하세요.` }],
+            messages: [{ role: 'user', content: `한국 커뮤니티 앱 "카더라"에 올릴 자연스러운 게시글을 써주세요. 카테고리: ${category}. 지역: ${regionId}. 중요: post의 title, category, region에 맞는 내용만 작성하세요. stock→주식/투자 관련, apt→부동산/아파트/전세/청약 관련, local→해당 지역(${regionId}) 이야기, free→자유로운 일상/생활 주제. 카테고리와 무관한 내용은 절대 쓰지 마세요. JSON으로 응답: {"title":"제목(30자이내)","content":"내용(200자이내)"}. JSON만 출력하세요.` }],
           }),
           signal: AbortSignal.timeout(8000),
         });

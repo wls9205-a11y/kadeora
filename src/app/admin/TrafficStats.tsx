@@ -1,22 +1,37 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-export default function TrafficStats() {
+interface TrafficStatsProps {
+  variant?: 'kpi' | 'full';
+}
+
+export default function TrafficStats({ variant = 'full' }: TrafficStatsProps) {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
     fetch('/api/analytics/visitors').then(r => r.json()).then(setData).catch(() => {});
   }, []);
 
+  // KPI variant - just show today's visitor count
+  if (variant === 'kpi') {
+    if (!data) return <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-tertiary)' }}>--</div>;
+    return (
+      <>
+        <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{(data.daily ?? 0).toLocaleString()}명</div>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>7일 {data.weekly ?? 0}명 · 30일 {data.monthly ?? 0}명</div>
+      </>
+    );
+  }
+
+  // Full variant
   if (!data) return <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: 16 }}>트래픽 로딩 중...</div>;
 
   const maxH = Math.max(...(data.hourly || []).map((h: any) => h.count), 1);
 
   return (
     <div>
-      <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 트래픽 현황</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>📊 트래픽 현황</h2>
 
-      {/* 일/주/월 카드 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {[
           { label: '오늘', value: data.daily, icon: '📅' },
@@ -31,7 +46,6 @@ export default function TrafficStats() {
         ))}
       </div>
 
-      {/* 인기 페이지 TOP 5 */}
       {data.topPaths?.length > 0 && (
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>인기 페이지 (7일)</div>
@@ -44,7 +58,6 @@ export default function TrafficStats() {
         </div>
       )}
 
-      {/* 시간대별 바 차트 */}
       <div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>시간대별 (오늘)</div>
         <svg width="100%" viewBox="0 0 240 70" style={{ display: 'block' }}>

@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
+import PullToRefresh from '@/components/PullToRefresh';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
@@ -207,6 +209,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   };
 
   return (
+    <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 프로필 카드 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
@@ -215,7 +218,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           {/* 아바타 */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
             {avatarUrl ? (
-              <img src={avatarUrl} alt={`${displayName} 프로필 사진`} style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }} />
+              <Image src={`${avatarUrl}?width=80&height=80`} alt={`${displayName} 프로필 사진`} width={72} height={72} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }} />
             ) : (
               <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
                 {GRADE_EMOJIS[profile.grade ?? 1] ?? '🌱'}
@@ -548,5 +551,6 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       </div>
 
     </div>
+    </PullToRefresh>
   );
 }

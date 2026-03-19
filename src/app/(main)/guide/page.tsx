@@ -22,6 +22,11 @@ const FEATURES = [
   { icon: '👥', title: '친구 초대', desc: '내 초대코드로 친구 초대 시 둘 다 +50 포인트. 프로필에서 코드 확인 가능.' },
   { icon: '🔥', title: '이번 주 HOT', desc: '이번 주 가장 핫한 글 TOP 5와 지역별 인기 글을 한눈에 확인.' },
   { icon: '🔔', title: '알림', desc: '댓글, 좋아요, 팔로우 알림을 실시간으로 받아보세요.' },
+  { icon: '🏆', title: '오늘의 HOT', desc: '24시간 동안 가장 인기있는 글 TOP 5를 확인하세요. 피드 상단과 /hot 페이지에서 볼 수 있어요.' },
+  { icon: '🔄', title: '당겨서 새로고침', desc: '피드/검색/알림 등 주요 페이지에서 화면을 아래로 당기면 최신 정보로 새로고침됩니다.' },
+  { icon: '✍️', title: '현장 한줄평', desc: '청약 아파트 상세 페이지에서 현장 한줄평을 남기고, 다른 사람의 후기도 확인하세요.' },
+  { icon: '📱', title: '푸시 알림', desc: '홈 화면에 추가 후 알림을 허용하면 댓글/좋아요/팔로우 시 실시간 푸시 알림을 받아요.' },
+  { icon: '📡', title: '전광판 유료 노출', desc: '전광판 노출권을 구매하면 내 글을 전체 사용자에게 스크롤 배너로 홍보할 수 있어요.' },
 ];
 
 const INSTALL_STEPS = {
@@ -63,7 +68,7 @@ export default function GuidePage() {
             </div>
             {steps.map(s => (
               <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '6px 0' }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.title}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{s.desc}</div>
@@ -91,46 +96,46 @@ export default function GuidePage() {
         ))}
       </div>
 
-      {/* 회원 등급 안내 */}
-      <div style={{ background: 'var(--bg-surface)', borderRadius: 12, padding: 16, marginTop: 24 }}>
+      {/* 등급 안내 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
         <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>🏅 회원 등급 안내</h2>
-        <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-tertiary)' }}>활동 포인트에 따라 등급이 올라갑니다</p>
+        <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-secondary)' }}>활동 포인트에 따라 등급이 올라갑니다</p>
         {[
-          { grade: 1, emoji: '🌱', title: '새싹', points: 0 },
-          { grade: 2, emoji: '🌿', title: '소문쟁이', points: 100 },
-          { grade: 3, emoji: '🍀', title: '동네방네', points: 300 },
-          { grade: 4, emoji: '🌸', title: '소문난집', points: 600 },
-          { grade: 5, emoji: '🌻', title: '핫이슈', points: 1000 },
-          { grade: 6, emoji: '⭐', title: '빅마우스', points: 2000 },
-          { grade: 7, emoji: '🔥', title: '인플루언서', points: 5000 },
-          { grade: 8, emoji: '💎', title: '전설', points: 10000 },
-          { grade: 9, emoji: '👑', title: '레전드', points: 30000 },
-          { grade: 10, emoji: '🚀', title: '카더라신', points: 100000 },
+          { lv: 1, name: '새싹', pts: '0P', emoji: '🌱' },
+          { lv: 2, name: '소문쟁이', pts: '100P', emoji: '🌿' },
+          { lv: 3, name: '동네방네', pts: '300P', emoji: '🍀' },
+          { lv: 4, name: '소문난집', pts: '600P', emoji: '🌸' },
+          { lv: 5, name: '핫이슈', pts: '1,000P', emoji: '🌻' },
+          { lv: 6, name: '빅마우스', pts: '2,000P', emoji: '⭐' },
+          { lv: 7, name: '인플루언서', pts: '5,000P', emoji: '🔥' },
+          { lv: 8, name: '전설', pts: '10,000P', emoji: '💎' },
+          { lv: 9, name: '레전드', pts: '30,000P', emoji: '👑' },
+          { lv: 10, name: '카더라신', pts: '100,000P', emoji: '🚀' },
         ].map((g, i, arr) => (
-          <div key={g.grade} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : undefined }}>
-            <span style={{ fontSize: 20 }}>{g.emoji}</span>
-            <div>
-              <span style={{ fontSize: 13, fontWeight: 'bold', color: 'var(--text-primary)' }}>{g.title}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>Lv.{g.grade}</span>
-            </div>
-            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--brand)' }}>{g.points === 0 ? '기본' : `${g.points.toLocaleString()}P`}</span>
+          <div key={g.lv} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <span style={{ fontSize: 18, width: 28, textAlign: 'center' as const }}>{g.emoji}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>Lv.{g.lv} {g.name}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{g.pts}~</span>
           </div>
         ))}
+      </div>
 
-        {/* 포인트 획득 방법 */}
-        <h3 style={{ margin: '20px 0 8px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>포인트 획득 방법</h3>
+      {/* 포인트 획득 방법 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
+        <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>💰 포인트 획득 방법</h2>
         {[
-          { action: '출석체크', pts: '+10P' },
-          { action: '7일 연속 출석', pts: '+30P' },
-          { action: '30일 연속 출석', pts: '+100P' },
-          { action: '게시글 작성', pts: '+5P' },
-          { action: '댓글 작성', pts: '+2P' },
-          { action: '좋아요 받기', pts: '+1P' },
-          { action: '친구 초대', pts: '+50P' },
-        ].map((p) => (
-          <div key={p.action} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12 }}>
-            <span style={{ color: 'var(--text-secondary)' }}>{p.action}</span>
-            <span style={{ color: 'var(--brand)' }}>{p.pts}</span>
+          { action: '출석체크', pts: '+10P', note: '7일 연속 +30P, 30일 연속 +100P' },
+          { action: '게시글 작성', pts: '+5P', note: '' },
+          { action: '댓글 작성', pts: '+2P', note: '' },
+          { action: '좋아요 받기', pts: '+1P', note: '' },
+          { action: '친구 초대', pts: '+50P', note: '초대한 친구도 +50P' },
+          { action: '프로필 사진 등록', pts: '+30P', note: '최초 1회' },
+          { action: '일일 초대 1등', pts: '+100P', note: '매일 가장 많이 초대한 유저' },
+        ].map((p, i, arr) => (
+          <div key={p.action} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>{p.action}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)' }}>{p.pts}</span>
+            {p.note && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{p.note}</span>}
           </div>
         ))}
       </div>

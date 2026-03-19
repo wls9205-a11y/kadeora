@@ -195,7 +195,7 @@ export default async function FeedDetailPage({ params }: Props) {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
           {post.profiles?.avatar_url ? (
-            <img src={post.profiles.avatar_url} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+            <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={42} height={42} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           ) : (
             <div style={{
               width: 42, height: 42, borderRadius: '50%', flexShrink: 0,

@@ -461,6 +461,49 @@ export interface Database {
           created_at?: string
         }
       }
+      chat_messages: {
+        Row: {
+          id: string
+          user_id: string | null
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          content?: string
+          created_at?: string
+        }
+      }
+      apt_cache: {
+        Row: {
+          id: string
+          cache_type: string
+          data: Json
+          refreshed_at: string
+          refreshed_by: string | null
+        }
+        Insert: {
+          id?: string
+          cache_type: string
+          data: Json
+          refreshed_at?: string
+          refreshed_by?: string | null
+        }
+        Update: {
+          id?: string
+          cache_type?: string
+          data?: Json
+          refreshed_at?: string
+          refreshed_by?: string | null
+        }
+      }
     }
   }
 }
@@ -482,6 +525,8 @@ export type ShopOrder = Database['public']['Tables']['shop_orders']['Row']
 export type Notification = Database['public']['Tables']['notifications']['Row']
 export type GradeDefinition = Database['public']['Tables']['grade_definitions']['Row']
 export type SearchLog = Database['public']['Tables']['search_logs']['Row']
+export type ChatMessage = Database['public']['Tables']['chat_messages']['Row']
+export type AptCache = Database['public']['Tables']['apt_cache']['Row']
 
 export type PostWithProfile = Post & {
   profiles: Pick<Profile, 'id' | 'nickname' | 'avatar_url' | 'grade'> | null

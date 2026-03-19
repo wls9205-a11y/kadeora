@@ -5,6 +5,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
 import { useRouter } from 'next/navigation';
+import PullToRefresh from '@/components/PullToRefresh';
 
 interface ShopProduct {
   id: string;
@@ -73,6 +74,7 @@ export default function ShopClient() {
   };
 
   return (
+    <PullToRefresh>
     <div>
       <ComingSoonBanner feature="토스페이먼츠 결제" description="사업자 등록 심사 완료 후 즉시 활성화됩니다." eta="2026년 4월 예정" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -151,5 +153,6 @@ export default function ShopClient() {
         onCancel={() => setConfirmProduct(null)}
       />
     </div>
+    </PullToRefresh>
   );
 }

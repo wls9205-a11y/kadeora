@@ -1,5 +1,5 @@
 # 카더라(KADEORA) 개발 저널
-# 마지막 업데이트: 2026-03-19
+# 마지막 업데이트: 2026-03-20
 
 ## 프로젝트 기본 정보
 - 서비스: 카더라 (kadeora.app) — 대한민국 소리소문 정보 커뮤니티
@@ -98,6 +98,69 @@
 ### DB 인덱스 최적화 (2026-03-19)
 - posts 중복 인덱스 9개 제거 (27개 → 17개 → 실제 write 속도 향상)
 
+## 2026-03-20 대규모 업데이트 (25개 작업)
+### 클린업
+- 미사용 패키지 제거: lucide-react, isomorphic-dompurify, @types/dompurify
+- username/following_id 잔여 참조 확인 → 이미 정리됨
+- FAB 잔여 코드 없음 확인
+
+### 어드민 리디자인
+- layout.tsx: 5개 섹션 (대시보드/유저관리/알림·공지/부동산/시스템) 사이드바
+- page.tsx: KPI 카드 6개 (가입자/방문자/게시글/댓글/푸시구독/포인트)
+- 새 페이지: /admin/notifications, /admin/realestate, /admin/system
+- 히스토리 토글 + 날짜 필터 추가
+- PWA 설치 카운팅: navigator.standalone + display-mode:standalone 감지 확인
+- 시드 유저 100명 (aaaaaaaa-0011~0100) INSERT 완료
+
+### 피드/UI 개선
+- HOT 랭킹: 1~5위 통일 카드, 이모지 🥇🥈🥉4️⃣5️⃣
+- PostCard: 패딩 축소, line-clamp-2, 메타정보 한줄, 썸네일 60x60, 태그 +N개
+- 👁️ → "조회수" 한글 전체 교체
+- NoticeBanner: height 45px, text-base, 35s 마퀴, CSS 변수 적용
+- 피드 무한스크롤: Supabase .range() PAGE_SIZE=20, 끝 메시지
+- PullToRefresh: notifications/profile/shop/search 추가, iOS touch-action:pan-y
+- 검색 input 반응형: w-full max-w-full box-sizing:border-box
+- 피드 태그 반응형: flex-wrap + overflow:hidden + +N개 표시
+- 글쓰기 기본 지역: profiles.region_id → local 카테고리 자동선택
+
+### DB 마이그레이션
+- chat_messages: 실시간 채팅 (RLS: 누구나 읽기, 로그인만 쓰기)
+- apt_cache: 부동산 캐시 (cache_type UNIQUE)
+- site_notices: author_id, linked_post_id, is_paid, display_start/end 추가
+- 전광판 상품: "1일 노출권" 500P/₩990, "3일 노출권" 1200P/₩2,200
+
+### 토론방→채팅방
+- DiscussClient/ChatRoom 완전 리라이트: 카더라 라운지
+- Supabase Realtime 구독, 내/타인 메시지 좌우 버블
+- 최근 100개 로드, 비로그인 읽기전용, 신고 버튼
+
+### 전광판 유료화
+- 클릭→바텀시트 (작성자 정보+연결 게시글+프로필 보기)
+- 구매 폼 컴포넌트, /shop/banner 페이지
+
+### 부동산
+- apt_cache 테이블 + 어드민 갱신 버튼
+- 미분양 통계 위젯: 지역 선택 pill + 요약 카드
+- /api/apt/unsold-stats 엔드포인트
+
+### 자동화/크론
+- /api/cron/cleanup-pageviews: 30일 이상 page_views 삭제 (매주 일요일)
+- /api/cron/stock-price: KIS API 스텁 (키 미설정)
+- vercel.json 크론 업데이트
+
+### 성능 최적화
+- img→next/image 교체 (FeedClient, ProfileClient)
+- Supabase URL ?width=80&height=80 파라미터
+- DB 인덱스 5개 추가
+
+### 가이드북
+- 오늘의HOT, 당겨서새로고침, 현장한줄평, 푸시알림, 전광판유료노출 섹션 추가
+- 포인트: 프로필사진+30P, 일일초대1등+100P
+
+### 시드 댓글 개선
+- 시드 유저 댓글 연관성 검토 및 업데이트
+- Haiku 프롬프트 post title/category/region 맞춤 생성 명시
+
 ## 완료된 주요 기능
 ### 코드
 - NoticeBanner: 헤더 아래 초록 텍스트 전광판 (site_notices 테이블)
@@ -114,13 +177,16 @@
 - 공지 미리보기: NoticeManager 실시간 미리보기
 - 푸시 발송: 전체/웹/앱 구분 + 4기기 미리보기(Android/iPhone/Chrome/Safari) + 이미지 첨부
 
-### 어드민 페이지 구성
-- 통계 카드 (가입자/게시글/오늘 신규)
-- PWA 설치 현황 (전체/Android/iOS/데스크탑)
-- 출석체크 현황 (오늘/전체/TOP5 연속출석)
-- 데이터 차트 (일별 가입자, 일별 게시글, 카테고리 도넛)
-- 공지 전광판 관리 (미리보기 포함)
-- 푸시 알림 발송 (전체/웹/앱, 4기기 미리보기, 이미지)
+### 어드민 페이지 구성 (2026-03-20 리디자인)
+- 사이드바 5섹션: 대시보드, 유저관리, 알림·공지, 부동산, 시스템 + 기존 콘텐츠/신고/결제
+- 대시보드 KPI 카드 6개 (2x3): 총 가입자(시드 포함 표시), 오늘 방문자, 게시글 수, 댓글 수, 푸시 구독 수, PWA 설치
+- /admin/notifications: NoticeManager + PushBroadcast 통합, 내역 토글 + 날짜 필터
+- /admin/realestate: 미분양 수집 + 부동산 캐시 갱신, 수집 내역 토글
+- /admin/system: 시드 데이터 관리 + 크론 수동 실행
+- 데이터 테이블: 줄무늬 행 (bg-surface/bg-hover 교차) + 상태 배지
+- PWA 설치 측정: localStorage 기반 + 서버측 user_id 중복 방지, 측정 방법 툴팁 추가
+- #A1 제거 항목: social_provider_stats 쿼리 (테이블 미존재, try-catch로 무시됨), 소셜 가입 배지(카카오/구글/이메일 표시)
+- 각 섹션 "내역 보기 ▼" 토글 + 오늘/이번주/이번달 날짜 필터
 
 ### TWA / PWA
 - VAPID 키: Vercel 환경변수 등록 완료

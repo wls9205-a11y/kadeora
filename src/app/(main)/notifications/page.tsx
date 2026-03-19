@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
+import PullToRefresh from '@/components/PullToRefresh';
 import type { User } from '@supabase/supabase-js';
 
 interface Notif {
@@ -87,6 +88,7 @@ export default function NotificationsPage() {
   );
 
   return (
+    <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -157,5 +159,6 @@ export default function NotificationsPage() {
         </div>
       )}
     </div>
+    </PullToRefresh>
   );
 }

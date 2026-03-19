@@ -1,26 +1,13 @@
 'use client';
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
-
-interface Post {
-  id: string;
-  title: string;
-  content?: string;
-  author_id: string;
-  likes_count: number;
-  comments_count: number;
-  created_at: string;
-  category?: string;
-  image_url?: string;
-  profiles?: { nickname: string } | null;
-  [key: string]: any;
-}
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
@@ -37,11 +24,15 @@ function timeAgo(dateStr: string) {
 }
 function numFmt(n: number) { return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n); }
 
+const PAGE_SIZE = 20;
+
 interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeCategory: string; activeRegion?: string; }
 
-export default function FeedClient({ posts, activeCategory, activeRegion = 'all' }: Props) {
+export default function FeedClient({ posts: initialPosts, activeCategory, activeRegion = 'all' }: Props) {
   const router = useRouter();
-  const [visibleCount, setVisibleCount] = useState(40);
+  const [posts, setPosts] = useState<PostWithProfile[]>(initialPosts);
+  const [hasMore, setHasMore] = useState(initialPosts.length >= PAGE_SIZE);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showRegionBanner, setShowRegionBanner] = useState(false);
   const [tipSeen, setTipSeen] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -50,7 +41,13 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
   const [userRegion, setUserRegion] = useState<string | null>(null);
   const [showHotBanner, setShowHotBanner] = useState(false);
-  const [hotPosts, setHotPosts] = useState<Post[]>([]);
+  const [hotPosts, setHotPosts] = useState<any[]>([]);
+
+  // Reset when initialPosts change (category/region switch)
+  useEffect(() => {
+    setPosts(initialPosts);
+    setHasMore(initialPosts.length >= PAGE_SIZE);
+  }, [initialPosts]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -62,12 +59,12 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
   useEffect(() => {
     const sb = createSupabaseBrowser();
     sb.from('posts')
-      .select('id,title,category,likes_count,comments_count,created_at,author_id,profiles!posts_author_id_fkey(nickname)')
+      .select('id,title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
       .eq('is_deleted', false)
-      .gte('created_at', new Date(Date.now() - 24*60*60*1000).toISOString())
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .order('likes_count', { ascending: false })
-      .limit(5)
-      .then(({ data }) => { if (data && data.length > 0) setHotPosts(data as unknown as Post[]); });
+      .limit(3)
+      .then(({ data }) => { if (data && data.length > 0) setHotPosts(data); });
   }, []);
 
   // Initialize like counts from posts data
@@ -194,21 +191,45 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
     }
   };
 
+  const loadMorePosts = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const sb = createSupabaseBrowser();
+      let q = sb.from('posts')
+        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .range(posts.length, posts.length + PAGE_SIZE - 1);
+      if (activeCategory !== 'all') q = q.eq('category', activeCategory);
+      if (activeCategory === 'local' && activeRegion !== 'all') q = q.eq('region_id', activeRegion);
+      const { data } = await q;
+      if (data && data.length > 0) {
+        setPosts(prev => [...prev, ...data as PostWithProfile[]]);
+        if (data.length < PAGE_SIZE) setHasMore(false);
+      } else {
+        setHasMore(false);
+      }
+    } catch {} finally {
+      setLoadingMore(false);
+    }
+  }, [posts.length, loadingMore, hasMore, activeCategory, activeRegion]);
+
   const observerRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
     const io = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting) setVisibleCount(c => Math.min(c + 40, posts.length)); },
+      entries => { if (entries[0].isIntersecting) loadMorePosts(); },
       { threshold: 0.1 }
     );
     io.observe(node);
     return () => io.disconnect();
-  }, [posts.length]);
+  }, [loadMorePosts]);
 
   const categories = [
     { key: 'all', label: '전체' }, { key: 'local', label: '📍 우리동네' },
     { key: 'stock', label: '📊 주식' }, { key: 'apt', label: '🏢 부동산' }, { key: 'free', label: '✏️ 자유' },
   ];
-  const visiblePosts = posts.slice(0, visibleCount);
+  const visiblePosts = posts;
 
   return (
     <PullToRefresh>
@@ -251,61 +272,40 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
       {/* 알림 설정 유도 */}
       <PushNudgeBanner />
 
-      {/* 오늘의 HOT */}
-      {hotPosts.length > 0 && (
-        <div style={{ marginBottom: 16, background: 'linear-gradient(135deg, #1a0a00 0%, #0d0d0d 100%)', border: '1px solid rgba(255,69,0,0.3)', borderRadius: 16, padding: '0 0 4px' }}>
-          <div style={{ padding: '12px 16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>⚡ 오늘의 HOT</span>
-            <Link href="/hot" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none' }}>전체보기</Link>
-          </div>
-
-          {hotPosts[0] && (
-            <div style={{ padding: '0 12px 10px' }}>
-              <Link href={`/feed/${hotPosts[0].id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ background: 'linear-gradient(135deg, rgba(255,69,0,0.15) 0%, rgba(255,140,0,0.05) 100%)', border: '1px solid rgba(255,69,0,0.25)', borderRadius: 12, padding: 14 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ background: 'rgba(255,69,0,0.2)', color: '#FF4500', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 8 }}>🔥 오늘 1위</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>❤️ {hotPosts[0].likes_count}</span>
-                  </div>
-                  <div style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.4, marginTop: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{hotPosts[0].title}</div>
-                  <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', gap: 6, alignItems: 'center' }}>
-                    {hotPosts[0].category && <span style={{ background: 'rgba(255,69,0,0.1)', color: 'var(--brand)', padding: '1px 6px', borderRadius: 4, fontSize: 10 }}>{CATEGORY_MAP[hotPosts[0].category]?.label ?? hotPosts[0].category}</span>}
-                    <span>❤️ {hotPosts[0].likes_count} · 💬 {hotPosts[0].comments_count}</span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          )}
-
-          {(hotPosts[1] || hotPosts[2]) && (
-            <div style={{ padding: '0 12px 8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {hotPosts.slice(1, 3).map((post: Post, i: number) => (
-                <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
-                    <span>{i === 0 ? '🥈' : '🥉'}</span>
-                    <div style={{ fontSize: 12, fontWeight: 700, marginTop: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{post.title}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>❤️ {post.likes_count}</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {hotPosts.length > 3 && (
-            <div style={{ padding: '0 12px 10px' }}>
-              <div style={{ borderTop: '1px solid rgba(255,69,0,0.1)', paddingTop: 8 }}>
-                {hotPosts.slice(3, 5).map((post: Post, i: number) => (
-                  <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: 8, padding: '5px 0', alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-tertiary)', width: 16 }}>{i + 4}</span>
-                    <span style={{ flex: 1, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>❤️ {post.likes_count}</span>
-                  </Link>
-                ))}
+      {/* 이번주 HOT */}
+      {hotPosts.length > 0 && (() => {
+        return (
+          <div style={{ marginBottom: 16, borderRadius: 16, background: 'linear-gradient(160deg, rgba(255,69,0,0.1) 0%, rgba(20,20,20,0) 60%)', border: '1px solid rgba(255,69,0,0.2)', overflow: 'hidden' }}>
+            {/* 헤더 */}
+            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 18, display: 'inline-block', animation: 'hotFlame 1.5s ease-in-out infinite' }}>🔥</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>이번주 HOT</span>
               </div>
+              <Link href="/hot" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>더보기 →</Link>
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Uniform ranking list */}
+            <div style={{ padding: '0 12px 12px' }}>
+              {hotPosts.slice(0, 5).map((hp: any, i: number) => {
+                const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+                return (
+                  <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < Math.min(hotPosts.length, 5) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
+                    <span style={{ fontSize: 18, width: 28, textAlign: 'center', flexShrink: 0 }}>{medals[i]}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{(hp.profiles as any)?.nickname ?? '익명'}</div>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {hp.likes_count ?? 0}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <style>{`@keyframes hotFlame { 0%,100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.3) rotate(3deg); } }`}</style>
+          </div>
+        );
+      })()}
 
       {/* 카테고리 바 */}
       <div style={{
@@ -386,7 +386,7 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 6, flexWrap: 'wrap' }}>
                   {post.profiles?.avatar_url ? (
-                    <img src={post.profiles.avatar_url} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={18} height={18} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                   ) : (
                     <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
                       {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
@@ -419,13 +419,13 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
                     {isBookmarked ? '🔖' : '🔖'} {isBookmarked ? '저장됨' : '저장'}
                   </div>
                   <div style={{ marginLeft: 'auto', fontSize: '0.6875rem', color: 'var(--text-tertiary)', padding: '5px 4px', display:'flex', alignItems:'center', gap:4 }}>
-                    👁 {numFmt(post.view_count ?? 0)}
+                    조회수 {numFmt(post.view_count ?? 0)}
                     <span style={{ fontSize:10, color:'var(--text-tertiary)', opacity:0.5 }}>kadeora.app</span>
                   </div>
                 </div>
               </div>
               {(post as any).images && (post as any).images.length > 0 && (
-                <img src={(post as any).images[0]} alt="" style={{ width:48, height:48, borderRadius:4, objectFit:'cover', flexShrink:0, alignSelf:'center' }} />
+                <Image src={(post as any).images[0]} alt="" width={48} height={48} style={{ borderRadius:4, objectFit:'cover', flexShrink:0, alignSelf:'center' }} />
               )}
               </div>
             </Link>
@@ -434,9 +434,14 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
         })}
       </div>
 
-      {visibleCount < posts.length && (
+      {hasMore && (
         <div ref={observerRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
           <div style={{ width: 22, height: 22, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%' }} className="animate-spin" />
+        </div>
+      )}
+      {!hasMore && posts.length > 0 && (
+        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
+          모든 글을 다 봤어요 🎉
         </div>
       )}
       {posts.length === 0 && (

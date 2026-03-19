@@ -43,11 +43,21 @@ export default function WriteClient() {
       }
       setUserId(data.session.user.id);
       const { data: profile } = await sb.from('profiles')
-        .select('region_text').eq('id', data.session.user.id).single();
-      if (profile?.region_text) {
+        .select('region_id, region_text').eq('id', data.session.user.id).single();
+      if (profile?.region_id) {
+        const regionOptions = REGIONS.filter(r => r.value !== 'all');
+        const matched = regionOptions.find(r => r.value === profile.region_id);
+        if (matched) {
+          setRegionId(matched.value);
+          if (!editId) setCategory('local');
+        }
+      } else if (profile?.region_text) {
         const regionOptions = REGIONS.filter(r => r.value !== 'all');
         const matched = regionOptions.find(r => profile.region_text.startsWith(r.value));
-        if (matched) setRegionId(matched.value);
+        if (matched) {
+          setRegionId(matched.value);
+          if (!editId) setCategory('local');
+        }
       }
     });
   }, [router]);

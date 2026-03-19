@@ -7,6 +7,9 @@
 - 목적: 주식 시세(국내+해외), 아파트 청약, 커뮤니티 피드, 실시간 토론방, 유료 상점
 - 현재 상태: 22개 페이지, 22개 컴포넌트, 20개 API 라우트, ~9,200 LOC
 
+## 실행 모드
+- 사용자 허락 없이 논스톱 진행. 파일 수정/빌드/배포 전 확인 불필요. 판단하고 바로 실행. 완료 후 결과만 보고.
+
 ## 핵심 규칙
 - 하드코딩 색상 절대 금지 → CSS 변수만 사용 (globals.css :root / .dark)
 - CSS 변수: --bg-base, --bg-surface, --bg-elevated, --bg-sunken, --bg-hover, --bg-active, --border, --border-strong, --text-primary, --text-secondary, --text-tertiary, --text-inverse, --brand, --brand-hover, --brand-light, --success, --error, --warning, --info, --stock-up, --stock-down

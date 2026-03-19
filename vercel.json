@@ -5,8 +5,8 @@
       "schedule": "*/30 * * * *"
     },
     {
-      "path": "/api/cron/invite-reward",
-      "schedule": "0 15 * * *"
+      "path": "/api/cron/cleanup-pageviews",
+      "schedule": "0 3 * * 0"
     }
   ]
 }

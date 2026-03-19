@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import PullToRefresh from '@/components/PullToRefresh';
 import type { PostWithProfile } from '@/types/database';
 
 const CATEGORY_MAP: Record<string, { label: string; bg: string; color: string }> = {
@@ -226,6 +227,7 @@ export default function SearchClient() {
   };
 
   return (
+    <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
 
@@ -239,7 +241,7 @@ export default function SearchClient() {
           onFocus={() => { if (inputVal.length >= 2) setAcOpen(true); }}
           placeholder="검색어를 입력하세요 (2글자 이상)"
           className="kd-input"
-          style={{ paddingLeft: 44, fontSize: 16, padding: '14px 14px 14px 44px' }}
+          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingLeft: 44, fontSize: 16, padding: '14px 14px 14px 44px' }}
           autoFocus
         />
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 18, pointerEvents: 'none' }}>🔍</span>
@@ -415,7 +417,7 @@ export default function SearchClient() {
                   {highlight(post.content.slice(0, 200), query)}
                 </p>
                 <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)' }}>
-                  <span>👁️ {post.view_count}</span>
+                  <span>조회수 {post.view_count}</span>
                   <span>❤️ {post.likes_count}</span>
                   <span>💬 {post.comments_count}</span>
                 </div>
@@ -488,5 +490,6 @@ export default function SearchClient() {
         </div>
       )}
     </div>
+    </PullToRefresh>
   );
 }
