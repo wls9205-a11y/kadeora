@@ -40,11 +40,11 @@ const TEMPLATES = [
 ];
 
 export async function GET(req: NextRequest) {
-  // CRON_SECRET 검증 (CRON_SECRETT 또는 CRON_SECRET 모두 허용)
+  // CRON_SECRET 검증 — 환경변수 없으면 항상 차단
   const auth = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && auth !== `Bearer ${cronSecret}`) {
-    console.error('[seed-posts] Unauthorized: header mismatch');
+  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET;
+  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
+    console.error('[seed-posts] Unauthorized attempt:', req.headers.get('x-forwarded-for'));
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

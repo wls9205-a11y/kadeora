@@ -44,7 +44,9 @@ export function sanitizeSearchQuery(input: unknown, maxLen = 200): string {
   s = s.replace(/--+/g, "-");
   s = s.replace(/\0/g, "");
   // Escape LIKE/ILIKE wildcards to prevent wildcard injection
-  s = s.replace(/[%_]/g, "");
+  s = s.replace(/[%_\\]/g, "");
+  // Remove fulltext search special characters
+  s = s.replace(/[|&!():<>*]/g, "");
   return s.trim();
 }
 
