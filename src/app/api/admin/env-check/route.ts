@@ -3,7 +3,6 @@ import { requireAdmin } from '@/lib/admin-auth'
 
 const REQUIRED_SERVER_VARS = [
   'SUPABASE_SERVICE_ROLE_KEY',
-  'NEXTAUTH_SECRET',
   'CRON_SECRETT',
   'CRON_SECRET',
   'ANTHROPIC_API_KEY',

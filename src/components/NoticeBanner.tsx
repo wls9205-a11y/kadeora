@@ -22,14 +22,9 @@ interface NoticeData {
 
 export default function NoticeBanner() {
   const [notice, setNotice] = useState<NoticeData | null>(null);
-  const [dismissed, setDismissed] = useState(false);
   const [showSheet, setShowSheet] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem('kd_notice_v2')) {
-      setDismissed(true);
-      return;
-    }
     const sb = createSupabaseBrowser();
 
     sb.from('site_notices')
@@ -58,7 +53,7 @@ export default function NoticeBanner() {
       .catch(() => {});
   }, []);
 
-  if (!notice || dismissed) return null;
+  if (!notice) return null;
 
   return (
     <>
@@ -121,29 +116,6 @@ export default function NoticeBanner() {
           <span style={{ margin: '0 60px', color: 'var(--text-tertiary)', fontSize: 14 }}>◆</span>
           <span>📡&nbsp;{notice.content}</span>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            sessionStorage.setItem('kd_notice_v2', '1');
-            setDismissed(true);
-          }}
-          style={{
-            position: 'absolute',
-            right: 8,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--success)',
-            fontSize: 16,
-            cursor: 'pointer',
-            zIndex: 3,
-            opacity: 0.7,
-            padding: '4px 6px',
-          }}
-        >
-          x
-        </button>
         <style>{`@keyframes kd-marquee-v2 { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }`}</style>
       </div>
 

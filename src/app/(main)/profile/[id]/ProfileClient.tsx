@@ -64,10 +64,15 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [followers, setFollowers] = useState(followersCount);
   const [followLoading, setFollowLoading] = useState(false);
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'bookmarks' ? 'bookmarks' : 'posts';
-  const [activeTab, setActiveTab] = useState<'posts'|'bookmarks'>(initialTab);
+  const paramTab = searchParams.get('tab');
+  const initialTab = paramTab === 'bookmarks' ? 'bookmarks' : paramTab === 'comments' ? 'comments' : 'posts';
+  const [activeTab, setActiveTab] = useState<'posts'|'bookmarks'|'comments'>(initialTab);
   const [bookmarkedPosts, setBookmarkedPosts] = useState<PostRow[]>([]);
   const [bookmarksLoaded, setBookmarksLoaded] = useState(false);
+  const [displayedPosts, setDisplayedPosts] = useState<PostRow[]>(posts);
+  const [postsOffset, setPostsOffset] = useState(posts.length);
+  const [hasMorePosts, setHasMorePosts] = useState(posts.length >= 20);
+  const [loadingMorePosts, setLoadingMorePosts] = useState(false);
   const [activityTab, setActivityTab] = useState<'posts'|'comments'|null>(null);
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [myComments, setMyComments] = useState<any[]>([]);
@@ -162,14 +167,35 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
     } catch {} finally { setBookmarksLoaded(true); }
   };
 
-  const handleTabChange = (tab: 'posts'|'bookmarks') => {
-    setActiveTab(tab);
-    if (tab === 'bookmarks') loadBookmarks();
+  const loadMorePosts = async () => {
+    setLoadingMorePosts(true);
+    try {
+      const sb = createSupabaseBrowser();
+      const { data } = await sb.from('posts')
+        .select('id,title,category,created_at,view_count,likes_count,comments_count')
+        .eq('author_id', profile.id).eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .range(postsOffset, postsOffset + 19);
+      if (data && data.length > 0) {
+        setDisplayedPosts(prev => [...prev, ...data]);
+        setPostsOffset(prev => prev + data.length);
+        if (data.length < 20) setHasMorePosts(false);
+      } else {
+        setHasMorePosts(false);
+      }
+    } catch {} finally { setLoadingMorePosts(false); }
   };
 
-  // Auto-load bookmarks if initial tab is bookmarks
+  const handleTabChange = (tab: 'posts'|'bookmarks'|'comments') => {
+    setActiveTab(tab);
+    if (tab === 'bookmarks') loadBookmarks();
+    if (tab === 'comments') loadMyComments();
+  };
+
+  // Auto-load bookmarks/comments if initial tab matches
   useEffect(() => {
     if (initialTab === 'bookmarks') loadBookmarks();
+    if (initialTab === 'comments') loadMyComments();
   }, []);
 
   const [postsLoaded, setPostsLoaded] = useState(false);
@@ -285,11 +311,20 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                 <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
                   <span>{joinDate} 가입</span>
                   {profile.region_text && <span>📍 {profile.region_text}</span>}
-                  <span>팔로워 <strong style={{ color: 'var(--text-primary)' }}>{followers}</strong></span>
-                  <span>팔로잉 <strong style={{ color: 'var(--text-primary)' }}>{followingCount}</strong></span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{followers}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로워</span>
+                  </div>
+                  <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{followingCount}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로잉</span>
+                  </div>
                 </div>
               </>
             )}
@@ -435,14 +470,14 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
 
       {/* 탭 — 게시글 / 북마크(본인만) */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 12, padding: 4, border: '1px solid var(--border)' }}>
-        {(['posts', ...(isOwner ? ['bookmarks'] : [])] as const).map(tab => (
+        {(['posts', 'comments', ...(isOwner ? ['bookmarks'] : [])] as ('posts'|'comments'|'bookmarks')[]).map(tab => (
           <button key={tab} onClick={() => handleTabChange(tab)} style={{
             flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
             background: activeTab === tab ? 'var(--brand)' : 'transparent',
             color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',
             fontWeight: 600, fontSize: 13, transition: 'all 0.15s',
           }}>
-            {tab === 'posts' ? `📝 작성한 글 (${posts.length})` : `🔖 북마크`}
+            {tab === 'posts' ? `📝 작성한 글 (${displayedPosts.length})` : tab === 'comments' ? `💬 댓글` : `🔖 북마크`}
           </button>
         ))}
       </div>
@@ -450,15 +485,15 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       {/* 게시글 목록 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '20px 24px' }}>
         {activeTab === 'posts' && (
-          posts.length === 0 ? (
+          displayedPosts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>✏️ 첫 글을 작성해보세요</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {posts.map((post, i) => {
+              {displayedPosts.map((post, i) => {
                 const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
                 return (
                   <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ padding: '12px 0', borderBottom: i < posts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
+                    <div style={{ padding: '12px 0', borderBottom: i < displayedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                       <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
@@ -471,6 +506,39 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                   </Link>
                 );
               })}
+              {hasMorePosts && (
+                <button onClick={loadMorePosts} disabled={loadingMorePosts}
+                  style={{ marginTop: 12, padding: '10px 0', width: '100%', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                  {loadingMorePosts ? '불러오는 중...' : '더보기'}
+                </button>
+              )}
+            </div>
+          )
+        )}
+
+        {activeTab === 'comments' && (
+          !commentsLoaded ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
+              <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', margin: '0 auto 8px' }} className="animate-spin" />
+            </div>
+          ) : myComments.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>💬 작성한 댓글이 없어요</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {myComments.map((comment, i) => (
+                <Link key={comment.id} href={`/feed/${comment.post_id}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ padding: '12px 0', borderBottom: i < myComments.length - 1 ? '1px solid var(--border)' : 'none', transition: 'opacity 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+                    <div style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {comment.content}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                      게시글 #{comment.post_id} · {new Date(comment.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           )
         )}

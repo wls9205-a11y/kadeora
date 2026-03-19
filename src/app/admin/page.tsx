@@ -20,16 +20,15 @@ export default async function AdminDashboard() {
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
   if (!profile?.is_admin) redirect('/feed');
 
-  const seedCount = 10;
-
   const [
-    usersR, todayUsersR, postsR, todayPostsR,
+    seedR, usersR, todayUsersR, postsR, todayPostsR,
     commentsR, pushSubsR, pwaStatsR,
     signupRawR, postRawR, catRawR,
     todayAttR, totalAttR, topAttR,
     recentUsersR, recentReportsR,
     pendingReportsR,
   ] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).filter('id::text', 'like', 'aaaaaaaa%'),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
@@ -48,6 +47,7 @@ export default async function AdminDashboard() {
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
   ]);
 
+  const seedCount = seedR.count ?? 0;
   const totalUsers = usersR.count ?? 0;
   const totalPosts = postsR.count ?? 0;
   const totalComments = commentsR.count ?? 0;
@@ -80,8 +80,8 @@ export default async function AdminDashboard() {
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>📊 대시보드</h1>
 
-      {/* KPI Cards - 2 rows of 3 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+      {/* KPI Cards */}
+      <div className="admin-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
         <div style={cardStyle}>
           <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>총 가입자</div>
           <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalUsers.toLocaleString()}명</div>

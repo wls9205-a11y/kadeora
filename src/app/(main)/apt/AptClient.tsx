@@ -92,11 +92,6 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <span>전국 청약 일정과 미분양 현황</span>
-          {lastRefreshed && (
-            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-              최종 갱신: {new Date(lastRefreshed).toLocaleDateString('ko-KR')}
-            </span>
-          )}
           <a href="/apt/diagnose" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>🎯 가점 진단 →</a>
         </div>
       </div>

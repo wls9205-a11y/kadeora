@@ -22,7 +22,7 @@ export default function WriteClient() {
   const editId = searchParams.get('edit');
   const { success, error } = useToast();
 
-  const [category, setCategory] = useState('stock');
+  const [category, setCategory] = useState('free');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -168,7 +168,7 @@ export default function WriteClient() {
                 style={{
                   padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
                   border: `1px solid ${category === cat.value ? 'var(--brand)' : 'var(--border)'}`,
-                  background: category === cat.value ? 'var(--brand)' : 'var(--bg-hover)',
+                  background: category === cat.value ? 'var(--brand)' : 'transparent',
                   color: category === cat.value ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
                 }}
@@ -209,10 +209,9 @@ export default function WriteClient() {
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            placeholder="제목을 입력해주세요"
+            placeholder="제목을 입력하세요"
             maxLength={100}
-            className="kd-input"
-            style={{ fontSize: 15, padding: '12px 14px' }}
+            style={{ fontSize: 18, padding: '14px 0', border: 'none', borderBottom: '1px solid var(--border)', borderRadius: 0, background: 'transparent', color: 'var(--text-primary)', outline: 'none', width: '100%' }}
           />
         </div>
 
@@ -231,14 +230,11 @@ export default function WriteClient() {
             maxLength={5000}
             rows={10}
             style={{
-              width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border)',
-              borderRadius: 10, color: 'var(--text-primary)', padding: '10px 14px',
-              fontSize: 14, resize: 'vertical', fontFamily: 'inherit',
-              lineHeight: 1.7, transition: 'border-color 0.15s', boxSizing: 'border-box',
-              minHeight: 200,
+              width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border)',
+              borderRadius: 0, color: 'var(--text-primary)', padding: '14px 0',
+              fontSize: 15, resize: 'vertical', fontFamily: 'inherit',
+              lineHeight: 1.8, boxSizing: 'border-box', minHeight: 300, outline: 'none',
             }}
-            onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
-            onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           />
         </div>
 

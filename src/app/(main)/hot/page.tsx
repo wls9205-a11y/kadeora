@@ -75,7 +75,7 @@ export default async function HotPage() {
     <HotClient>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>⚡ 오늘의 HOT 게시글</h1>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
         <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>{dateRange}</p>
       </div>
 
