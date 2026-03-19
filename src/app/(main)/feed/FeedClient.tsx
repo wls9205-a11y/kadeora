@@ -8,6 +8,8 @@ import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
+import TrendingBar from '@/components/TrendingBar';
+import AttendanceBanner from '@/components/AttendanceBanner';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
@@ -235,8 +237,16 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 피드 헤더 */}
-      <div style={{ marginBottom: 10 }}>
+      <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>피드</h1>
+        <button onClick={() => router.push('/search')} style={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: 20, padding: '6px 14px', fontSize: 13,
+          color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit',
+        }}>
+          🔍 검색
+        </button>
       </div>
 
       {/* 지역 미설정 배너 */}
@@ -271,6 +281,12 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
       {/* 알림 설정 유도 */}
       <PushNudgeBanner />
+
+      {/* 출석체크 배너 */}
+      {currentUserId && <AttendanceBanner />}
+
+      {/* 트렌딩 키워드 */}
+      <TrendingBar />
 
       {/* 이번주 HOT */}
       {hotPosts.length > 0 && (() => {
@@ -445,8 +461,22 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         </div>
       )}
       {posts.length === 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '40px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>게시글이 없습니다
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '48px 24px', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>아직 게시글이 없어요</div>
+          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 20 }}>첫 번째 글을 작성해보세요!</div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => router.push('/write')} style={{
+              padding: '10px 20px', borderRadius: 8, border: 'none',
+              background: 'var(--brand)', color: 'var(--text-inverse)',
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            }}>✍️ 글쓰기</button>
+            <button onClick={() => router.push('/search')} style={{
+              padding: '10px 20px', borderRadius: 8,
+              border: '1px solid var(--border)', background: 'var(--bg-hover)',
+              color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            }}>🔍 검색해보기</button>
+          </div>
         </div>
       )}
     </div>

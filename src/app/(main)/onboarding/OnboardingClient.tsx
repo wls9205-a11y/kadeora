@@ -138,7 +138,13 @@ export default function OnboardingClient() {
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
               거주 지역 <span style={{ color: 'var(--error)' }}>*</span>
+              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'var(--error)', color: 'var(--text-inverse)', marginLeft: 6, fontWeight: 700 }}>필수</span>
             </label>
+            {!region && (
+              <div style={{ fontSize: 11, color: 'var(--brand)', marginBottom: 6 }}>
+                📍 지역을 선택해야 맞춤 피드를 받을 수 있어요
+              </div>
+            )}
             <select value={region} onChange={e => setRegion(e.target.value)} style={{
               width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 20,
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
@@ -167,9 +173,9 @@ export default function OnboardingClient() {
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(2)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={handleComplete} disabled={saving}
-                style={{ flex: 2, padding: '16px', fontSize: 16, fontWeight: 800, border: 'none', borderRadius: 12, cursor: saving ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, #FF4500, #FF6B35)', boxShadow: '0 4px 16px rgba(255,69,0,0.3)', opacity: saving ? 0.7 : 1 }}>
-                {saving ? '저장 중...' : '카더라 시작하기 🚀'}
+              <button onClick={handleComplete} disabled={saving || !region}
+                style={{ flex: 2, padding: '16px', fontSize: 16, fontWeight: 800, border: 'none', borderRadius: 12, cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, #FF4500, #FF6B35)', boxShadow: '0 4px 16px rgba(255,69,0,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
+                {saving ? '저장 중...' : !region ? '지역을 선택해주세요' : '카더라 시작하기 🚀'}
               </button>
             </div>
           </div>

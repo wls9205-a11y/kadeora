@@ -62,6 +62,16 @@ export default function Sidebar() {
 
       {user && (
         <>
+          <Link href={`/profile/${user.id}?tab=bookmarks`} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 14px', borderRadius: 10,
+            textDecoration: 'none', fontSize: 14,
+            color: 'var(--text-primary)', background: 'transparent',
+          }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+            <span style={{ fontSize: 18 }}>🔖</span> 내 북마크
+          </Link>
           <Link href={`/profile/${user.id}`} style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px', borderRadius: 10,
