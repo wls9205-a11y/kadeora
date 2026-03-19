@@ -5,6 +5,7 @@ import { AdminLineChart, AdminDonutChart } from './AdminCharts';
 import TrafficStats from './TrafficStats';
 import DashboardPWACard from './DashboardPWACard';
 import AptCacheRefreshButton from './AptCacheRefreshButton';
+import EnvCheckCard from './EnvCheckCard';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -215,6 +216,11 @@ export default async function AdminDashboard() {
       {/* 부동산 데이터 갱신 */}
       <div style={{ ...cardStyle, marginBottom: 16 }}>
         <AptCacheRefreshButton hasKey={!!process.env.APT_DATA_API_KEY} />
+      </div>
+
+      {/* 시스템 환경변수 점검 */}
+      <div style={{ ...cardStyle, marginBottom: 16 }}>
+        <EnvCheckCard />
       </div>
 
       {/* 데이터 차트 */}

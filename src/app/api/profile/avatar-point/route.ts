@@ -22,6 +22,19 @@ export async function POST() {
     return NextResponse.json({ already: true })
   }
 
+  // 포인트 이상 감지: 1시간 내 200P 이상 적립 시 차단
+  const { data: recentPoints } = await sb
+    .from('point_history')
+    .select('amount')
+    .eq('user_id', user.id)
+    .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+    .gt('amount', 0)
+  const total1h = recentPoints?.reduce((sum, r) => sum + (r.amount ?? 0), 0) ?? 0
+  if (total1h >= 200) {
+    console.warn('[point-anomaly] suspicious activity:', user.id, 'total1h:', total1h)
+    return NextResponse.json({ error: '잠시 후 다시 시도해주세요.' }, { status: 429 })
+  }
+
   // Get current points
   const { data: profile } = await sb
     .from('profiles')

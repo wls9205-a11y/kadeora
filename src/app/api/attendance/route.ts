@@ -62,6 +62,19 @@ export async function POST() {
     if (streak === 7) { pointsEarned += 30; bonus = '7일 연속 보너스 +30P'; }
     if (streak === 30) { pointsEarned += 100; bonus = '30일 연속 보너스 +100P'; }
 
+    // 포인트 이상 감지: 1시간 내 200P 이상 적립 시 차단
+    const { data: recentPoints } = await sb
+      .from('point_history')
+      .select('amount')
+      .eq('user_id', user.id)
+      .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+      .gt('amount', 0)
+    const total1h = recentPoints?.reduce((sum: number, r: any) => sum + (r.amount ?? 0), 0) ?? 0
+    if (total1h >= 200) {
+      console.warn('[point-anomaly] suspicious attendance:', user.id, 'total1h:', total1h)
+      return NextResponse.json({ error: '잠시 후 다시 시도해주세요.' }, { status: 429 })
+    }
+
     // 포인트 지급
     await sb.from('profiles').update({
       points: (await sb.from('profiles').select('points').eq('id', user.id).single()).data?.points + pointsEarned,
