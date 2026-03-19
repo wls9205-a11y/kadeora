@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
+import { validateNickname } from '@/lib/nickname-filter';
 
 const INTERESTS = [
   { key: 'stock',   label: '📈 주식' },
@@ -33,8 +34,8 @@ export default function OnboardingClient() {
     );
 
   const handleComplete = async () => {
-    if (!nickname.trim() || nickname.trim().length < 2) { error('닉네임은 2자 이상이어야 합니다'); return; }
-    if (nickname.trim().length > 20) { error('닉네임은 20자 이하여야 합니다'); return; }
+    const nickValidation = validateNickname(nickname);
+    if (!nickValidation.valid) { error(nickValidation.error!); return; }
     if (!region) { error('지역을 선택해주세요'); return; }
     setSaving(true);
     try {
@@ -97,7 +98,7 @@ export default function OnboardingClient() {
               className="kd-input" style={{ fontSize: 16, marginBottom: 8 }} autoFocus
               onKeyDown={e => e.key === 'Enter' && nickname.trim().length >= 2 && setStep(2)} />
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
-            <button onClick={() => { if (nickname.trim().length < 2) { error('닉네임은 2자 이상이어야 합니다'); return; } setStep(2); }}
+            <button onClick={() => { const v = validateNickname(nickname); if (!v.valid) { error(v.error!); return; } setStep(2); }}
               className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 24, padding: '13px', fontSize: 15, fontWeight: 700 }}>
               다음 →
             </button>

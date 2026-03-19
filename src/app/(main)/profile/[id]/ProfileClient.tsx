@@ -8,6 +8,7 @@ import PullToRefresh from '@/components/PullToRefresh';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
+import { validateNickname } from '@/lib/nickname-filter';
 
 
 const GRADE_COLORS: Record<number, string> = {
@@ -119,8 +120,8 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   };
 
   const handleSave = async () => {
-    if (!nickname.trim()) { error('닉네임을 입력해주세요'); return; }
-    if (nickname.length > 20) { error('닉네임은 20자 이내로 입력해주세요'); return; }
+    const nickValidation = validateNickname(nickname);
+    if (!nickValidation.valid) { error(nickValidation.error!); return; }
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
