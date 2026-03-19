@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
   try {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-    // 시드 유저가 DB에 존재하는지 확인
-    const { data: seedCheck } = await admin.from('profiles').select('id').like('id', 'aaaaaaaa%').limit(1);
+    // 시드 유저가 DB에 존재하는지 확인 (UUID에 LIKE 사용 불가 → filter로 text cast)
+    const { data: seedCheck } = await admin.from('profiles').select('id').filter('id::text', 'like', 'aaaaaaaa%').limit(1);
     if (!seedCheck || seedCheck.length === 0) {
       return NextResponse.json({ skipped: true, reason: 'No seed users in DB' });
     }
