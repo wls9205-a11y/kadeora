@@ -221,6 +221,9 @@ export default async function FeedDetailPage({ params }: Props) {
               {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
           </div>
+          <div style={{ flexShrink: 0 }}>
+            <ReportButton postId={post.id} style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'transparent', border: 'none', cursor: 'pointer' }} />
+          </div>
         </div>
 
         <h1 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.4 }}>
@@ -231,15 +234,16 @@ export default async function FeedDetailPage({ params }: Props) {
           {post.content}
         </div>
 
-        {(post.category === 'stock' || post.category === 'apt') && (
+        {(post.category === '부동산' || post.category === '주식' || post.category === 'real_estate' || post.category === 'stock') && (
           <div style={{
-            marginTop: 16, marginBottom: 16,
+            background: 'rgba(255,69,0,0.04)',
+            border: '1px solid rgba(255,69,0,0.12)',
+            borderRadius: 8,
             padding: '8px 12px',
-            background: 'var(--bg-hover)',
-            borderRadius: 6,
             fontSize: 11,
             color: 'var(--text-tertiary)',
-            borderLeft: '2px solid var(--text-tertiary)'
+            marginTop: 12,
+            lineHeight: 1.5,
           }}>
             📌 이 게시글은 개인의 의견이며 투자 권유가 아닙니다. 모든 투자 판단과 손익은 투자자 본인에게 귀속됩니다.
           </div>
@@ -273,7 +277,7 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
         {/* Actions */}
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+        <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, display:'flex', alignItems:'center', gap:8 }}>
           <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'6px 12px', borderRadius:20, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', fontSize:13 }}>
             💬 <span>{comments.length.toLocaleString()}</span>
@@ -281,9 +285,6 @@ export default async function FeedDetailPage({ params }: Props) {
           <ShareButtons title={post.title} postId={post.id} content={post.content} />
           <div style={{ display:'flex', justifyContent:'center', padding:'6px 12px' }}>
             <BookmarkButton postId={post.id} />
-          </div>
-          <div style={{ display:'flex', justifyContent:'center', padding:'6px 12px' }}>
-            <ReportButton postId={post.id} />
           </div>
         </div>
       </article>

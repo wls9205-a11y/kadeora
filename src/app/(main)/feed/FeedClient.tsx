@@ -64,7 +64,7 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
     sb.from('posts')
       .select('id,title,category,likes_count,comments_count,created_at,author_id,profiles!posts_author_id_fkey(nickname)')
       .eq('is_deleted', false)
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .gte('created_at', new Date(Date.now() - 24*60*60*1000).toISOString())
       .order('likes_count', { ascending: false })
       .limit(5)
       .then(({ data }) => { if (data && data.length > 0) setHotPosts(data as unknown as Post[]); });
@@ -251,36 +251,40 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
       {/* 알림 설정 유도 */}
       <PushNudgeBanner />
 
-      {/* 이번주 HOT */}
-      <style>{`@keyframes hotFlame{0%,100%{transform:scale(1)rotate(-3deg)}50%{transform:scale(1.3)rotate(3deg)}}`}</style>
+      {/* 오늘의 HOT */}
       {hotPosts.length > 0 && (
-        <div style={{ marginBottom: 16, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(160deg, rgba(255,69,0,0.1) 0%, transparent 60%)', border: '1px solid rgba(255,69,0,0.2)' }}>
-          <div style={{ padding: '14px 16px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{animation:'hotFlame 1.5s infinite',display:'inline-block'}}>🔥</span>
-              <span style={{ fontSize: 15, fontWeight: 800 }}>이번주 HOT</span>
-            </div>
-            <Link href="/hot" style={{fontSize:12,color:'var(--brand)',textDecoration:'none'}}>더보기 →</Link>
+        <div style={{ marginBottom: 16, background: 'linear-gradient(135deg, #1a0a00 0%, #0d0d0d 100%)', border: '1px solid rgba(255,69,0,0.3)', borderRadius: 16, padding: '0 0 4px' }}>
+          <div style={{ padding: '12px 16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>⚡ 오늘의 HOT</span>
+            <Link href="/hot" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none' }}>전체보기</Link>
           </div>
 
           {hotPosts[0] && (
-            <Link href={`/feed/${hotPosts[0].id}`} style={{textDecoration:'none',color:'inherit'}}>
-              <div style={{background:'linear-gradient(135deg, rgba(255,69,0,0.08), rgba(255,140,0,0.04))',border:'1px solid rgba(255,69,0,0.15)',borderRadius:12,margin:'0 12px 10px',padding:12}}>
-                <span style={{background:'rgba(255,69,0,0.15)',color:'#FF4500',fontSize:10,fontWeight:800,padding:'2px 8px',borderRadius:8}}>👑 1위</span>
-                <div style={{fontSize:15,fontWeight:800,color:'var(--text-primary)',marginTop:6,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{hotPosts[0].title}</div>
-                <div style={{fontSize:11,color:'var(--text-tertiary)',marginTop:4}}>❤️ {hotPosts[0].likes_count} · 💬 {hotPosts[0].comments_count}</div>
-              </div>
-            </Link>
+            <div style={{ padding: '0 12px 10px' }}>
+              <Link href={`/feed/${hotPosts[0].id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ background: 'linear-gradient(135deg, rgba(255,69,0,0.15) 0%, rgba(255,140,0,0.05) 100%)', border: '1px solid rgba(255,69,0,0.25)', borderRadius: 12, padding: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ background: 'rgba(255,69,0,0.2)', color: '#FF4500', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 8 }}>🔥 오늘 1위</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>❤️ {hotPosts[0].likes_count}</span>
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.4, marginTop: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{hotPosts[0].title}</div>
+                  <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', gap: 6, alignItems: 'center' }}>
+                    {hotPosts[0].category && <span style={{ background: 'rgba(255,69,0,0.1)', color: 'var(--brand)', padding: '1px 6px', borderRadius: 4, fontSize: 10 }}>{CATEGORY_MAP[hotPosts[0].category]?.label ?? hotPosts[0].category}</span>}
+                    <span>❤️ {hotPosts[0].likes_count} · 💬 {hotPosts[0].comments_count}</span>
+                  </div>
+                </div>
+              </Link>
+            </div>
           )}
 
-          {hotPosts.length > 1 && (
-            <div style={{padding:'0 12px 10px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-              {hotPosts.slice(1,3).map((post: Post, i: number) => (
-                <Link key={post.id} href={`/feed/${post.id}`} style={{textDecoration:'none',color:'inherit'}}>
-                  <div style={{background:'var(--bg-surface)',border:'1px solid var(--border)',borderRadius:10,padding:10}}>
-                    <span style={{fontSize:10,fontWeight:800,padding:'2px 6px',borderRadius:6,...(i===0?{background:'rgba(192,192,192,0.15)',color:'#909090'}:{background:'rgba(205,127,50,0.15)',color:'#cd7f32'})}}>{i===0?'🥈 2위':'🥉 3위'}</span>
-                    <div style={{fontSize:12,fontWeight:700,marginTop:4,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,color:'var(--text-primary)'}}>{post.title}</div>
-                    <div style={{fontSize:11,color:'var(--text-tertiary)',marginTop:4}}>❤️ {post.likes_count}</div>
+          {(hotPosts[1] || hotPosts[2]) && (
+            <div style={{ padding: '0 12px 8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {hotPosts.slice(1, 3).map((post: Post, i: number) => (
+                <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
+                    <span>{i === 0 ? '🥈' : '🥉'}</span>
+                    <div style={{ fontSize: 12, fontWeight: 700, marginTop: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{post.title}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>❤️ {post.likes_count}</div>
                   </div>
                 </Link>
               ))}
@@ -288,14 +292,16 @@ export default function FeedClient({ posts, activeCategory, activeRegion = 'all'
           )}
 
           {hotPosts.length > 3 && (
-            <div style={{padding:'4px 12px 12px'}}>
-              {hotPosts.slice(3,5).map((post: Post, i: number) => (
-                <Link key={post.id} href={`/feed/${post.id}`} style={{textDecoration:'none',color:'inherit',display:'flex',gap:10,padding:'5px 0',borderBottom:i<hotPosts.slice(3,5).length-1?'1px solid var(--border)':'none',alignItems:'center'}}>
-                  <span style={{fontSize:13,fontWeight:800,color:'var(--text-tertiary)',width:18}}>{i+4}</span>
-                  <span style={{flex:1,fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--text-primary)'}}>{post.title}</span>
-                  <span style={{fontSize:11,color:'var(--text-tertiary)'}}>❤️ {post.likes_count}</span>
-                </Link>
-              ))}
+            <div style={{ padding: '0 12px 10px' }}>
+              <div style={{ borderTop: '1px solid rgba(255,69,0,0.1)', paddingTop: 8 }}>
+                {hotPosts.slice(3, 5).map((post: Post, i: number) => (
+                  <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: 8, padding: '5px 0', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-tertiary)', width: 16 }}>{i + 4}</span>
+                    <span style={{ flex: 1, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>❤️ {post.likes_count}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
         </div>

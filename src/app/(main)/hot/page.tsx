@@ -4,8 +4,8 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import HotClient from './HotClient';
 
 export const metadata: Metadata = {
-  title: '이번 주 HOT',
-  description: '이번 주 가장 인기있는 카더라 게시글',
+  title: '오늘의 HOT',
+  description: '오늘 가장 인기있는 카더라 게시글',
 };
 
 export const dynamic = 'force-dynamic';
@@ -65,7 +65,7 @@ export default async function HotPage() {
     <HotClient>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🔥 이번 주 카더라 HOT</h1>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>⚡ 오늘의 HOT 게시글</h1>
         <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>{dateRange}</p>
       </div>
 

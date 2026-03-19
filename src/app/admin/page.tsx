@@ -22,23 +22,31 @@ export default async function AdminDashboard() {
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
   if (!profile?.is_admin) redirect('/feed');
 
-  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR, signupRawR, postRawR, catRawR, todayAttR, totalAttR, topAttR, unsoldCountR] = await Promise.all([
-    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
-    supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
-    supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
-    supabase.from('posts').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
+  const [usersR, todayUsersR, postsR, todayPostsR, paymentsR, pendingReportsR, recentUsersR, recentReportsR, pwaStatsR, signupRawR, postRawR, catRawR, todayAttR, totalAttR, topAttR, unsoldCountR, realUsersR, realTodayUsersR, realPostsR, realTodayPostsR] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).neq('is_deleted', true),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).neq('is_deleted', true).gte('created_at', new Date().toISOString().slice(0, 10)),
+    supabase.from('posts').select('id', { count: 'exact', head: true }).neq('is_deleted', true),
+    supabase.from('posts').select('id', { count: 'exact', head: true }).neq('is_deleted', true).gte('created_at', new Date().toISOString().slice(0, 10)),
     supabase.from('payments').select('amount').eq('status', 'DONE'),
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('profiles').select('nickname, grade_title, created_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+    supabase.from('profiles').select('nickname, grade_title, created_at').neq('is_deleted', true).order('created_at', { ascending: false }).limit(5),
     supabase.from('reports').select('id, reason, content_type, created_at, status').eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
     supabase.from('pwa_installs').select('platform, installed_at, region_text').order('installed_at', { ascending: false }).limit(30),
-    supabase.from('profiles').select('created_at').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).eq('is_deleted', false),
-    supabase.from('posts').select('created_at, category').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).eq('is_deleted', false),
-    supabase.from('posts').select('category').eq('is_deleted', false),
+    supabase.from('profiles').select('created_at').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).neq('is_deleted', true),
+    supabase.from('posts').select('created_at, category').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString()).neq('is_deleted', true),
+    supabase.from('posts').select('category').neq('is_deleted', true),
     supabase.from('attendance').select('user_id', { count: 'exact', head: true }).eq('last_date', new Date().toISOString().slice(0, 10)),
     supabase.from('attendance').select('user_id', { count: 'exact', head: true }),
     supabase.from('attendance').select('user_id, streak, total_days, last_date, profiles(nickname)').order('streak', { ascending: false }).limit(5),
     supabase.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    // 시드 제외 실제 가입자
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).not('id', 'like', 'aaaaaaaa%').neq('is_deleted', true),
+    // 시드 제외 오늘 신규 가입자
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).not('id', 'like', 'aaaaaaaa%').neq('is_deleted', true).gte('created_at', new Date().toISOString().slice(0, 10)),
+    // 시드 제외 실제 게시글
+    supabase.from('posts').select('*', { count: 'exact', head: true }).not('author_id', 'like', 'aaaaaaaa%').neq('is_deleted', true),
+    // 시드 제외 오늘 신규 게시글
+    supabase.from('posts').select('*', { count: 'exact', head: true }).not('author_id', 'like', 'aaaaaaaa%').neq('is_deleted', true).gte('created_at', new Date().toISOString().slice(0, 10)),
   ]);
 
   const pwaStats = pwaStatsR.data ?? [];
@@ -68,6 +76,11 @@ export default async function AdminDashboard() {
     (ps || []).forEach((p: any) => { providerStats[p.provider || 'email'] = Number(p.count) || 0; });
   } catch {}
 
+  const realUsers = realUsersR.count ?? 0;
+  const realTodayUsers = realTodayUsersR.count ?? 0;
+  const realPosts = realPostsR.count ?? 0;
+  const realTodayPosts = realTodayPostsR.count ?? 0;
+
   const totalRevenue = paymentsR.data?.reduce((s: number, p: { amount: number }) => s + (p.amount || 0), 0) || 0;
   const pendingCount = pendingReportsR.count ?? 0;
 
@@ -85,7 +98,9 @@ export default async function AdminDashboard() {
         <div style={card}>
           <div style={label}>총 가입자</div>
           <div style={big}>{(usersR.count ?? 0).toLocaleString()}명</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>(시드 제외 {realUsers.toLocaleString()}명)</div>
           <div style={sub}>오늘 +{todayUsersR.count ?? 0}명</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>(시드 제외 +{realTodayUsers.toLocaleString()}명)</div>
           <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 16, fontWeight: 600, background: 'rgba(247,191,0,0.15)', color: '#b8860b', border: '1px solid rgba(247,191,0,0.3)' }}>카카오 {providerStats['kakao'] ?? 0}명</span>
             <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 16, fontWeight: 600, background: 'rgba(66,133,244,0.15)', color: '#4285f4', border: '1px solid rgba(66,133,244,0.3)' }}>구글 {providerStats['google'] ?? 0}명</span>
@@ -95,7 +110,9 @@ export default async function AdminDashboard() {
         <div style={card}>
           <div style={label}>총 게시글</div>
           <div style={big}>{(postsR.count ?? 0).toLocaleString()}개</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>(시드 제외 {realPosts.toLocaleString()}개)</div>
           <div style={sub}>오늘 +{todayPostsR.count ?? 0}개</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>(시드 제외 +{realTodayPosts.toLocaleString()}개)</div>
         </div>
         <div style={card}>
           <div style={label}>총 결제금액</div>

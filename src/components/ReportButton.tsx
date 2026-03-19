@@ -6,6 +6,7 @@ interface Props {
   postId?: number;
   commentId?: number;
   messageId?: number;
+  style?: React.CSSProperties;
 }
 
 const REASONS = [
@@ -16,7 +17,7 @@ const REASONS = [
   '기타',
 ];
 
-export default function ReportButton({ postId, commentId, messageId }: Props) {
+export default function ReportButton({ postId, commentId, messageId, style: customStyle }: Props) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
@@ -80,6 +81,7 @@ export default function ReportButton({ postId, commentId, messageId }: Props) {
           color: 'var(--text-tertiary)',
           padding: '2px 4px',
           transition: 'opacity 0.15s',
+          ...customStyle,
         }}
         onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
         onMouseLeave={e => (e.currentTarget.style.opacity = '0.5')}

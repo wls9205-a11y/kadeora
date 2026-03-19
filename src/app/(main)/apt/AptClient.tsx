@@ -98,9 +98,38 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
     }}>{label || v}</button>
   );
 
+  // Status counts for filter badges
+  const statusCounts = useMemo(() => {
+    const regionFiltered = region !== '전체' ? apts.filter(a => a.region_nm === region) : apts;
+    return {
+      total: regionFiltered.length,
+      open: regionFiltered.filter(a => getStatus(a) === 'open').length,
+      upcoming: regionFiltered.filter(a => getStatus(a) === 'upcoming').length,
+      closed: regionFiltered.filter(a => getStatus(a) === 'closed').length,
+    };
+  }, [apts, region]);
+
+  const statusPill = (v: string, label: string, count: number) => {
+    const selected = statusFilter === v;
+    let bg = 'transparent', color = 'var(--text-tertiary)', borderColor = 'var(--border)';
+    if (selected) {
+      if (v === '전체') { bg = 'var(--brand)'; color = 'white'; borderColor = 'var(--brand)'; }
+      else if (v === 'open') { bg = '#14532d'; color = '#86efac'; borderColor = '#166534'; }
+      else if (v === 'upcoming') { bg = '#1e3a5f'; color = '#93c5fd'; borderColor = '#1e40af'; }
+      else if (v === 'closed') { bg = 'rgba(100,100,100,0.2)'; color = 'var(--text-tertiary)'; borderColor = 'var(--border)'; }
+    }
+    return (
+      <button key={v} onClick={() => setStatusFilter(v)} style={{
+        padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+        border: `1px solid ${borderColor}`, cursor: 'pointer', transition: 'all 0.15s',
+        background: bg, color,
+      }}>{label} ({count})</button>
+    );
+  };
+
   return (
     <PullToRefresh>
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 12px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 12 }}>
@@ -110,12 +139,14 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
       </div>
 
       {/* 탭 */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)' }}>
-        {([['sub', '청약 일정'], ['unsold', '미분양']] as const).map(([k, l]) => (
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, justifyContent: 'center' }}>
+        {([['sub', '청약'], ['unsold', '미분양']] as const).map(([k, l]) => (
           <button key={k} onClick={() => setActiveTab(k)} style={{
-            flex: 1, padding: '7px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
-            background: activeTab === k ? 'var(--brand)' : 'transparent',
-            color: activeTab === k ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: 13,
+            padding: '10px 24px', borderRadius: 25, fontSize: 14, cursor: 'pointer',
+            background: activeTab === k ? 'var(--brand)' : 'var(--bg-surface)',
+            color: activeTab === k ? 'white' : 'var(--text-secondary)',
+            fontWeight: activeTab === k ? 700 : 400,
+            border: activeTab === k ? 'none' : '1px solid var(--border)',
           }}>{l}</button>
         ))}
       </div>
@@ -126,16 +157,16 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
           <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
             {availableRegions.map(r => pill(r, region, setRegion))}
           </div>
-          <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
-            {pill('전체', statusFilter, setStatusFilter)}
-            {pill('open', statusFilter, setStatusFilter, '접수중')}
-            {pill('upcoming', statusFilter, setStatusFilter, '예정')}
-            {pill('closed', statusFilter, setStatusFilter, '마감')}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+            {statusPill('전체', '전체', statusCounts.total)}
+            {statusPill('open', '접수중', statusCounts.open)}
+            {statusPill('upcoming', '예정', statusCounts.upcoming)}
+            {statusPill('closed', '마감', statusCounts.closed)}
           </div>
 
           {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>조건에 맞는 청약이 없습니다</div>}
 
-          {filtered.map((apt, i) => {
+          {filtered.map((apt) => {
             const st = getStatus(apt);
             const bd = SB[st];
             const h = apt.house_manage_no || String(apt.id);
@@ -143,49 +174,48 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
             const my = myAlerts.has(h);
             const dday = !apt.rcept_bgnde ? null : Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000);
 
+            const leftBorder = st === 'open' ? '3px solid #22c55e' : st === 'upcoming' ? '3px solid #3b82f6' : undefined;
+
             return (
               <div key={apt.id} style={{
-                padding: '14px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-                opacity: st === 'closed' ? 0.7 : 1,
+                background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14,
+                padding: '14px 16px', marginBottom: 10,
+                opacity: st === 'closed' ? 0.65 : 1,
+                borderLeft: leftBorder,
               }}>
-                {/* 줄1: 배지 + 현장명 + 경쟁률 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                {/* Header row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
-                  {st === 'upcoming' && dday !== null && dday >= 0 && (
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>D-{dday}</span>
-                  )}
-                  <Link href={`/apt/${apt.house_manage_no || apt.id}`} style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{apt.house_nm}</Link>
+                  <Link href={`/apt/${apt.house_manage_no || apt.id}`} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none', flex: 1, marginLeft: 8, marginRight: 8 }}>{apt.house_nm}</Link>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: st === 'upcoming' && dday !== null && dday >= 0 ? 'var(--brand)' : st === 'open' ? '#22c55e' : 'var(--text-tertiary)', flexShrink: 0 }}>
+                    {st === 'upcoming' && dday !== null && dday >= 0 ? `D-${dday}` : st === 'open' ? '접수중' : st === 'closed' ? '마감' : ''}
+                  </span>
+                </div>
+
+                {/* Body: address */}
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>
+                  {apt.region_nm}{apt.hssply_adres ? ` ${apt.hssply_adres}` : ''}
+                </div>
+
+                {/* Body: dates */}
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>
+                  청약 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)} · 당첨 {fmtD(apt.przwner_presnatn_de)}
+                  {apt.cntrct_cncls_bgnde && <span> · 계약 {fmtD(apt.cntrct_cncls_bgnde)}~{fmtD(apt.cntrct_cncls_endde)}</span>}
                   {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 7px', borderRadius: 10 }}>
+                    <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 7px', borderRadius: 10 }}>
                       {Number(apt.competition_rate_1st).toFixed(1)}:1
                     </span>
                   )}
                 </div>
 
-                {/* 줄2: 주소 + 현장 정보 */}
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>
-                  📍 {apt.region_nm}{apt.hssply_adres ? ` ${apt.hssply_adres}` : ''}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {apt.tot_supply_hshld_co > 0 && <span>🏠 {apt.tot_supply_hshld_co.toLocaleString()}세대</span>}
-                  {apt.mvn_prearnge_ym && <span>🔑 {apt.mvn_prearnge_ym.slice(0,4)}년 {parseInt(apt.mvn_prearnge_ym.slice(4,6))}월 입주</span>}
-                  {apt.mdatrgbn_nm && <span>📋 {apt.mdatrgbn_nm}</span>}
-                </div>
-
-                {/* 줄3: 날짜 한줄 */}
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>
-                  청약 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)} · 당첨 {fmtD(apt.przwner_presnatn_de)}
-                  {apt.cntrct_cncls_bgnde && <span> · 계약 {fmtD(apt.cntrct_cncls_bgnde)}~{fmtD(apt.cntrct_cncls_endde)}</span>}
-                </div>
-
-                {/* 줄4: pill 버튼 행 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                {/* Footer */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>
                     👁 {(apt.view_count || 0).toLocaleString()}
                   </span>
-                  {ac > 0 && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>🔔 {ac}</span>}
                   <button onClick={() => setCommentTarget({ houseKey: h, houseNm: apt.house_nm, houseType: 'sub' })}
                     style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
+                  {ac > 0 && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>🔔 {ac}</span>}
                   <div style={{ flex: 1 }} />
                   {aptUser && (
                     <button onClick={() => toggleAlert(apt)} style={{
@@ -235,38 +265,40 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
             </div>
 
             {/* 리스트 */}
-            {fu.map((u: UnsoldApt, i: number) => {
-              const rate = u.tot_supply_hshld_co ? Math.round((u.tot_unsold_hshld_co / u.tot_supply_hshld_co) * 100) : null;
+            {fu.map((u: UnsoldApt) => {
+              const maxUnsold = Math.max(...fu.map((x: UnsoldApt) => x.tot_unsold_hshld_co || 0), 1);
+              const pct = Math.min(Math.round(((u.tot_unsold_hshld_co || 0) / maxUnsold) * 100), 100);
+              const severity = pct > 70;
               const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
               const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
               const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
 
               return (
-                <div key={u.id} style={{ padding: '16px 16px', borderBottom: i < fu.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm || '미분양 단지'}</Link>
+                <div key={u.id} style={{
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14,
+                  padding: '14px 16px', marginBottom: 10,
+                }}>
+                  {/* Header: house name + unsold badge + price */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm || '미분양 단지'}</Link>
                     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
                     {priceStr && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
                   </div>
 
-                  {/* 줄2: 지역 + 세대 */}
-                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+                  {/* Sub-text: region, units, completion */}
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
                     {u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}
                     {u.tot_supply_hshld_co && <span> · 총 {u.tot_supply_hshld_co.toLocaleString()}세대</span>}
                     {u.completion_ym && <span> · 준공 {u.completion_ym.slice(0, 4)}.{u.completion_ym.slice(4, 6)}</span>}
                   </div>
 
-                  {/* 미분양률 바 */}
-                  {rate !== null && (
-                    <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 10 }}>
-                      <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#ef4444' : rate > 40 ? '#f97316' : '#eab308' }} />
-                      <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 10, fontWeight: 700, color: '#f87171' }}>{rate}%</span>
-                    </div>
-                  )}
+                  {/* Progress bar */}
+                  <div style={{ height: 6, borderRadius: 4, width: '100%', background: 'var(--border)', marginBottom: 10 }}>
+                    <div style={{ height: '100%', borderRadius: 4, width: `${pct}%`, background: severity ? '#ef4444' : 'var(--brand)', transition: 'width 0.3s' }} />
+                  </div>
 
-                  {/* 줄3: pill 버튼 */}
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {/* Action pills */}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                     <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
                       style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
                     <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>

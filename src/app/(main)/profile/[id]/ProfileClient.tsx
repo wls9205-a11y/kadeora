@@ -106,6 +106,11 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       if (updateErr) throw updateErr;
       setAvatarUrl(urlData.publicUrl);
       success('프로필 사진이 변경되었습니다');
+      // Award avatar upload bonus points
+      fetch('/api/profile/avatar-point', { method: 'POST' })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d?.granted) success('📸 프로필 사진 등록 보너스 +30P!'); })
+        .catch(() => {});
       router.refresh();
     } catch { error('업로드 중 오류가 발생했습니다'); }
     finally { setAvatarUploading(false); if (avatarInputRef.current) avatarInputRef.current.value = ''; }
@@ -323,7 +328,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 1, marginTop: 16, background: 'var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginTop: 16, background: 'var(--bg-base)', borderRadius: 12, border: '1px solid var(--border)', padding: '12px 0' }}>
           {(() => {
             const stats = [
               { label: '게시글', value: profile.posts_count ?? 0, icon: '📝' },
@@ -333,13 +338,12 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               { label: '포인트', value: profile.points ?? 0, icon: '💰' },
             ];
             return stats.map((stat, i) => (
-              <div key={stat.label} style={{ background: 'var(--bg-surface)', padding: '16px 12px', textAlign: 'center', gridColumn: i === stats.length - 1 && stats.length % 2 !== 0 ? '1 / -1' : undefined }}>
-                <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
-                {stat.label === '포인트' && (
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>등급 산정 기준</div>
-                )}
+              <div key={stat.label} style={{ display: 'contents' }}>
+                {i > 0 && <div style={{ height: 24, width: 1, background: 'var(--border)' }} />}
+                <div style={{ minWidth: 60, textAlign: 'center', padding: '0 16px' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
+                </div>
               </div>
             ));
           })()}
