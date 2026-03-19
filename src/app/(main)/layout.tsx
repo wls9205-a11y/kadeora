@@ -21,8 +21,15 @@ export const metadata: Metadata = {
 };
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createSupabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const supabase = await createSupabaseServer();
+    const result = await Promise.race([
+      supabase.auth.getUser(),
+      new Promise<{ data: { user: null } }>((resolve) => setTimeout(() => resolve({ data: { user: null } }), 3000)),
+    ]);
+    user = result.data.user;
+  } catch {}
 
   return (
     <ToastProvider>
