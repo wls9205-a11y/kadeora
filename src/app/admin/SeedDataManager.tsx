@@ -60,7 +60,7 @@ export default function SeedDataManager() {
           ⚠️ 전체 일괄 삭제
         </button>
       ) : (
-        <button onClick={() => handleDelete('all')} disabled={!!deleting} style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: 'none', background: 'var(--error)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={() => handleDelete('all')} disabled={!!deleting} style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: 'none', background: 'var(--error)', color: 'var(--text-inverse)', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
           {deleting === 'all' ? '삭제 중...' : '🚨 정말 전체 삭제합니다 (되돌릴 수 없음)'}
         </button>
       )}

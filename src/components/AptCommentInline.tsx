@@ -38,7 +38,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
               style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
             <span style={{ position: 'absolute', right: 10, bottom: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>{text.length}/200</span>
           </div>
-          <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 6, padding: '8px 16px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
+          <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 6, padding: '8px 16px', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
             {sending ? '등록 중...' : '등록'}
           </button>
         </div>

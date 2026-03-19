@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import HotClient from './HotClient';
 
 export const metadata: Metadata = {
   title: '이번 주 HOT',
@@ -61,6 +62,7 @@ export default async function HotPage() {
   const dateRange = `${weekStart.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} ~ ${now.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}`;
 
   return (
+    <HotClient>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🔥 이번 주 카더라 HOT</h1>
@@ -119,5 +121,6 @@ export default async function HotPage() {
         );
       })}
     </div>
+    </HotClient>
   );
 }

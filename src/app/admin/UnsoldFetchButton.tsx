@@ -29,7 +29,7 @@ export default function UnsoldFetchButton({ hasKey }: { hasKey: boolean }) {
       <button onClick={handleFetch} disabled={loading} style={{
         width: '100%', padding: '10px 0', borderRadius: 8, border: 'none',
         background: loading ? 'var(--bg-hover)' : 'var(--brand)',
-        color: loading ? 'var(--text-tertiary)' : '#fff',
+        color: loading ? 'var(--text-tertiary)' : 'var(--text-inverse)',
         fontSize: 13, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
       }}>
         {loading ? '수집 중... (최대 30초)' : '🔄 전국 미분양 데이터 수집'}

@@ -85,7 +85,7 @@ export default function Sidebar() {
             알림
             {unread > 0 && (
               <span style={{
-                marginLeft: 'auto', background: 'var(--brand)', color: '#fff',
+                marginLeft: 'auto', background: 'var(--brand)', color: 'var(--text-inverse)',
                 fontSize: 10, fontWeight: 700, borderRadius: 10,
                 padding: '2px 6px', minWidth: 18, textAlign: 'center',
               }}>{unread}</span>
@@ -95,7 +95,7 @@ export default function Sidebar() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             padding: '11px 14px', borderRadius: 10, marginTop: 4,
             textDecoration: 'none', fontSize: 14, fontWeight: 700,
-            color: '#fff', background: 'var(--brand)',
+            color: 'var(--text-inverse)', background: 'var(--brand)',
           }}>
             ✏️ 글쓰기
           </Link>

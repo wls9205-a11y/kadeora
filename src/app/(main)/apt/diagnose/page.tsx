@@ -38,7 +38,7 @@ export default function DiagnosePage() {
               <button key={n} onClick={() => setFamily(n)} style={{
                 flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
                 background: family === n ? 'var(--brand)' : 'var(--bg-hover)',
-                color: family === n ? '#fff' : 'var(--text-secondary)', fontSize: 13, fontWeight: 600,
+                color: family === n ? 'var(--text-inverse)' : 'var(--text-secondary)', fontSize: 13, fontWeight: 600,
               }}>{n}명</button>
             ))}
           </div>
@@ -65,7 +65,7 @@ export default function DiagnosePage() {
           <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>부양가족 {familyScore}점</div>
           <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>통장 {bankScore}점</div>
         </div>
-        <Link href="/apt" style={{ display: 'inline-block', marginTop: 16, padding: '10px 24px', background: 'var(--brand)', color: '#fff', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+        <Link href="/apt" style={{ display: 'inline-block', marginTop: 16, padding: '10px 24px', background: 'var(--brand)', color: 'var(--text-inverse)', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
           청약 일정 보러가기 →
         </Link>
       </div>

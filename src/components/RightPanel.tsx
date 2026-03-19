@@ -70,7 +70,7 @@ export default function RightPanel() {
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           📣 <strong style={{ color: 'var(--text-primary)' }}>카더라</strong>는<br />대한민국 소리소문<br />정보 커뮤니티입니다.
         </div>
-        <Link href="/guide" style={{ display: 'block', marginTop: 8, padding: '7px 0', textAlign: 'center', background: 'var(--brand)', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+        <Link href="/guide" style={{ display: 'block', marginTop: 8, padding: '7px 0', textAlign: 'center', background: 'var(--brand)', color: 'var(--text-inverse)', borderRadius: 8, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
           📖 가이드북 보기
         </Link>
       </div>

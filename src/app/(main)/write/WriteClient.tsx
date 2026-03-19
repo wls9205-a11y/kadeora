@@ -159,7 +159,7 @@ export default function WriteClient() {
                   padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
                   border: `1px solid ${category === cat.value ? 'var(--brand)' : 'var(--border)'}`,
                   background: category === cat.value ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: category === cat.value ? '#fff' : 'var(--text-secondary)',
+                  color: category === cat.value ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
                 }}
               >

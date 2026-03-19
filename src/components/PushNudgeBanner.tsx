@@ -34,7 +34,7 @@ export default function PushNudgeBanner() {
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>🔔 새 글 알림 받기</div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>놓치는 소식 없이 받아보세요</div>
       </div>
-      <button onClick={handleEnable} style={{ padding: '7px 14px', borderRadius: 8, background: 'var(--brand)', color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>알림 설정</button>
+      <button onClick={handleEnable} style={{ padding: '7px 14px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>알림 설정</button>
       <button onClick={() => { localStorage.setItem('push_nudge_dismissed_at', String(Date.now())); setShow(false); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}>나중에</button>
     </div>
   );

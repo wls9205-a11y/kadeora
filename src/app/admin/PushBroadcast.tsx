@@ -61,7 +61,7 @@ export default function PushBroadcast() {
                 flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12, fontWeight: 700,
                 border: `1.5px solid ${sendTarget === t.key ? 'var(--brand)' : 'var(--border)'}`,
                 background: sendTarget === t.key ? 'var(--brand)' : 'var(--bg-hover)',
-                color: sendTarget === t.key ? '#fff' : 'var(--text-secondary)', cursor: 'pointer',
+                color: sendTarget === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer',
               }}>{t.label}</button>
             ))}
           </div>
@@ -124,7 +124,7 @@ export default function PushBroadcast() {
         )}
 
         <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()}
-          style={{ padding: '12px 0', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer', opacity: sending ? 0.7 : 1 }}>
+          style={{ padding: '12px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer', opacity: sending ? 0.7 : 1 }}>
           {sending ? '발송 중...' : `🚀 ${sendTarget === 'all' ? '전체' : sendTarget === 'web' ? '웹' : '앱'} 발송`}
         </button>
         {result && <div style={{ fontSize: 13, color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', padding: '4px 0' }}>{result}</div>}

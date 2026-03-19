@@ -199,7 +199,7 @@ export default function ReportButton({ postId, commentId, messageId }: Props) {
                   borderRadius: 8,
                   border: 'none',
                   background: 'var(--error)',
-                  color: '#fff',
+                  color: 'var(--text-inverse)',
                   cursor: loading || !reason ? 'not-allowed' : 'pointer',
                   opacity: loading || !reason ? 0.5 : 1,
                   fontWeight: 600,

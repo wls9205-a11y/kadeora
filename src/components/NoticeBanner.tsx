@@ -33,14 +33,14 @@ export default function NoticeBanner() {
 
       {showFull && (
         <>
-          <div onClick={() => setShowFull(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999 }} />
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000, background: 'var(--bg-surface)', borderRadius: '16px 16px 0 0', padding: '20px 16px', maxHeight: '60vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>📡 공지사항</span>
-              <button onClick={() => setShowFull(false)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 18, cursor: 'pointer' }}>×</button>
+          <div onClick={() => setShowFull(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }} />
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--bg-surface)', borderRadius: '16px 16px 0 0', padding: '20px 16px', maxHeight: '60vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 14, fontWeight: 'bold' }}>📡 공지사항</span>
+              <button onClick={() => setShowFull(false)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 20, cursor: 'pointer' }}>×</button>
             </div>
-            <div style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text-primary)', whiteSpace: 'pre-line' }}>{notice}</div>
-            <button onClick={() => setShowFull(false)} style={{ marginTop: 16, width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>닫기</button>
+            <div style={{ marginTop: 12, fontSize: 14, lineHeight: 1.7, color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>{notice}</div>
+            <button onClick={() => setShowFull(false)} style={{ marginTop: 16, width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 14, cursor: 'pointer' }}>닫기</button>
           </div>
         </>
       )}

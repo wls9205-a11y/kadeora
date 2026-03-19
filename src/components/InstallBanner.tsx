@@ -67,12 +67,12 @@ export default function InstallBanner() {
       }}>
         <div style={{ fontSize: 30, flexShrink: 0 }}>📲</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 2 }}>앱처럼 사용하기</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-inverse)', marginBottom: 2 }}>앱처럼 사용하기</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)' }}>홈화면에 추가하면 푸시 알림도 받을 수 있어요!</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
           <button onClick={() => { hap('light'); handleInstall(); }} style={{
-            padding: '8px 14px', background: '#fff', color: '#FF4500',
+            padding: '8px 14px', background: 'var(--bg-primary)', color: '#FF4500',
             border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer',
           }}>{isIOS ? '방법 보기' : '📲 설치하기'}</button>
           <button onClick={handleDismiss} style={{
@@ -98,12 +98,12 @@ export default function InstallBanner() {
               { n: '3', text: '오른쪽 상단 "추가" 탭 — 완료!' },
             ].map(s => (
               <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
                 <span style={{ fontSize: 14, color: 'var(--text-primary)' }}>{s.text}</span>
               </div>
             ))}
             <button onClick={() => { hap('light'); setShowIOSGuide(false); handleDismiss(); logInstall('ios'); setTimeout(requestPush, 1000); }}
-              style={{ marginTop: 20, width: '100%', padding: '14px 0', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+              style={{ marginTop: 20, width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
               알겠어요!
             </button>
           </div>

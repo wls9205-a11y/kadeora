@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import type { DiscussionRoom } from '@/types/database';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import type { User } from '@supabase/supabase-js';
+import PullToRefresh from '@/components/PullToRefresh';
 
 const ChatRoom = dynamic(() => import('./ChatRoom'), {
   loading: () => (
@@ -37,6 +38,7 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
   }, []);
 
   return (
+    <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>💬 카더라 토론방</h1>
@@ -95,5 +97,6 @@ export default function DiscussClient({ rooms }: { rooms: DiscussionRoom[] }) {
 
       {active && <ChatRoom room={active} user={user} onClose={() => setActive(null)} />}
     </div>
+    </PullToRefresh>
   );
 }

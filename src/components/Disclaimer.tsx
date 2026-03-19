@@ -4,7 +4,8 @@ export default function Disclaimer() {
       fontSize: 10,
       color: 'var(--text-tertiary)',
       textAlign: 'center',
-      padding: '8px 16px',
+      padding: '6px 16px',
+      paddingBottom: 'calc(env(safe-area-inset-bottom) + 56px)',
       borderTop: '1px solid var(--border)',
       margin: 0,
     }}>

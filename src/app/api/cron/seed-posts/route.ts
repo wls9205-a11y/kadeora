@@ -27,7 +27,7 @@ const TEMPLATES = [
 export async function GET(req: NextRequest) {
   // CRON_SECRET 검증
   const auth = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET;
+  const cronSecret = process.env.CRON_SECRETT;
   if (cronSecret && auth !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

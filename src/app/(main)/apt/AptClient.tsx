@@ -3,6 +3,19 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
+import PullToRefresh from '@/components/PullToRefresh';
+
+interface UnsoldApt {
+  id?: string;
+  region_nm: string;
+  sigungu_nm: string;
+  house_nm: string;
+  tot_unsold_hshld_co: number;
+  sale_price_min?: number;
+  sale_price_max?: number;
+  completion_ym?: string;
+  [key: string]: any;
+}
 
 interface Apt {
   id: number; house_nm: string; house_manage_no?: string; region_nm: string;
@@ -36,7 +49,7 @@ const SB = {
   closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
-export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apts: Apt[]; unsold?: any[]; alertCounts?: Record<string, number> }) {
+export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apts: Apt[]; unsold?: UnsoldApt[]; alertCounts?: Record<string, number> }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'unsold'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
@@ -86,6 +99,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
   );
 
   return (
+    <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 12px' }}>
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
@@ -195,9 +209,9 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
       {/* ━━━ 미분양 탭 ━━━ */}
       {activeTab === 'unsold' && (() => {
         if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>미분양 데이터가 없습니다</div>;
-        const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
-        const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
-        const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
+        const total = unsold.reduce((s: number, u: UnsoldApt) => s + (u.tot_unsold_hshld_co || 0), 0);
+        const regs = ['전체', ...Array.from(new Set(unsold.map((u: UnsoldApt) => u.region_nm || '기타'))).sort()];
+        const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: UnsoldApt) => (u.region_nm || '기타') === unsoldRegion);
 
         return (
           <div>
@@ -221,7 +235,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
             </div>
 
             {/* 리스트 */}
-            {fu.map((u: any, i: number) => {
+            {fu.map((u: UnsoldApt, i: number) => {
               const rate = u.tot_supply_hshld_co ? Math.round((u.tot_unsold_hshld_co / u.tot_supply_hshld_co) * 100) : null;
               const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
               const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
@@ -279,5 +293,6 @@ export default function AptClient({ apts, unsold = [], alertCounts = {} }: { apt
         />
       )}
     </div>
+    </PullToRefresh>
   );
 }

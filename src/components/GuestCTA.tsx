@@ -27,7 +27,7 @@ export default function GuestCTA() {
           <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>카더라 회원이 되면 더 많은 기능을 쓸 수 있어요</div>
         </div>
         <Link href="/login" style={{
-          background: 'var(--brand)', color: '#fff', padding: '8px 16px', borderRadius: 10,
+          background: 'var(--brand)', color: 'var(--text-inverse)', padding: '8px 16px', borderRadius: 10,
           fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
         }}>1초 가입</Link>
         <button onClick={() => { setShow(false); localStorage.setItem('kd_guest_cta', String(Date.now() + 24 * 60 * 60 * 1000)); }}

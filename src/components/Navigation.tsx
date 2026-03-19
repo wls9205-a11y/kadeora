@@ -316,7 +316,7 @@ export function Navigation() {
               <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
                 display:'flex', alignItems:'center', justifyContent:'center',
                 width:48, height:48, borderRadius:14,
-                background:'var(--brand)', color:'#fff',
+                background:'var(--brand)', color:'var(--text-inverse)',
                 marginTop:-10, flexShrink:0, textDecoration:'none',
               }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

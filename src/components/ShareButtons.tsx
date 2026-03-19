@@ -55,7 +55,7 @@ export default function ShareButtons({ postId, title, content }: Props) {
     },
     {
       key: 'twitter', label: 'X(트위터)',
-      bg: '#000', color: '#fff', icon: '✕',
+      bg: '#000', color: 'var(--text-inverse)', icon: '✕',
       action: () => {
         window.open(`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`, '_blank');
         setOpen(false);
@@ -63,7 +63,7 @@ export default function ShareButtons({ postId, title, content }: Props) {
     },
     {
       key: 'band', label: '밴드',
-      bg: '#03C75A', color: '#fff', icon: '🎯',
+      bg: '#03C75A', color: 'var(--text-inverse)', icon: '🎯',
       action: () => {
         window.open(`https://band.us/plugin/share?body=${encodedTitle}%0A${encodedUrl}&route=share`, '_blank');
         setOpen(false);
@@ -71,7 +71,7 @@ export default function ShareButtons({ postId, title, content }: Props) {
     },
     {
       key: 'threads', label: '스레드',
-      bg: '#1a1a1a', color: '#fff', icon: '@',
+      bg: 'var(--bg-surface)', color: 'var(--text-inverse)', icon: '@',
       action: () => {
         window.open(`https://www.threads.net/intent/post?text=${encodedTitle}%0A${encodedUrl}`, '_blank');
         setOpen(false);
@@ -79,7 +79,7 @@ export default function ShareButtons({ postId, title, content }: Props) {
     },
     {
       key: 'line', label: '라인',
-      bg: '#06C755', color: '#fff', icon: '💚',
+      bg: '#06C755', color: 'var(--text-inverse)', icon: '💚',
       action: () => {
         window.open(`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`, '_blank');
         setOpen(false);
@@ -97,7 +97,7 @@ export default function ShareButtons({ postId, title, content }: Props) {
     },
     ...(hasNativeShare ? [{
       key: 'native', label: '더보기',
-      bg: 'var(--brand)', color: '#fff', icon: '📤',
+      bg: 'var(--brand)', color: 'var(--text-inverse)', icon: '📤',
       action: () => {
         navigator.share({ title, text: content?.slice(0, 80) || title, url });
         setOpen(false);

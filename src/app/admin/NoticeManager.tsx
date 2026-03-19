@@ -45,7 +45,7 @@ export default function NoticeManager() {
           {preview ? '미리보기 닫기' : '👁 미리보기'}
         </button>
         <button onClick={handleSave} disabled={saving || !content.trim()}
-          style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: saving ? 'var(--bg-hover)' : 'var(--brand)', color: saving ? 'var(--text-tertiary)' : '#fff', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
+          style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: saving ? 'var(--bg-hover)' : 'var(--brand)', color: saving ? 'var(--text-tertiary)' : 'var(--text-inverse)', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
           {saving ? '저장 중...' : '전광판 등록'}
         </button>
       </div>
