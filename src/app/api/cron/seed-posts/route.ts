@@ -40,11 +40,11 @@ const TEMPLATES = [
 ];
 
 export async function GET(req: NextRequest) {
-  // CRON_SECRET 검증 — 환경변수 없으면 항상 차단
-  const auth = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET;
-  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
-    console.error('[seed-posts] Unauthorized attempt:', req.headers.get('x-forwarded-for'));
+  // Vercel Cron 인증: CRON_SECRET 환경변수 → Authorization: Bearer 헤더 자동 전송
+  const auth = req.headers.get('authorization')?.replace('Bearer ', '');
+  const secrets = [process.env.CRON_SECRET, process.env.CRON_SECRETT].filter(Boolean);
+  if (secrets.length === 0 || !secrets.includes(auth || '')) {
+    console.error('[seed-posts] Unauthorized:', req.headers.get('x-forwarded-for'));
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
