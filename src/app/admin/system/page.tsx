@@ -125,7 +125,11 @@ function CronSection() {
   const triggerCron = async (endpoint: string, label: string) => {
     setTriggering(endpoint); setResult('');
     try {
-      const res = await fetch(endpoint);
+      const res = await fetch('/api/admin/trigger-cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint }),
+      });
       const data = await res.json();
       if (res.ok) {
         setResult(`${label} 실행 완료: ${JSON.stringify(data).slice(0, 100)}`);
