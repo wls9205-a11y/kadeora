@@ -93,12 +93,17 @@ export default function AdminContentPage() {
                       {p.is_deleted ? '숨김' : '정상'}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 8px' }}>
+                  <td style={{ padding: '10px 8px', display: 'flex', gap: 4 }}>
                     {p.is_deleted ? (
                       <button onClick={() => action(p.id, 'restore')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--success)', background: 'transparent', color: 'var(--success)', cursor: 'pointer' }}>복구</button>
                     ) : (
                       <button onClick={() => action(p.id, 'hide')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--error)', background: 'transparent', color: 'var(--error)', cursor: 'pointer' }}>숨김</button>
                     )}
+                    <button onClick={async () => {
+                      if (!confirm('정말 삭제하시겠습니까? 복구할 수 없습니다.')) return;
+                      await fetch(`/api/admin/posts/${p.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'hide' }) });
+                      setPosts(prev => prev.filter(x => x.id !== p.id));
+                    }} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: 'none', background: 'var(--error)', color: '#fff', cursor: 'pointer' }}>삭제</button>
                   </td>
                 </tr>
               ))}
