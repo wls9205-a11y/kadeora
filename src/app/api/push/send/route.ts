@@ -60,11 +60,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 발송 로그 먼저 생성 (log_id를 payload에 포함하기 위해)
+  let logId = null;
+  try {
+    const { data: logData } = await admin.from('push_logs').insert({ title, body, url, target, sent_count: 0 }).select('id').single();
+    logId = logData?.id;
+  } catch {}
+
   // Web Push 발송
   let sent = 0;
   const failed = [];
   if (subs?.length && process.env.VAPID_PRIVATE_KEY) {
-    const payload = JSON.stringify({ title, body, url });
+    const payload = JSON.stringify({ title, body, url, log_id: logId });
     await Promise.allSettled(
       subs.map(async sub => {
         try {
@@ -86,12 +93,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 발송 로그 기록
-  let logId = null;
-  try {
-    const { data: logData } = await admin.from('push_logs').insert({ title, body, url, target, sent_count: sent }).select('id').single();
-    logId = logData?.id;
-  } catch {}
+  // 발송 완료 후 sent_count 업데이트
+  if (logId) {
+    try {
+      await admin.from('push_logs').update({ sent_count: sent }).eq('id', logId);
+    } catch {}
+  }
 
   return NextResponse.json({
     ok: true,

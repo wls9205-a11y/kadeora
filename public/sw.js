@@ -30,7 +30,7 @@ self.addEventListener('push', e => {
     icon: '/icons/icon-192.png',
     badge: '/icons/icon-72.png',
     vibrate: [100, 50, 100],
-    data: { url: data.url || '/' },
+    data: { url: data.url || '/', log_id: data.log_id || null },
     actions: [
       { action: 'open', title: '바로가기' },
       { action: 'close', title: '닫기' },
@@ -41,18 +41,28 @@ self.addEventListener('push', e => {
   );
 });
 
-// 알림 클릭 → 페이지 열기
+// 알림 클릭 → 클릭 로그 기록 + 페이지 열기
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   if (e.action === 'close') return;
   const url = e.notification.data?.url || '/';
+  const log_id = e.notification.data?.log_id;
   e.waitUntil(
-    clients.matchAll({ type: 'window' }).then(list => {
-      for (const c of list) {
-        if (c.url.includes(url) && 'focus' in c) return c.focus();
-      }
-      return clients.openWindow(url);
-    })
+    Promise.all([
+      log_id
+        ? fetch('/api/push/click', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ log_id }),
+          }).catch(() => {})
+        : Promise.resolve(),
+      clients.matchAll({ type: 'window' }).then(list => {
+        for (const c of list) {
+          if (c.url.includes(url) && 'focus' in c) return c.focus();
+        }
+        return clients.openWindow(url);
+      }),
+    ])
   );
 });
 

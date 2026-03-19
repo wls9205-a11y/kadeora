@@ -20,6 +20,14 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
     fetch(`/api/apt/comments?house_key=${encodeURIComponent(houseKey)}`).then(r => r.json()).then(d => setComments(d.comments || []));
   }, [houseKey]);
 
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    const ch = sb.channel(`apt-inline-${houseKey}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'apt_comments', filter: `house_key=eq.${houseKey}` }, (payload: any) => {
+      setComments(p => [{ ...payload.new, nickname: '새 댓글' }, ...p]);
+    }).subscribe();
+    return () => { sb.removeChannel(ch); };
+  }, [houseKey]);
+
   const submit = async () => {
     if (!text.trim() || !user) return;
     setSending(true);

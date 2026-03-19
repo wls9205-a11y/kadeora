@@ -288,9 +288,14 @@ export default async function FeedDetailPage({ params }: Props) {
         </div>
       </article>
 
+      {/* Comments */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px', marginBottom: 16 }}>
+        <CommentSection postId={post.id} initialComments={comments} />
+      </div>
+
       {/* 관련 글 */}
       {related.length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px', marginBottom: 16 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px' }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>관련 글</h3>
           {related.map((r: any, i: number) => (
             <Link key={r.id} href={`/feed/${r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < related.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
@@ -300,11 +305,6 @@ export default async function FeedDetailPage({ params }: Props) {
           ))}
         </div>
       )}
-
-      {/* Comments */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>
-        <CommentSection postId={post.id} initialComments={comments} />
-      </div>
     </div>
   );
 }

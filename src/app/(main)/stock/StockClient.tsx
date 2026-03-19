@@ -177,7 +177,7 @@ export default function StockClient({ initialStocks }: Props) {
             disabled={loading}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              background: 'var(--brand)', color: 'var(--text-inverse, #fff)', border: 'none',
+              background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none',
               borderRadius: 20, padding: '8px 16px', fontSize: 13,
               fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1,
@@ -201,7 +201,7 @@ export default function StockClient({ initialStocks }: Props) {
               flex: 1, padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
               fontWeight: 700, fontSize: 13,
               background: market === m ? 'var(--brand)' : 'transparent',
-              color: market === m ? 'var(--text-inverse, #fff)' : 'var(--text-tertiary)',
+              color: market === m ? 'var(--text-inverse)' : 'var(--text-tertiary)',
             }}>
               {MARKET_LABEL[m]}
             </button>

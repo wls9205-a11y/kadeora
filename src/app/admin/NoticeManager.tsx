@@ -70,7 +70,7 @@ export default function NoticeManager() {
             <div key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
               <span style={{ flex: 1, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.content?.slice(0, 30)}{n.content?.length > 30 ? '...' : ''}</span>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{new Date(n.created_at).toLocaleDateString('ko-KR')}</span>
-              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, flexShrink: 0, background: n.is_active ? 'rgba(34,197,94,0.15)' : 'transparent', color: n.is_active ? '#22c55e' : 'var(--text-tertiary)', border: `1px solid ${n.is_active ? '#22c55e' : 'var(--border)'}` }}>
+              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, flexShrink: 0, background: n.is_active ? 'var(--success-bg)' : 'transparent', color: n.is_active ? 'var(--success)' : 'var(--text-tertiary)', border: `1px solid ${n.is_active ? 'var(--success)' : 'var(--border)'}` }}>
                 {n.is_active ? '활성' : '종료'}
               </span>
               {!n.is_active && (
