@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 // CRON_SECRET 헤더 검증
 // ANTHROPIC_API_KEY 필요 — 없으면 하드코딩 템플릿 사용
 
-const SEED_USERS = Array.from({ length: 100 }, (_, i) => {
+const SEED_USERS = Array.from({ length: 89 }, (_, i) => {
   const n = String(i + 1).padStart(4, '0');
   return `aaaaaaaa-${n}-${n}-${n}-${String(i + 1).padStart(12, '0')}`;
 });

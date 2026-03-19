@@ -7,25 +7,31 @@ import AptCommentInline from '@/components/AptCommentInline';
 interface Props { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const sb = await createSupabaseServer();
-  const numId = Number(id);
-  const { data: apt } = numId > 0
-    ? await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', numId).single()
-    : await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('house_manage_no', id).single();
-  if (!apt) return {};
-  return { title: `${apt.house_nm} 청약 | 카더라`, description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대` };
+  try {
+    const { id } = await params;
+    const sb = await createSupabaseServer();
+    const numId = Number(id);
+    const { data: apt } = numId > 0 && !isNaN(numId)
+      ? await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', numId).single()
+      : await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('house_manage_no', id).single();
+    if (!apt) return {};
+    return { title: `${apt.house_nm} 청약 | 카더라`, description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대` };
+  } catch { return {}; }
 }
 
 function fmtYM(s: string | null) { if (!s) return null; return `${s.slice(0, 4)}년 ${parseInt(s.slice(4, 6))}월`; }
 
 export default async function AptDetailPage({ params }: Props) {
   const { id } = await params;
-  const sb = await createSupabaseServer();
-  const numId = Number(id);
-  const { data: apt } = numId > 0
-    ? await sb.from('apt_subscriptions').select('*').eq('id', numId).single()
-    : await sb.from('apt_subscriptions').select('*').eq('house_manage_no', id).single();
+  let apt: any = null;
+  try {
+    const sb = await createSupabaseServer();
+    const numId = Number(id);
+    const { data } = numId > 0 && !isNaN(numId)
+      ? await sb.from('apt_subscriptions').select('*').eq('id', numId).single()
+      : await sb.from('apt_subscriptions').select('*').eq('house_manage_no', id).single();
+    apt = data;
+  } catch {}
   if (!apt) notFound();
 
   const today = new Date().toISOString().slice(0, 10);
@@ -100,13 +106,7 @@ export default async function AptDetailPage({ params }: Props) {
         <AptCommentInline houseKey={apt.house_manage_no || String(apt.id)} houseNm={apt.house_nm} houseType="sub" />
       </div>
 
-      {/* 외부 링크 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-        {apt.pblanc_url && (
-          <a href={apt.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--brand)', color: 'var(--brand)', textDecoration: 'none', fontSize: 14, fontWeight: 700, textAlign: 'center' }}>분양 홈페이지 바로가기 →</a>
-        )}
-        <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 14, fontWeight: 600, textAlign: 'center' }}>청약홈에서 확인하기 →</a>
-      </div>
+      <div style={{ height: 24 }} />
     </div>
   );
 }

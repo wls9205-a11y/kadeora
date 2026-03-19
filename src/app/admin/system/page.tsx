@@ -142,6 +142,8 @@ function CronSection() {
 
   const crons = [
     { endpoint: '/api/cron/seed-posts', label: '시드 게시글 생성', desc: '랜덤 시드 유저로 게시글 1개 자동 생성' },
+    { endpoint: '/api/cron/seed-comments', label: '시드 댓글 생성', desc: '랜덤 게시글에 시드 유저 댓글 생성' },
+    { endpoint: '/api/cron/seed-chat', label: '시드 채팅 생성', desc: '카더라 라운지에 시드 유저 대화 생성' },
     { endpoint: '/api/stock-refresh', label: '주식 데이터 갱신', desc: '주식 관련 데이터 캐시 갱신' },
   ];
 
@@ -173,6 +175,57 @@ function CronSection() {
   );
 }
 
+// ============ MANUAL CONTROL ============
+function ManualControlSection() {
+  const [triggering, setTriggering] = useState('');
+  const [result, setResult] = useState('');
+
+  const actions = [
+    { endpoint: '/api/admin/refresh-apt-cache', label: '부동산 캐시 갱신' },
+    { endpoint: '/api/admin/fetch-unsold', label: '미분양 데이터 수집' },
+  ];
+
+  const trigger = async (endpoint: string, label: string) => {
+    setTriggering(endpoint); setResult('');
+    try {
+      const res = await fetch(endpoint, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setResult(`${label} 완료: ${JSON.stringify(data).slice(0, 100)}`);
+      } else {
+        setResult(`${label} 실패: ${data.error || 'Unknown error'}`);
+      }
+    } catch { setResult(`${label} 요청 실패`); }
+    setTriggering('');
+  };
+
+  return (
+    <div style={card}>
+      <h2 style={sectionHeader}>🎛️ 수동 실행 컨트롤</h2>
+      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+        관리자 전용 수동 실행 작업
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {actions.map(a => (
+          <div key={a.endpoint} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: 'var(--bg-hover)', borderRadius: 8 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{a.label}</div>
+            </div>
+            <button onClick={() => trigger(a.endpoint, a.label)} disabled={!!triggering} style={{
+              padding: '6px 14px', borderRadius: 6, border: 'none', fontSize: 12, fontWeight: 700, cursor: triggering ? 'not-allowed' : 'pointer',
+              background: triggering === a.endpoint ? 'var(--bg-hover)' : 'var(--brand)',
+              color: triggering === a.endpoint ? 'var(--text-tertiary)' : '#fff',
+            }}>
+              {triggering === a.endpoint ? '실행 중...' : '실행'}
+            </button>
+          </div>
+        ))}
+      </div>
+      {result && <div style={{ fontSize: 12, marginTop: 8, color: result.includes('실패') ? 'var(--error)' : 'var(--success)' }}>{result}</div>}
+    </div>
+  );
+}
+
 // ============ MAIN PAGE ============
 export default function AdminSystemPage() {
   return (
@@ -181,6 +234,7 @@ export default function AdminSystemPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <SeedSection />
         <CronSection />
+        <ManualControlSection />
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ const MOBILE_TABS_LEFT = [
 ];
 const MOBILE_TABS_RIGHT = [
   { href: '/hot', label: 'HOT', icon: '🔥' },
-  { href: '/discuss', label: '토론', icon: '💭' },
+  { href: '/discuss', label: '라운지', icon: '💬' },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (

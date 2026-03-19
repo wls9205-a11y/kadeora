@@ -39,6 +39,15 @@ const menuGroups = [
 
 const allMenus = menuGroups.flatMap(g => g.items);
 
+const mobileMenus = allMenus.map(m => {
+  const shortLabels: Record<string, string> = {
+    '📊 대시보드': '📊 홈',
+    '📢 알림·공지': '📢 알림',
+    '📝 콘텐츠 관리': '📝 콘텐츠',
+  };
+  return { ...m, label: shortLabels[m.label] || m.label };
+});
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -90,7 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)',
         display: 'flex', overflowX: 'auto', padding: '8px 8px', gap: 4,
       }}>
-        {allMenus.map(m => {
+        {mobileMenus.map(m => {
           const active = isActive(m.href);
           return (
             <Link key={m.href} href={m.href} style={{
