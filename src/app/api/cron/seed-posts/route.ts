@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 
 // Vercel Cron: */30 * * * * (30분마다)
 // CRON_SECRET 헤더 검증
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001',
             max_tokens: 300,
-            messages: [{ role: 'user', content: `한국 커뮤니티 앱 "카더라"에 올릴 자연스러운 게시글을 써주세요. 카테고리: ${category}. 지역: ${regionId}. 중요: post의 title, category, region에 맞는 내용만 작성하세요. stock→주식/투자 관련, apt→부동산/아파트/전세/청약 관련, local→해당 지역(${regionId}) 이야기, free→자유로운 일상/생활 주제. 카테고리와 무관한 내용은 절대 쓰지 마세요. JSON으로 응답: {"title":"제목(30자이내)","content":"내용(200자이내)"}. JSON만 출력하세요.` }],
+            messages: [{ role: 'user', content: `한국 커뮤니티 앱 "카더라"에 올릴 자연스러운 게시글을 써주세요. 카테고리: ${category}. 지역: ${regionId}. 중요: post의 title, category, region에 맞는 내용만 작성하세요. stock→주식/투자 관련, apt→부동산/아파트/전세/청약 관련, local→해당 지역(${regionId}) 이야기, free→자유로운 일상/생활 주제. 카테고리와 무관한 내용은 절대 쓰지 마세요. 줄바꿈은 \\n 텍스트가 아닌 실제 줄바꿈 문자를 사용하세요. JSON으로 응답: {"title":"제목(30자이내)","content":"내용(200자이내)"}. JSON만 출력하세요.` }],
           }),
           signal: AbortSignal.timeout(8000),
         });
@@ -88,7 +89,10 @@ export async function GET(req: NextRequest) {
           const match = text.match(/\{[\s\S]*\}/);
           if (match) {
             const parsed = JSON.parse(match[0]);
-            if (parsed.title && parsed.content) { title = parsed.title; content = parsed.content; }
+            if (parsed.title && parsed.content) {
+              title = parsed.title;
+              content = parsed.content.replace(/\\n/g, '\n');
+            }
           }
         }
       } catch {}
@@ -112,6 +116,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     console.log('[seed-posts] Created:', title, 'by', userId, 'category:', finalCategory);
+    try { revalidatePath('/feed'); revalidatePath('/hot'); } catch {}
     return NextResponse.json({ ok: true, title, category: finalCategory, region: finalRegion });
   } catch (e: any) {
     console.error('[seed-posts] Exception:', e.message);
