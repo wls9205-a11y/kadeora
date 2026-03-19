@@ -12,7 +12,9 @@ import FeedClient from './FeedClient';
 import Disclaimer from '@/components/Disclaimer';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+
+const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
+  Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
 async function getPosts(category: string, region: string = 'all') {
   const sb = await createSupabaseServer();
@@ -23,15 +25,18 @@ async function getPosts(category: string, region: string = 'all') {
     .limit(20);
   if (category !== 'all') q = q.eq('category', category);
   if (category === 'local' && region !== 'all') q = q.eq('region_id', region);
-  const { data, error } = await q;
-  if (error || !data || data.length === 0) return null;
+  const result = await withTimeout(q);
+  const data = (result as any)?.data;
+  if (!data || data.length === 0) return null;
   return data as PostWithProfile[];
 }
 
 async function getTrending() {
   const sb = await createSupabaseServer();
-  const { data } = await sb.from('trending_keywords').select('*').order('heat_score', { ascending: false }).limit(10);
-  return data as TrendingKeyword[] | null;
+  const result = await withTimeout(
+    sb.from('trending_keywords').select('*').order('heat_score', { ascending: false }).limit(10)
+  );
+  return (result as any)?.data as TrendingKeyword[] | null;
 }
 
 interface Props { searchParams: Promise<{ category?: string; region?: string }>; }

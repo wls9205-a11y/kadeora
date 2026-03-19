@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
+    },
+    "src/app/(main)/**/*.tsx": {
+      "maxDuration": 30
+    },
+    "src/app/admin/**/*.tsx": {
+      "maxDuration": 30
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/seed-posts",

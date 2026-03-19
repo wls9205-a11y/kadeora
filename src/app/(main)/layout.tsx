@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { Navigation } from '@/components/Navigation';
 import TrendingTicker from '@/components/TrendingTicker';
 import { ToastProvider } from '@/components/Toast';
@@ -11,7 +12,6 @@ import PWAInstallTracker from '@/components/PWAInstallTracker';
 import NoticeBanner from '@/components/NoticeBanner';
 import GuestCTA from '@/components/GuestCTA';
 import PageViewTracker from '@/components/PageViewTracker';
-import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
@@ -21,15 +21,8 @@ export const metadata: Metadata = {
 };
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
-  let user = null;
-  try {
-    const supabase = await createSupabaseServer();
-    const result = await Promise.race([
-      supabase.auth.getUser(),
-      new Promise<{ data: { user: null } }>((resolve) => setTimeout(() => resolve({ data: { user: null } }), 3000)),
-    ]);
-    user = result.data.user;
-  } catch {}
+  const headerStore = await headers();
+  const isLoggedIn = headerStore.get('x-user-logged-in') === '1';
 
   return (
     <ToastProvider>
@@ -49,7 +42,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           color: 'var(--text-primary)',
         }}>
           <ErrorBoundary>
-            <GuestGate isLoggedIn={!!user}>
+            <GuestGate isLoggedIn={isLoggedIn}>
               {children}
             </GuestGate>
           </ErrorBoundary>

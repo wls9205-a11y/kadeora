@@ -83,8 +83,11 @@ export async function middleware(request: NextRequest) {
 
   let user = null;
   try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
+    const authResult = await Promise.race([
+      supabase.auth.getUser(),
+      new Promise<{ data: { user: null } }>((r) => setTimeout(() => r({ data: { user: null } }), 3000)),
+    ]);
+    user = authResult.data.user;
   } catch { }
 
   // 보호 경로: 미인증 → 로그인 리다이렉트
@@ -98,11 +101,11 @@ export async function middleware(request: NextRequest) {
   // 어드민 경로: is_admin 체크 (로그인은 위에서 보장)
   if (pathname.startsWith('/admin') && user) {
     try {
-      const { data: adminProfile } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', user.id)
-        .single();
+      const adminResult = await Promise.race([
+        supabase.from('profiles').select('is_admin').eq('id', user.id).single(),
+        new Promise<null>((r) => setTimeout(() => r(null), 2000)),
+      ]);
+      const adminProfile = (adminResult as any)?.data;
       if (!adminProfile?.is_admin) {
         return NextResponse.redirect(new URL('/feed', request.url));
       }
@@ -115,15 +118,21 @@ export async function middleware(request: NextRequest) {
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p));
   if (user && !isPublic && pathname !== '/onboarding') {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('onboarded, nickname_set')
-        .eq('id', user.id)
-        .single();
+      const profileResult = await Promise.race([
+        supabase.from('profiles').select('onboarded, nickname_set').eq('id', user.id).single(),
+        new Promise<null>((r) => setTimeout(() => r(null), 2000)),
+      ]);
+      const profile = (profileResult as any)?.data;
       if (profile && (!profile.onboarded || !profile.nickname_set)) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }
     } catch { }
+  }
+
+  // ── user 정보를 header에 주입 (layout.tsx에서 DB 호출 없이 읽기) ──
+  if (user) {
+    response.headers.set('x-user-id', user.id);
+    response.headers.set('x-user-logged-in', '1');
   }
 
   // ── CSP 헤더 ──

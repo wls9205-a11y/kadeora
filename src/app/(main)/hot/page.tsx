@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: '오늘 가장 인기있는 카더라 게시글',
 };
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const MEDAL: Record<number, string> = {
   1: '🥇', 2: '🥈', 3: '🥉', 4: '4️⃣', 5: '5️⃣',
@@ -20,40 +20,52 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 const REGION_SECTIONS = ['서울', '부산', '경기', '인천'];
 
+const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
+  Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
+
 export default async function HotPage() {
-  const sb = await createSupabaseServer();
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-  let { data: topPosts } = await sb
-    .from('posts')
-    .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
-    .eq('is_deleted', false)
-    .gte('created_at', weekAgo)
-    .order('likes_count', { ascending: false })
-    .limit(5);
-
-  // 7일 데이터 없으면 30일로 fallback
-  if (!topPosts || topPosts.length === 0) {
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data } = await sb.from('posts')
-      .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
-      .eq('is_deleted', false).gte('created_at', monthAgo)
-      .order('likes_count', { ascending: false }).limit(5);
-    topPosts = data;
-  }
-
+  let topPosts: any[] | null = null;
   const regionPosts: Record<string, any[]> = {};
-  for (const region of REGION_SECTIONS) {
-    const { data } = await sb
-      .from('posts')
-      .select('id,title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
-      .eq('is_deleted', false)
-      .eq('region_id', region)
-      .gte('created_at', weekAgo)
-      .order('likes_count', { ascending: false })
-      .limit(3);
-    if (data && data.length > 0) regionPosts[region] = data;
-  }
+
+  try {
+    const sb = await createSupabaseServer();
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const topResult = await withTimeout(
+      sb.from('posts')
+        .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
+        .eq('is_deleted', false).gte('created_at', weekAgo)
+        .order('likes_count', { ascending: false }).limit(5)
+    );
+    topPosts = (topResult as any)?.data ?? null;
+
+    if (!topPosts || topPosts.length === 0) {
+      const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const fallback = await withTimeout(
+        sb.from('posts')
+          .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
+          .eq('is_deleted', false).gte('created_at', monthAgo)
+          .order('likes_count', { ascending: false }).limit(5)
+      );
+      topPosts = (fallback as any)?.data ?? null;
+    }
+
+    const regionResults = await Promise.allSettled(
+      REGION_SECTIONS.map(region =>
+        withTimeout(
+          sb.from('posts')
+            .select('id,title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
+            .eq('is_deleted', false).eq('region_id', region).gte('created_at', weekAgo)
+            .order('likes_count', { ascending: false }).limit(3)
+        )
+      )
+    );
+    REGION_SECTIONS.forEach((region, i) => {
+      const r = regionResults[i];
+      const data = r.status === 'fulfilled' ? (r.value as any)?.data : null;
+      if (data && data.length > 0) regionPosts[region] = data;
+    });
+  } catch { }
 
   const now = new Date();
   const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
