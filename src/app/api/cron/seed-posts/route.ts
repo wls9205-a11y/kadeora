@@ -40,15 +40,22 @@ const TEMPLATES = [
 ];
 
 export async function GET(req: NextRequest) {
-  // CRON_SECRET 검증
+  // CRON_SECRET 검증 (CRON_SECRETT 또는 CRON_SECRET 모두 허용)
   const auth = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRETT;
+  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET;
   if (cronSecret && auth !== `Bearer ${cronSecret}`) {
+    console.error('[seed-posts] Unauthorized: header mismatch');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+    // 시드 유저가 DB에 존재하는지 확인
+    const { data: seedCheck } = await admin.from('profiles').select('id').like('id', 'aaaaaaaa%').limit(1);
+    if (!seedCheck || seedCheck.length === 0) {
+      return NextResponse.json({ skipped: true, reason: 'No seed users in DB' });
+    }
 
     const userId = SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];
     const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];

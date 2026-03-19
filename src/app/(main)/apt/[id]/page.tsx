@@ -9,7 +9,10 @@ interface Props { params: Promise<{ id: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const sb = await createSupabaseServer();
-  const { data: apt } = await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', Number(id)).single();
+  const numId = Number(id);
+  const { data: apt } = numId > 0
+    ? await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', numId).single()
+    : await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('house_manage_no', id).single();
   if (!apt) return {};
   return { title: `${apt.house_nm} 청약 | 카더라`, description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대` };
 }
@@ -19,7 +22,10 @@ function fmtYM(s: string | null) { if (!s) return null; return `${s.slice(0, 4)}
 export default async function AptDetailPage({ params }: Props) {
   const { id } = await params;
   const sb = await createSupabaseServer();
-  const { data: apt } = await sb.from('apt_subscriptions').select('*').eq('id', Number(id)).single();
+  const numId = Number(id);
+  const { data: apt } = numId > 0
+    ? await sb.from('apt_subscriptions').select('*').eq('id', numId).single()
+    : await sb.from('apt_subscriptions').select('*').eq('house_manage_no', id).single();
   if (!apt) notFound();
 
   const today = new Date().toISOString().slice(0, 10);
