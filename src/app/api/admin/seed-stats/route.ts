@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export async function GET() {
@@ -9,11 +10,17 @@ export async function GET() {
     const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
     if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
+    // Service role client for raw filter (anon key LIKE on uuid doesn't work)
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const [users, posts, comments, likes] = await Promise.all([
-      sb.from('profiles').select('id', { count: 'exact', head: true }).like('id', 'aaaaaaaa%'),
-      sb.from('posts').select('id', { count: 'exact', head: true }).like('author_id', 'aaaaaaaa%'),
-      sb.from('comments').select('id', { count: 'exact', head: true }).like('author_id', 'aaaaaaaa%'),
-      sb.from('post_likes').select('post_id', { count: 'exact', head: true }).like('user_id', 'aaaaaaaa%'),
+      admin.from('profiles').select('id', { count: 'exact', head: true }).filter('id::text', 'like', 'aaaaaaaa%'),
+      admin.from('posts').select('id', { count: 'exact', head: true }).filter('author_id::text', 'like', 'aaaaaaaa%'),
+      admin.from('comments').select('id', { count: 'exact', head: true }).filter('author_id::text', 'like', 'aaaaaaaa%'),
+      admin.from('post_likes').select('post_id', { count: 'exact', head: true }).filter('user_id::text', 'like', 'aaaaaaaa%'),
     ]);
 
     return NextResponse.json({
