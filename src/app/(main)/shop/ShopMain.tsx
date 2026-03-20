@@ -9,6 +9,13 @@ interface Product {
   icon: string | null; purchase_type: string;
 }
 
+const CATEGORIES: { key: string; label: string; ids: string[] }[] = [
+  { key: 'decor', label: '꾸미기', ids: ['custom_avatar_frame', 'profile_bg', 'emoji_pack'] },
+  { key: 'activity', label: '활동', ids: ['nickname_change', 'anonymous_post', 'premium_badge', 'double_points_24h'] },
+  { key: 'promo', label: '홍보', ids: ['post_boost', 'megaphone', 'pin_post'] },
+  { key: 'community', label: '커뮤니티', ids: ['create_room'] },
+];
+
 export default function ShopMain() {
   const [products, setProducts] = useState<Product[]>([]);
   const [myPoints, setMyPoints] = useState(0);
@@ -46,9 +53,33 @@ export default function ShopMain() {
       success('교환 완료!');
     } catch (e: unknown) {
       error(e instanceof Error ? e.message : '교환 실패');
-    } finally {
-      setExchanging(null);
-    }
+    } finally { setExchanging(null); }
+  };
+
+  const renderCard = (p: Product) => {
+    const canAfford = myPoints >= p.point_price;
+    const isExchanging = exchanging === p.id;
+    return (
+      <div key={p.id} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ fontSize: 22 }}>{p.icon ?? '🎁'}</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4, flex: 1 }}>{p.description}</div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--brand)' }}>{p.point_price.toLocaleString()}P</div>
+        <button
+          onClick={() => handleExchange(p.id, p.point_price)}
+          disabled={!canAfford || isExchanging}
+          style={{
+            padding: '7px 0', borderRadius: 10, border: 'none', fontSize: 12, fontWeight: 700,
+            background: canAfford ? 'var(--brand)' : 'var(--bg-hover)',
+            color: canAfford ? 'white' : 'var(--text-tertiary)',
+            cursor: canAfford && !isExchanging ? 'pointer' : 'not-allowed',
+            opacity: isExchanging ? 0.6 : 1,
+          }}
+        >
+          {isExchanging ? '...' : canAfford ? '교환하기' : `${(p.point_price - myPoints).toLocaleString()}P 부족`}
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -68,35 +99,19 @@ export default function ShopMain() {
         )}
       </div>
 
-      {/* 포인트 교환 상품 */}
-      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>포인트로 교환</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
-        {products.map(p => {
-          const canAfford = myPoints >= p.point_price;
-          const isExchanging = exchanging === p.id;
-          return (
-            <div key={p.id} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ fontSize: 24 }}>{p.icon ?? '🎁'}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>{p.description}</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand)', marginTop: 'auto' }}>{p.point_price.toLocaleString()}P</div>
-              <button
-                onClick={() => handleExchange(p.id, p.point_price)}
-                disabled={!canAfford || isExchanging}
-                style={{
-                  padding: '8px 0', borderRadius: 10, border: 'none', fontSize: 13, fontWeight: 700,
-                  background: canAfford ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: canAfford ? 'white' : 'var(--text-tertiary)',
-                  cursor: canAfford && !isExchanging ? 'pointer' : 'not-allowed',
-                  opacity: isExchanging ? 0.6 : 1,
-                }}
-              >
-                {isExchanging ? '교환 중...' : canAfford ? '교환하기' : `${(p.point_price - myPoints).toLocaleString()}P 부족`}
-              </button>
+      {/* 카테고리별 상품 */}
+      {CATEGORIES.map(cat => {
+        const catProducts = cat.ids.map(id => products.find(p => p.id === id)).filter(Boolean) as Product[];
+        if (catProducts.length === 0) return null;
+        return (
+          <div key={cat.key} style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>{cat.label}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
+              {catProducts.map(renderCard)}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
 
       {/* 포인트 모으는 법 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
