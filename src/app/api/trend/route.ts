@@ -3,6 +3,16 @@ import { createClient as admin } from '@supabase/supabase-js'
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
+export async function GET() {
+  try {
+    const sb = admin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const { data } = await sb.from('trending_keywords').select('keyword, heat_score').order('heat_score', { ascending: false }).limit(10);
+    return NextResponse.json(data ?? []);
+  } catch {
+    return NextResponse.json([]);
+  }
+}
+
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
