@@ -1,12 +1,19 @@
 export default function Loading() {
   return (
-    <div style={{ padding:16 }}>
-      <div style={{textAlign:'center', padding:'60px 20px'}}>
-        <div style={{fontSize:48, marginBottom:16}}>📡</div>
-        <p style={{color:'var(--text-secondary)', fontSize:14}}>잠시만요...</p>
-      </div>
-      {[1,2,3,4,5].map(i => (
-        <div key={i} className="skeleton" style={{ height:120, borderRadius:4, marginBottom:10, width:'100%' }} />
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px 0' }}>
+      {[1, 2, 3].map(i => (
+        <div key={i} style={{ padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--bg-hover)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ width: 100, height: 14, borderRadius: 4, background: 'var(--bg-hover)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          </div>
+          <div style={{ width: '80%', height: 18, borderRadius: 4, background: 'var(--bg-hover)', marginBottom: 8, animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ width: '60%', height: 14, borderRadius: 4, background: 'var(--bg-hover)', marginBottom: 12, animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ display: 'flex', gap: 16 }}>
+            <div style={{ width: 40, height: 12, borderRadius: 4, background: 'var(--bg-hover)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ width: 40, height: 12, borderRadius: 4, background: 'var(--bg-hover)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          </div>
+        </div>
       ))}
     </div>
   );
