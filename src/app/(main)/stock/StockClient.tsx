@@ -296,7 +296,7 @@ export default function StockClient({ initialStocks }: Props) {
                     {fmtPrice(s)}
                   </span>
                   {stale ? (
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 4 }}>시세없음</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 4 }}>전일종가</span>
                   ) : (
                     <ChangeDisplay s={s} />
                   )}
@@ -424,14 +424,14 @@ export default function StockClient({ initialStocks }: Props) {
                   {fmtPrice(s)}
                 </div>
                 {stale ? (
-                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>시세없음</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>전일종가</span>
                 ) : (
                   <div style={{ marginTop: 2 }}><ChangeDisplay s={s} /></div>
                 )}
               </div>
               <span style={{ textAlign: 'center' }}>
                 <Link
-                  href="/discuss"
+                  href={`/stock/${encodeURIComponent(s.symbol)}`}
                   onClick={e => e.stopPropagation()}
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 3,
@@ -441,7 +441,7 @@ export default function StockClient({ initialStocks }: Props) {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  토론
+                  상세
                 </Link>
               </span>
             </div>
@@ -491,7 +491,7 @@ export default function StockClient({ initialStocks }: Props) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize:18, fontWeight:800, color:'var(--text-primary)' }}>{fmtPrice(selectedStock)}</span>
                   {isStaleData(selectedStock) && (
-                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-surface)', padding: '1px 6px', borderRadius: 4, fontWeight: 600 }}>시세없음</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-surface)', padding: '1px 6px', borderRadius: 4, fontWeight: 600 }}>전일종가</span>
                   )}
                 </div>
               </div>
@@ -524,8 +524,8 @@ export default function StockClient({ initialStocks }: Props) {
               <strong>초보자 팁:</strong> 시가총액은 회사의 전체 가치입니다.
               1조 이상이면 대형주, 1000억~1조는 중형주, 1000억 미만은 소형주로 봅니다.
             </div>
-            <a href="/discuss" style={{ display:'block', textAlign:'center', background:'var(--brand)', color:'var(--text-inverse)', padding:12, borderRadius:8, textDecoration:'none', fontWeight:700, fontSize:14 }}>
-              종목 토론방 입장
+            <a href={`/stock/${encodeURIComponent(selectedStock?.symbol ?? '')}`} style={{ display:'block', textAlign:'center', background:'var(--brand)', color:'var(--text-inverse)', padding:12, borderRadius:8, textDecoration:'none', fontWeight:700, fontSize:14 }}>
+              종목 상세 보기
             </a>
           </div>
         </div>

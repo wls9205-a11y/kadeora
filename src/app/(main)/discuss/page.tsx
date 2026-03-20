@@ -6,8 +6,8 @@ import Disclaimer from '@/components/Disclaimer';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '카더라 라운지',
-  description: '실시간 채팅으로 소문을 나누는 카더라 라운지',
+  title: '토론 | 카더라',
+  description: '지금 뜨거운 토론과 실시간 라운지',
 };
 
 export default function DiscussPage() {

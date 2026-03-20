@@ -2,35 +2,27 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Flame, MessageCircle } from 'lucide-react';
+import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User, PenSquare, ShoppingBag, BookOpen, LogOut } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { haptic } from '@/lib/haptic';
 import type { User } from '@supabase/supabase-js';
 
-const NAV_ICONS: Record<string, React.ReactNode> = {
-  '📋': <Home size={20} />,
-  '📊': <TrendingUp size={20} />,
-  '🏢': <Building2 size={20} />,
-  '🔥': <Flame size={20} />,
-  '💬': <MessageCircle size={20} />,
-};
-
 const NAV_ITEMS = [
-  { href: '/feed',           label: '피드',   icon: '📋' },
-  { href: '/stock',          label: '주식',   icon: '📊' },
-  { href: '/apt',            label: '부동산', icon: '🏢' },
-  { href: '/discuss',        label: '라운지', icon: '💬' },
-  { href: '/hot',            label: 'HOT',    icon: '🔥' },
+  { href: '/feed',    label: '피드',   Icon: Home },
+  { href: '/stock',   label: '주식',   Icon: TrendingUp },
+  { href: '/apt',     label: '부동산', Icon: Building2 },
+  { href: '/discuss', label: '토론',   Icon: MessageCircle },
+  { href: '/hot',     label: 'HOT',    Icon: Flame },
 ];
 
 const MOBILE_TABS_LEFT = [
-  { href: '/feed', label: '피드', icon: '📋' },
-  { href: '/apt', label: '부동산', icon: '🏢' },
+  { href: '/feed', label: '피드', Icon: Home },
+  { href: '/apt',  label: '부동산', Icon: Building2 },
 ];
 const MOBILE_TABS_RIGHT = [
-  { href: '/hot', label: 'HOT', icon: '🔥' },
-  { href: '/discuss', label: '라운지', icon: '💬' },
+  { href: '/hot',     label: 'HOT',  Icon: Flame },
+  { href: '/discuss', label: '토론', Icon: MessageCircle },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
@@ -161,10 +153,10 @@ export function Navigation() {
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
-                style={navItemStyle(isActive(item.href))}
+                style={{ ...navItemStyle(isActive(item.href)), gap: 5 }}
                 onMouseEnter={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--text-primary)'; }}
                 onMouseLeave={e=>{ if(!isActive(item.href)) (e.currentTarget as HTMLElement).style.color='var(--nav-text)'; }}
-              >{item.label}</Link>
+              ><item.Icon size={16} />{item.label}</Link>
             ))}
           </nav>
 
@@ -186,7 +178,7 @@ export function Navigation() {
                   onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
                   onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                 >
-                  🔔
+                  <Bell size={18} />
                   {unread > 0 && (
                     <span style={{
                       position:'absolute', top:-2, right:-2,
@@ -234,23 +226,23 @@ export function Navigation() {
                       boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex:300,
                     }}>
                       {[
-                        { href:'/search',             label:'🔍 검색' },
-                        { href:'/shop/megaphone',     label:'🛒 상점' },
-                        { href:`/profile/${user.id}`, label:'👤 내 프로필' },
-                        { href:'/write',              label:'✏️ 글쓰기' },
-                        { href:'/notifications',      label:`🔔 알림${unread>0?` (${unread})`:''}` },
-                        { href:'/hot',                label:'🔥 이번주 HOT' },
-                        { href:'/guide',              label:'📖 가이드북' },
+                        { href:'/search',             label:'검색', LIcon: Search },
+                        { href:'/shop/megaphone',     label:'상점', LIcon: ShoppingBag },
+                        { href:`/profile/${user.id}`, label:'내 프로필', LIcon: User },
+                        { href:'/write',              label:'글쓰기', LIcon: PenSquare },
+                        { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
+                        { href:'/hot',                label:'이번주 HOT', LIcon: Flame },
+                        { href:'/guide',              label:'가이드북', LIcon: BookOpen },
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
-                          display:'block', padding:'11px 16px',
+                          display:'flex', alignItems:'center', gap:8, padding:'11px 16px',
                           color:'var(--text-primary)', fontSize:14, textDecoration:'none',
                           borderBottom:'1px solid var(--border)',
                           transition:'background 0.1s',
                         }}
                           onMouseEnter={e=>(e.currentTarget.style.background='var(--bg-hover)')}
                           onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
-                        >{item.label}</Link>
+                        ><item.LIcon size={16} style={{ color:'var(--text-tertiary)' }} />{item.label}</Link>
                       ))}
                       {/* 글씨 크기 */}
                       <div style={{ padding:'9px 16px', borderBottom:'1px solid var(--border)' }}>
@@ -274,7 +266,7 @@ export function Navigation() {
                       }}
                         onMouseEnter={e=>(e.currentTarget.style.background='var(--error-bg)')}
                         onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
-                      >🚪 로그아웃</button>
+                      ><span style={{ display:'flex', alignItems:'center', gap:8 }}><LogOut size={16} /> 로그아웃</span></button>
                     </div>
                   )}
                 </div>
@@ -286,7 +278,7 @@ export function Navigation() {
                   width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
                   borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:16,
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
-                }}>🔍</Link>
+                }}><Search size={18} /></Link>
                 <Link href="/login" style={{
                   height:34, padding:'0 14px', borderRadius:17,
                   border:'1px solid var(--brand)',
@@ -319,7 +311,7 @@ export function Navigation() {
         paddingTop:0,
         boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',
       }} className="md:hidden">
-        {[...MOBILE_TABS_LEFT, { href: '/write', label: '', icon: '' }, ...MOBILE_TABS_RIGHT].map(item => {
+        {[...MOBILE_TABS_LEFT, { href: '/write', label: '', Icon: PenSquare }, ...MOBILE_TABS_RIGHT].map(item => {
           if (item.href === '/write') {
             return (
               <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
@@ -344,7 +336,7 @@ export function Navigation() {
                 justifyContent:'center', flex:1,
                 color: active ? 'var(--brand)' : 'var(--text-tertiary)',
               }}>
-              <span style={{ fontSize:22, lineHeight:1 }}>{NAV_ICONS[item.icon] || <span>{item.icon}</span>}</span>
+              <item.Icon size={20} />
               <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
