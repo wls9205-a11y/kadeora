@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { GRADE_EMOJI } from '@/lib/constants';
 
 interface Message {
   id: number;
@@ -11,10 +12,6 @@ interface Message {
 }
 
 interface Props { roomKey: string; roomTitle: string }
-
-const GRADE_EMOJI: Record<number, string> = {
-  1:'🌱',2:'📡',3:'🏘️',4:'🏠',5:'⚡',6:'🔥',7:'💎',8:'🌟',9:'👑',10:'🚀',
-};
 
 export default function MiniDiscuss({ roomKey, roomTitle }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);

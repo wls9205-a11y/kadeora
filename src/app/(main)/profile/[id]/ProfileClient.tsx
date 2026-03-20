@@ -7,16 +7,13 @@ import { useRef } from 'react';
 import PullToRefresh from '@/components/PullToRefresh';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
-import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
+import { CATEGORY_MAP, REGIONS, GRADE_EMOJI } from '@/lib/constants';
 import { validateNickname } from '@/lib/nickname-filter';
 
 
 const GRADE_COLORS: Record<number, string> = {
   1:'#4CAF50',2:'#2196F3',3:'#9C27B0',4:'#FF9800',5:'#F44336',
   6:'#E91E63',7:'#00BCD4',8:'#FFD700',9:'#FF6B35',10:'#7B2FBE',
-};
-const GRADE_EMOJIS: Record<number, string> = {
-  1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀',
 };
 const GRADE_TITLES: Record<number, string> = {
   1:'새싹',2:'정보통',3:'동네어른',4:'소문난집',5:'인플루언서',
@@ -89,7 +86,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
 
   const gradeNum = profile.grade ?? 1;
   const gradeColor = GRADE_COLORS[gradeNum] ?? '#4CAF50';
-  const gradeEmoji = GRADE_EMOJIS[gradeNum] ?? '🌱';
+  const gradeEmoji = GRADE_EMOJI[gradeNum] ?? '🌱';
   const gradeTitle = GRADE_TITLES[gradeNum] ?? '새싹';
   const currentPoints = profile.points ?? 0;
   const nextPoints = NEXT_GRADE_POINTS[gradeNum] ?? 99999;
@@ -259,7 +256,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               <Image src={`${avatarUrl}?width=80&height=80`} alt={`${displayName} 프로필 사진`} width={72} height={72} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }} />
             ) : (
               <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
-                {GRADE_EMOJIS[profile.grade ?? 1] ?? '🌱'}
+                {GRADE_EMOJI[profile.grade ?? 1] ?? '🌱'}
               </div>
             )}
             {isOwner && (

@@ -1,5 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
-import { DEMO_POSTS, CATEGORY_MAP } from '@/lib/constants';
+import { DEMO_POSTS, CATEGORY_MAP, GRADE_EMOJI } from '@/lib/constants';
 
 // Cache: 120s — 게시글 상세
 export const revalidate = 120;
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 import ShareButtons from '@/components/ShareButtons'
-
+import { getAvatarColor } from '@/lib/avatar';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import ReportButton from '@/components/ReportButton';
 import PostActions from '@/components/PostActions';
@@ -24,10 +24,6 @@ function parsePostId(param: string): number {
   if (!isNaN(num)) return num;
   return 0;
 }
-
-const AVATAR_COLORS = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
-function getAvatarColor(str: string) { return AVATAR_COLORS[str.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % AVATAR_COLORS.length]; }
-const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'📡',3:'🏘',4:'🏠',5:'⚡',6:'🦁',7:'🏆',8:'👑',9:'🌟',10:'⚡'};
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();

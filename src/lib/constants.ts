@@ -126,6 +126,12 @@ export const DEMO_PRODUCTS: ShopProduct[] = [
   { id: 'premium-membership', name: '30일 프리미엄 멤버십', description: '광고 없는 깔끔한 환경 + 전용 채널 접근', price_krw: 9900, icon: '💎', is_active: true, created_at: new Date().toISOString() },
 ];
 
+// DB grade_definitions 테이블 기준 — 모든 파일에서 이 상수를 import할 것
+export const GRADE_EMOJI: Record<number, string> = {
+  1: '🌱', 2: '📡', 3: '🏘️', 4: '🏠', 5: '⚡',
+  6: '🔥', 7: '💎', 8: '🌟', 9: '👑', 10: '🚀',
+};
+
 export const CATEGORY_STYLES: Record<string, { label: string; color: string; bg: string }> = {
   stock: { label: '주식', color: '#ef4444', bg: '#ef444415' },
   apt: { label: '부동산', color: '#3b82f6', bg: '#3b82f615' },

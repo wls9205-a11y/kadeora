@@ -131,6 +131,16 @@ export default function WriteClient() {
         </button>
       </div>
 
+      {/* 투자 정보 면책 안내 */}
+      {(category === 'stock' || category === 'apt') && (
+        <div style={{
+          background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 8,
+          padding: '10px 14px', marginBottom: 16, fontSize: 12, color: '#92400e', lineHeight: 1.5,
+        }}>
+          ⚠️ 투자 관련 허위사실 유포는 자본시장법에 의해 처벌받을 수 있습니다. 특정 종목 매수/매도 권유, 확정 수익 보장 등의 표현은 삼가주세요.
+        </div>
+      )}
+
       {/* 카테고리 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {CATEGORIES.map(cat => {

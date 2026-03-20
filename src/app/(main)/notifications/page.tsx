@@ -31,9 +31,11 @@ const TYPE_ICON: Record<string, string> = {
 };
 
 function getNotifLink(n: Notif): string {
+  // 댓글/좋아요/답글 알림 → 피드
   if (n.type === 'comment' || n.type === 'like' || n.type === 'post_like' || n.type === 'reply' || n.type === 'comment_like') return '/feed';
-  if (n.type === 'follow') return '/feed';
-  if (n.type === 'invite') return '/feed';
+  // 팔로우 알림 → 프로필
+  if (n.type === 'follow') return '/profile';
+  // 시스템/마케팅 알림 → 피드
   return '/feed';
 }
 

@@ -1,113 +1,340 @@
-# 카더라 (KADEORA) - Claude Code 컨텍스트
+# kadeora.app 완벽 개선 — 15인 전문가 기반 Claude Code 명령어
+## 47개 이슈 · 4 Phase · 전부 병렬 처리 · --yes 자동 승인
 
-## 프로젝트 개요
-- 서비스명: 카더라 (kadeora.app)
-- 슬로건: 대한민국 소리소문 정보 커뮤니티
-- 스택: Next.js 15.2.4, Supabase PostgreSQL 17, Vercel, TypeScript, Tailwind CSS
-- 목적: 주식 시세(국내+해외), 아파트 청약, 커뮤니티 피드, 실시간 토론방, 유료 상점
-- 현재 상태: 22개 페이지, 22개 컴포넌트, 20개 API 라우트, ~9,200 LOC
+---
 
-## 실행 모드
-- 사용자 허락 없이 논스톱 진행. 파일 수정/빌드/배포 전 확인 불필요. 판단하고 바로 실행. 완료 후 결과만 보고.
+## 🔴 Phase 0: P0 긴급 — 출시 차단 8건
 
-## 핵심 규칙
-- 하드코딩 색상 절대 금지 → CSS 변수만 사용 (globals.css :root / .dark)
-- CSS 변수: --bg-base, --bg-surface, --bg-elevated, --bg-sunken, --bg-hover, --bg-active, --border, --border-strong, --text-primary, --text-secondary, --text-tertiary, --text-inverse, --brand, --brand-hover, --brand-light, --success, --error, --warning, --info, --stock-up, --stock-down
-- TypeScript: ignoreBuildErrors true 유지
-- 커밋 전 반드시 npm run build
-- 개인정보(주소/전화번호) 코드에 노출 금지
-- 디자인: Reddit 스타일 (라이트 #DAE0E6 / 다크 #1A1A1B)
-- Supabase: createSupabaseBrowser / createSupabaseServer만 사용
-- ThemeToggle, DeleteAccountSection은 named export
+```bash
+claude --yes "
+다음 8개 작업을 전부 병렬로 진행해. 내 의사 물어볼 필요 없이 yes로 다 진행.
 
-## 파일 구조
-- 페이지: 22개, 컴포넌트: 22개, API: 20개
-- 에러 바운더리: 7개 (main + feed/stock/apt/discuss/grades/profile) + ErrorBoundary 클래스 컴포넌트
-- 로딩 스켈레톤: 6개 (main + feed/stock/apt/discuss/grades)
-- GuestGate: 비회원 5회 페이지뷰 후 모달 (cookie 기반)
-- OfflineBanner: 오프라인 감지 배너
-- FontSizeToggle: 글씨 크기 3단계 (작게/보통/크게)
-- EmptyState: 빈 상태 공통 컴포넌트
-- not-found.tsx: 커스텀 404 페이지
+## 공통: 먼저 package.json과 디렉토리 구조를 분석해서 기술 스택 파악
 
-## 주요 기능
-- 피드: 게시글 CRUD, 좋아요, 북마크, 댓글, 이미지 업로드
-- 주식: 국내(KOSPI/KOSDAQ) + 해외(NYSE/NASDAQ), 원화/달러 토글, 컬럼 정렬
-- 청약: 전국 청약 일정, 지역/상태 필터, 현장토론방 연동
-- 토론방: Supabase Realtime, 136개(국내주식101+아파트33+테마2)
-- 검색: 멀티소스(posts+stocks+apts) 퍼지 검색, 300ms debounce 자동완성
-- 결제: 토스페이먼츠 (인증+금액 서버 검증), 상품별 후처리
-- 등급: 10단계 (Lv1 새싹 ~ Lv10 카더라신)
-- 푸시: Web Push (VAPID) + 앱 내 알림, 관리자 브로드캐스트
+## 작업 1: 주식 실시간 API 완성
+현재 /stock 페이지 150개 종목 대부분 0.00% 변동으로 표시됨.
+- 기존 주식 데이터 fetching 로직 분석
+- 국내: KIS API 또는 Yahoo Finance KR 데이터 실시간 연동 (WebSocket 우선, 불가 시 30초 폴링)
+- 해외: Yahoo Finance API 실시간 시세 연동
+- 장중/장후 분기처리: 장중엔 실시간, 장후엔 종가 표시
+- API 실패 시 마지막 캐시 데이터 + '업데이트 지연' 배지 표시
+- 환율도 실시간 갱신되도록 수정
 
-## 검색 시스템
-- API: /api/search — posts+stocks+apts 병렬, Cache-Control 30초
-- UI: SearchClient — 자동완성 드롭다운
+## 작업 2: 콘텐츠 신고/모니터링 시스템
+- 모든 피드 글, 댓글, 토론 메시지에 🚨신고 버튼 추가
+- 신고 사유 모달: 허위정보/시세조종 의심/욕설·비방/광고·스팸/기타
+- 신고 API 엔드포인트 + DB 테이블 생성
+- /admin/reports 관리자 페이지: 신고 목록, 상태 관리(접수/처리중/완료), 게시글 비공개/삭제 액션
+- 자동 필터링: '확정수익', '원금보장', '100% 수익', '리딩방' 등 패턴 감지 시 자동 비공개 + 관리자 알림
+- 신고 누적 N건 이상 시 자동 비공개 처리 로직
 
-## 주식시세 갱신
-- API: /api/stock-refresh — KIS API + Yahoo Finance 폴백 + 해외 USD
-- 스케줄러: supabase/functions/stock-scheduler/
-- 장 운영시간(평일 09:00~15:30 KST) 국내만, 해외는 항상
+## 작업 3: 자본시장법 대응 법적 문구 강화
+- 모든 페이지 푸터에 강화된 면책 문구 추가
+- 글 작성 페이지 상단에 경고 배너: '투자 관련 허위사실 유포는 자본시장법에 의해 처벌받을 수 있습니다'
+- 회원가입 시 투자정보 이용 동의 체크박스 추가 (체크 안 하면 가입 불가)
+- /terms 이용약관 보강: 분쟁해결 조항(관할법원: 서울중앙지방법원), 준거법(대한민국 법) 추가
+- 각 토론방 입장 시 면책 동의 팝업 1회 표시
 
-## 입력 검증 / 보안
-- Zod 스키마: src/lib/schemas.ts (PostCreate, CommentCreate, Payment 등 7개 스키마)
-- 환경변수 검증: src/lib/env.ts (Zod 기반, 서버/클라이언트 분리, lazy validation)
-- 입력 새니타이즈: src/lib/sanitize.ts (XSS, SQL injection, LIKE wildcard 이스케이프)
-- Rate limiting: src/lib/rate-limit.ts (Upstash Redis + 메모리 폴백, 3티어: api/auth/search)
-- 미들웨어: SSRF 차단, 봇 경로 차단, 보호 경로 인증, 온보딩 강제, CSP 동적 삽입
-- 보안 헤더: CSP, HSTS, X-Frame-Options, COOP, CORP 등 (next.config.ts + middleware)
+## 작업 4: 데이터 라이선스 정리
+- 주식 데이터 출처를 실제 사용 API 기준으로 명확히 표기
+- 청약 데이터 출처: '청약홈(applyhome.co.kr) 공개 데이터 기반'
+- 각 데이터 섹션 하단에 '데이터 제공: [출처명]' 통일
+- 코드 코멘트로 각 외부 데이터 소스의 이용약관/라이선스 상태 기록
 
-## 환경변수
-- NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
-- NEXT_PUBLIC_SITE_URL=https://kadeora.app
-- TOSS_SECRET_KEY, NEXT_PUBLIC_TOSS_CLIENT_KEY (테스트키)
-- NEXT_PUBLIC_SENTRY_DSN (미등록)
-- KIS_APP_KEY, KIS_APP_SECRET (미등록)
-- CRON_SECRET, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
-- VAPID_PRIVATE_KEY, NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_SUBJECT
+## 작업 5: XSS/CSRF 보안 감사 및 조치
+- 모든 유저 입력(글 제목, 본문, 댓글, 토론 메시지) XSS 살균 처리 확인/적용
+- DOMPurify 또는 동등 라이브러리로 HTML 살균
+- CSRF 토큰 적용 확인 — 모든 POST/PUT/DELETE 요청에 토큰 검증
+- Content-Security-Policy 헤더 설정
+- X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security 헤더 추가
 
-## 주요 라우트
-- /feed → 메인 피드 (FeedClient)
-- /feed/[id] → 게시글 상세 (SSR + 동적 OG + JSON-LD)
-- /stock → 주식 시세 (StockClient, overflow-x:auto 반응형 테이블)
-- /apt → 청약 정보 (AptClient, 현장토론방 버튼)
-- /discuss → 토론방 목록 (DiscussClient)
-- /discussion/[type]/[roomKey] → 토론방 (Supabase Realtime)
-- /grades → 등급 안내
-- /profile/[id] → 프로필 (generateMetadata 동적 SEO)
-- /admin → 관리자 패널 (탭 UI + 푸시 브로드캐스트)
-- /login → 소셜 로그인 (카카오/구글)
-- /payment → 결제 (토스페이먼츠)
-- /payment/success, /payment/fail → 결제 결과
-- /privacy, /terms, /faq → 정책/FAQ
-- /notifications → 알림
-- /search → 검색
-- /write → 글쓰기
-- /onboarding → 온보딩
-- /shop/megaphone → 확성기 상점
+## 작업 6: 개인정보처리방침 보강
+- /privacy 페이지 내용을 PIPA(개인정보보호법) 준수하도록 보강:
+  - 수집하는 개인정보 항목 명시 (소셜 로그인 시: 이름, 이메일, 프로필사진)
+  - 수집 목적, 보유기간, 제3자 제공 여부
+  - 쿠키 사용 고지
+  - 개인정보 삭제 요청 방법
+  - 개인정보보호 책임자 연락처
+- 쿠키 동의 배너 컴포넌트 추가 (최초 방문 시 표시, 동의/거부 선택)
+- 회원 탈퇴 시 개인정보 삭제 API 엔드포인트 구현
 
-## DB 주요 테이블
-- profiles: 유저 정보, grade, influence_score, points
-- posts: 피드 게시글
-- stock_quotes: 주식 시세 (101개 종목)
-- apt_subscriptions: 청약 정보 (30건)
-- discussion_rooms: 토론방 (136개)
-- discussion_messages: 토론방 메시지
-- grade_definitions: 등급 10단계 (Lv1 새싹 ~ Lv10 카더라신)
-- shop_products: 상점 아이템
-- shop_orders: 결제 내역
-- push_subscriptions: Web Push 구독 정보
-- notifications: 앱 내 알림
+## 작업 7: 토론방 실시간 채팅 인프라
+현재 토론방이 0개 메시지 + 실시간 기능이 없음.
+- WebSocket 또는 SSE 기반 실시간 채팅 구현
+- 메시지 전송/수신/표시 기본 기능
+- 메시지 DB 저장 + 페이지네이션 (최근 50개씩 로드)
+- 접속자 수 실시간 표시
+- 입력 중... 인디케이터
+- 욕설 필터링 기본 적용
 
-## 작업 시 주의사항
-- 새 컴포넌트: 반드시 CSS 변수 색상, 반응형(width:100% + maxWidth)
-- Supabase: createSupabaseBrowser / createSupabaseServer만 사용
-- ThemeToggle, DeleteAccountSection은 named export
-- 빌드 후 push (npm run build → commit → push)
-- OG route (src/app/api/og/route.tsx)는 건드리지 말 것
-- API 입력은 Zod 스키마(src/lib/schemas.ts)로 검증
-- 환경변수는 getServerEnv() / getClientEnv() 사용 권장
+## 작업 8: API 에러 핸들링 통합
+- 전역 에러 바운더리 컴포넌트 구현 (React ErrorBoundary 또는 프레임워크 동등)
+- API 호출 실패 시 사용자 친화적 에러 UI 표시 (빈 화면 대신)
+- 네트워크 오프라인 감지 + 오프라인 배너 표시
+- 404 페이지 디자인 및 라우팅
+- API 재시도 로직 (최대 3회, exponential backoff)
+"
+```
 
-## 참고 문서
-- APP_STORE_CHECKLIST.md: 앱스토어/플레이스토어/토스 심사 체크리스트
-- AUDIT_REPORT_v4.md: 7개 분야 전문가 감사 보고서
+---
+
+## 🟡 Phase 1: P1 출시 1주 내 12건
+
+```bash
+claude --yes "
+다음 작업을 전부 병렬로 진행해. yes로 다 진행.
+
+## 작업 9: 검색 기능 완성
+- 통합 검색 API: 피드 글(제목+본문), 주식 종목명, 청약 아파트명
+- 자동완성 (debounce 300ms)
+- 인기 검색어 top 10 (24시간 기준)
+- 최근 검색어 로컬스토리지 저장 + 삭제
+- 결과 탭 필터: 전체/주식/청약/자유
+- 빈 결과: '검색 결과가 없습니다' + 인기 글 추천
+- 검색 쿼리 서버 로깅 (향후 데이터 분석용)
+
+## 작업 10: SEO/OG 태그 완전 구현
+- 모든 페이지에 title, description 메타 태그
+- OG 태그: og:title, og:description, og:image(카더라 로고), og:url
+- Twitter Card 태그
+- 피드 개별 글: 글 제목+본문 앞부분 동적 반영
+- 주식 종목: 종목명+현재가 동적 반영
+- JSON-LD: WebSite, Organization 스키마
+- sitemap.xml 자동 생성
+- robots.txt에 sitemap 경로 추가
+
+## 작업 11: 온보딩 플로우
+- 첫 로그인 후 3단계 모달:
+  1. 서비스 소개 (소문을 나누고 함께 분석)
+  2. 관심 분야 선택 (주식/부동산/청약/자유 복수 선택)
+  3. 관심 종목 추가 (인기 종목 리스트에서 선택)
+- 선택 기반 피드 필터 기본값 설정
+- 온보딩 완료 여부 유저 프로필 저장
+- 스킵 버튼 제공
+
+## 작업 12: 시드 콘텐츠
+- '카더라봇' 시스템 계정 생성
+- 각 토론방에 웰컴 메시지 삽입
+- 피드에 서비스 소개/이용 가이드/인기 게시판 안내 글 3개
+- 주식 페이지에 '오늘의 시장 한줄평' 자동 표시 영역
+
+## 작업 13: 타이포그래피 & 카드 UI 개선
+- 타이포 시스템 정의: h1(24px), h2(20px), h3(16px), body(15px), caption(13px), meta(12px)
+- 피드 카드: 제목(bold 16px) / 본문(regular 14px) / 메타(secondary 12px) 명확히 분리
+- 카드 간 여백 통일 (12px)
+- HOT 뱃지 스타일 통일
+- 빈 상태(Empty State) 일러스트 + 메시지 컴포넌트
+
+## 작업 14: 로딩 스켈레톤
+- 피드 리스트용 스켈레톤 컴포넌트
+- 주식 테이블용 스켈레톤
+- 청약 카드 리스트용 스켈레톤
+- 토론방 메시지용 스켈레톤
+- 페이지 전환 시 부드러운 트랜지션
+
+## 작업 15: 접근성 기본 적용
+- 모든 인터랙티브 요소에 aria-label 추가
+- 키보드 탭 순서 최적화 + 포커스 인디케이터
+- skip-to-content 링크 추가
+- 색상 대비 WCAG AA 기준 검증 및 조정
+- img 태그에 alt 속성 일괄 추가
+
+## 작업 16: 종목 상세 페이지 기본
+- /stock/[ticker] 라우트 생성
+- 종목명, 현재가, 등락률, 시가총액 표시
+- 간단한 일봉 차트 (최근 30일) — Chart.js 또는 lightweight-charts
+- 해당 종목 관련 피드 글 목록 연동
+- 토론방 바로가기 버튼
+- 관심종목 추가 버튼 (별 아이콘)
+
+## 작업 17: 청약 카드 CTA 개선
+- 청약 카드 내 CTA 우선순위 정리: 기본은 '상세보기' 1개만 표시
+- '현장토론방', '청약홈' 링크는 상세보기 펼침 내에 배치
+- 청약 상태별 색상 코딩 강화: 접수중(초록), 예정(파랑), 마감(회색)
+"
+```
+
+---
+
+## 🔵 Phase 2: P2 출시 후 2주 14건
+
+```bash
+claude --yes "
+다음 작업을 전부 병렬로 진행해. yes로 다 진행.
+
+## 작업 18: 다크모드
+- CSS 변수 기반 테마 시스템 (--bg-primary, --text-primary 등)
+- prefers-color-scheme 자동 감지
+- 수동 토글 (헤더 아이콘)
+- 모든 페이지 대응
+- 로컬스토리지 저장
+
+## 작업 19: PWA + 푸시 기반
+- manifest.json (name, icons, start_url, display:standalone)
+- 서비스워커: 앱 셸 + 최근 피드 오프라인 캐싱
+- 푸시 구독 API 엔드포인트
+- 알림 권한 요청 UI
+
+## 작업 20: 주식 가상스크롤
+- react-window 또는 동등 라이브러리 적용
+- 정렬 최적화 (useMemo)
+- 필터 변경 시 부드러운 트랜지션
+
+## 작업 21: 이미지/에셋 최적화
+- next/image 또는 프레임워크 이미지 컴포넌트 적용
+- WebP 자동 변환 (가능 시)
+- lazy loading 전 이미지 적용
+- 폰트: font-display:swap, 서브셋
+
+## 작업 22: CDN 구성
+- 정적 에셋(JS/CSS/이미지/폰트) CDN 배포
+- Cache-Control 헤더: 정적 에셋 max-age=31536000, HTML no-cache
+- Brotli/Gzip 압축 확인
+
+## 작업 23: 캐싱 전략
+- API 응답 캐싱: 주식 시세(30초), 청약 데이터(1시간), 피드(5분)
+- Redis 또는 인메모리 캐시 도입
+- 캐시 무효화 전략 구현
+
+## 작업 24: DB 인덱싱
+- 주식 종목 정렬/필터 쿼리 인덱스 확인 및 추가
+- 피드 글 최신순/인기순 정렬 인덱스
+- 검색 쿼리 인덱스 (full-text search 또는 trigram)
+
+## 작업 25: 반응형 미세조정
+- 태블릿(768px~1024px) 레이아웃 최적화
+- 주식 테이블 가로스크롤 대응
+- 청약 카드 그리드 태블릿 2열 배치
+
+## 작업 26: 마이크로인터랙션
+- 좋아요 버튼 애니메이션
+- 스크롤 시 헤더 축소
+- 페이지 전환 fade 트랜지션
+- 토스트 알림 컴포넌트
+
+## 작업 27: 북마크/저장 폴더
+- 저장(🔖) 기능에 폴더 분류 추가: 기본/주식/부동산/자유
+- /profile/bookmarks 페이지
+- 폴더 CRUD
+
+## 작업 28: 댓글 정렬 + 대댓글
+- 댓글 정렬: 최신순/인기순 토글
+- 대댓글(1 depth) 구현
+- 댓글 좋아요 기능
+
+## 작업 29: 유저 프로필 페이지
+- /profile/[username] 공개 프로필
+- 작성한 글/댓글 목록
+- 등급 뱃지 표시
+- 팔로우 기능 기반 (DB 스키마만)
+
+## 작업 30: GA4 이벤트 추적
+- GA4 설치 (gtag.js)
+- 핵심 이벤트: page_view, sign_up, post_create, comment, share, search, stock_view
+- 전환 퍼널: 방문→가입→첫 글→재방문
+- UTM 파라미터 추적
+"
+```
+
+---
+
+## 🟢 Phase 3: P3 출시 후 1개월+ 13건
+
+```bash
+claude --yes "
+다음 작업을 전부 병렬로 진행해. yes로 다 진행.
+
+## 작업 31: 프리미엄 구독
+- /premium 플랜 비교 페이지: 무료 vs 프리미엄(월 4,900원)
+- 프리미엄 기능: 실시간 알림 무제한, 종목 분석, 광고 제거, 프리미엄 뱃지
+- 포트원(아임포트) 또는 토스페이먼츠 SDK 연동 준비
+- 구독 상태 유저 프로필 저장
+
+## 작업 32: 종목 알림 시스템
+- 관심종목 별(⭐) 토글
+- /profile/watchlist 페이지
+- 알림 조건: 목표가 도달, 등락률 N%, 거래량 급증
+- 인앱 + 푸시 알림
+
+## 작업 33: 랜딩 페이지
+- / 루트를 비로그인 유저용 랜딩으로 분기
+- 히어로: '아는 사람만 아는 그 정보'
+- 기능 소개 3섹션
+- CTA → /login
+
+## 작업 34: 유저 등급 고도화
+- 뉴비→브론즈→실버→골드→다이아
+- XP: 글 +10, 댓글 +3, 좋아요 받기 +1, 출석 +5
+- /profile/level 페이지: XP 프로그레스 바
+- 등급 변경 축하 모달
+
+## 작업 35: AI 요약 기능
+- 피드 인기 글 AI 요약 (3줄 요약)
+- 종목별 오늘의 여론 요약
+- Anthropic API 또는 OpenAI API 연동
+- 일일 1회 배치 처리
+
+## 작업 36: 다국어(영어) 기반
+- i18n 프레임워크 설치 (next-intl 등)
+- 한국어/영어 JSON 키 구조 생성
+- 네비게이션, 버튼, 시스템 메시지 영어 번역
+- 언어 전환 토글
+
+## 작업 37: 앱스토어 출시 준비
+- TWA(Trusted Web Activity) 또는 Capacitor로 네이티브 래핑 기반
+- 앱 아이콘 다양한 사이즈 생성
+- 스플래시 스크린
+- 앱스토어 스크린샷 자동 생성 스크립트
+
+## 작업 38: SNS 바이럴 카드 개선
+- 공유 시 생성되는 OG 카드 디자인 개선
+- 종목별 공유 카드: 종목명 + 현재가 + 등락률 그래픽
+- 청약별 공유 카드: 아파트명 + 접수 일정
+
+## 작업 39: 어드민 대시보드 고도화
+- /admin 메인: DAU/MAU, 신규가입, 글 수, 댓글 수 지표
+- /admin/users: 유저 관리 (정지/삭제)
+- /admin/content: 콘텐츠 관리 (비공개/삭제)
+- /admin/reports: 신고 관리 (Phase 0에서 만든 것 고도화)
+
+## 작업 40: 멀티미디어 글 작성
+- 이미지 업로드 (최대 5장)
+- 이미지 리사이즈/압축 서버 처리
+- 이미지 갤러리 뷰
+- 링크 프리뷰 자동 생성
+
+## 작업 41: 실시간 알림 센터
+- 헤더에 🔔 알림 아이콘 + 미읽음 카운트 뱃지
+- 알림 드롭다운: 내 글에 댓글, 좋아요, 팔로우, 시스템 공지
+- /notifications 전체 알림 페이지
+- WebSocket으로 실시간 수신
+
+## 작업 42: A/B 테스트 프레임워크
+- 피처 플래그 시스템: 유저 그룹별 기능 노출 제어
+- 실험 정의: 변형 A/B, 트래픽 비율
+- 결과 추적: 전환율 비교 대시보드
+
+## 작업 43: 사용자 피드백 위젯
+- 우하단 플로팅 '💬 피드백' 버튼
+- 피드백 유형: 버그 신고 / 기능 제안 / 기타
+- 스크린샷 자동 캡처 (선택)
+- /admin/feedback 관리 페이지
+"
+```
+
+---
+
+## 실행 순서
+
+| Phase | 내용 | 소요 추정 | 선행 조건 |
+|-------|------|-----------|-----------|
+| **P0** | 긴급 8건 | 2-3일 | 없음 |
+| **P1** | 출시 필수 12건 | 3-5일 | P0 완료 |
+| **P2** | 품질 강화 14건 | 1-2주 | P1 완료, 출시 후 |
+| **P3** | 성장 기능 13건 | 3-4주 | P2 완료 |
+
+### 팁
+- `cd /path/to/kadeora` 후 각 Phase 명령어 실행
+- 각 Phase별 Git 브랜치 생성 권장: `feature/p0-critical`, `feature/p1-launch` 등
+- Phase 완료마다 `npm run dev`로 로컬 확인
+- P0은 반드시 출시 전 완료 — 법적/보안 이슈 포함

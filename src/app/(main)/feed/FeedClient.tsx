@@ -1,19 +1,17 @@
 'use client';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Eye } from 'lucide-react';
-import type { PostWithProfile, TrendingKeyword } from '@/types/database';
-import { REGIONS } from '@/lib/constants';
+import type { PostWithProfile } from '@/types/database';
+import { REGIONS, GRADE_EMOJI } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/shared/EmptyState';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
 import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
-
-const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -30,7 +28,7 @@ function numFmt(n: number) { return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : St
 
 const PAGE_SIZE = 20;
 
-interface Props { posts: PostWithProfile[]; trending: TrendingKeyword[]; activeCategory: string; activeRegion?: string; }
+interface Props { posts: PostWithProfile[]; activeCategory: string; activeRegion?: string; }
 
 export default function FeedClient({ posts: initialPosts, activeCategory, activeRegion = 'all' }: Props) {
   const router = useRouter();
@@ -110,14 +108,13 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         }
       }
     });
-  }, [posts]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- 초기 로드 1회만
 
   const handleUpvote = async (e: React.MouseEvent, postId: number) => {
     e.preventDefault();
     e.stopPropagation();
     if (!currentUserId) { router.push('/login'); return; }
 
-    const sb = createSupabaseBrowser();
     const alreadyLiked = likedPosts.has(postId);
 
     // Optimistic update
@@ -131,10 +128,36 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       [postId]: (prev[postId] ?? 0) + (alreadyLiked ? -1 : 1),
     }));
 
-    if (alreadyLiked) {
-      await sb.from('post_likes').delete().eq('post_id', postId).eq('user_id', currentUserId);
-    } else {
-      await sb.from('post_likes').insert({ post_id: postId, user_id: currentUserId });
+    // API 호출 (DB 트리거가 likes_count 자동 관리)
+    try {
+      const res = await fetch('/api/likes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId }),
+      });
+      if (!res.ok) {
+        // Revert on failure
+        setLikedPosts(prev => {
+          const next = new Set(prev);
+          if (alreadyLiked) next.add(postId); else next.delete(postId);
+          return next;
+        });
+        setLikeCounts(prev => ({
+          ...prev,
+          [postId]: (prev[postId] ?? 0) + (alreadyLiked ? 1 : -1),
+        }));
+      }
+    } catch {
+      // Revert on error
+      setLikedPosts(prev => {
+        const next = new Set(prev);
+        if (alreadyLiked) next.add(postId); else next.delete(postId);
+        return next;
+      });
+      setLikeCounts(prev => ({
+        ...prev,
+        [postId]: (prev[postId] ?? 0) + (alreadyLiked ? 1 : -1),
+      }));
     }
   };
 
@@ -238,7 +261,9 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     }
   }, [posts.length, loadingMore, hasMore, activeCategory, activeRegion]);
 
-  const observerRef = useCallback((node: HTMLDivElement | null) => {
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = sentinelRef.current;
     if (!node) return;
     const io = new IntersectionObserver(
       entries => { if (entries[0].isIntersecting) loadMorePosts(); },
@@ -467,7 +492,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       </div>
 
       {hasMore && (
-        <div ref={observerRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
+        <div ref={sentinelRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
           <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>불러오는 중...</span>
         </div>
       )}

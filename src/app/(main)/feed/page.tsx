@@ -11,8 +11,7 @@ import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import FeedClient from './FeedClient';
 import Disclaimer from '@/components/Disclaimer';
 
-// Cache: 60s — 피드 목록
-export const dynamic = 'force-dynamic';
+// Cache: 60s — 피드 목록 (force-dynamic 제거: revalidate와 충돌)
 export const revalidate = 60;
 
 const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
@@ -51,7 +50,7 @@ export default async function FeedPage({ searchParams }: Props) {
   const trending = trendingData.status === 'fulfilled' && trendingData.value ? trendingData.value : DEMO_TRENDING;
   return (
     <Suspense>
-      <FeedClient posts={posts} trending={trending} activeCategory={category} activeRegion={region} />
+      <FeedClient posts={posts} activeCategory={category} activeRegion={region} />
       <Disclaimer />
     </Suspense>
   );

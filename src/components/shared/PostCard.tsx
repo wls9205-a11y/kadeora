@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Eye } from 'lucide-react';
 import { getAvatarColor } from "@/lib/avatar";
-import { CATEGORY_STYLES } from "@/lib/constants";
+import { CATEGORY_STYLES, GRADE_EMOJI } from "@/lib/constants";
 
 export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; grade?: number; }
 export interface Post {
@@ -20,8 +20,6 @@ export interface PostCardProps {
   variant?: "default" | "compact";
   showAuthor?: boolean;
 }
-const GRADE_EMOJI: Record<number,string> = {1:'🌱',2:'📡',3:'🏘',4:'🏠',5:'⚡',6:'🦁',7:'🏆',8:'👑',9:'🌟',10:'⚡'};
-
 function timeAgo(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (diff < 60) return "방금 전";
