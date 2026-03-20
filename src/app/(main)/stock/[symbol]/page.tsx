@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import MiniDiscuss from '@/components/MiniDiscuss';
-import StockCommentInline from '@/components/StockCommentInline';
+import StockComments from '@/components/StockComments';
 
 function fmtPrice(p: number, c: string) { return c === 'KRW' ? `₩${p.toLocaleString()}` : `$${p.toFixed(2)}`; }
 function fmtCap(v: number | null, c: string) {
@@ -96,7 +96,7 @@ export default async function StockDetailPage({ params }: Props) {
         ⚠️ 본 정보는 투자 권유가 아니며, 투자에 따른 손익은 투자자 본인에게 귀속됩니다. 금융투자상품은 원금 손실이 발생할 수 있습니다.
       </div>
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <StockCommentInline symbol={symbol} stockName={s.name} />
+        <StockComments symbol={symbol} stockName={s.name} />
       </div>
       <Link href="/discuss" style={{ display: 'block', textAlign: 'center', padding: 14, background: 'var(--brand)', borderRadius: 12, textDecoration: 'none', fontSize: 14, fontWeight: 700, color: 'var(--text-inverse)' }}>
         💬 라운지 입장
