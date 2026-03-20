@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Camera } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import ImageUpload from '@/components/ImageUpload';
@@ -9,10 +10,10 @@ import { filterContent } from '@/lib/filter';
 import { REGIONS } from '@/lib/constants';
 
 const CATEGORIES = [
-  { value: 'apt', label: '부동산', color: '#3b82f6' },
-  { value: 'stock', label: '주식', color: '#ef4444' },
-  { value: 'local', label: '우리동네', color: '#10b981' },
-  { value: 'free', label: '자유', color: '#8b5cf6' },
+  { value: 'free', label: '자유' },
+  { value: 'stock', label: '주식' },
+  { value: 'apt', label: '부동산' },
+  { value: 'local', label: '우리동네' },
 ];
 
 export default function WriteClient() {
@@ -26,12 +27,11 @@ export default function WriteClient() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [hashtags, setHashtags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
   const [regionId, setRegionId] = useState('서울');
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showCatPicker, setShowCatPicker] = useState(false);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -62,38 +62,37 @@ export default function WriteClient() {
       });
   }, [editId, error]);
 
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const tag = tagInput.trim().replace(/^#/, '');
-      if (tag && !hashtags.includes(tag) && hashtags.length < 5) setHashtags(prev => [...prev, tag]);
-      setTagInput('');
-    }
-  };
-
   const handleSubmit = async () => {
     if (!userId) { error('로그인이 필요합니다'); return; }
-    if (!title.trim()) { error('제목을 입력해주세요'); return; }
     if (!content.trim()) { error('내용을 입력해주세요'); return; }
-    if (title.length > 100) { error('제목은 100자 이하로 입력해주세요'); return; }
     if (content.length > 5000) { error('내용은 5000자 이하로 입력해주세요'); return; }
-    const titleCheck = filterContent(title);
-    if (titleCheck.isBlocked) { error(titleCheck.reason ?? '제목을 확인해주세요'); return; }
+    if (title && title.length > 100) { error('제목은 100자 이하로 입력해주세요'); return; }
     const contentCheck = filterContent(content);
     if (contentCheck.isBlocked) { error(contentCheck.reason ?? '내용을 확인해주세요'); return; }
+    if (title) {
+      const titleCheck = filterContent(title);
+      if (titleCheck.isBlocked) { error(titleCheck.reason ?? '제목을 확인해주세요'); return; }
+    }
 
     setLoading(true);
     try {
-      const body = { category, title: title.trim(), content: content.trim(), images, is_anonymous: isAnonymous, tag: hashtags, ...(category === 'local' ? { region_id: regionId } : {}) };
+      const body = {
+        category,
+        title: title.trim() || content.trim().slice(0, 50),
+        content: content.trim(),
+        images,
+        is_anonymous: isAnonymous,
+        ...(category === 'local' ? { region_id: regionId } : {}),
+      };
       if (editId) {
         const res = await fetch(`/api/posts/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '수정 실패');
-        success('게시글이 수정되었습니다'); router.push(`/feed/${editId}`);
+        success('수정되었습니다'); router.push(`/feed/${editId}`);
       } else {
         const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '작성 실패');
         const { post } = await res.json();
-        success('게시글이 작성되었습니다'); router.push(`/feed/${post.slug || post.id}`);
+        success('작성되었습니다'); router.push(`/feed/${post.slug || post.id}`);
       }
       router.refresh();
     } catch (e: unknown) {
@@ -103,102 +102,46 @@ export default function WriteClient() {
 
   if (loadingEdit) return (
     <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center', padding: '80px 0', color: 'var(--text-secondary)' }}>
-      게시글 불러오는 중...
+      불러오는 중...
     </div>
   );
 
-  const isDisabled = loading || !title.trim() || !content.trim();
+  const canSubmit = !loading && content.trim().length > 0;
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
       {/* 상단 바 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>← 취소</Link>
-        <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>
-          {editId ? '글 수정' : '새 글 쓰기'}
-        </span>
         <button
           onClick={handleSubmit}
-          disabled={isDisabled}
+          disabled={!canSubmit}
           style={{
-            padding: '7px 20px', borderRadius: 20, border: 'none', fontSize: 13, fontWeight: 700,
-            background: isDisabled ? 'var(--bg-hover)' : 'var(--brand)',
-            color: isDisabled ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-            cursor: isDisabled ? 'not-allowed' : 'pointer',
+            padding: '8px 20px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700,
+            background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
+            color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+            cursor: canSubmit ? 'pointer' : 'not-allowed',
           }}
         >
-          {loading ? '...' : '게시'}
+          {loading ? '...' : '남기기'}
         </button>
       </div>
 
-      {/* 투자 정보 면책 안내 */}
-      {(category === 'stock' || category === 'apt') && (
-        <div style={{
-          background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 8,
-          padding: '10px 14px', marginBottom: 16, fontSize: 12, color: '#92400e', lineHeight: 1.5,
-        }}>
-          ⚠️ 투자 관련 허위사실 유포는 자본시장법에 의해 처벌받을 수 있습니다. 특정 종목 매수/매도 권유, 확정 수익 보장 등의 표현은 삼가주세요.
-        </div>
-      )}
-
-      {/* 카테고리 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-        {CATEGORIES.map(cat => {
-          const active = category === cat.value;
-          return (
-            <button
-              key={cat.value}
-              onClick={() => setCategory(cat.value)}
-              style={{
-                padding: '6px 16px', borderRadius: 20, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                border: `1.5px solid ${active ? cat.color : 'var(--border)'}`,
-                background: active ? cat.color + '15' : 'transparent',
-                color: active ? cat.color : 'var(--text-secondary)',
-                transition: 'all 0.15s',
-              }}
-            >
-              {cat.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 지역 선택 */}
-      {category === 'local' && (
-        <select
-          value={regionId}
-          onChange={e => setRegionId(e.target.value)}
-          style={{
-            width: '100%', padding: '10px 14px', fontSize: 14, marginBottom: 20,
-            background: 'var(--bg-base)', border: '1px solid var(--border)',
-            borderRadius: 10, color: 'var(--text-primary)', boxSizing: 'border-box',
-          }}
-        >
-          {REGIONS.filter(r => r.value !== 'all').map(r => (
-            <option key={r.value} value={r.value}>{r.label}</option>
-          ))}
-        </select>
-      )}
-
-      {/* 제목 */}
+      {/* 제목 (선택사항) */}
       <input
         type="text"
         value={title}
         onChange={e => setTitle(e.target.value)}
-        placeholder="제목을 입력하세요"
+        placeholder="(선택) 제목을 입력해주세요"
         maxLength={100}
         style={{
-          width: '100%', fontSize: 22, fontWeight: 800, padding: '16px 0',
-          border: 'none', borderBottom: '1px solid var(--border)', borderRadius: 0,
-          background: 'transparent', color: 'var(--text-primary)', outline: 'none',
-          boxSizing: 'border-box',
+          width: '100%', fontSize: 18, fontWeight: 700, padding: '12px 0',
+          border: 'none', background: 'transparent', color: 'var(--text-primary)',
+          outline: 'none', boxSizing: 'border-box',
         }}
       />
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4, marginBottom: 16 }}>
-        {title.length}/100
-      </div>
 
-      {/* 내용 */}
+      {/* 본문 */}
       <textarea
         value={content}
         onChange={e => {
@@ -206,80 +149,71 @@ export default function WriteClient() {
           e.target.style.height = 'auto';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}
-        placeholder="내용을 자유롭게 작성해보세요..."
+        placeholder="내용을 입력해주세요..."
         maxLength={5000}
+        autoFocus
         style={{
           width: '100%', background: 'transparent', border: 'none',
-          color: 'var(--text-primary)', padding: '0',
-          fontSize: 16, resize: 'vertical', fontFamily: 'inherit',
-          lineHeight: 1.9, boxSizing: 'border-box', minHeight: 320, outline: 'none',
+          color: 'var(--text-primary)', padding: 0,
+          fontSize: 15, resize: 'none', fontFamily: 'inherit',
+          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 300, outline: 'none',
         }}
       />
 
       {/* 이미지 */}
-      <div style={{ marginBottom: 12 }}>
-        <ImageUpload images={images} onImagesChange={setImages} />
+      <ImageUpload images={images} onImagesChange={setImages} />
+
+      {/* 경고 */}
+      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 20, lineHeight: 1.5 }}>
+        광고, 비난, 도배성 글을 남기면 활동이 제한될 수 있어요.
       </div>
 
-      {/* 해시태그 */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-          {hashtags.map(h => (
-            <span key={h} style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              background: 'var(--brand-light)', color: 'var(--brand)',
-              borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600,
-            }}>
-              #{h}
-              <button onClick={() => setHashtags(prev => prev.filter(t => t !== h))}
-                type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: 13, padding: 0 }}>✕</button>
-            </span>
-          ))}
-        </div>
-        {hashtags.length < 5 && (
-          <input
-            value={tagInput}
-            onChange={e => setTagInput(e.target.value)}
-            onKeyDown={handleTagKeyDown}
-            placeholder="#태그 입력 후 엔터"
-            style={{
-              width: '100%', padding: '8px 0', fontSize: 13,
-              background: 'transparent', border: 'none', borderBottom: '1px solid var(--border)',
-              borderRadius: 0, color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
-            }}
-          />
-        )}
-      </div>
-
-      {/* 하단 고정 바 */}
+      {/* 하단 도구바 */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
-        padding: '10px 16px', paddingBottom: 'max(10px, env(safe-area-inset-bottom))', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        zIndex: 50,
+        padding: '8px 16px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+        display: 'flex', alignItems: 'center', gap: 12, zIndex: 50,
       }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)' }}>
+        <button onClick={() => document.querySelector<HTMLInputElement>('[data-image-input]')?.click()}
+          type="button" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 13, padding: '4px 0' }}>
+          <Camera size={18} /> 사진
+        </button>
+
+        <button onClick={() => setShowCatPicker(!showCatPicker)} type="button"
+          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 13, padding: '4px 0' }}>
+          {CATEGORIES.find(c => c.value === category)?.label ?? '카테고리'} ▾
+        </button>
+
+        {showCatPicker && (
+          <div style={{ position: 'absolute', bottom: '100%', left: 80, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 4, boxShadow: '0 -4px 16px rgba(0,0,0,0.1)' }}>
+            {CATEGORIES.map(c => (
+              <button key={c.value} onClick={() => { setCategory(c.value); setShowCatPicker(false); }}
+                style={{ display: 'block', width: '100%', padding: '8px 16px', border: 'none', background: category === c.value ? 'var(--bg-hover)' : 'transparent', color: 'var(--text-primary)', fontSize: 13, fontWeight: category === c.value ? 700 : 400, cursor: 'pointer', textAlign: 'left', borderRadius: 8 }}>
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {category === 'local' && (
+          <select value={regionId} onChange={e => setRegionId(e.target.value)}
+            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 8px', fontSize: 12, color: 'var(--text-primary)' }}>
+            {REGIONS.filter(r => r.value !== 'all').map(r => (
+              <option key={r.value} value={r.value}>{r.label}</option>
+            ))}
+          </select>
+        )}
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
           <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)}
-            style={{ width: 14, height: 14, accentColor: 'var(--brand)', cursor: 'pointer' }} />
+            style={{ width: 13, height: 13, accentColor: 'var(--brand)' }} />
           익명
         </label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 11, color: content.length > 4500 ? 'var(--warning)' : 'var(--text-tertiary)' }}>
-            {content.length}/5000
-          </span>
-          <button
-            onClick={handleSubmit}
-            disabled={isDisabled}
-            style={{
-              padding: '7px 20px', borderRadius: 20, border: 'none', fontSize: 13, fontWeight: 700,
-              background: isDisabled ? 'var(--bg-hover)' : 'var(--brand)',
-              color: isDisabled ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-              cursor: isDisabled ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {loading ? '...' : '게시'}
-          </button>
-        </div>
+
+        <span style={{ fontSize: 11, color: content.length > 4500 ? 'var(--warning)' : 'var(--text-tertiary)' }}>
+          {content.length}/5000
+        </span>
       </div>
     </div>
   );
