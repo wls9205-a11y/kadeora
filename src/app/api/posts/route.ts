@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
     const regionId = (category === 'local' && body.region_id && typeof body.region_id === 'string') ? body.region_id : 'all';
 
     // 게시글 INSERT (유저 세션 — 본인 데이터)
-    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId }).select().single();
+    const images = Array.isArray(body.images) ? body.images.filter((u: unknown) => typeof u === 'string').slice(0, 5) : [];
+    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId, images }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
 
     try { revalidatePath('/feed'); } catch {}

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { Heart } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface LikeButtonProps {
@@ -37,20 +38,19 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
     const prevLiked = liked;
     const prevCount = count;
 
-    // 낙관적 업데이트만 (서버 count 직접 수정 안함)
+    // Optimistic update
     setLiked(!liked);
     setCount(c => liked ? Math.max(0, (c ?? 0) - 1) : (c ?? 0) + 1);
 
     try {
-      const sb = createSupabaseBrowser();
-      if (!liked) {
-        const { error } = await sb.from('post_likes').insert({ post_id: postId, user_id: userId });
-        if (error) throw error;
-      } else {
-        const { error } = await sb.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId);
-        if (error) throw error;
-      }
+      const res = await fetch('/api/likes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId }),
+      });
+      if (!res.ok) throw new Error('API error');
     } catch {
+      // Rollback
       setLiked(prevLiked);
       setCount(prevCount);
     } finally {
@@ -65,18 +65,18 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
       aria-label={liked ? '좋아요 취소' : '좋아요'}
       aria-pressed={liked}
       style={{
-        display: 'flex', alignItems: 'center', gap: 4,
-        padding: '6px 12px', borderRadius: 20,
-        background: liked ? 'var(--brand-light)' : 'var(--bg-hover)',
-        border: `1px solid ${liked ? 'var(--brand)' : 'var(--border)'}`,
-        color: liked ? 'var(--brand)' : 'var(--text-secondary)',
+        display: 'flex', alignItems: 'center', gap: 5,
+        padding: '6px 14px', borderRadius: 20,
+        background: liked ? 'rgba(239,68,68,0.08)' : 'var(--bg-hover)',
+        border: `1px solid ${liked ? 'rgba(239,68,68,0.3)' : 'var(--border)'}`,
+        color: liked ? '#ef4444' : 'var(--text-secondary)',
         cursor: loading ? 'not-allowed' : 'pointer',
         transition: 'all 0.15s',
         fontSize: 13, fontWeight: 600,
         opacity: loading ? 0.7 : 1,
       }}
     >
-      <span style={{ fontSize: 16, lineHeight: 1 }}>{liked ? '❤️' : '🤍'}</span>
+      <Heart size={15} fill={liked ? '#ef4444' : 'none'} stroke={liked ? '#ef4444' : 'currentColor'} />
       <span>{(count ?? 0).toLocaleString()}</span>
     </button>
   );

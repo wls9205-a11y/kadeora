@@ -1,41 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-async function getUser() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    cookies: { getAll() { return cookieStore.getAll(); }, setAll() {} },
-  });
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
+import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getUser();
-    if (!user) return NextResponse.json({ success: false, error: 'Login required' }, { status: 401 });
+    const supabase = await createSupabaseServer();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 });
+
     const { id } = await params;
-    if (!id) return NextResponse.json({ success: false, error: 'Comment ID required' }, { status: 400 });
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-    const { data: comment, error: fetchError } = await supabase.from('comments').select('id, author_id, post_id').eq('id', id).eq('is_deleted', false).single();
-    if (fetchError || !comment) return NextResponse.json({ success: false, error: 'Comment not found' }, { status: 404 });
-    if (comment.author_id !== user.id) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
-    await supabase.from('comments').update({ is_deleted: true }).eq('id', id);
-    const { data: post } = await supabase.from('posts').select('comments_count').eq('id', comment.post_id).single();
-    if (post && post.comments_count > 0) {
-      await supabase.from('posts').update({ comments_count: post.comments_count - 1 }).eq('id', comment.post_id);
-    }
-    return NextResponse.json({ success: true, message: 'Deleted' });
+    if (!id) return NextResponse.json({ error: '댓글 ID가 필요합니다' }, { status: 400 });
+
+    const admin = getSupabaseAdmin();
+    const { data: comment, error: fetchError } = await admin
+      .from('comments').select('id, author_id, post_id')
+      .eq('id', id).eq('is_deleted', false).single();
+
+    if (fetchError || !comment) return NextResponse.json({ error: '댓글을 찾을 수 없습니다' }, { status: 404 });
+    if (comment.author_id !== user.id) return NextResponse.json({ error: '삭제 권한이 없습니다' }, { status: 403 });
+
+    // Soft delete
+    await admin.from('comments').update({ is_deleted: true }).eq('id', id);
+
+    // comments_count 동기화 — race condition 방지를 위해 실제 카운트 조회
+    const { count } = await admin.from('comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('post_id', comment.post_id)
+      .eq('is_deleted', false);
+    await admin.from('posts').update({ comments_count: count ?? 0 }).eq('id', comment.post_id);
+
+    return NextResponse.json({ success: true });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Server error' }, { status: 500 });
+    console.error('[DELETE /api/comments/:id]', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }
