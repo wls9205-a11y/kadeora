@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: '카더라',
     primaryColor: '#ff5b36',
-    icon: './icon.png',
+    icon: 'https://kadeora.app/icons/icon-192.png',
   },
   web: {
     port: 3000,
