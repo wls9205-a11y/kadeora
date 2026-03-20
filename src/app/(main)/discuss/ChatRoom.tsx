@@ -7,24 +7,25 @@ import type { User } from '@supabase/supabase-js';
 
 interface MsgProfile { id: string; nickname: string | null; grade: number | null; points: number | null; }
 interface ChatMsg {
-  id: string; user_id: string | null; content: string; created_at: string; parent_id?: string | null;
-  profiles?: MsgProfile | null; likes?: { count: number }[]; replies?: ChatMsg[];
+  id: string; user_id: string | null; content: string; created_at: string;
+  parent_id?: string | null; profiles?: MsgProfile | null;
+  likes?: { count: number }[]; replies?: ChatMsg[];
 }
 
 const PAGE_SIZE = 100;
-const GI: Record<number, { title: string; emoji: string; color: string }> = {
+const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }> = {
   1:{title:'새싹',emoji:'🌱',color:'#4CAF50'},2:{title:'정보통',emoji:'📡',color:'#2196F3'},
   3:{title:'동네어른',emoji:'🏘️',color:'#9C27B0'},4:{title:'소문난집',emoji:'🏠',color:'#FF9800'},
   5:{title:'인플루언서',emoji:'⚡',color:'#F44336'},6:{title:'빅마우스',emoji:'🦁',color:'#E91E63'},
   7:{title:'청약고수',emoji:'🏆',color:'#FFD700'},8:{title:'전설',emoji:'👑',color:'#FF6B35'},
   9:{title:'신의경지',emoji:'🌟',color:'#9C27B0'},10:{title:'카더라신',emoji:'⚡',color:'#FF4500'},
 };
-const AC = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
-function avc(uid: string|null) { if(!uid) return AC[0]; return AC[uid.split('').reduce((a,c)=>a+c.charCodeAt(0),0)%AC.length]; }
-function ta(d: string) { const m=Math.floor((Date.now()-new Date(d).getTime())/60000); if(m<1) return '방금'; if(m<60) return m+'분 전'; if(m<1440) return Math.floor(m/60)+'시간 전'; return Math.floor(m/1440)+'일 전'; }
-function rc(text: string) { return text.split(/(@\S+)/g).map((p,i) => p.startsWith('@') ? <span key={i} style={{color:'var(--brand)',fontWeight:700}}>{p}</span> : p); }
+const COLORS = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
+function avc(uid: string | null) { if (!uid) return COLORS[0]; return COLORS[uid.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length]; }
+function timeAgo(d: string) { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return '방금'; if (m < 60) return m + '분 전'; if (m < 1440) return Math.floor(m / 60) + '시간 전'; return Math.floor(m / 1440) + '일 전'; }
+function renderContent(text: string) { return text.split(/(@\S+)/g).map((p, i) => p.startsWith('@') ? <span key={i} style={{ color: 'var(--brand)', fontWeight: 700 }}>{p}</span> : p); }
 
-export default function ChatRoom({ user, myNickname }: { user: User|null; myNickname?: string|null }) {
+export default function ChatRoom({ user, myNickname }: { user: User | null; myNickname?: string | null }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -32,11 +33,11 @@ export default function ChatRoom({ user, myNickname }: { user: User|null; myNick
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
-  const [reportTarget, setReportTarget] = useState<string|null>(null);
-  const [sheetUser, setSheetUser] = useState<MsgProfile|null>(null);
+  const [reportTarget, setReportTarget] = useState<string | null>(null);
+  const [sheetUser, setSheetUser] = useState<MsgProfile | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [replyTarget, setReplyTarget] = useState<{id:string;nickname:string}|null>(null);
-  const [mentionList, setMentionList] = useState<{id:string;nickname:string;grade:number}[]>([]);
+  const [replyTarget, setReplyTarget] = useState<{ id: string; nickname: string } | null>(null);
+  const [mentionList, setMentionList] = useState<{ id: string; nickname: string; grade: number }[]>([]);
   const [showMention, setShowMention] = useState(false);
   const [mentionIndex, setMentionIndex] = useState(0);
   const mentionTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -60,9 +61,12 @@ export default function ChatRoom({ user, myNickname }: { user: User|null; myNick
       const { data: replies } = await sb.from('chat_messages')
         .select('*, profiles:user_id(id, nickname, grade, points)')
         .in('parent_id', ids).order('created_at', { ascending: true });
-      const rm: Record<string, ChatMsg[]> = {};
-      (replies ?? []).forEach((r: any) => { if (!rm[r.parent_id]) rm[r.parent_id] = []; rm[r.parent_id].push(r); });
-      sorted.forEach(m => { m.replies = rm[m.id] ?? []; });
+      const replyMap: Record<string, ChatMsg[]> = {};
+      (replies ?? []).forEach((r: any) => {
+        if (!replyMap[r.parent_id]) replyMap[r.parent_id] = [];
+        replyMap[r.parent_id].push(r as ChatMsg);
+      });
+      sorted.forEach(m => { m.replies = replyMap[m.id] ?? []; });
     }
 
     if (before) setMsgs(prev => [...sorted, ...prev]); else setMsgs(sorted);
@@ -70,96 +74,112 @@ export default function ChatRoom({ user, myNickname }: { user: User|null; myNick
     return sorted;
   }, []);
 
-  useEffect(() => { if(!user) return; createSupabaseBrowser().from('chat_message_likes').select('message_id').eq('user_id',user.id).then(({data})=>{if(data) setLikedIds(new Set(data.map((d:any)=>d.message_id)));}); }, [user]);
+  useEffect(() => { if (!user) return; createSupabaseBrowser().from('chat_message_likes').select('message_id').eq('user_id', user.id).then(({ data }) => { if (data) setLikedIds(new Set(data.map((d: any) => d.message_id))); }); }, [user]);
 
   useEffect(() => {
     setLoading(true);
     loadMessages().then(() => { setLoading(false); isFirst.current = true; });
     const sb = createSupabaseBrowser();
-    const ch = sb.channel('chat_lounge').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => {
-      loadMessages();
-    }).subscribe();
+    const ch = sb.channel('chat_lounge').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => { loadMessages(); }).subscribe();
     return () => { sb.removeChannel(ch); };
   }, [loadMessages]);
 
-  useEffect(() => { if(isFirst.current){isFirst.current=false;return;} const el=scrollRef.current; if(el&&el.scrollHeight-el.scrollTop-el.clientHeight<150) bottomRef.current?.scrollIntoView({behavior:'smooth'}); }, [msgs]);
+  useEffect(() => { if (isFirst.current) { isFirst.current = false; return; } const el = scrollRef.current; if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 150) bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
 
-  const handleScroll = () => { const el=scrollRef.current; if(el&&el.scrollTop<50&&hasMore&&!loadingMore){ setLoadingMore(true); const oldest=msgs[0]; const prev=el.scrollHeight; loadMessages(oldest.created_at).then(()=>{requestAnimationFrame(()=>{if(el) el.scrollTop=el.scrollHeight-prev;});setLoadingMore(false);}); } };
+  const handleScroll = () => { const el = scrollRef.current; if (el && el.scrollTop < 50 && hasMore && !loadingMore) { setLoadingMore(true); const oldest = msgs[0]; const prev = el.scrollHeight; loadMessages(oldest.created_at).then(() => { requestAnimationFrame(() => { if (el) el.scrollTop = el.scrollHeight - prev; }); setLoadingMore(false); }); } };
 
   const send = async () => {
-    if(!user){error('로그인이 필요합니다');return;} const t=input.trim(); if(!t||sending) return;
+    if (!user) { error('로그인이 필요합니다'); return; }
+    const t = input.trim(); if (!t || sending) return;
     setSending(true);
-    await createSupabaseBrowser().from('chat_messages').insert({ user_id: user.id, content: t, parent_id: replyTarget?.id ?? null });
-    setInput(''); setSending(false); setShowMention(false); setReplyTarget(null);
+    const sb = createSupabaseBrowser();
+    if (replyTarget) {
+      await sb.from('chat_messages').insert({ user_id: user.id, content: t, parent_id: replyTarget.id });
+      setReplyTarget(null);
+      await loadMessages();
+    } else {
+      await sb.from('chat_messages').insert({ user_id: user.id, content: t });
+    }
+    setInput(''); setSending(false); setShowMention(false);
   };
 
-  const toggleLike = async (mid:string) => { if(!user) return; const sb=createSupabaseBrowser(); const isLiked=likedIds.has(mid); if(isLiked){await sb.from('chat_message_likes').delete().eq('message_id',mid).eq('user_id',user.id);setLikedIds(p=>{const n=new Set(p);n.delete(mid);return n;});}else{await sb.from('chat_message_likes').insert({message_id:mid,user_id:user.id});setLikedIds(p=>new Set([...p,mid]));} setMsgs(p=>p.map(m=>m.id!==mid?m:{...m,likes:[{count:Math.max(0,(m.likes?.[0]?.count??0)+(isLiked?-1:1))}]})); };
+  const toggleLike = async (mid: string) => { if (!user) return; const sb = createSupabaseBrowser(); const isLiked = likedIds.has(mid); if (isLiked) { await sb.from('chat_message_likes').delete().eq('message_id', mid).eq('user_id', user.id); setLikedIds(p => { const n = new Set(p); n.delete(mid); return n; }); } else { await sb.from('chat_message_likes').insert({ message_id: mid, user_id: user.id }); setLikedIds(p => new Set([...p, mid])); } setMsgs(p => p.map(m => m.id !== mid ? m : { ...m, likes: [{ count: Math.max(0, (m.likes?.[0]?.count ?? 0) + (isLiked ? -1 : 1)) }] })); };
 
-  const openSheet = async (p:MsgProfile|null) => { if(!p) return; setSheetUser(p); if(user&&user.id!==p.id){const{data}=await createSupabaseBrowser().from('follows').select('id').eq('follower_id',user.id).eq('followee_id',p.id).maybeSingle();setIsFollowing(!!data);} };
-  const toggleFollow = async () => { if(!user||!sheetUser) return; const sb=createSupabaseBrowser(); if(isFollowing){await sb.from('follows').delete().eq('follower_id',user.id).eq('followee_id',sheetUser.id);setIsFollowing(false);}else{await sb.from('follows').insert({follower_id:user.id,followee_id:sheetUser.id});setIsFollowing(true);} };
+  const openSheet = async (p: MsgProfile | null) => { if (!p) return; setSheetUser(p); if (user && user.id !== p.id) { const { data } = await createSupabaseBrowser().from('follows').select('id').eq('follower_id', user.id).eq('followee_id', p.id).maybeSingle(); setIsFollowing(!!data); } };
+  const toggleFollow = async () => { if (!user || !sheetUser) return; const sb = createSupabaseBrowser(); if (isFollowing) { await sb.from('follows').delete().eq('follower_id', user.id).eq('followee_id', sheetUser.id); setIsFollowing(false); } else { await sb.from('follows').insert({ follower_id: user.id, followee_id: sheetUser.id }); setIsFollowing(true); } };
 
-  const handleInput = (val:string) => { setInput(val); const match=val.match(/@([^\s@]*)$/); if(match){setMentionIndex(0);if(mentionTimer.current)clearTimeout(mentionTimer.current);mentionTimer.current=setTimeout(async()=>{if(!match[1]){setShowMention(false);return;}const{data}=await createSupabaseBrowser().from('profiles').select('id,nickname,grade').ilike('nickname',`${match[1]}%`).limit(6);setMentionList((data??[])as any);setShowMention((data??[]).length>0);},200);}else{setShowMention(false);} };
-  const selectMention = (n:string) => { setInput(p=>p.replace(/@([^\s@]*)$/,`@${n} `)); setShowMention(false); };
-  const handleKeyDown = (e:React.KeyboardEvent) => { if(showMention&&mentionList.length>0){if(e.key==='ArrowDown'){e.preventDefault();setMentionIndex(i=>Math.min(i+1,mentionList.length-1));return;}if(e.key==='ArrowUp'){e.preventDefault();setMentionIndex(i=>Math.max(i-1,0));return;}if(e.key==='Enter'){e.preventDefault();selectMention(mentionList[mentionIndex].nickname);return;}if(e.key==='Escape'){setShowMention(false);return;}} if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} };
+  const handleInput = (val: string) => { setInput(val); const match = val.match(/@([^\s@]*)$/); if (match) { setMentionIndex(0); if (mentionTimer.current) clearTimeout(mentionTimer.current); mentionTimer.current = setTimeout(async () => { if (!match[1]) { setShowMention(false); return; } const { data } = await createSupabaseBrowser().from('profiles').select('id,nickname,grade').ilike('nickname', `${match[1]}%`).limit(6); setMentionList((data ?? []) as any); setShowMention((data ?? []).length > 0); }, 200); } else { setShowMention(false); } };
+  const selectMention = (n: string) => { setInput(p => p.replace(/@([^\s@]*)$/, `@${n} `)); setShowMention(false); };
+  const handleKeyDown = (e: React.KeyboardEvent) => { if (showMention && mentionList.length > 0) { if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => Math.min(i + 1, mentionList.length - 1)); return; } if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => Math.max(i - 1, 0)); return; } if (e.key === 'Enter') { e.preventDefault(); selectMention(mentionList[mentionIndex].nickname); return; } if (e.key === 'Escape') { setShowMention(false); return; } } if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 160px)', minHeight: 400, maxHeight: 800 }}>
-      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
-        {loadingMore && <div style={{textAlign:'center',padding:6,fontSize:11,color:'var(--text-tertiary)'}}>이전 메시지...</div>}
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 160px)', minHeight: 400, maxHeight: 800 }}>
+      {/* Messages */}
+      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '6px 8px' }}>
+        {loadingMore && <div style={{ textAlign: 'center', padding: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>이전 메시지...</div>}
         {loading ? (
-          <div style={{textAlign:'center',color:'var(--text-tertiary)',padding:'40px 0'}}>채팅 불러오는 중...</div>
+          <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '40px 0' }}>채팅 불러오는 중...</div>
         ) : msgs.length === 0 ? (
-          <div style={{textAlign:'center',padding:'60px 20px'}}>
-            <div style={{fontSize:48,marginBottom:12}}>☕</div>
-            <p style={{fontSize:16,fontWeight:700,color:'var(--text-primary)',marginBottom:6}}>아직 조용하네요</p>
-            <p style={{fontSize:13,color:'var(--text-tertiary)'}}>첫 번째 소문의 주인공이 되어보세요!</p>
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>☕</div>
+            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>아직 조용하네요</p>
+            <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>첫 번째 소문의 주인공이 되어보세요!</p>
           </div>
         ) : msgs.map(msg => {
-          const p = msg.profiles as MsgProfile|null;
-          const g = GI[p?.grade??1]??GI[1];
-          const nick = p?.nickname??'사용자';
+          const p = msg.profiles as MsgProfile | null;
+          const g = GRADE_INFO[p?.grade ?? 1] ?? GRADE_INFO[1];
+          const nick = p?.nickname ?? '사용자';
           const liked = likedIds.has(msg.id);
-          const lc = msg.likes?.[0]?.count??0;
+          const lc = msg.likes?.[0]?.count ?? 0;
           return (
-            <div key={msg.id} style={{marginBottom:2}}>
-              <div style={{display:'flex',gap:10,padding:'10px 12px',borderRadius:10,transition:'background 0.1s'}}
-                onMouseEnter={e=>(e.currentTarget.style.background='var(--bg-hover)')}
-                onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
-                <div onClick={()=>openSheet(p)} style={{width:34,height:34,borderRadius:'50%',background:avc(msg.user_id),color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:800,flexShrink:0,cursor:'pointer'}}>{nick[0]}</div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
-                    <span onClick={()=>openSheet(p)} style={{fontWeight:700,fontSize:13,cursor:'pointer',color:'var(--text-primary)'}}>{nick}</span>
-                    <span style={{fontSize:10,color:g.color,fontWeight:600,background:`${g.color}18`,padding:'1px 5px',borderRadius:4}}>{g.emoji} {g.title}</span>
-                    <span style={{fontSize:10,color:'var(--text-tertiary)'}}>{ta(msg.created_at)}</span>
+            <div key={msg.id} style={{ marginBottom: 1 }}>
+              {/* Main message */}
+              <div style={{ display: 'flex', gap: 10, padding: '8px 12px', borderRadius: 8, transition: 'background 0.1s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                <div onClick={() => openSheet(p)} style={{ width: 34, height: 34, borderRadius: '50%', background: avc(msg.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{nick[0]}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                    <span onClick={() => openSheet(p)} style={{ fontWeight: 700, fontSize: 13, cursor: 'pointer', color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{ fontSize: 10, background: `${g.color}20`, color: g.color, border: `1px solid ${g.color}40`, padding: '1px 5px', borderRadius: 4, fontWeight: 600 }}>{g.emoji} {g.title}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(msg.created_at)}</span>
                   </div>
-                  <p style={{fontSize:14,color:'var(--text-primary)',margin:'0 0 4px',lineHeight:1.5,wordBreak:'break-word'}}>{rc(msg.content)}</p>
-                  <div style={{display:'flex',gap:10,alignItems:'center'}}>
-                    <button onClick={()=>toggleLike(msg.id)} style={{display:'flex',alignItems:'center',gap:3,background:'none',border:'none',cursor:user?'pointer':'default',color:liked?'#ff4444':'var(--text-tertiary)',fontSize:11,padding:'2px 4px',fontWeight:liked?700:400}}>
-                      {liked?'❤️':'🤍'} {lc>0?lc:''}
+                  <p style={{ fontSize: 14, color: 'var(--text-primary)', margin: '0 0 5px', lineHeight: 1.5, wordBreak: 'break-word' }}>{renderContent(msg.content)}</p>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, background: liked ? '#ff444412' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? '#ff4444' : 'var(--text-tertiary)', fontSize: 11, padding: '2px 6px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
+                      {liked ? '❤️' : '🤍'} {lc > 0 ? lc : ''}
                     </button>
-                    {user&&<button onClick={()=>{setReplyTarget({id:msg.id,nickname:nick});setTimeout(()=>document.getElementById('chat-input')?.focus(),50);}} style={{display:'flex',alignItems:'center',gap:3,background:'none',border:'none',cursor:'pointer',color:'var(--text-tertiary)',fontSize:11,padding:'2px 4px'}}>
-                      💬 {msg.replies&&msg.replies.length>0?`답글 ${msg.replies.length}`:'답글'}
-                    </button>}
-                    {user&&user.id!==msg.user_id&&<button onClick={()=>setReportTarget(msg.id)} style={{background:'none',border:'none',cursor:'pointer',color:'var(--text-tertiary)',fontSize:10,padding:'2px 4px',marginLeft:'auto'}}>신고</button>}
+                    {user && (
+                      <button onClick={() => { setReplyTarget({ id: msg.id, nickname: nick }); document.getElementById('chat-input')?.focus(); }} style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: '2px 6px', borderRadius: 4 }}>
+                        💬 {msg.replies && msg.replies.length > 0 ? `${msg.replies.length}` : '답글'}
+                      </button>
+                    )}
+                    {user && user.id !== msg.user_id && (
+                      <button onClick={() => setReportTarget(msg.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 10, padding: '2px 4px', marginLeft: 'auto' }}>신고</button>
+                    )}
                   </div>
                 </div>
               </div>
-              {msg.replies&&msg.replies.length>0&&(
-                <div style={{marginLeft:44,borderLeft:'2px solid var(--border)',paddingLeft:12,marginBottom:4}}>
-                  {msg.replies.map(r=>{
-                    const rp=r.profiles as MsgProfile|null;const rg=GI[rp?.grade??1]??GI[1];const rN=rp?.nickname??'사용자';
-                    return(
-                      <div key={r.id} style={{display:'flex',gap:8,padding:'6px 8px',borderRadius:8,transition:'background 0.1s'}}
-                        onMouseEnter={e=>(e.currentTarget.style.background='var(--bg-hover)')}
-                        onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
-                        <div onClick={()=>openSheet(rp)} style={{width:26,height:26,borderRadius:'50%',background:avc(r.user_id),color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,flexShrink:0,cursor:'pointer'}}>{rN[0]}</div>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:1}}>
-                            <span onClick={()=>openSheet(rp)} style={{fontWeight:700,fontSize:12,cursor:'pointer',color:'var(--text-primary)'}}>{rN}</span>
-                            <span style={{fontSize:9,color:rg.color,background:`${rg.color}18`,padding:'1px 4px',borderRadius:3,fontWeight:600}}>{rg.emoji}</span>
-                            <span style={{fontSize:10,color:'var(--text-tertiary)'}}>{ta(r.created_at)}</span>
+
+              {/* Replies */}
+              {msg.replies && msg.replies.length > 0 && (
+                <div style={{ marginLeft: 56, paddingLeft: 10, borderLeft: '2px solid var(--border)', marginBottom: 4 }}>
+                  {msg.replies.map(reply => {
+                    const rp = reply.profiles as MsgProfile | null;
+                    const rg = GRADE_INFO[rp?.grade ?? 1] ?? GRADE_INFO[1];
+                    const rNick = rp?.nickname ?? '사용자';
+                    return (
+                      <div key={reply.id} style={{ display: 'flex', gap: 8, padding: '6px 8px', borderRadius: 6, transition: 'background 0.1s' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <div onClick={() => openSheet(rp)} style={{ width: 24, height: 24, borderRadius: '50%', background: avc(reply.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, flexShrink: 0, cursor: 'pointer' }}>{rNick[0]}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 1 }}>
+                            <span onClick={() => openSheet(rp)} style={{ fontWeight: 700, fontSize: 12, cursor: 'pointer', color: 'var(--text-primary)' }}>{rNick}</span>
+                            <span style={{ fontSize: 9, background: `${rg.color}18`, color: rg.color, padding: '1px 4px', borderRadius: 3, fontWeight: 600 }}>{rg.emoji}</span>
+                            <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(reply.created_at)}</span>
                           </div>
-                          <p style={{fontSize:13,color:'var(--text-secondary)',margin:0,lineHeight:1.5,wordBreak:'break-word'}}>{rc(r.content)}</p>
+                          <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4, wordBreak: 'break-word' }}>{renderContent(reply.content)}</p>
                         </div>
                       </div>
                     );
@@ -169,75 +189,74 @@ export default function ChatRoom({ user, myNickname }: { user: User|null; myNick
             </div>
           );
         })}
-        <div ref={bottomRef}/>
+        <div ref={bottomRef} />
       </div>
 
       {/* Input area */}
-      <div style={{borderTop:'1px solid var(--border)',background:'var(--bg-surface)',borderRadius:'0 0 14px 14px'}}>
-        {replyTarget&&(
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 14px',background:'rgba(255,69,0,0.06)',borderBottom:'1px solid var(--border)',fontSize:12}}>
-            <span style={{color:'var(--brand)',fontWeight:600}}>💬 @{replyTarget.nickname} 님에게 답글</span>
-            <button onClick={()=>{setReplyTarget(null);setInput('');}} style={{background:'none',border:'none',cursor:'pointer',color:'var(--text-tertiary)',fontSize:14,padding:0}}>✕</button>
+      <div style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-surface)', borderRadius: '0 0 16px 16px' }}>
+        {replyTarget && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 14px', background: 'rgba(255,69,0,0.06)', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ color: 'var(--brand)', fontWeight: 600, fontSize: 12 }}>💬 @{replyTarget.nickname} 에게 답글</span>
+            <button onClick={() => { setReplyTarget(null); setInput(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 16, padding: 0, lineHeight: 1 }}>×</button>
           </div>
         )}
-        {user?(
-          <div style={{padding:'10px 12px'}}>
-            <div style={{display:'flex',gap:8,alignItems:'flex-end'}}>
-              <div style={{width:28,height:28,borderRadius:'50%',flexShrink:0,background:avc(user.id),color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800}}>{(myNickname??'나')[0]}</div>
-              <div style={{flex:1,position:'relative'}}>
-                {showMention&&mentionList.length>0&&(
-                  <div style={{position:'absolute',bottom:'100%',left:0,right:0,marginBottom:4,background:'var(--bg-surface)',border:'1px solid var(--border)',borderRadius:10,overflow:'hidden',zIndex:100,boxShadow:'0 -4px 16px rgba(0,0,0,0.12)'}}>
-                    {mentionList.map((u,i)=>(
-                      <div key={u.id} onClick={()=>selectMention(u.nickname??'')} style={{padding:'7px 12px',cursor:'pointer',display:'flex',alignItems:'center',gap:8,fontSize:13,background:i===mentionIndex?'var(--bg-hover)':'transparent'}}>
-                        <div style={{width:22,height:22,borderRadius:'50%',background:avc(u.id),color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:700}}>{(u.nickname??'?')[0]}</div>
-                        <span style={{fontWeight:600}}>@{u.nickname}</span>
-                        <span style={{fontSize:10,color:(GI[u.grade??1]??GI[1]).color,marginLeft:'auto'}}>{(GI[u.grade??1]??GI[1]).emoji}</span>
+        {user ? (
+          <div style={{ padding: '10px 12px' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: avc(user.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800 }}>{(myNickname ?? '나')[0]}</div>
+              <div style={{ flex: 1, position: 'relative' }}>
+                {showMention && mentionList.length > 0 && (
+                  <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', zIndex: 100, boxShadow: '0 -4px 16px rgba(0,0,0,0.12)' }}>
+                    {mentionList.map((u, i) => (
+                      <div key={u.id} onClick={() => selectMention(u.nickname ?? '')} style={{ padding: '7px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, background: i === mentionIndex ? 'var(--bg-hover)' : 'transparent' }}>
+                        <div style={{ width: 22, height: 22, borderRadius: '50%', background: avc(u.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700 }}>{(u.nickname ?? '?')[0]}</div>
+                        <span style={{ fontWeight: 600 }}>@{u.nickname}</span>
+                        <span style={{ fontSize: 10, color: (GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).color, marginLeft: 'auto' }}>{(GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).emoji}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                <textarea id="chat-input" value={input} onChange={e=>handleInput(e.target.value)} onKeyDown={handleKeyDown}
-                  placeholder={replyTarget?`@${replyTarget.nickname}님에게 답글...`:'라운지에 소문 남기기... (@멘션, Enter 전송)'}
+                <textarea id="chat-input" value={input} onChange={e => handleInput(e.target.value)} onKeyDown={handleKeyDown}
+                  placeholder={replyTarget ? `@${replyTarget.nickname}에게 답글...` : '소문 남기기... (@멘션, Enter 전송)'}
                   maxLength={300} rows={1}
-                  style={{width:'100%',background:'var(--bg-hover)',border:'1px solid var(--border)',borderRadius:10,color:'var(--text-primary)',padding:'8px 60px 8px 12px',fontSize:13,fontFamily:'inherit',resize:'none',outline:'none',boxSizing:'border-box',lineHeight:1.5,minHeight:38}}/>
-                <button onClick={send} disabled={!input.trim()||sending} style={{position:'absolute',right:6,bottom:7,padding:'3px 10px',borderRadius:6,border:'none',background:input.trim()?(replyTarget?'#7c3aed':'var(--brand)'):'var(--bg-hover)',color:input.trim()?'white':'var(--text-tertiary)',fontWeight:700,fontSize:11,cursor:input.trim()?'pointer':'default'}}>{replyTarget?'답글':'전송'}</button>
+                  style={{ width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', padding: '8px 58px 8px 12px', fontSize: 13, fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5, minHeight: 38 }} />
+                <button onClick={send} disabled={!input.trim() || sending} style={{ position: 'absolute', right: 6, bottom: 6, padding: '3px 10px', borderRadius: 6, border: 'none', background: input.trim() ? (replyTarget ? '#7c3aed' : 'var(--brand)') : 'transparent', color: input.trim() ? 'white' : 'var(--text-tertiary)', fontWeight: 700, fontSize: 11, cursor: input.trim() ? 'pointer' : 'default' }}>{replyTarget ? '↩' : '↑'}</button>
               </div>
             </div>
-            <div style={{fontSize:10,color:'var(--text-tertiary)',marginTop:3,textAlign:'right'}}>{input.length}/300</div>
           </div>
-        ):(
-          <div style={{textAlign:'center',padding:'14px 0',fontSize:13,color:'var(--text-secondary)'}}>
-            <a href="/login" style={{color:'var(--brand)',fontWeight:700,textDecoration:'none'}}>로그인</a>하고 라운지에 참여하세요 🎉
+        ) : (
+          <div style={{ textAlign: 'center', padding: '14px 0', fontSize: 13, color: 'var(--text-secondary)' }}>
+            <a href="/login" style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</a>하고 라운지에 참여하세요 🎉
           </div>
         )}
       </div>
 
       {/* Mini Profile Sheet */}
-      {sheetUser&&(
-        <div style={{position:'fixed',inset:0,zIndex:1000,display:'flex',flexDirection:'column',justifyContent:'flex-end'}}>
-          <div onClick={()=>setSheetUser(null)} style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.5)'}}/>
-          <div style={{position:'relative',background:'var(--bg-surface)',borderRadius:'20px 20px 0 0',padding:24,zIndex:1,maxWidth:480,width:'100%',margin:'0 auto'}}>
-            <div style={{width:40,height:4,borderRadius:2,background:'var(--border)',margin:'0 auto 20px'}}/>
-            <div style={{display:'flex',gap:16,alignItems:'center',marginBottom:20}}>
-              <div style={{width:56,height:56,borderRadius:'50%',background:avc(sheetUser.id),color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:700}}>{(sheetUser.nickname??'?')[0]}</div>
+      {sheetUser && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div onClick={() => setSheetUser(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
+          <div style={{ position: 'relative', background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: 24, zIndex: 1, maxWidth: 480, width: '100%', margin: '0 auto' }}>
+            <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)', margin: '0 auto 20px' }} />
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: avc(sheetUser.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700 }}>{(sheetUser.nickname ?? '?')[0]}</div>
               <div>
-                <div style={{fontSize:18,fontWeight:800,color:'var(--text-primary)',marginBottom:4}}>{sheetUser.nickname??'사용자'}</div>
-                <div style={{fontSize:13,color:(GI[sheetUser.grade??1]??GI[1]).color,fontWeight:600}}>
-                  {(GI[sheetUser.grade??1]??GI[1]).emoji} {(GI[sheetUser.grade??1]??GI[1]).title}
-                  <span style={{color:'var(--text-tertiary)',fontWeight:400,marginLeft:8}}>{(sheetUser.points??0).toLocaleString()}pts</span>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>{sheetUser.nickname ?? '사용자'}</div>
+                <div style={{ fontSize: 13, color: (GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).color, fontWeight: 600 }}>
+                  {(GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).emoji} {(GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).title}
+                  <span style={{ color: 'var(--text-tertiary)', fontWeight: 400, marginLeft: 8 }}>{(sheetUser.points ?? 0).toLocaleString()}pts</span>
                 </div>
               </div>
             </div>
-            <div style={{display:'flex',gap:8}}>
-              <a href={`/profile/${sheetUser.id}`} onClick={()=>setSheetUser(null)} style={{flex:1,padding:'10px 0',borderRadius:10,border:'1px solid var(--border)',background:'transparent',color:'var(--text-primary)',fontSize:14,fontWeight:600,textAlign:'center',textDecoration:'none',display:'block'}}>프로필 보기</a>
-              {user&&user.id!==sheetUser.id&&(
-                <button onClick={toggleFollow} style={{flex:1,padding:'10px 0',borderRadius:10,border:'none',background:isFollowing?'var(--bg-hover)':'var(--brand)',color:isFollowing?'var(--text-secondary)':'white',fontSize:14,fontWeight:700,cursor:'pointer'}}>{isFollowing?'팔로잉 ✓':'팔로우'}</button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <a href={`/profile/${sheetUser.id}`} onClick={() => setSheetUser(null)} style={{ flex: 1, padding: '10px 0', borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, textAlign: 'center', textDecoration: 'none', display: 'block' }}>프로필 보기</a>
+              {user && user.id !== sheetUser.id && (
+                <button onClick={toggleFollow} style={{ flex: 1, padding: '10px 0', borderRadius: 10, border: 'none', background: isFollowing ? 'var(--bg-hover)' : 'var(--brand)', color: isFollowing ? 'var(--text-secondary)' : 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>{isFollowing ? '팔로잉 ✓' : '팔로우'}</button>
               )}
             </div>
           </div>
         </div>
       )}
-      {reportTarget&&<ReportModal targetType="chat" targetId={reportTarget} onClose={()=>setReportTarget(null)}/>}
+      {reportTarget && <ReportModal targetType="chat" targetId={reportTarget} onClose={() => setReportTarget(null)} />}
     </div>
   );
 }

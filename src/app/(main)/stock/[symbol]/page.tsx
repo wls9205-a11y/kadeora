@@ -34,7 +34,10 @@ export default async function StockDetailPage({ params }: Props) {
   const { data: s } = await sb.from('stock_quotes').select('*').eq('symbol', symbol).single();
   if (!s) notFound();
 
-  const isUp = Number(s.change_pct) >= 0;
+  const changePct = Number(s.change_pct);
+  const isUp = changePct > 0;
+  const isDown = changePct < 0;
+  const isStale = !s.updated_at || s.updated_at.startsWith('2000-01-01');
   const items = [
     { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency) },
     { label: '거래량', value: s.volume ? Number(s.volume).toLocaleString() : '-' },
@@ -53,9 +56,16 @@ export default async function StockDetailPage({ params }: Props) {
         <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>{s.name}</h1>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 34, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency)}</span>
-          <span style={{ fontSize: 20, fontWeight: 700, color: isUp ? 'var(--stock-up)' : 'var(--stock-down)' }}>
-            {isUp ? '▲' : '▼'} {Math.abs(Number(s.change_pct)).toFixed(2)}%
-          </span>
+          {isStale ? (
+            <span style={{ fontSize: 13, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>시세없음</span>
+          ) : (
+            <span style={{
+              fontSize: 20, fontWeight: 700,
+              color: isUp ? '#ef4444' : isDown ? '#3b82f6' : 'var(--text-tertiary)',
+            }}>
+              {isUp ? '▲' : isDown ? '▼' : '━'} {Math.abs(changePct).toFixed(2)}%
+            </span>
+          )}
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
