@@ -13,8 +13,8 @@ if (process.env.VAPID_PRIVATE_KEY && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
 
 export async function POST(req: NextRequest) {
   const sb = await createSupabaseServer();
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { data: { user }, error: authError } = await sb.auth.getUser();
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   );
 
   const { data: profile } = await admin
-    .from('profiles').select('is_admin').eq('id', session.user.id).single();
+    .from('profiles').select('is_admin').eq('id', user.id).single();
   if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { title, body, url = '/', target = 'all', user_ids } = await req.json();

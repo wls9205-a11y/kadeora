@@ -97,8 +97,8 @@ export default async function FeedDetailPage({ params }: Props) {
 
   try {
     const sb = await createSupabaseServer();
-    const { data: { session } } = await sb.auth.getSession();
-    currentUserId = session?.user?.id ?? null;
+    const { data: { user: authUser } } = await sb.auth.getUser();
+    currentUserId = authUser?.id ?? null;
 
     const { data: postData } = await sb
       .from('posts')

@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProfilePage({ params }: Props) {
   const { id } = await params;
   const sb = await createSupabaseServer();
-  const { data: { session } } = await sb.auth.getSession();
-  const isOwner = session?.user?.id === id;
+  const { data: { user: authUser } } = await sb.auth.getUser();
+  const isOwner = authUser?.id === id;
 
   const [
     { data: profile },
@@ -35,8 +35,8 @@ export default async function ProfilePage({ params }: Props) {
     sb.from('comments').select('*', { count: 'exact', head: true }).eq('author_id', id).eq('is_deleted', false),
     sb.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', id),
     sb.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', id),
-    session?.user
-      ? sb.from('follows').select('follower_id').eq('follower_id', session.user.id).eq('followee_id', id).maybeSingle()
+    authUser
+      ? sb.from('follows').select('follower_id').eq('follower_id', authUser.id).eq('followee_id', id).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
 
