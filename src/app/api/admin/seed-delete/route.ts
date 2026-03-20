@@ -14,24 +14,8 @@ export async function DELETE(req: NextRequest) {
     const target = searchParams.get('target') || 'all';
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-    if (target === 'likes' || target === 'all') {
-      await admin.from('post_likes').delete().like('user_id', 'aaaaaaaa%');
-    }
-    if (target === 'comments' || target === 'all') {
-      await admin.from('comments').delete().like('author_id', 'aaaaaaaa%');
-    }
-    if (target === 'posts' || target === 'all') {
-      const { data: seedPosts } = await admin.from('posts').select('id').like('author_id', 'aaaaaaaa%');
-      const ids = (seedPosts || []).map(p => p.id);
-      if (ids.length) {
-        await admin.from('post_likes').delete().in('post_id', ids);
-        await admin.from('comments').delete().in('post_id', ids);
-      }
-      await admin.from('posts').delete().like('author_id', 'aaaaaaaa%');
-    }
-    if (target === 'users' || target === 'all') {
-      await admin.from('profiles').delete().like('id', 'aaaaaaaa%');
-    }
+    const { error } = await admin.rpc('delete_seed_data', { target_type: target });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     return NextResponse.json({ ok: true, target });
   } catch (e: any) {

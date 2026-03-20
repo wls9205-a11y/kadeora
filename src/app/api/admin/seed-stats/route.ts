@@ -10,24 +10,19 @@ export async function GET() {
     const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
     if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-    // Service role client for raw filter (anon key LIKE on uuid doesn't work)
-    const admin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const { data, error } = await admin.rpc('get_seed_stats');
 
-    const [users, posts, comments, likes] = await Promise.all([
-      admin.from('profiles').select('id', { count: 'exact', head: true }).filter('id::text', 'like', 'aaaaaaaa%'),
-      admin.from('posts').select('id', { count: 'exact', head: true }).filter('author_id::text', 'like', 'aaaaaaaa%'),
-      admin.from('comments').select('id', { count: 'exact', head: true }).filter('author_id::text', 'like', 'aaaaaaaa%'),
-      admin.from('post_likes').select('post_id', { count: 'exact', head: true }).filter('user_id::text', 'like', 'aaaaaaaa%'),
-    ]);
+    if (error || !data || data.length === 0) {
+      return NextResponse.json({ users: 0, posts: 0, comments: 0, likes: 0 });
+    }
 
+    const row = data[0];
     return NextResponse.json({
-      users: users.count ?? 0,
-      posts: posts.count ?? 0,
-      comments: comments.count ?? 0,
-      likes: likes.count ?? 0,
+      users: Number(row.seed_users) || 0,
+      posts: Number(row.seed_posts) || 0,
+      comments: Number(row.seed_comments) || 0,
+      likes: Number(row.seed_likes) || 0,
     });
   } catch {
     return NextResponse.json({ error: 'error' }, { status: 500 });
