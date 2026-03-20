@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 function todayKST() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
@@ -75,14 +76,17 @@ export async function POST() {
       return NextResponse.json({ error: '잠시 후 다시 시도해주세요.' }, { status: 429 })
     }
 
-    // 포인트 지급
-    await sb.from('profiles').update({
-      points: (await sb.from('profiles').select('points').eq('id', user.id).single()).data?.points + pointsEarned,
-    }).eq('id', user.id);
+    // 포인트 지급 (award_points RPC — 트리거 바이패스 + point_history 자동 기록)
+    try {
+      const reason = bonus ? '출석연속보너스' : '출석체크';
+      await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: pointsEarned, p_reason: reason, p_meta: null });
+    } catch {}
 
     // 알림
-    const msg = bonus ? `출석 체크 완료! +${pointsEarned}P (${bonus})` : `출석 체크 완료! +10P 🌱`;
-    await sb.from('notifications').insert({ user_id: user.id, type: 'system', content: msg });
+    try {
+      const msg = bonus ? `출석 체크 완료! +${pointsEarned}P (${bonus})` : `출석 체크 완료! +10P 🌱`;
+      await sb.from('notifications').insert({ user_id: user.id, type: 'system', content: msg });
+    } catch {}
 
     return NextResponse.json({ streak, total_days: totalDays, points_earned: pointsEarned, bonus });
   } catch {

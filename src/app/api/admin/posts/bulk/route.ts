@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export async function POST(req: NextRequest) {
-  const sb = await createSupabaseServer();
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
-  if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+    const { supabase } = auth;
 
-  const { action, ids } = await req.json();
-  if (!action || !ids?.length) return NextResponse.json({ error: 'Invalid' }, { status: 400 });
+    const { action, ids } = await req.json();
+    if (!action || !ids?.length) return NextResponse.json({ error: 'Invalid' }, { status: 400 });
 
-  if (action === 'hide') {
-    await sb.from('posts').update({ is_deleted: true }).in('id', ids);
-  } else if (action === 'restore') {
-    await sb.from('posts').update({ is_deleted: false }).in('id', ids);
+    if (action === 'hide') {
+      await supabase.from('posts').update({ is_deleted: true }).in('id', ids);
+    } else if (action === 'restore') {
+      await supabase.from('posts').update({ is_deleted: false }).in('id', ids);
+    } else {
+      return NextResponse.json({ error: '알 수 없는 액션' }, { status: 400 });
+    }
+
+    return NextResponse.json({ ok: true, count: ids.length });
+  } catch {
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, count: ids.length });
 }

@@ -9,7 +9,8 @@ const CATEGORY_LABEL: Record<string, string> = {
   stock: '📈 주식', apt: '🏠 부동산', local: '🏘 우리동네', free: '💬 자유',
 };
 
-export default async function Image({ params }: { params: { id: string } }) {
+export default async function Image({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const sb = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,7 +18,7 @@ export default async function Image({ params }: { params: { id: string } }) {
   const { data: post } = await sb
     .from('posts')
     .select('title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   const title = post?.title ?? '카더라';

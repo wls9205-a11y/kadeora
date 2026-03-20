@@ -25,18 +25,7 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select('*').single();
     if (error) { console.error('[Comments]', error.message); return NextResponse.json({ error: '댓글 작성에 실패했습니다.' }, { status: 500 }); }
 
-    // 알림 INSERT (service_role — 타인 데이터)
-    try {
-      const { data: post } = await getSupabaseAdmin().from('posts').select('author_id').eq('id', postId).single();
-      if (post?.author_id && post.author_id !== user.id) {
-        const { data: profile } = await getSupabaseAdmin().from('profiles').select('nickname').eq('id', user.id).single();
-        const preview = content.length > 30 ? content.slice(0, 30) + '...' : content;
-        await getSupabaseAdmin().from('notifications').insert({
-          user_id: post.author_id, type: 'comment',
-          content: `${profile?.nickname ?? '누군가'}님이 댓글을 달았어요: ${preview}`,
-        });
-      }
-    } catch {}
+    // 알림은 DB 트리거(notify_on_comment)가 자동 처리 — 수동 INSERT 불필요
 
     // 포인트 적립 (award_points RPC — 트리거 바이패스)
     try {

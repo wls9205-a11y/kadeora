@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
@@ -23,17 +22,7 @@ export async function POST(req: NextRequest) {
       const { error } = await supabase.from('post_likes').insert({ post_id: postId, user_id: user.id });
       if (error) { console.error('[Likes]', error); return NextResponse.json({ error: '좋아요 실패' }, { status: 500 }); }
 
-      // 알림 INSERT (service_role — 타인 데이터)
-      try {
-        const { data: post } = await getSupabaseAdmin().from('posts').select('author_id').eq('id', postId).single();
-        if (post?.author_id && post.author_id !== user.id) {
-          const { data: profile } = await getSupabaseAdmin().from('profiles').select('nickname').eq('id', user.id).single();
-          await getSupabaseAdmin().from('notifications').insert({
-            user_id: post.author_id, type: 'like',
-            content: `${profile?.nickname ?? '누군가'}님이 좋아요를 눌렀어요 ❤`,
-          });
-        }
-      } catch {}
+      // 알림 + likes_count는 DB 트리거(handle_post_like_insert)가 자동 처리
 
       return NextResponse.json({ liked: true });
     }

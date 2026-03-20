@@ -39,14 +39,11 @@ export async function POST(req: NextRequest) {
       .select('id, endpoint, p256dh, auth, user_id')
       .in('user_id', userIds);
 
-    // 인앱 알림 생성
+    // 인앱 알림 생성 (notifications 테이블: user_id, type, content, is_read)
     const notifications = userIds.map((uid: string) => ({
       user_id: uid,
       type: 'marketing',
-      title,
-      body,
-      url: url || '/feed',
-      is_read: false,
+      content: `${title}\n${body}`,
     }));
 
     await supabaseAdmin.from('notifications').insert(notifications);
