@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, MessageCircle, Eye, Bookmark, Search, User } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Search, User } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -13,7 +13,6 @@ import EmptyState from '@/components/shared/EmptyState';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
 import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
-import ShareButtons from '@/components/ShareButtons';
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -42,7 +41,6 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
-  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
   const [userRegion, setUserRegion] = useState<string | null>(null);
   const [showHotBanner, setShowHotBanner] = useState(false);
   const [hotPosts, setHotPosts] = useState<any[]>([]);
@@ -99,15 +97,6 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           .eq('user_id', userId);
         if (likes) setLikedPosts(new Set(likes.map(l => l.post_id)));
 
-        // Load user's bookmarks
-        const postIds = posts.map(p => p.id);
-        if (postIds.length > 0) {
-          const res = await fetch(`/api/bookmarks?postIds=${postIds.join(',')}`).catch(() => null);
-          if (res?.ok) {
-            const d = await res.json().catch(() => null);
-            if (d?.bookmarkedIds) setBookmarkedPosts(new Set(d.bookmarkedIds));
-          }
-        }
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- 초기 로드 1회만
@@ -163,41 +152,14 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     }
   };
 
-  const handleBookmark = async (e: React.MouseEvent, postId: number) => {
+  const handleShare = async (e: React.MouseEvent, post: PostWithProfile) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!currentUserId) { router.push('/login'); return; }
-
-    const alreadyBookmarked = bookmarkedPosts.has(postId);
-    // Optimistic update
-    setBookmarkedPosts(prev => {
-      const next = new Set(prev);
-      if (alreadyBookmarked) next.delete(postId); else next.add(postId);
-      return next;
-    });
-
-    try {
-      const res = await fetch('/api/bookmarks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId }),
-      });
-      if (!res.ok) {
-        // Revert
-        setBookmarkedPosts(prev => {
-          const next = new Set(prev);
-          if (alreadyBookmarked) next.add(postId); else next.delete(postId);
-          return next;
-        });
-      }
-    } catch {
-      // Revert
-      setBookmarkedPosts(prev => {
-        const next = new Set(prev);
-        if (alreadyBookmarked) next.add(postId); else next.delete(postId);
-        return next;
-      });
+    const url = `${window.location.origin}/feed/${(post as any).slug || post.id}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: post.title, url }); return; } catch {}
     }
+    try { await navigator.clipboard.writeText(url); } catch {}
   };
 
   const loadMorePosts = useCallback(async () => {
@@ -317,91 +279,50 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       {/* 게시글 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {visiblePosts.map((post) => {
-          const catColors: Record<string, {bg: string; color: string; label: string}> = {
-            apt: { bg: '#3b82f620', color: '#3b82f6', label: '부동산' },
-            stock: { bg: '#ef444420', color: '#ef4444', label: '주식' },
-            local: { bg: '#10b98120', color: '#10b981', label: '우리동네' },
-            free: { bg: '#8b5cf620', color: '#8b5cf6', label: '자유' },
-          };
-          const catInfo = catColors[post.category] ?? null;
           const displayName = post.is_anonymous ? '익명' : (post.profiles?.nickname ?? '익명');
           const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           const isLiked = likedPosts.has(post.id as number);
-          const hasImages = post.images && post.images.length > 0;
-          const isNew = Date.now() - new Date(post.created_at).getTime() < 60 * 60 * 1000;
           const postHref = `/feed/${(post as any).slug || post.id}`;
           return (
             <div key={post.id} className="animate-fadeIn"
-              style={{ padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
-              {/* Clickable area — navigates to post detail */}
+              style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
               <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
-                {/* Header row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 8 }}>
-                  {post.profiles?.avatar_url ? (
-                    <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={32} height={32} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                  ) : (
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>
-                      {displayName[0].toUpperCase()}
-                    </div>
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
-                      <span style={{ fontSize: 12 }}>{gradeEmoji}</span>
-                      {catInfo && (
-                        <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 999, background: catInfo.bg, color: catInfo.color }}>{catInfo.label}</span>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
-                      {isNew && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />}
-                    </div>
+                {/* 1행: 아바타 + 닉네임 + 등급 + 시간 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#fff' }}>
+                    {displayName[0].toUpperCase()}
                   </div>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14 }}>{displayName}</span>
+                  <span style={{ fontSize: 13 }}>{gradeEmoji}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
                 </div>
 
-                {/* Content area — text left, thumbnail right */}
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                      {post.title}
-                    </h2>
-                    <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                      {post.content}
-                    </p>
+                {/* 본문: 제목 있으면 볼드 첫줄 + 본문 3줄 */}
+                {post.title && (
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>
+                    {post.title}
                   </div>
-                  {hasImages && (
-                    <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--bg-hover)' }}>
-                      <Image src={post.images![0]} alt="" fill sizes="56px" style={{ objectFit: 'cover' }} />
-                      {post.images!.length > 1 && (
-                        <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>+{post.images!.length - 1}</div>
-                      )}
-                    </div>
-                  )}
+                )}
+                <div style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                  {post.content}
                 </div>
               </Link>
 
-              {/* Interaction bar — OUTSIDE Link to prevent navigation on click */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+              {/* 인터랙션: 좋아요 + 댓글 + 공유 (3개만) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 10 }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, border: 'none', background: isLiked ? '#ff444412' : 'transparent', cursor: 'pointer', fontSize: 12, color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 700 : 400, fontFamily: 'inherit' }}>
-                  <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} stroke={isLiked ? '#ef4444' : 'currentColor'} /> {numFmt(displayLikes)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0 }}>
+                  <Heart size={18} fill={isLiked ? '#ef4444' : 'none'} stroke={isLiked ? '#ef4444' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : ''}
                 </button>
                 <Link href={`${postHref}#comments`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, textDecoration: 'none', fontSize: 12, color: 'var(--text-tertiary)' }}>
-                  <MessageCircle size={14} /> {numFmt(post.comments_count ?? 0)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', fontSize: 13, color: 'var(--text-tertiary)', padding: 0 }}>
+                  <MessageCircle size={18} /> {(post.comments_count ?? 0) > 0 ? numFmt(post.comments_count ?? 0) : ''}
                 </Link>
-                {(post.view_count ?? 0) > 0 && (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', fontSize: 12, color: 'var(--text-tertiary)' }}>
-                    <Eye size={14} /> {numFmt(post.view_count ?? 0)}
-                  </span>
-                )}
-                <div style={{ flex: 1 }} />
-                <button onClick={(e) => handleBookmark(e, post.id as number)}
-                  style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer', color: bookmarkedPosts.has(post.id as number) ? 'var(--brand)' : 'var(--text-tertiary)' }}>
-                  <Bookmark size={14} fill={bookmarkedPosts.has(post.id as number) ? 'var(--brand)' : 'none'} />
+                <button onClick={(e) => handleShare(e, post)}
+                  style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 0 }}>
+                  <Share2 size={18} />
                 </button>
-                <ShareButtons title={post.title} postId={post.id} content={post.content} />
               </div>
             </div>
           );
