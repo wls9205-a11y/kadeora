@@ -23,7 +23,9 @@ function parsePostId(param: string): number {
   return 0;
 }
 
-const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
+const AVATAR_COLORS = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
+function getAvatarColor(str: string) { return AVATAR_COLORS[str.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % AVATAR_COLORS.length]; }
+const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'📡',3:'🏘',4:'🏠',5:'⚡',6:'🦁',7:'🏆',8:'👑',9:'🌟',10:'⚡'};
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -122,7 +124,7 @@ export default async function FeedDetailPage({ params }: Props) {
           .order('created_at', { ascending: false })
           .limit(100),
         sb.from('posts')
-          .select('id,title,likes_count,comments_count')
+          .select('id,title,likes_count,comments_count,slug')
           .eq('category', postData.category)
           .eq('is_deleted', false)
           .neq('id', numId)
@@ -202,26 +204,22 @@ export default async function FeedDetailPage({ params }: Props) {
       </div>
 
       {/* Post article */}
-      <article style={{ marginBottom: 20 }}>
+      <article style={{ marginBottom: 20, paddingBottom: 80 }}>
         {/* Title */}
-        <h1 style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+        <h1 style={{ margin: '0 0 16px', fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35 }}>
           {post.title}
         </h1>
 
         {/* Author row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-          {post.profiles?.avatar_url ? (
-            <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-          ) : (
-            <div style={{
-              width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-              background: 'var(--brand)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 700, color: 'var(--text-inverse, #fff)',
-            }}>
-              {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
-            </div>
-          )}
+          <div style={{
+            width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+            background: getAvatarColor(post.profiles?.nickname ?? '익명'),
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 16, fontWeight: 700, color: '#fff',
+          }}>
+            {(post.profiles?.nickname ?? '익')[0].toUpperCase()}
+          </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
               {post.profiles?.nickname ?? '익명'}
@@ -303,9 +301,9 @@ export default async function FeedDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
           {related.map((r: any, i: number) => (
-            <Link key={r.id} href={`/feed/${r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+            <Link key={r.id} href={`/feed/${r.slug || r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
               <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>♡ {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>🤍 {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
             </Link>
           ))}
         </div>

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 
-export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; }
+export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; grade?: number; }
 export interface Post {
   id: number | string; title: string; content: string; created_at: string;
   category?: string; likes_count: number; comments_count: number; view_count?: number;
@@ -18,11 +18,12 @@ export interface PostCardProps {
   showAuthor?: boolean;
 }
 
-const CAT_COLORS: Record<string, {bg: string; color: string; label: string}> = {
-  apt: { bg: '#3b82f620', color: '#3b82f6', label: '부동산' },
-  stock: { bg: '#ef444420', color: '#ef4444', label: '주식' },
-  local: { bg: '#10b98120', color: '#10b981', label: '우리동네' },
-  free: { bg: '#8b5cf620', color: '#8b5cf6', label: '자유' },
+const AVATAR_COLORS = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
+function getAvatarColor(str: string) { return AVATAR_COLORS[str.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % AVATAR_COLORS.length]; }
+const GRADE_EMOJI: Record<number,string> = {1:'🌱',2:'📡',3:'🏘',4:'🏠',5:'⚡',6:'🦁',7:'🏆',8:'👑',9:'🌟',10:'⚡'};
+const CAT: Record<string,{label:string;color:string;bg:string}> = {
+  apt:{label:'부동산',color:'#3b82f6',bg:'#3b82f615'}, stock:{label:'주식',color:'#ef4444',bg:'#ef444415'},
+  local:{label:'우리동네',color:'#10b981',bg:'#10b98115'}, free:{label:'자유',color:'#8b5cf6',bg:'#8b5cf615'},
 };
 
 function timeAgo(dateStr: string): string {
@@ -36,8 +37,9 @@ function timeAgo(dateStr: string): string {
 
 function PostCard({ post, variant = "default", showAuthor = true }: PostCardProps) {
   const displayName = post.is_anonymous ? "익명" : post.author?.nickname || "사용자";
-  const catInfo = CAT_COLORS[post.category ?? ''] ?? null;
-
+  const catInfo = CAT[post.category ?? ''] ?? null;
+  const gradeEmoji = GRADE_EMOJI[post.author?.grade ?? 1] ?? '🌱';
+  const avatarColor = getAvatarColor(displayName);
   const href = post.slug ? `/feed/${post.slug}` : `/feed/${post.id}`;
 
   return (
@@ -53,14 +55,15 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
           fontSize: 13, marginBottom: 6,
         }}>
           <div style={{
-            width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-            background: "var(--brand)",
+            width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
+            background: avatarColor,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 12, fontWeight: 700, color: "var(--text-inverse, #fff)",
+            fontSize: 12, fontWeight: 700, color: "#fff",
           }}>
             {displayName[0].toUpperCase()}
           </div>
           <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{displayName}</span>
+          <span>{gradeEmoji}</span>
           {catInfo && (
             <span style={{
               fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999,
@@ -94,7 +97,7 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
         display: "flex", alignItems: "center", gap: 14,
         fontSize: 12, color: "var(--text-tertiary)",
       }}>
-        <span>♡ {post.likes_count}</span>
+        <span>🤍 {post.likes_count}</span>
         <span>💬 {post.comments_count}</span>
         {(post.view_count ?? 0) > 0 && <span>조회 {post.view_count}</span>}
       </div>

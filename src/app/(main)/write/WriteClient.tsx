@@ -9,10 +9,10 @@ import { filterContent } from '@/lib/filter';
 import { REGIONS } from '@/lib/constants';
 
 const CATEGORIES = [
-  { value: 'apt', label: '부동산' },
-  { value: 'stock', label: '주식' },
-  { value: 'local', label: '우리동네' },
-  { value: 'free', label: '자유' },
+  { value: 'apt', label: '부동산', color: '#3b82f6' },
+  { value: 'stock', label: '주식', color: '#ef4444' },
+  { value: 'local', label: '우리동네', color: '#10b981' },
+  { value: 'free', label: '자유', color: '#8b5cf6' },
 ];
 
 export default function WriteClient() {
@@ -107,42 +107,50 @@ export default function WriteClient() {
     </div>
   );
 
+  const isDisabled = loading || !title.trim() || !content.trim();
+
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
       {/* 상단 바 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14 }}>← 돌아가기</Link>
+        <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>← 취소</Link>
+        <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>
+          {editId ? '글 수정' : '새 글 쓰기'}
+        </span>
         <button
           onClick={handleSubmit}
-          disabled={loading || !title.trim() || !content.trim()}
+          disabled={isDisabled}
           style={{
-            padding: '8px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700,
-            background: loading || !title.trim() || !content.trim() ? 'var(--bg-hover)' : 'var(--brand)',
-            color: loading || !title.trim() || !content.trim() ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            padding: '7px 20px', borderRadius: 20, border: 'none', fontSize: 13, fontWeight: 700,
+            background: isDisabled ? 'var(--bg-hover)' : 'var(--brand)',
+            color: isDisabled ? 'var(--text-tertiary)' : 'var(--text-inverse)',
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
           }}
         >
-          {loading ? '처리 중...' : (editId ? '수정 완료' : '게시하기')}
+          {loading ? '...' : '게시'}
         </button>
       </div>
 
       {/* 카테고리 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.value}
-            onClick={() => setCategory(cat.value)}
-            style={{
-              padding: '6px 16px', borderRadius: 20, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-              border: `1px solid ${category === cat.value ? 'var(--brand)' : 'var(--border)'}`,
-              background: category === cat.value ? 'var(--brand)' : 'transparent',
-              color: category === cat.value ? 'var(--text-inverse)' : 'var(--text-secondary)',
-              transition: 'all 0.15s',
-            }}
-          >
-            {cat.label}
-          </button>
-        ))}
+        {CATEGORIES.map(cat => {
+          const active = category === cat.value;
+          return (
+            <button
+              key={cat.value}
+              onClick={() => setCategory(cat.value)}
+              style={{
+                padding: '6px 16px', borderRadius: 20, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                border: `1.5px solid ${active ? cat.color : 'var(--border)'}`,
+                background: active ? cat.color + '15' : 'transparent',
+                color: active ? cat.color : 'var(--text-secondary)',
+                transition: 'all 0.15s',
+              }}
+            >
+              {cat.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* 지역 선택 */}
@@ -170,7 +178,7 @@ export default function WriteClient() {
         placeholder="제목을 입력하세요"
         maxLength={100}
         style={{
-          width: '100%', fontSize: 22, fontWeight: 700, padding: '16px 0',
+          width: '100%', fontSize: 22, fontWeight: 800, padding: '16px 0',
           border: 'none', borderBottom: '1px solid var(--border)', borderRadius: 0,
           background: 'transparent', color: 'var(--text-primary)', outline: 'none',
           boxSizing: 'border-box',
@@ -189,60 +197,74 @@ export default function WriteClient() {
         style={{
           width: '100%', background: 'transparent', border: 'none',
           color: 'var(--text-primary)', padding: '0',
-          fontSize: 15, resize: 'vertical', fontFamily: 'inherit',
-          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 300, outline: 'none',
+          fontSize: 16, resize: 'vertical', fontFamily: 'inherit',
+          lineHeight: 1.9, boxSizing: 'border-box', minHeight: 320, outline: 'none',
         }}
       />
-      <div style={{ fontSize: 11, color: content.length > 4500 ? 'var(--warning)' : 'var(--text-tertiary)', textAlign: 'right', marginBottom: 20 }}>
-        {content.length}/5000
+
+      {/* 이미지 */}
+      <div style={{ marginBottom: 12 }}>
+        <ImageUpload images={images} onImagesChange={setImages} />
       </div>
 
-      {/* 하단 도구 */}
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {/* 이미지 */}
-        <ImageUpload images={images} onImagesChange={setImages} />
-
-        {/* 해시태그 */}
-        <div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-            {hashtags.map(h => (
-              <span key={h} style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                background: 'var(--brand-light)', color: 'var(--brand)',
-                borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600,
-              }}>
-                #{h}
-                <button onClick={() => setHashtags(prev => prev.filter(t => t !== h))}
-                  type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: 13, padding: 0 }}>✕</button>
-              </span>
-            ))}
-          </div>
-          {hashtags.length < 5 && (
-            <input
-              value={tagInput}
-              onChange={e => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              placeholder="#태그 입력 후 엔터"
-              style={{
-                width: '100%', padding: '8px 0', fontSize: 13,
-                background: 'transparent', border: 'none', borderBottom: '1px solid var(--border)',
-                borderRadius: 0, color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
-              }}
-            />
-          )}
+      {/* 해시태그 */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+          {hashtags.map(h => (
+            <span key={h} style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              background: 'var(--brand-light)', color: 'var(--brand)',
+              borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600,
+            }}>
+              #{h}
+              <button onClick={() => setHashtags(prev => prev.filter(t => t !== h))}
+                type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: 13, padding: 0 }}>✕</button>
+            </span>
+          ))}
         </div>
+        {hashtags.length < 5 && (
+          <input
+            value={tagInput}
+            onChange={e => setTagInput(e.target.value)}
+            onKeyDown={handleTagKeyDown}
+            placeholder="#태그 입력 후 엔터"
+            style={{
+              width: '100%', padding: '8px 0', fontSize: 13,
+              background: 'transparent', border: 'none', borderBottom: '1px solid var(--border)',
+              borderRadius: 0, color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
+            }}
+          />
+        )}
+      </div>
 
-        {/* 옵션 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)' }}>
-            <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)}
-              style={{ width: 14, height: 14, accentColor: 'var(--brand)', cursor: 'pointer' }} />
-            익명 작성
-          </label>
-          <details style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-            <summary style={{ cursor: 'pointer' }}>⚠ 유의사항</summary>
-            <p style={{ marginTop: 4, lineHeight: 1.5 }}>허위사실·과장된 수익 정보 유포는 자본시장법에 의거 처벌받을 수 있습니다.</p>
-          </details>
+      {/* 하단 고정 바 */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
+        padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        zIndex: 50,
+      }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)' }}>
+          <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)}
+            style={{ width: 14, height: 14, accentColor: 'var(--brand)', cursor: 'pointer' }} />
+          익명
+        </label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 11, color: content.length > 4500 ? 'var(--warning)' : 'var(--text-tertiary)' }}>
+            {content.length}/5000
+          </span>
+          <button
+            onClick={handleSubmit}
+            disabled={isDisabled}
+            style={{
+              padding: '7px 20px', borderRadius: 20, border: 'none', fontSize: 13, fontWeight: 700,
+              background: isDisabled ? 'var(--bg-hover)' : 'var(--brand)',
+              color: isDisabled ? 'var(--text-tertiary)' : 'var(--text-inverse)',
+              cursor: isDisabled ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loading ? '...' : '게시'}
+          </button>
         </div>
       </div>
     </div>
