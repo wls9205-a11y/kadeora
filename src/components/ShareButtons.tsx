@@ -1,145 +1,68 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useToast } from '@/components/Toast';
+import { useState } from 'react';
 
-interface Props {
-  postId: number | string;
-  title: string;
-  content?: string;
-}
+interface Props { title: string; postId: number | string; content?: string; }
 
-declare global { interface Window { Kakao: any; } }
+const PLATFORMS = [
+  { id: 'kakao', label: '카카오톡', bg: '#FEE500', color: '#191919', emoji: '💬' },
+  { id: 'x', label: 'X', bg: '#000000', color: '#ffffff', emoji: '𝕏' },
+  { id: 'naver', label: '밴드', bg: '#03C75A', color: '#ffffff', emoji: '📢' },
+  { id: 'copy', label: '링크복사', bg: '#374151', color: '#ffffff', emoji: '🔗' },
+];
 
-export default function ShareButtons({ postId, title, content }: Props) {
+export default function ShareButtons({ title, postId, content }: Props) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [hasNativeShare, setHasNativeShare] = useState(false);
-  const { success } = useToast();
-
-  useEffect(() => {
-    setHasNativeShare(typeof navigator !== 'undefined' && !!navigator.share);
-  }, []);
-
-  useEffect(() => {
-    if (open) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
-    return () => { document.body.style.overflow = ''; };
-  }, [open]);
-
   const url = `https://kadeora.app/feed/${postId}`;
-  const encodedUrl = encodeURIComponent(url);
-  const encodedTitle = encodeURIComponent(title);
 
-  const platforms = [
-    {
-      key: 'kakao', label: '카카오톡',
-      bg: '#FEE500', color: '#000', icon: '💬',
-      action: () => {
-        if (typeof window !== 'undefined' && window.Kakao?.isInitialized?.()) {
-          window.Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-              title,
-              description: content?.slice(0, 80) || title,
-              imageUrl: 'https://kadeora.app/og-image.png',
-              link: { mobileWebUrl: url, webUrl: url },
-            },
-            buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
-          });
-        } else {
-          navigator.clipboard.writeText(url);
-          success('링크가 복사됐어요!');
-        }
-        setOpen(false);
+  const share = async (pid: string) => {
+    if (pid === 'kakao') {
+      const kakao = (window as any).Kakao;
+      if (kakao?.isInitialized?.()) {
+        kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: { title, description: (content || '').slice(0, 80), imageUrl: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}`, link: { mobileWebUrl: url, webUrl: url } },
+          buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
+        });
+      } else {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
       }
-    },
-    {
-      key: 'twitter', label: 'X(트위터)',
-      bg: '#000', color: 'var(--text-inverse)', icon: '✕',
-      action: () => {
-        window.open(`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`, '_blank');
-        setOpen(false);
-      }
-    },
-    {
-      key: 'band', label: '밴드',
-      bg: '#03C75A', color: 'var(--text-inverse)', icon: '🎯',
-      action: () => {
-        window.open(`https://band.us/plugin/share?body=${encodedTitle}%0A${encodedUrl}&route=share`, '_blank');
-        setOpen(false);
-      }
-    },
-    {
-      key: 'threads', label: '스레드',
-      bg: 'var(--bg-surface)', color: 'var(--text-inverse)', icon: '@',
-      action: () => {
-        window.open(`https://www.threads.net/intent/post?text=${encodedTitle}%0A${encodedUrl}`, '_blank');
-        setOpen(false);
-      }
-    },
-    {
-      key: 'line', label: '라인',
-      bg: '#06C755', color: 'var(--text-inverse)', icon: '💚',
-      action: () => {
-        window.open(`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`, '_blank');
-        setOpen(false);
-      }
-    },
-    {
-      key: 'copy', label: copied ? '복사됨!' : '링크복사',
-      bg: 'var(--bg-hover)', color: 'var(--text-primary)', icon: copied ? '✓' : '🔗',
-      action: async () => {
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        success('링크가 복사됐어요!');
-        setTimeout(() => setCopied(false), 2000);
-      }
-    },
-    ...(hasNativeShare ? [{
-      key: 'native', label: '더보기',
-      bg: 'var(--brand)', color: 'var(--text-inverse)', icon: '📤',
-      action: () => {
-        navigator.share({ title, text: content?.slice(0, 80) || title, url });
-        setOpen(false);
-      }
-    }] : []),
-  ];
+    } else if (pid === 'x') {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' via 카더라')}&url=${encodeURIComponent(url)}`, '_blank');
+    } else if (pid === 'naver') {
+      window.open(`https://band.us/plugin/share?body=${encodeURIComponent(title + '\n' + url)}&route=shareButton`, '_blank');
+    } else if (pid === 'copy') {
+      await navigator.clipboard.writeText(url);
+      setCopied(true); setTimeout(() => setCopied(false), 2000);
+    }
+    if (pid !== 'copy') setOpen(false);
+  };
 
   return (
     <>
-      <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); setOpen(true); }}
-        style={{ display:'flex', alignItems:'center', gap:4, padding:'6px 10px', borderRadius:20, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', fontSize:13, cursor:'pointer' }}>
-        🔗 <span>공유</span>
+      <button onClick={() => setOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: 20, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+        🔗 공유
       </button>
-
       {open && (
-        <div onClick={() => setOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:9998 }} />
-      )}
-
-      <div style={{
-        position:'fixed', bottom:0, left:0, right:0, zIndex:9999,
-        background:'var(--bg-surface)', borderRadius:'20px 20px 0 0',
-        padding:'12px 20px 32px',
-        transform: open ? 'translateY(0)' : 'translateY(100%)',
-        transition:'transform 0.25s ease',
-        boxShadow:'0 -4px 24px rgba(0,0,0,0.3)',
-      }}>
-        <div style={{ width:40, height:4, background:'var(--border)', borderRadius:2, margin:'0 auto 16px' }} />
-        <div style={{ fontSize:16, fontWeight:700, color:'var(--text-primary)', marginBottom:20 }}>공유하기</div>
-
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16 }}>
-          {platforms.map(p => (
-            <button key={p.key} onClick={(e) => { e.stopPropagation(); p.action(); }}
-              style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, background:'transparent', border:'none', cursor:'pointer', padding:0 }}>
-              <div style={{
-                width:56, height:56, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center',
-                background: p.bg, color: p.color, fontSize:22, flexShrink:0,
-              }}>{p.icon}</div>
-              <span style={{ fontSize:11, color:'var(--text-secondary)', textAlign:'center', wordBreak:'keep-all' }}>{p.label}</span>
-            </button>
-          ))}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div onClick={() => setOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
+          <div style={{ position: 'relative', background: 'var(--bg-surface)', zIndex: 1, borderRadius: '20px 20px 0 0', padding: '20px 24px 40px', maxWidth: 480, width: '100%', margin: '0 auto' }}>
+            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 20px' }} />
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>공유하기</div>
+            <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
+              {PLATFORMS.map(p => (
+                <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 60 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? '#10b981' : p.bg, color: p.color, fontSize: 22, fontWeight: 900 }}>
+                    {p.id === 'copy' && copied ? '✓' : p.emoji}
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>
+                </button>
+              ))}
+            </div>
+            <div style={{ marginTop: 20, padding: '10px 14px', background: 'var(--bg-hover)', borderRadius: 8, fontSize: 12, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</div>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

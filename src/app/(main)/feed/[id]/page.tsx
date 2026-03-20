@@ -49,14 +49,14 @@ export async function generateMetadata({ params }: Props) {
     const sb = await createSupabaseServer();
     const { data: post } = await sb
       .from('posts')
-      .select('title, content, created_at, slug, profiles!posts_author_id_fkey(nickname)')
+      .select('title, content, created_at, slug, category, likes_count, comments_count, profiles!posts_author_id_fkey(nickname)')
       .eq('id', numId)
       .eq('is_deleted', false)
       .maybeSingle();
     if (!post) return {};
     const author = (post.profiles as { nickname?: string } | null)?.nickname ?? '익명';
     const description = post.content.slice(0, 160);
-    const ogImageUrl = `${SITE_URL_META}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}`;
+    const ogImageUrl = `${SITE_URL_META}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}&category=${encodeURIComponent(post.category || '')}&likes=${post.likes_count ?? 0}&comments=${post.comments_count ?? 0}`;
     return {
       title: post.title,
       description,
@@ -70,10 +70,7 @@ export async function generateMetadata({ params }: Props) {
         publishedTime: post.created_at,
         authors: [author],
         url: `${SITE_URL_META}/feed/${post.slug || numId}`,
-        images: [
-          { url: ogImageUrl, width: 1200, height: 630, alt: post.title },
-          { url: `${SITE_URL_META}/og-image.png`, width: 1200, height: 628, alt: '카더라' },
-        ],
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
       },
       twitter: {
         card: 'summary_large_image',

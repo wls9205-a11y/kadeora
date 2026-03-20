@@ -3,23 +3,70 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-const SITE_NAME = '카더라';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.vercel.app';
+const CATEGORY_COLORS: Record<string, string> = {
+  apt: '#3b82f6',
+  stock: '#ef4444',
+  local: '#10b981',
+  free: '#8b5cf6',
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  stock: '주식',
+  apt: '청약',
+  local: '우리동네',
+  free: '자유',
+};
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const title = searchParams.get('title') ?? '카더라 — 당신이 몰랐던 진짜 정보';
+  const title = searchParams.get('title');
   const author = searchParams.get('author') ?? '';
   const category = searchParams.get('category') ?? '';
+  const likes = searchParams.get('likes') ?? '0';
+  const comments = searchParams.get('comments') ?? '0';
 
-  const CATEGORY_LABELS: Record<string, string> = {
-    stock: '📈 주식',
-    apt: '🏠 청약',
-    discuss: '💬 토론',
-    free: '💬 자유',
-  };
-  const categoryLabel = CATEGORY_LABELS[category] ?? '';
+  const catColor = CATEGORY_COLORS[category] ?? '#8b5cf6';
+  const catLabel = CATEGORY_LABELS[category] ?? '';
 
+  // Home OG image (no title param)
+  if (!title) {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #0d1117 0%, #1a1f2e 100%)',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 12, background: '#f97316',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 28, fontWeight: 900, color: '#fff',
+            }}>K</div>
+            <span style={{ fontSize: 48, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-1px' }}>
+              카더라
+            </span>
+          </div>
+          <div style={{ fontSize: 24, color: '#94a3b8', fontWeight: 500, marginBottom: 16 }}>
+            아는 사람만 아는 그 정보
+          </div>
+          <div style={{ fontSize: 16, color: '#475569', fontWeight: 400 }}>
+            주식 · 부동산 · 청약 · 우리동네
+          </div>
+        </div>
+      ),
+      { width: 1200, height: 630 },
+    );
+  }
+
+  // Post OG image
   return new ImageResponse(
     (
       <div
@@ -29,63 +76,79 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: '#0A0E17',
-          padding: '60px 64px',
+          background: 'linear-gradient(135deg, #0d1117 0%, #1a1f2e 100%)',
+          padding: '56px 64px',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}
       >
-        {/* Top bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 28, fontWeight: 900, color: '#3B82F6', letterSpacing: '-1px' }}>
-            KADEORA
+        {/* Top: logo + category */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 10, background: '#f97316',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 20, fontWeight: 900, color: '#fff',
+          }}>K</div>
+          <span style={{ fontSize: 24, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.5px' }}>
+            카더라
           </span>
-          {categoryLabel && (
+          {catLabel && (
             <span style={{
-              fontSize: 14, padding: '4px 12px', borderRadius: 999,
-              background: 'rgba(59,130,246,0.15)', color: '#60A5FA',
+              fontSize: 14, padding: '4px 14px', borderRadius: 999,
+              background: `${catColor}22`, color: catColor,
               fontWeight: 700, marginLeft: 8,
             }}>
-              {categoryLabel}
+              {catLabel}
             </span>
           )}
         </div>
 
-        {/* Title */}
+        {/* Center: title */}
         <div style={{
-          fontSize: title.length > 40 ? 36 : 44,
+          fontSize: title.length > 50 ? 34 : title.length > 30 ? 40 : 48,
           fontWeight: 800,
-          color: '#F1F5F9',
-          lineHeight: 1.3,
-          maxWidth: 900,
+          color: '#f1f5f9',
+          lineHeight: 1.35,
+          maxWidth: 1000,
           display: '-webkit-box',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
         }}>
-          {title}
+          {title.length > 90 ? title.slice(0, 87) + '...' : title}
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom: author + stats */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {author && (
               <>
                 <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+                  width: 38, height: 38, borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${catColor}, #f97316)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 16, fontWeight: 700, color: 'white',
                 }}>
                   {author[0].toUpperCase()}
                 </div>
-                <span style={{ fontSize: 16, color: '#94A3B8', fontWeight: 500 }}>{author}</span>
+                <span style={{ fontSize: 16, color: '#94a3b8', fontWeight: 500 }}>{author}</span>
               </>
             )}
           </div>
-          <span style={{ fontSize: 14, color: '#475569' }}>{SITE_URL}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            {(Number(likes) > 0 || Number(comments) > 0) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                {Number(likes) > 0 && (
+                  <span style={{ fontSize: 15, color: '#64748b' }}>♥ {likes}</span>
+                )}
+                {Number(comments) > 0 && (
+                  <span style={{ fontSize: 15, color: '#64748b' }}>💬 {comments}</span>
+                )}
+              </div>
+            )}
+            <span style={{ fontSize: 14, color: '#475569' }}>kadeora.app</span>
+          </div>
         </div>
       </div>
     ),
-    {
-      width: 1200,
-      height: 630,
-    }
+    { width: 1200, height: 630 },
   );
 }
