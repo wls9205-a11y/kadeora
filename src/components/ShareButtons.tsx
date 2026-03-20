@@ -33,9 +33,21 @@ export default function ShareButtons({ title, postId, content }: Props) {
           buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
         });
       } else {
-        // SDK 미초기화 — 카카오톡 공유 picker URL
-        const kakaoShareUrl = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
-        window.open(kakaoShareUrl, '_blank');
+        // SDK 미초기화 — init 재시도
+        const kakao2 = (window as any).Kakao;
+        const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+        if (kakao2 && key && !kakao2.isInitialized()) kakao2.init(key);
+        if (kakao2?.isInitialized?.()) {
+          kakao2.Share.sendDefault({
+            objectType: 'feed',
+            content: { title, description: (content || '카더라에서 확인해보세요').slice(0, 100), imageUrl: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}`, link: { mobileWebUrl: url, webUrl: url } },
+            buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
+          });
+        } else {
+          // SDK 완전 불가 — 링크 복사 fallback
+          await navigator.clipboard.writeText(url).catch(() => {});
+          setCopied(true); setTimeout(() => setCopied(false), 2000);
+        }
       }
     } else if (pid === 'x') {
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' via 카더라')}&url=${encodeURIComponent(url)}`, '_blank');
