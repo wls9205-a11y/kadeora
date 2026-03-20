@@ -294,18 +294,25 @@ export default async function FeedDetailPage({ params }: Props) {
 
       </article>
 
-      {/* Sticky action bar */}
+      {/* Sticky action bar — 좌측: 좋아요+댓글, 우측: 공유+저장 */}
       <div style={{
         position: 'fixed', bottom: 56, left: 0, right: 0, zIndex: 40,
         background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
-        padding: '8px 0',
+        padding: '10px 0',
       }}>
-        <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', gap: 16, fontSize: 13, color: 'var(--text-tertiary)' }}>
-          <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>댓글 {comments.length}</span>
-          <div style={{ flex: 1 }} />
-          <ShareButtons title={post.title} postId={post.id} content={post.content} />
-          <BookmarkButton postId={post.id} />
+        <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+          {/* 좌측: 좋아요 + 댓글 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
+            <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 14 }}>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>{comments.length}</span>
+            </Link>
+          </div>
+          {/* 우측: 공유 + 저장 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
+            <ShareButtons title={post.title} postId={post.id} content={post.content} />
+            <BookmarkButton postId={post.id} />
+          </div>
         </div>
       </div>
 

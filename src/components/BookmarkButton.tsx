@@ -40,15 +40,13 @@ export function BookmarkButton({ postId }: Props) {
       aria-pressed={bookmarked}
       aria-label={bookmarked ? '북마크 해제' : '북마크 추가'}
       style={{
-        display: 'flex', alignItems: 'center', gap: 6,
-        padding: '8px 14px', borderRadius: 20, fontSize: 14, cursor: 'pointer',
-        background: bookmarked ? 'var(--warning-bg)' : 'var(--bg-hover)',
-        border: `1px solid ${bookmarked ? 'var(--warning)' : 'var(--border)'}`,
-        color: bookmarked ? 'var(--warning)' : 'var(--text-secondary)',
-        transition: 'all 0.15s', fontWeight: bookmarked ? 700 : 400,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 6, background: 'none', border: 'none',
+        color: bookmarked ? 'var(--brand)' : 'var(--text-tertiary)',
+        cursor: 'pointer', transition: 'color 0.15s',
       }}
     >
-      {bookmarked ? '🔖' : '📄'} <span>{bookmarked ? '저장됨' : '저장'}</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
     </button>
   );
 }
