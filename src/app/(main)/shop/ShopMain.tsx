@@ -1,0 +1,108 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useToast } from '@/components/Toast';
+
+interface Product {
+  id: string; name: string; description: string; point_price: number;
+  icon: string | null; purchase_type: string;
+}
+
+export default function ShopMain() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [myPoints, setMyPoints] = useState(0);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [exchanging, setExchanging] = useState<string | null>(null);
+  const { success, error } = useToast();
+  const router = useRouter();
+
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    sb.auth.getSession().then(async ({ data }) => {
+      if (data.session?.user) {
+        setUserId(data.session.user.id);
+        const { data: p } = await sb.from('profiles').select('points').eq('id', data.session.user.id).single();
+        setMyPoints(p?.points ?? 0);
+      }
+    });
+    sb.from('shop_products').select('*').eq('is_active', true).eq('purchase_type', 'points').order('point_price')
+      .then(({ data }) => { if (data) setProducts(data as Product[]); });
+  }, []);
+
+  const handleExchange = async (productId: string, price: number) => {
+    if (!userId) { router.push('/login'); return; }
+    if (myPoints < price) { error(`포인트가 부족합니다. ${price - myPoints}P 더 필요해요.`); return; }
+    setExchanging(productId);
+    try {
+      const res = await fetch('/api/shop/exchange', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMyPoints(data.remaining_points);
+      success('교환 완료!');
+    } catch (e: unknown) {
+      error(e instanceof Error ? e.message : '교환 실패');
+    } finally {
+      setExchanging(null);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
+      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>상점</h1>
+
+      {/* 내 포인트 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '16px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>내 포인트</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--brand)' }}>{myPoints.toLocaleString()}P</div>
+        </div>
+        {!userId && (
+          <button onClick={() => router.push('/login')} style={{ padding: '8px 16px', borderRadius: 10, background: 'var(--brand)', color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+            로그인
+          </button>
+        )}
+      </div>
+
+      {/* 포인트 교환 상품 */}
+      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>포인트로 교환</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
+        {products.map(p => {
+          const canAfford = myPoints >= p.point_price;
+          const isExchanging = exchanging === p.id;
+          return (
+            <div key={p.id} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 24 }}>{p.icon ?? '🎁'}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>{p.description}</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand)', marginTop: 'auto' }}>{p.point_price.toLocaleString()}P</div>
+              <button
+                onClick={() => handleExchange(p.id, p.point_price)}
+                disabled={!canAfford || isExchanging}
+                style={{
+                  padding: '8px 0', borderRadius: 10, border: 'none', fontSize: 13, fontWeight: 700,
+                  background: canAfford ? 'var(--brand)' : 'var(--bg-hover)',
+                  color: canAfford ? 'white' : 'var(--text-tertiary)',
+                  cursor: canAfford && !isExchanging ? 'pointer' : 'not-allowed',
+                  opacity: isExchanging ? 0.6 : 1,
+                }}
+              >
+                {isExchanging ? '교환 중...' : canAfford ? '교환하기' : `${(p.point_price - myPoints).toLocaleString()}P 부족`}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 포인트 모으는 법 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+        <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>포인트 모으는 법</div>
+        글쓰기 +10P · 댓글 +5P · 출석체크 +10P · 프로필 완성 +100P
+      </div>
+    </div>
+  );
+}
