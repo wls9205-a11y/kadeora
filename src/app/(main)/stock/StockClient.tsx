@@ -103,8 +103,9 @@ function ChangeDisplay({ s, large }: { s: Stock; large?: boolean }) {
     );
   }
   return (
-    <span style={{ color: 'var(--text-tertiary)', fontWeight: 700, fontSize, fontVariantNumeric: 'tabular-nums' }}>
-      ━ 0.00%
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--text-tertiary)', fontWeight: 600, fontSize, fontVariantNumeric: 'tabular-nums' }}>
+      – 0.00%
+      <span style={{ fontSize: 10, fontWeight: 500 }}>전일종가</span>
     </span>
   );
 }
@@ -213,10 +214,24 @@ export default function StockClient({ initialStocks }: Props) {
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>실시간 주식시세</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>
-            국내·해외 주요 종목
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>주식시세</h1>
+            {(() => {
+              const status = getMarketStatus(market === 'ALL' ? 'KOSPI' : market);
+              const isOpen = status === '장중';
+              return (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
+                  background: isOpen ? 'rgba(34,197,94,0.1)' : 'var(--bg-hover)',
+                  color: isOpen ? '#16a34a' : 'var(--text-tertiary)',
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOpen ? '#16a34a' : '#94a3b8' }} />
+                  {status}
+                </span>
+              );
+            })()}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
