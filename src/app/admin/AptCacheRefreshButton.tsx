@@ -12,9 +12,14 @@ export default function AptCacheRefreshButton({ hasKey }: { hasKey: boolean }) {
     setResult('');
     try {
       const sb = createSupabaseBrowser();
-      const { data: { session } } = await sb.auth.getSession();
+      let { data: { session } } = await sb.auth.getSession();
       if (!session) {
-        setResult('로그인이 필요합니다');
+        // 세션 갱신 시도
+        const { data } = await sb.auth.refreshSession();
+        session = data.session;
+      }
+      if (!session) {
+        setResult('로그인이 필요합니다. 다시 로그인해주세요.');
         return;
       }
 
