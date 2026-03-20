@@ -43,7 +43,7 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
   const href = post.slug ? `/feed/${post.slug}` : `/feed/${post.id}`;
 
   return (
-    <Link href={href} style={{
+    <Link href={href} aria-label={post.title} role="article" style={{
       display: "block", textDecoration: "none", color: "inherit",
       padding: "14px 0",
       borderBottom: "1px solid var(--border)",

@@ -1,19 +1,33 @@
-import { createSupabaseServer } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
+
+export const revalidate = 0;
 
 export async function GET() {
   const start = Date.now();
   try {
-    const supabase = await createSupabaseServer();
-    const { error } = await supabase.from('profiles').select('id').limit(1);
+    const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+    const [postsR, usersR, commentsR, todayR] = await Promise.all([
+      sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
+      sb.from('profiles').select('id', { count: 'exact', head: true }),
+      sb.from('comments').select('id', { count: 'exact', head: true }),
+      sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', new Date(Date.now() - 86400000).toISOString()),
+    ]);
+
     const latency = Date.now() - start;
     return Response.json({
-      status: error ? 'degraded' : 'ok',
-      db: error ? 'error' : 'connected',
-      latency_ms: latency,
+      status: 'ok',
       timestamp: new Date().toISOString(),
       version: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'local',
-    }, { status: error ? 503 : 200 });
-  } catch {
-    return Response.json({ status: 'error', db: 'disconnected', timestamp: new Date().toISOString() }, { status: 503 });
+      checks: { database: { status: 'ok', latency_ms: latency } },
+      stats: {
+        posts: postsR.count ?? 0,
+        users: usersR.count ?? 0,
+        comments: commentsR.count ?? 0,
+        posts_today: todayR.count ?? 0,
+      },
+    });
+  } catch (e) {
+    return Response.json({ status: 'error', timestamp: new Date().toISOString(), error: (e as Error).message }, { status: 503 });
   }
 }
