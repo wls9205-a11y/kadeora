@@ -120,6 +120,14 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
             {pill('closed', statusFilter, setStatusFilter, '마감')}
           </div>
 
+          {/* 필터 결과 카운트 */}
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건</span>
+            {filtered.filter(a => getStatus(a) === 'open').length > 0 && (
+              <span style={{ color: '#22c55e', fontWeight: 600 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}건</span>
+            )}
+          </div>
+
           {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>조건에 맞는 청약이 없습니다</div>}
 
           {filtered.map((apt, i) => {
@@ -130,11 +138,13 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
             const my = myAlerts.has(h);
             const dday = !apt.rcept_bgnde ? null : Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000);
 
+            const accentColor = st === 'open' ? '#22c55e' : st === 'upcoming' ? '#3b82f6' : 'var(--border)';
             return (
               <div key={apt.id} style={{
                 padding: '14px 16px', borderRadius: 12, marginBottom: 8,
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                opacity: st === 'closed' ? 0.7 : 1,
+                borderLeft: `3px solid ${accentColor}`,
+                opacity: st === 'closed' ? 0.6 : 1,
                 transition: 'background 0.15s',
                 cursor: 'pointer',
               }}

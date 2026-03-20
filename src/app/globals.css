@@ -352,10 +352,16 @@ button:active,
   100% { background-position: -200% 0; }
 }
 
-.animate-fade-in { animation: fadeIn 0.2s ease forwards; }
+.animate-fade-in, .animate-fadeIn { animation: fadeIn 0.2s ease forwards; }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* pulse animation — loading 스켈레톤에서 사용 */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 /* ========================================

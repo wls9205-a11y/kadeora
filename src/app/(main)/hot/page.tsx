@@ -33,7 +33,7 @@ export default async function HotPage() {
 
     const topResult = await withTimeout(
       sb.from('posts')
-        .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
+        .select('id,title,slug,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
         .eq('is_deleted', false).gte('created_at', weekAgo)
         .order('likes_count', { ascending: false }).limit(5)
     );
@@ -43,7 +43,7 @@ export default async function HotPage() {
       const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const fallback = await withTimeout(
         sb.from('posts')
-          .select('id,title,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
+          .select('id,title,slug,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
           .eq('is_deleted', false).gte('created_at', monthAgo)
           .order('likes_count', { ascending: false }).limit(5)
       );
@@ -54,7 +54,7 @@ export default async function HotPage() {
       REGION_SECTIONS.map(region =>
         withTimeout(
           sb.from('posts')
-            .select('id,title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
+            .select('id,title,slug,category,likes_count,profiles!posts_author_id_fkey(nickname)')
             .eq('is_deleted', false).eq('region_id', region).gte('created_at', weekAgo)
             .order('likes_count', { ascending: false }).limit(3)
         )
@@ -85,20 +85,32 @@ export default async function HotPage() {
         {(topPosts ?? []).length === 0 ? (
           <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 20 }}>이번 주 데이터가 아직 없어요</p>
         ) : (
-          (topPosts ?? []).map((post: any, i: number) => (
-              <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < (topPosts?.length ?? 0) - 1 ? '1px solid var(--border)' : 'none' }}>
-                <span style={{ fontSize: 20, width: 28, textAlign: 'center', flexShrink: 0 }}>
+          (topPosts ?? []).map((post: any, i: number) => {
+              const isTop3 = i < 3;
+              return (
+              <Link key={post.id} href={`/feed/${post.slug || post.id}`} style={{
+                textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12,
+                padding: isTop3 ? '14px 12px' : '10px 0',
+                borderBottom: i < (topPosts?.length ?? 0) - 1 ? '1px solid var(--border)' : 'none',
+                background: isTop3 ? 'rgba(255,69,0,0.04)' : 'transparent',
+                borderRadius: isTop3 ? 10 : 0,
+                marginBottom: isTop3 ? 4 : 0,
+              }}>
+                <span style={{ fontSize: isTop3 ? 24 : 18, width: 32, textAlign: 'center', flexShrink: 0 }}>
                   {MEDAL[i + 1] ?? `${i + 1}`}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
+                  <div style={{ fontSize: isTop3 ? 15 : 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {CATEGORY_LABEL[post.category] ?? ''} · {(post.profiles as any)?.nickname ?? '익명'}
                   </div>
                 </div>
-                <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontSize: isTop3 ? 14 : 12, color: 'var(--brand)', fontWeight: 700 }}>❤ {post.likes_count ?? 0}</div>
+                </div>
               </Link>
-            ))
+              );
+            })
         )}
       </div>
 
@@ -110,12 +122,12 @@ export default async function HotPage() {
           <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
             <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>📍 {region} TOP 3</h2>
             {posts.map((post: any, i: number) => (
-                <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <Link key={post.id} href={`/feed/${post.slug || post.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ fontSize: 20, width: 28, textAlign: 'center', flexShrink: 0 }}>
                     {MEDAL[i + 1] ?? `${i + 1}`}
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{(post.profiles as any)?.nickname ?? '익명'}</div>
                   </div>
                   <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>

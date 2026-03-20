@@ -37,6 +37,14 @@ export default function DiscussClient() {
           <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>🟢 실시간</div>
         </div>
       </div>
+      {/* 라운지 면책 안내 */}
+      <div style={{
+        fontSize: 11, color: 'var(--text-tertiary)', padding: '6px 12px',
+        marginBottom: 8, lineHeight: 1.5,
+        background: 'var(--bg-surface)', borderRadius: 8, border: '1px solid var(--border)',
+      }}>
+        투자 관련 대화는 개인 의견이며, 특정 종목 매수/매도 권유는 금지됩니다. 허위사실 유포 시 자본시장법에 의해 처벌받을 수 있습니다.
+      </div>
       <ChatRoom user={user} myNickname={myNickname} />
     </div>
   );
