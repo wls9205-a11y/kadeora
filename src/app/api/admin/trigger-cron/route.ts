@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid endpoint' }, { status: 400 });
   }
 
-  const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT || '';
+  const cronSecret = process.env.CRON_SECRET || '';
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${req.headers.get('host')}`;
 
   try {

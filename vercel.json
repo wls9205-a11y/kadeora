@@ -22,6 +22,14 @@
     {
       "path": "/api/cron/cleanup",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-pageviews",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/stock-refresh",
+      "schedule": "*/5 9-16 * * 1-5"
     }
   ]
 }

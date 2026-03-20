@@ -9,14 +9,14 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Auth check
+    // Auth check — Supabase session token
     const authHeader = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!authHeader) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: '인증 토큰이 없습니다. 다시 로그인해주세요.' }, { status: 401 });
     }
-    const { data: { user } } = await supabase.auth.getUser(authHeader);
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader);
+    if (authError || !user) {
+      return NextResponse.json({ success: false, error: '세션이 만료되었습니다. 다시 로그인해주세요.' }, { status: 401 });
     }
     const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
     if (!profile?.is_admin) {
