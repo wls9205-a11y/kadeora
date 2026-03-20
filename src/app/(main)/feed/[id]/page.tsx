@@ -189,7 +189,7 @@ export default async function FeedDetailPage({ params }: Props) {
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px' }}>
       {/* JSON-LD SEO */}
       <script
         type="application/ld+json"

@@ -277,9 +277,13 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
       {/* 글쓰기 프롬프트 */}
       {currentUserId && (
-        <a href="/write" style={{ display:'flex', gap:10, alignItems:'center', padding:'12px 0', borderBottom:'1px solid var(--border)', textDecoration:'none', marginBottom:4 }}>
-          <div style={{ width:36, height:36, borderRadius:'50%', background:'var(--brand)', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:14, fontWeight:800 }}>✏</div>
-          <div style={{ flex:1, background:'var(--bg-hover)', border:'1px solid var(--border)', borderRadius:20, padding:'10px 16px', fontSize:14, color:'var(--text-tertiary)' }}>무슨 소문이 있나요?</div>
+        <a href="/write" style={{
+          display: 'flex', gap: 12, alignItems: 'center', padding: '14px 16px',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: 14, textDecoration: 'none', marginBottom: 12,
+        }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 800 }}>✏</div>
+          <div style={{ flex: 1, fontSize: 14, color: 'var(--text-tertiary)' }}>무슨 소문이 있나요?</div>
         </a>
       )}
 

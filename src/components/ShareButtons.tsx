@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Props { title: string; postId: number | string; content?: string; }
 
@@ -14,6 +14,14 @@ export default function ShareButtons({ title, postId, content }: Props) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const url = `https://kadeora.app/feed/${postId}`;
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = 'hidden';
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', handleEsc);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handleEsc); };
+  }, [open]);
 
   const share = async (pid: string) => {
     if (pid === 'kakao') {
