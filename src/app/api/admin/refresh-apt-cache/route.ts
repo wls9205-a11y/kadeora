@@ -22,45 +22,65 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
     }
 
-    // Fetch from 청약홈 API
     const APT_API_KEY = process.env.APT_DATA_API_KEY;
     if (!APT_API_KEY) {
       return NextResponse.json({ success: false, error: 'APT_DATA_API_KEY not configured' }, { status: 500 });
     }
 
-    const apiUrl =
-      'https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=' +
-      encodeURIComponent(APT_API_KEY) +
-      '&page=1&perPage=100';
+    // 과거 1년 ~ 미래 6개월 날짜 범위
+    const now = new Date();
+    const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    const sixMonthsLater = new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());
+    const fromDate = yearAgo.toISOString().slice(0, 10).replace(/-/g, '');
+    const toDate = sixMonthsLater.toISOString().slice(0, 10).replace(/-/g, '');
 
-    const apiRes = await fetch(apiUrl);
-    if (!apiRes.ok) {
-      return NextResponse.json({ success: false, error: `API error: ${apiRes.status}` }, { status: 502 });
+    // 여러 페이지 수집 (최대 3페이지 = 300건)
+    const allItems: any[] = [];
+    for (let page = 1; page <= 3; page++) {
+      const apiUrl =
+        'https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=' +
+        encodeURIComponent(APT_API_KEY) +
+        `&page=${page}&perPage=100` +
+        `&cond[RCEPT_BGNDE::GTE]=${fromDate}` +
+        `&cond[RCEPT_ENDDE::LTE]=${toDate}`;
+
+      try {
+        const apiRes = await fetch(apiUrl, { signal: AbortSignal.timeout(10000) });
+        if (!apiRes.ok) break;
+        const json = await apiRes.json();
+        const items = json?.data || json?.response?.body?.items?.item || [];
+        if (!Array.isArray(items) || items.length === 0) break;
+        allItems.push(...items);
+        if (items.length < 100) break; // 마지막 페이지
+      } catch { break; }
     }
 
-    const json = await apiRes.json();
-    const items = json?.data || json?.response?.body?.items?.item || [];
+    // 날짜 조건 없이도 시도 (API가 조건 파라미터 미지원하는 경우 fallback)
+    if (allItems.length === 0) {
+      try {
+        const fallbackUrl =
+          'https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=' +
+          encodeURIComponent(APT_API_KEY) + '&page=1&perPage=100';
+        const apiRes = await fetch(fallbackUrl, { signal: AbortSignal.timeout(10000) });
+        if (apiRes.ok) {
+          const json = await apiRes.json();
+          const items = json?.data || json?.response?.body?.items?.item || [];
+          if (Array.isArray(items)) allItems.push(...items);
+        }
+      } catch {}
+    }
 
-    if (!Array.isArray(items) || items.length === 0) {
+    if (allItems.length === 0) {
       return NextResponse.json({ success: true, count: 0, message: 'No data from API' });
     }
 
     // UPSERT to apt_cache
-    const { error: upsertErr } = await supabase.from('apt_cache').upsert(
-      {
-        cache_type: 'apt_subscriptions',
-        data: items,
-        refreshed_at: new Date().toISOString(),
-        refreshed_by: user.id,
-      },
+    await supabase.from('apt_cache').upsert(
+      { cache_type: 'apt_subscriptions', data: allItems, refreshed_at: new Date().toISOString(), refreshed_by: user.id },
       { onConflict: 'cache_type' }
     );
 
-    if (upsertErr) {
-      return NextResponse.json({ success: false, error: upsertErr.message }, { status: 500 });
-    }
-
-    // Also sync to apt_subscriptions table as before
+    // Sync to apt_subscriptions (UPSERT on house_manage_no)
     const mapItem = (item: Record<string, string>) => ({
       house_manage_no: item.HOUSE_MANAGE_NO || item.houseManageNo || '',
       house_nm: item.HOUSE_NM || item.houseNm || '',
@@ -83,11 +103,12 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     });
 
-    await supabase
-      .from('apt_subscriptions')
-      .upsert(items.map(mapItem), { onConflict: 'house_manage_no' });
+    const mapped = allItems.filter(i => (i.HOUSE_MANAGE_NO || i.houseManageNo)).map(mapItem);
+    if (mapped.length > 0) {
+      await supabase.from('apt_subscriptions').upsert(mapped, { onConflict: 'house_manage_no' });
+    }
 
-    return NextResponse.json({ success: true, count: items.length });
+    return NextResponse.json({ success: true, count: allItems.length });
   } catch (err) {
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Unknown error' },
