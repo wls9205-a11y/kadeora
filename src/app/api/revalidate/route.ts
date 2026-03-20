@@ -4,8 +4,8 @@ import { revalidatePath } from 'next/cache';
 export async function POST(req: NextRequest) {
   try {
     const { secret, path } = await req.json();
-    const secrets = [process.env.CRON_SECRET, process.env.CRON_SECRETT].filter(Boolean);
-    if (secrets.length === 0 || !secrets.includes(secret)) {
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret || secret !== cronSecret) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
     revalidatePath(path || '/feed');

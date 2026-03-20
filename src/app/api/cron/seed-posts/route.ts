@@ -41,11 +41,9 @@ const TEMPLATES = [
 ];
 
 export async function GET(req: NextRequest) {
-  // Vercel Cron 인증: CRON_SECRET 환경변수 → Authorization: Bearer 헤더 자동 전송
-  const auth = req.headers.get('authorization')?.replace('Bearer ', '');
-  const secrets = [process.env.CRON_SECRET, process.env.CRON_SECRETT].filter(Boolean);
-  if (secrets.length === 0 || !secrets.includes(auth || '')) {
-    console.error('[seed-posts] Unauthorized:', req.headers.get('x-forwarded-for'));
+  const authHeader = req.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -114,15 +112,14 @@ export async function GET(req: NextRequest) {
       console.error('[seed-posts] Failed:', error.message, { title, userId });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    console.log('[seed-posts] Created:', title, 'by', userId, 'category:', finalCategory);
     try { revalidatePath('/feed'); revalidatePath('/hot'); } catch {}
     // Also call revalidate API for Vercel edge cache
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
-    const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT || '';
+    const secret = process.env.CRON_SECRET || '';
     fetch(`${siteUrl}/api/revalidate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: cronSecret, path: '/feed' }),
+      body: JSON.stringify({ secret, path: '/feed' }),
     }).catch(() => {});
     return NextResponse.json({ ok: true, title, category: finalCategory, region: finalRegion });
   } catch (e: any) {

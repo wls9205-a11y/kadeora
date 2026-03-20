@@ -35,9 +35,9 @@ const CHAT_TEMPLATES = [
 ];
 
 export async function GET(req: NextRequest) {
-  const secrets = [process.env.CRON_SECRET, process.env.CRON_SECRETT].filter(Boolean);
-  const token = req.headers.get('authorization')?.replace('Bearer ', '');
-  if (secrets.length === 0 || !secrets.includes(token || '')) {
+  const authHeader = req.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

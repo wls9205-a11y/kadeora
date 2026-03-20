@@ -4,10 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET
-  const auth = req.headers.get('authorization')
-  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
-    console.error('[cleanup] Unauthorized attempt:', req.headers.get('x-forwarded-for'))
+  const authHeader = req.headers.get('authorization')
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -30,7 +29,6 @@ export async function GET(req: NextRequest) {
       .delete({ count: 'exact' })
       .lt('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
 
-    console.log('[cleanup] notifications:', notifCount, 'page_views:', pvCount)
 
     return NextResponse.json({
       ok: true,

@@ -6,9 +6,8 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: Request) {
   // CRON_SECRET 검증 — 환경변수 없으면 항상 차단
   const authHeader = req.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET
+  const cronSecret = process.env.CRON_SECRET
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    console.error('[invite-reward] Unauthorized attempt:', req.headers.get('x-forwarded-for'))
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

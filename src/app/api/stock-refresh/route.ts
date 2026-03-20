@@ -297,13 +297,10 @@ async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: n
 export async function GET(req: NextRequest) {
   if (!(await rateLimit(req, 'auth'))) return rateLimitResponse();
 
-  // CRON_SECRET 체크 (CRON_SECRET + CRON_SECRETT 양쪽 허용)
-  const secrets = [process.env.CRON_SECRET, process.env.CRON_SECRETT].filter(Boolean);
-  const token = req.headers.get('authorization')?.replace('Bearer ', '');
-  if (secrets.length === 0 || !secrets.includes(token || '')) {
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const authHeader = req.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const supabase = createClient(

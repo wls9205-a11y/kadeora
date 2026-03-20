@@ -16,7 +16,10 @@ export function GuestGate({ children, isLoggedIn }: GuestGateProps) {
   useEffect(() => {
     if (isLoggedIn) return;
     if (typeof window === 'undefined') return;
-    if (sessionStorage.getItem('login_prompt_dismissed')) return;
+    try {
+      const val = localStorage.getItem('kd_login_dismissed');
+      if (val && Date.now() - JSON.parse(val).ts < 86400000) return;
+    } catch {}
 
     // 15초 후 표시
     const timer = setTimeout(() => setShowPrompt(true), 15000);
@@ -35,7 +38,7 @@ export function GuestGate({ children, isLoggedIn }: GuestGateProps) {
 
   const dismiss = () => {
     setShowPrompt(false);
-    sessionStorage.setItem('login_prompt_dismissed', '1');
+    try { localStorage.setItem('kd_login_dismissed', JSON.stringify({ ts: Date.now() })); } catch {}
   };
 
   return (

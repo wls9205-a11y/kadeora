@@ -3,7 +3,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const revalidate = 300;
 
-const withTimeout = <T>(p: Promise<T>, ms = 4000): Promise<T | null> =>
+const withTimeout = <T>(p: Promise<T>, ms = 3000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
 export async function GET() {
