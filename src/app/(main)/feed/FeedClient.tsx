@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
-import { CATEGORY_MAP, REGIONS } from '@/lib/constants';
+import { REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
@@ -350,22 +350,27 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
       {/* 카테고리 바 */}
       <div style={{
-        background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 4, padding: '8px 10px', display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'nowrap', overflowX: 'auto',
+        display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 10,
+        flexWrap: 'nowrap', overflowX: 'auto',
       }}>
-        {categories.map(cat => (
-          <button key={cat.key} aria-pressed={activeCategory === cat.key}
-            onClick={() => router.push(`/feed${cat.key !== 'all' ? `?category=${cat.key}` : ''}`)}
-            style={{
-              padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
-              fontWeight: 700, fontSize: 14,
-              background: activeCategory === cat.key ? 'var(--border)' : 'transparent',
-              color: activeCategory === cat.key ? 'var(--text-primary)' : 'var(--text-secondary)',
-              transition: 'all 0.1s',
-            }}>
-            {cat.label}
-          </button>
-        ))}
+        {categories.map(cat => {
+          const isActive = activeCategory === cat.key;
+          return (
+            <button key={cat.key} aria-pressed={isActive}
+              onClick={() => router.push(`/feed${cat.key !== 'all' ? `?category=${cat.key}` : ''}`)}
+              style={{
+                padding: '10px 16px', border: 'none', cursor: 'pointer', flexShrink: 0,
+                fontWeight: isActive ? 700 : 500, fontSize: 14,
+                background: 'transparent',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                borderBottom: isActive ? '2px solid var(--brand)' : '2px solid transparent',
+                transition: 'all 0.1s',
+                fontFamily: 'inherit',
+              }}>
+              {cat.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* 지역 탭 (우리동네 카테고리일 때만) */}
@@ -398,79 +403,51 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       )}
 
       {/* 게시글 목록 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {visiblePosts.map((post, postIndex) => {
-          const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {visiblePosts.map((post) => {
+          const catColors: Record<string, {bg: string; color: string; label: string}> = {
+            apt: { bg: '#3b82f620', color: '#3b82f6', label: '부동산' },
+            stock: { bg: '#ef444420', color: '#ef4444', label: '주식' },
+            local: { bg: '#10b98120', color: '#10b981', label: '우리동네' },
+            free: { bg: '#8b5cf620', color: '#8b5cf6', label: '자유' },
+          };
+          const catInfo = catColors[post.category] ?? null;
           const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
-          const isLiked = likedPosts.has(post.id);
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
-          const isBookmarked = bookmarkedPosts.has(post.id);
           return (
-            <React.Fragment key={post.id}>
-            <Link href={`/feed/${post.id}`} className="animate-fadeIn kd-card"
-              style={{ display: 'flex', textDecoration: 'none' }}>
-              {/* 투표 */}
-              <div
-                onClick={(e) => handleUpvote(e, post.id)}
-                style={{
-                  width: 40, background: isLiked ? 'var(--brand)' : 'var(--bg-hover)', borderRadius: '4px 0 0 4px',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '10px 4px', gap: 4, flexShrink: 0, cursor: 'pointer',
-                  transition: 'background 0.15s',
-                }}>
-                <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: `8px solid ${isLiked ? 'var(--text-inverse)' : 'var(--brand)'}` }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: isLiked ? 'var(--text-inverse)' : 'var(--brand)' }}>{numFmt(displayLikes)}</span>
-                <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `8px solid ${isLiked ? 'var(--text-inverse)' : 'var(--border)'}` }} />
+            <Link key={post.id} href={`/feed/${post.id}`} className="animate-fadeIn"
+              style={{ display: 'block', textDecoration: 'none', color: 'inherit', padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+              {/* Header row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, marginBottom: 6 }}>
+                {post.profiles?.avatar_url ? (
+                  <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={28} height={28} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
+                    {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
+                  </div>
+                )}
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{post.profiles?.nickname ?? '익명'}</span>
+                <span>{gradeEmoji}</span>
+                {catInfo && (
+                  <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, background: catInfo.bg, color: catInfo.color }}>{catInfo.label}</span>
+                )}
+                <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
               </div>
-              {/* 본문 */}
-              <div style={{ flex: 1, padding: '10px 12px', minWidth: 0, display:'flex', gap:10 }}>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 6, flexWrap: 'wrap' }}>
-                  {post.profiles?.avatar_url ? (
-                    <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={18} height={18} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                  ) : (
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
-                      {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
-                    </div>
-                  )}
-                  <span>{gradeEmoji} <strong style={{ color: 'var(--text-primary)' }}>{post.profiles?.nickname ?? '익명'}</strong> · {timeAgo(post.created_at)}</span>
-                  <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                  {((post.likes_count ?? 0) >= 100 || (post.view_count ?? 0) >= 1000) && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 2, fontWeight: 700, background: 'var(--error-bg)', color: 'var(--error)' }}>🔥 HOT</span>}
-                </div>
-                <h2 style={{ margin: '0 0 4px', fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                  {post.title}
-                </h2>
-                <p style={{ margin: '0 0 8px', fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
-                  {post.content}
-                </p>
-                <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <div onClick={(e) => handleComment(e, post.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
-                    💬 댓글 {numFmt(post.comments_count ?? 0)}
-                  </div>
-                  <div onClick={(e) => handleShare(e, post)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
-                    🔗 공유
-                  </div>
-                  <div onClick={(e) => handleBookmark(e, post.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 8px', borderRadius: 2, fontSize: '0.75rem', fontWeight: 700, color: isBookmarked ? 'var(--brand)' : 'var(--text-tertiary)', cursor: 'pointer' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border)'; if (!bookmarkedPosts.has(post.id)) (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; if (!bookmarkedPosts.has(post.id)) (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)'; }}>
-                    {isBookmarked ? '🔖' : '🔖'} {isBookmarked ? '저장됨' : '저장'}
-                  </div>
-                  <div style={{ marginLeft: 'auto', fontSize: '0.6875rem', color: 'var(--text-tertiary)', padding: '5px 4px', display:'flex', alignItems:'center', gap:4 }}>
-                    조회수 {numFmt(post.view_count ?? 0)}
-                    <span style={{ fontSize:10, color:'var(--text-tertiary)', opacity:0.5 }}>kadeora.app</span>
-                  </div>
-                </div>
-              </div>
-              {(post as any).images && (post as any).images.length > 0 && (
-                <Image src={(post as any).images[0]} alt="" width={48} height={48} style={{ borderRadius:4, objectFit:'cover', flexShrink:0, alignSelf:'center' }} />
-              )}
+              {/* Title */}
+              <h2 style={{ margin: '0 0 5px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                {post.title}
+              </h2>
+              {/* Content preview */}
+              <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                {post.content}
+              </p>
+              {/* Footer */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, color: 'var(--text-tertiary)' }}>
+                <span>♡ {numFmt(displayLikes)}</span>
+                <span>💬 {numFmt(post.comments_count ?? 0)}</span>
+                {(post.view_count ?? 0) > 0 && <span>조회 {numFmt(post.view_count ?? 0)}</span>}
               </div>
             </Link>
-            </React.Fragment>
           );
         })}
       </div>

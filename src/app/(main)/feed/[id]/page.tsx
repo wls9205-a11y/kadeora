@@ -181,43 +181,38 @@ export default async function FeedDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: 'var(--text-tertiary)' }}>
-        <Link href="/feed" style={{ color: 'var(--brand)', textDecoration: 'none' }}>피드</Link>
-        <span>›</span>
-        <span style={{ padding: '1px 8px', borderRadius: 999, background: cat.bg, color: cat.color, fontSize: 11, fontWeight: 700 }}>
-          {cat.label}
-        </span>
+      {/* Back link */}
+      <div style={{ marginBottom: 20 }}>
+        <Link href="/feed" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 피드</Link>
       </div>
 
-      {/* Post card */}
-      <article style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+      {/* Post article */}
+      <article style={{ marginBottom: 20 }}>
+        {/* Title */}
+        <h1 style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+          {post.title}
+        </h1>
+
+        {/* Author row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
           {post.profiles?.avatar_url ? (
-            <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={42} height={42} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+            <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           ) : (
             <div style={{
-              width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
-              background: 'linear-gradient(135deg, var(--brand), var(--info))',
+              width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+              background: 'var(--brand)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, fontWeight: 700, color: 'var(--text-inverse)',
+              fontSize: 14, fontWeight: 700, color: 'var(--text-inverse, #fff)',
             }}>
               {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
             </div>
           )}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>
-                {GRADE_EMOJI[post.profiles?.grade as number] || '🌱'} {post.profiles?.nickname ?? '익명'}
-              </span>
-              {post.profiles?.grade && (
-                <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  {post.profiles.grade}
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+              {post.profiles?.nickname ?? '익명'}
+            </span>
+            <span style={{ marginLeft: 4 }}>{GRADE_EMOJI[post.profiles?.grade as number] || '🌱'}</span>
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
               {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
           </div>
@@ -226,11 +221,8 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         </div>
 
-        <h1 style={{ margin: '0 0 16px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.4 }}>
-          {post.title}
-        </h1>
-
-        <div style={{ fontSize: 15, color: 'var(--text-primary)', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
+        {/* Content body */}
+        <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.9, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
           {post.content}
         </div>
 
@@ -242,7 +234,7 @@ export default async function FeedDetailPage({ params }: Props) {
             padding: '8px 12px',
             fontSize: 11,
             color: 'var(--text-tertiary)',
-            marginTop: 12,
+            marginBottom: 24,
             lineHeight: 1.5,
           }}>
             📌 이 게시글은 개인의 의견이며 투자 권유가 아닙니다. 모든 투자 판단과 손익은 투자자 본인에게 귀속됩니다.
@@ -276,32 +268,29 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* Actions */}
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, display:'flex', alignItems:'center', gap:8 }}>
+        {/* Action bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 13, color: 'var(--text-tertiary)', borderTop: '1px solid var(--border)', paddingTop: 12 }}>
           <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'6px 12px', borderRadius:20, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', fontSize:13 }}>
-            💬 <span>{comments.length.toLocaleString()}</span>
-          </div>
+          <span>💬 {comments.length}</span>
           <ShareButtons title={post.title} postId={post.id} content={post.content} />
-          <div style={{ display:'flex', justifyContent:'center', padding:'6px 12px' }}>
-            <BookmarkButton postId={post.id} />
-          </div>
+          <BookmarkButton postId={post.id} />
         </div>
       </article>
 
       {/* Comments */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px', marginBottom: 16 }}>
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>💬 댓글 {comments.length}</h3>
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
 
-      {/* 관련 글 */}
+      {/* Related posts */}
       {related.length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px' }}>
-          <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>관련 글</h3>
+        <div style={{ marginBottom: 20 }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
           {related.map((r: any, i: number) => (
-            <Link key={r.id} href={`/feed/${r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < related.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
+            <Link key={r.id} href={`/feed/${r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
               <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>❤ {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>♡ {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
             </Link>
           ))}
         </div>
