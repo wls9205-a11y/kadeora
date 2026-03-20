@@ -1,14 +1,15 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Post { id: number; title: string; category: string; is_deleted: boolean; created_at: string; likes_count: number; comments_count: number; view_count: number; profiles: { nickname: string } | null }
 interface ChatMsg { id: string; content: string; created_at: string; profiles: { nickname: string } | null }
 
-const ITEMS_PER_PAGE = 30;
+const LIMIT = 20;
 
 export default function AdminContentPage() {
   const [mainTab, setMainTab] = useState<'posts' | 'chat'>('posts');
   const [posts, setPosts] = useState<Post[]>([]);
+  const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all'|'active'|'hidden'>('all');
@@ -21,13 +22,19 @@ export default function AdminContentPage() {
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async (p = 1, s = search, f = statusFilter, c = catFilter) => {
     setLoading(true);
-    const res = await fetch('/api/admin/posts');
-    if (res.ok) { const d = await res.json(); setPosts(d.posts ?? []); }
+    const params = new URLSearchParams({ page: String(p), limit: String(LIMIT), search: s, filter: f, category: c });
+    const res = await fetch(`/api/admin/posts?${params}`);
+    if (res.ok) {
+      const d = await res.json();
+      setPosts(d.posts ?? []);
+      setTotal(d.total ?? 0);
+    }
     setLoading(false);
     setSelectedIds(new Set());
-  };
+  }, [search, statusFilter, catFilter]);
+
   useEffect(() => { load(); }, []);
 
   const loadChat = async () => {
@@ -48,7 +55,7 @@ export default function AdminContentPage() {
   const action = async (id: number, act: string) => {
     if (act === 'hide' && !confirm('이 게시글을 숨김 처리하시겠습니까?')) return;
     await fetch(`/api/admin/posts/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: act }) });
-    load();
+    load(currentPage, search, statusFilter, catFilter);
   };
 
   const toggleSelect = (id: number) => {
@@ -60,10 +67,10 @@ export default function AdminContentPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === paginatedPosts.length) {
+    if (selectedIds.size === posts.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(paginatedPosts.map(p => p.id)));
+      setSelectedIds(new Set(posts.map(p => p.id)));
     }
   };
 
@@ -76,19 +83,23 @@ export default function AdminContentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'hide', ids: Array.from(selectedIds) }),
       });
-      await load();
+      await load(currentPage, search, statusFilter, catFilter);
     } catch {}
     setBulkLoading(false);
   };
 
-  const filtered = posts
-    .filter(p => catFilter === 'all' || p.category === catFilter)
-    .filter(p => statusFilter === 'all' || (statusFilter === 'active' ? !p.is_deleted : p.is_deleted))
-    .filter(p => !search || p.title.includes(search));
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
-  const paginatedPosts = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  useEffect(() => { setCurrentPage(1); setSelectedIds(new Set()); }, [search, catFilter, statusFilter]);
+  // When filters change, reset to page 1 and reload
+  useEffect(() => {
+    setCurrentPage(1);
+    load(1, search, statusFilter, catFilter);
+  }, [search, catFilter, statusFilter]);
+
+  // When page changes (but not from filter reset), reload
+  useEffect(() => {
+    load(currentPage, search, statusFilter, catFilter);
+  }, [currentPage]);
 
   const tabStyle = (active: boolean) => ({
     padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700,
@@ -167,7 +178,7 @@ export default function AdminContentPage() {
                     <th style={{ padding: '10px 8px', width: 36 }}>
                       <input
                         type="checkbox"
-                        checked={paginatedPosts.length > 0 && selectedIds.size === paginatedPosts.length}
+                        checked={posts.length > 0 && selectedIds.size === posts.length}
                         onChange={toggleSelectAll}
                         style={{ cursor: 'pointer', width: 16, height: 16 }}
                       />
@@ -179,7 +190,7 @@ export default function AdminContentPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedPosts.map(p => (
+                  {posts.map(p => (
                     <tr key={p.id} style={{ borderBottom: '1px solid var(--border)', opacity: p.is_deleted ? 0.5 : 1, background: selectedIds.has(p.id) ? 'var(--bg-hover)' : 'transparent' }}>
                       <td style={{ padding: '10px 8px' }}>
                         <input

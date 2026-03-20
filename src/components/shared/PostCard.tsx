@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { getAvatarColor } from "@/lib/avatar";
+import { CATEGORY_STYLES } from "@/lib/constants";
 
 export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; grade?: number; }
 export interface Post {
@@ -19,10 +20,6 @@ export interface PostCardProps {
   showAuthor?: boolean;
 }
 const GRADE_EMOJI: Record<number,string> = {1:'🌱',2:'📡',3:'🏘',4:'🏠',5:'⚡',6:'🦁',7:'🏆',8:'👑',9:'🌟',10:'⚡'};
-const CAT: Record<string,{label:string;color:string;bg:string}> = {
-  apt:{label:'부동산',color:'#3b82f6',bg:'#3b82f615'}, stock:{label:'주식',color:'#ef4444',bg:'#ef444415'},
-  local:{label:'우리동네',color:'#10b981',bg:'#10b98115'}, free:{label:'자유',color:'#8b5cf6',bg:'#8b5cf615'},
-};
 
 function timeAgo(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -35,7 +32,7 @@ function timeAgo(dateStr: string): string {
 
 function PostCard({ post, variant = "default", showAuthor = true }: PostCardProps) {
   const displayName = post.is_anonymous ? "익명" : post.author?.nickname || "사용자";
-  const catInfo = CAT[post.category ?? ''] ?? null;
+  const catInfo = CATEGORY_STYLES[post.category ?? ''] ?? null;
   const gradeEmoji = GRADE_EMOJI[post.author?.grade ?? 1] ?? '🌱';
   const avatarColor = getAvatarColor(displayName);
   const href = post.slug ? `/feed/${post.slug}` : `/feed/${post.id}`;

@@ -126,6 +126,13 @@ export const DEMO_PRODUCTS: ShopProduct[] = [
   { id: 'premium-membership', name: '30일 프리미엄 멤버십', description: '광고 없는 깔끔한 환경 + 전용 채널 접근', price_krw: 9900, icon: '💎', is_active: true, created_at: new Date().toISOString() },
 ];
 
+export const CATEGORY_STYLES: Record<string, { label: string; color: string; bg: string }> = {
+  stock: { label: '주식', color: '#ef4444', bg: '#ef444415' },
+  apt: { label: '부동산', color: '#3b82f6', bg: '#3b82f615' },
+  local: { label: '우리동네', color: '#10b981', bg: '#10b98115' },
+  free: { label: '자유', color: '#8b5cf6', bg: '#8b5cf615' },
+};
+
 export const CATEGORY_MAP: Record<string, { label: string; color: string; bg: string }> = {
   apt: { label: '청약', color: '#10B981', bg: 'rgba(16,185,129,0.15)' },
   stock: { label: '주식', color: '#3B82F6', bg: 'rgba(59,130,246,0.15)' },

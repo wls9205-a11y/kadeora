@@ -13,6 +13,7 @@ import ShareButtons from '@/components/ShareButtons'
 
 import { BookmarkButton } from '@/components/BookmarkButton';
 import ReportButton from '@/components/ReportButton';
+import PostActions from '@/components/PostActions';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
@@ -227,7 +228,8 @@ export default async function FeedDetailPage({ params }: Props) {
               {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
           </div>
-          <div style={{ flexShrink: 0 }}>
+          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <PostActions postId={post.id} isOwner={currentUserId === post.author_id} />
             <ReportButton postId={post.id} style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'transparent', border: 'none', cursor: 'pointer' }} />
           </div>
         </div>
