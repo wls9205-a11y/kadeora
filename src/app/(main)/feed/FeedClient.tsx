@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, MessageCircle, Eye, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Bookmark, Search, User } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -237,137 +237,40 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   }, [loadMorePosts]);
 
   const categories = [
-    { key: 'all', label: '전체' }, { key: 'local', label: '📍 우리동네' },
-    { key: 'stock', label: '📊 주식' }, { key: 'apt', label: '🏢 부동산' }, { key: 'free', label: '✏️ 자유' },
+    { key: 'all', label: '전체' }, { key: 'stock', label: '주식' },
+    { key: 'apt', label: '부동산' }, { key: 'local', label: '우리동네' }, { key: 'free', label: '자유' },
   ];
   const visiblePosts = posts;
 
   return (
     <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      {/* 피드 헤더 */}
-      <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>피드</h1>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <Link href="/guide" style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            padding: '6px 12px', borderRadius: 20,
-            border: '1px solid var(--border)', background: 'var(--bg-surface)',
-            color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 13, fontWeight: 600,
-          }}>📖 가이드</Link>
-          <button onClick={() => router.push('/search')} style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderRadius: 20, padding: '6px 14px', fontSize: 13,
-            color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit',
-          }}>🔍 검색</button>
+      {/* 헤더 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, padding: '4px 0' }}>
+        <h1 style={{ fontSize: 20, fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5 }}>카더라</h1>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link href="/search" aria-label="검색" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 12, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+            <Search size={20} />
+          </Link>
+          <Link href="/profile" aria-label="프로필" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 12, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+            <User size={20} />
+          </Link>
         </div>
       </div>
 
-      {/* 글쓰기 프롬프트 */}
-      {currentUserId && (
-        <a href="/write" style={{
-          display: 'flex', gap: 12, alignItems: 'center', padding: '14px 16px',
-          background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 14, textDecoration: 'none', marginBottom: 12,
-        }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 800 }}>✏</div>
-          <div style={{ flex: 1, fontSize: 14, color: 'var(--text-tertiary)' }}>무슨 소문이 있나요?</div>
-        </a>
-      )}
-
-      {/* 지역 미설정 배너 */}
-      {showRegionBanner && (
-        <div style={{
-          background:'var(--brand)', color:'var(--text-inverse)',
-          padding:'10px 16px', borderRadius:4, marginBottom:10,
-          display:'flex', alignItems:'center', justifyContent:'space-between',
-          fontSize:13, fontWeight:600,
-        }}>
-          <span>📍 지역을 설정하면 우리동네 소식을 볼 수 있어요!</span>
-          <a href="/onboarding" style={{
-            color:'var(--text-inverse)', textDecoration:'underline', fontWeight:700, marginLeft:8,
-          }}>설정하기</a>
-        </div>
-      )}
-
-      {/* 안내 배너 */}
-      {!tipSeen && (
-        <div style={{
-          background:'var(--bg-surface)', border:'1px solid var(--border)',
-          borderRadius:8, padding:'10px 14px', marginBottom:8,
-          display:'flex', justifyContent:'space-between', alignItems:'center',
-          fontSize:13, color:'var(--text-secondary)',
-        }}>
-          <span style={{ whiteSpace:'nowrap' }}>💡 ▲ 숫자를 클릭하면 좋은 글에 투표할 수 있어요!</span>
-          <button onClick={() => { setTipSeen(true); localStorage.setItem('kd_tip_seen','1'); }}
-            aria-label="닫기"
-            style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-tertiary)', fontSize:16, flexShrink:0, marginLeft:8 }}>✕</button>
-        </div>
-      )}
-
-      {/* 알림 설정 유도 */}
-      <PushNudgeBanner />
-
-      {/* 출석체크 배너 */}
-      {currentUserId && <AttendanceBanner />}
-
-      {/* 트렌딩 키워드 */}
-      <TrendingBar />
-
-      {/* 이번주 HOT */}
-      {hotPosts.length > 0 && (() => {
-        return (
-          <div style={{ marginBottom: 16, borderRadius: 16, background: 'linear-gradient(160deg, rgba(255,69,0,0.1) 0%, rgba(20,20,20,0) 60%)', border: '1px solid rgba(255,69,0,0.2)', overflow: 'hidden' }}>
-            {/* 헤더 */}
-            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 18, display: 'inline-block', animation: 'hotFlame 1.5s ease-in-out infinite' }}>🔥</span>
-                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>이번주 HOT</span>
-              </div>
-              <Link href="/hot" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>더보기 →</Link>
-            </div>
-
-            {/* Uniform ranking list */}
-            <div style={{ padding: '0 12px 12px' }}>
-              {hotPosts.slice(0, 5).map((hp: any, i: number) => {
-                const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-                return (
-                  <Link key={hp.id} href={`/feed/${(hp as any).slug || hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < Math.min(hotPosts.length, 5) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
-                    <span style={{ fontSize: 18, width: 28, textAlign: 'center', flexShrink: 0 }}>{medals[i]}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{(hp.profiles as any)?.nickname ?? '익명'}</div>
-                    </div>
-                    <span style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {hp.likes_count ?? 0}</span>
-                  </Link>
-                );
-              })}
-            </div>
-
-            <style>{`@keyframes hotFlame { 0%,100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.3) rotate(3deg); } }`}</style>
-          </div>
-        );
-      })()}
-
-      {/* 카테고리 바 */}
-      <div style={{
-        display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 10,
-        flexWrap: 'nowrap', overflowX: 'auto',
-      }}>
+      {/* 카테고리 pill 탭 */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 2 }}>
         {categories.map(cat => {
           const isActive = activeCategory === cat.key;
           return (
             <button key={cat.key} aria-pressed={isActive}
               onClick={() => router.push(`/feed${cat.key !== 'all' ? `?category=${cat.key}` : ''}`)}
               style={{
-                padding: '10px 16px', border: 'none', cursor: 'pointer', flexShrink: 0,
-                fontWeight: isActive ? 700 : 500, fontSize: 14,
-                background: 'transparent',
-                color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                borderBottom: isActive ? '2px solid var(--brand)' : '2px solid transparent',
-                transition: 'all 0.1s',
-                fontFamily: 'inherit',
+                padding: '7px 16px', borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0,
+                fontWeight: isActive ? 700 : 500, fontSize: 13,
+                background: isActive ? 'var(--text-primary)' : 'var(--bg-surface)',
+                color: isActive ? 'var(--bg-base, #fff)' : 'var(--text-secondary)',
+                transition: 'all 0.15s', fontFamily: 'inherit',
               }}>
               {cat.label}
             </button>
@@ -375,27 +278,19 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         })}
       </div>
 
-      {/* 지역 탭 (우리동네 카테고리일 때만) */}
+      {/* 지역 필터 (우리동네만) */}
       {activeCategory === 'local' && (
-        <div style={{
-          background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 4, padding: '6px 8px', display: 'flex', gap: 3, marginBottom: 10,
-          flexWrap: 'nowrap', overflowX: 'auto',
-        }}>
+        <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', flexWrap: 'nowrap' }}>
           {REGIONS.map(r => {
             const isActive = activeRegion === r.value || (activeRegion === 'all' && r.value === 'all');
             return (
               <button key={r.value}
-                onClick={() => {
-                  const params = r.value === 'all' ? '?category=local' : `?category=local&region=${r.value}`;
-                  router.push(`/feed${params}`);
-                }}
+                onClick={() => router.push(`/feed${r.value === 'all' ? '?category=local' : `?category=local&region=${r.value}`}`)}
                 style={{
-                  padding: '5px 10px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
-                  fontWeight: 600, fontSize: 12,
+                  padding: '5px 12px', borderRadius: 999, border: `1px solid ${isActive ? 'var(--brand)' : 'var(--border)'}`, cursor: 'pointer', flexShrink: 0,
+                  fontWeight: 600, fontSize: 11, fontFamily: 'inherit',
                   background: isActive ? 'var(--brand)' : 'transparent',
-                  color: isActive ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-                  transition: 'all 0.1s',
+                  color: isActive ? '#fff' : 'var(--text-tertiary)',
                 }}>
                 {r.label}
               </button>
@@ -403,6 +298,21 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           })}
         </div>
       )}
+
+      {/* 글쓰기 프롬프트 */}
+      {currentUserId && (
+        <Link href="/write" style={{
+          display: 'flex', gap: 12, alignItems: 'center', padding: '12px 16px',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: 16, textDecoration: 'none', marginBottom: 14,
+        }}>
+          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 16, fontWeight: 700 }}>+</div>
+          <span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>무슨 소문이 있나요?</span>
+        </Link>
+      )}
+
+      {/* 트렌딩 */}
+      <TrendingBar />
 
       {/* 게시글 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -424,7 +334,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const postHref = `/feed/${(post as any).slug || post.id}`;
           return (
             <div key={post.id} className="animate-fadeIn"
-              style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', borderLeft: isPopular ? '3px solid var(--brand)' : 'none', paddingLeft: isPopular ? 12 : 0 }}>
+              style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', borderLeft: isPopular ? '2px solid var(--brand)' : 'none', paddingLeft: isPopular ? 14 : 0 }}>
               {/* Clickable area — navigates to post detail */}
               <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                 {/* Header row */}
@@ -462,8 +372,8 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                     </p>
                   </div>
                   {hasImages && (
-                    <div style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--bg-hover)' }}>
-                      <Image src={post.images![0]} alt="" fill sizes="72px" style={{ objectFit: 'cover' }} />
+                    <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--bg-hover)' }}>
+                      <Image src={post.images![0]} alt="" fill sizes="56px" style={{ objectFit: 'cover' }} />
                       {post.images!.length > 1 && (
                         <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>+{post.images!.length - 1}</div>
                       )}
