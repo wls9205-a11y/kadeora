@@ -7,6 +7,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all'|'active'|'suspended'>('all');
+  const [userType, setUserType] = useState<'all'|'real'|'seed'>('all');
   const [regionFilter, setRegionFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +41,12 @@ export default function AdminUsersPage() {
   const regionUnsetCount = totalUsers - regionSetCount;
   const regionPct = totalUsers > 0 ? Math.round((regionSetCount / totalUsers) * 100) : 0;
 
+  const isSeed = (id: string) => id.startsWith('aaaaaaaa');
+  const seedUsers = users.filter(u => isSeed(u.id));
+  const realUsersList = users.filter(u => !isSeed(u.id));
+
   const filtered = users
+    .filter(u => userType === 'all' || (userType === 'real' ? !isSeed(u.id) : isSeed(u.id)))
     .filter(u => filter === 'all' || (filter === 'active' ? !u.is_deleted : u.is_deleted))
     .filter(u => regionFilter === 'all' || u.region_text === regionFilter)
     .filter(u => !search || (u.nickname || '').includes(search));
@@ -53,24 +59,37 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>👥 유저 관리</h1>
-      {/* 지역 통계 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>유저 관리</h1>
+      {/* 유저 통계 카드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
           <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{totalUsers}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>전체 유저</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>전체</div>
+        </div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#10b981' }}>{realUsersList.length}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>실제 유저</div>
+        </div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-tertiary)' }}>{seedUsers.length}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>시드</div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
           <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--success)' }}>{regionSetCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>지역 설정 완료 · {regionPct}%</div>
-        </div>
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--warning)' }}>{regionUnsetCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>미설정</div>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>지역 설정 {regionPct}%</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* 유저 타입 필터 */}
+        {(['all', 'real', 'seed'] as const).map(t => (
+          <button key={t} onClick={() => setUserType(t)} style={{
+            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            background: userType === t ? 'var(--brand)' : 'var(--bg-hover)',
+            color: userType === t ? 'var(--text-inverse)' : 'var(--text-secondary)',
+          }}>{t === 'all' ? '전체' : t === 'real' ? `실제 (${realUsersList.length})` : `시드 (${seedUsers.length})`}</button>
+        ))}
+        <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
         <button onClick={() => setFilter('all')} style={tab('all', '전체')}>전체</button>
         <button onClick={() => setFilter('active')} style={tab('active', '정상')}>정상</button>
         <button onClick={() => setFilter('suspended')} style={tab('suspended', '정지됨')}>정지됨</button>

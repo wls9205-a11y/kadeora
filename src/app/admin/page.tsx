@@ -7,6 +7,7 @@ import TrafficStats from './TrafficStats';
 import AptCacheRefreshButton from './AptCacheRefreshButton';
 import EnvCheckCard from './EnvCheckCard';
 import QuickActions from './QuickActions';
+import AdminQuickPanel from './AdminQuickPanel';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -94,13 +95,14 @@ export default async function AdminDashboard() {
   const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
   const headerStyle: React.CSSProperties = { fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 };
 
+  const realUsers = totalUsers - seedCount;
   const kpiCards = [
-    { label: '총 회원', value: totalUsers, icon: '👥', color: '#ff5b36', sub: `시드 ${seedCount}명 포함` },
+    { label: '실제 회원', value: realUsers, icon: '👥', color: '#ff5b36', sub: `+시드 ${seedCount}명 = 총 ${totalUsers}명` },
     { label: '오늘 가입', value: todayUsers, icon: '🆕', color: '#10b981', sub: '신규 회원' },
     { label: '총 게시글', value: totalPosts, icon: '📝', color: '#3b82f6', sub: `오늘 +${todayPosts}개` },
     { label: '오늘 조회수', value: todayViews, icon: '👁️', color: '#8b5cf6', sub: '금일 누적' },
     { label: '댓글', value: totalComments, icon: '💬', color: '#f59e0b' },
-    { label: '신고 대기', value: pendingCount, icon: '🚨', color: '#ef4444', sub: '미처리 건' },
+    { label: '신고 대기', value: pendingCount, icon: '🚨', color: pendingCount > 0 ? '#ef4444' : '#10b981', sub: pendingCount > 0 ? '미처리 건' : '이상 없음' },
     { label: 'PWA 설치', value: pwaTotal, icon: '📲', color: '#06b6d4', sub: `푸시 구독 ${pushSubs}명` },
     { label: '결제', value: totalRevenue, icon: '💰', color: '#22c55e', sub: `총 ${paymentCount}건`, format: 'currency' as const },
   ];
@@ -132,6 +134,9 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* 빠른 관리 패널 */}
+      <AdminQuickPanel />
 
       {/* 미처리 신고 배너 */}
       {pendingCount > 0 && (

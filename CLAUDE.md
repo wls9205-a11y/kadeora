@@ -1,308 +1,274 @@
-# 카더라 4대 개선 — Claude Code 통합 작업 지시서
+# 카더라 어드민 페이지 전면 개편 — Claude Code 작업 지시서
 
-> 4가지를 효율적으로 한번에 진행. 각 항목 완료 시 커밋+빌드+푸시.
-
----
-
-## TASK 1: 부동산 페이지 개선
-
-### 소스 읽기
-```bash
-find src/app/(main)/apt -name "*.tsx" -exec echo "=== {} ===" \; -exec cat {} \;
-```
-
-### 1-1. 청약 카드 간소화
-```
-현재 카드에 너무 많은 정보: 단지명, 주소 전체, 세대수, 날짜, 현장토론방, 청약홈, 상세보기
-
-변경 → 카드에는 핵심만:
-┌──────────────────────────────────┐
-│ 🟢접수중  D-2         서울      │  ← 상태 + D-day + 지역 (1행)
-│ 래미안 엘라비네                  │  ← 단지명 (font-semibold)
-│ 강서구 방화동 · 272세대          │  ← 간략 주소 + 세대수 (1행)
-│ 3/16 ~ 3/19                     │  ← 접수 기간
-└──────────────────────────────────┘
-
-제거: 주소 전체 → 구+동만, "현장토론방" 버튼, "상세보기 ▼" 텍스트
-카드 클릭 시 → /apt/[id] 상세 페이지에서 전체 정보
-```
-
-### 1-2. 미분양 탭 추가
-```
-unsold_apts 35건 데이터가 있는데 페이지에 안 보임.
-
-상태 필터에 "미분양" 탭 추가:
-전체 | 접수중 | 예정 | 마감 | 미분양
-
-미분양 카드:
-┌──────────────────────────────────┐
-│ 미분양  경기 평택시              │  ← 뱃지 + 지역
-│ 평택 브레인시티 수자인            │  ← 단지명
-│ 미분양 124세대 / 전체 842세대    │  ← 미분양 비율
-│ 분양가 3.6억 ~ 5.2억             │  ← sale_price_min/max (만원 → 억 변환)
-│ 준공 2025.06                     │  ← completion_ym
-└──────────────────────────────────┘
-
-DB 쿼리: SELECT * FROM unsold_apts WHERE is_active = true ORDER BY region_nm
-분양가 변환: sale_price_min 36000 (만원) → "3.6억"
-미분양 뱃지: bg-amber-500 text-white
-```
-
-### 1-3. 청약 상세 페이지 (/apt/[id]) 보강
-```
-현재 접기/펼치기 구조 → 전용 상세 페이지로
-
-상세에 포함할 정보:
-- 단지명, 전체 주소
-- 세대수 (특별공급/일반공급 구분: special_supply_total, general_supply_total)
-- 접수/당첨/계약 기간
-- 경쟁률 (competition_rate_1st, competition_rate_2nd) — 있으면 표시
-- 타입별 정보 (house_type_info JSONB) — 있으면 표시
-- 입주 예정 (mvn_prearnge_ym)
-- 청약홈 링크 (pblanc_url)
-- 관련 피드 글 (posts에서 단지명 검색)
-```
-
-커밋: `feat: 부동산 카드 간소화 + 미분양 탭 + 상세 보강`
+> 핵심 요구: "버튼 하나로 캐시 재생성 + 시드 콘텐츠 발생"
+> 전체적으로 더 효율적이고 한눈에 파악 가능한 어드민
 
 ---
 
-## TASK 2: 주식 종목 확대 + 모바일 접근성
-
-### 소스 읽기
+## 소스 읽기 (필수)
 ```bash
-cat src/components/Navigation.tsx
-cat src/app/(main)/stock/StockClient.tsx
-cat src/app/api/stock-refresh/route.ts
+find src/app/admin -name "*.tsx" -exec echo "=== {} ===" \; -exec cat {} \;
+find src/app/api/admin -name "*.ts" -exec echo "=== {} ===" \; -exec cat {} \;
+cat src/lib/admin-auth.ts
 ```
-
-### 2-1. 바텀네비에 주식 탭 추가
-```
-현재: 피드 / 부동산 / + / HOT / 토론 (5개, 주식 없음!)
-변경: 피드 / 주식 / + / 부동산 / 토론 (HOT는 피드 내 탭으로 이동)
-
-Navigation.tsx에서:
-- 바텀네비 items 배열 수정
-- /stock 추가, /hot 제거 (또는 /hot을 피드 사이드바로 이동)
-- 아이콘: TrendingUp (주식)
-```
-
-### 2-2. 인기 종목 추가 (DB)
-```
-현재 150종목. 아래 종목을 stock_quotes에 INSERT:
-
-KOSDAQ 추가 (20개):
-카카오게임즈, 셀트리온헬스케어, 에코프로비엠, 에코프로, HLB, 
-레인보우로보틱스, 리가켐바이오, 알테오젠, 클래시스, 
-파두, 두산로보틱스, 엔켐, 에스티팜, 씨앤씨, 
-하이브, 카카오뱅크, 원익IPS, 솔브레인, JYP, SM
-→ 이미 있는 종목은 제외
-
-해외 ETF + 인기종목 추가 (15개):
-SPY (S&P500 ETF), QQQ (나스닥100 ETF), ARKK, VOO, VTI,
-SOFI, PLTR (이미 있으면 제외), ARM, SMCI, MSTR,
-COIN (이미 있으면 제외), SNOW, CRWD, DDOG, NET
-
-→ 총 약 180~200종목 목표
-→ stock_quotes 테이블에 INSERT (name_ko, symbol, market, sector 등)
-→ 크론이 자동으로 시세 갱신
-```
-
-### 2-3. 주식 페이지 개선
-```
-- 상단에 "오늘의 화제 종목" 3개 (등락률 절대값 상위)
-- 검색바 강화 (종목명 + 티커 실시간 필터)
-- 장 마감 시 모든 종목에 "전일종가" 라벨 확실히 표시
-```
-
-커밋: `feat: 바텀네비 주식 추가 + 종목 확대 + 검색 강화`
 
 ---
 
-## TASK 3: 회원가입 유도 강화
+## 1. 대시보드 (/admin) — "원클릭 관리 센터"
 
-### 소스 읽기
-```bash
-cat src/hooks/useAuthGuard.ts
-cat src/app/(main)/login/page.tsx
-find src -name "*.tsx" | xargs grep -l "useAuthGuard\|로그인\|회원가입" | head -10
+### 1-1. 상단 원클릭 액션 버튼 패널
 ```
+현재 어드민 대시보드에 다음 버튼들을 추가:
 
-### 3-1. 콘텐츠 게이팅 — 글 전문 보기 제한
-```
-비로그인 유저: 피드에서 글 클릭 → 글 상세 페이지
-- 본문 첫 3줄만 보여주고 블러 처리
-- 블러 위에: "전체 글을 보려면 로그인하세요" + 카카오 로그인 버튼
-- 댓글은 완전히 숨김
+┌──────────────────────────────────────────────────┐
+│ ⚡ 빠른 관리                                      │
+│                                                    │
+│ [🔄 전체 새로고침]  [📝 시드 생성]  [🗑 캐시 초기화] │
+│                                                    │
+│ 마지막 시드: 7:30 AM · 마지막 캐시: 7:00 AM       │
+└──────────────────────────────────────────────────┘
 
-로그인 유저: 전문 + 댓글 전부 공개
+버튼 동작:
+
+1. "🔄 전체 새로고침" (원클릭 올인원):
+   → 순서대로 실행:
+   a. /api/cron/seed-posts (시드 게시글 1~3개 + 댓글/좋아요 생성)
+   b. /api/admin/refresh-apt-cache (청약 데이터 갱신)
+   c. /api/stock-refresh (주식 시세 갱신)
+   → 각 단계 성공/실패 표시
+   → 전체 완료 시 "✅ 전체 새로고침 완료" 토스트
+
+2. "📝 시드 생성" (시드만):
+   → /api/cron/seed-posts 호출
+   → "게시글 N개 + 댓글 N개 생성됨" 결과 표시
+
+3. "🗑 캐시 초기화":
+   → /api/admin/refresh-apt-cache (청약 캐시)
+   → revalidatePath('/feed'), revalidatePath('/stock'), revalidatePath('/apt')
+   → "캐시 초기화 완료" 토스트
 
 구현:
-- feed/[id]/page.tsx에서 유저 세션 확인
-- 비로그인: content를 slice(0, 200) + "..." + 블러 오버레이
-- 로그인 버튼: /login으로 이동
+- POST /api/admin/refresh-all (새 API)
+  - requireAdmin() 인증
+  - 순서대로 3개 크론 호출
+  - 각 결과 JSON 반환
+- 프론트: 버튼 클릭 → loading 스피너 → 결과 토스트
 ```
 
-### 3-2. 피드 중간 가입 유도 배너
+### 1-2. KPI 카드 개선
 ```
-피드 스크롤 시 5번째 카드 뒤에 가입 유도 카드 삽입 (비로그인만):
+현재 get_admin_dashboard_stats() 데이터:
+total_users: 100, new_users_today: 0, total_posts: 3672, posts_today: 35
+total_comments: 1518, total_likes: 2362, pending_reports: 0
+stock_count: 150, apt_count: 106, push_subs: 1, pwa_installs: 27
 
-┌──────────────────────────────────┐
-│ 🔔 카더라 회원이 되면             │
-│                                  │
-│ ✓ 관심 종목 알림                 │
-│ ✓ 청약 마감 알림                 │
-│ ✓ 글 전문 보기 + 댓글 참여       │
-│ ✓ 매일 출석 포인트 적립          │
-│                                  │
-│ [카카오로 3초 가입]              │  ← CTA 버튼 (bg-yellow-400)
-└──────────────────────────────────┘
+개선:
+- "총 회원" → "실제 11명 / 시드 89명" 구분 표시
+- 오늘 시드 게시글 수 vs 실제 게시글 수 구분
+- 삭제된 댓글 670건 표시 (is_deleted)
+- 포인트 이상치 경고: "Ss: 81,437P (비정상)" 표시
 
-FeedClient.tsx에서 posts 배열 5번째 뒤에 조건부 렌더링
-```
-
-### 3-3. 글 상세 하단 가입 유도
-```
-비로그인 상태에서 글 상세 페이지 하단 (댓글 영역):
-
-┌──────────────────────────────────┐
-│ 💬 이 글에 3개의 댓글이 있습니다 │
-│                                  │
-│ 댓글을 보려면 로그인하세요       │
-│ [카카오로 로그인]                │
-└──────────────────────────────────┘
+KPI 카드 레이아웃 (2행 4열):
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│ 실제 유저 │ │ 오늘글   │ │ 오늘댓글 │ │ 신고대기 │
+│ 11명     │ │ 35개     │ │ 22개     │ │ 0건      │
+│ +시드 89 │ │ 시드 35  │ │          │ │          │
+└──────────┘ └──────────┘ └──────────┘ └──────────┘
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│ 종목     │ │ 청약     │ │ PWA      │ │ 상점구매 │
+│ 150개    │ │ 106건    │ │ 27설치   │ │ 2건      │
+└──────────┘ └──────────┘ └──────────┘ └──────────┘
 ```
 
-### 3-4. 로그인 페이지 개선
+### 1-3. 최근 활동 피드
 ```
-현재 로그인 페이지 확인 후:
-- "카카오로 3초 가입" 강조 (카카오 노란 버튼 크게)
-- 가입 혜택 목록: 포인트 적립, 알림, 글 전문 보기
-- "30초면 끝나요" 같은 안심 문구
-```
-
-커밋: `feat: 콘텐츠 게이팅 + 피드 가입 유도 + 로그인 페이지 개선`
-
----
-
-## TASK 4: 상점 포인트 교환 시스템
-
-### 소스 읽기
-```bash
-find src/app/(main)/shop -name "*.tsx" -exec echo "=== {} ===" \; -exec cat {} \;
-find src/app/api/shop -name "*.ts" -exec echo "=== {} ===" \; -exec cat {} \;
-cat src/lib/constants.ts | grep -A 20 "shop\|SHOP\|product\|PRODUCT"
-```
-
-### 4-1. 포인트 교환 상품 활성화 (DB)
-```sql
--- 닉네임 변경권: 포인트로 교환 가능하도록
-UPDATE shop_products SET is_active = true WHERE id = 'nickname_change';
-
--- 프리미엄 배지: 포인트로 교환
-UPDATE shop_products SET is_active = true WHERE id = 'premium_badge';
-
--- 가격 체계 추가: point_price 컬럼 (없으면 추가)
--- 닉네임 변경권: 500P
--- 프리미엄 배지: 1000P  
--- 게시글 부스트: 2000P
--- 전광판 2회: 3000P
-```
-
-### 4-2. 상점 메인 페이지 (/shop) 리디자인
-```
-현재: /shop/megaphone만 있음
-변경: /shop 메인에서 전체 상품 보기
-
-┌──────────────────────────────────┐
-│ 🛒 상점                          │
-│ 내 포인트: 150P                  │  ← 현재 포인트 표시
-├──────────────────────────────────┤
-│ 💰 포인트로 교환                 │  ← 섹션
-│ ┌────────────┐ ┌────────────┐  │
-│ │ ✏️ 닉변권   │ │ ✨ 배지     │  │  ← 2열 그리드
-│ │ 500P       │ │ 1,000P     │  │
-│ │ [교환하기] │ │ [교환하기] │  │
-│ └────────────┘ └────────────┘  │
-├──────────────────────────────────┤
-│ 💳 프리미엄 (결제 준비 중)       │  ← 토스 결제 연동 전
-│ ┌────────────┐ ┌────────────┐  │
-│ │ 🚀 부스트   │ │ 📢 전광판   │  │
-│ │ ₩3,900     │ │ ₩4,900     │  │
-│ │ [준비 중]  │ │ [준비 중]  │  │
-│ └────────────┘ └────────────┘  │
-└──────────────────────────────────┘
-
-포인트 교환 API:
-POST /api/shop/exchange
-body: { product_id: 'nickname_change' }
-→ 포인트 확인 → deduct_points RPC → 상품 적용
-```
-
-### 4-3. 포인트 교환 API 구현
-```
-/api/shop/exchange/route.ts:
-
-1. getUser()로 인증 확인
-2. product_id로 상품 조회 (is_active = true 확인)
-3. 유저 포인트 확인 (profiles.points >= point_price)
-4. deduct_points RPC로 포인트 차감
-5. 상품 적용:
-   - nickname_change: use_nickname_change RPC 호출 (이미 있음)
-   - premium_badge: use_premium_badge RPC 호출 (이미 있음)
-   - post_boost: use_post_boost RPC 호출 (이미 있음)
-6. purchases 테이블에 기록
-```
-
-### 4-4. 내 포인트 + 교환 내역 표시
-```
-프로필 페이지 또는 상점 페이지에:
-- "내 포인트: 150P"
-- "이 상품까지 350P 더 모아야 해요" 진행 바
-- 최근 교환 내역 (purchases 테이블)
-```
-
-커밋: `feat: 상점 포인트 교환 시스템 + 상점 리디자인`
-
----
-
-## DB 마이그레이션 (필요시)
-
-```sql
--- shop_products에 point_price 컬럼 추가
-ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS point_price integer DEFAULT 0;
-ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS purchase_type text DEFAULT 'cash'; 
--- purchase_type: 'cash' | 'points' | 'both'
-
--- 포인트 가격 설정
-UPDATE shop_products SET point_price = 500, purchase_type = 'points', is_active = true WHERE id = 'nickname_change';
-UPDATE shop_products SET point_price = 1000, purchase_type = 'points', is_active = true WHERE id = 'premium_badge';
-UPDATE shop_products SET point_price = 2000, purchase_type = 'points', is_active = true WHERE id = 'post_boost';
-UPDATE shop_products SET point_price = 3000, purchase_type = 'points', is_active = true WHERE id = 'megaphone';
+대시보드 하단에:
+- 최근 실제 유저 게시글 5개 (시드 제외)
+- 최근 가입자 5명
+- 최근 신고 (있으면)
+- 크론 실행 이력 (마지막 시드 시간, 주식 갱신 시간)
 ```
 
 ---
 
-## 작업 순서
+## 2. 회원 관리 (/admin/users) 개선
 
 ```
-TASK 2 (바텀네비 주식) → TASK 1 (부동산) → TASK 3 (가입 유도) → TASK 4 (상점)
+현재 확인 필요사항:
+- 실제 유저 vs 시드 유저 구분 뱃지
+- 포인트 수동 조정 (award_points RPC)
+- 정지/해제 기능
+- 관리자 권한 토글
+
+개선:
+- 실제 유저 탭 | 시드 유저 탭 분리
+- 포인트 이상치 하이라이트 (81,437P인 "Ss" 유저)
+- 마지막 활동 시간 표시
+- 벌크 선택 → 정지/포인트 초기화
 ```
-바텀네비가 가장 긴급하고 간단해서 먼저.
+
+---
+
+## 3. 게시글 관리 (/admin/content) 개선
+
+```
+개선:
+- 시드 게시글 필터 (author_id LIKE 'aaaaaaaa-%')
+- 벌크 삭제/숨김
+- "시드 전체 삭제" 버튼 (delete_seed_data RPC)
+- 카테고리별 필터
+- 검색
+```
+
+---
+
+## 4. 시스템 (/admin/system) 개선
+
+### 4-1. 크론 관리 패널
+```
+┌──────────────────────────────────────────────────┐
+│ 크론 잡 관리                                      │
+│                                                    │
+│ 시드 게시글 (30분마다)                             │
+│ 마지막: 7:30 AM  상태: ✅  [수동 실행]            │
+│                                                    │
+│ 주식 시세 (5분, 평일 장중)                         │
+│ 마지막: 15:30  상태: ⚫ 장 마감  [수동 실행]      │
+│                                                    │
+│ 청약 갱신                                          │
+│ 마지막: 05:56  상태: ✅  [수동 실행]              │
+│                                                    │
+│ 정리 (매일 3AM)                                    │
+│ 마지막: 03:00  상태: ✅  [수동 실행]              │
+│                                                    │
+│ 페이지뷰 정리 (매주 일요일)                        │
+│ 마지막: 일요일 03:00  상태: ✅                    │
+└──────────────────────────────────────────────────┘
+
+각 "수동 실행" 버튼:
+- /api/admin/trigger-cron POST { target: 'seed-posts' | 'stock-refresh' | ... }
+- 실행 중 스피너 → 완료/실패 토스트
+```
+
+### 4-2. 환경변수 점검
+```
+현재 /api/admin/env-check 있음.
+개선: 각 환경변수 존재 여부를 초록/빨강 뱃지로 표시
+값은 마스킹 (***로 표시), 존재 여부만
+```
+
+### 4-3. 금지어 관리
+```
+- 현재 17개 등록
+- CRUD UI: 추가/삭제 버튼
+- 카테고리별 (profanity/adult/hate) 필터
+- "테스트" 기능: 입력 텍스트에 금지어 포함 여부 실시간 체크
+```
+
+---
+
+## 5. "전체 새로고침" API 구현
+
+### /api/admin/refresh-all/route.ts
+```typescript
+// POST - requireAdmin 인증
+// 순서대로 실행:
+// 1. seed-posts: CRON_SECRET으로 /api/cron/seed-posts 호출
+// 2. refresh-apt: /api/admin/refresh-apt-cache 호출  
+// 3. stock-refresh: CRON_SECRET으로 /api/stock-refresh 호출
+// 4. revalidate: 주요 경로 캐시 무효화
+
+import { revalidatePath } from 'next/cache';
+
+export async function POST(req: Request) {
+  const { admin } = await requireAdmin(req);
+  
+  const results = { seed: null, apt: null, stock: null, cache: null };
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const cronSecret = process.env.CRON_SECRET;
+  
+  // 1. 시드 생성
+  try {
+    const res = await fetch(`${baseUrl}/api/cron/seed-posts`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${cronSecret}` }
+    });
+    results.seed = { ok: res.ok, status: res.status };
+  } catch (e) { results.seed = { ok: false, error: e.message }; }
+  
+  // 2. 청약 캐시
+  try {
+    const res = await fetch(`${baseUrl}/api/admin/refresh-apt-cache`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${admin.token}` }
+    });
+    results.apt = { ok: res.ok, status: res.status };
+  } catch (e) { results.apt = { ok: false, error: e.message }; }
+  
+  // 3. 주식 시세
+  try {
+    const res = await fetch(`${baseUrl}/api/stock-refresh`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${cronSecret}` }
+    });
+    results.stock = { ok: res.ok, status: res.status };
+  } catch (e) { results.stock = { ok: false, error: e.message }; }
+  
+  // 4. 캐시 무효화
+  try {
+    revalidatePath('/feed');
+    revalidatePath('/stock');
+    revalidatePath('/apt');
+    revalidatePath('/hot');
+    results.cache = { ok: true };
+  } catch (e) { results.cache = { ok: false, error: e.message }; }
+  
+  return Response.json({ results });
+}
+```
+
+---
+
+## 6. 사이드바 메뉴 정리
+
+```
+현재 어드민 라우트:
+/admin (대시보드)
+/admin/users (회원)
+/admin/content (게시글)
+/admin/comments (댓글)
+/admin/reports (신고)
+/admin/notifications (알림)
+/admin/payments (결제)
+/admin/system (시스템)
+
+사이드바 메뉴 (lucide 아이콘):
+- LayoutDashboard 대시보드
+- Users 회원 관리
+- FileText 게시글
+- MessageSquare 댓글
+- AlertTriangle 신고 (미처리 건수 뱃지)
+- Bell 알림
+- CreditCard 결제/상점
+- Settings 시스템
+```
 
 ---
 
 ## Claude Code 시작 프롬프트
 
 ```
-CLAUDE.md를 읽고, 아래 4가지 작업을 순서대로 진행해:
+어드민 페이지를 전부 읽어:
+find src/app/admin -name "*.tsx" -exec echo "=== {} ===" \; -exec cat {} \;
+find src/app/api/admin -name "*.ts" -exec echo "=== {} ===" \; -exec cat {} \;
 
-1. 바텀네비에 주식 탭 추가 (Navigation.tsx) — HOT 제거하고 주식 추가
-2. 부동산 카드 간소화 + 미분양 탭 추가
-3. 비로그인 글 전문 블러 + 피드 5번째 카드 뒤 가입 유도 배너 + 댓글 로그인 유도
-4. 상점 포인트 교환 시스템 (DB 마이그레이션 + API + UI)
+읽은 다음:
 
-각 파일을 반드시 cat으로 읽고 수정. 
-각 TASK 완료 시 npm run build → 커밋 → push.
-논스톱으로 끝까지.
+1. /api/admin/refresh-all API 생성 (시드+청약+주식+캐시 원클릭)
+2. 대시보드에 "빠른 관리" 버튼 패널 추가 (전체 새로고침 / 시드 생성 / 캐시 초기화)
+3. KPI 카드에 실제/시드 유저 구분 + 포인트 이상치 경고
+4. 크론 관리 패널 개선 (각 크론잡 상태 + 수동 실행 버튼)
+5. 회원 관리에 실제/시드 탭 분리
+
+각 단계 npm run build → 커밋 → push. 논스톱으로.
 ```
