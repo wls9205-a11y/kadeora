@@ -26,6 +26,13 @@ const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }
   10: { title: '카더라신', emoji: '⚡', color: '#FF4500' },
 };
 
+const AVATAR_COLORS = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
+function avatarColor(userId: string | null): string {
+  if (!userId) return AVATAR_COLORS[0];
+  const hash = userId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
 function timeAgo(d: string) {
   const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
   if (m < 1) return '방금';
@@ -34,7 +41,7 @@ function timeAgo(d: string) {
   return Math.floor(m / 1440) + '일 전';
 }
 
-export default function ChatRoom({ user }: { user: User | null }) {
+export default function ChatRoom({ user, myNickname }: { user: User | null; myNickname?: string | null }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -64,15 +71,12 @@ export default function ChatRoom({ user }: { user: User | null }) {
     return sorted;
   }, []);
 
-  // Load my likes
   useEffect(() => {
     if (!user) return;
-    const sb = createSupabaseBrowser();
-    sb.from('chat_message_likes').select('message_id').eq('user_id', user.id)
+    createSupabaseBrowser().from('chat_message_likes').select('message_id').eq('user_id', user.id)
       .then(({ data }) => { if (data) setLikedIds(new Set(data.map((d: any) => d.message_id))); });
   }, [user]);
 
-  // Initial load + realtime
   useEffect(() => {
     setLoading(true);
     loadMessages().then(() => { setLoading(false); isFirstLoad.current = true; });
@@ -87,7 +91,6 @@ export default function ChatRoom({ user }: { user: User | null }) {
     return () => { sb.removeChannel(ch); };
   }, [loadMessages]);
 
-  // Auto-scroll on new messages only
   useEffect(() => {
     if (isFirstLoad.current) { isFirstLoad.current = false; return; }
     const el = scrollRef.current;
@@ -131,8 +134,7 @@ export default function ChatRoom({ user }: { user: User | null }) {
     }
     setMsgs(prev => prev.map(m => {
       if (m.id !== messageId) return m;
-      const delta = isLiked ? -1 : 1;
-      return { ...m, likes: [{ count: Math.max(0, (m.likes?.[0]?.count ?? 0) + delta) }] };
+      return { ...m, likes: [{ count: Math.max(0, (m.likes?.[0]?.count ?? 0) + (isLiked ? -1 : 1)) }] };
     }));
   };
 
@@ -157,51 +159,61 @@ export default function ChatRoom({ user }: { user: User | null }) {
     }
   };
 
-  const likeCount = (m: ChatMsg) => m.likes?.[0]?.count ?? 0;
-
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 200px)', minHeight: 400, maxHeight: 700 }}>
-      {/* Header */}
-      <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
-        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>실시간 채팅</span>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{msgs.length > 0 ? `${msgs.length}개 메시지` : ''}</span>
-      </div>
-
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 160px)', minHeight: 400, maxHeight: 800 }}>
       {/* Messages */}
-      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '4px 16px' }}>
+      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
         {loadingMore && <div style={{ textAlign: 'center', padding: 8, fontSize: 12, color: 'var(--text-tertiary)' }}>이전 메시지 불러오는 중...</div>}
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '40px 0' }}>채팅 불러오는 중...</div>
         ) : msgs.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '60px 0', fontSize: 14 }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>💬</div>첫 메시지를 남겨보세요!
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>☕</div>
+            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>아직 조용하네요</p>
+            <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>첫 번째 소문의 주인공이 되어보세요!</p>
           </div>
         ) : msgs.map(msg => {
           const p = msg.profiles as MsgProfile | null;
           const g = GRADE_INFO[p?.grade ?? 1] ?? GRADE_INFO[1];
           const nick = p?.nickname ?? '사용자';
           const liked = likedIds.has(msg.id);
-          const lc = likeCount(msg);
+          const lc = msg.likes?.[0]?.count ?? 0;
           return (
-            <div key={msg.id} style={{ display: 'flex', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-              <div onClick={() => openSheet(p)} style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, cursor: 'pointer' }}>
-                {nick[0]}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
-                  <span onClick={() => openSheet(p)} style={{ fontWeight: 700, fontSize: 13, cursor: 'pointer', color: 'var(--text-primary)' }}>{nick}</span>
-                  <span style={{ fontSize: 11, color: g.color, fontWeight: 600 }}>{g.emoji} {g.title}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(msg.created_at)}</span>
-                </div>
-                <p style={{ fontSize: 14, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.6, wordBreak: 'break-word' }}>{msg.content}</p>
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? '#ef4444' : 'var(--text-tertiary)', fontSize: 12, padding: 0 }}>
-                    {liked ? '❤️' : '🤍'} {lc > 0 ? lc : ''}
-                  </button>
-                  {user && user.id !== msg.user_id && (
-                    <button onClick={() => setReportTarget(msg.id)} style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>신고</button>
-                  )}
+            <div key={msg.id} style={{
+              background: 'var(--bg-base)', border: '1px solid var(--border)',
+              borderRadius: 12, padding: '14px 16px', marginBottom: 10,
+            }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                <div onClick={() => openSheet(p)} style={{
+                  width: 40, height: 40, borderRadius: '50%', background: avatarColor(msg.user_id),
+                  color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 15, fontWeight: 800, flexShrink: 0, cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                }}>{nick[0]}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <span onClick={() => openSheet(p)} style={{ fontWeight: 700, fontSize: 14, cursor: 'pointer', color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{
+                      fontSize: 10, padding: '2px 7px', borderRadius: 20, fontWeight: 700,
+                      background: `${g.color}22`, color: g.color, border: `1px solid ${g.color}44`,
+                    }}>{g.emoji} {g.title}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(msg.created_at)}</span>
+                  </div>
+                  <p style={{ fontSize: 15, color: 'var(--text-primary)', margin: '0 0 10px', lineHeight: 1.6, wordBreak: 'break-word' }}>{msg.content}</p>
+                  <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                    <button onClick={() => toggleLike(msg.id)} style={{
+                      display: 'flex', alignItems: 'center', gap: 5,
+                      background: liked ? '#ff444418' : 'var(--bg-hover)',
+                      border: `1px solid ${liked ? '#ff444444' : 'var(--border)'}`,
+                      borderRadius: 20, padding: '4px 12px', cursor: user ? 'pointer' : 'default',
+                      color: liked ? '#ff4444' : 'var(--text-tertiary)', fontSize: 12, fontWeight: liked ? 700 : 400,
+                    }}>
+                      {liked ? '❤️' : '🤍'} {lc > 0 ? lc : '좋아요'}
+                    </button>
+                    {user && user.id !== msg.user_id && (
+                      <button onClick={() => setReportTarget(msg.id)} style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: 'auto' }}>신고</button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -211,19 +223,30 @@ export default function ChatRoom({ user }: { user: User | null }) {
       </div>
 
       {/* Input */}
-      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+      <div style={{ padding: '16px 16px', borderTop: '2px solid var(--border)', background: 'var(--bg-surface)', borderRadius: '0 0 16px 16px' }}>
         {user ? (
           <>
-            <input value={input} onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder="메시지를 입력하세요 (300자)" maxLength={300}
-              style={{ flex: 1, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', padding: '10px 12px', fontSize: 14, fontFamily: 'inherit' }} />
-            <button onClick={send} disabled={!input.trim() || sending}
-              style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>전송</button>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+              <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: avatarColor(user.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800 }}>
+                {(myNickname ?? '나')[0]}
+              </div>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <textarea value={input} onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+                  placeholder="라운지에 소문 남기기... (Enter 전송)" maxLength={300} rows={1}
+                  style={{ width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 12, color: 'var(--text-primary)', padding: '10px 70px 10px 14px', fontSize: 14, fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5, minHeight: 42 }} />
+                <button onClick={send} disabled={!input.trim() || sending} style={{
+                  position: 'absolute', right: 8, bottom: 8, padding: '5px 14px', borderRadius: 8, border: 'none',
+                  background: input.trim() ? 'var(--brand)' : 'var(--bg-hover)', color: input.trim() ? 'white' : 'var(--text-tertiary)',
+                  fontWeight: 700, fontSize: 12, cursor: input.trim() ? 'pointer' : 'default',
+                }}>전송</button>
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4, textAlign: 'right' }}>{input.length}/300</div>
           </>
         ) : (
-          <div style={{ flex: 1, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13, padding: '10px 0' }}>
-            <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 채팅에 참여할 수 있습니다
+          <div style={{ textAlign: 'center', padding: '12px 0', fontSize: 14, color: 'var(--text-secondary)' }}>
+            <a href="/login" style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</a>하고 라운지에 참여하세요 🎉
           </div>
         )}
       </div>
@@ -235,7 +258,7 @@ export default function ChatRoom({ user }: { user: User | null }) {
           <div style={{ position: 'relative', background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: 24, zIndex: 1, maxWidth: 480, width: '100%', margin: '0 auto' }}>
             <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)', margin: '0 auto 20px' }} />
             <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: avatarColor(sheetUser.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700 }}>
                 {(sheetUser.nickname ?? '?')[0]}
               </div>
               <div>
