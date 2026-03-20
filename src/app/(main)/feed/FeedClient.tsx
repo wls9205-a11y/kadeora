@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, MessageCircle, Eye, Share2, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Bookmark } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -13,6 +13,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
 import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
+import ShareButtons from '@/components/ShareButtons';
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -160,45 +161,6 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         [postId]: (prev[postId] ?? 0) + (alreadyLiked ? 1 : -1),
       }));
     }
-  };
-
-  const handleComment = (e: React.MouseEvent, postId: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/feed/${postId}#comments`);
-  };
-
-  const handleShare = async (e: React.MouseEvent, post: PostWithProfile) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const url = `${window.location.origin}/feed/${post.id}`;
-
-    // Try Kakao Share first
-    if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
-      try {
-        (window as any).Kakao.Share.sendDefault({
-          objectType: 'feed',
-          content: {
-            title: post.title,
-            description: (post.content || '').slice(0, 100),
-            imageUrl: 'https://kadeora.app/og-image.svg',
-            link: { mobileWebUrl: url, webUrl: url },
-          },
-        });
-        return;
-      } catch {}
-    }
-
-    // Try Web Share API
-    if (navigator.share) {
-      try { await navigator.share({ title: post.title, url }); return; } catch {}
-    }
-
-    // Fallback: clipboard
-    try {
-      await navigator.clipboard.writeText(url);
-      alert('링크가 복사되었습니다!');
-    } catch {}
   };
 
   const handleBookmark = async (e: React.MouseEvent, postId: number) => {
@@ -459,66 +421,67 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const hasImages = post.images && post.images.length > 0;
           const isPopular = (post.likes_count ?? 0) >= 5;
           const isNew = Date.now() - new Date(post.created_at).getTime() < 60 * 60 * 1000;
+          const postHref = `/feed/${(post as any).slug || post.id}`;
           return (
-            <Link key={post.id} href={`/feed/${(post as any).slug || post.id}`} className="animate-fadeIn"
-              style={{ display: 'block', textDecoration: 'none', color: 'inherit', padding: '16px 0', borderBottom: '1px solid var(--border)', borderLeft: isPopular ? '3px solid var(--brand)' : 'none', paddingLeft: isPopular ? 12 : 0 }}>
-              {/* Header row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 8 }}>
-                {post.profiles?.avatar_url ? (
-                  <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={32} height={32} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                ) : (
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>
-                    {displayName[0].toUpperCase()}
-                  </div>
-                )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
-                    <span style={{ fontSize: 12 }}>{gradeEmoji}</span>
-                    {catInfo && (
-                      <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 999, background: catInfo.bg, color: catInfo.color }}>{catInfo.label}</span>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
-                    {isNew && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />}
+            <div key={post.id} className="animate-fadeIn"
+              style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', borderLeft: isPopular ? '3px solid var(--brand)' : 'none', paddingLeft: isPopular ? 12 : 0 }}>
+              {/* Clickable area — navigates to post detail */}
+              <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                {/* Header row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 8 }}>
+                  {post.profiles?.avatar_url ? (
+                    <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={32} height={32} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                      {displayName[0].toUpperCase()}
+                    </div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
+                      <span style={{ fontSize: 12 }}>{gradeEmoji}</span>
+                      {catInfo && (
+                        <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 999, background: catInfo.bg, color: catInfo.color }}>{catInfo.label}</span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                      {isNew && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Content area — text left, thumbnail right */}
-              <div style={{ display: 'flex', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {/* Title */}
-                  <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                    {post.title}
-                  </h2>
-                  {/* Content preview */}
-                  <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                    {post.content}
-                  </p>
-                </div>
-                {/* Thumbnail */}
-                {hasImages && (
-                  <div style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--bg-hover)' }}>
-                    <Image src={post.images![0]} alt="" fill sizes="72px" style={{ objectFit: 'cover' }} />
-                    {post.images!.length > 1 && (
-                      <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>+{post.images!.length - 1}</div>
-                    )}
+                {/* Content area — text left, thumbnail right */}
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                      {post.title}
+                    </h2>
+                    <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                      {post.content}
+                    </p>
                   </div>
-                )}
-              </div>
+                  {hasImages && (
+                    <div style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--bg-hover)' }}>
+                      <Image src={post.images![0]} alt="" fill sizes="72px" style={{ objectFit: 'cover' }} />
+                      {post.images!.length > 1 && (
+                        <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>+{post.images!.length - 1}</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Link>
 
-              {/* Footer — interaction bar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+              {/* Interaction bar — OUTSIDE Link to prevent navigation on click */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, border: 'none', background: isLiked ? '#ff444412' : 'transparent', cursor: 'pointer', fontSize: 12, color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 700 : 400 }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, border: 'none', background: isLiked ? '#ff444412' : 'transparent', cursor: 'pointer', fontSize: 12, color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 700 : 400, fontFamily: 'inherit' }}>
                   <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} stroke={isLiked ? '#ef4444' : 'currentColor'} /> {numFmt(displayLikes)}
                 </button>
-                <button onClick={(e) => handleComment(e, post.id as number)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'var(--text-tertiary)' }}>
+                <Link href={`${postHref}#comments`}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, textDecoration: 'none', fontSize: 12, color: 'var(--text-tertiary)' }}>
                   <MessageCircle size={14} /> {numFmt(post.comments_count ?? 0)}
-                </button>
+                </Link>
                 {(post.view_count ?? 0) > 0 && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', fontSize: 12, color: 'var(--text-tertiary)' }}>
                     <Eye size={14} /> {numFmt(post.view_count ?? 0)}
@@ -529,12 +492,9 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                   style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer', color: bookmarkedPosts.has(post.id as number) ? 'var(--brand)' : 'var(--text-tertiary)' }}>
                   <Bookmark size={14} fill={bookmarkedPosts.has(post.id as number) ? 'var(--brand)' : 'none'} />
                 </button>
-                <button onClick={(e) => handleShare(e, post)}
-                  style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-tertiary)' }}>
-                  <Share2 size={14} />
-                </button>
+                <ShareButtons title={post.title} postId={post.id} content={post.content} />
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>
