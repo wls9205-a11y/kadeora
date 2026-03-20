@@ -117,6 +117,14 @@ export async function GET(req: NextRequest) {
     }
     console.log('[seed-posts] Created:', title, 'by', userId, 'category:', finalCategory);
     try { revalidatePath('/feed'); revalidatePath('/hot'); } catch {}
+    // Also call revalidate API for Vercel edge cache
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+    const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT || '';
+    fetch(`${siteUrl}/api/revalidate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: cronSecret, path: '/feed' }),
+    }).catch(() => {});
     return NextResponse.json({ ok: true, title, category: finalCategory, region: finalRegion });
   } catch (e: any) {
     console.error('[seed-posts] Exception:', e.message);

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   openGraph: { title: '피드 | 카더라', description: '주식, 부동산, 청약 정보 커뮤니티' },
 };
 import { Suspense } from 'react';
+import { unstable_noStore } from 'next/cache';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { DEMO_POSTS, DEMO_TRENDING } from '@/lib/constants';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
@@ -12,15 +13,19 @@ import FeedClient from './FeedClient';
 import Disclaimer from '@/components/Disclaimer';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
 async function getPosts(category: string, region: string = 'all') {
+  unstable_noStore();
   const sb = await createSupabaseServer();
   let q = sb.from('posts')
     .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
     .eq('is_deleted', false)
+    .lte('created_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .limit(20);
   if (category !== 'all') q = q.eq('category', category);
