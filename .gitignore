@@ -1,5 +1,8 @@
 # dependencies
 /node_modules
+
+# appintoss bundle output
+*.ait
 /.pnp
 .pnp.*
 .yarn/install-state.gz

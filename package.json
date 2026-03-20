@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:ait": "node scripts/build-ait.js"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.43.0",

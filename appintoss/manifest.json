@@ -1,0 +1,10 @@
+{
+  "appName": "kadeora",
+  "version": "1.0.0",
+  "displayName": "카더라",
+  "description": "아는 사람만 아는 그 정보",
+  "type": "webview",
+  "entry": "index.html",
+  "permissions": [],
+  "orientation": "portrait"
+}
