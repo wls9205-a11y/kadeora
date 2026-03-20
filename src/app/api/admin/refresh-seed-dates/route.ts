@@ -1,19 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServer } from '@/lib/supabase-server';
-import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/admin-auth';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST() {
   try {
-    const sb = await createSupabaseServer();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
-    if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
 
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
 
     // 시드 게시글 중 랜덤 10개 선택
-    const { data: seedPosts } = await admin
+    const { data: seedPosts } = await supabase
       .from('posts')
       .select('id')
       .like('author_id', 'aaaaaaaa%')
@@ -33,7 +30,7 @@ export async function POST() {
       // now() - random 0~2hours
       const offset = Math.floor(Math.random() * 2 * 60 * 60 * 1000);
       const newDate = new Date(Date.now() - offset).toISOString();
-      const { error } = await admin
+      const { error } = await supabase
         .from('posts')
         .update({ created_at: newDate })
         .eq('id', post.id);

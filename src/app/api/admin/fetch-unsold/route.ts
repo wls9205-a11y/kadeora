@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServer } from '@/lib/supabase-server';
-import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/admin-auth';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const SIDO: Record<string, string> = {
   '11': '서울', '26': '부산', '27': '대구', '28': '인천', '29': '광주',
@@ -10,16 +10,13 @@ const SIDO: Record<string, string> = {
 
 export async function POST() {
   try {
-    const sb = await createSupabaseServer();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
-    if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
 
     const apiKey = process.env.UNSOLD_API_KEY;
     if (!apiKey) return NextResponse.json({ error: 'UNSOLD_API_KEY 미설정' }, { status: 503 });
 
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
 
     // 국토부 미분양 통계 API 호출
     const baseUrl = 'https://apis.data.go.kr/1613000/KMHW_UNSOLD_HOUSE_INFO/getUnsoldHouseInfoList';
@@ -82,10 +79,10 @@ export async function POST() {
     }
 
     // 기존 데이터 비활성화
-    await admin.from('unsold_apts').update({ is_active: false }).eq('is_active', true);
+    await supabase.from('unsold_apts').update({ is_active: false }).eq('is_active', true);
 
     // 새 데이터 삽입
-    const { error } = await admin.from('unsold_apts').insert(allItems);
+    const { error } = await supabase.from('unsold_apts').insert(allItems);
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
 
     return NextResponse.json({ success: true, count: allItems.length, message: `${allItems.length}개 현장 업데이트 완료` });

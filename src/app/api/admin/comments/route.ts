@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(req: NextRequest) {
   try {
-    const sb = await createSupabaseServer();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
-    if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -17,9 +14,9 @@ export async function GET(req: NextRequest) {
     const filter = searchParams.get('filter') || 'all';
     const offset = (page - 1) * limit;
 
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
 
-    let query = admin.from('comments')
+    let query = supabase.from('comments')
       .select('id, content, created_at, is_deleted, post_id, profiles:author_id(nickname), posts:post_id(title)', { count: 'exact' })
       .order('created_at', { ascending: false });
 
