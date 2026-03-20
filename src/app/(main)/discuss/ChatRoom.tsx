@@ -5,6 +5,7 @@ import { useToast } from '@/components/Toast';
 import { ReportModal } from '@/components/modals/ReportModal';
 import EmptyState from '@/components/shared/EmptyState';
 import type { User } from '@supabase/supabase-js';
+import { getAvatarColor } from '@/lib/avatar';
 
 interface MsgProfile { id: string; nickname: string | null; grade: number | null; points: number | null; }
 interface ChatMsg {
@@ -21,8 +22,7 @@ const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }
   7:{title:'청약고수',emoji:'🏆',color:'#FFD700'},8:{title:'전설',emoji:'👑',color:'#FF6B35'},
   9:{title:'신의경지',emoji:'🌟',color:'#9C27B0'},10:{title:'카더라신',emoji:'⚡',color:'#FF4500'},
 };
-const COLORS = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
-function avc(uid: string | null) { if (!uid) return COLORS[0]; return COLORS[uid.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length]; }
+function avc(uid: string | null) { return getAvatarColor(uid ?? ''); }
 function timeAgo(d: string) { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return '방금'; if (m < 60) return m + '분 전'; if (m < 1440) return Math.floor(m / 60) + '시간 전'; return Math.floor(m / 1440) + '일 전'; }
 function renderContent(text: string) { return text.split(/(@\S+)/g).map((p, i) => p.startsWith('@') ? <span key={i} style={{ color: 'var(--brand)', fontWeight: 700 }}>{p}</span> : p); }
 

@@ -36,6 +36,11 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
     try { revalidatePath('/feed'); } catch {}
+    try {
+      const { data: currentProfile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
+      const newPoints = (currentProfile?.points ?? 0) + 10;
+      await supabase.from('profiles').update({ points: newPoints }).eq('id', user.id);
+    } catch {}
     return NextResponse.json({ post: data }, { status: 201 });
   } catch (err) { console.error('[Posts POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }

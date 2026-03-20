@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getAvatarColor } from "@/lib/avatar";
 
 export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; grade?: number; }
 export interface Post {
@@ -17,9 +18,6 @@ export interface PostCardProps {
   variant?: "default" | "compact";
   showAuthor?: boolean;
 }
-
-const AVATAR_COLORS = ['#FF5B36','#FF8C42','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF9800','#00BCD4'];
-function getAvatarColor(str: string) { return AVATAR_COLORS[str.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % AVATAR_COLORS.length]; }
 const GRADE_EMOJI: Record<number,string> = {1:'🌱',2:'📡',3:'🏘',4:'🏠',5:'⚡',6:'🦁',7:'🏆',8:'👑',9:'🌟',10:'⚡'};
 const CAT: Record<string,{label:string;color:string;bg:string}> = {
   apt:{label:'부동산',color:'#3b82f6',bg:'#3b82f615'}, stock:{label:'주식',color:'#ef4444',bg:'#ef444415'},

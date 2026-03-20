@@ -37,6 +37,11 @@ export async function POST(req: NextRequest) {
       }
     } catch {}
 
+    try {
+      const { data: cp } = await supabase.from('profiles').select('points').eq('id', user.id).single();
+      await supabase.from('profiles').update({ points: (cp?.points ?? 0) + 5 }).eq('id', user.id);
+    } catch {}
+
     return NextResponse.json({ comment: data }, { status: 201 });
   } catch (err) { console.error('[Comments POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
