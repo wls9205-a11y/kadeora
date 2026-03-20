@@ -3,27 +3,22 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const GRADES = [
-  { grade: 1, emoji: '🌱', title: '새싹', points: '0' },
-  { grade: 2, emoji: '📢', title: '정보통', points: '100' },
-  { grade: 3, emoji: '🏘', title: '동네어른', points: '500' },
-  { grade: 4, emoji: '⭐', title: '소문난집', points: '1,500' },
-  { grade: 5, emoji: '💫', title: '인플루언서', points: '3,000' },
-  { grade: 6, emoji: '🦊', title: '빅마우스', points: '6,000' },
-  { grade: 7, emoji: '🔥', title: '찐고수', points: '15,000' },
-  { grade: 8, emoji: '👑', title: '전설', points: '30,000' },
-  { grade: 9, emoji: '🌟', title: '신의경지', points: '60,000' },
-  { grade: 10, emoji: '🚀', title: '카더라신', points: '∞' },
+  { emoji: '🌱', title: '새싹', pts: '0' }, { emoji: '📡', title: '정보통', pts: '100' },
+  { emoji: '🏘️', title: '동네어른', pts: '500' }, { emoji: '🏠', title: '소문난집', pts: '1.5K' },
+  { emoji: '⚡', title: '인플루언서', pts: '3K' }, { emoji: '🔥', title: '빅마우스', pts: '6K' },
+  { emoji: '💎', title: '찐고수', pts: '15K' }, { emoji: '🌟', title: '전설', pts: '30K' },
+  { emoji: '👑', title: '신의경지', pts: '60K' }, { emoji: '🚀', title: '카더라신', pts: '∞' },
 ];
 
-const FALLBACK = ['삼성전자', '아파트 청약', '부산 맛집', '코스피', '서울 핫플', '엔비디아', '강남 부동산', '테슬라', '제주 여행', '주식 추천'];
+const FALLBACK = ['삼성전자', '아파트 청약', '코스피', '엔비디아', '테슬라'];
 
 export default function RightPanel() {
   const [trending, setTrending] = useState<{ keyword: string }[]>([]);
-  const [showAll, setShowAll] = useState(false);
+  const [gradeOpen, setGradeOpen] = useState(false);
 
   useEffect(() => {
     fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 10)); })
+      .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 5)); })
       .catch(() => {});
   }, []);
 
@@ -31,48 +26,46 @@ export default function RightPanel() {
 
   return (
     <div style={{ width: 200, flexShrink: 0, position: 'sticky', top: 72, height: 'fit-content', display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
-      {/* 실시간 인기 검색어 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔍 인기 검색어</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {display.map((item, i) => (
-            <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '3px 0' }}>
-              <span style={{ fontSize: 11, fontWeight: 700, minWidth: 16, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{i + 1}</span>
-              <span style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.keyword}</span>
-            </Link>
-          ))}
-        </div>
-        <div style={{ marginTop: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>최근 7일 기준</div>
+      {/* 인기 검색어 (5개) */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>인기 검색어</div>
+        {display.map((item, i) => (
+          <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '4px 0' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, minWidth: 14, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{i + 1}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.keyword}</span>
+          </Link>
+        ))}
       </div>
 
-      {/* 등급 안내 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>⭐ 등급 안내</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          {(showAll ? GRADES : GRADES.slice(0, 5)).map(g => (
-            <div key={g.grade} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0' }}>
-              <span style={{ fontSize: 14, minWidth: 20 }}>{g.emoji}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{g.title}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{g.points}P~</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button onClick={() => setShowAll(v => !v)} style={{ marginTop: 8, width: '100%', padding: '6px 0', background: 'var(--bg-hover)', border: 'none', borderRadius: 6, fontSize: 11, color: 'var(--text-secondary)', cursor: 'pointer' }}>
-          {showAll ? '접기 ▲' : '전체보기 ▼'}
+      {/* 등급 안내 (접힌 상태 기본) */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+        <button onClick={() => setGradeOpen(v => !v)} style={{
+          width: '100%', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 12, fontWeight: 700,
+        }}>
+          등급 안내 <span style={{ fontSize: 10 }}>{gradeOpen ? '▲' : '▼'}</span>
         </button>
-        <Link href="/grades" style={{ display: 'block', marginTop: 6, textAlign: 'center', fontSize: 11, color: 'var(--brand)', textDecoration: 'none' }}>등급 혜택 자세히 →</Link>
+        {gradeOpen && (
+          <div style={{ padding: '0 14px 12px' }}>
+            {GRADES.map((g, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', fontSize: 12 }}>
+                <span>{g.emoji}</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{g.title}</span>
+                <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)', fontSize: 10 }}>{g.pts}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* 카더라 소개 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          📣 <strong style={{ color: 'var(--text-primary)' }}>카더라</strong>는<br />대한민국 소리소문<br />정보 커뮤니티입니다.
-        </div>
-        <Link href="/guide" style={{ display: 'block', marginTop: 8, padding: '7px 0', textAlign: 'center', background: 'var(--brand)', color: 'var(--text-inverse)', borderRadius: 8, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
-          📖 가이드북 보기
-        </Link>
+      {/* 푸터 정보 */}
+      <div style={{ padding: '8px 4px', fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+        <Link href="/guide" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>가이드</Link>
+        {' · '}
+        <Link href="/terms" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>이용약관</Link>
+        {' · '}
+        <Link href="/privacy" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>개인정보</Link>
+        <div style={{ marginTop: 4 }}>(주)카더라 · 사업자 278-57-00801</div>
       </div>
     </div>
   );
