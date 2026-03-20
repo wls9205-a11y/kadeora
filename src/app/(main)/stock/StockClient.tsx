@@ -120,6 +120,7 @@ export default function StockClient({ initialStocks }: Props) {
   const [showKRW, setShowKRW] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(1380);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+  const [sortBy, setSortBy] = useState('default');
 
   useEffect(() => {
     const saved = localStorage.getItem('kd_currency');
@@ -187,9 +188,16 @@ export default function StockClient({ initialStocks }: Props) {
 
   const MARKET_LABEL: Record<string, string> = { ALL: '전체', KOSPI: '코스피', KOSDAQ: '코스닥', NYSE: '뉴욕', NASDAQ: '나스닥' };
 
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'pct_desc') return Number(b.change_pct) - Number(a.change_pct);
+    if (sortBy === 'pct_asc') return Number(a.change_pct) - Number(b.change_pct);
+    if (sortBy === 'price_desc') return Number(b.price) - Number(a.price);
+    return 0; // default
+  });
+
   // Separate index entries from regular stocks
-  const indexEntries = filtered.filter(s => isIndexEntry(s));
-  const regularStocks = filtered.filter(s => !isIndexEntry(s));
+  const indexEntries = sorted.filter(s => isIndexEntry(s));
+  const regularStocks = sorted.filter(s => !isIndexEntry(s));
 
   function getIndexGradient(s: Stock) {
     const pct = s.change_pct ?? 0;
@@ -321,6 +329,16 @@ export default function StockClient({ initialStocks }: Props) {
             </button>
           ))}
         </div>
+        <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
+          background: 'var(--bg-hover)', border: '1px solid var(--border)',
+          borderRadius: 8, padding: '6px 10px', fontSize: 13, color: 'var(--text-primary)',
+          cursor: 'pointer', outline: 'none', marginLeft: 'auto', flexShrink: 0,
+        }}>
+          <option value="default">기본순</option>
+          <option value="pct_desc">등락률 ▲ 높은순</option>
+          <option value="pct_asc">등락률 ▼ 낮은순</option>
+          <option value="price_desc">가격 높은순</option>
+        </select>
       </div>
       {/* 검색 */}
       <div style={{ marginBottom: 10 }}>

@@ -4,6 +4,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface StockComment {
   id: string;
+  user_id: string;
   content: string;
   created_at: string;
   profiles?: { nickname: string | null } | null;
@@ -15,6 +16,13 @@ function timeAgo(d: string) {
   if (m < 60) return m + '분 전';
   if (m < 1440) return Math.floor(m / 60) + '시간 전';
   return Math.floor(m / 1440) + '일 전';
+}
+
+function avatarColor(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  const colors = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899'];
+  return colors[Math.abs(h) % colors.length];
 }
 
 export default function StockCommentInline({ symbol, stockName }: { symbol: string; stockName: string }) {
@@ -29,7 +37,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
       if (data.session) setUserId(data.session.user.id);
     });
     sb.from('stock_comments')
-      .select('id, content, created_at, profiles:user_id(nickname)')
+      .select('id, user_id, content, created_at, profiles:user_id(nickname)')
       .eq('symbol', symbol)
       .order('created_at', { ascending: false })
       .limit(5)
@@ -42,13 +50,19 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
     const sb = createSupabaseBrowser();
     const { data, error } = await sb.from('stock_comments')
       .insert({ symbol, user_id: userId, content: input.trim() })
-      .select('id, content, created_at, profiles:user_id(nickname)')
+      .select('id, user_id, content, created_at, profiles:user_id(nickname)')
       .single();
     if (!error && data) {
       setComments(prev => [data as any, ...prev].slice(0, 5));
       setInput('');
     }
     setSending(false);
+  };
+
+  const deleteComment = async (id: string) => {
+    const sb = createSupabaseBrowser();
+    await sb.from('stock_comments').delete().eq('id', id).eq('user_id', userId);
+    setComments(prev => prev.filter(c => c.id !== id));
   };
 
   return (
@@ -61,9 +75,9 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
           <input
             value={input}
-            onChange={e => setInput(e.target.value.slice(0, 150))}
+            onChange={e => setInput(e.target.value.slice(0, 100))}
             onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
-            placeholder="한줄평을 남겨보세요 (150자)"
+            placeholder="한줄평 남기기 (100자)"
             style={{
               flex: 1, padding: '8px 12px', fontSize: 13, borderRadius: 8,
               border: '1px solid var(--border)', background: 'var(--bg-base)',
@@ -83,7 +97,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
         </div>
       ) : (
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
-          로그인 후 한줄평을 남길 수 있어요
+          <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>로그인</a>하고 한줄평을 남겨보세요
         </div>
       )}
 
@@ -92,17 +106,30 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
           아직 한줄평이 없어요. 첫 번째 한줄평을 남겨보세요!
         </div>
       ) : (
-        comments.map(c => (
-          <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                {(c.profiles as any)?.nickname ?? '사용자'}
-              </span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+        comments.map(c => {
+          const nick = (c.profiles as any)?.nickname ?? '사용자';
+          return (
+            <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                    background: avatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, color: '#fff',
+                  }}>{nick[0]}</div>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+                  {userId === c.user_id && (
+                    <button onClick={() => deleteComment(c.id)} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
+                  )}
+                </div>
+              </div>
+              <div style={{ color: 'var(--text-secondary)', marginLeft: 30 }}>{c.content}</div>
             </div>
-            <div style={{ color: 'var(--text-secondary)' }}>{c.content}</div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );

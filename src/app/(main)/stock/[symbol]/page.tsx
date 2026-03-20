@@ -51,25 +51,32 @@ export default async function StockDetailPage({ params }: Props) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <Link href="/stock" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none', marginBottom: 20, display: 'inline-block' }}>← 주식 시세</Link>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '20px', marginBottom: 16 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>{s.name}</h1>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
           <span style={{ fontSize: 12, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 10px', borderRadius: 6 }}>{symbol}</span>
           <span style={{ fontSize: 12, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 10px', borderRadius: 6 }}>{s.market}</span>
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>{s.name}</h1>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 34, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency)}</span>
-          {isStale ? (
-            <span style={{ fontSize: 13, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>시세없음</span>
-          ) : (
+          <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency)}</span>
+        </div>
+        {isStale ? (
+          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 8 }}>⏳ 시세 정보 준비 중입니다</div>
+        ) : (
+          <div style={{ marginTop: 8 }}>
             <span style={{
               fontSize: 20, fontWeight: 700,
               color: isUp ? '#ef4444' : isDown ? '#3b82f6' : 'var(--text-tertiary)',
             }}>
-              {isUp ? '▲' : isDown ? '▼' : '━'} {Math.abs(changePct).toFixed(2)}%
+              {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
-          )}
-        </div>
+            {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
         {items.map(({ label, value }) => (
