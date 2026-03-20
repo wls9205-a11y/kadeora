@@ -331,7 +331,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               {hotPosts.slice(0, 5).map((hp: any, i: number) => {
                 const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
                 return (
-                  <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < Math.min(hotPosts.length, 5) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
+                  <Link key={hp.id} href={`/feed/${(hp as any).slug || hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < Math.min(hotPosts.length, 5) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none' }}>
                     <span style={{ fontSize: 18, width: 28, textAlign: 'center', flexShrink: 0 }}>{medals[i]}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</div>
@@ -415,7 +415,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           return (
-            <Link key={post.id} href={`/feed/${post.id}`} className="animate-fadeIn"
+            <Link key={post.id} href={`/feed/${(post as any).slug || post.id}`} className="animate-fadeIn"
               style={{ display: 'block', textDecoration: 'none', color: 'inherit', padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
               {/* Header row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, marginBottom: 6 }}>

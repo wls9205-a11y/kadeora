@@ -38,8 +38,10 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
   const displayName = post.is_anonymous ? "익명" : post.author?.nickname || "사용자";
   const catInfo = CAT_COLORS[post.category ?? ''] ?? null;
 
+  const href = post.slug ? `/feed/${post.slug}` : `/feed/${post.id}`;
+
   return (
-    <Link href={`/feed/${post.id}`} style={{
+    <Link href={href} style={{
       display: "block", textDecoration: "none", color: "inherit",
       padding: "14px 0",
       borderBottom: "1px solid var(--border)",

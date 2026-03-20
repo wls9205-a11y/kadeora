@@ -18,7 +18,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ? await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('id', numId).single()
         : await sb.from('apt_subscriptions').select('house_nm, region_nm, tot_supply_hshld_co').eq('house_manage_no', id).single();
     if (!apt) return {};
-    return { title: `${apt.house_nm} 청약 | 카더라`, description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대` };
+    return {
+      title: `${apt.house_nm} 청약 | 카더라`,
+      description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대`,
+      alternates: {
+        canonical: `https://kadeora.app/apt/${id}`,
+      },
+    };
   } catch { return {}; }
 }
 

@@ -7,13 +7,21 @@ import { LikeButton } from '@/components/LikeButton';
 import { CommentSection } from '@/components/CommentSection';
 import Link from 'next/link';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import ShareButtons from '@/components/ShareButtons'
 
 import { BookmarkButton } from '@/components/BookmarkButton';
 import ReportButton from '@/components/ReportButton';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+
+function parsePostId(param: string): number {
+  const match = param.match(/-(\d+)$/);
+  if (match) return parseInt(match[1]);
+  const num = parseInt(param);
+  if (!isNaN(num)) return num;
+  return 0;
+}
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
@@ -33,13 +41,13 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const numId = Number(id);
+  const numId = parsePostId(id);
   const SITE_URL_META = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
   try {
     const sb = await createSupabaseServer();
     const { data: post } = await sb
       .from('posts')
-      .select('title, content, created_at, profiles!posts_author_id_fkey(nickname)')
+      .select('title, content, created_at, slug, profiles!posts_author_id_fkey(nickname)')
       .eq('id', numId)
       .eq('is_deleted', false)
       .maybeSingle();
@@ -50,13 +58,16 @@ export async function generateMetadata({ params }: Props) {
     return {
       title: post.title,
       description,
+      alternates: {
+        canonical: `https://kadeora.app/feed/${post.slug || numId}`,
+      },
       openGraph: {
         title: post.title,
         description,
         type: 'article',
         publishedTime: post.created_at,
         authors: [author],
-        url: `${SITE_URL_META}/feed/${numId}`,
+        url: `${SITE_URL_META}/feed/${post.slug || numId}`,
         images: [
           { url: ogImageUrl, width: 1200, height: 630, alt: post.title },
           { url: `${SITE_URL_META}/og-image.png`, width: 1200, height: 628, alt: '카더라' },
@@ -80,7 +91,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function FeedDetailPage({ params }: Props) {
   const { id } = await params;
-  const numId = Number(id);
+  const numId = parsePostId(id);
 
   let post: PostWithProfile | null = null;
   let comments: CommentWithProfile[] = [];
@@ -94,7 +105,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
     const { data: postData } = await sb
       .from('posts')
-      .select('*, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+      .select('*, slug, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
       .eq('id', numId)
       .eq('is_deleted', false)
       .maybeSingle();
@@ -141,6 +152,10 @@ export default async function FeedDetailPage({ params }: Props) {
         profiles: { id: 'demo-b', nickname: '투자마니아', avatar_url: null },
       },
     ];
+  }
+
+  if (post?.slug && id === String(numId) && !isNaN(Number(id))) {
+    redirect(`/feed/${post.slug}`);
   }
 
   const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;

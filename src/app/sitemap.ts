@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       Promise.race([promise, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
     const [postsResult, stocksResult, aptsResult] = await Promise.all([
-      timeout(sb.from('posts').select('id, updated_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(200), 5000),
+      timeout(sb.from('posts').select('id, slug, updated_at, likes_count, comments_count').eq('is_deleted', false).order('created_at', { ascending: false }).limit(200), 5000),
       timeout(sb.from('stock_quotes').select('symbol, updated_at'), 5000),
       timeout(sb.from('apt_subscriptions').select('id, updated_at'), 5000),
     ]);
@@ -38,13 +38,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const apts = (aptsResult as any)?.data ?? [];
 
     const feedRoutes: MetadataRoute.Sitemap = posts.map((p: any) => ({
-      url: `${SITE}/feed/${p.id}`,
+      url: `${SITE}/feed/${p.slug || p.id}`,
       lastModified: new Date(p.updated_at ?? Date.now()),
       changeFrequency: 'weekly' as const,
-      priority: 0.6,
+      priority: (p.likes_count >= 5 || p.comments_count >= 3) ? 0.8 : 0.6,
     }));
 
-    const stockRoutes: MetadataRoute.Sitemap = stocks.map((s: any) => ({
+    const activeStocks = stocks.filter((s: any) => {
+      if (!s.updated_at) return false;
+      return new Date(s.updated_at).getFullYear() > 2000;
+    });
+    const stockRoutes: MetadataRoute.Sitemap = activeStocks.map((s: any) => ({
       url: `${SITE}/stock/${s.symbol}`,
       lastModified: new Date(s.updated_at ?? Date.now()),
       changeFrequency: 'hourly' as const,
