@@ -103,7 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           const active = isActive(m.href);
           return (
             <Link key={m.href} href={m.href} style={{
-              padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+              padding: '5px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
               textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
               background: active ? 'var(--bg-hover)' : 'transparent',
               color: active ? 'var(--brand)' : 'var(--text-secondary)',

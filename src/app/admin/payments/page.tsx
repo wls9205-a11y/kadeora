@@ -48,32 +48,40 @@ export default async function AdminPaymentsPage() {
       </div>
 
       <div style={{ ...card, overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 500 }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
-              <th style={{ padding: '10px 12px' }}>결제일</th>
-              <th style={{ padding: '10px 8px' }}>유저</th>
-              <th style={{ padding: '10px 8px' }}>상품</th>
-              <th style={{ padding: '10px 8px', textAlign: 'right' }}>금액</th>
-              <th style={{ padding: '10px 8px' }}>주문번호</th>
-              <th style={{ padding: '10px 8px' }}>상태</th>
-            </tr>
-          </thead>
-          <tbody>
-            {all.map((p: any) => (
-              <tr key={p.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)' }}>{p.created_at ? new Date(p.created_at).toLocaleDateString('ko-KR') : '-'}</td>
-                <td style={{ padding: '10px 8px', color: 'var(--text-secondary)' }}>{p.user_id?.slice(0, 8) || '-'}</td>
-                <td style={{ padding: '10px 8px', color: 'var(--text-primary)' }}>{p.product_id || '-'}</td>
-                <td style={{ padding: '10px 8px', color: 'var(--text-primary)', fontWeight: 700, textAlign: 'right' }}>{(p.amount || 0).toLocaleString()}원</td>
-                <td style={{ padding: '10px 8px', color: 'var(--text-tertiary)', fontSize: 11 }}>{p.order_id || '-'}</td>
-                <td style={{ padding: '10px 8px' }}>
-                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 600, background: statusColor(p.status), color: 'var(--text-inverse)' }}>{p.status}</span>
-                </td>
+        {all.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-tertiary)' }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>{'💳'}</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>아직 결제 내역이 없습니다</div>
+            <div style={{ fontSize: 13 }}>전광판 상품이 등록되면 여기에 표시됩니다.</div>
+          </div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 500 }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
+                <th style={{ padding: '10px 12px' }}>결제일</th>
+                <th style={{ padding: '10px 8px' }}>유저</th>
+                <th style={{ padding: '10px 8px' }}>상품</th>
+                <th style={{ padding: '10px 8px', textAlign: 'right' }}>금액</th>
+                <th style={{ padding: '10px 8px' }}>주문번호</th>
+                <th style={{ padding: '10px 8px' }}>상태</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {all.map((p: any) => (
+                <tr key={p.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)' }}>{p.created_at ? new Date(p.created_at).toLocaleDateString('ko-KR') : '-'}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--text-secondary)' }}>{p.user_id?.slice(0, 8) || '-'}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--text-primary)' }}>{p.product_id || '-'}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--text-primary)', fontWeight: 700, textAlign: 'right' }}>{(p.amount || 0).toLocaleString()}원</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--text-tertiary)', fontSize: 11 }}>{p.order_id || '-'}</td>
+                  <td style={{ padding: '10px 8px' }}>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 600, background: statusColor(p.status), color: 'var(--text-inverse)' }}>{p.status}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>

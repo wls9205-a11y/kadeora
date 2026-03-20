@@ -67,7 +67,8 @@ function NoticeSection() {
       await sb.from('site_notices').update({ is_active: false }).eq('is_active', true);
       await sb.from('site_notices').insert({ content: content.trim(), is_active: true });
       setResult('공지가 등록됐어요!'); setContent(''); setPreview(false); loadHistory();
-    } catch { setResult('저장 실패'); }
+      setTimeout(() => setResult(''), 3000);
+    } catch { setResult('저장 실패'); setTimeout(() => setResult(''), 3000); }
     finally { setSaving(false); }
   };
 
@@ -196,6 +197,7 @@ function PushSection() {
       } else { setResult(`발송 실패: ${data.error}`); }
     } catch { setResult('발송 실패'); }
     setSending(false);
+    setTimeout(() => setResult(''), 3000);
   };
 
   const inp: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, boxSizing: 'border-box' };

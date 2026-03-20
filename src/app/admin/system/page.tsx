@@ -44,6 +44,7 @@ function SeedSection() {
       load();
     } catch { setResult('삭제 실패'); }
     setDeleting(''); setConfirmAll(false);
+    setTimeout(() => setResult(''), 3000);
   };
 
   const btn = (target: string, label: string, color: string) => (
@@ -138,6 +139,7 @@ function CronSection() {
       }
     } catch { setResult(`${label} 요청 실패`); }
     setTriggering('');
+    setTimeout(() => setResult(''), 3000);
   };
 
   const crons = [
@@ -197,6 +199,7 @@ function ManualControlSection() {
       }
     } catch { setResult(`${label} 요청 실패`); }
     setTriggering('');
+    setTimeout(() => setResult(''), 3000);
   };
 
   return (

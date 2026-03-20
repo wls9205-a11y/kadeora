@@ -63,6 +63,7 @@ function UnsoldSection() {
       }
     } catch { setResult('요청 실패'); }
     setLoading(false);
+    setTimeout(() => setResult(''), 3000);
   };
 
   const filteredHistory = recentUnsold.filter(u => {
@@ -152,6 +153,7 @@ function AptCacheSection() {
       }
     } catch { setResult('요청 실패'); }
     setRefreshing(false);
+    setTimeout(() => setResult(''), 3000);
   };
 
   return (

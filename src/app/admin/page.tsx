@@ -21,14 +21,13 @@ export default async function AdminDashboard() {
   if (!profile?.is_admin) redirect('/feed');
 
   const [
-    seedR, usersR, todayUsersR, postsR, todayPostsR,
+    usersR, todayUsersR, postsR, todayPostsR,
     commentsR, pushSubsR, pwaStatsR,
     signupRawR, postRawR, catRawR,
     todayAttR, totalAttR, topAttR,
     recentUsersR, recentReportsR,
     pendingReportsR,
   ] = await Promise.all([
-    supabase.from('profiles').select('id', { count: 'exact', head: true }).filter('id::text', 'like', 'aaaaaaaa%'),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
@@ -47,7 +46,12 @@ export default async function AdminDashboard() {
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
   ]);
 
-  const seedCount = seedR.count ?? 0;
+  let seedCount = 0;
+  try {
+    const { data: seedData } = await supabase.rpc('get_seed_stats');
+    seedCount = Number(seedData?.[0]?.seed_users) || 0;
+  } catch {}
+
   const totalUsers = usersR.count ?? 0;
   const totalPosts = postsR.count ?? 0;
   const totalComments = commentsR.count ?? 0;
@@ -82,30 +86,31 @@ export default async function AdminDashboard() {
 
       {/* KPI Cards */}
       <div className="admin-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div style={cardStyle}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>총 가입자</div>
+        <div style={{ ...cardStyle, borderLeft: '3px solid var(--brand)', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'👥'} 총 가입자</div>
           <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalUsers.toLocaleString()}명</div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>시드 {seedCount}명 포함 · 오늘 +{todayUsersR.count ?? 0}명</div>
         </div>
-        <div style={cardStyle}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>오늘 방문자</div>
-          <TrafficStats variant="kpi" />
-        </div>
-        <div style={cardStyle}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>게시글 수</div>
+        <div style={{ ...cardStyle, borderLeft: '3px solid var(--success)', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'📝'} 게시글</div>
           <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalPosts.toLocaleString()}개</div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>오늘 +{todayPostsR.count ?? 0}개</div>
         </div>
-        <div style={cardStyle}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>댓글 수</div>
+        <div style={{ ...cardStyle, borderLeft: '3px solid #8b5cf6', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'💬'} 댓글</div>
           <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalComments.toLocaleString()}개</div>
         </div>
-        <div style={cardStyle}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>푸시 구독 수</div>
+        <div style={{ ...cardStyle, borderLeft: '3px solid #f59e0b', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'🔔'} 푸시 구독</div>
           <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{pushSubs.toLocaleString()}명</div>
         </div>
-        <div style={cardStyle}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>홈화면 추가 (PWA)</div>
+        <div style={{ ...cardStyle, borderLeft: '3px solid var(--error)', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'🚨'} 신고</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{pendingCount}건</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>미처리 대기 중</div>
+        </div>
+        <div style={{ ...cardStyle, borderLeft: '3px solid #06b6d4', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'💳'} 결제</div>
           <DashboardPWACard total={pwaTotal} android={pwaAndroid} ios={pwaIOS} desktop={pwaDesktop} />
         </div>
       </div>
