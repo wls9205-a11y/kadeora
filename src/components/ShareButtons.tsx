@@ -33,7 +33,9 @@ export default function ShareButtons({ title, postId, content }: Props) {
           buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
         });
       } else {
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+        // SDK 미초기화 — 카카오톡 앱 공유 URL로 시도
+        const kakaoShareUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`;
+        window.open(kakaoShareUrl, '_blank');
       }
     } else if (pid === 'x') {
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' via 카더라')}&url=${encodeURIComponent(url)}`, '_blank');

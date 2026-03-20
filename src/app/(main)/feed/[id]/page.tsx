@@ -202,7 +202,7 @@ export default async function FeedDetailPage({ params }: Props) {
       </div>
 
       {/* Post article */}
-      <article style={{ marginBottom: 20, paddingBottom: 80 }}>
+      <article style={{ marginBottom: 20, paddingBottom: 120 }}>
         {/* Title */}
         <h1 style={{ margin: '0 0 16px', fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35 }}>
           {post.title}
@@ -233,7 +233,7 @@ export default async function FeedDetailPage({ params }: Props) {
         </div>
 
         {/* Content body */}
-        <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.9, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
+        <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
           {post.content}
         </div>
 

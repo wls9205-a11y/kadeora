@@ -93,7 +93,7 @@ export default function WriteClient() {
         const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '작성 실패');
         const { post } = await res.json();
-        success('게시글이 작성되었습니다'); router.push(`/feed/${post.id}`);
+        success('게시글이 작성되었습니다'); router.push(`/feed/${post.slug || post.id}`);
       }
       router.refresh();
     } catch (e: unknown) {
@@ -191,7 +191,11 @@ export default function WriteClient() {
       {/* 내용 */}
       <textarea
         value={content}
-        onChange={e => setContent(e.target.value)}
+        onChange={e => {
+          setContent(e.target.value);
+          e.target.style.height = 'auto';
+          e.target.style.height = e.target.scrollHeight + 'px';
+        }}
         placeholder="내용을 자유롭게 작성해보세요..."
         maxLength={5000}
         style={{
@@ -241,7 +245,7 @@ export default function WriteClient() {
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
-        padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '10px 16px', paddingBottom: 'max(10px, env(safe-area-inset-bottom))', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 50,
       }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)' }}>
