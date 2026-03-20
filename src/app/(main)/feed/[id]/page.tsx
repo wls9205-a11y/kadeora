@@ -287,16 +287,15 @@ export default async function FeedDetailPage({ params }: Props) {
       }}>
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', gap: 16, fontSize: 13, color: 'var(--text-tertiary)' }}>
           <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-          <span>💬 {comments.length}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>댓글 {comments.length}</span>
           <div style={{ flex: 1 }} />
           <ShareButtons title={post.title} postId={post.id} content={post.content} />
           <BookmarkButton postId={post.id} />
         </div>
       </div>
 
-      {/* Comments */}
+      {/* Comments — 헤더는 CommentSection 내부에서 렌더링 */}
       <div style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>💬 댓글 {comments.length}</h3>
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
 
