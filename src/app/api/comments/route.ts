@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizeComment } from '@/lib/sanitize'
 import { filterContent } from '@/lib/filter'
@@ -17,35 +18,32 @@ export async function POST(req: NextRequest) {
     if (!content || content.length < 1) return NextResponse.json({ error: '댓글 내용을 입력해주세요.' }, { status: 400 });
     if (containsBannedWord(content)) return NextResponse.json({ error: '부적절한 표현이 포함되어 있습니다.' }, { status: 400 });
     const { isBlocked, reason } = filterContent(content);
-    if (isBlocked) {
-      return NextResponse.json({ error: reason ?? '내용을 다시 확인해주세요' }, { status: 400 });
-    }
+    if (isBlocked) return NextResponse.json({ error: reason ?? '내용을 다시 확인해주세요' }, { status: 400 });
     if (!postId) return NextResponse.json({ error: '게시글 ID가 필요합니다.' }, { status: 400 });
-    const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select('*').single();
-    if (error) { console.error('[Comments POST]', error.message, error.details); return NextResponse.json({ error: '댓글 작성에 실패했습니다: ' + error.message }, { status: 500 }); }
 
-    // 댓글 알림 (service_role로 다른 유저 알림 INSERT)
+    // 댓글 INSERT (유저 세션 — 본인 데이터)
+    const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select('*').single();
+    if (error) { console.error('[Comments]', error.message); return NextResponse.json({ error: '댓글 작성에 실패했습니다.' }, { status: 500 }); }
+
+    // 알림 INSERT (service_role — 타인 데이터)
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const adminSb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-      const { data: post } = await adminSb.from('posts').select('author_id').eq('id', postId).single();
+      const { data: post } = await getSupabaseAdmin().from('posts').select('author_id').eq('id', postId).single();
       if (post?.author_id && post.author_id !== user.id) {
-        const { data: profile } = await adminSb.from('profiles').select('nickname').eq('id', user.id).single();
+        const { data: profile } = await getSupabaseAdmin().from('profiles').select('nickname').eq('id', user.id).single();
         const preview = content.length > 30 ? content.slice(0, 30) + '...' : content;
-        await adminSb.from('notifications').insert({
+        await getSupabaseAdmin().from('notifications').insert({
           user_id: post.author_id, type: 'comment',
           content: `${profile?.nickname ?? '누군가'}님이 댓글을 달았어요: ${preview}`,
         });
       }
     } catch {}
 
+    // 포인트 적립 (service_role — 타인 데이터 수정 권한 필요)
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const adminSb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-      const { data: cp } = await adminSb.from('profiles').select('points').eq('id', user.id).single();
-      await adminSb.from('profiles').update({ points: (cp?.points ?? 0) + 5 }).eq('id', user.id);
+      const { data: cp } = await getSupabaseAdmin().from('profiles').select('points').eq('id', user.id).single();
+      await getSupabaseAdmin().from('profiles').update({ points: (cp?.points ?? 0) + 5 }).eq('id', user.id);
     } catch {}
 
     return NextResponse.json({ comment: data }, { status: 201 });
-  } catch (err) { console.error('[Comments POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
+  } catch (err) { console.error('[Comments]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }

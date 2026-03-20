@@ -1,6 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createSupabaseServer } from '@/lib/supabase-server'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizePostInput } from '@/lib/sanitize'
 import { containsBannedWord } from '@/lib/nickname-filter'
@@ -33,15 +34,19 @@ export async function POST(req: NextRequest) {
     if (!content || content.length < 5) return NextResponse.json({ error: '내용은 5자 이상이어야 합니다.' }, { status: 400 });
     if (containsBannedWord(title) || containsBannedWord(content)) return NextResponse.json({ error: '부적절한 표현이 포함되어 있습니다.' }, { status: 400 });
     const regionId = (category === 'local' && body.region_id && typeof body.region_id === 'string') ? body.region_id : 'all';
+
+    // 게시글 INSERT (유저 세션 — 본인 데이터)
     const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
+
     try { revalidatePath('/feed'); } catch {}
+
+    // 포인트 적립 (service_role — profiles UPDATE 필요)
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const adminSb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-      const { data: cp } = await adminSb.from('profiles').select('points').eq('id', user.id).single();
-      await adminSb.from('profiles').update({ points: (cp?.points ?? 0) + 10 }).eq('id', user.id);
+      const { data: cp } = await getSupabaseAdmin().from('profiles').select('points').eq('id', user.id).single();
+      await getSupabaseAdmin().from('profiles').update({ points: (cp?.points ?? 0) + 10 }).eq('id', user.id);
     } catch {}
+
     return NextResponse.json({ post: data }, { status: 201 });
   } catch (err) { console.error('[Posts POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
