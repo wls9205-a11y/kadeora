@@ -33,8 +33,8 @@ export default function ShareButtons({ title, postId, content }: Props) {
           buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
         });
       } else {
-        // SDK 미초기화 — 카카오톡 앱 공유 URL로 시도
-        const kakaoShareUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`;
+        // SDK 미초기화 — 카카오톡 공유 picker URL
+        const kakaoShareUrl = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
         window.open(kakaoShareUrl, '_blank');
       }
     } else if (pid === 'x') {
