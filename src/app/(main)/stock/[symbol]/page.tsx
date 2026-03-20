@@ -1,3 +1,6 @@
+// Cache: 300s — 주식 상세 (시세 크론 5분 주기)
+export const revalidate = 300;
+
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';

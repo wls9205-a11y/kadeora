@@ -11,8 +11,9 @@ import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import FeedClient from './FeedClient';
 import Disclaimer from '@/components/Disclaimer';
 
+// Cache: 60s — 피드 목록
 export const dynamic = 'force-dynamic';
-export const revalidate = 30;
+export const revalidate = 60;
 
 const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);

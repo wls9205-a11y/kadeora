@@ -18,7 +18,8 @@ async function fetchStocks() {
   return data ?? [];
 }
 
-const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v3'], { revalidate: 600 });
+// Cache: 300s — 주식 목록 (시세 크론 5분 주기)
+const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v3'], { revalidate: 300 });
 
 export default async function StockPage() {
   let stocks: { symbol: string; name: string; market: string; price: number; change_amt: number; change_pct: number; volume: number; market_cap: number; updated_at: string }[] = [];

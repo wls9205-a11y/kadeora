@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { z } from 'zod';
 
@@ -39,6 +40,7 @@ export async function PATCH(req: Request, { params }: Params) {
       .single();
 
     if (error) throw error;
+    try { revalidatePath('/feed'); revalidatePath(`/feed/${id}`); } catch {}
     return NextResponse.json({ post: updated });
   } catch (e: unknown) {
     console.error('[PATCH /api/posts/:id]', e);

@@ -1,4 +1,5 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizePostInput } from '@/lib/sanitize'
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
     const regionId = (category === 'local' && body.region_id && typeof body.region_id === 'string') ? body.region_id : 'all';
     const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
+    try { revalidatePath('/feed'); } catch {}
     return NextResponse.json({ post: data }, { status: 201 });
   } catch (err) { console.error('[Posts POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }

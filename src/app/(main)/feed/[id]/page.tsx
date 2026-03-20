@@ -1,7 +1,8 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { DEMO_POSTS, CATEGORY_MAP } from '@/lib/constants';
 
-export const revalidate = 60;
+// Cache: 120s — 게시글 상세
+export const revalidate = 120;
 import type { PostWithProfile, CommentWithProfile } from '@/types/database';
 import { LikeButton } from '@/components/LikeButton';
 import { CommentSection } from '@/components/CommentSection';

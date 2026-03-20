@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
-export const revalidate = 300;
+// Cache: 600s — 트렌딩 검색어
+export const revalidate = 600;
 
 const withTimeout = <T>(p: Promise<T>, ms = 3000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
