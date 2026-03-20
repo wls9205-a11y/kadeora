@@ -199,7 +199,7 @@ export default async function FeedDetailPage({ params }: Props) {
       </div>
 
       {/* Post article */}
-      <article style={{ marginBottom: 20, paddingBottom: 120 }}>
+      <article style={{ marginBottom: 0 }}>
         {/* Title */}
         <h1 style={{ margin: '0 0 16px', fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35 }}>
           {post.title}

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Eye } from 'lucide-react';
 import { getAvatarColor } from "@/lib/avatar";
-import { CATEGORY_STYLES, GRADE_EMOJI } from "@/lib/constants";
+import { GRADE_EMOJI } from "@/lib/constants";
 
 export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; grade?: number; }
 export interface Post {
@@ -31,7 +31,6 @@ function timeAgo(dateStr: string): string {
 
 function PostCard({ post, variant = "default", showAuthor = true }: PostCardProps) {
   const displayName = post.is_anonymous ? "익명" : post.author?.nickname || "사용자";
-  const catInfo = CATEGORY_STYLES[post.category ?? ''] ?? null;
   const gradeEmoji = GRADE_EMOJI[post.author?.grade ?? 1] ?? '🌱';
   const avatarColor = getAvatarColor(displayName);
   const href = post.slug ? `/feed/${post.slug}` : `/feed/${post.id}`;
@@ -58,12 +57,6 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
           </div>
           <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{displayName}</span>
           <span>{gradeEmoji}</span>
-          {catInfo && (
-            <span style={{
-              fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999,
-              background: catInfo.bg, color: catInfo.color,
-            }}>{catInfo.label}</span>
-          )}
           <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--text-tertiary)" }}>
             {timeAgo(post.created_at)}
           </span>

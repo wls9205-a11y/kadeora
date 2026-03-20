@@ -91,35 +91,35 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   };
 
   return (
-    <div style={{ marginTop: 32 }}>
-      <h3 style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span>💬</span> 댓글 <span style={{ color: 'var(--brand)', fontSize: 14, fontWeight: 500 }}>{comments.length}</span>
+    <div style={{ marginTop: 8, paddingBottom: 80 }}>
+      <h3 style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, margin: '0 0 12px' }}>
+        댓글 {comments.length}
       </h3>
 
-      {/* 댓글 입력 */}
-      <div style={{ background: 'var(--bg-surface)', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid var(--border)' }}>
+      {/* 댓글 입력 — 하단 고정 */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 45, background: 'var(--bg-base)', borderTop: '1px solid var(--border)', padding: '8px 16px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
         {user ? (
           <>
-            <textarea
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="댓글을 작성해주세요... (Ctrl+Enter로 작성)"
-              maxLength={500}
-              rows={3}
-              style={{
-                width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border)',
-                borderRadius: 8, color: 'var(--text-primary)', padding: '10px 12px',
-                fontSize: 14, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6, boxSizing: 'border-box',
-              }}
-              onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
-              onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-              onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit(); }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-              <span style={{ fontSize: 12, color: content.length > 450 ? 'var(--error)' : 'var(--text-tertiary)' }}>{content.length}/500자</span>
-              <button onClick={handleSubmit} disabled={loading || !content.trim()} className="kd-btn kd-btn-primary" style={{ fontSize: 13, padding: '7px 16px' }}>
-                {loading ? '작성 중...' : '댓글 작성'}
-              </button>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', maxWidth: 680, margin: '0 auto' }}>
+              <textarea
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                placeholder="댓글을 남겨보세요..."
+                maxLength={500}
+                rows={1}
+                style={{
+                  flex: 1, background: 'var(--bg-hover)', border: '1px solid var(--border)',
+                  borderRadius: 20, color: 'var(--text-primary)', padding: '8px 14px',
+                  fontSize: 14, resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box', minHeight: 38,
+                }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+              />
+              <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
+                width: 36, height: 36, borderRadius: '50%', border: 'none', flexShrink: 0,
+                background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
+                color: content.trim() ? 'white' : 'var(--text-tertiary)',
+                cursor: content.trim() ? 'pointer' : 'default', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>↑</button>
             </div>
           </>
         ) : (

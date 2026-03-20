@@ -134,10 +134,13 @@ export default function WriteClient() {
         onChange={e => setTitle(e.target.value)}
         placeholder="(선택) 제목을 입력해주세요"
         maxLength={100}
+        onFocus={e => (e.currentTarget.style.borderBottomColor = 'var(--text-tertiary)')}
+        onBlur={e => (e.currentTarget.style.borderBottomColor = 'var(--border)')}
         style={{
           width: '100%', fontSize: 18, fontWeight: 700, padding: '12px 0',
-          border: 'none', background: 'transparent', color: 'var(--text-primary)',
-          outline: 'none', boxSizing: 'border-box',
+          border: 'none', borderBottom: '1px solid var(--border)', borderRadius: 0,
+          background: 'transparent', color: 'var(--text-primary)',
+          outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s',
         }}
       />
 
