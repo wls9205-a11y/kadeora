@@ -10,7 +10,7 @@ export async function GET() {
     const { data: existing } = await sb
       .from('invite_codes')
       .select('code')
-      .eq('owner_id', user.id)
+      .eq('creator_id', user.id)
       .maybeSingle();
 
     if (existing?.code) {
@@ -20,7 +20,7 @@ export async function GET() {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     const { error } = await sb
       .from('invite_codes')
-      .insert({ code, owner_id: user.id });
+      .insert({ code, creator_id: user.id });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ code });
