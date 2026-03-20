@@ -4,7 +4,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
 
 interface StockComment {
-  id: string; user_id: string; content: string; created_at: string;
+  id: string; author_id: string; content: string; created_at: string;
   likes_count: number; replies_count: number; parent_id: string | null;
   profiles?: { nickname: string | null; grade: number | null } | null;
 }
@@ -45,7 +45,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       ? { column: 'created_at', ascending: false }
       : { column: 'likes_count', ascending: false };
     const { data } = await sb.from('stock_comments')
-      .select('id, user_id, content, created_at, likes_count, replies_count, parent_id, profiles:user_id(nickname, grade)')
+      .select('id, author_id, content, created_at, likes_count, replies_count, parent_id, profiles:author_id(nickname, grade)')
       .eq('symbol', symbol)
       .is('parent_id', null)
       .order(order.column as any, { ascending: order.ascending })
@@ -61,11 +61,11 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
         setUserId(uid);
         const { data: likes } = await sb.from('stock_comment_likes')
           .select('comment_id')
-          .eq('user_id', uid);
+          .eq('author_id', uid);
         if (likes) setLikedIds(new Set(likes.map((l: any) => l.comment_id)));
         const { data: reacts } = await sb.from('stock_comment_reactions')
           .select('comment_id, emoji')
-          .eq('user_id', uid);
+          .eq('author_id', uid);
         if (reacts) {
           const m: Record<string, string> = {};
           reacts.forEach((r: any) => { m[r.comment_id] = r.emoji; });
@@ -83,8 +83,8 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     setSending(true);
     const sb = createSupabaseBrowser();
     const { data, error } = await sb.from('stock_comments')
-      .insert({ symbol, user_id: userId, content: input.trim() })
-      .select('id, user_id, content, created_at, likes_count, replies_count, parent_id, profiles:user_id(nickname, grade)')
+      .insert({ symbol, author_id: userId, content: input.trim() })
+      .select('id, author_id, content, created_at, likes_count, replies_count, parent_id, profiles:author_id(nickname, grade)')
       .single();
     if (!error && data) {
       setComments(prev => [data as any, ...prev]);
@@ -108,9 +108,9 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       c.id === commentId ? { ...c, likes_count: c.likes_count + (liked ? -1 : 1) } : c
     ));
     if (liked) {
-      await sb.from('stock_comment_likes').delete().eq('comment_id', commentId).eq('user_id', userId);
+      await sb.from('stock_comment_likes').delete().eq('comment_id', commentId).eq('author_id', userId);
     } else {
-      await sb.from('stock_comment_likes').insert({ comment_id: commentId, user_id: userId });
+      await sb.from('stock_comment_likes').insert({ comment_id: commentId, author_id: userId });
     }
   };
 
@@ -119,13 +119,13 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     const sb = createSupabaseBrowser();
     const existing = userReactions[commentId];
     if (existing === emoji) {
-      await sb.from('stock_comment_reactions').delete().eq('comment_id', commentId).eq('user_id', userId);
+      await sb.from('stock_comment_reactions').delete().eq('comment_id', commentId).eq('author_id', userId);
       setUserReactions(prev => { const n = { ...prev }; delete n[commentId]; return n; });
     } else {
       if (existing) {
-        await sb.from('stock_comment_reactions').update({ emoji }).eq('comment_id', commentId).eq('user_id', userId);
+        await sb.from('stock_comment_reactions').update({ emoji }).eq('comment_id', commentId).eq('author_id', userId);
       } else {
-        await sb.from('stock_comment_reactions').insert({ comment_id: commentId, user_id: userId, emoji });
+        await sb.from('stock_comment_reactions').insert({ comment_id: commentId, author_id: userId, emoji });
       }
       setUserReactions(prev => ({ ...prev, [commentId]: emoji }));
     }
@@ -134,7 +134,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
   const loadReplies = async (commentId: string) => {
     const sb = createSupabaseBrowser();
     const { data } = await sb.from('stock_comments')
-      .select('id, user_id, content, created_at, likes_count, replies_count, parent_id, profiles:user_id(nickname, grade)')
+      .select('id, author_id, content, created_at, likes_count, replies_count, parent_id, profiles:author_id(nickname, grade)')
       .eq('parent_id', commentId)
       .order('created_at', { ascending: true })
       .limit(30);
@@ -146,8 +146,8 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     if (!text || !userId) return;
     const sb = createSupabaseBrowser();
     const { data, error } = await sb.from('stock_comments')
-      .insert({ symbol, user_id: userId, content: text, parent_id: parentId })
-      .select('id, user_id, content, created_at, likes_count, replies_count, parent_id, profiles:user_id(nickname, grade)')
+      .insert({ symbol, author_id: userId, content: text, parent_id: parentId })
+      .select('id, author_id, content, created_at, likes_count, replies_count, parent_id, profiles:author_id(nickname, grade)')
       .single();
     if (!error && data) {
       setReplies(prev => ({ ...prev, [parentId]: [...(prev[parentId] || []), data as any] }));
@@ -161,7 +161,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
   const deleteComment = async (id: string, parentId: string | null) => {
     if (!userId) return;
     const sb = createSupabaseBrowser();
-    await sb.from('stock_comments').delete().eq('id', id).eq('user_id', userId);
+    await sb.from('stock_comments').delete().eq('id', id).eq('author_id', userId);
     if (parentId) {
       setReplies(prev => ({ ...prev, [parentId]: (prev[parentId] || []).filter(c => c.id !== id) }));
       setComments(prev => prev.map(c =>
@@ -225,7 +225,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     const nick = c.profiles?.nickname ?? '사용자';
     const grade = c.profiles?.grade ?? undefined;
     const liked = likedIds.has(c.id);
-    const isOwn = userId === c.user_id;
+    const isOwn = userId === c.author_id;
     const isExpanded = expandedId === c.id;
     const showMenu = menuId === c.id;
 
@@ -240,15 +240,15 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
                 background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
               }}>{GL(grade)}</span>
-              {userId && userId !== c.user_id && (
-                <button onClick={() => toggleFollow(c.user_id)} style={{
+              {userId && userId !== c.author_id && (
+                <button onClick={() => toggleFollow(c.author_id)} style={{
                   padding: '4px 12px', borderRadius: 4,
                   border: `1px solid var(--brand)`,
-                  background: followingIds.has(c.user_id) ? 'var(--brand)' : 'transparent',
-                  color: followingIds.has(c.user_id) ? 'white' : 'var(--brand)',
+                  background: followingIds.has(c.author_id) ? 'var(--brand)' : 'transparent',
+                  color: followingIds.has(c.author_id) ? 'white' : 'var(--brand)',
                   fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                 }}>
-                  {followingIds.has(c.user_id) ? '팔로잉' : '팔로우'}
+                  {followingIds.has(c.author_id) ? '팔로잉' : '팔로우'}
                 </button>
               )}
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(c.created_at)}</span>

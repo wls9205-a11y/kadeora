@@ -4,7 +4,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface StockComment {
   id: string;
-  user_id: string;
+  author_id: string;
   content: string;
   created_at: string;
   profiles?: { nickname: string | null } | null;
@@ -37,7 +37,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
       if (data.session) setUserId(data.session.user.id);
     });
     sb.from('stock_comments')
-      .select('id, user_id, content, created_at, profiles:user_id(nickname)')
+      .select('id, author_id, content, created_at, profiles:author_id(nickname)')
       .eq('symbol', symbol)
       .order('created_at', { ascending: false })
       .limit(5)
@@ -49,8 +49,8 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
     setSending(true);
     const sb = createSupabaseBrowser();
     const { data, error } = await sb.from('stock_comments')
-      .insert({ symbol, user_id: userId, content: input.trim() })
-      .select('id, user_id, content, created_at, profiles:user_id(nickname)')
+      .insert({ symbol, author_id: userId, content: input.trim() })
+      .select('id, author_id, content, created_at, profiles:author_id(nickname)')
       .single();
     if (!error && data) {
       setComments(prev => [data as any, ...prev].slice(0, 5));
@@ -61,7 +61,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
 
   const deleteComment = async (id: string) => {
     const sb = createSupabaseBrowser();
-    await sb.from('stock_comments').delete().eq('id', id).eq('user_id', userId);
+    await sb.from('stock_comments').delete().eq('id', id).eq('author_id', userId);
     setComments(prev => prev.filter(c => c.id !== id));
   };
 
@@ -121,7 +121,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
-                  {userId === c.user_id && (
+                  {userId === c.author_id && (
                     <button onClick={() => deleteComment(c.id)} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
                   )}
                 </div>
