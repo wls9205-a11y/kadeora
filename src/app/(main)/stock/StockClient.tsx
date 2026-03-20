@@ -189,12 +189,13 @@ export default function StockClient({ initialStocks }: Props) {
 
   const MARKET_LABEL: Record<string, string> = { ALL: '전체', KOSPI: '코스피', KOSDAQ: '코스닥', NYSE: '뉴욕', NASDAQ: '나스닥' };
 
-  const sorted = [...filtered].sort((a, b) => {
+  // sortBy 드롭다운이 선택되면 메인 정렬을 오버라이드
+  const sorted = sortBy !== 'default' ? [...filtered].sort((a, b) => {
     if (sortBy === 'pct_desc') return Number(b.change_pct) - Number(a.change_pct);
     if (sortBy === 'pct_asc') return Number(a.change_pct) - Number(b.change_pct);
     if (sortBy === 'price_desc') return Number(b.price) - Number(a.price);
-    return 0; // default
-  });
+    return 0;
+  }) : filtered;
 
   // Separate index entries from regular stocks
   const indexEntries = sorted.filter(s => isIndexEntry(s));
