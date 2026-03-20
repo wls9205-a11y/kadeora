@@ -326,7 +326,24 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               </div>
             </div>
           );
-        })}
+        }).reduce((acc: React.ReactNode[], card, i) => {
+          acc.push(card);
+          // 비로그인 시 5번째 카드 뒤 가입 유도 배너
+          if (i === 4 && !currentUserId) {
+            acc.push(
+              <div key="signup-cta" style={{ padding: '20px 16px', margin: '8px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>카더라 회원이 되면</div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
+                  관심 종목 알림 · 청약 마감 알림<br />글 전문 보기 · 댓글 참여 · 포인트 적립
+                </div>
+                <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+                  카카오로 3초 가입
+                </Link>
+              </div>
+            );
+          }
+          return acc;
+        }, [])}
       </div>
 
       {hasMore && (

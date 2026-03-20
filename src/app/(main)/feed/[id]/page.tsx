@@ -231,9 +231,24 @@ export default async function FeedDetailPage({ params }: Props) {
         </div>
 
         {/* Content body */}
-        <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
-          {post.content}
-        </div>
+        {currentUserId ? (
+          <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
+            {post.content}
+          </div>
+        ) : (
+          <div style={{ position: 'relative', margin: '0 0 24px' }}>
+            <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 120, overflow: 'hidden' }}>
+              {post.content}
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, background: 'linear-gradient(transparent, var(--bg-base))' }} />
+            <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>전체 글을 보려면 로그인하세요</div>
+              <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+                카카오로 로그인
+              </Link>
+            </div>
+          </div>
+        )}
 
         {(post.category === 'apt' || post.category === 'stock') && (
           <div style={{
@@ -294,9 +309,19 @@ export default async function FeedDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Comments — 헤더는 CommentSection 내부에서 렌더링 */}
+      {/* Comments */}
       <div style={{ marginBottom: 16 }}>
-        <CommentSection postId={post.id} initialComments={comments} />
+        {currentUserId ? (
+          <CommentSection postId={post.id} initialComments={comments} />
+        ) : (
+          <div style={{ textAlign: 'center', padding: '32px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+            <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>이 글에 {comments.length}개의 댓글이 있습니다</div>
+            <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>댓글을 보려면 로그인하세요</div>
+            <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+              카카오로 로그인
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Related posts */}
