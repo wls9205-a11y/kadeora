@@ -329,12 +329,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           const isLiked = likedPosts.has(post.id as number);
           const hasImages = post.images && post.images.length > 0;
-          const isPopular = (post.likes_count ?? 0) >= 5;
           const isNew = Date.now() - new Date(post.created_at).getTime() < 60 * 60 * 1000;
           const postHref = `/feed/${(post as any).slug || post.id}`;
           return (
             <div key={post.id} className="animate-fadeIn"
-              style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', borderLeft: isPopular ? '2px solid var(--brand)' : 'none', paddingLeft: isPopular ? 14 : 0 }}>
+              style={{ padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
               {/* Clickable area — navigates to post detail */}
               <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                 {/* Header row */}
