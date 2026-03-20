@@ -363,7 +363,7 @@ export default function StockClient({ initialStocks }: Props) {
       </div>
 
       {/* 종목 카드 리스트 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {regularStocks.map((s, i) => {
           const badgeStyle = MARKET_STYLE[s.market] ?? { bg: 'var(--bg-hover)', color: 'var(--text-secondary)' };
           const stale = isStaleData(s);
@@ -375,61 +375,45 @@ export default function StockClient({ initialStocks }: Props) {
                 border: '1px solid var(--border)',
                 borderRadius: 12,
                 padding: '12px 16px',
-                display: 'grid',
-                gridTemplateColumns: '32px 1fr 110px 110px 80px 70px',
+                display: 'flex',
                 alignItems: 'center',
+                gap: 12,
                 transition: 'background 0.15s',
                 cursor: 'pointer',
-                minWidth: 500,
               }}
               onClick={() => setSelectedStock(s)}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
             >
-              <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 700 }}>{i + 1}</span>
-              <div style={{ minWidth: 100 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {/* 순위 */}
+              <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 700, width: 20, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+              {/* 종목명 + 시장 */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {s.name}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                   <span style={{
-                    background: badgeStyle.bg,
-                    color: badgeStyle.color,
+                    background: badgeStyle.bg, color: badgeStyle.color,
                     padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700,
-                    display: 'inline-block',
                   }}>{s.market}</span>
+                  {s.sector && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.sector}</span>}
                 </div>
               </div>
-              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-                <span style={{
-                  fontSize: 16, fontWeight: 800,
-                  fontVariantNumeric: 'tabular-nums',
-                  color: stale ? 'var(--text-tertiary)' : isUp(s) ? 'var(--stock-up)' : isDown(s) ? 'var(--stock-down)' : 'var(--text-primary)',
+              {/* 가격 + 변동 */}
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{
+                  fontSize: 15, fontWeight: 800, fontVariantNumeric: 'tabular-nums',
+                  color: stale ? 'var(--text-tertiary)' : isUp(s) ? '#ef4444' : isDown(s) ? '#3b82f6' : 'var(--text-primary)',
                 }}>
                   {fmtPrice(s)}
-                </span>
-                {stale && (
-                  <span style={{
-                    fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)',
-                    padding: '1px 6px', borderRadius: 4, fontWeight: 600,
-                  }}>시세없음</span>
-                )}
-              </div>
-              <div style={{ textAlign: 'right' }}>
+                </div>
                 {stale ? (
-                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>-</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>시세없음</span>
                 ) : (
-                  <>
-                    <div><ChangeDisplay s={s} /></div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums', marginTop: 1 }}>
-                      {isUp(s) ? '+' : ''}{fmt(s.change_amt)}
-                    </div>
-                  </>
+                  <div style={{ marginTop: 2 }}><ChangeDisplay s={s} /></div>
                 )}
               </div>
-              <span style={{ textAlign: 'right', fontSize: 12, color: 'var(--text-tertiary)' }}>
-                {fmtCap(s.market_cap, s.currency)}
-              </span>
               <span style={{ textAlign: 'center' }}>
                 <Link
                   href="/discuss"

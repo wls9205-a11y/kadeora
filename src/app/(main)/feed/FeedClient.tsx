@@ -3,9 +3,10 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, MessageCircle, Eye } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Share2, Bookmark } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI } from '@/lib/constants';
+import { getAvatarColor } from '@/lib/avatar';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/shared/EmptyState';
@@ -451,40 +452,82 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
             free: { bg: '#8b5cf620', color: '#8b5cf6', label: '자유' },
           };
           const catInfo = catColors[post.category] ?? null;
+          const displayName = post.is_anonymous ? '익명' : (post.profiles?.nickname ?? '익명');
           const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
+          const isLiked = likedPosts.has(post.id as number);
+          const hasImages = post.images && post.images.length > 0;
           return (
             <Link key={post.id} href={`/feed/${(post as any).slug || post.id}`} className="animate-fadeIn"
-              style={{ display: 'block', textDecoration: 'none', color: 'inherit', padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+              style={{ display: 'block', textDecoration: 'none', color: 'inherit', padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
               {/* Header row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 8 }}>
                 {post.profiles?.avatar_url ? (
-                  <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={28} height={28} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                  <Image src={`${post.profiles.avatar_url}?width=80&height=80`} alt="" width={32} height={32} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                 ) : (
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-inverse, #fff)' }}>
-                    {(post.profiles?.nickname ?? 'U')[0].toUpperCase()}
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                    {displayName[0].toUpperCase()}
                   </div>
                 )}
-                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{post.profiles?.nickname ?? '익명'}</span>
-                <span>{gradeEmoji}</span>
-                {catInfo && (
-                  <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, background: catInfo.bg, color: catInfo.color }}>{catInfo.label}</span>
-                )}
-                <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
+                    <span style={{ fontSize: 12 }}>{gradeEmoji}</span>
+                    {catInfo && (
+                      <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 999, background: catInfo.bg, color: catInfo.color }}>{catInfo.label}</span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                </div>
               </div>
-              {/* Title */}
-              <h2 style={{ margin: '0 0 5px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                {post.title}
-              </h2>
-              {/* Content preview */}
-              <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                {post.content}
-              </p>
-              {/* Footer */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, color: 'var(--text-tertiary)' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Heart size={14} /> {numFmt(displayLikes)}</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MessageCircle size={14} /> {numFmt(post.comments_count ?? 0)}</span>
-                {(post.view_count ?? 0) > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Eye size={14} /> {numFmt(post.view_count ?? 0)}</span>}
+
+              {/* Content area — text left, thumbnail right */}
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Title */}
+                  <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                    {post.title}
+                  </h2>
+                  {/* Content preview */}
+                  <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                    {post.content}
+                  </p>
+                </div>
+                {/* Thumbnail */}
+                {hasImages && (
+                  <div style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--bg-hover)' }}>
+                    <Image src={post.images![0]} alt="" fill sizes="72px" style={{ objectFit: 'cover' }} />
+                    {post.images!.length > 1 && (
+                      <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>+{post.images!.length - 1}</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer — interaction bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                <button onClick={(e) => handleUpvote(e, post.id as number)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, border: 'none', background: isLiked ? '#ff444412' : 'transparent', cursor: 'pointer', fontSize: 12, color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 700 : 400 }}>
+                  <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} stroke={isLiked ? '#ef4444' : 'currentColor'} /> {numFmt(displayLikes)}
+                </button>
+                <button onClick={(e) => handleComment(e, post.id as number)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 16, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'var(--text-tertiary)' }}>
+                  <MessageCircle size={14} /> {numFmt(post.comments_count ?? 0)}
+                </button>
+                {(post.view_count ?? 0) > 0 && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', fontSize: 12, color: 'var(--text-tertiary)' }}>
+                    <Eye size={14} /> {numFmt(post.view_count ?? 0)}
+                  </span>
+                )}
+                <div style={{ flex: 1 }} />
+                <button onClick={(e) => handleBookmark(e, post.id as number)}
+                  style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer', color: bookmarkedPosts.has(post.id as number) ? 'var(--brand)' : 'var(--text-tertiary)' }}>
+                  <Bookmark size={14} fill={bookmarkedPosts.has(post.id as number) ? 'var(--brand)' : 'none'} />
+                </button>
+                <button onClick={(e) => handleShare(e, post)}
+                  style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-tertiary)' }}>
+                  <Share2 size={14} />
+                </button>
               </div>
             </Link>
           );

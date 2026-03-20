@@ -235,7 +235,7 @@ export default async function FeedDetailPage({ params }: Props) {
           {post.content}
         </div>
 
-        {(post.category === '부동산' || post.category === '주식' || post.category === 'real_estate' || post.category === 'stock') && (
+        {(post.category === 'apt' || post.category === 'stock') && (
           <div style={{
             background: 'rgba(255,69,0,0.04)',
             border: '1px solid rgba(255,69,0,0.12)',
@@ -277,14 +277,22 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* Action bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 13, color: 'var(--text-tertiary)', borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+      </article>
+
+      {/* Sticky action bar */}
+      <div style={{
+        position: 'fixed', bottom: 56, left: 0, right: 0, zIndex: 40,
+        background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
+        padding: '8px 0',
+      }}>
+        <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', gap: 16, fontSize: 13, color: 'var(--text-tertiary)' }}>
           <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
           <span>💬 {comments.length}</span>
+          <div style={{ flex: 1 }} />
           <ShareButtons title={post.title} postId={post.id} content={post.content} />
           <BookmarkButton postId={post.id} />
         </div>
-      </article>
+      </div>
 
       {/* Comments */}
       <div style={{ marginBottom: 16 }}>
