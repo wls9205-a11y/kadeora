@@ -17,12 +17,12 @@ const NAV_ITEMS = [
 ];
 
 const MOBILE_TABS_LEFT = [
-  { href: '/feed', label: '피드', Icon: Home },
-  { href: '/apt',  label: '부동산', Icon: Building2 },
+  { href: '/feed',  label: '피드', Icon: Home },
+  { href: '/stock', label: '주식', Icon: TrendingUp },
 ];
 const MOBILE_TABS_RIGHT = [
-  { href: '/hot',     label: 'HOT',  Icon: Flame },
-  { href: '/discuss', label: '토론', Icon: MessageCircle },
+  { href: '/apt',     label: '부동산', Icon: Building2 },
+  { href: '/discuss', label: '토론',   Icon: MessageCircle },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
