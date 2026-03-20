@@ -143,7 +143,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
               <div key={apt.id} style={{
                 padding: '14px 16px', borderRadius: 12, marginBottom: 8,
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                borderLeft: `3px solid ${accentColor}`,
+                borderLeft: `4px solid ${accentColor}`,
                 opacity: st === 'closed' ? 0.6 : 1,
                 transition: 'background 0.15s',
                 cursor: 'pointer',
@@ -154,9 +154,20 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
                 {/* 줄1: 배지 + 현장명 + 경쟁률 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
-                  {st === 'upcoming' && dday !== null && dday >= 0 && (
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>D-{dday}</span>
-                  )}
+                  {dday !== null && dday >= 0 && st !== 'closed' && (() => {
+                    const ddayStyle = dday === 0
+                      ? { bg: '#fee2e2', color: '#b91c1c', label: '오늘 마감!' }
+                      : dday <= 2
+                      ? { bg: '#fef2f2', color: '#dc2626', label: `D-${dday}` }
+                      : dday <= 6
+                      ? { bg: '#fffbeb', color: '#d97706', label: `D-${dday}` }
+                      : { bg: 'var(--bg-hover)', color: 'var(--text-secondary)', label: `D-${dday}` };
+                    return (
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: ddayStyle.bg, color: ddayStyle.color, animation: dday === 0 ? 'pulse 1.5s ease-in-out infinite' : undefined }}>
+                        {ddayStyle.label}
+                      </span>
+                    );
+                  })()}
                   <Link href={`/apt/${apt.house_manage_no || apt.id}`} style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{apt.house_nm}</Link>
                   {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 7px', borderRadius: 10 }}>
