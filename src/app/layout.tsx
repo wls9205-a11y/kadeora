@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import OfflineBanner from '@/components/OfflineBanner';
 import CookieBanner from '@/components/CookieBanner';
+import KakaoInit from '@/components/KakaoInit';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
 
@@ -101,7 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           },
         }) }} />
       </head>
-      <body className={inter.className}><OfflineBanner />{children}<CookieBanner /></body>
+      <body className={inter.className}><OfflineBanner /><KakaoInit />{children}<CookieBanner /></body>
     </html>
   );
 }

@@ -462,12 +462,12 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
       {hasMore && (
         <div ref={observerRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
-          <div style={{ width: 22, height: 22, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%' }} className="animate-spin" />
+          <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>불러오는 중...</span>
         </div>
       )}
       {!hasMore && posts.length > 0 && (
         <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
-          모든 글을 다 봤어요 🎉
+          모든 게시글을 읽었어요 ✓
         </div>
       )}
       {posts.length === 0 && (

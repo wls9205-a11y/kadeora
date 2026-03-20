@@ -36,6 +36,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
   const [replies, setReplies] = useState<Record<string, StockComment[]>>({});
   const [menuId, setMenuId] = useState<string | null>(null);
   const [sort, setSort] = useState<'latest' | 'popular'>('latest');
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const loadComments = useCallback(async () => {
@@ -70,6 +71,8 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
           reacts.forEach((r: any) => { m[r.comment_id] = r.emoji; });
           setUserReactions(m);
         }
+        const { data: follows } = await sb.from('follows').select('followee_id').eq('follower_id', uid);
+        setFollowingIds(new Set(follows?.map((f: any) => f.followee_id) || []));
       }
     });
     loadComments();
@@ -170,6 +173,23 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     setMenuId(null);
   };
 
+  const toggleFollow = async (targetId: string) => {
+    if (!userId) return;
+    const sb = createSupabaseBrowser();
+    if (followingIds.has(targetId)) {
+      await sb.from('follows').delete().eq('follower_id', userId).eq('followee_id', targetId);
+      setFollowingIds(prev => { const s = new Set(prev); s.delete(targetId); return s; });
+    } else {
+      await sb.from('follows').insert({ follower_id: userId, followee_id: targetId });
+      setFollowingIds(prev => new Set([...prev, targetId]));
+    }
+  };
+
+  const handleBookmark = async (content: string) => {
+    await navigator.clipboard.writeText(content);
+    alert('클립보드에 복사되었습니다.');
+  };
+
   const reportComment = async (id: string) => {
     alert('신고가 접수되었습니다.');
     setMenuId(null);
@@ -220,6 +240,17 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
                 background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
               }}>{GL(grade)}</span>
+              {userId && userId !== c.user_id && (
+                <button onClick={() => toggleFollow(c.user_id)} style={{
+                  padding: '4px 12px', borderRadius: 4,
+                  border: `1px solid var(--brand)`,
+                  background: followingIds.has(c.user_id) ? 'var(--brand)' : 'transparent',
+                  color: followingIds.has(c.user_id) ? 'white' : 'var(--brand)',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                }}>
+                  {followingIds.has(c.user_id) ? '팔로잉' : '팔로우'}
+                </button>
+              )}
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(c.created_at)}</span>
             </div>
             <div style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 6, wordBreak: 'break-word' }}>
@@ -264,6 +295,10 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                     border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     zIndex: 10, overflow: 'hidden', minWidth: 80,
                   }}>
+                    <button
+                      onClick={() => { handleBookmark(c.content); setMenuId(null); }}
+                      style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 13, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                    >북마크</button>
                     {isOwn ? (
                       <button
                         onClick={() => deleteComment(c.id, c.parent_id)}
