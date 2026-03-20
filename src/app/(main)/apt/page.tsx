@@ -3,7 +3,8 @@ export const metadata: Metadata = {
   title: '아파트 청약 일정',
   description: '2026년 전국 아파트 청약 일정과 분양 정보를 한눈에 확인하세요.',
 };
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
