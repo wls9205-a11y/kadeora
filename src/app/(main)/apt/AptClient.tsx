@@ -132,9 +132,15 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
 
             return (
               <div key={apt.id} style={{
-                padding: '14px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
+                padding: '14px 16px', borderRadius: 12, marginBottom: 8,
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 opacity: st === 'closed' ? 0.7 : 1,
-              }}>
+                transition: 'background 0.15s',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
+              >
                 {/* 줄1: 배지 + 현장명 + 경쟁률 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
@@ -232,7 +238,14 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
               const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
 
               return (
-                <div key={u.id} style={{ padding: '16px 16px', borderBottom: i < fu.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <div key={u.id} style={{
+                  padding: '16px 16px', borderRadius: 12, marginBottom: 8,
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  transition: 'background 0.15s', cursor: 'pointer',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
+                >
                   {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                     <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm || '미분양 단지'}</Link>

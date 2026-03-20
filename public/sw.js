@@ -1,5 +1,5 @@
 // Kadeora Service Worker — CACHE_VERSION은 빌드 스크립트가 주입
-const CACHE_VERSION = '20260318';
+const CACHE_VERSION = '20260321';
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
 const PRECACHE = ['/feed', '/offline.html', '/icons/icon-192.png'];
 const OFFLINE_PAGES = ['/feed', '/stock', '/hot', '/apt'];
