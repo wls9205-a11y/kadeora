@@ -8,7 +8,7 @@ import { LikeButton } from '@/components/LikeButton';
 import { CommentSection } from '@/components/CommentSection';
 import Link from 'next/link';
 import Image from 'next/image';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import ShareButtons from '@/components/ShareButtons'
 
 import { BookmarkButton } from '@/components/BookmarkButton';
@@ -155,7 +155,7 @@ export default async function FeedDetailPage({ params }: Props) {
   }
 
   if (post?.slug && id === String(numId) && !isNaN(Number(id))) {
-    redirect(`/feed/${post.slug}`);
+    permanentRedirect(`/feed/${post.slug}`);
   }
 
   const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;

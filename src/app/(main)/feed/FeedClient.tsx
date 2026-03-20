@@ -7,6 +7,7 @@ import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import { REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
+import EmptyState from '@/components/shared/EmptyState';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
 import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
@@ -471,23 +472,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         </div>
       )}
       {posts.length === 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '48px 24px', textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>아직 게시글이 없어요</div>
-          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 20 }}>첫 번째 글을 작성해보세요!</div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => router.push('/write')} style={{
-              padding: '10px 20px', borderRadius: 8, border: 'none',
-              background: 'var(--brand)', color: 'var(--text-inverse)',
-              fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            }}>✍️ 글쓰기</button>
-            <button onClick={() => router.push('/search')} style={{
-              padding: '10px 20px', borderRadius: 8,
-              border: '1px solid var(--border)', background: 'var(--bg-hover)',
-              color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-            }}>🔍 검색해보기</button>
-          </div>
-        </div>
+        <EmptyState icon="📝" title="아직 게시글이 없어요" description="첫 번째 글의 주인공이 되어보세요" actionLabel="글쓰기" actionHref="/write" />
       )}
     </div>
     </PullToRefresh>

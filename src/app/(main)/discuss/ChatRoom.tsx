@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { ReportModal } from '@/components/modals/ReportModal';
+import EmptyState from '@/components/shared/EmptyState';
 import type { User } from '@supabase/supabase-js';
 
 interface MsgProfile { id: string; nickname: string | null; grade: number | null; points: number | null; }
@@ -120,11 +121,7 @@ export default function ChatRoom({ user, myNickname }: { user: User | null; myNi
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '40px 0' }}>채팅 불러오는 중...</div>
         ) : msgs.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>☕</div>
-            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>아직 조용하네요</p>
-            <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>첫 번째 소문의 주인공이 되어보세요!</p>
-          </div>
+          <EmptyState icon="☕" title="조용한 라운지네요" description="첫 번째 소문의 주인공이 되어보세요" />
         ) : msgs.map(msg => {
           const p = msg.profiles as MsgProfile | null;
           const g = GRADE_INFO[p?.grade ?? 1] ?? GRADE_INFO[1];
