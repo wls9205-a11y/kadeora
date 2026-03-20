@@ -2,16 +2,22 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const menuItems = [
-  { icon: '📊', label: '대시보드', href: '/admin' },
-  { icon: '👥', label: '회원관리', href: '/admin/users' },
-  { icon: '📝', label: '게시글관리', href: '/admin/content' },
-  { icon: '💬', label: '댓글관리', href: '/admin/comments' },
-  { icon: '🚨', label: '신고관리', href: '/admin/reports' },
-  { icon: '📢', label: '공지/전광판', href: '/admin/notifications' },
-  { icon: '💰', label: '결제내역', href: '/admin/payments' },
-  { icon: '🔧', label: '시스템', href: '/admin/system' },
+const menuGroups = [
+  { section: '개요', items: [{ href: '/admin', icon: '📊', label: '대시보드' }] },
+  { section: '콘텐츠', items: [
+    { href: '/admin/content', icon: '📝', label: '게시글' },
+    { href: '/admin/comments', icon: '💬', label: '댓글' },
+    { href: '/admin/reports', icon: '🚨', label: '신고' },
+  ]},
+  { section: '사용자', items: [{ href: '/admin/users', icon: '👥', label: '회원' }] },
+  { section: '운영', items: [
+    { href: '/admin/notifications', icon: '📢', label: '공지/전광판' },
+    { href: '/admin/system', icon: '🔧', label: '시스템' },
+    { href: '/admin/payments', icon: '💰', label: '결제' },
+  ]},
 ];
+
+const mobileItems = menuGroups.flatMap(g => g.items);
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -43,33 +49,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Menu */}
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px', flex: 1 }}>
-          {menuItems.map(m => {
-            const active = isActive(m.href);
-            return (
-              <Link
-                key={m.href}
-                href={m.href}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  background: active ? 'rgba(255,91,54,0.2)' : 'transparent',
-                  color: active ? '#ffffff' : 'rgba(255,255,255,0.6)',
-                  borderLeft: active ? '3px solid #ff5b36' : '3px solid transparent',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <span style={{ fontSize: 16 }}>{m.icon}</span>
-                <span>{m.label}</span>
-              </Link>
-            );
-          })}
+        <nav style={{ display: 'flex', flexDirection: 'column', padding: '0 8px', flex: 1 }}>
+          {menuGroups.map((group, gi) => (
+            <div key={gi} style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', padding: '8px 12px 4px', textTransform: 'uppercase', letterSpacing: 1 }}>{group.section}</div>
+              {group.items.map(item => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 14px',
+                      borderRadius: 8,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      background: active ? 'rgba(255,91,54,0.15)' : 'transparent',
+                      color: active ? 'white' : 'rgba(255,255,255,0.6)',
+                      borderLeft: active ? '3px solid #ff5b36' : '3px solid transparent',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <span style={{ fontSize: 16 }}>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Bottom link */}
@@ -97,15 +108,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           gap: 0,
         }}
       >
-        {menuItems.map(m => {
+        {mobileItems.map(m => {
           const active = isActive(m.href);
           return (
             <Link
               key={m.href}
               href={m.href}
               style={{
-                padding: '12px 12px 10px',
-                fontSize: 12,
+                padding: '12px 10px 10px',
+                fontSize: 11,
                 fontWeight: 600,
                 textDecoration: 'none',
                 whiteSpace: 'nowrap',

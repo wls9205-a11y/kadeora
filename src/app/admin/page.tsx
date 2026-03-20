@@ -6,6 +6,7 @@ import TrafficStats from './TrafficStats';
 
 import AptCacheRefreshButton from './AptCacheRefreshButton';
 import EnvCheckCard from './EnvCheckCard';
+import QuickActions from './QuickActions';
 
 export const metadata = {
   title: '관리자 대시보드',
@@ -104,25 +105,30 @@ export default async function AdminDashboard() {
     { label: '결제', value: totalRevenue, icon: '💰', color: '#22c55e', sub: `총 ${paymentCount}건`, format: 'currency' as const },
   ];
 
+  const todayDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>📊 대시보드</h1>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>안녕하세요! 👋</h1>
+        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: 0 }}>{todayDate}</p>
+      </div>
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
         {kpiCards.map(kpi => (
           <div key={kpi.label} style={{
-            background: 'var(--bg-surface)', borderRadius: 12, padding: '18px 20px',
-            border: '1px solid var(--border)', borderLeftWidth: 4, borderLeftColor: kpi.color,
+            background: 'var(--bg-surface)', borderRadius: 14, padding: '18px 20px',
+            border: '1px solid var(--border)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 22, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, background: `${kpi.color}18` }}>{kpi.icon}</span>
               <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.5 }}>{kpi.label}</span>
-              <span style={{ fontSize: 20 }}>{kpi.icon}</span>
             </div>
             <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1, margin: '4px 0' }}>
               {kpi.format === 'currency' ? (kpi.value || 0).toLocaleString() + '원' : (kpi.value || 0).toLocaleString()}
             </div>
-            {kpi.sub && <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{kpi.sub}</div>}
+            {kpi.sub && <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>{kpi.sub}</div>}
           </div>
         ))}
       </div>
@@ -288,6 +294,9 @@ export default async function AdminDashboard() {
           <AdminDonutChart data={catStats} label="카테고리별 게시글 분포" />
         </div>
       </div>
+
+      {/* 빠른 작업 */}
+      <QuickActions />
     </div>
   );
 }

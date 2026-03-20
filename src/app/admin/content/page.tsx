@@ -14,6 +14,8 @@ export default function AdminContentPage() {
   const [statusFilter, setStatusFilter] = useState<'all'|'active'|'hidden'>('all');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   // Chat state
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
@@ -24,6 +26,7 @@ export default function AdminContentPage() {
     const res = await fetch('/api/admin/posts');
     if (res.ok) { const d = await res.json(); setPosts(d.posts ?? []); }
     setLoading(false);
+    setSelectedIds(new Set());
   };
   useEffect(() => { load(); }, []);
 
@@ -48,6 +51,36 @@ export default function AdminContentPage() {
     load();
   };
 
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paginatedPosts.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginatedPosts.map(p => p.id)));
+    }
+  };
+
+  const bulkHide = async () => {
+    if (!confirm(`선택한 ${selectedIds.size}개 게시글을 숨김 처리하시겠습니까?`)) return;
+    setBulkLoading(true);
+    try {
+      await fetch('/api/admin/posts/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'hide', ids: Array.from(selectedIds) }),
+      });
+      await load();
+    } catch {}
+    setBulkLoading(false);
+  };
+
   const filtered = posts
     .filter(p => catFilter === 'all' || p.category === catFilter)
     .filter(p => statusFilter === 'all' || (statusFilter === 'active' ? !p.is_deleted : p.is_deleted))
@@ -55,7 +88,7 @@ export default function AdminContentPage() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const paginatedPosts = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  useEffect(() => { setCurrentPage(1); }, [search, catFilter, statusFilter]);
+  useEffect(() => { setCurrentPage(1); setSelectedIds(new Set()); }, [search, catFilter, statusFilter]);
 
   const tabStyle = (active: boolean) => ({
     padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700,
@@ -91,6 +124,39 @@ export default function AdminContentPage() {
             width: '100%', padding: '8px 12px', fontSize: 13, background: 'var(--bg-hover)',
             border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', marginBottom: 12, boxSizing: 'border-box',
           }} />
+
+          {/* Bulk action bar */}
+          {selectedIds.size > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px', marginBottom: 10,
+              background: 'var(--bg-hover)', borderRadius: 8, border: '1px solid var(--border)',
+            }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                {selectedIds.size}개 선택됨
+              </span>
+              <button
+                onClick={bulkHide}
+                disabled={bulkLoading}
+                style={{
+                  fontSize: 12, padding: '5px 14px', borderRadius: 6, border: 'none',
+                  background: 'var(--error)', color: '#fff', cursor: bulkLoading ? 'not-allowed' : 'pointer',
+                  fontWeight: 700, opacity: bulkLoading ? 0.6 : 1,
+                }}
+              >
+                {bulkLoading ? '처리 중...' : `선택한 ${selectedIds.size}개 숨기기`}
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                style={{
+                  fontSize: 12, padding: '5px 12px', borderRadius: 6, border: '1px solid var(--border)',
+                  background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600,
+                }}
+              >
+                선택 해제
+              </button>
+            </div>
+          )}
+
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'auto' }}>
             {loading ? (
               <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>
@@ -98,6 +164,14 @@ export default function AdminContentPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 600 }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
+                    <th style={{ padding: '10px 8px', width: 36 }}>
+                      <input
+                        type="checkbox"
+                        checked={paginatedPosts.length > 0 && selectedIds.size === paginatedPosts.length}
+                        onChange={toggleSelectAll}
+                        style={{ cursor: 'pointer', width: 16, height: 16 }}
+                      />
+                    </th>
                     <th style={{ padding: '10px 12px' }}>제목</th><th style={{ padding: '10px 8px' }}>작성자</th>
                     <th style={{ padding: '10px 8px' }}>분류</th><th style={{ padding: '10px 8px' }}>작성일</th>
                     <th style={{ padding: '10px 8px', textAlign: 'right' }}>조회</th><th style={{ padding: '10px 8px' }}>상태</th>
@@ -106,7 +180,15 @@ export default function AdminContentPage() {
                 </thead>
                 <tbody>
                   {paginatedPosts.map(p => (
-                    <tr key={p.id} style={{ borderBottom: '1px solid var(--border)', opacity: p.is_deleted ? 0.5 : 1 }}>
+                    <tr key={p.id} style={{ borderBottom: '1px solid var(--border)', opacity: p.is_deleted ? 0.5 : 1, background: selectedIds.has(p.id) ? 'var(--bg-hover)' : 'transparent' }}>
+                      <td style={{ padding: '10px 8px' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(p.id)}
+                          onChange={() => toggleSelect(p.id)}
+                          style={{ cursor: 'pointer', width: 16, height: 16 }}
+                        />
+                      </td>
                       <td style={{ padding: '10px 12px', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         <a href={`/feed/${p.id}`} target="_blank" rel="noopener" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>{p.title}</a>
                       </td>
