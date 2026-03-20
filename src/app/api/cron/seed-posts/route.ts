@@ -61,35 +61,50 @@ export async function GET(req: NextRequest) {
       const userId = pick(seedUsers).id;
       const category = pick(CATEGORIES);
       const regionId = pick(REGIONS);
-      const template = pick(TEMPLATES);
 
-      let title = template.title;
-      let content = template.content;
+      let title = '', content = '', attempts = 0;
+      let selectedTemplate;
+      do {
+        selectedTemplate = pick(TEMPLATES);
+        title = selectedTemplate.title;
+        content = selectedTemplate.content;
 
-      // Haiku 생성 시도
-      if (process.env.ANTHROPIC_API_KEY) {
-        try {
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-            body: JSON.stringify({
-              model: 'claude-haiku-4-5-20251001', max_tokens: 300,
-              messages: [{ role: 'user', content: `한국 커뮤니티 앱 "카더라"에 올릴 자연스러운 게시글. 카테고리: ${category}. 지역: ${regionId}. stock→주식, apt→부동산, local→${regionId} 이야기, free→일상. 줄바꿈은 실제 줄바꿈 사용. JSON만: {"title":"제목(30자이내)","content":"내용(200자이내)"}` }],
-            }),
-            signal: AbortSignal.timeout(8000),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
-            if (match) {
-              const parsed = JSON.parse(match[0]);
-              if (parsed.title && parsed.content) { title = parsed.title; content = parsed.content.replace(/\\n/g, '\n'); }
+        // Haiku 생성 시도
+        if (process.env.ANTHROPIC_API_KEY) {
+          try {
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+              body: JSON.stringify({
+                model: 'claude-haiku-4-5-20251001', max_tokens: 300,
+                messages: [{ role: 'user', content: `한국 커뮤니티 앱 "카더라"에 올릴 자연스러운 게시글. 카테고리: ${category}. 지역: ${regionId}. stock→주식, apt→부동산, local→${regionId} 이야기, free→일상. 줄바꿈은 실제 줄바꿈 사용. JSON만: {"title":"제목(30자이내)","content":"내용(200자이내)"}` }],
+              }),
+              signal: AbortSignal.timeout(8000),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
+              if (match) {
+                const parsed = JSON.parse(match[0]);
+                if (parsed.title && parsed.content) { title = parsed.title; content = parsed.content.replace(/\\n/g, '\n'); }
+              }
             }
-          }
-        } catch {}
-      }
+          } catch {}
+        }
 
-      const finalCategory = (template as any).category || category;
+        // Check for duplicate title in last 24h
+        const { data: dup } = await admin.from('posts')
+          .select('id')
+          .eq('title', title)
+          .gte('created_at', new Date(Date.now() - 86400000).toISOString())
+          .limit(1);
+        if (!dup || dup.length === 0) break; // unique title, proceed
+        attempts++;
+      } while (attempts < 3);
+
+      if (attempts >= 3) continue; // skip if all attempts produced duplicates
+
+      const finalCategory = (selectedTemplate as any).category || category;
       const finalRegion = finalCategory === 'local' ? regionId : 'all';
 
       // 게시글 created_at에 0~25분 랜덤 오프셋

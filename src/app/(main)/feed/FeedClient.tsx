@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Heart, MessageCircle, Eye } from 'lucide-react';
 import type { PostWithProfile, TrendingKeyword } from '@/types/database';
 import { REGIONS } from '@/lib/constants';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -456,9 +457,9 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               </p>
               {/* Footer */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, color: 'var(--text-tertiary)' }}>
-                <span>🤍 {numFmt(displayLikes)}</span>
-                <span>💬 {numFmt(post.comments_count ?? 0)}</span>
-                {(post.view_count ?? 0) > 0 && <span>조회 {numFmt(post.view_count ?? 0)}</span>}
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Heart size={14} /> {numFmt(displayLikes)}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MessageCircle size={14} /> {numFmt(post.comments_count ?? 0)}</span>
+                {(post.view_count ?? 0) > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Eye size={14} /> {numFmt(post.view_count ?? 0)}</span>}
               </div>
             </Link>
           );

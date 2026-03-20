@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { Heart, MessageCircle, Eye } from 'lucide-react';
 import { getAvatarColor } from "@/lib/avatar";
 import { CATEGORY_STYLES } from "@/lib/constants";
 
@@ -92,9 +93,9 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
         display: "flex", alignItems: "center", gap: 14,
         fontSize: 12, color: "var(--text-tertiary)",
       }}>
-        <span>🤍 {post.likes_count}</span>
-        <span>💬 {post.comments_count}</span>
-        {(post.view_count ?? 0) > 0 && <span>조회 {post.view_count}</span>}
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Heart size={14} /> {post.likes_count}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MessageCircle size={14} /> {post.comments_count}</span>
+        {(post.view_count ?? 0) > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Eye size={14} /> {post.view_count}</span>}
       </div>
     </Link>
   );

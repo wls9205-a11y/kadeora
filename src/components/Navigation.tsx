@@ -2,10 +2,19 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { Home, TrendingUp, Building2, Flame, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { haptic } from '@/lib/haptic';
 import type { User } from '@supabase/supabase-js';
+
+const NAV_ICONS: Record<string, React.ReactNode> = {
+  '📋': <Home size={20} />,
+  '📊': <TrendingUp size={20} />,
+  '🏢': <Building2 size={20} />,
+  '🔥': <Flame size={20} />,
+  '💬': <MessageCircle size={20} />,
+};
 
 const NAV_ITEMS = [
   { href: '/feed',           label: '피드',   icon: '📋' },
@@ -335,7 +344,7 @@ export function Navigation() {
                 justifyContent:'center', flex:1,
                 color: active ? 'var(--brand)' : 'var(--text-tertiary)',
               }}>
-              <span style={{ fontSize:22, lineHeight:1 }}>{item.icon}</span>
+              <span style={{ fontSize:22, lineHeight:1 }}>{NAV_ICONS[item.icon] || <span>{item.icon}</span>}</span>
               <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
