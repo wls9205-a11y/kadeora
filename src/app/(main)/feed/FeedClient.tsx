@@ -457,9 +457,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           const isLiked = likedPosts.has(post.id as number);
           const hasImages = post.images && post.images.length > 0;
+          const isPopular = (post.likes_count ?? 0) >= 5;
+          const isNew = Date.now() - new Date(post.created_at).getTime() < 60 * 60 * 1000;
           return (
             <Link key={post.id} href={`/feed/${(post as any).slug || post.id}`} className="animate-fadeIn"
-              style={{ display: 'block', textDecoration: 'none', color: 'inherit', padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
+              style={{ display: 'block', textDecoration: 'none', color: 'inherit', padding: '16px 0', borderBottom: '1px solid var(--border)', borderLeft: isPopular ? '3px solid var(--brand)' : 'none', paddingLeft: isPopular ? 12 : 0 }}>
               {/* Header row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 8 }}>
                 {post.profiles?.avatar_url ? (
@@ -477,7 +479,10 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                       <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 999, background: catInfo.bg, color: catInfo.color }}>{catInfo.label}</span>
                     )}
                   </div>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                    {isNew && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />}
+                  </div>
                 </div>
               </div>
 
