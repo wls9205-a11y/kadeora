@@ -139,78 +139,35 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
             const dday = !apt.rcept_bgnde ? null : Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000);
 
             const accentColor = st === 'open' ? '#22c55e' : st === 'upcoming' ? '#3b82f6' : 'var(--border)';
+            // 간략 주소: 전체 주소에서 구+동 추출
+            const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ') : '';
             return (
-              <div key={apt.id} style={{
-                padding: '14px 16px', borderRadius: 12, marginBottom: 8,
+              <Link key={apt.id} href={`/apt/${apt.house_manage_no || apt.id}`} style={{
+                display: 'block', padding: '12px 16px', borderRadius: 12, marginBottom: 6,
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 borderLeft: `4px solid ${accentColor}`,
                 opacity: st === 'closed' ? 0.6 : 1,
-                transition: 'background 0.15s',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
-              >
-                {/* 줄1: 배지 + 현장명 + 경쟁률 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                textDecoration: 'none', color: 'inherit',
+              }}>
+                {/* 1행: 상태 + D-day + 지역 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
-                  {dday !== null && dday >= 0 && st !== 'closed' && (() => {
-                    const ddayStyle = dday === 0
-                      ? { bg: '#fee2e2', color: '#b91c1c', label: '오늘 마감!' }
-                      : dday <= 2
-                      ? { bg: '#fef2f2', color: '#dc2626', label: `D-${dday}` }
-                      : dday <= 6
-                      ? { bg: '#fffbeb', color: '#d97706', label: `D-${dday}` }
-                      : { bg: 'var(--bg-hover)', color: 'var(--text-secondary)', label: `D-${dday}` };
-                    return (
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: ddayStyle.bg, color: ddayStyle.color, animation: dday === 0 ? 'pulse 1.5s ease-in-out infinite' : undefined }}>
-                        {ddayStyle.label}
-                      </span>
-                    );
-                  })()}
-                  <Link href={`/apt/${apt.house_manage_no || apt.id}`} style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{apt.house_nm}</Link>
-                  {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 7px', borderRadius: 10 }}>
-                      {Number(apt.competition_rate_1st).toFixed(1)}:1
-                    </span>
+                  {dday !== null && dday >= 0 && st !== 'closed' && (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: dday <= 2 ? '#dc2626' : dday <= 6 ? '#d97706' : 'var(--text-secondary)' }}>D-{dday}</span>
                   )}
+                  <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
                 </div>
-
-                {/* 줄2: 주소 + 현장 정보 */}
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>
-                  📍 {apt.region_nm}{apt.hssply_adres ? ` ${apt.hssply_adres}` : ''}
+                {/* 2행: 단지명 */}
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{apt.house_nm}</div>
+                {/* 3행: 간략주소 + 세대수 */}
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 2 }}>
+                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {apt.tot_supply_hshld_co > 0 && <span>🏠 {apt.tot_supply_hshld_co.toLocaleString()}세대</span>}
-                  {apt.mvn_prearnge_ym && <span>🔑 {apt.mvn_prearnge_ym.slice(0,4)}년 {parseInt(apt.mvn_prearnge_ym.slice(4,6))}월 입주</span>}
-                  {apt.mdatrgbn_nm && <span>📋 {apt.mdatrgbn_nm}</span>}
+                {/* 4행: 접수 기간 */}
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                  {fmtD(apt.rcept_bgnde)} ~ {fmtD(apt.rcept_endde)}
                 </div>
-
-                {/* 줄3: 날짜 한줄 */}
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>
-                  청약 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)} · 당첨 {fmtD(apt.przwner_presnatn_de)}
-                  {apt.cntrct_cncls_bgnde && <span> · 계약 {fmtD(apt.cntrct_cncls_bgnde)}~{fmtD(apt.cntrct_cncls_endde)}</span>}
-                </div>
-
-                {/* 줄4: pill 버튼 행 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>
-                    조회수 {(apt.view_count || 0).toLocaleString()}
-                  </span>
-                  {ac > 0 && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>🔔 {ac}</span>}
-                  <button onClick={() => setCommentTarget({ houseKey: h, houseNm: apt.house_nm, houseType: 'sub' })}
-                    style={{ fontSize: 11, padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
-                  <div style={{ flex: 1 }} />
-                  {aptUser && (
-                    <button onClick={() => toggleAlert(apt)} style={{
-                      width: 30, height: 30, borderRadius: '50%', border: `1px solid ${my ? 'var(--brand)' : 'var(--border)'}`,
-                      background: my ? 'rgba(255,69,0,0.12)' : 'transparent',
-                      color: my ? 'var(--brand)' : 'var(--text-tertiary)',
-                      cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>{my ? '🔔' : '🔕'}</button>
-                  )}
-                </div>
-              </div>
+              </Link>
             );
           })}
 
