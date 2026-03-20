@@ -345,6 +345,21 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                 {followLoading ? '...' : following ? '✓ 팔로잉' : '+ 팔로우'}
               </button>
             )}
+            {/* 프로필 공유 버튼 */}
+            <button onClick={() => {
+              const url = `https://kadeora.app/profile/${profile.id}`;
+              if (typeof window !== 'undefined' && (window as any).Kakao?.isInitialized?.()) {
+                (window as any).Kakao.Share.sendDefault({
+                  objectType: 'feed',
+                  content: { title: `${displayName}님의 카더라 프로필`, description: `${gradeEmoji} ${gradeTitle} · ${currentPoints}P · 게시글 ${profile.posts_count ?? 0}개`, imageUrl: 'https://kadeora.app/og-image.png', link: { mobileWebUrl: url, webUrl: url } },
+                  buttons: [{ title: '프로필 보기', link: { mobileWebUrl: url, webUrl: url } }],
+                });
+              } else {
+                navigator.clipboard.writeText(url).then(() => success('프로필 링크가 복사됐어요!'));
+              }
+            }} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+              공유
+            </button>
           </div>
         </div>
 
