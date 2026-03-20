@@ -258,14 +258,20 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       {/* 피드 헤더 */}
       <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>피드</h1>
-        <button onClick={() => router.push('/search')} style={{
-          display: 'flex', alignItems: 'center', gap: 4,
-          background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 20, padding: '6px 14px', fontSize: 13,
-          color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit',
-        }}>
-          🔍 검색
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <Link href="/guide" style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            padding: '6px 12px', borderRadius: 20,
+            border: '1px solid var(--border)', background: 'var(--bg-surface)',
+            color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 13, fontWeight: 600,
+          }}>📖 가이드</Link>
+          <button onClick={() => router.push('/search')} style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            borderRadius: 20, padding: '6px 14px', fontSize: 13,
+            color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit',
+          }}>🔍 검색</button>
+        </div>
       </div>
 
       {/* 지역 미설정 배너 */}

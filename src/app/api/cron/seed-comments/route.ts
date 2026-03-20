@@ -31,7 +31,10 @@ export async function GET(req: NextRequest) {
     if (!posts || posts.length === 0) return NextResponse.json({ skipped: true });
 
     const post = posts[Math.floor(Math.random() * posts.length)];
-    const userId = SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];
+    // RPC로 시드유저 조회 (UUID LIKE 미지원 대응)
+    const { data: seedUsers } = await admin.rpc('get_seed_users');
+    const userId = seedUsers?.[Math.floor(Math.random() * (seedUsers?.length || 1))]?.id
+      || SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];
     const content = COMMENT_TEMPLATES[Math.floor(Math.random() * COMMENT_TEMPLATES.length)];
 
     const { error } = await admin.from('comments').insert({

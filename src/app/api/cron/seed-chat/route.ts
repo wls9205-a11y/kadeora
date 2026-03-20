@@ -25,7 +25,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-    const userId = SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];
+    const { data: seedUsers } = await admin.rpc('get_seed_users');
+    const userId = seedUsers?.[Math.floor(Math.random() * (seedUsers?.length || 1))]?.id
+      || SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];
     const content = CHAT_TEMPLATES[Math.floor(Math.random() * CHAT_TEMPLATES.length)];
 
     // Check if chat_messages table exists, create if not

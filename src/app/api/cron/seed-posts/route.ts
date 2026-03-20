@@ -52,13 +52,12 @@ export async function GET(req: NextRequest) {
   try {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-    // 시드 유저가 DB에 존재하는지 확인 (UUID에 LIKE 사용 불가 → filter로 text cast)
-    const { data: seedCheck } = await admin.from('profiles').select('id').filter('id::text', 'like', 'aaaaaaaa%').limit(1);
-    if (!seedCheck || seedCheck.length === 0) {
+    // 시드 유저 조회 (SQL RPC — PostgREST에서 UUID text cast LIKE 미지원)
+    const { data: seedUsers } = await admin.rpc('get_seed_users');
+    if (!seedUsers || seedUsers.length === 0) {
       return NextResponse.json({ skipped: true, reason: 'No seed users in DB' });
     }
-
-    const userId = SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];
+    const userId = seedUsers[Math.floor(Math.random() * seedUsers.length)].id;
     const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
     const regionId = REGIONS[Math.floor(Math.random() * REGIONS.length)];
     const template = TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)];
