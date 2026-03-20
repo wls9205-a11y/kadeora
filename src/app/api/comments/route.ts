@@ -24,22 +24,26 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select('*').single();
     if (error) { console.error('[Comments POST]', error.message, error.details); return NextResponse.json({ error: '댓글 작성에 실패했습니다: ' + error.message }, { status: 500 }); }
 
-    // 댓글 알림: 글 작성자에게 (본인 댓글 제외)
+    // 댓글 알림 (service_role로 다른 유저 알림 INSERT)
     try {
-      const { data: post } = await supabase.from('posts').select('author_id').eq('id', postId).single();
+      const { createClient } = await import('@supabase/supabase-js');
+      const adminSb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+      const { data: post } = await adminSb.from('posts').select('author_id').eq('id', postId).single();
       if (post?.author_id && post.author_id !== user.id) {
-        const nickname = (data as any)?.author?.nickname ?? '누군가';
+        const { data: profile } = await adminSb.from('profiles').select('nickname').eq('id', user.id).single();
         const preview = content.length > 30 ? content.slice(0, 30) + '...' : content;
-        await supabase.from('notifications').insert({
+        await adminSb.from('notifications').insert({
           user_id: post.author_id, type: 'comment',
-          content: `${nickname}님이 댓글을 달았어요: ${preview}`,
+          content: `${profile?.nickname ?? '누군가'}님이 댓글을 달았어요: ${preview}`,
         });
       }
     } catch {}
 
     try {
-      const { data: cp } = await supabase.from('profiles').select('points').eq('id', user.id).single();
-      await supabase.from('profiles').update({ points: (cp?.points ?? 0) + 5 }).eq('id', user.id);
+      const { createClient } = await import('@supabase/supabase-js');
+      const adminSb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+      const { data: cp } = await adminSb.from('profiles').select('points').eq('id', user.id).single();
+      await adminSb.from('profiles').update({ points: (cp?.points ?? 0) + 5 }).eq('id', user.id);
     } catch {}
 
     return NextResponse.json({ comment: data }, { status: 201 });

@@ -37,9 +37,10 @@ export async function POST(req: NextRequest) {
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
     try { revalidatePath('/feed'); } catch {}
     try {
-      const { data: currentProfile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
-      const newPoints = (currentProfile?.points ?? 0) + 10;
-      await supabase.from('profiles').update({ points: newPoints }).eq('id', user.id);
+      const { createClient } = await import('@supabase/supabase-js');
+      const adminSb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+      const { data: cp } = await adminSb.from('profiles').select('points').eq('id', user.id).single();
+      await adminSb.from('profiles').update({ points: (cp?.points ?? 0) + 10 }).eq('id', user.id);
     } catch {}
     return NextResponse.json({ post: data }, { status: 201 });
   } catch (err) { console.error('[Posts POST]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
