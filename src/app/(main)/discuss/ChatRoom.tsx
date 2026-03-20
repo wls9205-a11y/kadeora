@@ -100,19 +100,18 @@ export default function ChatRoom({ user }: ChatRoomProps) {
     };
   }, [loadMessages]);
 
-  // Auto-scroll on new messages
+  // Auto-scroll only on NEW messages (not initial load)
   useEffect(() => {
     if (isFirstLoad.current) {
-      bottomRef.current?.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
       isFirstLoad.current = false;
-    } else {
-      // Only auto-scroll if user is near bottom
-      const el = scrollRef.current;
-      if (el) {
-        const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
-        if (isNearBottom) {
-          bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }
+      return; // 초기 로드 시 스크롤 안 함 — 맨 위부터 보기
+    }
+    // 새 메시지 도착 시 하단 근처에 있으면 자동 스크롤
+    const el = scrollRef.current;
+    if (el) {
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+      if (isNearBottom) {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
       }
     }
   }, [msgs]);
