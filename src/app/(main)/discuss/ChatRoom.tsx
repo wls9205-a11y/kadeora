@@ -15,12 +15,13 @@ interface ChatMsg {
 }
 
 const PAGE_SIZE = 100;
+// DB grade_definitions 기준
 const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }> = {
   1:{title:'새싹',emoji:'🌱',color:'#4CAF50'},2:{title:'정보통',emoji:'📡',color:'#2196F3'},
   3:{title:'동네어른',emoji:'🏘️',color:'#9C27B0'},4:{title:'소문난집',emoji:'🏠',color:'#FF9800'},
-  5:{title:'인플루언서',emoji:'⚡',color:'#F44336'},6:{title:'빅마우스',emoji:'🦁',color:'#E91E63'},
-  7:{title:'청약고수',emoji:'🏆',color:'#FFD700'},8:{title:'전설',emoji:'👑',color:'#FF6B35'},
-  9:{title:'신의경지',emoji:'🌟',color:'#9C27B0'},10:{title:'카더라신',emoji:'⚡',color:'#FF4500'},
+  5:{title:'인플루언서',emoji:'⚡',color:'#F44336'},6:{title:'빅마우스',emoji:'🔥',color:'#E91E63'},
+  7:{title:'찐고수',emoji:'💎',color:'#FFD700'},8:{title:'전설',emoji:'🌟',color:'#FF6B35'},
+  9:{title:'신의경지',emoji:'👑',color:'#9C27B0'},10:{title:'카더라신',emoji:'🚀',color:'#FF4500'},
 };
 function avc(uid: string | null) { return getAvatarColor(uid ?? ''); }
 function timeAgo(d: string) { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return '방금'; if (m < 60) return m + '분 전'; if (m < 1440) return Math.floor(m / 60) + '시간 전'; return Math.floor(m / 1440) + '일 전'; }
@@ -82,7 +83,7 @@ export default function ChatRoom({ user, myNickname }: { user: User | null; myNi
     loadMessages().then(() => { setLoading(false); isFirst.current = true; });
     const sb = createSupabaseBrowser();
     const ch = sb.channel('chat_lounge').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => { loadMessages(); }).subscribe();
-    return () => { sb.removeChannel(ch); };
+    return () => { sb.removeChannel(ch); if (mentionTimer.current) clearTimeout(mentionTimer.current); };
   }, [loadMessages]);
 
   useEffect(() => { if (isFirst.current) { isFirst.current = false; return; } const el = scrollRef.current; if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 150) bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
