@@ -29,6 +29,8 @@ export default async function AdminDashboard() {
     pendingReportsR,
     paymentsR,
     hiddenPostsR,
+    recentPostsR,
+    todayViewsR,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
@@ -48,6 +50,8 @@ export default async function AdminDashboard() {
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('payments').select('amount', { count: 'exact' }).eq('status', 'DONE'),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', true),
+    supabase.from('posts').select('id, title, category, created_at, profiles(nickname)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+    supabase.from('posts').select('view_count').gte('created_at', new Date().toISOString().slice(0, 10)).eq('is_deleted', false),
   ]);
 
   let seedCount = 0;
@@ -57,14 +61,13 @@ export default async function AdminDashboard() {
   } catch {}
 
   const totalUsers = usersR.count ?? 0;
+  const todayUsers = todayUsersR.count ?? 0;
   const totalPosts = postsR.count ?? 0;
+  const todayPosts = todayPostsR.count ?? 0;
   const totalComments = commentsR.count ?? 0;
   const pushSubs = pushSubsR.count ?? 0;
   const pwaStats = pwaStatsR.data ?? [];
   const pwaTotal = pwaStats.length;
-  const pwaAndroid = pwaStats.filter((p: any) => p.platform === 'android').length;
-  const pwaIOS = pwaStats.filter((p: any) => p.platform === 'ios').length;
-  const pwaDesktop = pwaStats.filter((p: any) => p.platform === 'desktop').length;
 
   const pendingCount = pendingReportsR.count ?? 0;
   const paymentCount = paymentsR.count ?? 0;
@@ -73,6 +76,9 @@ export default async function AdminDashboard() {
   const todayAtt = todayAttR.count ?? 0;
   const totalAtt = totalAttR.count ?? 0;
   const topAtt = topAttR.data ?? [];
+  const recentPosts = recentPostsR.data ?? [];
+  const recentUsers = recentUsersR.data ?? [];
+  const todayViews = (todayViewsR.data ?? []).reduce((sum: number, p: any) => sum + (Number(p.view_count) || 0), 0);
 
   const signupRaw = signupRawR.data ?? [];
   const postRaw = postRawR.data ?? [];
@@ -87,40 +93,38 @@ export default async function AdminDashboard() {
   const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
   const headerStyle: React.CSSProperties = { fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 };
 
+  const kpiCards = [
+    { label: '총 회원', value: totalUsers, icon: '👥', color: '#ff5b36', sub: `시드 ${seedCount}명 포함` },
+    { label: '오늘 가입', value: todayUsers, icon: '🆕', color: '#10b981', sub: '신규 회원' },
+    { label: '총 게시글', value: totalPosts, icon: '📝', color: '#3b82f6', sub: `오늘 +${todayPosts}개` },
+    { label: '오늘 조회수', value: todayViews, icon: '👁️', color: '#8b5cf6', sub: '금일 누적' },
+    { label: '댓글', value: totalComments, icon: '💬', color: '#f59e0b' },
+    { label: '신고 대기', value: pendingCount, icon: '🚨', color: '#ef4444', sub: '미처리 건' },
+    { label: 'PWA 설치', value: pwaTotal, icon: '📲', color: '#06b6d4', sub: `푸시 구독 ${pushSubs}명` },
+    { label: '결제', value: totalRevenue, icon: '💰', color: '#22c55e', sub: `총 ${paymentCount}건`, format: 'currency' as const },
+  ];
+
   return (
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>📊 대시보드</h1>
 
       {/* KPI Cards */}
-      <div className="admin-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div style={{ ...cardStyle, borderLeft: '3px solid var(--brand)', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'👥'} 총 가입자</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalUsers.toLocaleString()}명</div>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>시드 {seedCount}명 포함 · 오늘 +{todayUsersR.count ?? 0}명</div>
-        </div>
-        <div style={{ ...cardStyle, borderLeft: '3px solid var(--success)', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'📝'} 게시글</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalPosts.toLocaleString()}개</div>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>오늘 +{todayPostsR.count ?? 0}개</div>
-        </div>
-        <div style={{ ...cardStyle, borderLeft: '3px solid #8b5cf6', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'💬'} 댓글</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalComments.toLocaleString()}개</div>
-        </div>
-        <div style={{ ...cardStyle, borderLeft: '3px solid #f59e0b', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'🔔'} 푸시 구독</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{pushSubs.toLocaleString()}명</div>
-        </div>
-        <div style={{ ...cardStyle, borderLeft: '3px solid var(--error)', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'🚨'} 신고</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{pendingCount}건</div>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>미처리 대기 중</div>
-        </div>
-        <div style={{ ...cardStyle, borderLeft: '3px solid #06b6d4', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'💳'} 결제</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalRevenue.toLocaleString()}원</div>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>총 {paymentCount}건 · 삭제글 {hiddenPosts}개</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+        {kpiCards.map(kpi => (
+          <div key={kpi.label} style={{
+            background: 'var(--bg-surface)', borderRadius: 12, padding: '18px 20px',
+            border: '1px solid var(--border)', borderLeftWidth: 4, borderLeftColor: kpi.color,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.5 }}>{kpi.label}</span>
+              <span style={{ fontSize: 20 }}>{kpi.icon}</span>
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1, margin: '4px 0' }}>
+              {kpi.format === 'currency' ? (kpi.value || 0).toLocaleString() + '원' : (kpi.value || 0).toLocaleString()}
+            </div>
+            {kpi.sub && <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{kpi.sub}</div>}
+          </div>
+        ))}
       </div>
 
       {/* 미처리 신고 배너 */}
@@ -134,28 +138,67 @@ export default async function AdminDashboard() {
         </div>
       )}
 
-      {/* 최근 가입자 */}
-      <div style={{ ...cardStyle, marginBottom: 16 }}>
-        <h2 style={headerStyle}>👥 최근 가입자</h2>
-        <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
-                <th style={{ padding: '8px 12px', fontWeight: 600 }}>닉네임</th>
-                <th style={{ padding: '8px 12px', fontWeight: 600 }}>등급</th>
-                <th style={{ padding: '8px 12px', fontWeight: 600 }}>가입일</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(recentUsersR.data ?? []).map((u: any, i: number) => (
-                <tr key={i} style={{ background: i % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-hover)' }}>
-                  <td style={{ padding: '10px 12px', color: 'var(--text-primary)', fontWeight: 600 }}>{u.nickname || '미설정'}</td>
-                  <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.grade_title || '-'}</td>
-                  <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+      {/* 2-Column: Recent Posts + Recent Users */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16, marginBottom: 16 }}>
+        {/* 최근 게시글 */}
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h2 style={{ ...headerStyle, marginBottom: 0 }}>📝 최근 게시글</h2>
+            <Link href="/admin/content" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>전체 보기 →</Link>
+          </div>
+          <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: 'var(--bg-hover)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>제목</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>작성자</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>날짜</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentPosts.map((p: any, i: number) => (
+                  <tr key={p.id} style={{ background: i % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-hover)' }}>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-primary)', fontWeight: 600, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.title || '(제목 없음)'}
+                    </td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{(p.profiles as any)?.nickname || '-'}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
+                  </tr>
+                ))}
+                {recentPosts.length === 0 && (
+                  <tr><td colSpan={3} style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)' }}>게시글이 없습니다</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 최근 가입자 */}
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h2 style={{ ...headerStyle, marginBottom: 0 }}>👥 최근 가입자</h2>
+            <Link href="/admin/users" style={{ fontSize: 12, color: 'var(--brand)', textDecoration: 'none' }}>전체 보기 →</Link>
+          </div>
+          <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: 'var(--bg-hover)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>닉네임</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>등급</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>가입일</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentUsers.map((u: any, i: number) => (
+                  <tr key={i} style={{ background: i % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-hover)' }}>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-primary)', fontWeight: 600 }}>{u.nickname || '미설정'}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.grade_title || '-'}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -171,11 +214,11 @@ export default async function AdminDashboard() {
           <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
-                <tr style={{ background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
-                  <th style={{ padding: '8px 12px', fontWeight: 600 }}>유형</th>
-                  <th style={{ padding: '8px 12px', fontWeight: 600 }}>사유</th>
-                  <th style={{ padding: '8px 12px', fontWeight: 600 }}>날짜</th>
-                  <th style={{ padding: '8px 12px', fontWeight: 600 }}>상태</th>
+                <tr style={{ background: 'var(--bg-hover)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>유형</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>사유</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>날짜</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11 }}>상태</th>
                 </tr>
               </thead>
               <tbody>
