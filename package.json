@@ -9,7 +9,7 @@
     "lint": "next lint",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "build:ait": "node scripts/build-ait.js"
+    "build:ait": "cd appintoss-build && npx ait build"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.43.0",

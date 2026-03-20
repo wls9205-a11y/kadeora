@@ -3,6 +3,9 @@
 
 # appintoss bundle output
 *.ait
+appintoss-build/node_modules/
+appintoss-build/dist/
+appintoss-build/package-lock.json
 /.pnp
 .pnp.*
 .yarn/install-state.gz
