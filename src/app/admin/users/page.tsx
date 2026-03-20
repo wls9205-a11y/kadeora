@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-interface User { id: string; nickname: string; grade_title: string; created_at: string; posts_count: number; is_deleted: boolean; region_text: string | null }
+interface User { id: string; nickname: string; grade_title: string; created_at: string; posts_count: number; is_deleted: boolean; region_text: string | null; points: number | null }
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -22,6 +22,15 @@ export default function AdminUsersPage() {
     const msg = act === 'suspend' ? '이 유저를 정지하시겠습니까?' : '이 유저를 복구하시겠습니까?';
     if (!confirm(msg)) return;
     await fetch(`/api/admin/users/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: act }) });
+    load();
+  };
+
+  const setPoints = async (id: string, current: number | null) => {
+    const val = prompt('새 포인트 값을 입력하세요', String(current ?? 0));
+    if (val === null) return;
+    const num = Number(val);
+    if (isNaN(num)) { alert('숫자를 입력하세요'); return; }
+    await fetch(`/api/admin/users/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'set_points', points: num }) });
     load();
   };
 
@@ -89,6 +98,7 @@ export default function AdminUsersPage() {
                 <th style={{ padding: '10px 12px' }}>지역</th>
                 <th style={{ padding: '10px 12px' }}>가입일</th>
                 <th style={{ padding: '10px 12px' }}>게시글</th>
+                <th style={{ padding: '10px 12px' }}>포인트</th>
                 <th style={{ padding: '10px 12px' }}>상태</th>
                 <th style={{ padding: '10px 12px' }}>액션</th>
               </tr>
@@ -101,17 +111,19 @@ export default function AdminUsersPage() {
                   <td style={{ padding: '10px 12px', color: u.region_text ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>{u.region_text || '미설정'}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.posts_count ?? 0}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.points ?? 0}</td>
                   <td style={{ padding: '10px 12px' }}>
                     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 600,
                       background: u.is_deleted ? 'var(--error)' : 'var(--success)',
                       color: 'var(--text-inverse)' }}>{u.is_deleted ? '정지' : '정상'}</span>
                   </td>
-                  <td style={{ padding: '10px 12px' }}>
+                  <td style={{ padding: '10px 12px', display: 'flex', gap: 4 }}>
                     {u.is_deleted ? (
                       <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--success)', background: 'transparent', color: 'var(--success)', cursor: 'pointer' }}>복구</button>
                     ) : (
                       <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--error)', background: 'transparent', color: 'var(--error)', cursor: 'pointer' }}>정지</button>
                     )}
+                    <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--brand)', background: 'transparent', color: 'var(--brand)', cursor: 'pointer' }}>포인트 수정</button>
                   </td>
                 </tr>
               ))}

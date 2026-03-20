@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { AdminLineChart, AdminDonutChart } from './AdminCharts';
 import TrafficStats from './TrafficStats';
-import DashboardPWACard from './DashboardPWACard';
+
 import AptCacheRefreshButton from './AptCacheRefreshButton';
 import EnvCheckCard from './EnvCheckCard';
 
@@ -27,6 +27,8 @@ export default async function AdminDashboard() {
     todayAttR, totalAttR, topAttR,
     recentUsersR, recentReportsR,
     pendingReportsR,
+    paymentsR,
+    hiddenPostsR,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)),
@@ -44,6 +46,8 @@ export default async function AdminDashboard() {
     supabase.from('profiles').select('nickname, grade_title, created_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('reports').select('id, reason, content_type, created_at, status').eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('payments').select('amount', { count: 'exact' }).eq('status', 'DONE'),
+    supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', true),
   ]);
 
   let seedCount = 0;
@@ -63,6 +67,9 @@ export default async function AdminDashboard() {
   const pwaDesktop = pwaStats.filter((p: any) => p.platform === 'desktop').length;
 
   const pendingCount = pendingReportsR.count ?? 0;
+  const paymentCount = paymentsR.count ?? 0;
+  const totalRevenue = (paymentsR.data ?? []).reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+  const hiddenPosts = hiddenPostsR.count ?? 0;
   const todayAtt = todayAttR.count ?? 0;
   const totalAtt = totalAttR.count ?? 0;
   const topAtt = topAttR.data ?? [];
@@ -111,7 +118,8 @@ export default async function AdminDashboard() {
         </div>
         <div style={{ ...cardStyle, borderLeft: '3px solid #06b6d4', transition: 'transform 0.15s, box-shadow 0.15s' }} className="admin-kpi-card">
           <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{'💳'} 결제</div>
-          <DashboardPWACard total={pwaTotal} android={pwaAndroid} ios={pwaIOS} desktop={pwaDesktop} />
+          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalRevenue.toLocaleString()}원</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>총 {paymentCount}건 · 삭제글 {hiddenPosts}개</div>
         </div>
       </div>
 

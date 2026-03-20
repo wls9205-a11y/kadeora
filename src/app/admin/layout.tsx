@@ -59,17 +59,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex" style={{
         width: 210, flexShrink: 0, flexDirection: 'column',
-        background: 'var(--bg-surface)', borderRight: '1px solid var(--border)',
+        background: '#0f172a', borderRight: 'none',
         position: 'sticky', top: 0, height: '100vh', overflowY: 'auto',
       }}>
-        <div style={{ padding: '20px 16px 12px', fontWeight: 800, fontSize: 16, color: 'var(--brand)' }}>
+        <div style={{ padding: '20px 16px 12px', fontWeight: 800, fontSize: 16, color: '#ffffff' }}>
           카더라 어드민
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: '0 8px' }}>
           {menuGroups.map((group, gi) => (
             <div key={gi}>
               {gi > 0 && (
-                <div style={{ height: 1, background: 'var(--border)', margin: '6px 4px' }} />
+                <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '6px 4px' }} />
               )}
               {group.items.map(m => {
                 const active = isActive(m.href);
@@ -77,8 +77,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link key={m.href} href={m.href} style={{
                     display: 'block', padding: '10px 12px', borderRadius: 8,
                     fontSize: 13, fontWeight: 600, textDecoration: 'none',
-                    background: active ? 'var(--bg-hover)' : 'transparent',
-                    color: active ? 'var(--brand)' : 'var(--text-secondary)',
+                    background: active ? 'rgba(255,255,255,0.1)' : 'transparent',
+                    color: active ? '#ffffff' : 'rgba(255,255,255,0.6)',
+                    borderLeft: active ? '3px solid var(--brand)' : '3px solid transparent',
                     transition: 'all 0.1s',
                   }}>{m.label}</Link>
                 );
@@ -86,8 +87,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           ))}
         </nav>
-        <div style={{ marginTop: 'auto', padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
-          <Link href="/feed" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
+        <div style={{ marginTop: 'auto', padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <Link href="/feed" style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
             ← 서비스로 돌아가기
           </Link>
         </div>
