@@ -1,3 +1,10 @@
 User-agent: *
+Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api/
+Disallow: /onboarding
+Disallow: /payment
+Disallow: /login
+
+Sitemap: https://kadeora.app/sitemap.xml

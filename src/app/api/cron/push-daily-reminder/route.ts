@@ -20,12 +20,15 @@ export async function GET(req: NextRequest) {
       .eq('last_date', today);
     const checkedIds = new Set((checkedUsers ?? []).map(u => u.user_id));
 
-    const { data: allUsers } = await admin.from('profiles')
-      .select('id')
-      .eq('marketing_agreed', true)
-      .eq('is_deleted', false);
+    // notification_settings에서 push_attendance=false인 유저 제외
+    const { data: optedOut } = await admin.from('notification_settings')
+      .select('user_id').eq('push_attendance', false);
+    const optedOutIds = new Set((optedOut ?? []).map(s => s.user_id));
 
-    const unchecked = (allUsers ?? []).filter(u => !checkedIds.has(u.id));
+    const { data: allUsers } = await admin.from('profiles')
+      .select('id').eq('is_deleted', false);
+
+    const unchecked = (allUsers ?? []).filter(u => !checkedIds.has(u.id) && !optedOutIds.has(u.id));
     if (unchecked.length === 0) {
       return NextResponse.json({ sent: 0, message: 'All users checked in or no marketing users' });
     }

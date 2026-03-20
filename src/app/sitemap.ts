@@ -28,9 +28,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       Promise.race([promise, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
     const [postsResult, stocksResult, aptsResult] = await Promise.all([
-      timeout(sb.from('posts').select('id, slug, updated_at, likes_count, comments_count').eq('is_deleted', false).order('created_at', { ascending: false }).limit(200), 5000),
+      timeout(sb.from('posts').select('id, slug, updated_at, likes_count, comments_count').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000), 10000),
       timeout(sb.from('stock_quotes').select('symbol, updated_at'), 5000),
-      timeout(sb.from('apt_subscriptions').select('id, updated_at'), 5000),
+      timeout(sb.from('apt_subscriptions').select('id, house_manage_no, updated_at'), 5000),
     ]);
 
     const posts = (postsResult as any)?.data ?? [];
@@ -56,7 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     const aptRoutes: MetadataRoute.Sitemap = apts.map((a: any) => ({
-      url: `${SITE}/apt/${a.id}`,
+      url: `${SITE}/apt/${a.house_manage_no || a.id}`,
       lastModified: new Date(a.updated_at ?? Date.now()),
       changeFrequency: 'daily' as const,
       priority: 0.7,

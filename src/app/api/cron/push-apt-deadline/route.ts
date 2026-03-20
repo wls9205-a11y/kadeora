@@ -26,14 +26,26 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ sent: 0, message: 'No deadlines today/tomorrow' });
     }
 
-    // 알림 생성 (전체 유저 중 마케팅 동의자)
-    const { data: users } = await admin.from('profiles')
+    // 알림 생성 (notification_settings에서 push_apt_deadline = true인 유저)
+    const { data: settings } = await admin.from('notification_settings')
+      .select('user_id')
+      .eq('push_apt_deadline', true);
+    const optedInIds = new Set((settings ?? []).map(s => s.user_id));
+
+    // notification_settings가 없는 유저는 기본값(true)이므로 전체 유저에서 옵트아웃 제외
+    const { data: allUsers } = await admin.from('profiles')
       .select('id')
-      .eq('marketing_agreed', true)
       .eq('is_deleted', false);
 
-    if (!users || users.length === 0) {
-      return NextResponse.json({ sent: 0, message: 'No marketing-agreed users' });
+    const { data: optedOut } = await admin.from('notification_settings')
+      .select('user_id')
+      .eq('push_apt_deadline', false);
+    const optedOutIds = new Set((optedOut ?? []).map(s => s.user_id));
+
+    const users = (allUsers ?? []).filter(u => !optedOutIds.has(u.id));
+
+    if (users.length === 0) {
+      return NextResponse.json({ sent: 0, message: 'No eligible users' });
     }
 
     const notifications = [];
