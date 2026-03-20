@@ -18,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { data: current } = await supabase.from('profiles').select('points').eq('id', id).single();
     const diff = Number(points) - (current?.points ?? 0);
     if (diff !== 0) {
-      await supabase.rpc('award_points', { p_user_id: id, p_amount: diff, p_reason: 'admin_set', p_meta: null });
+      await supabase.rpc('award_points', { p_user_id: id, p_amount: diff, p_reason: '관리자조정', p_meta: null });
     }
   } else if (action === 'toggle_admin') {
     // toggle_admin은 prevent_privilege_escalation 트리거가 차단하므로 SQL RPC 필요

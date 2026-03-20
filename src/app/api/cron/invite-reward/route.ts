@@ -68,7 +68,7 @@ export async function GET(req: Request) {
     await sb.rpc('award_points', {
       p_user_id: winnerId,
       p_amount: 100,
-      p_reason: 'invite_daily_top',
+      p_reason: '일일초대1등',
       p_meta: { description: `친구초대 일일 1등 (${winnerData.count}명 초대)` }
     })
 

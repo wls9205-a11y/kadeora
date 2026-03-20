@@ -46,7 +46,7 @@ export async function POST() {
   await sb.rpc('award_points', {
     p_user_id: user.id,
     p_amount: 30,
-    p_reason: 'avatar_upload',
+    p_reason: '아바타등록',
     p_meta: null,
   })
 
