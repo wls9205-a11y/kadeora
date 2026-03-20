@@ -137,10 +137,11 @@ export default function StockClient({ initialStocks }: Props) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/stock-refresh');
-      const data = await res.json();
-      if (data.stocks?.length) {
-        setStocks(data.stocks);
+      // 주식 데이터는 크론으로 갱신됨. 클라이언트에서는 Supabase에서 직접 조회
+      const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
+      const { data } = await sb.from('stock_quotes').select('*').order('market_cap', { ascending: false });
+      if (data?.length) {
+        setStocks(data as any);
         setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
       }
     } catch {}
