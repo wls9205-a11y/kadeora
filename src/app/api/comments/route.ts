@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: reason ?? '내용을 다시 확인해주세요' }, { status: 400 });
     }
     if (!postId) return NextResponse.json({ error: '게시글 ID가 필요합니다.' }, { status: 400 });
-    const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select(`*, author:profiles!comments_author_id_fkey(id, nickname, avatar_url)`).single();
-    if (error) { console.error('[Comments POST]', error); return NextResponse.json({ error: '댓글 작성에 실패했습니다.' }, { status: 500 }); }
+    const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select('*').single();
+    if (error) { console.error('[Comments POST]', error.message, error.details); return NextResponse.json({ error: '댓글 작성에 실패했습니다: ' + error.message }, { status: 500 }); }
 
     // 댓글 알림: 글 작성자에게 (본인 댓글 제외)
     try {
