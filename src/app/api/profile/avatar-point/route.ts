@@ -42,22 +42,16 @@ export async function POST() {
     .eq('id', user.id)
     .single()
 
-  // Award 30 points
-  await sb
-    .from('profiles')
-    .update({ points: (profile?.points || 0) + 30 })
-    .eq('id', user.id)
+  // Award 30 points (award_points RPC handles point_history too)
+  await sb.rpc('award_points', {
+    p_user_id: user.id,
+    p_amount: 30,
+    p_reason: 'avatar_upload',
+    p_meta: null,
+  })
 
   // Record grant
   await sb.from('avatar_point_granted').insert({ user_id: user.id })
-
-  // NOTE: point_history table may need to be created.
-  await sb.from('point_history').insert({
-    user_id: user.id,
-    amount: 30,
-    reason: 'avatar_upload',
-    description: '프로필 사진 등록 보너스'
-  })
 
   // Notification
   await sb.from('notifications').insert({

@@ -14,10 +14,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   } else if (action === 'restore') {
     await supabase.from('profiles').update({ is_deleted: false }).eq('id', id);
   } else if (action === 'set_points' && points !== undefined) {
-    await supabase.from('profiles').update({ points: Number(points) }).eq('id', id);
+    // admin set_points: 현재 포인트 조회 후 차이만큼 award_points 호출
+    const { data: current } = await supabase.from('profiles').select('points').eq('id', id).single();
+    const diff = Number(points) - (current?.points ?? 0);
+    if (diff !== 0) {
+      await supabase.rpc('award_points', { p_user_id: id, p_amount: diff, p_reason: 'admin_set', p_meta: null });
+    }
   } else if (action === 'toggle_admin') {
-    const { data: current } = await supabase.from('profiles').select('is_admin').eq('id', id).single();
-    await supabase.from('profiles').update({ is_admin: !current?.is_admin }).eq('id', id);
+    // toggle_admin은 prevent_privilege_escalation 트리거가 차단하므로 SQL RPC 필요
+    const { data: cur } = await supabase.from('profiles').select('is_admin').eq('id', id).single();
+    await supabase.rpc('admin_toggle_admin', { p_user_id: id, p_value: !cur?.is_admin });
   } else if (action === 'ban') {
     await supabase.from('profiles').update({ is_banned: true }).eq('id', id);
   } else if (action === 'unban') {

@@ -38,10 +38,9 @@ export async function POST(req: NextRequest) {
       }
     } catch {}
 
-    // 포인트 적립 (service_role — 타인 데이터 수정 권한 필요)
+    // 포인트 적립 (award_points RPC — 트리거 바이패스)
     try {
-      const { data: cp } = await getSupabaseAdmin().from('profiles').select('points').eq('id', user.id).single();
-      await getSupabaseAdmin().from('profiles').update({ points: (cp?.points ?? 0) + 5 }).eq('id', user.id);
+      await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 5, p_reason: '댓글작성', p_meta: null });
     } catch {}
 
     return NextResponse.json({ comment: data }, { status: 201 });

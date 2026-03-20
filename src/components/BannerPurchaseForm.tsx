@@ -92,19 +92,12 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
 
       if (insertErr) throw insertErr;
 
-      // Deduct points
-      await sb.rpc('deduct_points', {
+      // Deduct points via RPC (트리거 바이패스)
+      const { error: rpcErr } = await sb.rpc('deduct_points', {
         p_user_id: user.id,
         p_amount: selectedProduct.point_cost,
-      }).then(async ({ error: rpcErr }) => {
-        // Fallback: direct update if RPC doesn't exist
-        if (rpcErr) {
-          await sb
-            .from('profiles')
-            .update({ points: (profile.points - selectedProduct.point_cost) })
-            .eq('id', user.id);
-        }
       });
+      if (rpcErr) throw new Error('포인트 차감 실패');
 
       success(`전광판 등록 완료! ${days}일간 노출됩니다.`);
       onClose();

@@ -65,18 +65,11 @@ export async function GET(req: Request) {
     .single()
 
   if (profile) {
-    await sb
-      .from('profiles')
-      .update({ points: (profile.points || 0) + 100 })
-      .eq('id', winnerId)
-
-    // NOTE: point_history table may need to be created.
-    // Schema suggestion: id UUID, user_id UUID, amount INT, reason TEXT, description TEXT, created_at TIMESTAMPTZ
-    await sb.from('point_history').insert({
-      user_id: winnerId,
-      amount: 100,
-      reason: 'invite_daily_top',
-      description: `친구초대 일일 1등 (${winnerData.count}명 초대)`
+    await sb.rpc('award_points', {
+      p_user_id: winnerId,
+      p_amount: 100,
+      p_reason: 'invite_daily_top',
+      p_meta: { description: `친구초대 일일 1등 (${winnerData.count}명 초대)` }
     })
 
     // Insert notification
