@@ -65,6 +65,18 @@
     {
       "path": "/api/cron/blog-monthly-theme",
       "schedule": "0 10 1 * *"
+    },
+    {
+      "path": "/api/cron/crawl-seoul-redev",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/crawl-gyeonggi-redev",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/crawl-busan-redev",
+      "schedule": "0 6 * * 1"
     }
   ]
 }

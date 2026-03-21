@@ -15,6 +15,9 @@ const CRON_BUTTONS = [
   { key: 'blog-redevelopment', icon: '🏗️', label: '재개발/재건축', path: '/api/cron/blog-redevelopment' },
   { key: 'blog-seed-guide', icon: '📖', label: '가이드/꿀팁', path: '/api/cron/blog-seed-guide' },
   { key: 'blog-monthly-theme', icon: '🗓️', label: '월별 주제', path: '/api/cron/blog-monthly-theme' },
+  { key: 'crawl-seoul-redev', icon: '🏗️', label: '서울 재개발 수집', path: '/api/cron/crawl-seoul-redev' },
+  { key: 'crawl-gyeonggi-redev', icon: '🏗️', label: '경기 재개발 수집', path: '/api/cron/crawl-gyeonggi-redev' },
+  { key: 'crawl-busan-redev', icon: '🏗️', label: '부산 재개발 수집', path: '/api/cron/crawl-busan-redev' },
 ];
 
 export default function AdminBlogPage() {

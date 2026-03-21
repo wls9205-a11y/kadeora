@@ -57,6 +57,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
+  const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -470,11 +471,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
             {filteredRedev.map((r: any) => {
               const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
               return (
-                <div key={r.id} style={{
+                <div key={r.id} onClick={() => setSelectedRedev(r)} style={{
                   padding: '12px 16px', borderRadius: 12, marginBottom: 6,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  borderLeft: `4px solid ${sc.border}`,
-                }}>
+                  borderLeft: `4px solid ${sc.border}`, cursor: 'pointer',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
+                >
                   {/* 1행: 단계 + 유형 + 지역 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
@@ -501,6 +506,70 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
             <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
               각 지자체 정비사업 공개 데이터 기준 · 실제 진행 상황은 해당 조합/지자체에서 확인하세요
             </p>
+          </div>
+        );
+      })()}
+
+      {/* 재개발 상세 모달 */}
+      {selectedRedev && (() => {
+        const r = selectedRedev;
+        const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+            onClick={() => setSelectedRedev(null)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setSelectedRedev(null); }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
+            <div style={{
+              position: 'relative', width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto',
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              borderRadius: '16px 16px 0 0', padding: 20,
+            }} onClick={e => e.stopPropagation()}>
+              {/* 헤더 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74' }}>{r.project_type}</span>
+                <button onClick={() => setSelectedRedev(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18, padding: 4 }}>✕</button>
+              </div>
+
+              {/* 제목 */}
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{r.district_name}</h2>
+              <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
+                {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}
+              </div>
+
+              {/* 상세 정보 */}
+              <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                {[
+                  r.address && ['📍 주소', r.address],
+                  r.constructor && ['🏗️ 시공사', r.constructor],
+                  r.area_sqm && ['📐 면적', `${r.area_sqm.toLocaleString()}㎡`],
+                  r.stage && ['📅 단계', r.stage],
+                  r.expected_completion && ['🗓️ 예상 준공', r.expected_completion],
+                  r.notes && ['📝 비고', r.notes],
+                ].filter(Boolean).map(([label, value]: any) => (
+                  <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+                    <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, width: 70 }}>{label}</span>
+                    <span style={{ color: 'var(--text-primary)' }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 요약 */}
+              {r.summary ? (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📋 사업 요약</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{r.summary}</div>
+                </div>
+              ) : (
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', padding: '12px 0', marginBottom: 16 }}>
+                  요약 정보를 준비 중입니다
+                </div>
+              )}
+
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                본 정보는 참고용이며, 투자 판단의 근거로 사용하면 안 됩니다.
+              </div>
+            </div>
           </div>
         );
       })()}
