@@ -173,10 +173,7 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 면책 */}
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 24, padding: '8px 12px', background: 'var(--bg-hover)', borderRadius: 8, lineHeight: 1.5 }}>
-          본 콘텐츠는 투자 권유가 아니며 참고용입니다. 데이터 출처: 청약홈, 국토교통부, 한국거래소
-        </div>
+        {/* 면책고지는 콘텐츠(DB) 안에 이미 포함 — 중복 제거 */}
       </article>
 
       {/* 댓글 섹션 */}
