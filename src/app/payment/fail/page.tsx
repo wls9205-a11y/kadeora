@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: '결제 실패 | 카더라', robots: { index: false } };
+export const metadata: Metadata = { title: '결제 실패', robots: { index: false } };
 
 export default function PaymentFail() {
   return (

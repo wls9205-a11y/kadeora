@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '아파트 청약 일정 · 미분양 · 재개발 | 카더라',
+  title: '아파트 청약 일정 · 미분양 · 재개발',
   description: '2026년 전국 아파트 청약 일정, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.',
   openGraph: {
-    title: '청약·미분양·재개발 | 카더라',
+    title: '청약·미분양·재개발',
     description: '전국 아파트 청약 일정, 미분양 현황, 재개발·재건축 진행 현황',
     images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 청약·미분양·재개발' }],
   },

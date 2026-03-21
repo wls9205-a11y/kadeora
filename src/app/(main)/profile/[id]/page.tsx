@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sb = await createSupabaseServer();
   const { data: profile } = await sb.from('profiles').select('nickname').eq('id', id).single();
   return {
-    title: `${profile?.nickname ?? '프로필'} | 카더라`,
+    title: `${profile?.nickname ?? '프로필'}`,
     robots: { index: false, follow: false },
   };
 }

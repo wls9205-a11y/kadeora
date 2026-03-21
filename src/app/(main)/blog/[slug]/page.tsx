@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: Props) {
   };
   const ogImage = post.cover_image || BRAND_COVERS[post.category] || BRAND_COVERS.general;
   return {
-    title: `${post.title} | 카더라 블로그`,
+    title: `${post.title} | 블로그`,
     description: post.meta_description || post.excerpt || post.title,
     keywords: post.meta_keywords || (post.tags ?? []).join(', '),
     alternates: { canonical: `${SITE}/blog/${slug}` },

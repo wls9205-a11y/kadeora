@@ -6,7 +6,7 @@ import { createServerClient } from '@supabase/ssr';
 import LoginClient from './LoginClient';
 
 export const metadata: Metadata = {
-  title: '로그인 | 카더라',
+  title: '로그인',
   robots: { index: false, follow: false },
   openGraph: {
     title: '카더라 시작하기',

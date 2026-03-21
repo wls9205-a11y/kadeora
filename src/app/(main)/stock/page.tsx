@@ -3,7 +3,7 @@ export const metadata: Metadata = {
   title: '실시간 주식 시세',
   description: '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.',
   openGraph: {
-    title: '주식 시세 | 카더라',
+    title: '실시간 주식 시세',
     description: '국내외 주요 종목 실시간 시세와 등락률',
     images: [{ url: 'https://kadeora.app/images/brand/kadeora-wide.png', alt: '카더라 주식' }],
   },

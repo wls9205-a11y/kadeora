@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '이용약관 | 카더라',
+  title: '이용약관',
   description: '카더라 서비스 이용약관',
 };
 

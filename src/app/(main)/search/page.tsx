@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import SearchClient from './SearchClient';
 
 export const metadata: Metadata = {
-  title: '검색 | 카더라',
+  title: '검색',
   description: '카더라 통합 검색 — 게시글, 종목, 토론방 검색',
 };
 

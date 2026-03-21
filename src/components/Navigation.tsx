@@ -69,6 +69,10 @@ export function Navigation() {
     setFontSize(val);
     localStorage.setItem('kd_font_size', val);
     applyFontClass(val);
+    if (user) {
+      const sb = createSupabaseBrowser();
+      sb.from('profiles').update({ font_size_preference: val }).eq('id', user.id).then(() => {});
+    }
   };
 
   useEffect(() => {

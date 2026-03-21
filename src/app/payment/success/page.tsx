@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: '결제 완료 | 카더라', robots: { index: false } };
+export const metadata: Metadata = { title: '결제 완료', robots: { index: false } };
 
 export default function PaymentSuccess() {
   return (

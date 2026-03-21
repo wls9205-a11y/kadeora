@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import WriteClient from './WriteClient';
 
-export const metadata: Metadata = { title: '글쓰기 | 카더라', robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: '글쓰기', robots: { index: false, follow: false } };
 
 export default function WritePage() {
   return (

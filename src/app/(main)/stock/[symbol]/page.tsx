@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = fmtPrice(Number(s.price), s.currency);
   const ch = `${Number(s.change_pct) >= 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
   return {
-    title: `${s.name} (${symbol}) 주가 | 카더라`,
+    title: `${s.name} (${symbol}) 주가`,
     description: `${s.name} 현재가 ${p} ${ch}. ${s.market} 상장.`,
     alternates: { canonical: `https://kadeora.app/stock/${symbol}` },
     openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: 'https://kadeora.app/images/brand/kadeora-wide.png' }] },
