@@ -140,6 +140,12 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
                     {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : '#22c55e' }}>접수{r.open}</span>}
                     {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : '#3b82f6' }}>예정{r.upcoming}</span>}
                   </div>
+                  {r.total > 0 && (
+                    <div style={{ width: '100%', height: 3, background: region === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
+                      <div style={{ height: '100%', background: '#22c55e', width: `${(r.open / r.total) * 100}%` }} />
+                      <div style={{ height: '100%', background: '#3b82f6', width: `${(r.upcoming / r.total) * 100}%` }} />
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
