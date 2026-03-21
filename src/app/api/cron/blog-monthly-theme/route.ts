@@ -1,15 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { ensureMinLength } from '@/lib/blog-padding';
+import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 300
-export const dynamic = 'force-dynamic'
+export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
-interface MonthlyTheme {
-  slug: string
-  title: string
-  category: string
-  outline: string[]
-}
+interface MonthlyTheme { slug: string; title: string; category: string; outline: string[]; }
 
 const MONTHLY_THEMES: Record<string, MonthlyTheme[]> = {
   '2026-03': [
@@ -37,67 +34,72 @@ const MONTHLY_THEMES: Record<string, MonthlyTheme[]> = {
   '2026-10': [{ slug: 'monthly-2026-10-q3-review', title: '2026년 3분기 시장 결산', category: 'stock', outline: ['실적 시즌', '수급 분석', '4분기 전망', '연말 전략'] }],
   '2026-11': [{ slug: 'monthly-2026-11-year-end-tax', title: '2026년 연말정산 미리보기', category: 'finance', outline: ['공제 항목', '절세 전략', '서류 준비', '자주 묻는 질문'] }],
   '2026-12': [{ slug: 'monthly-2026-12-year-review', title: '2026년 투자 총결산', category: 'stock', outline: ['연간 수익률', '주요 이벤트', '교훈', '2027년 전망'] }],
-}
+};
 
 function generateMonthlyContent(theme: MonthlyTheme): string {
-  let content = `${theme.title}에 대해 핵심 내용을 정리했습니다. 투자와 재테크에 도움이 되는 실용적인 정보를 담았습니다.\n\n`
-
+  let content = `${theme.title}에 대해 핵심 내용을 정리했습니다. 투자와 재테크에 도움이 되는 실용적인 정보를 담았습니다.\n\n`;
   for (const section of theme.outline) {
-    content += `## ${section}\n\n`
-    content += `${section}에 대해 살펴보겠습니다. `
-
+    content += `## ${section}\n\n`;
     if (section.includes('전망') || section.includes('전략')) {
-      content += '시장 상황과 전문가 의견을 종합하면, 신중한 접근이 필요한 시기입니다. 분산 투자 원칙을 유지하면서 기회를 포착하는 것이 중요합니다. 단기적 변동성에 흔들리기보다 중장기적 관점에서 판단하시기 바랍니다.\n\n'
+      content += '시장 상황과 전문가 의견을 종합하면, 신중한 접근이 필요한 시기입니다. 분산 투자 원칙을 유지하면서 기회를 포착하는 것이 중요합니다. 단기적 변동성에 흔들리기보다 중장기적 관점에서 판단하시기 바랍니다.\n\n';
     } else if (section.includes('분석') || section.includes('현황')) {
-      content += '최근 데이터를 바탕으로 현황을 분석했습니다. 수치적 변화와 함께 그 배경이 되는 정책적·경제적 요인도 함께 살펴보는 것이 중요합니다. 단편적인 수치보다 추세를 읽는 것이 핵심입니다.\n\n'
+      content += '최근 데이터를 바탕으로 현황을 분석했습니다. 수치적 변화와 함께 그 배경이 되는 정책적·경제적 요인도 함께 살펴보는 것이 중요합니다.\n\n';
     } else {
-      content += '이 부분은 실제 행동으로 옮기기 위한 구체적인 정보를 담고 있습니다. 본인의 재무 상황과 목표에 맞게 적용해 보시기 바랍니다. 필요하다면 전문가 상담도 고려해 보세요.\n\n'
+      content += '이 부분은 실제 행동으로 옮기기 위한 구체적인 정보를 담고 있습니다. 본인의 재무 상황과 목표에 맞게 적용해 보시기 바랍니다.\n\n';
     }
   }
-
-  content += `---\n\n> **면책고지**: 본 콘텐츠는 정보 제공 목적으로 작성되었으며 투자 권유가 아닙니다. 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다.`
-  return content
+  content += `---\n\n> **면책고지**: 본 콘텐츠는 정보 제공 목적으로 작성되었으며 투자 권유가 아닙니다. 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다.`;
+  return content;
 }
 
 export async function GET(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET
-  const auth = req.headers.get('authorization')
-  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authHeader = req.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-
   try {
-    const now = new Date()
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-    const themes = MONTHLY_THEMES[monthKey]
+    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const themes = MONTHLY_THEMES[monthKey];
     if (!themes || themes.length === 0) {
-      return NextResponse.json({ ok: true, created: 0, message: `No themes defined for ${monthKey}` })
+      return NextResponse.json({ ok: true, created: 0, message: `No themes for ${monthKey}` });
     }
 
-    const blogPosts = themes.map(theme => ({
-      slug: theme.slug,
-      title: theme.title,
-      content: generateMonthlyContent(theme),
-      category: theme.category,
-      cron_type: 'monthly-theme',
-      meta_description: `${theme.title} — 카더라 월별 특집`,
-      tags: [monthKey, theme.category],
-      faq_schema: null,
-      is_published: true,
-    }))
+    let created = 0;
+    for (const theme of themes) {
+      try {
+        const { data: exists } = await admin.from('blog_posts').select('id').eq('slug', theme.slug).maybeSingle();
+        if (exists) continue;
 
-    const { error: insertErr } = await supabase
-      .from('blog_posts')
-      .upsert(blogPosts, { onConflict: 'slug', ignoreDuplicates: true })
+        const content = generateMonthlyContent(theme);
+        const tags = [monthKey, theme.category];
 
-    if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
+        await admin.from('blog_posts').insert({
+          slug: theme.slug,
+          title: theme.title,
+          content: ensureMinLength(content, theme.category),
+          excerpt: `${theme.title} — 카더라 월별 특집`,
+          category: theme.category,
+          tags,
+          cron_type: 'monthly-theme',
+          cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(theme.title)}&type=blog`,
+          image_alt: generateImageAlt(theme.category, theme.title),
+          meta_description: generateMetaDesc(content),
+          meta_keywords: generateMetaKeywords(theme.category, tags),
+        });
+        created++;
+      } catch (e: any) {
+        console.error(`[blog-monthly-theme] Error for ${theme.slug}:`, e.message);
+      }
+    }
 
-    console.log(`[blog-monthly-theme] Created ${blogPosts.length} posts for ${monthKey}`)
-    return NextResponse.json({ ok: true, created: blogPosts.length, month: monthKey })
-  } catch (e: any) {
-    console.error('[blog-monthly-theme]', e.message)
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    console.log(`[blog-monthly-theme] Created ${created} for ${monthKey}`);
+    return NextResponse.json({ ok: true, created, month: monthKey });
+  } catch (error: any) {
+    console.error('[blog-monthly-theme] Error:', error);
+    return NextResponse.json({ error: String(error.message || error) }, { status: 500 });
   }
 }

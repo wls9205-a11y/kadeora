@@ -1,39 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { ensureMinLength } from '@/lib/blog-padding';
+import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 300
-export const dynamic = 'force-dynamic'
-
-function generateFaqSchema(apt: any) {
-  const faqs = [
-    { q: `${apt.name} 현재 매매 시세는?`, a: `${apt.name}의 ${apt.size_py || '주요'}평형 기준 매매가는 약 ${apt.price_buy || '시세 확인 필요'}입니다. 최근 거래 동향과 호가를 함께 확인하시길 권합니다.` },
-    { q: `${apt.name} 주변 학군은?`, a: `${apt.name} 인근에는 ${apt.school_name || '학교'}가 있으며, 도보 ${apt.school_dist || '약 10분'} 거리입니다. ${apt.school_note || '학군 평가는 지역 내 상위권입니다.'}` },
-    { q: `${apt.name} 교통 여건은?`, a: `가장 가까운 역은 ${apt.station || '인근역'}으로 도보 ${apt.station_dist || '약 10분'} 거리입니다. ${apt.transport_note || '대중교통 접근성이 양호합니다.'}` },
-    { q: `${apt.name} 투자 전망은?`, a: `${apt.investment_note || `${apt.district || apt.region} 지역 내 대장 아파트로 안정적 가치가 기대됩니다.`} 다만, 부동산 투자는 개인 상황에 따라 신중히 판단하시기 바랍니다.` },
-  ]
-  return JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map(f => ({
-      '@type': 'Question', name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  })
-}
+export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
 
 function generateLandmarkBlog(apt: any): string {
-  const name = apt.name || '단지'
-  const region = apt.region || ''
-  const district = apt.district || ''
-  const year = apt.built_year || '-'
-  const households = apt.households || '-'
-  const sizePy = apt.size_py || '-'
-  const priceBuy = apt.price_buy || '시세 확인 필요'
-  const priceRent = apt.price_rent || '시세 확인 필요'
-  const station = apt.station || '인근역'
-  const stationDist = apt.station_dist || '도보 약 10분'
-  const schoolName = apt.school_name || '인근 학교'
-  const schoolDist = apt.school_dist || '도보 약 10분'
+  const name = apt.name || '단지';
+  const region = apt.region || '';
+  const district = apt.district || '';
+  const year = apt.built_year || '-';
+  const households = apt.households || '-';
+  const sizePy = apt.size_py || '-';
+  const priceBuy = apt.price_buy || '시세 확인 필요';
+  const priceRent = apt.price_rent || '시세 확인 필요';
+  const station = apt.station || '인근역';
+  const stationDist = apt.station_dist || '도보 약 10분';
+  const schoolName = apt.school_name || '인근 학교';
+  const schoolDist = apt.school_dist || '도보 약 10분';
 
   return `## ${name} 단지 개요
 
@@ -89,63 +74,66 @@ ${sizePy}평형 기준 매매가는 약 ${priceBuy}입니다. 최근 거래 동�
 ### ${name} 교통은 편리한가요?
 가장 가까운 역은 ${station}으로 ${stationDist} 거리입니다. ${apt.transport_note || '대중교통 접근성이 양호합니다.'}
 
-### ${name} 투자 가치는?
-${apt.investment_note || `${district} 지역 내 대장 아파트로 안정적 가치가 기대됩니다.`} 다만, 부동산 투자는 개인 상황에 따라 신중히 판단하시기 바랍니다.
-
 ---
 
-> **면책고지**: 본 콘텐츠는 정보 제공 목적으로 작성되었으며 투자 권유가 아닙니다. 시세 정보는 실제와 다를 수 있으며, 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다. 데이터 출처: 국토교통부 실거래가, 한국부동산원.`
+> **면책고지**: 본 콘텐츠는 정보 제공 목적으로 작성되었으며 투자 권유가 아닙니다. 시세 정보는 실제와 다를 수 있으며, 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다. 데이터 출처: 국토교통부 실거래가, 한국부동산원.`;
 }
 
 export async function GET(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRETT || process.env.CRON_SECRET
-  const auth = req.headers.get('authorization')
-  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authHeader = req.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
   try {
-    const { data: apts, error: fetchErr } = await supabase
+    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+    const { data: apts, error: fetchErr } = await admin
       .from('landmark_apts')
       .select('*')
-      .eq('blog_generated', false)
+      .eq('blog_generated', false);
 
-    if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 })
-    if (!apts || apts.length === 0) return NextResponse.json({ ok: true, created: 0, message: 'No pending landmark apts' })
+    if (fetchErr) { console.error('[blog-apt-landmark] fetch error:', fetchErr); return NextResponse.json({ error: fetchErr.message }, { status: 500 }); }
+    if (!apts || apts.length === 0) return NextResponse.json({ ok: true, created: 0, message: 'No pending landmark apts' });
 
-    const blogPosts = apts.map(apt => ({
-      slug: apt.blog_slug,
-      title: `${apt.region} ${apt.district} ${apt.name} 완전 분석 — 시세·학군·교통·투자 전망 (2026)`,
-      content: generateLandmarkBlog(apt),
-      category: 'apt',
-      cron_type: 'apt-landmark',
-      meta_description: `${apt.name} 매매 전세 시세 학군 교통 투자전망 2026`,
-      tags: apt.tags || [apt.region, apt.district, apt.name],
-      faq_schema: generateFaqSchema(apt),
-      is_published: true,
-    }))
+    let created = 0;
+    for (const apt of apts) {
+      try {
+        const slug = apt.blog_slug;
+        if (!slug) continue;
 
-    const { error: insertErr } = await supabase
-      .from('blog_posts')
-      .upsert(blogPosts, { onConflict: 'slug', ignoreDuplicates: true })
+        const { data: exists } = await admin.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
+        if (exists) { await admin.from('landmark_apts').update({ blog_generated: true }).eq('blog_slug', slug); continue; }
 
-    if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
+        const title = `${apt.region || ''} ${apt.district || ''} ${apt.name || ''} 완전 분석 — 시세·학군·교통·투자 전망 (2026)`;
+        const content = generateLandmarkBlog(apt);
+        const tags = apt.tags || [apt.region, apt.district, apt.name].filter(Boolean);
 
-    const slugs = apts.map(a => a.blog_slug)
-    await supabase
-      .from('landmark_apts')
-      .update({ blog_generated: true })
-      .in('blog_slug', slugs)
+        await admin.from('blog_posts').insert({
+          slug,
+          title,
+          content: ensureMinLength(content, 'apt'),
+          excerpt: `${apt.name} ${apt.region} ${apt.district} 매매 전세 시세 학군 교통 투자전망 분석`,
+          category: 'apt',
+          tags,
+          cron_type: 'apt-landmark',
+          cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}&type=blog`,
+          image_alt: generateImageAlt('apt', title),
+          meta_description: generateMetaDesc(content),
+          meta_keywords: generateMetaKeywords('apt', tags),
+        });
 
-    console.log(`[blog-apt-landmark] Created ${blogPosts.length} posts`)
-    return NextResponse.json({ ok: true, created: blogPosts.length })
-  } catch (e: any) {
-    console.error('[blog-apt-landmark]', e.message)
-    return NextResponse.json({ error: e.message }, { status: 500 })
+        await admin.from('landmark_apts').update({ blog_generated: true }).eq('blog_slug', slug);
+        created++;
+      } catch (e: any) {
+        console.error(`[blog-apt-landmark] Error for ${apt.blog_slug}:`, e.message);
+      }
+    }
+
+    console.log(`[blog-apt-landmark] Created ${created}/${apts.length}`);
+    return NextResponse.json({ ok: true, created, total: apts.length });
+  } catch (error: any) {
+    console.error('[blog-apt-landmark] Error:', error);
+    return NextResponse.json({ error: String(error.message || error) }, { status: 500 });
   }
 }
