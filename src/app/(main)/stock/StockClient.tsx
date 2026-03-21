@@ -31,7 +31,6 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const [moversTab, setMoversTab] = useState<'up'|'down'|'volume'>('up');
   const [sectorFilter, setSectorFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(1500);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
@@ -46,12 +45,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   }, []);
 
   const refresh = useCallback(async () => {
-    setLoading(true);
     try {
       const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
       const { data } = await sb.from('stock_quotes').select('*').order('market_cap', { ascending: false });
       if (data?.length) setStocks(data as any);
-    } catch {} finally { setLoading(false); }
+    } catch {}
   }, []);
 
   useEffect(() => { refresh(); const id = setInterval(refresh, 5 * 60 * 1000); return () => clearInterval(id); }, [refresh]);
@@ -138,22 +136,17 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
-            <span style={{ color: 'var(--text-tertiary)' }}>원/달러</span>
-            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>₩{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
-            {exchangeHistory && exchangeHistory.length > 1 && (() => {
-              const rates = exchangeHistory.map((h: any) => h.rate);
-              const min = Math.min(...rates); const max = Math.max(...rates);
-              const range = max - min || 1;
-              const points = rates.map((r: number, i: number) => `${(i / (rates.length - 1)) * 32},${16 - ((r - min) / range) * 14}`).join(' ');
-              const isUp = rates[rates.length - 1] > rates[0];
-              return <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#22c55e'} strokeWidth="1.5" /></svg>;
-            })()}
-          </div>
-          <button onClick={refresh} disabled={loading} style={{ padding: '6px 14px', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 12, fontWeight: 600, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
-            {loading ? '갱신 중...' : '🔄 새로고침'}
-          </button>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
+          <span style={{ color: 'var(--text-tertiary)' }}>원/달러</span>
+          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>₩{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
+          {exchangeHistory && exchangeHistory.length > 1 && (() => {
+            const rates = exchangeHistory.map((h: any) => h.rate);
+            const min = Math.min(...rates); const max = Math.max(...rates);
+            const range = max - min || 1;
+            const points = rates.map((r: number, i: number) => `${(i / (rates.length - 1)) * 32},${16 - ((r - min) / range) * 14}`).join(' ');
+            const isUp = rates[rates.length - 1] > rates[0];
+            return <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#22c55e'} strokeWidth="1.5" /></svg>;
+          })()}
         </div>
       </div>
 
