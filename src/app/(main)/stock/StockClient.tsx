@@ -348,6 +348,30 @@ export default function StockClient({ initialStocks }: Props) {
         </div>
       )}
 
+      {/* 시장 상승/하락 비율 */}
+      {(() => {
+        const domestic = stocks.filter(s => (s.market === 'KOSPI' || s.market === 'KOSDAQ') && !isIndexEntry(s));
+        const up = domestic.filter(s => (s.change_pct ?? 0) > 0).length;
+        const down = domestic.filter(s => (s.change_pct ?? 0) < 0).length;
+        const flat = domestic.length - up - down;
+        const total = domestic.length || 1;
+        if (domestic.length === 0) return null;
+        return (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>
+              <span style={{ color: '#22c55e', fontWeight: 600 }}>▲ 상승 {up}</span>
+              <span>· 보합 {flat}</span>
+              <span style={{ color: '#ef4444', fontWeight: 600 }}>· ▼ 하락 {down}</span>
+            </div>
+            <div style={{ display: 'flex', height: 4, borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ width: `${(up / total) * 100}%`, background: '#22c55e' }} />
+              <div style={{ width: `${(flat / total) * 100}%`, background: 'var(--bg-hover)' }} />
+              <div style={{ width: `${(down / total) * 100}%`, background: '#ef4444' }} />
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 오늘의 테마 */}
       {themes.length > 0 && (
         <div style={{ marginBottom: 14 }}>
@@ -595,6 +619,43 @@ export default function StockClient({ initialStocks }: Props) {
           </div>
         )}
       </div>}
+
+      {/* 종목 비교 */}
+      {mainTab === 'ranking' && (() => {
+        const comparisons = [
+          { a: '005930', b: '000660', title: '삼성전자 vs SK하이닉스' },
+          { a: '005380', b: '000270', title: '현대차 vs 기아' },
+          { a: '373220', b: '006400', title: 'LG에너지 vs 삼성SDI' },
+        ];
+        const validComparisons = comparisons.map(c => {
+          const stockA = stocks.find(s => s.symbol === c.a);
+          const stockB = stocks.find(s => s.symbol === c.b);
+          return stockA && stockB ? { ...c, stockA, stockB } : null;
+        }).filter(Boolean) as { a: string; b: string; title: string; stockA: Stock; stockB: Stock }[];
+        if (validComparisons.length === 0) return null;
+        return (
+          <div style={{ marginTop: 16, marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔀 종목 비교</div>
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
+              {validComparisons.map(c => (
+                <div key={c.title} style={{ minWidth: 280, padding: 14, background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', flexShrink: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>{c.title}</div>
+                  <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
+                    <thead><tr style={{ color: 'var(--text-tertiary)', fontSize: 11 }}><td></td><td>{c.stockA.name}</td><td>{c.stockB.name}</td></tr></thead>
+                    <tbody>
+                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>시총</td><td style={{ fontWeight: 600 }}>{fmtCap(c.stockA.market_cap, c.stockA.currency)}</td><td style={{ fontWeight: 600 }}>{fmtCap(c.stockB.market_cap, c.stockB.currency)}</td></tr>
+                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>등락</td>
+                        <td style={{ fontWeight: 700, color: (c.stockA.change_pct ?? 0) > 0 ? '#22c55e' : (c.stockA.change_pct ?? 0) < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>{(c.stockA.change_pct ?? 0) > 0 ? '+' : ''}{(c.stockA.change_pct ?? 0).toFixed(2)}%</td>
+                        <td style={{ fontWeight: 700, color: (c.stockB.change_pct ?? 0) > 0 ? '#22c55e' : (c.stockB.change_pct ?? 0) < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>{(c.stockB.change_pct ?? 0) > 0 ? '+' : ''}{(c.stockB.change_pct ?? 0).toFixed(2)}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>
         * 국내 주가는 KIS/Yahoo Finance 기준 · 해외 주가는 Yahoo Finance 기준 · 환율: 1 USD = ₩{exchangeRate.toLocaleString()}
