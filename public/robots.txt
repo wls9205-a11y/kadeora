@@ -1,13 +1,21 @@
 User-agent: *
 Allow: /
-
-User-agent: Yeti
-Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+Disallow: /auth/
+Disallow: /write
 Disallow: /onboarding
 Disallow: /payment
-Disallow: /login
+Disallow: /profile
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Yeti
+Allow: /
 
 Sitemap: https://kadeora.app/sitemap.xml
