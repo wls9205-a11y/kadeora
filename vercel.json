@@ -6,6 +6,9 @@
     "src/app/api/cron/blog-*/*.ts": {
       "maxDuration": 300
     },
+    "src/app/api/cron/crawl-*/*.ts": {
+      "maxDuration": 60
+    },
     "src/app/(main)/**/*.tsx": {
       "maxDuration": 30
     },
