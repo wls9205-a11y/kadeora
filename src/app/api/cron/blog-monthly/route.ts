@@ -81,9 +81,51 @@ ${apts.length >= 3 ? `이번 달 **${region}**에는 ${apts.length}개 단지가
       const total = Object.values(byRegion).reduce((s, v) => s + v, 0);
       const table = Object.entries(byRegion).sort((a, b) => b[1] - a[1]).map(([r, c]) => `| ${r} | ${c.toLocaleString()} |`).join('\n');
 
-      const content = `## 전국 미분양 현황 (${month})\n\n전국 미분양 총 **${total.toLocaleString()}세대**\n\n| 지역 | 미분양 세대 |\n|---|---|\n${table}\n\n---\n\n[미분양 상세 보기 →](/apt?tab=unsold)\n[부동산 소문 보기 →](/feed?category=apt)\n\n> 국토교통부 미분양주택현황 기반.`;
+      const regionCount = Object.keys(byRegion).length;
+      const topRegion = Object.entries(byRegion).sort((a, b) => b[1] - a[1])[0];
+      const unsoldTitle = `전국 미분양 아파트 ${total.toLocaleString()}세대 현황 (${month})`;
+      const content = `## 전국 미분양 아파트 현황 — ${month} 지역별 분석
 
-      await admin.from('blog_posts').insert({ slug: slugUnsold, title: `전국 미분양 아파트 ${total.toLocaleString()}세대 현황 (${month})`, content, excerpt: `${month} 전국 미분양 ${total.toLocaleString()}세대. 지역별 현황 정리.`, category: 'unsold', tags: ['미분양', '미분양아파트', '부동산'], source_type: 'auto' });
+${month} 기준 전국 **미분양 아파트**는 총 **${total.toLocaleString()}세대**로 집계되었습니다. **${regionCount}개 지역**에서 미분양이 발생하고 있으며, 가장 많은 지역은 **${topRegion ? topRegion[0] : '-'}**(${topRegion ? topRegion[1].toLocaleString() : 0}세대)입니다.
+
+미분양 아파트는 시장 상황에 따라 **할인 분양**, **중도금 무이자**, **옵션 무료 제공** 등 다양한 혜택이 제공되는 경우가 있어, 실수요자에게 기회가 될 수 있습니다. 다만, 미분양 발생 원인을 꼼꼼히 분석한 후 매수 결정을 내리는 것이 중요합니다.
+
+---
+
+### 지역별 미분양 현황
+
+| 지역 | 미분양 세대 |
+|---|---|
+${table}
+
+---
+
+### 미분양 분석
+
+전국 미분양 ${total.toLocaleString()}세대 중 **${topRegion ? topRegion[0] : '-'}** 지역이 전체의 약 **${topRegion ? Math.round((topRegion[1] / total) * 100) : 0}%**를 차지하고 있습니다. 미분양이 집중된 지역은 주로 **분양가 대비 주변 시세가 낮거나**, **교통·생활 인프라가 부족한 신도시/외곽 지역**인 경우가 많습니다.
+
+미분양 아파트 매수를 고려할 때 반드시 체크해야 할 사항:
+
+1. **미분양 원인 분석**: 분양가가 높은지, 입지가 불리한지, 시행사 문제인지 파악
+2. **주변 시세 비교**: 인근 기존 아파트 실거래가와 비교하여 적정가 판단
+3. **시행사/시공사 재무**: 공사 중단 리스크 확인
+4. **입주 시기**: 실입주까지 남은 기간과 금리 변동 리스크
+
+---
+
+### 관련 정보
+
+- [**미분양** 상세 목록 →](/apt?tab=unsold)
+- [**청약 일정** 보기 →](/apt)
+- [부동산 커뮤니티 **토론** →](/feed?category=apt)
+- [**미분양 알림** 받기 →](/login)
+- [카더라 **블로그** →](/blog?category=unsold)
+
+미분양 현황은 매월 **국토교통부**에서 발표하며, 카더라에서 자동으로 업데이트됩니다. 관심 지역의 미분양 정보를 놓치지 마세요.
+
+> 국토교통부 미분양주택현황 기반. 투자 권유가 아니며, 정확한 정보는 해당 시행사에 직접 확인하세요.`;
+
+      await admin.from('blog_posts').insert({ slug: slugUnsold, title: unsoldTitle, content, excerpt: `${month} 전국 미분양 ${total.toLocaleString()}세대. ${regionCount}개 지역 분석.`, category: 'unsold', tags: ['미분양', '미분양아파트', '부동산', '전국미분양'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog` });
       created++;
     }
 
@@ -104,10 +146,47 @@ ${apts.length >= 3 ? `이번 달 **${region}**에는 ${apts.length}개 단지가
       const { data: budgetApts } = await bq.order('sale_price_min').limit(15);
 
       if (budgetApts && budgetApts.length > 0) {
-        const bTable = budgetApts.map(a => `| ${a.house_nm} | ${a.region_nm} | ${(a.tot_unsold_hshld_co ?? 0).toLocaleString()} | ${a.sale_price_min ? (a.sale_price_min / 10000).toFixed(1) + '억' : '-'} |`).join('\n');
-        const bTitle = `${b.label} 미분양 아파트 총정리 (${month})`;
-        const bContent = `## ${bTitle}\n\n| 단지명 | 지역 | 미분양 | 분양가 |\n|---|---|---|---|\n${bTable}\n\n---\n\n[미분양 상세 보기 →](/apt?tab=unsold)\n[청약 일정 →](/apt)\n\n> 국토교통부 기반.`;
-        await admin.from('blog_posts').insert({ slug: bSlug, title: bTitle, content: bContent, excerpt: `${b.label} 가격대 미분양 아파트 ${budgetApts.length}건.`, category: 'unsold', tags: [`${b.label} 미분양`, '미분양 아파트', '가격대별'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(bTitle)}&type=blog` });
+        const bTotalUnsold = budgetApts.reduce((s: number, a: any) => s + (a.tot_unsold_hshld_co ?? 0), 0);
+        const bRegions = [...new Set(budgetApts.map((a: any) => a.region_nm))];
+        const bTable = budgetApts.map(a => `| [**${a.house_nm}**](/apt/unsold/${a.house_nm}) | ${a.region_nm} | ${(a.tot_unsold_hshld_co ?? 0).toLocaleString()} | ${a.sale_price_min ? (a.sale_price_min / 10000).toFixed(1) + '억' : '-'} |`).join('\n');
+        const bTitle = `${b.label} 미분양 아파트 총정리 — ${month} 가격대별 분석`;
+        const bContent = `## ${b.label} 미분양 아파트 현황 (${month})
+
+${month} 기준 **${b.label}** 가격대의 미분양 아파트 현황을 정리했습니다. 전국적으로 **${budgetApts.length}건**, 총 **${bTotalUnsold.toLocaleString()}세대**가 미분양 상태입니다. 주요 분포 지역은 **${bRegions.slice(0, 3).join(', ')}** 등입니다.
+
+${b.slug === 'under-3' ? '**3억 이하** 가격대는 실수요자와 신혼부부 특별공급 대상자에게 매력적인 가격대입니다. 미분양 단지의 경우 추가 할인이나 중도금 무이자 혜택이 제공될 수 있으므로, 시행사에 직접 문의해보는 것을 권합니다.' : b.slug === '3-to-5' ? '**3~5억** 가격대는 중산층 실수요자에게 가장 관심이 높은 구간입니다. 이 가격대의 미분양은 입지와 브랜드에 따라 향후 가치 상승 가능성이 다르므로, 주변 시세와 인프라를 꼼꼼히 비교해야 합니다.' : '**5억 이상** 가격대의 미분양은 주로 대형 평형이나 프리미엄 브랜드 단지에서 발생합니다. 분양가가 높은 만큼 금리 부담이 크지만, 입지가 좋은 단지는 장기적으로 가치가 인정받는 경우가 많습니다.'}
+
+---
+
+### ${b.label} 미분양 목록
+
+| 단지명 | 지역 | 미분양 | 분양가 |
+|---|---|---|---|
+${bTable}
+
+---
+
+### 미분양 매수 시 체크리스트
+
+1. **분양가 적정성**: 주변 기존 아파트 실거래가와 비교
+2. **시행사 재무 상태**: 공사 중단 리스크 확인
+3. **입주 시기**: 잔금 납부 시점의 금리 전망 고려
+4. **할인 혜택**: 미분양 할인, 중도금 무이자, 옵션 무료 등 확인
+5. **교통·학군**: 실거주 관점에서 생활 인프라 점검
+
+---
+
+### 관련 정보
+
+- [**미분양** 전체 목록 →](/apt?tab=unsold)
+- [**청약 일정** 보기 →](/apt)
+- [부동산 **커뮤니티** →](/feed?category=apt)
+- [**미분양 알림** 받기 →](/login)
+
+카더라에서 매월 업데이트되는 가격대별 미분양 정보를 확인하세요.
+
+> 국토교통부 미분양주택현황 기반. 투자 권유가 아닙니다.`;
+        await admin.from('blog_posts').insert({ slug: bSlug, title: bTitle, content: bContent, excerpt: `${b.label} 미분양 ${budgetApts.length}건 · ${bTotalUnsold.toLocaleString()}세대. ${bRegions.slice(0, 3).join(', ')}.`, category: 'unsold', tags: [`${b.label} 미분양`, '미분양 아파트', '가격대별', '부동산'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(bTitle)}&type=blog` });
         created++;
       }
     }
