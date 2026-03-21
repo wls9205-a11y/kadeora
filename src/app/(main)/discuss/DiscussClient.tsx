@@ -7,14 +7,20 @@ import { useToast } from '@/components/Toast';
 import type { User } from '@supabase/supabase-js';
 import ChatRoom from './ChatRoom';
 
-const CATEGORIES = [
-  { key: 'all', label: '전체' },
-  { key: 'stock', label: '📊 주식' },
-  { key: 'apt', label: '🏢 부동산' },
-  { key: 'economy', label: '💹 경제' },
-  { key: 'free', label: '✏️ 자유' },
-  { key: 'lounge', label: '💬 라운지' },
+const TABS = [
+  { key: 'lounge', label: '💬 전체' },
+  { key: 'stock', label: '📊 주식방' },
+  { key: 'apt', label: '🏢 부동산방' },
+  { key: 'free', label: '✏️ 자유방' },
+  { key: 'poll', label: '🗳 투표' },
 ];
+
+const ROOM_MAP: Record<string, string> = {
+  lounge: 'lounge',
+  stock: 'stock',
+  apt: 'apt',
+  free: 'free',
+};
 
 const CAT_STYLE: Record<string, { bg: string; color: string; label: string }> = {
   stock: { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6', label: '📊 주식' },
@@ -48,16 +54,13 @@ function TopicCard({ topic }: { topic: Topic }) {
     <Link href={`/discuss/${topic.id}`} style={{ textDecoration: 'none' }}>
       <div style={{
         padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 12, marginBottom: 8, transition: 'border-color 0.15s',
+        borderRadius: 12, marginBottom: 8,
       }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
           {topic.is_hot && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
-          {topic.is_pinned && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 999, fontWeight: 600, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>📌 고정</span>}
         </div>
-
         <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
-
         {topic.topic_type === 'poll' && (
           <div style={{ marginBottom: 12 }}>
             {[
@@ -67,19 +70,13 @@ function TopicCard({ topic }: { topic: Topic }) {
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, minWidth: 60, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
                 <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 11, overflow: 'hidden' }}>
-                  <div style={{
-                    width: `${opt.pct}%`, height: '100%',
-                    background: opt.winning ? 'var(--brand)' : 'var(--border)',
-                    borderRadius: 11, transition: 'width 0.3s',
-                    minWidth: opt.pct > 0 ? 8 : 0,
-                  }} />
+                  <div style={{ width: `${opt.pct}%`, height: '100%', background: opt.winning ? 'var(--brand)' : 'var(--border)', borderRadius: 11, transition: 'width 0.3s', minWidth: opt.pct > 0 ? 8 : 0 }} />
                 </div>
                 <span style={{ fontSize: 12, fontWeight: 700, minWidth: 36, textAlign: 'right', color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>{opt.pct}%</span>
               </div>
             ))}
           </div>
         )}
-
         <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--text-tertiary)' }}>
           <span>💬 {topic.comment_count || 0}</span>
           <span>👁 {topic.view_count || 0}</span>
@@ -91,11 +88,21 @@ function TopicCard({ topic }: { topic: Topic }) {
   );
 }
 
+// --- Poll sub-filter ---
+const POLL_CATS = [
+  { key: 'all', label: '전체' },
+  { key: 'stock', label: '주식' },
+  { key: 'apt', label: '부동산' },
+  { key: 'economy', label: '경제' },
+  { key: 'free', label: '자유' },
+];
+
 export default function DiscussClient() {
   const [user, setUser] = useState<User | null>(null);
-  const [tab, setTab] = useState('all');
+  const [tab, setTab] = useState('lounge');
   const [topics, setTopics] = useState<Topic[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [pollCat, setPollCat] = useState('all');
+  const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const router = useRouter();
   const { error, success } = useToast();
@@ -111,16 +118,13 @@ export default function DiscussClient() {
     setLoading(true);
     try {
       const res = await fetch(`/api/discuss?category=${cat}`);
-      if (res.ok) {
-        const d = await res.json();
-        setTopics(d.topics || []);
-      }
+      if (res.ok) { const d = await res.json(); setTopics(d.topics || []); }
     } catch {} finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { if (tab !== 'lounge') loadTopics(tab); }, [tab, loadTopics]);
+  useEffect(() => { if (tab === 'poll') loadTopics(pollCat); }, [tab, pollCat, loadTopics]);
 
-  // Create topic
+  // Create topic state
   const [newTitle, setNewTitle] = useState('');
   const [newCat, setNewCat] = useState('free');
   const [newOptA, setNewOptA] = useState('찬성');
@@ -139,23 +143,21 @@ export default function DiscussClient() {
       if (res.ok) {
         success('토론이 생성되었습니다!');
         setShowCreate(false); setNewTitle(''); setNewOptA('찬성'); setNewOptB('반대');
-        loadTopics(tab);
-      } else {
-        const d = await res.json();
-        error(d.error || '생성 실패');
-      }
+        loadTopics(pollCat);
+      } else { const d = await res.json(); error(d.error || '생성 실패'); }
     } catch { error('오류가 발생했습니다.'); }
     finally { setCreating(false); }
   };
 
   const hotTopics = topics.filter(t => t.is_hot || t.is_pinned);
   const regularTopics = topics.filter(t => !t.is_hot && !t.is_pinned);
+  const isChat = tab !== 'poll';
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 16 }}>
-        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>토론</h1>
-        <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>지금 가장 뜨거운 주제들 🔥</p>
+        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
+        <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들</p>
       </div>
 
       {/* 탭 */}
@@ -163,29 +165,39 @@ export default function DiscussClient() {
         display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none',
         background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '8px 10px',
       }}>
-        {CATEGORIES.map(c => (
-          <button key={c.key} onClick={() => setTab(c.key)} style={{
+        {TABS.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
             fontWeight: 700, fontSize: 13,
-            background: tab === c.key ? 'var(--border)' : 'transparent',
-            color: tab === c.key ? 'var(--text-primary)' : 'var(--text-secondary)',
-          }}>{c.label}</button>
+            background: tab === t.key ? 'var(--border)' : 'transparent',
+            color: tab === t.key ? 'var(--text-primary)' : 'var(--text-secondary)',
+          }}>{t.label}</button>
         ))}
       </div>
 
-      {/* 라운지 탭 */}
-      {tab === 'lounge' ? (
-        <ChatRoom user={user} />
-      ) : (
+      {/* 채팅 탭 (전체/주식방/부동산방/자유방) */}
+      {isChat && <ChatRoom user={user} room={ROOM_MAP[tab] || 'lounge'} />}
+
+      {/* 투표 탭 */}
+      {tab === 'poll' && (
         <>
+          {/* 투표 카테고리 서브필터 */}
+          <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {POLL_CATS.map(c => (
+              <button key={c.key} onClick={() => setPollCat(c.key)} style={{
+                padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
+                background: pollCat === c.key ? 'var(--text-primary)' : 'var(--bg-hover)',
+                color: pollCat === c.key ? 'var(--bg-base)' : 'var(--text-secondary)',
+              }}>{c.label}</button>
+            ))}
+          </div>
+
           {/* 새 토론 만들기 */}
           <button onClick={() => user ? setShowCreate(!showCreate) : router.push('/login')} style={{
             width: '100%', padding: '12px', marginBottom: 12, borderRadius: 12,
             border: '1px dashed var(--border)', background: 'var(--bg-surface)',
             color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          }}>
-            ✍️ 새 토론 만들기
-          </button>
+          }}>✍️ 새 토론 만들기</button>
 
           {showCreate && (
             <div style={{ padding: 16, marginBottom: 12, borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
@@ -224,9 +236,7 @@ export default function DiscussClient() {
             <>
               {hotTopics.length > 0 && (
                 <div style={{ marginBottom: 8 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    🔥 HOT 토론
-                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🔥 HOT 토론</div>
                   {hotTopics.map(t => <TopicCard key={t.id} topic={t} />)}
                 </div>
               )}
