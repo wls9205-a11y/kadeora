@@ -55,18 +55,30 @@ export async function GET(req: NextRequest) {
       '착공': '착공', '준공': '준공',
     };
 
+    // 첫 행의 모든 키를 응답에 포함 (디버깅용)
+    const sampleFields = allRows[0] ? Object.keys(allRows[0]) : [];
+    const sampleRow = allRows[0] || null;
+
+    // 필드 탐색 헬퍼
+    const find = (row: any, candidates: string[]): string | null => {
+      for (const c of candidates) {
+        if (row[c] != null && String(row[c]).trim() !== '') return String(row[c]).trim();
+      }
+      return null;
+    };
+
     const mapped = allRows
       .filter(r => r && typeof r === 'object')
       .map(r => {
-        const bizType = r.bsnsTp || r.bsnsSe || r.projectType || '';
+        const bizType = find(r, ['bsnsTp', 'bsnsSe', 'projectType', 'bsnsClNm', 'bsnsCl']) || '';
         const isRebuild = bizType.includes('재건축');
         return {
-          district_name: r.guynm || r.bsnsNm || r.zoneName || '미상',
+          district_name: find(r, ['guynm', 'guyNm', 'bsnsNm', 'bsnsnm', 'zoneName', 'zoneNm', 'sbjctNm', 'nm']) || find(r, Object.keys(r).filter(k => typeof r[k] === 'string' && r[k].length > 2 && r[k].length < 50)) || '미상',
           region: '부산',
-          sigungu: r.guNm || r.sggNm || null,
+          sigungu: find(r, ['guNm', 'sggNm', 'gu', 'gugun']) || null,
           project_type: isRebuild ? '재건축' : '재개발',
-          stage: stageMap[r.stepSe || r.bsnsStep || ''] || '기타',
-          total_households: r.totHshldCo ? parseInt(r.totHshldCo) : null,
+          stage: stageMap[find(r, ['stepSe', 'bsnsStep', 'stepNm', 'sttusSe']) || ''] || '기타',
+          total_households: (() => { const v = find(r, ['totHshldCo', 'hshldCo', 'planHshldCo']); return v ? parseInt(v) : null; })(),
           constructor: r.cnstrctEntrps || r.builder || null,
           address: r.adres || r.lcAdres || null,
           notes: r.rm || null,
@@ -89,6 +101,8 @@ export async function GET(req: NextRequest) {
       message: 'Busan redevelopment data refreshed',
       total_from_api: allRows.length,
       inserted,
+      sampleFields,
+      ...(inserted === 0 ? { sampleRow } : {}),
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

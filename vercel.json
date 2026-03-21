@@ -84,6 +84,14 @@
     {
       "path": "/api/cron/crawl-unsold-molit",
       "schedule": "0 7 1 * *"
+    },
+    {
+      "path": "/api/cron/crawl-apt-trade",
+      "schedule": "0 8 * * 1-5"
+    },
+    {
+      "path": "/api/cron/crawl-apt-resale",
+      "schedule": "0 9 * * 1"
     }
   ]
 }

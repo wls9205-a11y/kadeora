@@ -19,6 +19,8 @@ const CRON_BUTTONS = [
   { key: 'crawl-gyeonggi-redev', icon: '🏗️', label: '경기 재개발 수집', path: '/api/cron/crawl-gyeonggi-redev' },
   { key: 'crawl-busan-redev', icon: '🏗️', label: '부산 재개발 수집', path: '/api/cron/crawl-busan-redev' },
   { key: 'crawl-unsold-molit', icon: '🏠', label: '미분양 수집', path: '/api/cron/crawl-unsold-molit' },
+  { key: 'crawl-apt-trade', icon: '💰', label: '실거래가 수집', path: '/api/cron/crawl-apt-trade' },
+  { key: 'crawl-apt-resale', icon: '📋', label: '분양권 수집', path: '/api/cron/crawl-apt-resale' },
 ];
 
 export default function AdminBlogPage() {

@@ -47,14 +47,16 @@ const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }
 };
 const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
-  const [activeTab, setActiveTab] = useState<'sub' | 'unsold' | 'redev'>('sub');
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
+  const [activeTab, setActiveTab] = useState<'sub' | 'unsold' | 'redev' | 'trade'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
   const [redevPage, setRedevPage] = useState(1);
+  const [tradeRegion, setTradeRegion] = useState('전체');
+  const [tradePage, setTradePage] = useState(1);
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
@@ -113,7 +115,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], unsol
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)' }}>
-        {([['sub', '청약 일정'], ['unsold', '미분양'], ['redev', '재개발·재건축']] as const).map(([k, l]) => (
+        {([['sub', '청약'], ['unsold', '미분양'], ['redev', '재개발'], ['trade', '실거래가']] as const).map(([k, l]) => (
           <button key={k} onClick={() => setActiveTab(k)} style={{
             flex: 1, padding: '7px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
             background: activeTab === k ? 'var(--brand)' : 'transparent',
@@ -206,8 +208,22 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], unsol
                   {dday !== null && dday >= 0 && st !== 'closed' && (
                     <span style={{ fontSize: 11, fontWeight: 700, color: dday <= 2 ? '#dc2626' : dday <= 6 ? '#d97706' : 'var(--text-secondary)' }}>D-{dday}</span>
                   )}
+                  {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(139,92,246,0.12)', color: '#a78bfa', border: '1px solid rgba(139,92,246,0.2)' }}>분양가상한</span>}
+                  {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>투기과열</span>}
+                  {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(249,115,22,0.12)', color: '#fdba74', border: '1px solid rgba(249,115,22,0.2)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
                 </div>
+                {/* 경쟁률 */}
+                {(apt.competition_rate_1st != null && Number(apt.competition_rate_1st) > 0) && (
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span style={{ color: Number(apt.competition_rate_1st) >= 10 ? '#ef4444' : Number(apt.competition_rate_1st) >= 5 ? '#f97316' : '#22c55e', fontWeight: 700 }}>
+                      {Number(apt.competition_rate_1st) >= 10 ? '🔥' : ''} 1순위 {Number(apt.competition_rate_1st).toFixed(1)}:1
+                    </span>
+                    {apt.competition_rate_2nd != null && Number(apt.competition_rate_2nd) > 0 && (
+                      <span style={{ color: 'var(--text-tertiary)' }}>2순위 {Number(apt.competition_rate_2nd).toFixed(1)}:1</span>
+                    )}
+                  </div>
+                )}
                 {/* 2행: 단지명 */}
                 <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{apt.house_nm}</div>
                 {/* 3행: 간략주소 + 세대수 */}
@@ -550,6 +566,87 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], unsol
             {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>조건에 맞는 프로젝트가 없습니다</div>}
             <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
               각 지자체 정비사업 공개 데이터 기준 · 실제 진행 상황은 해당 조합/지자체에서 확인하세요
+            </p>
+          </div>
+        );
+      })()}
+
+      {/* ━━━ 실거래가 탭 ━━━ */}
+      {activeTab === 'trade' && (() => {
+        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>실거래가 데이터가 없습니다. 크론 수집 후 표시됩니다.</div>;
+
+        const tradeRegs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
+        const filteredTrades = tradeRegion === '전체' ? transactions : transactions.filter((t: any) => t.region_nm === tradeRegion);
+        const pagedTrades = filteredTrades.slice(0, tradePage * 20);
+
+        // 요약 통계
+        const totalCount = filteredTrades.length;
+        const avgAmount = totalCount > 0 ? Math.round(filteredTrades.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
+
+        function fmtAmount(amt: number): string {
+          if (!amt) return '-';
+          if (amt >= 10000) return `${(amt / 10000).toFixed(1)}억`;
+          return `${amt.toLocaleString()}만`;
+        }
+
+        return (
+          <div>
+            {/* 요약 */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>거래 건수</div>
+              </div>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 거래가</div>
+              </div>
+            </div>
+
+            {/* 지역 필터 */}
+            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>
+              {tradeRegs.map(r => pill(r, tradeRegion, (v) => { setTradeRegion(v); setTradePage(1); }))}
+            </div>
+
+            {/* 결과 */}
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+              총 <strong style={{ color: 'var(--text-primary)' }}>{filteredTrades.length}</strong>건
+            </div>
+
+            {/* 카드 리스트 */}
+            {pagedTrades.map((t: any, i: number) => {
+              const amt = t.deal_amount || 0;
+              const borderColor = amt >= 100000 ? '#ef4444' : amt >= 50000 ? '#f97316' : amt >= 30000 ? '#eab308' : '#22c55e';
+              return (
+                <div key={`${t.id || i}`} style={{
+                  padding: '12px 16px', borderRadius: 12, marginBottom: 6,
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  borderLeft: `4px solid ${borderColor}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}>{t.trade_type || '매매'}</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{t.region_nm} {t.sigungu}</span>
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{t.apt_name}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+                    전용 {t.exclusive_area}㎡ | <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(amt)}</strong> | {t.floor}층 | {t.deal_date}
+                  </div>
+                </div>
+              );
+            })}
+
+            {tradePage * 20 < filteredTrades.length && (
+              <button onClick={() => setTradePage(p => p + 1)} style={{
+                width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)',
+                background: 'var(--bg-surface)', color: 'var(--text-secondary)',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer', marginBottom: 8,
+              }}>
+                더 보기 ({Math.min(tradePage * 20, filteredTrades.length)} / {filteredTrades.length}건)
+              </button>
+            )}
+
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
+              국토교통부 실거래가 공개시스템 기준 · 실제 거래가와 차이가 있을 수 있습니다
             </p>
           </div>
         );
