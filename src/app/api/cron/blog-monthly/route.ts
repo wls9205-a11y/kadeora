@@ -48,6 +48,53 @@ export async function GET(req: NextRequest) {
       created++;
     }
 
+    // 가격대별 미분양
+    const BUDGETS = [
+      { label: '3억 이하', max: 30000 },
+      { label: '3~5억', min: 30000, max: 50000 },
+      { label: '5억 이상', min: 50000 },
+    ];
+    for (const b of BUDGETS) {
+      const bSlug = `unsold-budget-${b.label.replace(/[^가-힣0-9]/g, '')}-${month}`;
+      const { data: be } = await admin.from('blog_posts').select('id').eq('slug', bSlug).maybeSingle();
+      if (be) continue;
+
+      let bq = admin.from('unsold_apts').select('house_nm, region_nm, tot_unsold_hshld_co, sale_price_min, sale_price_max').eq('is_active', true);
+      if (b.max) bq = bq.lte('sale_price_min', b.max);
+      if (b.min) bq = bq.gte('sale_price_min', b.min);
+      const { data: budgetApts } = await bq.order('sale_price_min').limit(15);
+
+      if (budgetApts && budgetApts.length > 0) {
+        const bTable = budgetApts.map(a => `| ${a.house_nm} | ${a.region_nm} | ${(a.tot_unsold_hshld_co ?? 0).toLocaleString()} | ${a.sale_price_min ? (a.sale_price_min / 10000).toFixed(1) + '억' : '-'} |`).join('\n');
+        const bTitle = `${b.label} 미분양 아파트 총정리 (${month})`;
+        const bContent = `## ${bTitle}\n\n| 단지명 | 지역 | 미분양 | 분양가 |\n|---|---|---|---|\n${bTable}\n\n---\n\n[미분양 상세 보기 →](/apt?tab=unsold)\n[청약 일정 →](/apt)\n\n> 국토교통부 기반.`;
+        await admin.from('blog_posts').insert({ slug: bSlug, title: bTitle, content: bContent, excerpt: `${b.label} 가격대 미분양 아파트 ${budgetApts.length}건.`, category: 'unsold', tags: [`${b.label} 미분양`, '미분양 아파트', '가격대별'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(bTitle)}&type=blog` });
+        created++;
+      }
+    }
+
+    // 캘린더 (다음달 청약 일정)
+    const nextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+    const calMonth = nextMonth.toISOString().slice(0, 7);
+    const calSlug = `calendar-${calMonth}`;
+    const { data: calE } = await admin.from('blog_posts').select('id').eq('slug', calSlug).maybeSingle();
+    if (!calE) {
+      const calStart = nextMonth.toISOString().slice(0, 10);
+      const calEnd = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).toISOString().slice(0, 10);
+      const { data: calApts } = await admin.from('apt_subscriptions')
+        .select('house_nm, house_manage_no, region_nm, rcept_bgnde, rcept_endde')
+        .gte('rcept_bgnde', calStart).lte('rcept_bgnde', calEnd)
+        .order('rcept_bgnde').limit(20);
+
+      if (calApts && calApts.length > 0) {
+        const calTable = calApts.map(a => `| ${a.rcept_bgnde?.slice(5) ?? '-'} | [${a.house_nm}](/apt/${a.house_manage_no}) | ${a.region_nm} | ${a.rcept_endde?.slice(5) ?? '-'} |`).join('\n');
+        const calTitle = `${calMonth.replace('-', '년 ')}월 아파트 청약 캘린더`;
+        const calContent = `## ${calTitle}\n\n| 접수시작 | 단지명 | 지역 | 접수마감 |\n|---|---|---|---|\n${calTable}\n\n---\n\n[전체 청약 일정 →](/apt)\n[청약 마감 알림 받기 →](/login)\n\n> 청약홈 공공데이터 기반.`;
+        await admin.from('blog_posts').insert({ slug: calSlug, title: calTitle, content: calContent, excerpt: `${calMonth} 접수 예정 청약 ${calApts.length}건 캘린더.`, category: 'apt', tags: ['청약캘린더', `${calMonth} 청약`, '청약일정'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(calTitle)}&type=blog` });
+        created++;
+      }
+    }
+
     return NextResponse.json({ ok: true, created });
   } catch (err) {
     console.error('[blog-monthly]', err);
