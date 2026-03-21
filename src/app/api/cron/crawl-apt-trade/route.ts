@@ -93,11 +93,37 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // 관심단지 알림 생성
+    let notifCount = 0;
+    try {
+      const { data: watchItems } = await supabase.from('apt_watchlist').select('user_id, item_id').eq('item_type', 'transaction').eq('notify_enabled', true);
+      if (watchItems?.length) {
+        const aptNames = new Set(watchItems.map(w => w.item_id));
+        const { data: newTrades } = await supabase.from('apt_transactions')
+          .select('apt_name, deal_amount, deal_date')
+          .in('apt_name', Array.from(aptNames))
+          .gte('created_at', new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())
+          .limit(50);
+        if (newTrades?.length) {
+          const notifs = watchItems.filter(w => newTrades.some((t: any) => t.apt_name === w.item_id))
+            .map(w => {
+              const trade = newTrades.find((t: any) => t.apt_name === w.item_id);
+              return { user_id: w.user_id, type: 'system', content: `관심단지 ${w.item_id}의 새 거래가 등록되었습니다. ${trade?.deal_date} ${trade?.deal_amount ? (trade.deal_amount / 10000).toFixed(1) + '억' : ''}` };
+            });
+          if (notifs.length > 0) {
+            await supabase.from('notifications').insert(notifs);
+            notifCount = notifs.length;
+          }
+        }
+      }
+    } catch {}
+
     return NextResponse.json({
       message: 'Apt trade data crawled (full)',
       total_regions: entries.length,
       inserted: totalInserted,
       months,
+      notifications: notifCount,
       ...(failed.length > 0 ? { failed } : {}),
     });
   } catch (err: any) {

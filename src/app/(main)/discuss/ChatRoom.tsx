@@ -50,10 +50,12 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
 
   const loadMessages = useCallback(async (before?: string) => {
     const sb = createSupabaseBrowser();
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     let q = sb.from('chat_messages')
       .select('*, profiles:user_id(id, nickname, grade, points), likes:chat_message_likes(count)')
       .eq('room', room)
       .is('parent_id', null)
+      .gte('created_at', twentyFourHoursAgo)
       .order('created_at', { ascending: false }).limit(PAGE_SIZE);
     if (before) q = q.lt('created_at', before);
     const { data: mainMsgs } = await q;
@@ -104,6 +106,17 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
       await sb.from('chat_messages').insert({ user_id: user.id, content: t, room });
     }
     setInput(''); setSending(false); setShowMention(false);
+
+    // 포인트 적립 (1분 디바운싱)
+    try {
+      const lastKey = `kd_chat_point_${user.id}`;
+      const last = parseInt(localStorage.getItem(lastKey) || '0');
+      if (Date.now() - last > 60000) {
+        await sb.rpc('award_points', { target_user_id: user.id, amount: 1 });
+        localStorage.setItem(lastKey, String(Date.now()));
+        success('+1P 획득!');
+      }
+    } catch {}
   };
 
   const toggleLike = async (mid: string) => { if (!user) return; const sb = createSupabaseBrowser(); const isLiked = likedIds.has(mid); if (isLiked) { await sb.from('chat_message_likes').delete().eq('message_id', mid).eq('user_id', user.id); setLikedIds(p => { const n = new Set(p); n.delete(mid); return n; }); } else { await sb.from('chat_message_likes').insert({ message_id: mid, user_id: user.id }); setLikedIds(p => new Set([...p, mid])); } setMsgs(p => p.map(m => m.id !== mid ? m : { ...m, likes: [{ count: Math.max(0, (m.likes?.[0]?.count ?? 0) + (isLiked ? -1 : 1)) }] })); };
@@ -117,6 +130,10 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
 
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      {/* 라운지 공지 */}
+      <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <span>💬 오늘의 라운지 ({new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}) — 채팅 1회 = 1P</span>
+      </div>
       {/* Messages */}
       <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: 0, WebkitOverflowScrolling: 'touch' as any }}>
         {loadingMore && <div style={{ textAlign: 'center', padding: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>이전 메시지...</div>}

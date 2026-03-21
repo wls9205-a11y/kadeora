@@ -4,6 +4,15 @@ import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
 
+const NEW_HOURS: Record<string, number> = { subscription: 24, unsold: 168, redevelopment: 168, transaction: 72 };
+function isNew(item: any, type: string): boolean {
+  const h = NEW_HOURS[type] || 72;
+  const ts = item.created_at || item.fetched_at;
+  if (!ts) return false;
+  return Date.now() - new Date(ts).getTime() < h * 60 * 60 * 1000;
+}
+const NewBadge = () => <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: '#ef4444', color: '#fff', marginRight: 4, animation: 'pulse 2s infinite' }}>NEW</span>;
+
 
 interface Apt {
   id: number; house_nm: string; house_manage_no?: string; region_nm: string;
@@ -61,6 +70,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
   const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
+  const [selectedTrade, setSelectedTrade] = useState<any | null>(null);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -114,13 +124,24 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)' }}>
-        {([['sub', '📅 청약'], ['unsold', '🏚️ 미분양'], ['redev', '🏗️ 재개발'], ['trade', '💰 실거래']] as const).map(([k, l]) => (
-          <button key={k} onClick={() => setActiveTab(k)} style={{
-            flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
-            background: activeTab === k ? 'var(--brand)' : 'transparent',
-            color: activeTab === k ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: 12,
-          }}>{l}</button>
-        ))}
+        {[
+          { k: 'sub' as const, l: '📅 청약', type: 'subscription', data: apts },
+          { k: 'unsold' as const, l: '🏚️ 미분양', type: 'unsold', data: unsold },
+          { k: 'redev' as const, l: '🏗️ 재개발', type: 'redevelopment', data: redevelopment },
+          { k: 'trade' as const, l: '💰 실거래', type: 'transaction', data: transactions },
+        ].map(({ k, l, type, data }) => {
+          const hasNew = (data as any[]).some((item: any) => isNew(item, type));
+          return (
+            <button key={k} onClick={() => setActiveTab(k)} style={{
+              flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
+              background: activeTab === k ? 'var(--brand)' : 'transparent',
+              color: activeTab === k ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: 12,
+            }}>
+              {l}
+              {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} />}
+            </button>
+          );
+        })}
       </div>
 
       {/* ━━━ 청약 일정 탭 ━━━ */}
@@ -203,6 +224,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               }}>
                 {/* 1행: 상태 + D-day + 지역 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  {isNew(apt, 'subscription') && <NewBadge />}
                   <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
                     <span style={{ fontSize: 11, fontWeight: 700, color: dday <= 2 ? '#dc2626' : dday <= 6 ? '#d97706' : 'var(--text-secondary)' }}>D-{dday}</span>
@@ -357,7 +379,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 >
                   {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm || '미분양 단지'}</Link>
+                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
                     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
                     {priceStr && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
                   </div>
@@ -425,6 +447,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           if (redevType !== '전체' && r.project_type !== redevType) return false;
           if (redevRegion !== '전체' && r.region !== redevRegion) return false;
           return true;
+        }).sort((a: any, b: any) => {
+          const aOk = a.district_name && a.district_name !== '정보 준비중' && a.district_name !== '미상';
+          const bOk = b.district_name && b.district_name !== '정보 준비중' && b.district_name !== '미상';
+          if (aOk && !bOk) return -1;
+          if (!aOk && bOk) return 1;
+          return 0;
         });
 
         return (
@@ -540,7 +568,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{r.region}</span>
                   </div>
                   {/* 2행: 구역명 */}
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 2 }}>
+                    {r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '📋 정보 준비중'}
+                  </div>
                   {/* 3행: 시군구 + 세대수 + 시공사 */}
                   <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 2 }}>
                     {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ' · 세대수 미상'}{r.constructor ? ` · ${r.constructor}` : ''}
@@ -643,12 +673,17 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const amt = t.deal_amount || 0;
               const borderColor = amt >= 100000 ? '#ef4444' : amt >= 50000 ? '#f97316' : amt >= 30000 ? '#eab308' : '#22c55e';
               return (
-                <div key={`${t.id || i}`} style={{
+                <div key={`${t.id || i}`} onClick={() => setSelectedTrade(t)} style={{
                   padding: '12px 16px', borderRadius: 12, marginBottom: 6,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  borderLeft: `4px solid ${borderColor}`,
-                }}>
+                  borderLeft: `4px solid ${borderColor}`, cursor: 'pointer',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    {isNew(t, 'transaction') && <NewBadge />}
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}>{t.trade_type || '매매'}</span>
                     <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{t.region_nm} {t.sigungu}</span>
                   </div>
@@ -736,6 +771,36 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center' }}>
                 본 정보는 참고용이며, 투자 판단의 근거로 사용하면 안 됩니다.
               </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 실거래가 상세 모달 */}
+      {selectedTrade && (() => {
+        const t = selectedTrade;
+        const related = transactions.filter((x: any) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
+        function fmtAmt(a: number) { return a >= 10000 ? `${(a / 10000).toFixed(1)}억` : `${a.toLocaleString()}만`; }
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+            onClick={() => setSelectedTrade(null)}>
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
+            <div style={{ position: 'relative', width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: 20 }}
+              onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <h2 style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.apt_name}</h2>
+                <button onClick={() => setSelectedTrade(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18 }}>✕</button>
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>거래 이력 ({related.length}건)</div>
+              {related.map((r: any, i: number) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{r.exclusive_area}㎡ · {r.floor}층</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmt(r.deal_amount)}</span>
+                </div>
+              ))}
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 12 }}>국토교통부 실거래가 공개시스템 기준</div>
             </div>
           </div>
         );

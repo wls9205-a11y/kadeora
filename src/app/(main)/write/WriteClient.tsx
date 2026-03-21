@@ -116,7 +116,12 @@ export default function WriteClient() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>← 돌아가기</Link>
         <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>글쓰기</span>
-        <div style={{ width: 60 }} />
+        <button onClick={handleSubmit} disabled={!canSubmit} style={{
+          padding: '7px 16px', borderRadius: 12, border: 'none', fontSize: 13, fontWeight: 700,
+          background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
+          color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+          cursor: canSubmit ? 'pointer' : 'not-allowed',
+        }}>{loading ? '...' : '등록'}</button>
       </div>
 
       {/* 카테고리 칩 */}
@@ -150,10 +155,13 @@ export default function WriteClient() {
         placeholder="제목을 입력하세요"
         maxLength={100}
         style={{
-          width: '100%', fontSize: 20, fontWeight: 800, padding: '8px 0',
-          border: 'none', background: 'transparent', color: 'var(--text-primary)',
-          outline: 'none', boxSizing: 'border-box',
+          width: '100%', fontSize: 18, fontWeight: 700, padding: '12px 16px',
+          border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-surface)',
+          color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
+          transition: 'border-color 0.2s',
         }}
+        onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+        onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
       />
 
       {/* 본문 */}
@@ -168,11 +176,14 @@ export default function WriteClient() {
         maxLength={5000}
         autoFocus
         style={{
-          width: '100%', background: 'transparent', border: 'none',
-          color: 'var(--text-primary)', padding: 0, marginTop: 4,
+          width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: 12, color: 'var(--text-primary)', padding: '12px 16px', marginTop: 8,
           fontSize: 15, resize: 'none', fontFamily: 'inherit',
-          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 240, outline: 'none',
+          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 200, outline: 'none',
+          transition: 'border-color 0.2s',
         }}
+        onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
+        onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
       />
 
       {/* 이미지 */}
