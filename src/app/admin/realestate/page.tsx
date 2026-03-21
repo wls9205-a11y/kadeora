@@ -51,10 +51,17 @@ function UnsoldSection() {
   const handleFetch = async () => {
     setLoading(true); setResult('');
     try {
-      const res = await fetch('/api/admin/fetch-unsold', { method: 'POST' });
+      const sb = createSupabaseBrowser();
+      const { data: session } = await sb.auth.getSession();
+      const token = session.session?.access_token ?? '';
+      const res = await fetch('/api/admin/trigger-cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ endpoint: '/api/cron/crawl-unsold-molit' }),
+      });
       const data = await res.json();
-      if (data.success) {
-        setResult(data.message || '수집 완료');
+      if (res.ok && !data.error) {
+        setResult(`수집 완료: ${data.inserted ?? 0}건 (${data.month ?? ''})`);
         // Refresh count
         createSupabaseBrowser().from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true)
           .then(({ count }) => setUnsoldCount(count ?? 0));

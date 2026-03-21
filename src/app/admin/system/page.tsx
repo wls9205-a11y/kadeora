@@ -183,14 +183,30 @@ function ManualControlSection() {
   const [result, setResult] = useState('');
 
   const actions = [
-    { endpoint: '/api/admin/refresh-apt-cache', label: '부동산 캐시 갱신' },
-    { endpoint: '/api/admin/fetch-unsold', label: '미분양 데이터 수집' },
+    { endpoint: '/api/admin/refresh-apt-cache', label: '부동산 캐시 갱신', direct: true },
+    { endpoint: '/api/cron/crawl-unsold-molit', label: '미분양 데이터 수집 (통계누리)', direct: false },
+    { endpoint: '/api/cron/crawl-seoul-redev', label: '서울 재개발 수집', direct: false },
+    { endpoint: '/api/cron/crawl-gyeonggi-redev', label: '경기 재개발 수집', direct: false },
+    { endpoint: '/api/cron/crawl-busan-redev', label: '부산 재개발 수집', direct: false },
   ];
 
-  const trigger = async (endpoint: string, label: string) => {
+  const trigger = async (endpoint: string, label: string, direct?: boolean) => {
     setTriggering(endpoint); setResult('');
     try {
-      const res = await fetch(endpoint, { method: 'POST' });
+      const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
+      const { data: session } = await sb.auth.getSession();
+      const token = session.session?.access_token ?? '';
+
+      let res: Response;
+      if (direct) {
+        res = await fetch(endpoint, { method: 'POST' });
+      } else {
+        res = await fetch('/api/admin/trigger-cron', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ endpoint }),
+        });
+      }
       const data = await res.json();
       if (res.ok) {
         setResult(`${label} 완료: ${JSON.stringify(data).slice(0, 100)}`);
@@ -214,7 +230,7 @@ function ManualControlSection() {
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{a.label}</div>
             </div>
-            <button onClick={() => trigger(a.endpoint, a.label)} disabled={!!triggering} style={{
+            <button onClick={() => trigger(a.endpoint, a.label, (a as any).direct)} disabled={!!triggering} style={{
               padding: '6px 14px', borderRadius: 6, border: 'none', fontSize: 12, fontWeight: 700, cursor: triggering ? 'not-allowed' : 'pointer',
               background: triggering === a.endpoint ? 'var(--bg-hover)' : 'var(--brand)',
               color: triggering === a.endpoint ? 'var(--text-tertiary)' : '#fff',

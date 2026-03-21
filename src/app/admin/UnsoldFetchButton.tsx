@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 export default function UnsoldFetchButton({ hasKey }: { hasKey: boolean }) {
   const [loading, setLoading] = useState(false);
@@ -8,21 +9,24 @@ export default function UnsoldFetchButton({ hasKey }: { hasKey: boolean }) {
   const handleFetch = async () => {
     setLoading(true); setResult('');
     try {
-      const res = await fetch('/api/admin/fetch-unsold', { method: 'POST' });
+      const sb = createSupabaseBrowser();
+      const { data: session } = await sb.auth.getSession();
+      const token = session.session?.access_token ?? '';
+
+      const res = await fetch('/api/admin/trigger-cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ endpoint: '/api/cron/crawl-unsold-molit' }),
+      });
       const data = await res.json();
-      if (data.success) setResult(`✅ ${data.message}`);
-      else setResult(`❌ ${data.error || data.message || '실패'}`);
+      if (res.ok && !data.error) {
+        setResult(`✅ 미분양 ${data.inserted ?? 0}건 수집 (${data.month ?? ''})`);
+      } else {
+        setResult(`❌ ${data.error || '실패'}`);
+      }
     } catch { setResult('❌ 요청 실패'); }
     setLoading(false);
   };
-
-  if (!hasKey) {
-    return (
-      <button disabled style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 13, fontWeight: 600, cursor: 'not-allowed' }}>
-        API 키 미등록 — 수집 비활성
-      </button>
-    );
-  }
 
   return (
     <div>
@@ -32,7 +36,7 @@ export default function UnsoldFetchButton({ hasKey }: { hasKey: boolean }) {
         color: loading ? 'var(--text-tertiary)' : 'var(--text-inverse)',
         fontSize: 13, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
       }}>
-        {loading ? '수집 중... (최대 30초)' : '🔄 전국 미분양 데이터 수집'}
+        {loading ? '수집 중... (최대 60초)' : '🔄 전국 미분양 데이터 수집 (통계누리)'}
       </button>
       {result && <div style={{ fontSize: 12, color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', marginTop: 6 }}>{result}</div>}
     </div>
