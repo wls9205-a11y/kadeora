@@ -12,6 +12,25 @@ marked.setOptions({ breaks: true, gfm: true });
 
 interface Props { params: Promise<{ slug: string }> }
 
+// 목차 추출: HTML에서 h2/h3 태그 파싱
+function extractToc(html: string): { level: number; text: string; id: string }[] {
+  const regex = /<h([23])[^>]*id="([^"]*)"[^>]*>(.*?)<\/h[23]>/gi;
+  const items: { level: number; text: string; id: string }[] = [];
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    items.push({ level: parseInt(match[1]), text: match[3].replace(/<[^>]+>/g, ''), id: match[2] });
+  }
+  return items;
+}
+
+// GEO 지역 코드 매핑
+const GEO_CODES: Record<string, string> = {
+  '서울': 'KR-11', '부산': 'KR-26', '대구': 'KR-27', '인천': 'KR-28',
+  '광주': 'KR-29', '대전': 'KR-30', '울산': 'KR-31', '세종': 'KR-36',
+  '경기': 'KR-41', '강원': 'KR-42', '충북': 'KR-43', '충남': 'KR-44',
+  '전북': 'KR-45', '전남': 'KR-46', '경북': 'KR-47', '경남': 'KR-48', '제주': 'KR-50',
+};
+
 function timeAgo(d: string) {
   const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
   if (m < 1) return '방금 전'; if (m < 60) return `${m}분 전`;
@@ -43,6 +62,12 @@ export async function generateMetadata({ params }: Props) {
       publishedTime: post.created_at, url: `${SITE}/blog/${slug}`,
       ...(post.cover_image ? { images: [{ url: post.cover_image, width: 1200, height: 630 }] } : {}),
     },
+    other: (() => {
+      // GEO 태그: 제목/태그에서 지역명 추출
+      const allText = `${post.title} ${(post.tags ?? []).join(' ')}`;
+      const geo = Object.entries(GEO_CODES).find(([k]) => allText.includes(k));
+      return geo ? { 'geo.region': geo[1], 'geo.placename': geo[0] } : {};
+    })(),
   };
 }
 
@@ -84,9 +109,23 @@ export default async function BlogDetailPage({ params }: Props) {
   const cutoff = Math.floor(htmlFull.length * 0.4);
   const htmlTruncated = htmlFull.slice(0, cutoff);
 
+  // 목차 추출
+  const toc = extractToc(htmlFull);
+
+  // FAQ schema (tags에 'FAQ' 포함 시)
+  const isFaq = (post.tags ?? []).some((t: string) => t.toLowerCase().includes('faq') || t === '자주묻는질문');
+  const faqSchema = isFaq ? {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: toc.filter(t => t.text.startsWith('Q.')).map(t => ({
+      '@type': 'Question', name: t.text.replace(/^Q\.\s*/, ''),
+      acceptedAnswer: { '@type': 'Answer', text: `자세한 답변은 ${SITE}/blog/${slug}#${t.id} 에서 확인하세요.` },
+    })),
+  } : null;
+
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
       <div style={{ marginBottom: 16 }}>
         <Link href="/blog" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
@@ -102,6 +141,18 @@ export default async function BlogDetailPage({ params }: Props) {
         {(post.tags ?? []).length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
             {post.tags.map((t: string) => <span key={t} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>#{t}</span>)}
+          </div>
+        )}
+
+        {/* 목차 */}
+        {toc.length >= 3 && (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>목차</div>
+            {toc.map((item, i) => (
+              <a key={i} href={`#${item.id}`} style={{ display: 'block', padding: '3px 0', paddingLeft: item.level === 3 ? 16 : 0, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', lineHeight: 1.5 }}>
+                {item.text}
+              </a>
+            ))}
           </div>
         )}
 
