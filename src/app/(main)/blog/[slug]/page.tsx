@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
+import ShareButtons from '@/components/ShareButtons';
 import { getAvatarColor } from '@/lib/avatar';
 
 export const revalidate = 300;
@@ -174,7 +175,11 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 면책고지는 콘텐츠(DB) 안에 이미 포함 — 중복 제거 */}
+        {/* 공유 */}
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>공유하기</span>
+          <ShareButtons title={post.title} postId={slug} />
+        </div>
       </article>
 
       {/* 댓글 섹션 */}

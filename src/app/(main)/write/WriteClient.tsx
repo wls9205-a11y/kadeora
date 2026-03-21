@@ -32,6 +32,8 @@ export default function WriteClient() {
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [showCatPicker, setShowCatPicker] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -82,6 +84,7 @@ export default function WriteClient() {
         content: content.trim(),
         images,
         is_anonymous: isAnonymous,
+        tags,
         ...(category === 'local' ? { region_id: regionId } : {}),
       };
       if (editId) {
@@ -132,7 +135,7 @@ export default function WriteClient() {
         type="text"
         value={title}
         onChange={e => setTitle(e.target.value)}
-        placeholder="(선택) 제목을 입력해주세요"
+        placeholder="제목 (선택)"
         maxLength={100}
         onFocus={e => (e.currentTarget.style.borderBottomColor = 'var(--text-tertiary)')}
         onBlur={e => (e.currentTarget.style.borderBottomColor = 'var(--border)')}
@@ -152,7 +155,7 @@ export default function WriteClient() {
           e.target.style.height = 'auto';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}
-        placeholder="내용을 입력해주세요..."
+        placeholder="무슨 소문이 있나요?"
         maxLength={5000}
         autoFocus
         style={{
@@ -165,6 +168,42 @@ export default function WriteClient() {
 
       {/* 이미지 */}
       <ImageUpload images={images} onImagesChange={setImages} />
+
+      {/* 태그 */}
+      <div style={{ marginTop: 16 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+          {tags.map(t => (
+            <span key={t} style={{
+              fontSize: 12, padding: '3px 10px', borderRadius: 999,
+              background: 'var(--bg-hover)', color: 'var(--text-secondary)',
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+            }}>
+              #{t}
+              <button onClick={() => setTags(prev => prev.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0 }}>×</button>
+            </span>
+          ))}
+        </div>
+        {tags.length < 5 && (
+          <input
+            value={tagInput}
+            onChange={e => setTagInput(e.target.value.replace(/[#\s]/g, ''))}
+            onKeyDown={e => {
+              if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+                e.preventDefault();
+                const t = tagInput.trim();
+                if (t && !tags.includes(t) && tags.length < 5) setTags(prev => [...prev, t]);
+                setTagInput('');
+              }
+            }}
+            placeholder="태그 입력 (최대 5개, Enter로 추가)"
+            style={{
+              width: '100%', padding: '8px 12px', fontSize: 13,
+              background: 'var(--bg-hover)', border: '1px solid var(--border)',
+              borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box',
+            }}
+          />
+        )}
+      </div>
 
       {/* 경고 */}
       <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 20, lineHeight: 1.5 }}>

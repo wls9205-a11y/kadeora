@@ -27,7 +27,7 @@ function avc(uid: string | null) { return getAvatarColor(uid ?? ''); }
 function timeAgo(d: string) { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return '방금'; if (m < 60) return m + '분 전'; if (m < 1440) return Math.floor(m / 60) + '시간 전'; return Math.floor(m / 1440) + '일 전'; }
 function renderContent(text: string) { return text.split(/(@\S+)/g).map((p, i) => p.startsWith('@') ? <span key={i} style={{ color: 'var(--brand)', fontWeight: 700 }}>{p}</span> : p); }
 
-export default function ChatRoom({ user, myNickname }: { user: User | null; myNickname?: string | null }) {
+export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: User | null; myNickname?: string | null; room?: string }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -52,6 +52,7 @@ export default function ChatRoom({ user, myNickname }: { user: User | null; myNi
     const sb = createSupabaseBrowser();
     let q = sb.from('chat_messages')
       .select('*, profiles:user_id(id, nickname, grade, points), likes:chat_message_likes(count)')
+      .eq('room', room)
       .is('parent_id', null)
       .order('created_at', { ascending: false }).limit(PAGE_SIZE);
     if (before) q = q.lt('created_at', before);
@@ -82,9 +83,9 @@ export default function ChatRoom({ user, myNickname }: { user: User | null; myNi
     setLoading(true);
     loadMessages().then(() => { setLoading(false); isFirst.current = true; });
     const sb = createSupabaseBrowser();
-    const ch = sb.channel('chat_lounge').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => { loadMessages(); }).subscribe();
+    const ch = sb.channel(`chat_${room}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => { loadMessages(); }).subscribe();
     return () => { sb.removeChannel(ch); if (mentionTimer.current) clearTimeout(mentionTimer.current); };
-  }, [loadMessages]);
+  }, [loadMessages, room]);
 
   useEffect(() => { if (isFirst.current) { isFirst.current = false; return; } const el = scrollRef.current; if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 150) bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
 
@@ -96,11 +97,11 @@ export default function ChatRoom({ user, myNickname }: { user: User | null; myNi
     setSending(true);
     const sb = createSupabaseBrowser();
     if (replyTarget) {
-      await sb.from('chat_messages').insert({ user_id: user.id, content: t, parent_id: replyTarget.id });
+      await sb.from('chat_messages').insert({ user_id: user.id, content: t, parent_id: replyTarget.id, room });
       setReplyTarget(null);
       await loadMessages();
     } else {
-      await sb.from('chat_messages').insert({ user_id: user.id, content: t });
+      await sb.from('chat_messages').insert({ user_id: user.id, content: t, room });
     }
     setInput(''); setSending(false); setShowMention(false);
   };

@@ -12,11 +12,19 @@ interface HotDiscussion {
   profiles?: { nickname?: string } | null;
 }
 
+const ROOMS = [
+  { id: 'lounge', label: '라운지', icon: '💬', desc: '자유 수다방' },
+  { id: 'stock', label: '주식방', icon: '📊', desc: '종목 토론' },
+  { id: 'apt', label: '부동산방', icon: '🏢', desc: '청약·매매 이야기' },
+  { id: 'crypto', label: '코인방', icon: '₿', desc: '가상자산 토론' },
+];
+
 export default function DiscussClient() {
   const [user, setUser] = useState<User | null>(null);
   const [myNickname, setMyNickname] = useState<string | null>(null);
   const [hotDiscussions, setHotDiscussions] = useState<HotDiscussion[]>([]);
   const [showChat, setShowChat] = useState(false);
+  const [activeRoom, setActiveRoom] = useState('lounge');
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -87,25 +95,32 @@ export default function DiscussClient() {
         </div>
       )}
 
-      {/* 실시간 라운지 */}
-      <div style={{ marginBottom: 12 }}>
-        <button onClick={() => setShowChat(!showChat)} style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 16px', borderRadius: 14, border: '1px solid var(--border)',
-          background: showChat ? 'var(--bg-surface)' : 'linear-gradient(135deg, var(--brand) 0%, #ff8c42 100%)',
-          color: showChat ? 'var(--text-primary)' : 'white',
-          cursor: 'pointer', fontFamily: 'inherit',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <MessageCircle size={18} />
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 14, fontWeight: 700 }}>실시간 라운지</div>
-              <div style={{ fontSize: 11, opacity: 0.8 }}>실시간으로 소문을 나눠보세요</div>
-            </div>
-          </div>
-          <span style={{ fontSize: 12, fontWeight: 600 }}>{showChat ? '접기 ▲' : '입장 ▼'}</span>
-        </button>
+      {/* 채팅방 선택 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
+        {ROOMS.map(r => (
+          <button key={r.id} onClick={() => { setActiveRoom(r.id); setShowChat(true); }} style={{
+            padding: '10px 8px', borderRadius: 12, border: activeRoom === r.id && showChat ? '2px solid var(--brand)' : '1px solid var(--border)',
+            background: activeRoom === r.id && showChat ? 'var(--bg-hover)' : 'var(--bg-surface)',
+            cursor: 'pointer', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 20, marginBottom: 4 }}>{r.icon}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{r.label}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{r.desc}</div>
+          </button>
+        ))}
       </div>
+
+      {!showChat && (
+        <button onClick={() => setShowChat(true)} style={{
+          width: '100%', padding: '14px 16px', borderRadius: 14, border: 'none',
+          background: 'linear-gradient(135deg, var(--brand) 0%, #ff8c42 100%)',
+          color: 'white', cursor: 'pointer', fontFamily: 'inherit',
+          fontSize: 14, fontWeight: 700, marginBottom: 12,
+        }}>
+          <MessageCircle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+          {ROOMS.find(r => r.id === activeRoom)?.label ?? '라운지'} 입장하기
+        </button>
+      )}
 
       {showChat && (
         <>
@@ -116,7 +131,7 @@ export default function DiscussClient() {
           }}>
             투자 관련 대화는 개인 의견이며, 특정 종목 매수/매도 권유는 금지됩니다.
           </div>
-          <ChatRoom user={user} myNickname={myNickname} />
+          <ChatRoom key={activeRoom} user={user} myNickname={myNickname} room={activeRoom} />
         </>
       )}
     </div>
