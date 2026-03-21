@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User, PenSquare, ShoppingBag, BookOpen, LogOut } from 'lucide-react';
+import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User, PenSquare, ShoppingBag, BookOpen, LogOut, FileText } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { haptic } from '@/lib/haptic';
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/feed',    label: '피드',   Icon: Home },
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/apt',     label: '부동산', Icon: Building2 },
+  { href: '/blog',    label: '블로그', Icon: FileText },
   { href: '/discuss', label: '토론',   Icon: MessageCircle },
   { href: '/hot',     label: 'HOT',    Icon: Flame },
 ];

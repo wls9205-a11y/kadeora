@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE}/apt`,      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
     { url: `${SITE}/discuss`,  lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.7 },
     { url: `${SITE}/hot`,      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${SITE}/blog`,     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
     { url: `${SITE}/guide`,    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE}/search`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${SITE}/faq`,      lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
@@ -27,10 +28,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const timeout = <T>(promise: Promise<T>, ms: number): Promise<T | null> =>
       Promise.race([promise, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
-    const [postsResult, stocksResult, aptsResult] = await Promise.all([
+    const [postsResult, stocksResult, aptsResult, blogResult] = await Promise.all([
       timeout(sb.from('posts').select('id, slug, updated_at, likes_count, comments_count').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000), 10000),
       timeout(sb.from('stock_quotes').select('symbol, updated_at'), 5000),
       timeout(sb.from('apt_subscriptions').select('id, house_manage_no, updated_at'), 5000),
+      timeout(sb.from('blog_posts').select('slug, updated_at').eq('is_published', true).order('created_at', { ascending: false }).limit(1000), 5000),
     ]);
 
     const posts = (postsResult as any)?.data ?? [];
@@ -62,7 +64,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    return [...staticRoutes, ...feedRoutes, ...stockRoutes, ...aptRoutes];
+    const blogs = (blogResult as any)?.data ?? [];
+    const blogRoutes: MetadataRoute.Sitemap = blogs.map((b: any) => ({
+      url: `${SITE}/blog/${b.slug}`,
+      lastModified: new Date(b.updated_at ?? Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
+
+    return [...staticRoutes, ...feedRoutes, ...stockRoutes, ...aptRoutes, ...blogRoutes];
   } catch {
     return staticRoutes;
   }
