@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User, PenSquare, ShoppingBag, BookOpen, LogOut, FileText } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import ThemeToggle from '@/components/ThemeToggle';
 import { haptic } from '@/lib/haptic';
 import type { User } from '@supabase/supabase-js';
 
