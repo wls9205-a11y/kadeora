@@ -58,8 +58,8 @@ export default async function AdminDashboard() {
 
   let seedCount = 0;
   try {
-    const { data: seedData } = await supabase.rpc('get_seed_stats');
-    seedCount = Number(seedData?.[0]?.seed_users) || 0;
+    const { count: sc } = await supabase.from('profiles').select('id', { count: 'exact', head: true }).like('id', 'aaaaaaaa-%');
+    seedCount = sc ?? 0;
   } catch {}
 
   const totalUsers = usersR.count ?? 0;
