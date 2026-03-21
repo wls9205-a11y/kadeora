@@ -3,6 +3,64 @@ import { useState, useEffect } from 'react';
 
 const DB_LIMIT = 8 * 1024 * 1024 * 1024; // 8GB Pro plan
 
+function DonutGauge({ value, max, label, color }: { value: number; max: number; label: string; color: string }) {
+  const percent = Math.min(Math.round((value / max) * 100), 100);
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+  const statusColor = percent > 80 ? '#EF4444' : percent > 50 ? '#F59E0B' : color;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ position: 'relative', width: 128, height: 128 }}>
+        <svg width="128" height="128" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="#374151" strokeWidth="8" />
+          <circle cx="60" cy="60" r={radius} fill="none" stroke={statusColor} strokeWidth="8"
+            strokeDasharray={circumference} strokeDashoffset={offset}
+            strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />
+        </svg>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{percent}%</span>
+          <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>사용중</span>
+        </div>
+      </div>
+      <p style={{ fontSize: 13, fontWeight: 600, marginTop: 8, color: 'var(--text-secondary)' }}>{label}</p>
+    </div>
+  );
+}
+
+function StatCard({ icon, value, label, bg }: { icon: string; value: string | number; label: string; bg: string }) {
+  return (
+    <div style={{ padding: 14, borderRadius: 12, background: bg, border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>
+        {typeof value === 'number' ? value.toLocaleString() : value}
+      </div>
+      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>{label}</div>
+    </div>
+  );
+}
+
+function TableBar({ name, sizeBytes, maxBytes, size, rows }: { name: string; sizeBytes: number; maxBytes: number; size: string; rows: number }) {
+  const percent = maxBytes > 0 ? Math.min((sizeBytes / maxBytes) * 100, 100) : 0;
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3 }}>
+        <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>{name}</span>
+        <span style={{ color: 'var(--text-tertiary)' }}>{(rows ?? 0).toLocaleString()}행 · {size}</span>
+      </div>
+      <div style={{ height: 6, background: '#1f2937', borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{
+          height: '100%', borderRadius: 3,
+          background: 'linear-gradient(90deg, #22c55e, #34d399)',
+          width: `${Math.max(percent, 2)}%`,
+          transition: 'width 0.7s ease',
+        }} />
+      </div>
+    </div>
+  );
+}
+
 export default function InfraPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -24,15 +82,11 @@ export default function InfraPage() {
   const db = data.dbStats;
   const github = data.github;
   const vercel = data.vercel;
-  const dbUsagePercent = db ? Math.round((db.db_size_bytes / DB_LIMIT) * 100) : 0;
-
-  const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 20, marginBottom: 16 };
-  const kpiBox: React.CSSProperties = { background: 'var(--bg-hover)', borderRadius: 10, padding: 14, textAlign: 'center' };
-  const sectionTitle: React.CSSProperties = { fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* 헤더 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🖥️ 인프라 모니터링</h1>
         <button onClick={() => window.location.reload()} style={{
           background: 'none', border: '1px solid var(--border)', borderRadius: 8,
@@ -41,134 +95,162 @@ export default function InfraPage() {
       </div>
 
       {/* === Supabase === */}
-      <div style={card}>
-        <div style={sectionTitle}><span style={{ color: '#22c55e' }}>⚡</span> Supabase (Pro)</div>
+      <div style={{
+        padding: 24, borderRadius: 16,
+        background: 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(17,24,39,0.95) 100%)',
+        border: '1px solid rgba(34,197,94,0.15)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,197,94,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)' }}>Supabase</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Pro Plan · Seoul Region</div>
+          </div>
+        </div>
 
-        {db && (
+        {db ? (
           <>
-            {/* DB 사이즈 게이지 */}
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6, color: 'var(--text-secondary)' }}>
-                <span>DB 사용량</span>
-                <span>{db.db_size_pretty} / 8GB ({dbUsagePercent}%)</span>
-              </div>
-              <div style={{ height: 14, background: 'var(--bg-hover)', borderRadius: 7, overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%', borderRadius: 7, transition: 'width 0.5s',
-                  background: dbUsagePercent > 80 ? '#ef4444' : dbUsagePercent > 50 ? '#eab308' : '#22c55e',
-                  width: `${Math.min(dbUsagePercent, 100)}%`,
-                }} />
+            {/* 도넛 게이지 + KPI */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 24 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 24 }}>
+                <DonutGauge value={db.db_size_bytes} max={DB_LIMIT} label={`${db.db_size_pretty} / 8GB`} color="#10B981" />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, flex: 1, minWidth: 200 }}>
+                  <StatCard icon="🔌" value={db.active_connections ?? 0} label="활성 커넥션" bg="rgba(59,130,246,0.08)" />
+                  <StatCard icon="⚡" value={`${db.cache_hit_ratio ?? 0}%`} label="캐시 히트율" bg="rgba(34,197,94,0.08)" />
+                  <StatCard icon="📊" value={db.total_rows ?? 0} label="총 행 수" bg="rgba(139,92,246,0.08)" />
+                  <StatCard icon="📁" value={db.index_size ?? '0'} label="인덱스" bg="rgba(249,115,22,0.08)" />
+                </div>
               </div>
             </div>
 
-            {/* KPIs */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{db.active_connections ?? 0}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>활성 커넥션</div>
-              </div>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{db.cache_hit_ratio ?? 0}%</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>캐시 히트율</div>
-              </div>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{(db.total_rows ?? 0).toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>총 행 수</div>
-              </div>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{db.index_size ?? '0'}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>인덱스 크기</div>
-              </div>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#22c55e' }}>{data.weeklyActive ?? 0}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>주간 활성 유저</div>
+            {/* 주간 활성 유저 */}
+            <div style={{
+              marginBottom: 20, padding: 16, borderRadius: 12,
+              background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.12)',
+              display: 'flex', alignItems: 'center', gap: 14,
+            }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(234,179,8,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>👥</div>
+              <div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{data.weeklyActive ?? 0}명</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>주간 활성 유저 (최근 7일, 실제 유저)</div>
               </div>
             </div>
 
-            {/* 테이블별 사용량 */}
+            {/* 테이블별 막대 차트 */}
             <details>
-              <summary style={{ fontSize: 13, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', marginBottom: 8 }}>
-                테이블별 사용량 Top 15
+              <summary style={{ fontSize: 13, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', marginBottom: 12 }}>
+                📊 테이블별 사용량 Top 15
               </summary>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ background: 'rgba(17,24,39,0.5)', borderRadius: 12, padding: 16 }}>
                 {(db.tables ?? []).map((t: any) => (
-                  <div key={t.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, padding: '4px 0' }}>
-                    <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace', fontSize: 11 }}>{t.name}</span>
-                    <div style={{ display: 'flex', gap: 12 }}>
-                      <span style={{ color: 'var(--text-tertiary)', fontSize: 11 }}>{(t.rows ?? 0).toLocaleString()}행</span>
-                      <span style={{ fontWeight: 600, width: 60, textAlign: 'right', fontSize: 11, color: 'var(--text-secondary)' }}>{t.size}</span>
-                    </div>
-                  </div>
+                  <TableBar key={t.name} name={t.name} sizeBytes={t.size_bytes} maxBytes={db.tables[0]?.size_bytes || 1} size={t.size} rows={t.rows} />
                 ))}
               </div>
             </details>
           </>
+        ) : (
+          <div style={{ color: 'var(--text-tertiary)', fontSize: 13, textAlign: 'center', padding: 20 }}>DB 통계를 가져올 수 없습니다</div>
         )}
-        {!db && <div style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>DB 통계를 가져올 수 없습니다</div>}
       </div>
 
       {/* === Vercel === */}
-      <div style={card}>
-        <div style={sectionTitle}><span>▲</span> Vercel (Pro)</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8, marginBottom: 12 }}>
-          {[['Bandwidth', '1TB/월'], ['Serverless', '1,000시간/월'], ['Edge', '무제한']].map(([l, v]) => (
-            <div key={l} style={kpiBox}>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{l} 한도</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{v}</div>
+      <div style={{
+        padding: 24, borderRadius: 16,
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(17,24,39,0.95) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>▲</div>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)' }}>Vercel</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Pro Plan</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+          {[
+            { label: 'Bandwidth', value: '1TB', sub: '/ 월', barPct: 3, barColor: '#3b82f6' },
+            { label: 'Serverless', value: '1,000h', sub: '/ 월', barPct: 5, barColor: '#22c55e' },
+            { label: 'Edge Requests', value: '∞', sub: '', barPct: 0, barColor: '' },
+          ].map(item => (
+            <div key={item.label} style={{ padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.03)', textAlign: 'center' }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{item.value}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>{item.label} {item.sub}</div>
+              {item.barPct > 0 ? (
+                <>
+                  <div style={{ height: 5, background: '#1f2937', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', background: item.barColor, borderRadius: 3, width: `${item.barPct}%` }} />
+                  </div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 3 }}>여유로움</div>
+                </>
+              ) : (
+                <div style={{ fontSize: 9, color: '#22c55e', marginTop: 3 }}>무제한</div>
+              )}
             </div>
           ))}
         </div>
+
         {vercel?.deployments ? (
           <details>
-            <summary style={{ fontSize: 13, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', marginBottom: 8 }}>최근 배포</summary>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {vercel.deployments.map((d: any) => (
-                <div key={d.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, padding: '6px 8px', borderRadius: 6, background: 'var(--bg-hover)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: d.state === 'READY' ? '#22c55e' : d.state === 'ERROR' ? '#ef4444' : '#eab308' }} />
-                    <span style={{ color: 'var(--text-primary)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11 }}>{d.meta || d.id}</span>
+            <summary style={{ fontSize: 13, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', marginBottom: 8 }}>🚀 최근 배포</summary>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {vercel.deployments.map((d: any, i: number) => (
+                <div key={d.id || i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.02)' }}>
+                  <span style={{
+                    width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
+                    background: d.state === 'READY' ? '#22c55e' : d.state === 'ERROR' ? '#ef4444' : '#eab308',
+                    boxShadow: d.state === 'READY' ? '0 0 6px rgba(34,197,94,0.4)' : d.state === 'ERROR' ? '0 0 6px rgba(239,68,68,0.4)' : 'none',
+                  }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.meta || '배포'}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{d.created ? new Date(d.created).toLocaleString('ko-KR') : ''}</div>
                   </div>
-                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{d.created ? new Date(d.created).toLocaleDateString('ko-KR') : ''}</span>
+                  <span style={{
+                    fontSize: 10, padding: '2px 8px', borderRadius: 999, fontWeight: 600,
+                    background: d.state === 'READY' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                    color: d.state === 'READY' ? '#22c55e' : '#ef4444',
+                  }}>{d.state}</span>
                 </div>
               ))}
             </div>
           </details>
         ) : (
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-            {vercel?.message || 'Vercel 대시보드에서 확인하세요'}{' '}
-            <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>→ Vercel</a>
+          <div style={{ textAlign: 'center', padding: 16 }}>
+            <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 6 }}>배포 정보를 보려면 VERCEL_TOKEN이 필요합니다</div>
+            <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none' }}>→ Vercel 대시보드에서 확인</a>
           </div>
         )}
       </div>
 
       {/* === GitHub === */}
-      <div style={card}>
-        <div style={sectionTitle}><span>🐙</span> GitHub</div>
+      <div style={{
+        padding: 24, borderRadius: 16,
+        background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(17,24,39,0.95) 100%)',
+        border: '1px solid rgba(139,92,246,0.15)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🐙</div>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)' }}>GitHub</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>wls9205-a11y/kadeora</div>
+          </div>
+        </div>
+
         {github ? (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8, marginBottom: 12 }}>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{github.size_pretty}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>레포 크기</div>
-              </div>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{github.open_issues}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>Open Issues</div>
-              </div>
-              <div style={kpiBox}>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{github.default_branch}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>기본 브랜치</div>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+              <StatCard icon="💾" value={github.size_pretty} label="레포 크기" bg="rgba(139,92,246,0.08)" />
+              <StatCard icon="🐛" value={github.open_issues} label="Open Issues" bg="rgba(234,179,8,0.08)" />
+              <StatCard icon="🌿" value={github.default_branch} label="기본 브랜치" bg="rgba(34,197,94,0.08)" />
             </div>
+
             <details>
-              <summary style={{ fontSize: 13, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', marginBottom: 8 }}>최근 커밋 5개</summary>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {(github.recent_commits ?? []).map((c: any) => (
-                  <div key={c.sha} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, padding: '6px 8px', borderRadius: 6, background: 'var(--bg-hover)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <code style={{ fontSize: 10, color: '#8b5cf6' }}>{c.sha}</code>
-                      <span style={{ color: 'var(--text-primary)', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11 }}>{c.message}</span>
-                    </div>
+              <summary style={{ fontSize: 13, fontWeight: 600, cursor: 'pointer', color: 'var(--text-secondary)', marginBottom: 8 }}>📝 최근 커밋 5개</summary>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {(github.recent_commits ?? []).map((c: any, i: number) => (
+                  <div key={c.sha || i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.02)' }}>
+                    <code style={{ fontSize: 10, color: '#a78bfa', fontFamily: 'monospace', background: 'rgba(139,92,246,0.1)', padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{c.sha}</code>
+                    <div style={{ flex: 1, fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.message}</div>
                     <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{c.date ? new Date(c.date).toLocaleDateString('ko-KR') : ''}</span>
                   </div>
                 ))}
@@ -176,33 +258,34 @@ export default function InfraPage() {
             </details>
           </>
         ) : (
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: 16 }}>
             GitHub 데이터를 가져올 수 없습니다{' '}
-            <a href="https://github.com/wls9205-a11y/kadeora" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>→ GitHub</a>
+            <a href="https://github.com/wls9205-a11y/kadeora" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'none' }}>→ GitHub</a>
           </div>
         )}
       </div>
 
       {/* === 바로가기 === */}
-      <div style={card}>
-        <div style={sectionTitle}>🔗 상세 대시보드 바로가기</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
-          {[
-            { label: 'Supabase', sub: 'DB 대시보드', href: 'https://supabase.com/dashboard/project/tezftxakuwhsclarprlz', color: '#22c55e' },
-            { label: 'Vercel', sub: '배포/Analytics', href: 'https://vercel.com/dashboard', color: '#fff' },
-            { label: 'GitHub', sub: '소스코드', href: 'https://github.com/wls9205-a11y/kadeora', color: '#8b5cf6' },
-            { label: 'GA4', sub: '트래픽 분석', href: 'https://analytics.google.com', color: '#eab308' },
-          ].map(link => (
-            <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" style={{
-              display: 'block', padding: 12, borderRadius: 10, textDecoration: 'none', textAlign: 'center',
-              background: `${link.color}10`, border: `1px solid ${link.color}25`,
-              transition: 'background 0.15s',
-            }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{link.label}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{link.sub}</div>
-            </a>
-          ))}
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
+        {[
+          { icon: '⚡', label: 'Supabase', sub: 'DB 대시보드', href: 'https://supabase.com/dashboard/project/tezftxakuwhsclarprlz', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.15)' },
+          { icon: '▲', label: 'Vercel', sub: '배포 / Analytics', href: 'https://vercel.com/dashboard', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.08)' },
+          { icon: '🐙', label: 'GitHub', sub: '소스코드', href: 'https://github.com/wls9205-a11y/kadeora', bg: 'rgba(139,92,246,0.08)', border: 'rgba(139,92,246,0.15)' },
+          { icon: '📊', label: 'GA4', sub: '트래픽 분석', href: 'https://analytics.google.com', bg: 'rgba(234,179,8,0.08)', border: 'rgba(234,179,8,0.15)' },
+        ].map(link => (
+          <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" style={{
+            display: 'block', padding: 16, borderRadius: 12, textDecoration: 'none', textAlign: 'center',
+            background: link.bg, border: `1px solid ${link.border}`,
+            transition: 'transform 0.15s',
+          }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <div style={{ fontSize: 24, marginBottom: 6 }}>{link.icon}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{link.label}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{link.sub}</div>
+          </a>
+        ))}
       </div>
     </div>
   );
