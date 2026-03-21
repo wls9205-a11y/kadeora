@@ -1,12 +1,22 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+
 interface BlogPost { id: number; slug: string; title: string; category: string; cron_type: string | null; view_count: number; created_at: string; is_published: boolean; content_length?: number }
+
+const CRON_BUTTONS = [
+  { key: 'blog-daily', icon: '📈', label: '주식 시황', path: '/api/cron/blog-daily' },
+  { key: 'blog-apt-new', icon: '🏠', label: '청약/미분양', path: '/api/cron/blog-apt-new' },
+  { key: 'blog-weekly', icon: '📅', label: '주간', path: '/api/cron/blog-weekly' },
+  { key: 'blog-monthly', icon: '📊', label: '월간', path: '/api/cron/blog-monthly' },
+  { key: 'seed-finance', icon: '💰', label: '재테크 시드', path: '/api/admin/seed-finance-blogs' },
+  { key: 'all', icon: '🔄', label: '전체 재생성', path: '' },
+];
 
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [triggering, setTriggering] = useState<string | null>(null);
+  const [running, setRunning] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
   const [catFilter, setCatFilter] = useState('all');
 
@@ -21,21 +31,48 @@ export default function AdminBlogPage() {
   };
   useEffect(() => { load(); }, []);
 
-  const trigger = async (endpoint: string, label: string) => {
-    setTriggering(label); setMsg('');
+  const getToken = async () => {
     const sb = createSupabaseBrowser();
     const { data } = await sb.auth.getSession();
-    const token = data.session?.access_token ?? '';
-    try {
-      const res = await fetch('/api/admin/trigger-cron', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ endpoint }),
-      });
-      const d = await res.json();
-      setMsg(`${label}: ${d.created ?? d.status ?? 'done'}`);
-      load();
-    } catch { setMsg(`${label} 실패`); }
-    setTriggering(null);
+    return data.session?.access_token ?? '';
+  };
+
+  const runCron = async (key: string) => {
+    setRunning(key); setMsg('');
+    const token = await getToken();
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+    if (key === 'all') {
+      // 4개 크론 순차 호출 (seed-finance 제외)
+      const crons = ['/api/cron/blog-daily', '/api/cron/blog-apt-new', '/api/cron/blog-weekly', '/api/cron/blog-monthly'];
+      let totalCreated = 0;
+      for (const ep of crons) {
+        try {
+          const res = await fetch('/api/admin/trigger-cron', { method: 'POST', headers, body: JSON.stringify({ endpoint: ep }) });
+          const d = await res.json();
+          totalCreated += d.created ?? 0;
+        } catch {}
+      }
+      setMsg(`전체 재생성 완료: ${totalCreated}건`);
+    } else if (key === 'seed-finance') {
+      // seed-finance는 CRON_SECRET 기반이므로 trigger-cron 대신 직접 호출 불가
+      // trigger-cron으로 우회
+      try {
+        const res = await fetch('/api/admin/trigger-cron', { method: 'POST', headers, body: JSON.stringify({ endpoint: '/api/admin/seed-finance-blogs' }) });
+        const d = await res.json();
+        setMsg(`재테크 시드: ${d.created ?? d.status ?? 'done'}`);
+      } catch { setMsg('실패'); }
+    } else {
+      const btn = CRON_BUTTONS.find(b => b.key === key);
+      if (!btn) return;
+      try {
+        const res = await fetch('/api/admin/trigger-cron', { method: 'POST', headers, body: JSON.stringify({ endpoint: btn.path }) });
+        const d = await res.json();
+        setMsg(`${btn.label}: ${d.created ?? d.status ?? 'done'}건`);
+      } catch { setMsg('실패'); }
+    }
+    setRunning(null);
+    load();
   };
 
   const deletePost = async (id: number) => {
@@ -44,25 +81,6 @@ export default function AdminBlogPage() {
     await sb.from('blog_posts').delete().eq('id', id);
     setPosts(p => p.filter(x => x.id !== id));
     setMsg('삭제됨');
-  };
-
-  const resetAll = async () => {
-    if (!confirm('모든 블로그 글을 삭제하고 재생성합니다. 계속하시겠습니까?')) return;
-    setTriggering('초기화'); setMsg('삭제 중...');
-    const sb = createSupabaseBrowser();
-    await sb.from('blog_comments').delete().neq('id', 0);
-    await sb.from('blog_posts').delete().neq('id', 0);
-    setMsg('재생성 중...');
-    for (const ep of ['/api/cron/blog-apt-new', '/api/cron/blog-daily', '/api/cron/blog-weekly', '/api/cron/blog-monthly']) {
-      const { data } = await sb.auth.getSession();
-      await fetch('/api/admin/trigger-cron', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session?.access_token ?? ''}` },
-        body: JSON.stringify({ endpoint: ep }),
-      });
-    }
-    setMsg('초기화 완료!');
-    setTriggering(null);
-    load();
   };
 
   const filtered = catFilter === 'all' ? posts : posts.filter(p => p.category === catFilter);
@@ -92,34 +110,33 @@ export default function AdminBlogPage() {
         ))}
       </div>
 
-      {/* 크론 + 초기화 */}
+      {/* 크론 버튼 6개 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>크론 수동 실행</div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {[
-            { label: '현장별', ep: '/api/cron/blog-apt-new' },
-            { label: '주식 시황', ep: '/api/cron/blog-daily' },
-            { label: '주간', ep: '/api/cron/blog-weekly' },
-            { label: '월간', ep: '/api/cron/blog-monthly' },
-          ].map(c => (
-            <button key={c.label} onClick={() => trigger(c.ep, c.label)} disabled={!!triggering}
-              style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 12, fontWeight: 600, cursor: triggering ? 'not-allowed' : 'pointer' }}>
-              {triggering === c.label ? '...' : c.label}
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>블로그 자동 생성</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          {CRON_BUTTONS.map(btn => (
+            <button key={btn.key} onClick={() => runCron(btn.key)} disabled={!!running}
+              style={{
+                padding: '12px 8px', borderRadius: 10,
+                background: running === btn.key ? 'var(--bg-hover)' : 'var(--bg-surface)',
+                border: '1px solid var(--border)', cursor: running ? 'not-allowed' : 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                opacity: running && running !== btn.key ? 0.5 : 1,
+              }}>
+              <span style={{ fontSize: 22 }}>{btn.icon}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{btn.label}</span>
+              {running === btn.key && <span style={{ fontSize: 10, color: 'var(--brand)' }}>생성 중...</span>}
             </button>
           ))}
-          <button onClick={resetAll} disabled={!!triggering}
-            style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontSize: 12, fontWeight: 600, cursor: triggering ? 'not-allowed' : 'pointer', marginLeft: 'auto' }}>
-            {triggering === '초기화' ? '초기화 중...' : '전체 초기화'}
-          </button>
         </div>
-        {msg && <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{msg}</div>}
+        {msg && <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 10, textAlign: 'center' }}>{msg}</div>}
       </div>
 
-      {/* 필터 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+      {/* 카테고리 필터 */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto' }}>
         <button onClick={() => setCatFilter('all')} style={{ padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: catFilter === 'all' ? 700 : 500, background: catFilter === 'all' ? 'var(--text-primary)' : 'var(--bg-hover)', color: catFilter === 'all' ? 'var(--bg-base)' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}>전체 ({total})</button>
         {cats.map(c => (
-          <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: catFilter === c ? 700 : 500, background: catFilter === c ? 'var(--text-primary)' : 'var(--bg-hover)', color: catFilter === c ? 'var(--bg-base)' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}>{c} ({posts.filter(p => p.category === c).length})</button>
+          <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: catFilter === c ? 700 : 500, background: catFilter === c ? 'var(--text-primary)' : 'var(--bg-hover)', color: catFilter === c ? 'var(--bg-base)' : 'var(--text-secondary)', border: 'none', cursor: 'pointer', flexShrink: 0 }}>{c} ({posts.filter(p => p.category === c).length})</button>
         ))}
       </div>
 
