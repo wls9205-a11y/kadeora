@@ -18,6 +18,7 @@ export default async function AptPage() {
   let apts: any[] = [];
   let unsold: any[] = [];
   let redevelopment: any[] = [];
+  let unsoldSummary: any = null;
   let alertCounts: Record<string, number> = {};
   let lastRefreshed: string | null = null;
 
@@ -48,6 +49,7 @@ export default async function AptPage() {
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
     if (redevelopmentR.data?.length) redevelopment = redevelopmentR.data;
+    if (unsoldSummaryR?.data) unsoldSummary = unsoldSummaryR.data;
     (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
   } catch {}
 
@@ -63,8 +65,6 @@ export default async function AptPage() {
     else regionDetail[r].upcoming++;
   });
   const regionStats = Object.entries(regionDetail).sort((a, b) => b[1].total - a[1].total).map(([name, s]) => ({ name, ...s }));
-
-  const unsoldSummary = unsoldSummaryR?.data || null;
 
   return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} /><Disclaimer /></>;
 }
