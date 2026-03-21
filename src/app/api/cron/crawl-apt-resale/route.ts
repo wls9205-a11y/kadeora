@@ -12,20 +12,16 @@ const LAWD_CODES: Record<string, string> = {
 function parseXmlItems(xml: string): any[] {
   const items: any[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
-  while ((match = itemRegex.exec(xml)) !== null) {
-    const block = match[1];
-    const get = (tag: string) => {
-      const m = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
-      return m ? m[1].trim() : null;
-    };
+  let m;
+  while ((m = itemRegex.exec(xml)) !== null) {
+    const b = m[1];
+    const g = (tag: string) => { const r = b.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`)); return r ? r[1].trim() : null; };
     items.push({
-      apt_name: get('단지') || get('아파트') || '미상',
-      dong: get('법정동') || null,
-      exclusive_area: parseFloat(get('전용면적') || '0'),
-      deal_amount: parseInt((get('거래금액') || '0').replace(/,/g, '').trim()),
-      deal_year: get('년'), deal_month: get('월'), deal_day: get('일'),
-      floor: parseInt(get('층') || '0'),
+      apt_name: g('단지') || g('아파트') || '미상', dong: g('법정동') || null,
+      exclusive_area: parseFloat(g('전용면적') || '0'),
+      deal_amount: parseInt((g('거래금액') || '0').replace(/,/g, '').trim()),
+      deal_year: g('년'), deal_month: g('월'), deal_day: g('일'),
+      floor: parseInt(g('층') || '0'),
     });
   }
   return items;
@@ -37,7 +33,6 @@ export async function GET(req: NextRequest) {
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
   const apiKey = process.env.BUSAN_DATA_API_KEY;
   if (!apiKey) return NextResponse.json({ error: 'BUSAN_DATA_API_KEY not set' }, { status: 500 });
 
@@ -50,39 +45,39 @@ export async function GET(req: NextRequest) {
       `${now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()}${String(now.getMonth() === 0 ? 12 : now.getMonth()).padStart(2, '0')}`,
     ];
 
+    const entries = Object.entries(LAWD_CODES);
     let totalInserted = 0;
-    for (const [label, lawdCd] of Object.entries(LAWD_CODES)) {
+
+    async function fetchOne(label: string, lawdCd: string): Promise<number> {
       const [regionPart, sigunguPart] = label.split(' ');
+      let count = 0;
       for (const ym of months) {
-        try {
-          const url = `https://apis.data.go.kr/1613000/RTMSDataSvcSilvTrade/getRTMSDataSvcSilvTrade?serviceKey=${encodeURIComponent(apiKey)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
-          const res = await fetch(url);
-          const xml = await res.text();
-          const items = parseXmlItems(xml);
-
-          const rows = items.map(item => ({
-            apt_name: item.apt_name,
-            region_nm: regionPart,
-            sigungu: sigunguPart,
-            dong: item.dong,
-            exclusive_area: item.exclusive_area,
-            deal_amount: item.deal_amount,
-            deal_date: item.deal_year && item.deal_month && item.deal_day
-              ? `${item.deal_year}-${String(item.deal_month).padStart(2,'0')}-${String(item.deal_day).padStart(2,'0')}`
-              : null,
-            floor: item.floor,
-            source: 'molit_resale',
-          })).filter(r => r.deal_amount > 0 && r.deal_date);
-
-          if (rows.length > 0) {
-            const { error } = await supabase.from('apt_resale_rights').insert(rows);
-            if (!error) totalInserted += rows.length;
-          }
-        } catch {}
+        const url = `https://apis.data.go.kr/1613000/RTMSDataSvcSilvTrade/getRTMSDataSvcSilvTrade?serviceKey=${encodeURIComponent(apiKey)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
+        const res = await fetch(url);
+        const xml = await res.text();
+        const items = parseXmlItems(xml);
+        const rows = items.map(it => ({
+          apt_name: it.apt_name, region_nm: regionPart, sigungu: sigunguPart, dong: it.dong,
+          exclusive_area: it.exclusive_area, deal_amount: it.deal_amount,
+          deal_date: it.deal_year && it.deal_month && it.deal_day
+            ? `${it.deal_year}-${String(it.deal_month).padStart(2,'0')}-${String(it.deal_day).padStart(2,'0')}` : null,
+          floor: it.floor, source: 'molit_resale',
+        })).filter(r => r.deal_amount > 0 && r.deal_date);
+        if (rows.length > 0) {
+          const { error } = await supabase.from('apt_resale_rights').insert(rows);
+          if (!error) count += rows.length;
+        }
       }
+      return count;
     }
 
-    return NextResponse.json({ message: 'Resale rights data crawled', inserted: totalInserted });
+    // 전체 병렬 처리 (15개 시군구 한번에)
+    const results = await Promise.allSettled(entries.map(([name, code]) => fetchOne(name, code)));
+    for (const r of results) {
+      if (r.status === 'fulfilled') totalInserted += r.value;
+    }
+
+    return NextResponse.json({ message: 'Resale rights data crawled (full)', inserted: totalInserted, months });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

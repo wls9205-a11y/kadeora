@@ -16,29 +16,21 @@ const LAWD_CODES: Record<string, string> = {
   '부산 수영구':'26410','부산 동래구':'26260',
 };
 
-const ENTRIES = Object.entries(LAWD_CODES);
-const BATCH_SIZE = 10;
-
 function parseXmlItems(xml: string): any[] {
   const items: any[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
-  while ((match = itemRegex.exec(xml)) !== null) {
-    const block = match[1];
-    const get = (tag: string) => {
-      const m = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
-      return m ? m[1].trim() : null;
-    };
+  let m;
+  while ((m = itemRegex.exec(xml)) !== null) {
+    const b = m[1];
+    const g = (tag: string) => { const r = b.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`)); return r ? r[1].trim() : null; };
     items.push({
-      apt_name: get('아파트') || get('aptNm') || '미상',
-      dong: get('법정동') || get('umdNm') || null,
-      exclusive_area: parseFloat(get('전용면적') || get('excluUseAr') || '0'),
-      deal_amount: parseInt((get('거래금액') || get('dealAmount') || '0').replace(/,/g, '').trim()),
-      deal_year: get('년') || get('dealYear'),
-      deal_month: get('월') || get('dealMonth'),
-      deal_day: get('일') || get('dealDay'),
-      floor: parseInt(get('층') || get('floor') || '0'),
-      built_year: parseInt(get('건축년도') || get('buildYear') || '0'),
+      apt_name: g('아파트') || g('aptNm') || '미상',
+      dong: g('법정동') || g('umdNm') || null,
+      exclusive_area: parseFloat(g('전용면적') || g('excluUseAr') || '0'),
+      deal_amount: parseInt((g('거래금액') || g('dealAmount') || '0').replace(/,/g, '').trim()),
+      deal_year: g('년') || g('dealYear'), deal_month: g('월') || g('dealMonth'), deal_day: g('일') || g('dealDay'),
+      floor: parseInt(g('층') || g('floor') || '0'),
+      built_year: parseInt(g('건축년도') || g('buildYear') || '0'),
     });
   }
   return items;
@@ -50,76 +42,63 @@ export async function GET(req: NextRequest) {
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
   const apiKey = process.env.BUSAN_DATA_API_KEY;
   if (!apiKey) return NextResponse.json({ error: 'BUSAN_DATA_API_KEY not set' }, { status: 500 });
 
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
   try {
-    // 이번 달 + 지난 달
     const now = new Date();
     const months = [
       `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`,
       `${now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()}${String(now.getMonth() === 0 ? 12 : now.getMonth()).padStart(2, '0')}`,
     ];
 
-    // 이전 배치 인덱스 조회
-    const { data: cache } = await supabase.from('apt_cache').select('data').eq('cache_type', 'trade_crawl_index').maybeSingle();
-    let startIdx = (cache?.data as any)?.nextIndex || 0;
-    if (startIdx >= ENTRIES.length) startIdx = 0;
-
-    const endIdx = Math.min(startIdx + BATCH_SIZE, ENTRIES.length);
-    const batch = ENTRIES.slice(startIdx, endIdx);
+    const entries = Object.entries(LAWD_CODES);
     let totalInserted = 0;
+    let failed: string[] = [];
+    const BATCH = 10;
 
-    for (const [label, lawdCd] of batch) {
+    async function fetchOne(label: string, lawdCd: string): Promise<number> {
       const [regionPart, sigunguPart] = label.split(' ');
+      let count = 0;
       for (const ym of months) {
-        try {
-          const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey=${encodeURIComponent(apiKey)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
-          const res = await fetch(url);
-          const xml = await res.text();
-          const items = parseXmlItems(xml);
+        const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey=${encodeURIComponent(apiKey)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
+        const res = await fetch(url);
+        const xml = await res.text();
+        const items = parseXmlItems(xml);
+        const rows = items.map(it => ({
+          apt_name: it.apt_name, region_nm: regionPart, sigungu: sigunguPart, dong: it.dong,
+          exclusive_area: it.exclusive_area, deal_amount: it.deal_amount,
+          deal_date: it.deal_year && it.deal_month && it.deal_day
+            ? `${it.deal_year}-${String(it.deal_month).padStart(2,'0')}-${String(it.deal_day).padStart(2,'0')}` : null,
+          floor: it.floor, built_year: it.built_year || null, trade_type: '매매', source: 'molit_trade',
+        })).filter(r => r.deal_amount > 0 && r.deal_date);
+        if (rows.length > 0) {
+          const { error } = await supabase.from('apt_transactions').insert(rows);
+          if (!error) count += rows.length;
+        }
+      }
+      return count;
+    }
 
-          const rows = items.map(item => ({
-            apt_name: item.apt_name,
-            region_nm: regionPart,
-            sigungu: sigunguPart,
-            dong: item.dong,
-            exclusive_area: item.exclusive_area,
-            deal_amount: item.deal_amount,
-            deal_date: item.deal_year && item.deal_month && item.deal_day
-              ? `${item.deal_year}-${String(item.deal_month).padStart(2,'0')}-${String(item.deal_day).padStart(2,'0')}`
-              : null,
-            floor: item.floor,
-            built_year: item.built_year || null,
-            trade_type: '매매',
-            source: 'molit_trade',
-          })).filter(r => r.deal_amount > 0 && r.deal_date);
-
-          if (rows.length > 0) {
-            const { error } = await supabase.from('apt_transactions').insert(rows);
-            if (!error) totalInserted += rows.length;
-          }
-        } catch {}
+    // 4 그룹 × 10개 병렬
+    for (let i = 0; i < entries.length; i += BATCH) {
+      const batch = entries.slice(i, i + BATCH);
+      const results = await Promise.allSettled(batch.map(([name, code]) => fetchOne(name, code)));
+      for (let j = 0; j < results.length; j++) {
+        const r = results[j];
+        if (r.status === 'fulfilled') totalInserted += r.value;
+        else failed.push(batch[j][0]);
       }
     }
 
-    // 다음 배치 인덱스 저장
-    const nextIndex = endIdx >= ENTRIES.length ? 0 : endIdx;
-    await supabase.from('apt_cache').upsert({
-      cache_type: 'trade_crawl_index',
-      data: { nextIndex, lastRun: new Date().toISOString(), lastBatch: batch.map(b => b[0]) },
-      refreshed_at: new Date().toISOString(),
-    }, { onConflict: 'cache_type' });
-
     return NextResponse.json({
-      message: 'Apt trade data crawled',
-      batch: batch.map(b => b[0]),
-      batchRange: `${startIdx}-${endIdx}/${ENTRIES.length}`,
+      message: 'Apt trade data crawled (full)',
+      total_regions: entries.length,
       inserted: totalInserted,
-      nextIndex,
+      months,
+      ...(failed.length > 0 ? { failed } : {}),
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

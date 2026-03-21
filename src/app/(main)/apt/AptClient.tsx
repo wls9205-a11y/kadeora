@@ -104,22 +104,21 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 12px' }}>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <span>청약 일정 · 미분양 · 재개발·재건축</span>
-          <a href="/apt/diagnose" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>🎯 가점 진단 →</a>
-          <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>🏠 청약홈 →</a>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <a href="/apt/diagnose" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(255,91,54,0.08)', border: '1px solid rgba(255,91,54,0.15)' }}>🎯 가점진단</a>
+          <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>🏠 청약홈</a>
         </div>
       </div>
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)' }}>
-        {([['sub', '청약'], ['unsold', '미분양'], ['redev', '재개발'], ['trade', '실거래가']] as const).map(([k, l]) => (
+        {([['sub', '📅 청약'], ['unsold', '🏚️ 미분양'], ['redev', '🏗️ 재개발'], ['trade', '💰 실거래']] as const).map(([k, l]) => (
           <button key={k} onClick={() => setActiveTab(k)} style={{
-            flex: 1, padding: '7px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
+            flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
             background: activeTab === k ? 'var(--brand)' : 'transparent',
-            color: activeTab === k ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: 13,
+            color: activeTab === k ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: 12,
           }}>{l}</button>
         ))}
       </div>
@@ -230,9 +229,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 2 }}>
                   {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}
                 </div>
-                {/* 4행: 접수 기간 */}
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                  {fmtD(apt.rcept_bgnde)} ~ {fmtD(apt.rcept_endde)}
+                {/* 4행: 일정 타임라인 */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                  {apt.spsply_rcept_bgnde && <span>특별공급 {fmtD(apt.spsply_rcept_bgnde)}</span>}
+                  <span>접수 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)}</span>
+                  {apt.przwner_presnatn_de && <span>당첨발표 {fmtD(apt.przwner_presnatn_de)}</span>}
+                  {apt.cntrct_cncls_bgnde && <span>계약 {fmtD(apt.cntrct_cncls_bgnde)}~{fmtD(apt.cntrct_cncls_endde)}</span>}
                 </div>
               </Link>
             );
@@ -286,7 +288,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{(us.local || 0).toLocaleString()}</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>{us.year || ''}년 기준 · 국토교통부 통계누리</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>{us.month ? `${us.month.slice(0,4)}.${us.month.slice(4)}` : us.year ? `${us.year}년` : ''} 기준 · 국토교통부 통계누리</div>
               </div>
             )}
 
@@ -589,18 +591,41 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           return `${amt.toLocaleString()}만`;
         }
 
+        // 지역별 평균
+        const regionAvgs: Record<string, { sum: number; cnt: number }> = {};
+        filteredTrades.forEach((t: any) => {
+          const r = t.region_nm || '기타';
+          if (!regionAvgs[r]) regionAvgs[r] = { sum: 0, cnt: 0 };
+          regionAvgs[r].sum += t.deal_amount || 0;
+          regionAvgs[r].cnt++;
+        });
+
         return (
           <div>
-            {/* 요약 */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>거래 건수</div>
+            {/* 대시보드 */}
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 최근 거래 현황</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>거래 건수</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 거래가</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{Object.keys(regionAvgs).length}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>지역 수</div>
+                </div>
               </div>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 거래가</div>
-              </div>
+              {Object.keys(regionAvgs).length > 1 && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {Object.entries(regionAvgs).sort((a, b) => b[1].sum / b[1].cnt - a[1].sum / a[1].cnt).slice(0, 3).map(([r, v]) => (
+                    <span key={r} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{r} 평균 <strong style={{ color: 'var(--text-secondary)' }}>{fmtAmount(Math.round(v.sum / v.cnt))}</strong></span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* 지역 필터 */}
