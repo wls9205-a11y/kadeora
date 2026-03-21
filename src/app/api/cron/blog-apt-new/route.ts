@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { ensureMinLength } from '@/lib/blog-padding';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +97,7 @@ ${region} 지역은 최근 분양 물량이 꾸준히 공급되고 있어 청약
       const aptTitle = `${apt.house_nm} ${region} 분양 청약 일정 총정리`;
       await admin.from('blog_posts').insert({
         slug, title: aptTitle,
-        content, excerpt: `${apt.house_nm} ${region} ${units.toLocaleString()}세대 분양. 접수 ${fmtDate(apt.rcept_bgnde)}~${fmtDate(apt.rcept_endde)}.`,
+        content: ensureMinLength(content, 'apt'), excerpt: `${apt.house_nm} ${region} ${units.toLocaleString()}세대 분양. 접수 ${fmtDate(apt.rcept_bgnde)}~${fmtDate(apt.rcept_endde)}.`,
         category: 'apt', tags, source_type: 'apt', source_ref: apt.house_manage_no,
         cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(aptTitle)}&type=blog`,
       });
@@ -167,7 +168,7 @@ ${unsoldPct >= 50 ? `**${u.house_nm}**의 미분양률이 ${unsoldPct}%로 상�
       const unsoldTitle = `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대 현황`;
       await admin.from('blog_posts').insert({
         slug, title: unsoldTitle,
-        content, excerpt: `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대. 분양가 ${pMin}~${pMax}.`,
+        content: ensureMinLength(content, 'unsold'), excerpt: `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대. 분양가 ${pMin}~${pMax}.`,
         category: 'unsold', tags: [`${u.house_nm} 미분양`, `${u.region_nm} 미분양`, '미분양 아파트'],
         source_type: 'unsold', source_ref: String(u.id),
         cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog`,
