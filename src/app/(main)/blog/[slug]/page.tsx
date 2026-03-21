@@ -9,7 +9,8 @@ const SITE = 'https://kadeora.app';
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
   const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
@@ -23,7 +24,8 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function BlogDetailPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
 
   const { data: post } = await sb.from('blog_posts').select('*').eq('slug', slug).eq('is_published', true).maybeSingle();
