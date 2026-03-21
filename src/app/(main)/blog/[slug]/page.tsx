@@ -5,7 +5,9 @@ import { marked } from 'marked';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import ShareButtons from '@/components/ShareButtons';
+import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import { getAvatarColor } from '@/lib/avatar';
+import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 
 export const revalidate = 300;
 const SITE = 'https://kadeora.app';
@@ -126,13 +128,15 @@ export default async function BlogDetailPage({ params }: Props) {
   // 목차 추출
   const toc = extractToc(htmlFull);
 
-  // FAQ schema (tags에 'FAQ' 포함 시)
+  // FAQ 파싱
+  const faqItems = parseFaqFromContent(post.content);
   const isFaq = (post.tags ?? []).some((t: string) => t.toLowerCase().includes('faq') || t === '자주묻는질문');
-  const faqSchema = isFaq ? {
+  const showFaq = isFaq || faqItems.length >= 3;
+  const faqSchema = showFaq && faqItems.length > 0 ? {
     '@context': 'https://schema.org', '@type': 'FAQPage',
-    mainEntity: toc.filter(t => t.text.startsWith('Q.')).map(t => ({
-      '@type': 'Question', name: t.text.replace(/^Q\.\s*/, ''),
-      acceptedAnswer: { '@type': 'Answer', text: `자세한 답변은 ${SITE}/blog/${slug}#${t.id} 에서 확인하세요.` },
+    mainEntity: faqItems.map(f => ({
+      '@type': 'Question', name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
     })),
   } : null;
 
@@ -186,6 +190,9 @@ export default async function BlogDetailPage({ params }: Props) {
             </div>
           </div>
         )}
+
+        {/* FAQ 아코디언 */}
+        {showFaq && <BlogFaqAccordion items={faqItems} />}
 
         {/* 공유 */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
