@@ -47,13 +47,14 @@ const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }
 };
 const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
+export default function AptClient({ apts, unsold = [], redevelopment = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'unsold' | 'redev'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
+  const [redevPage, setRedevPage] = useState(1);
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
@@ -233,6 +234,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
         const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
         const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
+        const us = unsoldSummary;
 
         // 지역별 현황판 데이터 집계
         const unsoldRegionStats = regs.filter(r => r !== '전체').map(r => {
@@ -243,6 +245,32 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
 
         return (
           <div>
+            {/* 전국 종합 현황판 */}
+            {us && (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 전국 미분양 현황</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전국</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--brand)' }}>{(us.total || total).toLocaleString()}호</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>준공후(악성)</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: '#ef4444' }}>{(us.after_completion || 0).toLocaleString()}호</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>수도권</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{(us.capital || 0).toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>지방</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{(us.local || 0).toLocaleString()}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>{us.year || ''}년 기준 · 국토교통부 통계누리</div>
+              </div>
+            )}
+
             {/* 지역별 현황판 */}
             <div style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -293,10 +321,14 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
               const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
               const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
 
+              const unsoldCount = u.tot_unsold_hshld_co || 0;
+              const dangerColor = unsoldCount >= 1000 ? '#ef4444' : unsoldCount >= 500 ? '#f97316' : unsoldCount >= 100 ? '#eab308' : '#22c55e';
+
               return (
                 <div key={u.id} style={{
                   padding: '16px 16px', borderRadius: 12, marginBottom: 8,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  borderLeft: `4px solid ${dangerColor}`,
                   transition: 'background 0.15s', cursor: 'pointer',
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
@@ -418,7 +450,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
                 <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {totalHouseholds.toLocaleString()}세대</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
-                <button onClick={() => setRedevRegion('전체')} style={{
+                <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: redevRegion === '전체' ? '2px solid var(--brand)' : '1px solid var(--border)',
                   background: redevRegion === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
@@ -429,7 +461,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
                   <span style={{ fontSize: 8, color: redevRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{totalHouseholds.toLocaleString()}세대</span>
                 </button>
                 {redevRegionStats.map(r => (
-                  <button key={r.name} onClick={() => setRedevRegion(r.name === redevRegion ? '전체' : r.name)} style={{
+                  <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                     border: redevRegion === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
                     background: redevRegion === r.name ? 'var(--brand)' : 'var(--bg-surface)',
@@ -454,9 +486,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
 
             {/* 유형 필터 */}
             <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
-              {pill('전체', redevType, setRedevType)}
-              {pill('재개발', redevType, setRedevType)}
-              {pill('재건축', redevType, setRedevType)}
+              {pill('전체', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
+              {pill('재개발', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
+              {pill('재건축', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
             </div>
 
             {/* 안내 */}
@@ -467,8 +499,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
               총 <strong style={{ color: 'var(--text-primary)' }}>{filteredRedev.length}</strong>건
             </div>
 
-            {/* 카드 리스트 */}
-            {filteredRedev.map((r: any) => {
+            {/* 카드 리스트 (20건씩 페이지네이션) */}
+            {filteredRedev.slice(0, redevPage * 20).map((r: any) => {
               const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
               return (
                 <div key={r.id} onClick={() => setSelectedRedev(r)} style={{
@@ -490,7 +522,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{r.district_name}</div>
                   {/* 3행: 시군구 + 세대수 + 시공사 */}
                   <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 2 }}>
-                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}{r.constructor ? ` · ${r.constructor}` : ''}
+                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ' · 세대수 미상'}{r.constructor ? ` · ${r.constructor}` : ''}
                   </div>
                   {/* 4행: 비고/예상준공 */}
                   {(r.notes || r.expected_completion) && (
@@ -501,6 +533,16 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], alert
                 </div>
               );
             })}
+
+            {redevPage * 20 < filteredRedev.length && (
+              <button onClick={() => setRedevPage(p => p + 1)} style={{
+                width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)',
+                background: 'var(--bg-surface)', color: 'var(--text-secondary)',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer', marginBottom: 8,
+              }}>
+                더 보기 ({Math.min(redevPage * 20, filteredRedev.length)} / {filteredRedev.length}건)
+              </button>
+            )}
 
             {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>조건에 맞는 프로젝트가 없습니다</div>}
             <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
