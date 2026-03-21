@@ -17,13 +17,20 @@ const NAV_ITEMS = [
   { href: '/hot',     label: 'HOT',    Icon: Flame },
 ];
 
-const MOBILE_TABS_LEFT = [
-  { href: '/feed',  label: '피드', Icon: Home },
-  { href: '/stock', label: '주식', Icon: TrendingUp },
-];
-const MOBILE_TABS_RIGHT = [
+const MOBILE_TABS = [
+  { href: '/feed',    label: '피드',   Icon: Home },
+  { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/apt',     label: '부동산', Icon: Building2 },
   { href: '/discuss', label: '토론',   Icon: MessageCircle },
+];
+
+const MORE_ITEMS = [
+  { href: '/blog',          emoji: '📰', label: '블로그' },
+  { href: '/hot',           emoji: '🔥', label: '이번주 HOT' },
+  { href: '/premium',       emoji: '💎', label: '프리미엄' },
+  { href: '/shop/megaphone', emoji: '🛒', label: '상점' },
+  { href: '/guide',         emoji: '📖', label: '가이드북' },
+  { href: '/grades',        emoji: '🏅', label: '등급 안내' },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
@@ -312,39 +319,100 @@ export function Navigation() {
         paddingTop:0,
         boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',
       }} className="md:hidden">
-        {[...MOBILE_TABS_LEFT, { href: '/write', label: '', Icon: PenSquare }, ...MOBILE_TABS_RIGHT].map(item => {
-          if (item.href === '/write') {
-            return (
-              <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
-                display:'flex', alignItems:'center', justifyContent:'center',
-                width:48, height:48, borderRadius:14,
-                background:'var(--brand)', color:'var(--text-inverse)',
-                marginTop:-10, flexShrink:0, textDecoration:'none',
-              }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-              </Link>
-            );
-          }
+        {MOBILE_TABS.slice(0, 2).map(item => {
           const active = isActive(item.href);
           return (
-            <Link key={item.href} href={item.href}
-              aria-current={active ? 'page' : undefined}
-              style={{
-                display:'flex', flexDirection:'column', alignItems:'center', gap:3,
-                padding:'10px 4px', textDecoration:'none', minHeight:56,
-                justifyContent:'center', flex:1,
-                color: active ? 'var(--brand)' : 'var(--text-tertiary)',
-              }}>
+            <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
+              display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+              padding:'10px 4px', textDecoration:'none', minHeight:56,
+              justifyContent:'center', flex:1,
+              color: active ? 'var(--brand)' : 'var(--text-tertiary)',
+            }}>
               <item.Icon size={20} />
               <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
         })}
+        {/* 글쓰기 */}
+        <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
+          display:'flex', alignItems:'center', justifyContent:'center',
+          width:48, height:48, borderRadius:14,
+          background:'var(--brand)', color:'var(--text-inverse)',
+          marginTop:-10, flexShrink:0, textDecoration:'none',
+        }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </Link>
+        {MOBILE_TABS.slice(2).map(item => {
+          const active = isActive(item.href);
+          return (
+            <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
+              display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+              padding:'10px 4px', textDecoration:'none', minHeight:56,
+              justifyContent:'center', flex:1,
+              color: active ? 'var(--brand)' : 'var(--text-tertiary)',
+            }}>
+              <item.Icon size={20} />
+              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+            </Link>
+          );
+        })}
+        {/* 더보기 */}
+        <button onClick={() => setMenuOpen(!menuOpen)} style={{
+          display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+          padding:'10px 4px', background:'none', border:'none',
+          minHeight:56, justifyContent:'center', flex:1, cursor:'pointer',
+          color: menuOpen ? 'var(--brand)' : 'var(--text-tertiary)',
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          <span style={{ fontSize:10, fontWeight: menuOpen ? 700 : 500, lineHeight:1.2 }}>더보기</span>
+        </button>
       </nav>
 
-      {menuOpen && <div style={{ position:'fixed', inset:0, zIndex:199 }} onClick={()=>setMenuOpen(false)} />}
+      {/* 더보기 시트 (모바일) */}
+      {menuOpen && (
+        <div className="md:hidden" style={{ position:'fixed', inset:0, zIndex:201 }}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMenuOpen(false)} />
+          <div style={{
+            position:'absolute', bottom:68, left:12, right:12,
+            background:'var(--bg-surface)', border:'1px solid var(--border)',
+            borderRadius:16, padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
+          }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
+              {MORE_ITEMS.map(item => (
+                <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{
+                  display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+                  padding:'12px 0', borderRadius:12, textDecoration:'none',
+                  color:'var(--text-primary)',
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span style={{ fontSize:24 }}>{item.emoji}</span>
+                  <span style={{ fontSize:11, fontWeight:600 }}>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+            {user && (
+              <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--border)', display:'flex', gap:8 }}>
+                <Link href={`/profile/${user.id}`} onClick={() => setMenuOpen(false)} style={{
+                  flex:1, textAlign:'center', padding:'10px 0', borderRadius:10,
+                  background:'var(--bg-hover)', color:'var(--text-primary)',
+                  fontSize:13, fontWeight:600, textDecoration:'none',
+                }}>내 프로필</Link>
+                <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{
+                  flex:1, textAlign:'center', padding:'10px 0', borderRadius:10,
+                  background:'var(--bg-hover)', color:'var(--text-primary)',
+                  fontSize:13, fontWeight:600, textDecoration:'none',
+                }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {menuOpen && <div className="hidden md:block" style={{ position:'fixed', inset:0, zIndex:199 }} onClick={()=>setMenuOpen(false)} />}
     </>
   );
 }
