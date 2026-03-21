@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import OfflineBanner from '@/components/OfflineBanner';
 import CookieBanner from '@/components/CookieBanner';
+import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
@@ -101,7 +102,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           },
         }) }} />
       </head>
-      <body className={inter.className}><OfflineBanner /><KakaoInit />{children}<CookieBanner /></body>
+      <body className={inter.className}>
+        <OfflineBanner />
+        <KakaoInit />
+        {children}
+        <CookieBanner />
+        {/* GA4 */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-VP4F6TH2GD" strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-VP4F6TH2GD');`}</Script>
+      </body>
     </html>
   );
 }
