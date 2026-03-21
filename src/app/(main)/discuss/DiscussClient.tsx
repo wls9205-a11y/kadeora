@@ -12,11 +12,10 @@ interface HotDiscussion {
   profiles?: { nickname?: string } | null;
 }
 
-const ROOMS = [
-  { id: 'lounge', label: '라운지', icon: '💬', desc: '자유 수다방' },
-  { id: 'stock', label: '주식방', icon: '📊', desc: '종목 토론' },
-  { id: 'apt', label: '부동산방', icon: '🏢', desc: '청약·매매 이야기' },
-  { id: 'crypto', label: '코인방', icon: '₿', desc: '가상자산 토론' },
+const SUB_ROOMS = [
+  { id: 'stock', label: '국내주식', icon: '📊', desc: '종목 토론' },
+  { id: 'apt', label: '부동산·청약', icon: '🏢', desc: '청약·매매 이야기' },
+  { id: 'crypto', label: '해외주식·코인', icon: '🌐', desc: '해외 투자 토론' },
 ];
 
 export default function DiscussClient() {
@@ -25,6 +24,26 @@ export default function DiscussClient() {
   const [hotDiscussions, setHotDiscussions] = useState<HotDiscussion[]>([]);
   const [showChat, setShowChat] = useState(false);
   const [activeRoom, setActiveRoom] = useState('lounge');
+  const [activeCounts, setActiveCounts] = useState<Record<string, number>>({});
+
+  // 활동 인원수 조회
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const rooms = ['lounge', 'stock', 'apt', 'crypto'];
+    Promise.all(rooms.map(async (room) => {
+      const { data } = await sb.from('chat_messages')
+        .select('user_id')
+        .eq('room', room)
+        .gte('created_at', fiveMinAgo);
+      const unique = new Set((data ?? []).map((d: any) => d.user_id)).size;
+      return { room, count: unique };
+    })).then(results => {
+      const counts: Record<string, number> = {};
+      results.forEach(r => { counts[r.room] = r.count; });
+      setActiveCounts(counts);
+    });
+  }, []);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -95,32 +114,55 @@ export default function DiscussClient() {
         </div>
       )}
 
-      {/* 채팅방 선택 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
-        {ROOMS.map(r => (
-          <button key={r.id} onClick={() => { setActiveRoom(r.id); setShowChat(true); }} style={{
-            padding: '10px 8px', borderRadius: 12, border: activeRoom === r.id && showChat ? '2px solid var(--brand)' : '1px solid var(--border)',
-            background: activeRoom === r.id && showChat ? 'var(--bg-hover)' : 'var(--bg-surface)',
-            cursor: 'pointer', textAlign: 'center',
+      {/* 메인 라운지 */}
+      <button onClick={() => { setActiveRoom('lounge'); setShowChat(true); }} style={{
+        width: '100%', padding: '24px 20px', borderRadius: 16, marginBottom: 12,
+        border: activeRoom === 'lounge' && showChat ? '2px solid rgba(139,92,246,0.5)' : '1px solid var(--border)',
+        background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(59,130,246,0.1) 100%)',
+        cursor: 'pointer', textAlign: 'left',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>
+              💬 카더라 라운지
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+              자유롭게 수다떨어요 — 주식·부동산·일상 뭐든 OK
+            </div>
+            <div style={{ fontSize: 12, marginTop: 8, color: (activeCounts.lounge ?? 0) > 0 ? '#22c55e' : 'var(--text-tertiary)' }}>
+              {(activeCounts.lounge ?? 0) > 0 ? `🟢 약 ${activeCounts.lounge}명 활동 중` : '💬 조용한 중...'}
+            </div>
+          </div>
+          <div style={{
+            padding: '10px 20px', borderRadius: 12,
+            background: 'rgba(139,92,246,0.8)', color: '#fff',
+            fontSize: 14, fontWeight: 700, flexShrink: 0,
           }}>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>{r.icon}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{r.label}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{r.desc}</div>
+            입장하기 →
+          </div>
+        </div>
+      </button>
+
+      {/* 서브 토론방 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        {SUB_ROOMS.map(r => (
+          <button key={r.id} onClick={() => { setActiveRoom(r.id); setShowChat(true); }} style={{
+            padding: '14px 12px', borderRadius: 12,
+            border: activeRoom === r.id && showChat ? '2px solid var(--brand)' : '1px solid var(--border)',
+            background: activeRoom === r.id && showChat ? 'var(--bg-hover)' : 'var(--bg-surface)',
+            cursor: 'pointer', textAlign: 'left',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 18 }}>{r.icon}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{r.label}</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>{r.desc}</div>
+            <div style={{ fontSize: 11, color: (activeCounts[r.id] ?? 0) > 0 ? '#22c55e' : 'var(--text-tertiary)' }}>
+              {(activeCounts[r.id] ?? 0) > 0 ? `🟢 ${activeCounts[r.id]}명` : '—'}
+            </div>
           </button>
         ))}
       </div>
-
-      {!showChat && (
-        <button onClick={() => setShowChat(true)} style={{
-          width: '100%', padding: '14px 16px', borderRadius: 14, border: 'none',
-          background: 'linear-gradient(135deg, var(--brand) 0%, #ff8c42 100%)',
-          color: 'white', cursor: 'pointer', fontFamily: 'inherit',
-          fontSize: 14, fontWeight: 700, marginBottom: 12,
-        }}>
-          <MessageCircle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
-          {ROOMS.find(r => r.id === activeRoom)?.label ?? '라운지'} 입장하기
-        </button>
-      )}
 
       {showChat && (
         <>
