@@ -65,10 +65,12 @@ export async function GET(req: NextRequest) {
 > 본 콘텐츠는 청약홈(applyhome.co.kr) 공공데이터 기반이며, 정확한 정보는 청약홈에서 확인하세요. 투자 권유가 아닙니다.`;
 
       const tags = [`${apt.house_nm} 분양`, `${region} 청약`, '아파트 청약', '분양일정'];
+      const aptTitle = `${apt.house_nm} ${region} 분양 청약 일정 총정리`;
       await admin.from('blog_posts').insert({
-        slug, title: `${apt.house_nm} ${region} 분양 청약 일정 총정리`,
+        slug, title: aptTitle,
         content, excerpt: `${apt.house_nm} ${region} ${units.toLocaleString()}세대 분양. 접수 ${fmtDate(apt.rcept_bgnde)}~${fmtDate(apt.rcept_endde)}.`,
         category: 'apt', tags, source_type: 'apt', source_ref: apt.house_manage_no,
+        cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(aptTitle)}&type=blog`,
       });
       created++;
     }
@@ -104,11 +106,13 @@ export async function GET(req: NextRequest) {
 
 > 국토교통부 미분양주택현황 기반. 투자 권유가 아닙니다.`;
 
+      const unsoldTitle = `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대 현황`;
       await admin.from('blog_posts').insert({
-        slug, title: `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대 현황`,
+        slug, title: unsoldTitle,
         content, excerpt: `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대. 분양가 ${pMin}~${pMax}.`,
         category: 'unsold', tags: [`${u.house_nm} 미분양`, `${u.region_nm} 미분양`, '미분양 아파트'],
         source_type: 'unsold', source_ref: String(u.id),
+        cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog`,
       });
       created++;
     }

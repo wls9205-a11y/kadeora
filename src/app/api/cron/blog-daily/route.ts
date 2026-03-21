@@ -45,10 +45,32 @@ export async function GET(req: NextRequest) {
       const { data: existing } = await admin.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
       if (existing) continue;
 
+      const blogTitle = t.titleFn(today);
       await admin.from('blog_posts').insert({
-        slug, title: t.titleFn(today), content: contents[i],
+        slug, title: blogTitle, content: contents[i],
         excerpt: contents[i].slice(0, 100).replace(/[#|*\n]/g, ''),
         category: t.cat, tags: t.tagsFn(), source_type: 'auto',
+        cron_type: 'daily', data_date: dateSlug,
+        cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(blogTitle)}&type=blog`,
+      });
+      created++;
+    }
+
+    // 종목별 개별 블로그 (등락률 ±3% 이상)
+    const bigMovers = (stocks ?? []).filter(s => Math.abs(s.change_pct ?? 0) >= 3);
+    for (const s of bigMovers.slice(0, 5)) {
+      const stockSlug = `stock-${s.symbol}-${dateSlug}`;
+      const { data: se } = await admin.from('blog_posts').select('id').eq('slug', stockSlug).maybeSingle();
+      if (se) continue;
+      const dir = (s.change_pct ?? 0) > 0 ? '급등' : '급락';
+      const stockTitle = `${s.name} ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(1)}% — ${today} 분석`;
+      const stockContent = `## ${s.name} (${s.symbol}) ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(2)}%\n\n| 항목 | 값 |\n|---|---|\n| 현재가 | ${s.price?.toLocaleString()} |\n| 등락률 | ${(s.change_pct ?? 0) > 0 ? '▲' : '▼'} ${Math.abs(s.change_pct ?? 0).toFixed(2)}% |\n| 시장 | ${s.market} |\n\n---\n\n[${s.name} 종목 상세 →](/stock/${s.symbol})\n[주식 토론 →](/feed?category=stock)\n[전체 시세 보기 →](/stock)\n\n> 투자 권유가 아니며 참고용입니다.`;
+      await admin.from('blog_posts').insert({
+        slug: stockSlug, title: stockTitle, content: stockContent,
+        excerpt: `${s.name} ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(1)}%. ${today} 시세 분석.`,
+        category: 'stock', tags: [s.name, dir, s.market, '주식'], source_type: 'auto',
+        cron_type: 'daily-stock', data_date: dateSlug, source_ref: s.symbol,
+        cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(stockTitle)}&type=blog`,
       });
       created++;
     }
