@@ -325,21 +325,6 @@ export default async function FeedDetailPage({ params }: Props) {
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
 
-      {/* 프리미엄 배너 */}
-      <Link href="/premium" style={{
-        display: 'block', padding: '16px 20px', marginBottom: 16,
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(249,115,22,0.1) 100%)',
-        border: '1px solid rgba(139,92,246,0.2)', borderRadius: 12,
-        textDecoration: 'none', textAlign: 'center',
-      }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
-          💎 프리미엄으로 더 많은 정보를 받아보세요
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-          광고 제거 · 블로그 전문 열람 · 급등주 알림
-        </div>
-      </Link>
-
       {/* Related posts */}
       {related.length > 0 && (
         <div style={{ marginBottom: 20 }}>
