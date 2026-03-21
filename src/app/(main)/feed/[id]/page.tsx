@@ -295,26 +295,22 @@ export default async function FeedDetailPage({ params }: Props) {
 
       </article>
 
-      {/* Sticky action bar — 좌측: 좋아요+댓글, 우측: 공유+저장 */}
+      {/* 액션 바 — 본문과 댓글 사이 (인라인) */}
       <div style={{
-        position: 'fixed', bottom: 56, left: 0, right: 0, zIndex: 40,
-        background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
-        padding: '10px 0',
+        display: 'flex', alignItems: 'center',
+        padding: '12px 0', borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)', margin: '16px 0',
       }}>
-        <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
-          {/* 좌측: 좋아요 + 댓글 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-            <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 14 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-              <span style={{ fontWeight: 500 }}>{comments.length}</span>
-            </Link>
-          </div>
-          {/* 우측: 공유 + 저장 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
-            <ShareButtons title={post.title} postId={post.id} content={post.content} />
-            <BookmarkButton postId={post.id} />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
+          <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 14 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            <span style={{ fontWeight: 500 }}>{comments.length}</span>
+          </Link>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
+          <ShareButtons title={post.title} postId={post.id} content={post.content} />
+          <BookmarkButton postId={post.id} />
         </div>
       </div>
 
