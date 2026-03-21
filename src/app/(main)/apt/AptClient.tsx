@@ -76,6 +76,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
   const [redevStage, setRedevStage] = useState('전체');
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
+  const [tradeChartRegion, setTradeChartRegion] = useState('');
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -254,7 +255,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               return dayApts.length > 0 ? (
                 <div style={{ marginTop: 12, padding: '12px', background: 'var(--bg-hover)', borderRadius: 8 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-                    {'\u{1F4C5}'} {selectedCalDate.slice(5).replace('-', '\uC6D4 ')}\uC77C \uCCAD\uC57D \uC77C\uC815 ({dayApts.length}\uAC74)
+                    📅 {selectedCalDate.slice(5).replace('-', '월 ')}일 청약 일정 ({dayApts.length}건)
                   </div>
                   {dayApts.map(a => (
                     <div key={a.id} style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
@@ -431,10 +432,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 미분양 추이 차트 */}
             {unsoldMonthly.length > 0 && (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📈 전국 미분양 추이 (6개월)</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📈 전국 미분양 추이 (12개월)</div>
                 <MiniLineChart
                   data={(() => {
-                    const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
+                    const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-12);
                     return months.map(m => {
                       const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
                       const total = rows.reduce((sum: number, r: any) => sum + (r.total_unsold || 0), 0);
@@ -443,7 +444,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   })()}
                   color="#3B82F6"
                   secondaryData={(() => {
-                    const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
+                    const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-12);
                     return months.map(m => {
                       const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
                       const total = rows.reduce((sum: number, r: any) => sum + (r.after_completion || 0), 0);
@@ -815,13 +816,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
                 {(() => {
                   const regions = [...new Set(tradeMonthly.map((s: any) => s.region))];
-                  const selectedRegion = regions[0] || '';
-                  const data = tradeMonthly.filter((s: any) => s.region === selectedRegion);
+                  const activeRegion = tradeChartRegion || regions[0] || '';
+                  const data = tradeMonthly.filter((s: any) => s.region === activeRegion);
                   return (
                     <>
                       <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
                         {regions.slice(0, 8).map(r => (
-                          <span key={r} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{r}</span>
+                          <button key={r} onClick={() => setTradeChartRegion(r)} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, border: (tradeChartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (tradeChartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (tradeChartRegion || regions[0]) === r ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
                         ))}
                       </div>
                       <MiniLineChart
@@ -846,12 +847,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 .slice(0, 10)
                 .map((s: any) => ({
                   label: s.region,
-                  value: Math.round((s.avg_price_per_pyeong || 0) / 10000),
+                  value: Math.round(s.avg_price_per_pyeong || 0),
                   color: `hsl(${240 - (s.avg_price_per_pyeong / Math.max(...tradeMonthly.filter((t: any) => t.stat_month === latestMonth).map((t: any) => t.avg_price_per_pyeong || 1))) * 240}, 70%, 55%)`,
                 }));
               return data.length > 0 ? (
                 <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>💰 평당가 TOP 10 (만원)</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>💰 평당가 TOP 10 (만원/평)</div>
                   <MiniBarChart data={data} defaultColor="#8B5CF6" />
                 </div>
               ) : null;
@@ -937,6 +938,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
               {/* 제목 */}
               <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}</h2>
+              {r.address && (
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                  📍 {r.address}
+                </div>
+              )}
               <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
                 {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}
               </div>

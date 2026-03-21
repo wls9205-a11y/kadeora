@@ -20,22 +20,43 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
+    const today = new Date().toISOString().slice(0, 10);
+
     Promise.all([
-      sb.rpc('get_admin_dashboard'),
+      // KPI counts
+      sb.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
+      sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', today),
+      sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
+      sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', today),
+      sb.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', today),
+      sb.from('blog_posts').select('id', { count: 'exact', head: true }),
+      sb.from('stock_quotes').select('id', { count: 'exact', head: true }),
+      sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }),
+      // Other data
       sb.from('admin_alerts').select('*').order('created_at', { ascending: false }).limit(20),
       sb.from('health_checks').select('*'),
       sb.from('daily_stats').select('*').order('stat_date', { ascending: false }).limit(7),
-      sb.from('unsold_monthly_stats').select('stat_month, unsold_count').order('stat_month', { ascending: true }),
+      sb.from('unsold_monthly_stats').select('stat_month, total_unsold').order('stat_month', { ascending: true }),
       sb.from('stock_daily_briefing').select('*').eq('market', 'KR').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
-    ]).then(([dashRes, alertsRes, healthRes, statsRes, unsoldRes, briefingRes]) => {
-      setData(dashRes.data);
+    ]).then(([usersR, todayUsersR, postsR, todayPostsR, todayCommentsR, blogsR, stocksR, redevR, alertsRes, healthRes, statsRes, unsoldRes, briefingRes]) => {
+      setData({
+        total_users: usersR.count || 0,
+        today_signups: todayUsersR.count || 0,
+        total_posts: postsR.count || 0,
+        today_posts: todayPostsR.count || 0,
+        today_comments: todayCommentsR.count || 0,
+        dau: todayUsersR.count || 0,
+        total_blogs: blogsR.count || 0,
+        total_stocks: stocksR.count || 0,
+        total_apt_data: redevR.count || 0,
+      });
       setAlerts(alertsRes.data || []);
       setHealthChecks(healthRes.data || []);
       setDailyStats((statsRes.data || []).reverse());
       setUnsoldMonthly(unsoldRes.data || []);
       setBriefing(briefingRes.data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const markRead = async (id: number) => {
@@ -104,8 +125,8 @@ export default function AdminDashboard() {
             <div key={hc.service_name} style={{
               padding: '10px 16px',
               borderRadius: 10,
-              background: hc.status === 'ok' ? '#f0fdf4' : hc.status === 'warning' ? '#fffbeb' : '#fef2f2',
-              border: `1px solid ${hc.status === 'ok' ? '#bbf7d0' : hc.status === 'warning' ? '#fde68a' : '#fecaca'}`,
+              background: hc.status === 'ok' ? 'rgba(34,197,94,0.1)' : hc.status === 'warning' ? 'rgba(234,179,8,0.1)' : 'rgba(248,113,113,0.1)',
+              border: `1px solid ${hc.status === 'ok' ? 'rgba(34,197,94,0.3)' : hc.status === 'warning' ? 'rgba(234,179,8,0.3)' : 'rgba(248,113,113,0.3)'}`,
               display: 'flex',
               alignItems: 'center',
               gap: 8,
@@ -206,8 +227,8 @@ export default function AdminDashboard() {
               <div key={a.id} style={{
                 padding: '10px 14px',
                 borderRadius: 8,
-                background: a.is_read ? 'var(--bg-base)' : a.severity === 'error' ? '#fef2f2' : a.severity === 'warning' ? '#fffbeb' : '#f0fdf4',
-                border: `1px solid ${a.is_read ? 'var(--border)' : a.severity === 'error' ? '#fecaca' : a.severity === 'warning' ? '#fde68a' : '#bbf7d0'}`,
+                background: a.is_read ? 'var(--bg-base)' : a.severity === 'error' ? 'rgba(248,113,113,0.1)' : a.severity === 'warning' ? 'rgba(234,179,8,0.1)' : 'rgba(34,197,94,0.1)',
+                border: `1px solid ${a.is_read ? 'var(--border)' : a.severity === 'error' ? 'rgba(248,113,113,0.3)' : a.severity === 'warning' ? 'rgba(234,179,8,0.3)' : 'rgba(34,197,94,0.3)'}`,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
