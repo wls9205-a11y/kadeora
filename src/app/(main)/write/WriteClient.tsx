@@ -31,7 +31,6 @@ export default function WriteClient() {
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [showCatPicker, setShowCatPicker] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
 
@@ -114,36 +113,58 @@ export default function WriteClient() {
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
       {/* 상단 바 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>← 취소</Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>← 돌아가기</Link>
+        <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>글쓰기</span>
         <button
           onClick={handleSubmit}
           disabled={!canSubmit}
           style={{
-            padding: '8px 20px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700,
+            padding: '8px 20px', borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700,
             background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
             color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
             cursor: canSubmit ? 'pointer' : 'not-allowed',
+            transition: 'all 0.15s',
           }}
         >
-          {loading ? '...' : '남기기'}
+          {loading ? '...' : '등록'}
         </button>
       </div>
 
-      {/* 제목 (선택사항) */}
+      {/* 카테고리 칩 */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 2 }}>
+        {CATEGORIES.map(c => (
+          <button key={c.value} onClick={() => setCategory(c.value)} style={{
+            padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+            cursor: 'pointer', flexShrink: 0, border: 'none',
+            background: category === c.value ? 'var(--brand)' : 'var(--bg-hover)',
+            color: category === c.value ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+            transition: 'all 0.15s',
+          }}>
+            {c.label}
+          </button>
+        ))}
+        {category === 'local' && (
+          <select value={regionId} onChange={e => setRegionId(e.target.value)}
+            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 999, padding: '4px 10px', fontSize: 12, color: 'var(--text-primary)', flexShrink: 0 }}>
+            {REGIONS.filter(r => r.value !== 'all').map(r => (
+              <option key={r.value} value={r.value}>{r.label}</option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {/* 제목 */}
       <input
         type="text"
         value={title}
         onChange={e => setTitle(e.target.value)}
-        placeholder="제목 (선택)"
+        placeholder="제목을 입력하세요"
         maxLength={100}
-        onFocus={e => (e.currentTarget.style.borderBottomColor = 'var(--text-tertiary)')}
-        onBlur={e => (e.currentTarget.style.borderBottomColor = 'var(--border)')}
         style={{
-          width: '100%', fontSize: 18, fontWeight: 700, padding: '12px 0',
-          border: 'none', borderBottom: '1px solid var(--border)', borderRadius: 0,
-          background: 'transparent', color: 'var(--text-primary)',
-          outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s',
+          width: '100%', fontSize: 20, fontWeight: 800, padding: '8px 0',
+          border: 'none', background: 'transparent', color: 'var(--text-primary)',
+          outline: 'none', boxSizing: 'border-box',
         }}
       />
 
@@ -155,14 +176,14 @@ export default function WriteClient() {
           e.target.style.height = 'auto';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}
-        placeholder="무슨 소문이 있나요?"
+        placeholder="무슨 소문이 있나요? 자유롭게 이야기해주세요."
         maxLength={5000}
         autoFocus
         style={{
           width: '100%', background: 'transparent', border: 'none',
-          color: 'var(--text-primary)', padding: 0,
+          color: 'var(--text-primary)', padding: 0, marginTop: 4,
           fontSize: 15, resize: 'none', fontFamily: 'inherit',
-          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 300, outline: 'none',
+          lineHeight: 1.8, boxSizing: 'border-box', minHeight: 240, outline: 'none',
         }}
       />
 
@@ -221,31 +242,6 @@ export default function WriteClient() {
           type="button" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 13, padding: '4px 0' }}>
           <Camera size={18} /> 사진
         </button>
-
-        <button onClick={() => setShowCatPicker(!showCatPicker)} type="button"
-          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 13, padding: '4px 0' }}>
-          {CATEGORIES.find(c => c.value === category)?.label ?? '카테고리'} ▾
-        </button>
-
-        {showCatPicker && (
-          <div style={{ position: 'absolute', bottom: '100%', left: 80, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 4, boxShadow: '0 -4px 16px rgba(0,0,0,0.1)' }}>
-            {CATEGORIES.map(c => (
-              <button key={c.value} onClick={() => { setCategory(c.value); setShowCatPicker(false); }}
-                style={{ display: 'block', width: '100%', padding: '8px 16px', border: 'none', background: category === c.value ? 'var(--bg-hover)' : 'transparent', color: 'var(--text-primary)', fontSize: 13, fontWeight: category === c.value ? 700 : 400, cursor: 'pointer', textAlign: 'left', borderRadius: 8 }}>
-                {c.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {category === 'local' && (
-          <select value={regionId} onChange={e => setRegionId(e.target.value)}
-            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 8px', fontSize: 12, color: 'var(--text-primary)' }}>
-            {REGIONS.filter(r => r.value !== 'all').map(r => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
-        )}
 
         <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
           <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)}
