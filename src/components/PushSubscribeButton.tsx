@@ -32,16 +32,25 @@ export default function PushSubscribeButton() {
 
   if (status === 'denied') return null;
   if (status === 'subscribed') return (
-    <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: '6px 0' }}>🔔 알림 구독 중</div>
+    <div style={{
+      fontSize: 12, color: 'var(--text-tertiary)', padding: '8px 0',
+      textAlign: 'center', background: 'var(--bg-hover)', borderRadius: 10, marginTop: 8,
+    }}>🔔 알림 설정됨</div>
   );
 
   return (
     <button onClick={handleSubscribe} disabled={status === 'loading'}
       style={{
-        padding: '10px 16px', background: 'var(--brand)', color: 'var(--text-inverse)',
-        border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700,
-        cursor: 'pointer', width: '100%', marginTop: 8,
-      }}>
+        padding: '11px 16px',
+        background: 'linear-gradient(135deg, #ef4444, #f97316)',
+        color: '#fff', border: 'none', borderRadius: 10,
+        fontSize: 13, fontWeight: 700, cursor: 'pointer', width: '100%', marginTop: 8,
+        boxShadow: '0 4px 12px rgba(239,68,68,0.25)',
+        transition: 'opacity 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
+      onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+    >
       {status === 'loading' ? '설정 중...' : '🔔 알림 받기'}
     </button>
   );
