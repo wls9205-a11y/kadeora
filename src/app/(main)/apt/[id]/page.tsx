@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import AptCommentInline from '@/components/AptCommentInline';
+import ShareButtons from '@/components/ShareButtons';
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -89,6 +90,15 @@ export default async function AptDetailPage({ params }: Props) {
         </div>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{apt.house_nm}</h1>
         <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{apt.region_nm} · {apt.hssply_adres}{apt.tot_supply_hshld_co ? ` · ${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : ''}</div>
+      </div>
+
+      {/* 공유 + 청약홈 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+        <ShareButtons title={`${apt.house_nm} 청약`} postId={id} />
+        <a href={apt.pblanc_url || 'https://www.applyhome.co.kr'} target="_blank" rel="noopener noreferrer"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(59,130,246,0.2)' }}>
+          🏠 청약홈
+        </a>
       </div>
 
       {/* 분양 일정 */}
