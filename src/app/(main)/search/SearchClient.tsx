@@ -183,6 +183,7 @@ export default function SearchClient() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(0);
+      setLoading(true);
       setResults([]);
       doSearch(inputVal, category, 0);
       setQuery(inputVal);
@@ -278,7 +279,7 @@ export default function SearchClient() {
               </div>
             )}
 
-            {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && (
+            {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && results.length === 0 && (
               <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>🔍 검색 결과가 없어요</div>
             )}
 
