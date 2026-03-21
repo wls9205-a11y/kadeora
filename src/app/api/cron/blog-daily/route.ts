@@ -67,8 +67,48 @@ export async function GET(req: NextRequest) {
       const { data: se } = await admin.from('blog_posts').select('id').eq('slug', stockSlug).maybeSingle();
       if (se) continue;
       const dir = (s.change_pct ?? 0) > 0 ? '급등' : '급락';
-      const stockTitle = `${s.name} ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(1)}% — ${today} 분석`;
-      const stockContent = `## ${s.name} (${s.symbol}) ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(2)}%\n\n| 항목 | 값 |\n|---|---|\n| 현재가 | ${s.price?.toLocaleString()} |\n| 등락률 | ${(s.change_pct ?? 0) > 0 ? '▲' : '▼'} ${Math.abs(s.change_pct ?? 0).toFixed(2)}% |\n| 시장 | ${s.market} |\n\n---\n\n[${s.name} 종목 상세 →](/stock/${s.symbol})\n[주식 토론 →](/feed?category=stock)\n[전체 시세 보기 →](/stock)\n\n> 투자 권유가 아니며 참고용입니다.`;
+      const dirArrow = (s.change_pct ?? 0) > 0 ? '▲' : '▼';
+      const absPct = Math.abs(s.change_pct ?? 0).toFixed(2);
+      const stockTitle = `${s.name} ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(1)}% — ${today} 시세·분석·전망`;
+      const stockContent = `## ${s.name} (${s.symbol}) ${dir} ${absPct}% — ${today}
+
+${today} **${s.name}**(${s.symbol})이 전일 대비 **${dirArrow} ${absPct}%** ${dir}하며 시장의 주목을 받고 있습니다. 현재가는 **${s.price?.toLocaleString()}${s.market === 'NYSE' || s.market === 'NASDAQ' ? '달러' : '원'}**입니다.
+
+${(s.change_pct ?? 0) > 0 ? `이번 상승은 실적 개선 기대감, 업종 전반의 호조, 또는 수급 변화 등 복합적인 요인이 작용한 것으로 보입니다. 다만, 단기 급등 후에는 차익 실현 매물이 나올 수 있으므로 주의가 필요합니다.` : `하락의 원인으로는 실적 우려, 업종 하락, 대외 변수 등이 거론되고 있습니다. 단기 낙폭이 큰 만큼 반등 가능성도 열려 있지만, 추가 하락 리스크도 함께 고려해야 합니다.`}
+
+---
+
+### 종목 정보
+
+| 항목 | 내용 |
+|---|---|
+| **종목명** | ${s.name} (${s.symbol}) |
+| **현재가** | ${s.price?.toLocaleString()} |
+| **등락률** | ${dirArrow} **${absPct}%** |
+| **시장** | ${s.market} |
+
+---
+
+### 분석 포인트
+
+1. **${dir} 원인 분석**: ${(s.change_pct ?? 0) > 0 ? '호재성 뉴스, 기관/외국인 매수세, 업종 모멘텀 등을 확인하세요.' : '악재 뉴스, 기관 매도, 업종 약세 등의 원인을 파악하세요.'}
+
+2. **섹터 동향**: **${s.name}**이 속한 ${s.market} 시장의 동종 업종 흐름도 함께 살펴보는 것이 중요합니다. 개별 종목의 움직임이 섹터 전체 흐름인지, 개별 이슈인지 구분하세요.
+
+3. **최근 추세**: 단일 거래일의 급등락보다 **최근 5일~1개월간의 추세**를 함께 확인하는 것이 합리적인 판단에 도움이 됩니다.
+
+---
+
+### 관련 정보
+
+- [**${s.name}** 종목 상세 시세 →](/stock/${s.symbol})
+- [주식 **커뮤니티 토론** →](/feed?category=stock)
+- [**전체 시세** 보기 →](/stock)
+- [**종목 알림** 받기 →](/login)
+
+카더라에서 ${s.name}의 시세와 커뮤니티 반응을 실시간으로 확인해보세요.
+
+> 투자 권유가 아니며 참고용입니다. 모든 투자 판단과 손익은 투자자 본인에게 귀속됩니다.`;
       await admin.from('blog_posts').insert({
         slug: stockSlug, title: stockTitle, content: stockContent,
         excerpt: `${s.name} ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(1)}%. ${today} 시세 분석.`,

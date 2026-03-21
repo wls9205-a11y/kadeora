@@ -22,10 +22,47 @@ export async function GET(req: NextRequest) {
         .select('house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co, house_manage_no')
         .gte('rcept_endde', today).lte('rcept_bgnde', nextWeek).order('rcept_bgnde').limit(10);
 
-      const table = (apts ?? []).map(a => `| [${a.house_nm}](/apt/${a.house_manage_no}) | ${a.region_nm} | ${a.rcept_bgnde?.slice(5)} ~ ${a.rcept_endde?.slice(5)} | ${(a.tot_supply_hshld_co ?? 0).toLocaleString()} |`).join('\n');
-      const content = `## 이번 주 청약 일정 (${weekStr})\n\n| 단지명 | 지역 | 접수 기간 | 세대수 |\n|---|---|---|---|\n${table || '| 이번 주 접수 예정 청약이 없습니다 | | | |'}\n\n---\n\n[전체 청약 일정 보기 →](/apt)\n[청약 마감 알림 받기 →](/login)\n\n> 청약홈 공공데이터 기반. 정확한 정보는 청약홈에서 확인하세요.`;
+      const aptCount = (apts ?? []).length;
+      const totalUnits = (apts ?? []).reduce((s: number, a: any) => s + (a.tot_supply_hshld_co ?? 0), 0);
+      const regions = [...new Set((apts ?? []).map((a: any) => a.region_nm))];
+      const table = (apts ?? []).map(a => `| [**${a.house_nm}**](/apt/${a.house_manage_no}) | ${a.region_nm} | ${a.rcept_bgnde?.slice(5)} ~ ${a.rcept_endde?.slice(5)} | ${(a.tot_supply_hshld_co ?? 0).toLocaleString()} |`).join('\n');
+      const weekTitle = `이번 주 아파트 청약 일정 총정리 (${weekStr})`;
+      const content = `## 이번 주 아파트 청약 일정 (${weekStr})
 
-      await admin.from('blog_posts').insert({ slug: slug1, title: `이번 주 아파트 청약 일정 총정리 (${weekStr})`, content, excerpt: `이번 주 접수 예정/진행 중인 청약 ${(apts ?? []).length}건 정리.`, category: 'apt', tags: ['청약일정', '이번주청약', '아파트분양'], source_type: 'auto' });
+${weekStr} 기준 이번 주 주요 **아파트 청약 일정**을 정리했습니다. 이번 주에는 총 **${aptCount}건**의 청약이 접수 중이거나 접수 예정이며, 총 **${totalUnits.toLocaleString()}세대** 규모입니다.${regions.length > 0 ? ` 주요 지역은 **${regions.join(', ')}** 등입니다.` : ''}
+
+청약을 준비하시는 분들은 접수 마감일을 반드시 확인하고, 청약 자격 요건도 미리 점검하세요.
+
+---
+
+### 이번 주 청약 일정표
+
+| 단지명 | 지역 | 접수 기간 | 세대수 |
+|---|---|---|---|
+${table || '| 이번 주 접수 예정 청약이 없습니다 | | | |'}
+
+---
+
+### 이번 주 청약 분석
+
+${aptCount >= 2 ? `이번 주에는 **${aptCount}건**의 청약이 동시에 진행됩니다. 접수 일정이 겹치는 경우 **중복 청약이 불가**하므로, 가점과 추첨 전략에 따라 우선순위를 정하는 것이 중요합니다.` : aptCount === 1 ? `이번 주는 **1건**의 청약만 진행됩니다. 집중적으로 준비하여 당첨 확률을 높이세요.` : '이번 주에는 접수 예정 청약이 없습니다. 다음 주 일정을 미리 확인해두세요.'}
+
+가점이 높은 분들은 경쟁률이 높더라도 대단지에 도전하는 것이 유리하고, 추첨제 물량을 노리시는 분들은 상대적으로 관심이 적은 단지에서 기회를 찾아보세요.
+
+---
+
+### 관련 정보
+
+- [**전체 청약 일정** 보기 →](/apt)
+- [**청약 마감 알림** 받기 →](/login)
+- [청약 커뮤니티 **토론** →](/feed?category=apt)
+- [카더라 **블로그**에서 더 보기 →](/blog?category=apt)
+
+정확한 청약 일정은 **청약홈(applyhome.co.kr)**에서 확인하시고, 카더라에서 매주 업데이트되는 일정을 참고하세요.
+
+> 청약홈 공공데이터 기반. 투자 권유가 아닙니다.`;
+
+      await admin.from('blog_posts').insert({ slug: slug1, title: weekTitle, content, excerpt: `이번 주 청약 ${aptCount}건 · ${totalUnits.toLocaleString()}세대. ${regions.join(', ')}.`, category: 'apt', tags: ['청약일정', '이번주청약', '아파트분양'], source_type: 'auto', cron_type: 'weekly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(weekTitle)}&type=blog` });
       created++;
     }
 
