@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
-import UnsoldStatsWidget from '@/components/UnsoldStatsWidget';
+
 
 interface Apt {
   id: number; house_nm: string; house_manage_no?: string; region_nm: string;
@@ -230,22 +230,6 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
 
         return (
           <div>
-            {/* 미분양 통계 위젯 */}
-            <UnsoldStatsWidget />
-
-            {/* 요약 */}
-            <div style={{ display: 'flex', gap: 16, marginBottom: 14, padding: '10px 0' }}>
-              <div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전국 미분양</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: '#f87171' }}>{total.toLocaleString()}세대</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>현장</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{unsold.length}곳</div>
-              </div>
-              <div style={{ flex: 1, textAlign: 'right' as const, fontSize: 11, color: 'var(--text-tertiary)', alignSelf: 'flex-end' }}>국토교통부 기준</div>
-            </div>
-
             {/* 지역별 현황판 */}
             <div style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
