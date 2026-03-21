@@ -90,6 +90,27 @@ export default async function StockDetailPage({ params }: Props) {
           </div>
         ))}
       </div>
+      {/* AI 한줄평 */}
+      {await (async () => {
+        const { data: aiComment } = await sb.from('stock_ai_comments')
+          .select('*').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle();
+        if (!aiComment) return null;
+        const signalColor = aiComment.signal === 'bullish' ? '#16a34a' : aiComment.signal === 'bearish' ? '#ef4444' : 'var(--text-tertiary)';
+        const signalLabel = aiComment.signal === 'bullish' ? '🟢 매수 우위' : aiComment.signal === 'bearish' ? '🔴 매도 우위' : '🟡 중립';
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: signalColor }}>{signalLabel}</span>
+            </div>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.content}</p>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>
+              {new Date(aiComment.created_at).toLocaleDateString('ko-KR')} 기준 · AI 분석은 참고용이며 투자 판단의 근거가 될 수 없습니다
+            </div>
+          </div>
+        );
+      })()}
+
       <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>🏢 회사 소개</div>
         <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.75 }}>

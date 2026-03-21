@@ -17,6 +17,9 @@ interface Stock {
   description?: string;
 }
 
+interface Theme { id: number; theme_name: string; change_pct: number; is_hot: boolean; related_symbols?: string[]; description?: string; }
+interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
+
 interface Props {
   initialStocks: Stock[];
 }
@@ -122,6 +125,18 @@ export default function StockClient({ initialStocks }: Props) {
   const [exchangeRate, setExchangeRate] = useState(1380);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [sortBy, setSortBy] = useState('default');
+  const [mainTab, setMainTab] = useState<'ranking'|'movers'|'themes'|'calendar'|'overseas'>('ranking');
+  const [moversTab, setMoversTab] = useState<'up'|'down'|'volume'>('up');
+  const [themes, setThemes] = useState<Theme[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [sectorFilter, setSectorFilter] = useState('all');
+
+  const SECTORS = ['all', '반도체', '바이오', '금융', '자동차', '방산', 'IT/소프트웨어', '에너지', '2차전지', '소비재', '건설', '통신', '유틸리티', '화학', '미디어'];
+
+  useEffect(() => {
+    fetch('/api/stock/themes').then(r => r.ok ? r.json() : null).then(d => { if (d?.themes) setThemes(d.themes); }).catch(() => {});
+    fetch('/api/stock/calendar').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setCalendarEvents(d.events); }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('kd_currency');
@@ -206,7 +221,23 @@ export default function StockClient({ initialStocks }: Props) {
 
   // Separate index entries from regular stocks
   const indexEntries = sorted.filter(s => isIndexEntry(s));
-  const regularStocks = sorted.filter(s => !isIndexEntry(s));
+  let regularStocks = sorted.filter(s => !isIndexEntry(s));
+
+  // Sector filter
+  if (sectorFilter !== 'all') {
+    regularStocks = regularStocks.filter(s => (s.sector || '').includes(sectorFilter));
+  }
+
+  // Tab-specific filtering and sorting
+  if (mainTab === 'overseas') {
+    regularStocks = regularStocks.filter(s => s.market === 'NYSE' || s.market === 'NASDAQ');
+  } else if (mainTab === 'movers') {
+    if (moversTab === 'up') regularStocks = [...regularStocks].sort((a, b) => (b.change_pct ?? 0) - (a.change_pct ?? 0)).slice(0, 20);
+    else if (moversTab === 'down') regularStocks = [...regularStocks].sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 20);
+    else regularStocks = [...regularStocks].sort((a, b) => (b.volume ?? 0) - (a.volume ?? 0)).slice(0, 20);
+  } else if (mainTab === 'ranking') {
+    regularStocks = regularStocks.slice(0, 30);
+  }
 
   function getIndexGradient(s: Stock) {
     const pct = s.change_pct ?? 0;
@@ -313,60 +344,120 @@ export default function StockClient({ initialStocks }: Props) {
         </div>
       )}
 
-      {/* 필터 탭 */}
+      {/* 오늘의 테마 */}
+      {themes.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🔥 오늘의 테마</div>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+            {themes.map(t => (
+              <div key={t.id} onClick={() => setMainTab('themes')} style={{
+                minWidth: 120, padding: '10px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                borderRadius: 12, flexShrink: 0, cursor: 'pointer',
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+                  {t.is_hot && '🔥 '}{t.theme_name}
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: (t.change_pct ?? 0) > 0 ? '#ef4444' : (t.change_pct ?? 0) < 0 ? '#3b82f6' : 'var(--text-tertiary)' }}>
+                  {(t.change_pct ?? 0) > 0 ? '+' : ''}{(t.change_pct ?? 0).toFixed(1)}%
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 메인 탭 */}
+      <div style={{
+        display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '6px 8px',
+      }}>
+        {([
+          ['ranking', '📊 시총순위'], ['movers', '📈 등락률'], ['themes', '🔥 테마'],
+          ['calendar', '📅 캘린더'], ['overseas', '🌐 해외'],
+        ] as const).map(([k, l]) => (
+          <button key={k} onClick={() => { setMainTab(k); if (k === 'overseas') setMarket('NYSE'); else if (market === 'NYSE' || market === 'NASDAQ') setMarket('ALL'); }} style={{
+            padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
+            fontWeight: 700, fontSize: 13,
+            background: mainTab === k ? 'var(--border)' : 'transparent',
+            color: mainTab === k ? 'var(--text-primary)' : 'var(--text-secondary)',
+          }}>{l}</button>
+        ))}
+      </div>
+
+      {/* 캘린더 탭 */}
+      {mainTab === 'calendar' && (
+        <div style={{ marginBottom: 16 }}>
+          {calendarEvents.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>예정된 이벤트가 없습니다</div>
+          ) : calendarEvents.map(ev => {
+            const imp = ev.importance === 'high' ? '🔴' : ev.importance === 'medium' ? '🟡' : '⚪';
+            return (
+              <div key={ev.id} style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 6, alignItems: 'center' }}>
+                <div style={{ textAlign: 'center', flexShrink: 0, width: 44 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date(ev.event_date).toLocaleDateString('ko-KR', { month: 'short' })}</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{new Date(ev.event_date).getDate()}</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{imp} {ev.title}</div>
+                  {ev.description && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>{ev.description}</div>}
+                </div>
+                <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{ev.category}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 등락률 탭 서브탭 */}
+      {mainTab === 'movers' && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {([['up', '📈 상승'], ['down', '📉 하락'], ['volume', '🔥 거래량']] as const).map(([k, l]) => (
+            <button key={k} onClick={() => setMoversTab(k)} style={{
+              padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer',
+              background: moversTab === k ? 'var(--brand)' : 'var(--bg-hover)',
+              color: moversTab === k ? 'var(--text-inverse)' : 'var(--text-secondary)',
+            }}>{l}</button>
+          ))}
+        </div>
+      )}
+
+      {/* 섹터 필터 (시총순위/등락률 탭) */}
+      {(mainTab === 'ranking' || mainTab === 'movers') && (
+        <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+          {SECTORS.map(s => (
+            <button key={s} onClick={() => setSectorFilter(s)} style={{
+              padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
+              background: sectorFilter === s ? 'var(--text-primary)' : 'var(--bg-hover)',
+              color: sectorFilter === s ? 'var(--bg-base)' : 'var(--text-tertiary)',
+            }}>{s === 'all' ? '전체' : s}</button>
+          ))}
+        </div>
+      )}
+
+      {/* 시장 필터 + 검색 (시총순위/해외 탭) */}
+      {(mainTab === 'ranking' || mainTab === 'overseas') && (
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 12, padding: '6px 8px', marginBottom: 10,
         display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center',
       }}>
-        {/* 시장 필터 */}
         <div style={{ display: 'flex', gap: 2, flex: 1 }}>
-          {['ALL', 'KOSPI', 'KOSDAQ', 'NYSE', 'NASDAQ'].map(m => (
+          {(mainTab === 'overseas' ? ['NYSE', 'NASDAQ'] : ['ALL', 'KOSPI', 'KOSDAQ']).map(m => (
             <button key={m} onClick={() => setMarket(m)} style={{
               flex: 1, padding: '8px 12px', border: 'none', cursor: 'pointer',
-              fontWeight: 700, fontSize: 13, position: 'relative',
+              fontWeight: 700, fontSize: 13,
               background: 'transparent',
               color: market === m ? 'var(--brand)' : 'var(--text-tertiary)',
-              borderRadius: 0,
               borderBottom: market === m ? '2px solid var(--brand)' : '2px solid transparent',
-              transition: 'color 0.15s, border-color 0.15s',
             }}>
               {MARKET_LABEL[m]}
             </button>
           ))}
         </div>
-        <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 4px' }} />
-        {/* 정렬 */}
-        <div style={{ display: 'flex', gap: 4 }}>
-          {([['cap', '시가총액'], ['change', '등락률'], ['volume', '거래량']] as const).map(([k, l]) => (
-            <button key={k} onClick={() => {
-              if (sort === k) { setSortDir(d => d === 'desc' ? 'asc' : 'desc'); }
-              else { setSort(k); setSortDir('desc'); }
-            }} style={{
-              padding: '6px 12px', borderRadius: 6, border: 'none', cursor: 'pointer',
-              fontWeight: 700, fontSize: 13,
-              background: sort === k ? 'var(--border)' : 'transparent',
-              color: sort === k ? 'var(--text-primary)' : 'var(--text-tertiary)',
-            }}>
-              {l}
-            </button>
-          ))}
-        </div>
-        <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
-          background: 'var(--bg-hover)', border: '1px solid var(--border)',
-          borderRadius: 8, padding: '6px 10px', fontSize: 13, color: 'var(--text-primary)',
-          cursor: 'pointer', outline: 'none', marginLeft: 'auto', flexShrink: 0,
-        }}>
-          <option value="default">기본순 (시총)</option>
-          <option value="market_cap_desc">시총 높은순</option>
-          <option value="market_cap_asc">시총 낮은순</option>
-          <option value="pct_desc">등락률 ▲ 높은순</option>
-          <option value="pct_asc">등락률 ▼ 낮은순</option>
-          <option value="price_desc">가격 높은순</option>
-        </select>
       </div>
-      {/* 검색 */}
-      <div style={{ marginBottom: 10 }}>
+      )}
+      {/* 검색 (시총/등락률/해외 탭만) */}
+      {mainTab !== 'calendar' && mainTab !== 'themes' && <div style={{ marginBottom: 10 }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -378,15 +469,51 @@ export default function StockClient({ initialStocks }: Props) {
             color: 'var(--text-primary)', width: '100%', boxSizing: 'border-box',
           }}
         />
-      </div>
+      </div>}
+
+      {/* 테마 상세 탭 */}
+      {mainTab === 'themes' && (
+        <div style={{ marginBottom: 16 }}>
+          {themes.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>테마 데이터 준비 중</div>
+          ) : themes.map(t => (
+            <div key={t.id} style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot && '🔥 '}{t.theme_name}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: (t.change_pct ?? 0) > 0 ? '#ef4444' : '#3b82f6' }}>
+                  {(t.change_pct ?? 0) > 0 ? '+' : ''}{(t.change_pct ?? 0).toFixed(1)}%
+                </span>
+              </div>
+              {t.description && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.description}</div>}
+              {t.related_symbols && t.related_symbols.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {t.related_symbols.map(sym => {
+                    const stock = stocks.find(s => s.symbol === sym);
+                    return stock ? (
+                      <Link key={sym} href={`/stock/${sym}`} style={{
+                        fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'var(--bg-hover)', border: '1px solid var(--border)',
+                        color: 'var(--text-secondary)', textDecoration: 'none',
+                      }}>
+                        {stock.name} {(stock.change_pct ?? 0) > 0 ? '▲' : (stock.change_pct ?? 0) < 0 ? '▼' : '–'}{Math.abs(stock.change_pct ?? 0).toFixed(1)}%
+                      </Link>
+                    ) : (
+                      <span key={sym} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{sym}</span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 시장 상태 */}
       <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8, textAlign: 'right' }}>
         {getMarketStatus(market === 'ALL' ? 'KOSPI' : market)} · {lastUpdated ? `마지막 업데이트: ${lastUpdated}` : '장 마감 기준'}
       </div>
 
-      {/* 종목 카드 리스트 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* 종목 카드 리스트 (캘린더/테마 탭에서는 숨김) */}
+      {mainTab !== 'calendar' && mainTab !== 'themes' && <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {regularStocks.map((s, i) => {
           const badgeStyle = MARKET_STYLE[s.market] ?? { bg: 'var(--bg-hover)', color: 'var(--text-secondary)' };
           const stale = isStaleData(s);
@@ -457,12 +584,12 @@ export default function StockClient({ initialStocks }: Props) {
           );
         })}
 
-        {filtered.length === 0 && (
+        {regularStocks.length === 0 && (
           <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
             검색 결과가 없어요
           </div>
         )}
-      </div>
+      </div>}
 
       <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>
         * 국내 주가는 KIS/Yahoo Finance 기준 · 해외 주가는 Yahoo Finance 기준 · 환율: 1 USD = ₩{exchangeRate.toLocaleString()}
