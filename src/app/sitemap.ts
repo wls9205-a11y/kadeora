@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       timeout(sb.from('posts').select('id, slug, updated_at, likes_count, comments_count').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000), 10000),
       timeout(sb.from('stock_quotes').select('symbol, updated_at'), 5000),
       timeout(sb.from('apt_subscriptions').select('id, house_manage_no, updated_at'), 5000),
-      timeout(sb.from('blog_posts').select('slug, updated_at').eq('is_published', true).order('created_at', { ascending: false }).limit(1000), 5000),
+      timeout(sb.from('blog_posts').select('slug, updated_at, cover_image').eq('is_published', true).order('created_at', { ascending: false }).limit(1000), 5000),
     ]);
 
     const posts = (postsResult as any)?.data ?? [];
@@ -70,6 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(b.updated_at ?? Date.now()),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
+      ...(b.cover_image ? { images: [b.cover_image] } : {}),
     }));
 
     return [...staticRoutes, ...feedRoutes, ...stockRoutes, ...aptRoutes, ...blogRoutes];

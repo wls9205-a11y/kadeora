@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
+import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +59,9 @@ export async function GET(req: NextRequest) {
         category: t.cat, tags: t.tagsFn(), source_type: 'auto',
         cron_type: 'daily', data_date: dateSlug,
         cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(blogTitle)}&type=blog`,
+        image_alt: generateImageAlt(t.cat, blogTitle),
+        meta_description: generateMetaDesc(finalContent),
+        meta_keywords: generateMetaKeywords(t.cat, t.tagsFn()),
       });
       created++;
     }
@@ -118,6 +122,9 @@ ${(s.change_pct ?? 0) > 0 ? `이번 상승은 실적 개선 기대감, 업종 �
         category: 'stock', tags: [s.name, dir, s.market, '주식'], source_type: 'auto',
         cron_type: 'daily-stock', data_date: dateSlug, source_ref: s.symbol,
         cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(stockTitle)}&type=blog`,
+        image_alt: generateImageAlt('stock', stockTitle),
+        meta_description: generateMetaDesc(finalStockContent),
+        meta_keywords: generateMetaKeywords('stock', [s.name, dir, s.market, '주식']),
       });
       created++;
     }

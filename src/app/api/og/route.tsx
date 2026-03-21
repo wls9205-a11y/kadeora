@@ -23,7 +23,17 @@ const CATEGORY_LABELS: Record<string, string> = {
   general: '정보',
 };
 
+const FALLBACK_IMAGES: Record<string, string> = {
+  stock: 'https://kadeora.app/images/brand/kadeora-wide.png',
+  finance: 'https://kadeora.app/images/brand/kadeora-hero.png',
+  apt: 'https://kadeora.app/images/brand/kadeora-full.png',
+  unsold: 'https://kadeora.app/images/brand/kadeora-full.png',
+  blog: 'https://kadeora.app/images/brand/kadeora-wide.png',
+  default: 'https://kadeora.app/images/brand/kadeora-hero.png',
+};
+
 export async function GET(req: NextRequest) {
+  try {
   const { searchParams } = new URL(req.url);
   const title = searchParams.get('title');
   const author = searchParams.get('author') ?? '';
@@ -169,4 +179,10 @@ export async function GET(req: NextRequest) {
       },
     },
   );
+  } catch {
+    const { searchParams } = new URL(req.url);
+    const cat = searchParams.get('category') || 'default';
+    const fallbackUrl = FALLBACK_IMAGES[cat] || FALLBACK_IMAGES.default;
+    return Response.redirect(fallbackUrl, 302);
+  }
 }

@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
-  const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at, cover_image').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at, cover_image, image_alt, meta_description, meta_keywords').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
   const BRAND_COVERS: Record<string, string> = {
     stock: `${SITE}/images/brand/kadeora-wide.png`,
@@ -64,13 +64,13 @@ export async function generateMetadata({ params }: Props) {
   const ogImage = post.cover_image || BRAND_COVERS[post.category] || BRAND_COVERS.general;
   return {
     title: `${post.title} | 카더라 블로그`,
-    description: post.excerpt || post.title,
-    keywords: (post.tags ?? []).join(', '),
+    description: post.meta_description || post.excerpt || post.title,
+    keywords: post.meta_keywords || (post.tags ?? []).join(', '),
     alternates: { canonical: `${SITE}/blog/${slug}` },
     openGraph: {
       title: post.title, description: post.excerpt || post.title, type: 'article',
       publishedTime: post.created_at, url: `${SITE}/blog/${slug}`,
-      images: [{ url: ogImage, width: 1200, height: 630 }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: post.image_alt || `카더라 — ${post.title}` }],
     },
     twitter: {
       card: 'summary_large_image' as const,
