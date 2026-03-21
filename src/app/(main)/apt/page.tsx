@@ -42,5 +42,10 @@ export default async function AptPage() {
     (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
   } catch {}
 
-  return <><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} /><Disclaimer /></>;
+  // 지역별 건수 계산
+  const regionCounts: Record<string, number> = {};
+  apts.forEach((a: any) => { const r = a.region_nm || '기타'; regionCounts[r] = (regionCounts[r] || 0) + 1; });
+  const regionStats = Object.entries(regionCounts).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }));
+
+  return <><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} /><Disclaimer /></>;
 }

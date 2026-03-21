@@ -37,7 +37,7 @@ const SB = {
   closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
-export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRefreshed }: { apts: Apt[]; unsold?: any[]; alertCounts?: Record<string, number>; lastRefreshed?: string | null }) {
+export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; count: number }[] }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'unsold'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
@@ -111,7 +111,8 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
       {activeTab === 'sub' && (
         <div>
           <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
-            {availableRegions.map(r => pill(r, region, setRegion))}
+            {pill('전체', region, setRegion, `전체 ${apts.length}건`)}
+            {regionStats.map(r => pill(r.name, region, setRegion, `${r.name} ${r.count}건`))}
           </div>
           <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
             {pill('전체', statusFilter, setStatusFilter)}

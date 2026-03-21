@@ -77,7 +77,7 @@ async function fetchViaKis(supabase: any): Promise<{ stocks: any[]; success: num
     .from('stock_quotes')
     .select('symbol')
     .order('market_cap', { ascending: false })
-    .limit(50);
+    .limit(250);
 
   if (!allStocks?.length) return null;
 
@@ -169,7 +169,7 @@ async function fetchViaNaver(supabase: any): Promise<{ stocks: any[]; success: n
     .select('symbol')
     .neq('currency', 'USD')
     .order('market_cap', { ascending: false })
-    .limit(50);
+    .limit(250);
 
   if (!allStocks?.length) return null;
 
@@ -209,12 +209,16 @@ async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: n
     .select('symbol')
     .neq('currency', 'USD')
     .order('market_cap', { ascending: false })
-    .limit(50);
+    .limit(250);
 
   if (!allStocks?.length) return null;
 
+  // KOSDAQ 판별: DB에서 market='KOSDAQ'인 심볼 조회
+  const { data: kosdaqList } = await supabase.from('stock_quotes').select('symbol').eq('market', 'KOSDAQ');
+  const kosdaqSet = new Set((kosdaqList ?? []).map((s: any) => s.symbol));
+
   const tickers = allStocks.map((s: any) =>
-    `${s.symbol}.${KOSDAQ_SYMBOLS.has(s.symbol) ? 'KQ' : 'KS'}`
+    `${s.symbol}.${kosdaqSet.has(s.symbol) ? 'KQ' : 'KS'}`
   ).join(',');
 
   const controller = new AbortController();
@@ -373,7 +377,7 @@ export async function GET(req: NextRequest) {
       .select('symbol')
       .eq('currency', 'USD')
       .order('market_cap', { ascending: false })
-      .limit(50);
+      .limit(100);
 
     if (usdStocks?.length) {
       const usdTickers = usdStocks.map((s: any) => s.symbol).join(',');
