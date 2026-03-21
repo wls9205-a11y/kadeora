@@ -46,6 +46,7 @@ export function Navigation() {
   const router    = useRouter();
   const [user, setUser]         = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [nickname, setNickname] = useState<string | null>(null);
   const [unread, setUnread]     = useState(0);
   const [fontSize, setFontSize] = useState('medium');
@@ -174,12 +175,12 @@ export function Navigation() {
             {/* 더보기 (모바일 헤더) */}
             <button
               className="md:hidden"
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); setMenuOpen(false); }}
               aria-label="더보기"
               style={{
                 width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
                 borderRadius:'50%', background:'var(--bg-hover)', border:'1px solid var(--border)',
-                color: menuOpen ? 'var(--brand)' : 'var(--text-secondary)',
+                color: moreOpen ? 'var(--brand)' : 'var(--text-secondary)',
                 cursor:'pointer', transition:'border-color 0.12s',
               }}
               onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
@@ -219,7 +220,7 @@ export function Navigation() {
 
                 {/* 유저 메뉴 */}
                 <div style={{ position:'relative' }}>
-                  <button onClick={() => setMenuOpen(!menuOpen)} aria-label="사용자 메뉴" style={{
+                  <button onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); setMoreOpen(false); }} aria-label="사용자 메뉴" style={{
                     display:'flex', alignItems:'center', gap:5,
                     height:34, padding:'0 10px', borderRadius:17,
                     background:'var(--bg-hover)', border:'1px solid var(--border)',
@@ -377,9 +378,9 @@ export function Navigation() {
       </nav>
 
       {/* 더보기 시트 (모바일) */}
-      {menuOpen && (
+      {moreOpen && (
         <div className="md:hidden" style={{ position:'fixed', inset:0, zIndex:201 }}>
-          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMenuOpen(false)} />
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
           <div style={{
             position:'absolute', bottom:72, left:12, right:12,
             background:'var(--bg-surface)', border:'1px solid var(--border)',
@@ -387,7 +388,7 @@ export function Navigation() {
           }}>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
               {MORE_ITEMS.map(item => (
-                <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{
+                <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
                   display:'flex', flexDirection:'column', alignItems:'center', gap:4,
                   padding:'12px 0', borderRadius:12, textDecoration:'none',
                   color:'var(--text-primary)',
@@ -402,12 +403,12 @@ export function Navigation() {
             </div>
             {user && (
               <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--border)', display:'flex', gap:8 }}>
-                <Link href={`/profile/${user.id}`} onClick={() => setMenuOpen(false)} style={{
+                <Link href={`/profile/${user.id}`} onClick={() => setMoreOpen(false)} style={{
                   flex:1, textAlign:'center', padding:'10px 0', borderRadius:10,
                   background:'var(--bg-hover)', color:'var(--text-primary)',
                   fontSize:13, fontWeight:600, textDecoration:'none',
                 }}>내 프로필</Link>
-                <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{
+                <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
                   flex:1, textAlign:'center', padding:'10px 0', borderRadius:10,
                   background:'var(--bg-hover)', color:'var(--text-primary)',
                   fontSize:13, fontWeight:600, textDecoration:'none',
