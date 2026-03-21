@@ -8,6 +8,10 @@ import LoginClient from './LoginClient';
 export const metadata: Metadata = {
   title: '로그인 | 카더라',
   robots: { index: false, follow: false },
+  openGraph: {
+    title: '카더라 시작하기',
+    images: [{ url: 'https://kadeora.app/images/brand/kadeora-features.png', alt: '카더라 시작하기' }],
+  },
 };
 
 export default async function LoginPage({

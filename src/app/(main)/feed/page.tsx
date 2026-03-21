@@ -2,7 +2,11 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '피드',
   description: '주식, 부동산, 청약 관련 소문과 정보를 나누는 카더라 커뮤니티 피드',
-  openGraph: { title: '피드 | 카더라', description: '주식, 부동산, 청약 정보 커뮤니티' },
+  openGraph: {
+    title: '피드 | 카더라',
+    description: '주식, 부동산, 청약 정보 커뮤니티',
+    images: [{ url: 'https://kadeora.app/images/brand/kadeora-hero.png', alt: '카더라 피드' }],
+  },
 };
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';

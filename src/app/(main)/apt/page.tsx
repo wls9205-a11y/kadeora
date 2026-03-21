@@ -2,6 +2,11 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '아파트 청약 일정',
   description: '2026년 전국 아파트 청약 일정과 분양 정보를 한눈에 확인하세요.',
+  openGraph: {
+    title: '청약·미분양 | 카더라',
+    description: '전국 아파트 청약 일정과 미분양 현황',
+    images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 청약·미분양' }],
+  },
 };
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
 export const revalidate = 3600;

@@ -54,6 +54,14 @@ export async function generateMetadata({ params }: Props) {
   const sb = await createSupabaseServer();
   const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at, cover_image').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
+  const BRAND_COVERS: Record<string, string> = {
+    stock: `${SITE}/images/brand/kadeora-wide.png`,
+    finance: `${SITE}/images/brand/kadeora-hero.png`,
+    apt: `${SITE}/images/brand/kadeora-full.png`,
+    unsold: `${SITE}/images/brand/kadeora-full.png`,
+    general: `${SITE}/images/brand/kadeora-hero.png`,
+  };
+  const ogImage = post.cover_image || BRAND_COVERS[post.category] || BRAND_COVERS.general;
   return {
     title: `${post.title} | 카더라 블로그`,
     description: post.excerpt || post.title,
@@ -62,7 +70,11 @@ export async function generateMetadata({ params }: Props) {
     openGraph: {
       title: post.title, description: post.excerpt || post.title, type: 'article',
       publishedTime: post.created_at, url: `${SITE}/blog/${slug}`,
-      ...(post.cover_image ? { images: [{ url: post.cover_image, width: 1200, height: 630 }] } : {}),
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+      images: [ogImage],
     },
     other: (() => {
       // GEO 태그: 제목/태그에서 지역명 추출

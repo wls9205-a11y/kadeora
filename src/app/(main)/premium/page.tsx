@@ -5,6 +5,11 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '프리미엄 구독',
   description: '카더라 프리미엄으로 더 많은 정보를 받아보세요',
+  openGraph: {
+    title: '프리미엄 | 카더라',
+    description: '프리미엄으로 더 깊은 투자 인사이트를 받아보세요',
+    images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 프리미엄' }],
+  },
 };
 
 export default async function PremiumPage() {
