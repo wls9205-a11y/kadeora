@@ -8,6 +8,47 @@ import type { Metadata } from 'next';
 import MiniDiscuss from '@/components/MiniDiscuss';
 import StockComments from '@/components/StockComments';
 import ShareButtons from '@/components/ShareButtons';
+import StockWatchlistButton from './WatchlistButton';
+
+function MiniChart({ data }: { data: { date: string; close_price: number }[] }) {
+  if (!data || data.length < 2) return null;
+  const prices = data.map(d => Number(d.close_price));
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+  const W = 300, H = 80, P = 4;
+  const points = prices.map((p, i) => {
+    const x = P + (i / (prices.length - 1)) * (W - P * 2);
+    const y = H - P - ((p - min) / range) * (H - P * 2);
+    return `${x},${y}`;
+  }).join(' ');
+  const isUp = prices[prices.length - 1] >= prices[0];
+  const color = isUp ? '#22c55e' : '#ef4444';
+  const pctChange = ((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(1);
+  return (
+    <div style={{ padding: 16, background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+        <span style={{ fontWeight: 600 }}>📈 1개월 추이</span>
+        <span style={{ color, fontWeight: 700 }}>{isUp ? '▲' : '▼'} {pctChange}%</span>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 80 }}>
+        <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
+        <span>{data[0].date.slice(5)}</span>
+        <span>{data[data.length - 1].date.slice(5)}</span>
+      </div>
+    </div>
+  );
+}
+
+function timeAgoNews(d: string) {
+  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+  if (m < 60) return `${m}분 전`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}시간 전`;
+  return `${Math.floor(h / 24)}일 전`;
+}
 
 function fmtPrice(p: number, c: string) { return c === 'KRW' ? `₩${p.toLocaleString()}` : `$${p.toFixed(2)}`; }
 function fmtCap(v: number | null, c: string) {
@@ -82,6 +123,20 @@ export default async function StockDetailPage({ params }: Props) {
           </div>
         )}
       </div>
+      {/* 미니 차트 */}
+      {await (async () => {
+        const { data: hist } = await sb.from('stock_price_history')
+          .select('date, close_price').eq('symbol', symbol)
+          .order('date', { ascending: true }).limit(30);
+        if (!hist || hist.length < 2) return null;
+        return <MiniChart data={hist} />;
+      })()}
+
+      {/* 관심종목 버튼 */}
+      <div style={{ marginBottom: 16 }}>
+        <StockWatchlistButton symbol={symbol} />
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
         {items.map(({ label, value }) => (
           <div key={label} style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '12px 14px' }}>
@@ -117,6 +172,31 @@ export default async function StockDetailPage({ params }: Props) {
           {s.description ?? `${s.name}은(는) ${s.market} 상장 종목입니다. 자세한 기업 정보는 공식 홈페이지나 증권사 앱에서 확인해보세요.`}
         </p>
       </div>
+      {/* 관련 뉴스 */}
+      {await (async () => {
+        const { data: news } = await sb.from('stock_news')
+          .select('*').eq('symbol', symbol)
+          .order('published_at', { ascending: false }).limit(5);
+        if (!news || news.length === 0) return null;
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
+            {news.map((n: any) => (
+              <a key={n.id} href={n.url} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>{n.title}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 6 }}>
+                  <span>{n.source || '뉴스'}</span>
+                  <span>{timeAgoNews(n.published_at)}</span>
+                  {n.sentiment === 'positive' && <span>🟢</span>}
+                  {n.sentiment === 'negative' && <span>🔴</span>}
+                </div>
+              </a>
+            ))}
+          </div>
+        );
+      })()}
+
       <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 10, padding: 12, marginBottom: 20, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
         ⚠️ 본 정보는 투자 권유가 아니며, 투자에 따른 손익은 투자자 본인에게 귀속됩니다. 금융투자상품은 원금 손실이 발생할 수 있습니다.
       </div>

@@ -125,7 +125,8 @@ export default function StockClient({ initialStocks }: Props) {
   const [exchangeRate, setExchangeRate] = useState(1380);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [sortBy, setSortBy] = useState('default');
-  const [mainTab, setMainTab] = useState<'ranking'|'movers'|'themes'|'calendar'|'overseas'>('ranking');
+  const [mainTab, setMainTab] = useState<'ranking'|'movers'|'themes'|'calendar'|'overseas'|'watchlist'>('ranking');
+  const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
   const [moversTab, setMoversTab] = useState<'up'|'down'|'volume'>('up');
   const [themes, setThemes] = useState<Theme[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
@@ -136,6 +137,7 @@ export default function StockClient({ initialStocks }: Props) {
   useEffect(() => {
     fetch('/api/stock/themes').then(r => r.ok ? r.json() : null).then(d => { if (d?.themes) setThemes(d.themes); }).catch(() => {});
     fetch('/api/stock/calendar').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setCalendarEvents(d.events); }).catch(() => {});
+    fetch('/api/stock/watchlist').then(r => r.ok ? r.json() : null).then(d => { if (d?.symbols) setWatchlistSymbols(d.symbols); }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -235,6 +237,8 @@ export default function StockClient({ initialStocks }: Props) {
     if (moversTab === 'up') regularStocks = [...regularStocks].sort((a, b) => (b.change_pct ?? 0) - (a.change_pct ?? 0)).slice(0, 20);
     else if (moversTab === 'down') regularStocks = [...regularStocks].sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 20);
     else regularStocks = [...regularStocks].sort((a, b) => (b.volume ?? 0) - (a.volume ?? 0)).slice(0, 20);
+  } else if (mainTab === 'watchlist') {
+    regularStocks = regularStocks.filter(s => watchlistSymbols.includes(s.symbol));
   } else if (mainTab === 'ranking') {
     regularStocks = regularStocks.slice(0, 30);
   }
@@ -374,6 +378,7 @@ export default function StockClient({ initialStocks }: Props) {
         {([
           ['ranking', '📊 시총순위'], ['movers', '📈 등락률'], ['themes', '🔥 테마'],
           ['calendar', '📅 캘린더'], ['overseas', '🌐 해외'],
+          ...(watchlistSymbols.length > 0 ? [['watchlist', '⭐ 관심'] as const] : []),
         ] as const).map(([k, l]) => (
           <button key={k} onClick={() => { setMainTab(k); if (k === 'overseas') setMarket('NYSE'); else if (market === 'NYSE' || market === 'NASDAQ') setMarket('ALL'); }} style={{
             padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
