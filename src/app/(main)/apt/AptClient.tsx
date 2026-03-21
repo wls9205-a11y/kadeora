@@ -221,6 +221,13 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
         const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
         const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
 
+        // 지역별 현황판 데이터 집계
+        const unsoldRegionStats = regs.filter(r => r !== '전체').map(r => {
+          const items = unsold.filter((u: any) => (u.region_nm || '기타') === r);
+          const unitCount = items.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+          return { name: r, siteCount: items.length, unitCount };
+        }).sort((a, b) => b.unitCount - a.unitCount);
+
         return (
           <div>
             {/* 미분양 통계 위젯 */}
@@ -237,6 +244,43 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
                 <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{unsold.length}곳</div>
               </div>
               <div style={{ flex: 1, textAlign: 'right' as const, fontSize: 11, color: 'var(--text-tertiary)', alignSelf: 'flex-end' }}>국토교통부 기준</div>
+            </div>
+
+            {/* 지역별 현황판 */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 미분양 현황</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#f87171' }}>총 {total.toLocaleString()}세대</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6 }}>
+                <button onClick={() => setUnsoldRegion('전체')} style={{
+                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  border: unsoldRegion === '전체' ? '2px solid #f87171' : '1px solid var(--border)',
+                  background: unsoldRegion === '전체' ? '#f87171' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#f87171' }}>{total.toLocaleString()}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                  <span style={{ fontSize: 8, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
+                </button>
+                {unsoldRegionStats.map(r => (
+                  <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
+                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                    border: unsoldRegion === r.name ? '2px solid #f87171' : '1px solid var(--border)',
+                    background: unsoldRegion === r.name ? '#f87171' : 'var(--bg-surface)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                  }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#f87171' }}>{r.unitCount.toLocaleString()}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                    <span style={{ fontSize: 8, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+                    {total > 0 && (
+                      <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
+                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : '#f87171', width: `${(r.unitCount / total) * 100}%` }} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* 안내 + 필터 */}
