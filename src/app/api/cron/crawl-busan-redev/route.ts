@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  try {
+  const result = await withCronLogging('crawl-busan-redev', async () => {
     const BASE_URL = 'https://apis.data.go.kr/6260000/MaintenanceBusinessStatus1/getMaintenanceBusiness1';
 
     // 1) 전체 건수 파악
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     if (totalCount === 0) {
       console.log('[crawl-busan-redev] first response:', JSON.stringify(firstData).slice(0, 500));
-      return NextResponse.json({ message: 'No data or check API response structure', totalCount: 0 });
+      return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'busan_opendata', api_calls: 1, sampleFields: [] } };
     }
 
     // 2) 전체 데이터 (100건씩 페이징)
@@ -57,7 +58,6 @@ export async function GET(req: NextRequest) {
 
     // 첫 행의 모든 키를 응답에 포함 (디버깅용)
     const sampleFields = allRows[0] ? Object.keys(allRows[0]) : [];
-    const sampleRow = allRows[0] || null;
 
     // 필드 탐색 헬퍼
     const find = (row: any, candidates: string[]): string | null => {
@@ -97,14 +97,16 @@ export async function GET(req: NextRequest) {
       if (!error) inserted += batch.length;
     }
 
-    return NextResponse.json({
-      message: 'Busan redevelopment data refreshed',
-      total_from_api: allRows.length,
-      inserted,
-      sampleFields,
-      ...(inserted === 0 ? { sampleRow } : {}),
-    });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return {
+      processed: allRows.length,
+      created: inserted,
+      failed: 0,
+      metadata: { api_name: 'busan_opendata', api_calls: Math.ceil(totalCount / 100) + 1, sampleFields },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...result });
 }

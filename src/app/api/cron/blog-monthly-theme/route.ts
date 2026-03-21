@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
+import { withCronLogging } from '@/lib/cron-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,12 +69,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  try {
+  const result = await withCronLogging('blog-monthly-theme', async () => {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const now = new Date();
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const themes = MONTHLY_THEMES[monthKey];
-    if (!themes || themes.length === 0) return NextResponse.json({ ok: true, created: 0, message: `No themes for ${monthKey}` });
+    if (!themes || themes.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'anthropic', api_calls: 0, month: monthKey } };
 
     let created = 0;
     for (const theme of themes) {
@@ -101,9 +102,16 @@ export async function GET(req: NextRequest) {
     }
 
     console.log(`[blog-monthly-theme] Created ${created} for ${monthKey}`);
-    return NextResponse.json({ ok: true, created, month: monthKey });
-  } catch (error: any) {
-    console.error('[blog-monthly-theme] Error:', error);
-    return NextResponse.json({ error: String(error.message || error) }, { status: 500 });
+    return {
+      processed: themes.length,
+      created,
+      failed: 0,
+      metadata: { api_name: 'anthropic', api_calls: 0, month: monthKey },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, created: result.created });
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
 
 const LAWD_CODES: Record<string, string> = {
   '서울 종로구':'11110','서울 중구':'11140','서울 용산구':'11170','서울 성동구':'11200',
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
 
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  try {
+  const result = await withCronLogging('crawl-apt-trade', async () => {
     const now = new Date();
     const months = [
       `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`,
@@ -118,15 +119,16 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
-    return NextResponse.json({
-      message: 'Apt trade data crawled (full)',
-      total_regions: entries.length,
-      inserted: totalInserted,
-      months,
-      notifications: notifCount,
-      ...(failed.length > 0 ? { failed } : {}),
-    });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return {
+      processed: entries.length,
+      created: totalInserted,
+      failed: failed.length,
+      metadata: { api_name: 'data_go_kr', api_calls: entries.length * 2, months, notifications: notifCount, ...(failed.length > 0 ? { failed } : {}) },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...result });
 }

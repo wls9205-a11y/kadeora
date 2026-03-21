@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
+import { withCronLogging } from '@/lib/cron-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,12 +106,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  try {
+  const result = await withCronLogging('blog-seed-guide', async () => {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const { data: seeds, error: fetchErr } = await admin.from('guide_seeds').select('*').eq('blog_generated', false);
 
-    if (fetchErr) { console.error('[blog-seed-guide] fetch error:', fetchErr); return NextResponse.json({ error: fetchErr.message }, { status: 500 }); }
-    if (!seeds || seeds.length === 0) return NextResponse.json({ ok: true, created: 0, message: 'No pending guide seeds' });
+    if (fetchErr) { console.error('[blog-seed-guide] fetch error:', fetchErr); throw new Error(fetchErr.message); }
+    if (!seeds || seeds.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'anthropic', api_calls: 0 } };
 
     console.log(`[blog-seed-guide] Found ${seeds.length} seeds, columns:`, Object.keys(seeds[0] || {}));
 
@@ -152,9 +153,16 @@ export async function GET(req: NextRequest) {
     }
 
     console.log(`[blog-seed-guide] Created ${created}/${seeds.length}, skipped ${skipped}`);
-    return NextResponse.json({ ok: true, created, total: seeds.length, skipped });
-  } catch (error: any) {
-    console.error('[blog-seed-guide] Error:', error);
-    return NextResponse.json({ error: String(error.message || error) }, { status: 500 });
+    return {
+      processed: seeds.length,
+      created,
+      failed: skipped,
+      metadata: { api_name: 'anthropic', api_calls: 0 },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, created: result.created });
 }

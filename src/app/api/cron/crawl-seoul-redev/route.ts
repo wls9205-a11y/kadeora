@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
 
 const SERVICE_NAME = 'upisRebuild';
 
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  try {
+  const result = await withCronLogging('crawl-seoul-redev', async () => {
     const baseUrl = `http://openapi.seoul.go.kr:8088/${apiKey}/json/${SERVICE_NAME}`;
 
     // 1) 전체 건수 파악
@@ -48,16 +49,12 @@ export async function GET(req: NextRequest) {
     const countText = await countRes.text();
     let countData: any;
     try { countData = JSON.parse(countText); } catch {
-      return NextResponse.json({ error: 'Invalid JSON', raw: countText.slice(0, 300) });
+      throw new Error('Invalid JSON from Seoul API: ' + countText.slice(0, 300));
     }
 
     const totalCount = countData?.[SERVICE_NAME]?.list_total_count || 0;
     if (totalCount === 0) {
-      return NextResponse.json({
-        message: 'No data from Seoul API',
-        keys: Object.keys(countData),
-        sample: countText.slice(0, 300),
-      });
+      return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'seoul_opendata', api_calls: 1, filtered: 0, deduped: 0 } };
     }
 
     // 2) 전체 데이터 (1000건씩 페이징)
@@ -107,15 +104,16 @@ export async function GET(req: NextRequest) {
       else insertErrors.push(error.message);
     }
 
-    return NextResponse.json({
-      message: 'Seoul redevelopment data refreshed',
-      total_from_api: allRows.length,
-      filtered: filtered.length,
-      deduped: unique.length,
-      inserted,
-      ...(insertErrors.length > 0 ? { insertErrors: insertErrors.slice(0, 3) } : {}),
-    });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return {
+      processed: allRows.length,
+      created: inserted,
+      failed: insertErrors.length,
+      metadata: { api_name: 'seoul_opendata', api_calls: Math.ceil(totalCount / 1000) + 1, filtered: filtered.length, deduped: unique.length },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...result });
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  try {
+  const result = await withCronLogging('crawl-unsold-molit', async () => {
     // 최신 월 데이터 (보통 2~3개월 전까지 제공)
     const now = new Date();
     const attempts = [2, 3, 4]; // 2개월 전, 3개월 전, 4개월 전 순서로 시도
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (formList.length === 0) {
-      return NextResponse.json({ error: 'No unsold data available from MOLIT', attempts });
+      return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'molit_stat', api_calls: attempts.length, month: '', summaryStored: false } };
     }
 
     // 시군구별 미분양 매핑 (합계 행 제외, 0세대 제외)
@@ -118,15 +119,17 @@ export async function GET(req: NextRequest) {
       console.error('[crawl-unsold-molit] summary error:', e);
     }
 
-    return NextResponse.json({
-      message: 'Unsold apartments data refreshed from MOLIT',
-      month: usedMonth,
-      total_from_api: formList.length,
-      filtered: mapped.length,
-      inserted,
-      summaryStored,
-    });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return {
+      processed: formList.length,
+      created: inserted,
+      updated: 0,
+      failed: formList.length - mapped.length,
+      metadata: { api_name: 'molit_stat', api_calls: attempts.length + 1, month: usedMonth, summaryStored },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...result });
 }

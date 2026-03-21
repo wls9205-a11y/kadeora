@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
 
 const LAWD_CODES: Record<string, string> = {
   '서울 강남구':'11680','서울 서초구':'11650','서울 송파구':'11710','서울 강동구':'11740',
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
 
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  try {
+  const result = await withCronLogging('crawl-apt-resale', async () => {
     const now = new Date();
     const months = [
       `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`,
@@ -77,8 +78,16 @@ export async function GET(req: NextRequest) {
       if (r.status === 'fulfilled') totalInserted += r.value;
     }
 
-    return NextResponse.json({ message: 'Resale rights data crawled (full)', inserted: totalInserted, months });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return {
+      processed: entries.length,
+      created: totalInserted,
+      failed: 0,
+      metadata: { api_name: 'data_go_kr', api_calls: entries.length * 2, months },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...result });
 }

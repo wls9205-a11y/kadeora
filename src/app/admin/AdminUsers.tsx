@@ -1,0 +1,222 @@
+'use client';
+import { useState, useEffect } from 'react';
+
+const cardStyle: React.CSSProperties = {
+  background: '#fff',
+  borderRadius: 12,
+  padding: 20,
+  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+};
+
+interface User {
+  id: string;
+  nickname: string;
+  grade_title: string;
+  created_at: string;
+  posts_count: number;
+  is_deleted: boolean;
+  region_text: string | null;
+  points: number | null;
+}
+
+export default function AdminUsers() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<'all' | 'active' | 'suspended'>('all');
+  const [userType, setUserType] = useState<'all' | 'real' | 'seed'>('all');
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    const res = await fetch('/api/admin/users');
+    if (res.ok) {
+      const d = await res.json();
+      setUsers(d.users ?? []);
+    }
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const action = async (id: string, act: string) => {
+    const msg = act === 'suspend' ? '이 유저를 정지하시겠습니까?' : '이 유저를 복구하시겠습니까?';
+    if (!confirm(msg)) return;
+    await fetch(`/api/admin/users/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: act }),
+    });
+    load();
+  };
+
+  const setPoints = async (id: string, current: number | null) => {
+    const val = prompt('새 포인트 값을 입력하세요', String(current ?? 0));
+    if (val === null) return;
+    const num = Number(val);
+    if (isNaN(num)) { alert('숫자를 입력하세요'); return; }
+    await fetch(`/api/admin/users/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'set_points', points: num }),
+    });
+    load();
+  };
+
+  const isSeed = (id: string) => id.startsWith('aaaaaaaa');
+  const seedUsers = users.filter(u => isSeed(u.id));
+  const realUsersList = users.filter(u => !isSeed(u.id));
+
+  const filtered = users
+    .filter(u => userType === 'all' || (userType === 'real' ? !isSeed(u.id) : isSeed(u.id)))
+    .filter(u => filter === 'all' || (filter === 'active' ? !u.is_deleted : u.is_deleted))
+    .filter(u => !search || (u.nickname || '').includes(search));
+
+  // Grade distribution
+  const gradeMap: Record<string, number> = {};
+  for (const u of users) {
+    const g = u.grade_title || '미설정';
+    gradeMap[g] = (gradeMap[g] || 0) + 1;
+  }
+  const gradeColors: Record<string, string> = {
+    '뉴비': '#94a3b8', '초보자': '#3b82f6', '주민': '#10b981', '터줏대감': '#f59e0b',
+    '인싸': '#8b5cf6', '핵인싸': '#ef4444', '미설정': '#cbd5e1',
+  };
+
+  return (
+    <div>
+      {/* Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
+        {[
+          { label: '전체', value: users.length, color: '#1e293b' },
+          { label: '실제 유저', value: realUsersList.length, color: '#10b981' },
+          { label: '시드', value: seedUsers.length, color: '#94a3b8' },
+          { label: '정지됨', value: users.filter(u => u.is_deleted).length, color: '#ef4444' },
+        ].map(s => (
+          <div key={s.label} style={{ ...cardStyle, textAlign: 'center' }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Grade Distribution Bar */}
+      <div style={{ ...cardStyle, marginBottom: 20 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginBottom: 10 }}>등급 분포</div>
+        <div style={{ display: 'flex', height: 24, borderRadius: 12, overflow: 'hidden', background: '#f1f5f9' }}>
+          {Object.entries(gradeMap).map(([grade, count]) => {
+            const pct = users.length > 0 ? (count / users.length) * 100 : 0;
+            if (pct < 1) return null;
+            return (
+              <div
+                key={grade}
+                title={`${grade}: ${count}명 (${pct.toFixed(1)}%)`}
+                style={{
+                  width: `${pct}%`,
+                  background: gradeColors[grade] || '#94a3b8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 9,
+                  color: '#fff',
+                  fontWeight: 700,
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {pct > 8 ? grade : ''}
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
+          {Object.entries(gradeMap).map(([grade, count]) => (
+            <div key={grade} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#64748b' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: gradeColors[grade] || '#94a3b8' }} />
+              {grade} ({count})
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        {(['all', 'real', 'seed'] as const).map(t => (
+          <button key={t} onClick={() => setUserType(t)} style={{
+            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            background: userType === t ? '#ff5b36' : '#f1f5f9',
+            color: userType === t ? '#fff' : '#64748b',
+          }}>
+            {t === 'all' ? '전체' : t === 'real' ? `실제 (${realUsersList.length})` : `시드 (${seedUsers.length})`}
+          </button>
+        ))}
+        <div style={{ width: 1, height: 20, background: '#e2e8f0' }} />
+        {(['all', 'active', 'suspended'] as const).map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            background: filter === f ? '#ff5b36' : '#f1f5f9',
+            color: filter === f ? '#fff' : '#64748b',
+          }}>
+            {{ all: '전체', active: '정상', suspended: '정지됨' }[f]}
+          </button>
+        ))}
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="닉네임 검색"
+          style={{
+            marginLeft: 'auto', padding: '6px 12px', fontSize: 13, background: '#f1f5f9',
+            border: '1px solid #e2e8f0', borderRadius: 6, color: '#1e293b', width: '100%', maxWidth: 180,
+          }}
+        />
+      </div>
+
+      {/* Users Table */}
+      <div style={{ ...cardStyle, overflow: 'auto', padding: 0 }}>
+        {loading ? (
+          <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩 중...</div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#94a3b8', textAlign: 'left' }}>
+                <th style={{ padding: '10px 14px' }}>닉네임</th>
+                <th style={{ padding: '10px 14px' }}>등급</th>
+                <th style={{ padding: '10px 14px' }}>가입일</th>
+                <th style={{ padding: '10px 14px' }}>게시글</th>
+                <th style={{ padding: '10px 14px' }}>포인트</th>
+                <th style={{ padding: '10px 14px' }}>상태</th>
+                <th style={{ padding: '10px 14px' }}>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(u => (
+                <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9', opacity: u.is_deleted ? 0.5 : 1 }}>
+                  <td style={{ padding: '10px 14px', color: '#1e293b', fontWeight: 600 }}>
+                    {u.nickname || '미설정'}
+                    {isSeed(u.id) && <span style={{ fontSize: 9, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: '#f1f5f9', color: '#94a3b8' }}>시드</span>}
+                  </td>
+                  <td style={{ padding: '10px 14px', color: '#64748b' }}>{u.grade_title || '-'}</td>
+                  <td style={{ padding: '10px 14px', color: '#94a3b8' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+                  <td style={{ padding: '10px 14px', color: '#64748b' }}>{u.posts_count ?? 0}</td>
+                  <td style={{ padding: '10px 14px', color: '#64748b' }}>{u.points ?? 0}</td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <span style={{
+                      fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700,
+                      background: u.is_deleted ? '#fee2e2' : '#dcfce7',
+                      color: u.is_deleted ? '#dc2626' : '#16a34a',
+                    }}>{u.is_deleted ? '정지' : '정상'}</span>
+                  </td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {u.is_deleted ? (
+                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', cursor: 'pointer', fontWeight: 600 }}>복구</button>
+                      ) : (
+                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontWeight: 600 }}>정지</button>
+                      )}
+                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #3b82f6', background: 'transparent', color: '#3b82f6', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}

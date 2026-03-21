@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
+import { withCronLogging } from '@/lib/cron-logger';
 
 const CATEGORIES = ['stock', 'apt', 'free', 'local'];
 const REGIONS = ['서울','부산','경기','인천','대구','광주','대전','울산','세종','제주','강원','충북','충남','전북','전남','경북','경남'];
@@ -45,12 +46,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  try {
+  const result = await withCronLogging('seed-posts', async () => {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
     const { data: seedUsers } = await admin.rpc('get_seed_users');
     if (!seedUsers || seedUsers.length === 0) {
-      return NextResponse.json({ skipped: true, reason: 'No seed users in DB' });
+      return { processed: 0, created: 0, failed: 0 };
     }
 
     // 1~3개 글 랜덤 생성
@@ -166,9 +167,16 @@ export async function GET(req: NextRequest) {
       body: JSON.stringify({ secret: cronSecret, path: '/feed' }),
     }).catch(() => {});
 
-    return NextResponse.json({ ok: true, created: results.length, posts: results });
-  } catch (e: any) {
-    console.error('[seed-posts]', e.message);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return {
+      processed: postCount,
+      created: results.length,
+      failed: postCount - results.length,
+      metadata: { posts: results },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...result });
 }

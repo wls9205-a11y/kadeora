@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { withCronLogging } from '@/lib/cron-logger';
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  try {
+  const result = await withCronLogging('crawl-gyeonggi-redev', async () => {
     // 여러 서비스명 후보 시도
     const SERVICE_CANDIDATES = ['Ggcleanupbiz', 'UrbanMntncBizInfo', 'URBMNTNCBIZ', 'GgClnupBsnsSttus'];
     let allRows: any[] = [];
@@ -68,11 +69,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (allRows.length === 0) {
-      return NextResponse.json({
-        message: 'No data found from Gyeonggi API',
-        triedServices: SERVICE_CANDIDATES,
-        debugInfo,
-      });
+      return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'gyeonggi_data', api_calls: SERVICE_CANDIDATES.length, usedService: '', sampleFields: [] } };
     }
 
     const stageMap: Record<string, string> = {
@@ -117,16 +114,16 @@ export async function GET(req: NextRequest) {
       else insertErrors.push(error.message);
     }
 
-    return NextResponse.json({
-      message: 'Gyeonggi redevelopment data refreshed',
-      usedService,
-      sampleFields: allRows[0] ? Object.keys(allRows[0]) : [],
-      total: allRows.length,
-      inserted,
-      ...(insertErrors.length > 0 ? { insertErrors: insertErrors.slice(0, 3) } : {}),
-      ...(inserted === 0 ? { debugInfo, sampleRow: allRows[0] } : {}),
-    });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return {
+      processed: allRows.length,
+      created: inserted,
+      failed: insertErrors.length,
+      metadata: { api_name: 'gyeonggi_data', api_calls: allRows.length > 5 ? Math.ceil(allRows.length / 100) + 1 : 1, usedService, sampleFields: allRows[0] ? Object.keys(allRows[0]) : [] },
+    };
+  });
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...result });
 }
