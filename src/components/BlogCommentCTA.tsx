@@ -1,0 +1,19 @@
+'use client';
+
+export default function BlogCommentCTA({ commentCount }: { commentCount: number }) {
+  if (commentCount > 0) return null;
+  return (
+    <div style={{
+      margin: '24px 0', padding: '20px', borderRadius: 16, textAlign: 'center',
+      background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.08) 100%)',
+      border: '1px solid rgba(139,92,246,0.15)',
+    }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+        이 글에 대해 어떻게 생각하세요?
+      </div>
+      <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+        첫 번째 댓글의 주인공이 되어보세요! 댓글 작성 시 포인트가 적립됩니다.
+      </div>
+    </div>
+  );
+}

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import BlogCommentInput from '@/components/BlogCommentInput';
+import BlogCommentCTA from '@/components/BlogCommentCTA';
 import { getAvatarColor } from '@/lib/avatar';
 
 export const revalidate = 300;
@@ -177,6 +178,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </article>
 
       {/* 댓글 섹션 */}
+      <BlogCommentCTA commentCount={comments.length} />
       <div id="blog-comments" style={{ marginBottom: 20 }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 16px' }}>
