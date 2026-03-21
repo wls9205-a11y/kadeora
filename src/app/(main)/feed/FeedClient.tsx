@@ -46,12 +46,6 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   const [userRegion, setUserRegion] = useState<string | null>(null);
   const [showHotBanner, setShowHotBanner] = useState(false);
   const [hotPosts, setHotPosts] = useState<any[]>([]);
-  const [trending, setTrending] = useState<any[]>([]);
-
-  useEffect(() => {
-    fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.keywords) setTrending(d.keywords.slice(0, 6)); }).catch(() => {});
-  }, []);
 
   // Reset when initialPosts change (category/region switch)
   useEffect(() => {
@@ -296,22 +290,6 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           </div>
           <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>→</span>
         </Link>
-      )}
-
-      {/* 모바일 인기검색어 칩 */}
-      {trending.length > 0 && (
-        <div className="sm:hidden" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginBottom: 10 }}>
-          <span style={{ width: '100%', textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 2 }}>🔍 인기 검색어</span>
-          {trending.slice(0, 6).map((kw: any, i: number) => (
-            <Link key={kw.keyword} href={`/search?q=${encodeURIComponent(kw.keyword)}`} style={{
-              fontSize: 11, padding: '3px 10px', borderRadius: 999,
-              background: 'var(--bg-hover)', color: 'var(--text-secondary)',
-              textDecoration: 'none',
-            }}>
-              {i + 1}. {kw.keyword}
-            </Link>
-          ))}
-        </div>
       )}
 
       {/* 트렌딩 */}

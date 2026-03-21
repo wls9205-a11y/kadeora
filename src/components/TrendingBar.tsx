@@ -28,6 +28,7 @@ export default function TrendingBar() {
       padding: '8px 16px',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: 'center',
       gap: 6,
       overflowX: 'auto',
       scrollbarWidth: 'none',
