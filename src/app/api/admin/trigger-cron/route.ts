@@ -26,13 +26,16 @@ export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET || '';
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${req.headers.get('host')}`;
 
+  const targetUrl = `${baseUrl}${endpoint}`;
   try {
-    const res = await fetch(`${baseUrl}${endpoint}`, {
+    const res = await fetch(targetUrl, {
       headers: { 'Authorization': `Bearer ${cronSecret}` },
     });
-    const data = await res.json();
-    return NextResponse.json({ status: res.status, ...data });
+    const text = await res.text();
+    let data: any;
+    try { data = JSON.parse(text); } catch { data = { raw: text.slice(0, 200) }; }
+    return NextResponse.json({ status: res.status, endpoint, url: targetUrl, ...data });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Trigger failed' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Trigger failed', endpoint, url: targetUrl }, { status: 500 });
   }
 }
