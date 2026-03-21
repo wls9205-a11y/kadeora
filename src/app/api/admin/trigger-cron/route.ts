@@ -7,6 +7,7 @@ const ALLOWED_ENDPOINTS = [
   '/api/admin/seed-finance-blogs',
   '/api/cron/blog-apt-landmark', '/api/cron/blog-redevelopment', '/api/cron/blog-seed-guide', '/api/cron/blog-monthly-theme',
   '/api/cron/crawl-seoul-redev', '/api/cron/crawl-gyeonggi-redev', '/api/cron/crawl-busan-redev', '/api/cron/crawl-unsold-molit',
+  '/api/admin/seed-discussions',
 ];
 
 export async function POST(req: NextRequest) {
