@@ -37,11 +37,23 @@ const SB = {
   closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
-export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
-  const [activeTab, setActiveTab] = useState<'sub' | 'unsold'>('sub');
+const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }> = {
+  '정비구역지정': { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af', border: '#6b7280' },
+  '조합설립': { bg: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '#3b82f6' },
+  '사업시행인가': { bg: 'rgba(234,179,8,0.15)', color: '#fde047', border: '#eab308' },
+  '관리처분': { bg: 'rgba(249,115,22,0.15)', color: '#fdba74', border: '#f97316' },
+  '착공': { bg: 'rgba(34,197,94,0.15)', color: '#86efac', border: '#22c55e' },
+  '준공': { bg: 'rgba(255,91,54,0.15)', color: '#ff5b36', border: 'var(--brand)' },
+};
+const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
+
+export default function AptClient({ apts, unsold = [], redevelopment = [], alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
+  const [activeTab, setActiveTab] = useState<'sub' | 'unsold' | 'redev'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
+  const [redevType, setRedevType] = useState('전체');
+  const [redevRegion, setRedevRegion] = useState('전체');
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
@@ -91,7 +103,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <span>전국 청약 일정과 미분양 현황</span>
+          <span>청약 일정 · 미분양 · 재개발·재건축</span>
           <a href="/apt/diagnose" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>🎯 가점 진단 →</a>
           <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>🏠 청약홈 →</a>
         </div>
@@ -99,7 +111,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)' }}>
-        {([['sub', '청약 일정'], ['unsold', '미분양']] as const).map(([k, l]) => (
+        {([['sub', '청약 일정'], ['unsold', '미분양'], ['redev', '재개발·재건축']] as const).map(([k, l]) => (
           <button key={k} onClick={() => setActiveTab(k)} style={{
             flex: 1, padding: '7px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
             background: activeTab === k ? 'var(--brand)' : 'transparent',
@@ -324,6 +336,116 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
 
             {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>해당 지역 데이터가 없습니다</div>}
             <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>최근 1년 미분양 현황 · 국토교통부 미분양주택현황 및 청약홈 공공데이터 기반 · 매월 갱신</p>
+          </div>
+        );
+      })()}
+
+      {/* ━━━ 재개발·재건축 탭 ━━━ */}
+      {activeTab === 'redev' && (() => {
+        if (!redevelopment.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>재개발·재건축 데이터가 없습니다</div>;
+
+        const redevCount = redevelopment.filter((r: any) => r.project_type === '재개발').length;
+        const rebuildCount = redevelopment.filter((r: any) => r.project_type === '재건축').length;
+        const stageCount: Record<string, number> = {};
+        STAGE_ORDER.forEach(s => { stageCount[s] = 0; });
+        redevelopment.forEach((r: any) => { if (stageCount[r.stage] !== undefined) stageCount[r.stage]++; else stageCount['기타'] = (stageCount['기타'] || 0) + 1; });
+
+        const redevRegs = ['전체', ...Array.from(new Set(redevelopment.map((r: any) => r.region || '기타'))).sort()];
+        const filteredRedev = redevelopment.filter((r: any) => {
+          if (redevType !== '전체' && r.project_type !== redevType) return false;
+          if (redevRegion !== '전체' && r.region !== redevRegion) return false;
+          return true;
+        });
+
+        return (
+          <div>
+            {/* 현황 요약 */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전체</div>
+              </div>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#3b82f6' }}>{redevCount}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재개발</div>
+              </div>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#f97316' }}>{rebuildCount}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재건축</div>
+              </div>
+            </div>
+
+            {/* 단계별 파이프라인 */}
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>단계별 현황</div>
+              <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end' }}>
+                {STAGE_ORDER.map((stage, i) => {
+                  const cnt = stageCount[stage] || 0;
+                  const sc = STAGE_COLORS[stage] || STAGE_COLORS['정비구역지정'];
+                  return (
+                    <div key={stage} style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: sc.color, marginBottom: 2 }}>{cnt}</div>
+                      <div style={{ height: 4, background: sc.border, borderRadius: 2, marginBottom: 4 }} />
+                      <div style={{ fontSize: 8, color: 'var(--text-tertiary)', lineHeight: 1.2 }}>{stage.length > 4 ? stage.slice(0, 4) + '\n' + stage.slice(4) : stage}</div>
+                      {i < STAGE_ORDER.length - 1 && <span />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 유형 필터 */}
+            <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
+              {pill('전체', redevType, setRedevType)}
+              {pill('재개발', redevType, setRedevType)}
+              {pill('재건축', redevType, setRedevType)}
+            </div>
+
+            {/* 지역 필터 */}
+            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>
+              {redevRegs.map(r => pill(r, redevRegion, setRedevRegion))}
+            </div>
+
+            {/* 결과 카운트 */}
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+              총 <strong style={{ color: 'var(--text-primary)' }}>{filteredRedev.length}</strong>건
+            </div>
+
+            {/* 카드 리스트 */}
+            {filteredRedev.map((r: any) => {
+              const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
+              return (
+                <div key={r.id} style={{
+                  padding: '12px 16px', borderRadius: 12, marginBottom: 6,
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  borderLeft: `4px solid ${sc.border}`,
+                }}>
+                  {/* 1행: 단계 + 유형 + 지역 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74', border: `1px solid ${r.project_type === '재개발' ? 'rgba(59,130,246,0.2)' : 'rgba(249,115,22,0.2)'}` }}>{r.project_type}</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{r.region}</span>
+                  </div>
+                  {/* 2행: 구역명 */}
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{r.district_name}</div>
+                  {/* 3행: 시군구 + 세대수 + 시공사 */}
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 2 }}>
+                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}{r.constructor ? ` · ${r.constructor}` : ''}
+                  </div>
+                  {/* 4행: 비고/예상준공 */}
+                  {(r.notes || r.expected_completion) && (
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                      {r.notes}{r.expected_completion ? (r.notes ? `, ${r.expected_completion}` : r.expected_completion) : ''}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>조건에 맞는 프로젝트가 없습니다</div>}
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
+              각 지자체 정비사업 공개 데이터 기준 · 실제 진행 상황은 해당 조합/지자체에서 확인하세요
+            </p>
           </div>
         );
       })()}

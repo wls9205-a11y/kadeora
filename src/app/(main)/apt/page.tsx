@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '아파트 청약 일정',
-  description: '2026년 전국 아파트 청약 일정과 분양 정보를 한눈에 확인하세요.',
+  title: '아파트 청약 일정 · 미분양 · 재개발 | 카더라',
+  description: '2026년 전국 아파트 청약 일정, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.',
   openGraph: {
-    title: '청약·미분양 | 카더라',
-    description: '전국 아파트 청약 일정과 미분양 현황',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 청약·미분양' }],
+    title: '청약·미분양·재개발 | 카더라',
+    description: '전국 아파트 청약 일정, 미분양 현황, 재개발·재건축 진행 현황',
+    images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 청약·미분양·재개발' }],
   },
 };
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
@@ -17,6 +17,7 @@ import Disclaimer from '@/components/Disclaimer';
 export default async function AptPage() {
   let apts: any[] = [];
   let unsold: any[] = [];
+  let redevelopment: any[] = [];
   let alertCounts: Record<string, number> = {};
   let lastRefreshed: string | null = null;
 
@@ -35,15 +36,17 @@ export default async function AptPage() {
     }
 
     // Always read from apt_subscriptions (the cache sync also writes there)
-    const [aptsR, unsoldR, alertsR] = await Promise.all([
+    const [aptsR, unsoldR, alertsR, redevelopmentR] = await Promise.all([
       sb.from('apt_subscriptions').select('*')
         .or(`rcept_endde.gte.${new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(300),
       sb.from('unsold_apts').select('*').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
       sb.from('apt_alerts').select('house_manage_no'),
+      sb.from('redevelopment_projects').select('*').eq('is_active', true).order('total_households', { ascending: false }),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
+    if (redevelopmentR.data?.length) redevelopment = redevelopmentR.data;
     (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
   } catch {}
 
@@ -60,5 +63,5 @@ export default async function AptPage() {
   });
   const regionStats = Object.entries(regionDetail).sort((a, b) => b[1].total - a[1].total).map(([name, s]) => ({ name, ...s }));
 
-  return <><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} /><Disclaimer /></>;
+  return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} /><Disclaimer /></>;
 }
