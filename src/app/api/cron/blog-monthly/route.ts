@@ -50,12 +50,12 @@ export async function GET(req: NextRequest) {
 
     // 가격대별 미분양
     const BUDGETS = [
-      { label: '3억 이하', max: 30000 },
-      { label: '3~5억', min: 30000, max: 50000 },
-      { label: '5억 이상', min: 50000 },
+      { label: '3억 이하', slug: 'under-3', max: 30000 },
+      { label: '3~5억', slug: '3-to-5', min: 30000, max: 50000 },
+      { label: '5억 이상', slug: 'over-5', min: 50000 },
     ];
     for (const b of BUDGETS) {
-      const bSlug = `unsold-budget-${b.label.replace(/[^가-힣0-9]/g, '')}-${month}`;
+      const bSlug = `unsold-budget-${b.slug}-${month}`;
       const { data: be } = await admin.from('blog_posts').select('id').eq('slug', bSlug).maybeSingle();
       if (be) continue;
 
