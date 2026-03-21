@@ -1,80 +1,99 @@
-import { createClient } from '@supabase/supabase-js';
-import type { MetadataRoute } from 'next';
+import { MetadataRoute } from 'next';
+import { createSupabaseServer } from '@/lib/supabase-server';
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+const BASE = 'https://kadeora.app';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: SITE,               lastModified: new Date(), changeFrequency: 'daily',   priority: 1 },
-    { url: `${SITE}/feed`,     lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.9 },
-    { url: `${SITE}/stock`,    lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.8 },
-    { url: `${SITE}/apt`,      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
-    { url: `${SITE}/discuss`,  lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.7 },
-    { url: `${SITE}/hot`,      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
-    { url: `${SITE}/blog`,     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
-    { url: `${SITE}/guide`,    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${SITE}/search`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.6 },
-    { url: `${SITE}/faq`,      lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
-    { url: `${SITE}/terms`,    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE}/privacy`,  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+export async function generateSitemaps() {
+  return [
+    { id: 0 },  // static pages
+    { id: 1 },  // blog posts
+    { id: 2 },  // stock pages
+    { id: 3 },  // apt pages
+    { id: 4 },  // feed posts
   ];
+}
+
+export default async function sitemap({ id }: { id: number }): Promise<MetadataRoute.Sitemap> {
+  const now = new Date().toISOString();
+
+  if (id === 0) {
+    // Static pages
+    return [
+      { url: BASE, lastModified: now, changeFrequency: 'daily', priority: 1.0 },
+      { url: `${BASE}/feed`, lastModified: now, changeFrequency: 'hourly', priority: 0.9 },
+      { url: `${BASE}/hot`, lastModified: now, changeFrequency: 'hourly', priority: 0.9 },
+      { url: `${BASE}/stock`, lastModified: now, changeFrequency: 'always', priority: 0.9 },
+      { url: `${BASE}/apt`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+      { url: `${BASE}/discuss`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+      { url: `${BASE}/blog`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+      { url: `${BASE}/guide`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+      { url: `${BASE}/search`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
+      { url: `${BASE}/faq`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+      { url: `${BASE}/terms`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
+      { url: `${BASE}/privacy`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
+    ];
+  }
 
   try {
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const sb = await createSupabaseServer();
 
-    const timeout = <T>(promise: Promise<T>, ms: number): Promise<T | null> =>
-      Promise.race([promise, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
+    if (id === 1) {
+      // Blog posts
+      const { data: blogs } = await sb.from('blog_posts')
+        .select('slug, updated_at, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1000);
+      return (blogs || []).map(b => ({
+        url: `${BASE}/blog/${b.slug}`,
+        lastModified: b.updated_at || b.created_at || now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      }));
+    }
 
-    const [postsResult, stocksResult, aptsResult, blogResult] = await Promise.all([
-      timeout(sb.from('posts').select('id, slug, updated_at, likes_count, comments_count').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000), 10000),
-      timeout(sb.from('stock_quotes').select('symbol, updated_at'), 5000),
-      timeout(sb.from('apt_subscriptions').select('id, house_manage_no, updated_at'), 5000),
-      timeout(sb.from('blog_posts').select('slug, updated_at, cover_image').eq('is_published', true).order('created_at', { ascending: false }).limit(1000), 5000),
-    ]);
+    if (id === 2) {
+      // Stock pages
+      const { data: stocks } = await sb.from('stock_quotes')
+        .select('symbol, updated_at')
+        .gt('updated_at', '2000-01-01')
+        .limit(500);
+      return (stocks || []).map(s => ({
+        url: `${BASE}/stock/${s.symbol}`,
+        lastModified: s.updated_at || now,
+        changeFrequency: 'daily' as const,
+        priority: 0.6,
+      }));
+    }
 
-    const posts = (postsResult as any)?.data ?? [];
-    const stocks = (stocksResult as any)?.data ?? [];
-    const apts = (aptsResult as any)?.data ?? [];
+    if (id === 3) {
+      // Apt pages
+      const { data: apts } = await sb.from('apt_subscriptions')
+        .select('house_manage_no, created_at')
+        .order('rcept_bgnde', { ascending: false })
+        .limit(500);
+      return (apts || []).map(a => ({
+        url: `${BASE}/apt/${a.house_manage_no}`,
+        lastModified: a.created_at || now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }));
+    }
 
-    const feedRoutes: MetadataRoute.Sitemap = posts.map((p: any) => ({
-      url: `${SITE}/feed/${p.slug || p.id}`,
-      lastModified: new Date(p.updated_at ?? Date.now()),
-      changeFrequency: 'weekly' as const,
-      priority: (p.likes_count >= 5 || p.comments_count >= 3) ? 0.8 : 0.6,
-    }));
+    if (id === 4) {
+      // Feed posts (popular ones only)
+      const { data: posts } = await sb.from('posts')
+        .select('id, slug, updated_at, created_at')
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      return (posts || []).map(p => ({
+        url: `${BASE}/feed/${p.slug || p.id}`,
+        lastModified: p.updated_at || p.created_at || now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.5,
+      }));
+    }
+  } catch {}
 
-    const activeStocks = stocks.filter((s: any) => {
-      if (!s.updated_at) return false;
-      return new Date(s.updated_at).getFullYear() > 2000;
-    });
-    const stockRoutes: MetadataRoute.Sitemap = activeStocks.map((s: any) => ({
-      url: `${SITE}/stock/${s.symbol}`,
-      lastModified: new Date(s.updated_at ?? Date.now()),
-      changeFrequency: 'hourly' as const,
-      priority: 0.7,
-    }));
-
-    const aptRoutes: MetadataRoute.Sitemap = apts.map((a: any) => ({
-      url: `${SITE}/apt/${a.house_manage_no || a.id}`,
-      lastModified: new Date(a.updated_at ?? Date.now()),
-      changeFrequency: 'daily' as const,
-      priority: 0.7,
-    }));
-
-    const blogs = (blogResult as any)?.data ?? [];
-    const blogRoutes: MetadataRoute.Sitemap = blogs.map((b: any) => ({
-      url: `${SITE}/blog/${b.slug}`,
-      lastModified: new Date(b.updated_at ?? Date.now()),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      ...(b.cover_image ? { images: [b.cover_image] } : {}),
-    }));
-
-    return [...staticRoutes, ...feedRoutes, ...stockRoutes, ...aptRoutes, ...blogRoutes];
-  } catch {
-    return staticRoutes;
-  }
+  return [];
 }

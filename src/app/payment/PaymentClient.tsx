@@ -105,6 +105,11 @@ export default function PaymentClient() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 py-8">
+      {process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY?.startsWith('test_') && (
+        <div style={{ background: '#FEF3C7', padding: '8px 16px', borderRadius: 8, fontSize: 13, color: '#92400E', marginBottom: 12 }}>
+          ⚠️ 현재 테스트 모드입니다. 실제 결제가 되지 않습니다.
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">상점</h1>
       <p className="text-[var(--text-primary)]/60 mb-6">아이템을 둘러보고 구매하세요</p>
       {step === 'confirm' && product && (

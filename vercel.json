@@ -120,6 +120,18 @@
     {
       "path": "/api/cron/aggregate-trade-stats",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/stock-price",
+      "schedule": "*/15 0-6 * * 1-5"
+    },
+    {
+      "path": "/api/cron/blog-weekly-market",
+      "schedule": "0 1 * * 1"
+    },
+    {
+      "path": "/api/cron/blog-monthly-market",
+      "schedule": "0 1 2 * *"
     }
   ]
 }

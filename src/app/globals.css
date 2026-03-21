@@ -78,6 +78,25 @@ html.font-large { font-size: 18px; }
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.7);
 }
 
+.light {
+  --bg-base: #ffffff;
+  --bg-surface: #f9fafb;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #f3f4f6;
+  --bg-hover: #f3f4f6;
+  --bg-active: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --text-disabled: #d1d5db;
+  --text-inverse: #ffffff;
+  --text-link: #2563eb;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+}
+
 /* ========================================
    기본 리셋
    ======================================== */

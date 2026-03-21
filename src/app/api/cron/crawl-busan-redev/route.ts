@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     if (totalCount === 0) {
       console.log('[crawl-busan-redev] first response:', JSON.stringify(firstData).slice(0, 500));
-      return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'busan_opendata', api_calls: 1, sampleFields: [] } };
+      return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'busan_opendata', api_calls: 1, sampleFields: [], sampleRow: null } };
     }
 
     // 2) 전체 데이터 (100건씩 페이징)
@@ -87,6 +87,18 @@ export async function GET(req: NextRequest) {
         };
       });
 
+    // 3.5) Fix misplaced district_name values (address-like patterns)
+    for (const item of mapped) {
+      if (item.district_name && (item.district_name.includes('번길') || /로\s/.test(item.district_name) || /구\s/.test(item.district_name))) {
+        // district_name looks like an address - move it and generate a name
+        if (!item.address) {
+          item.address = item.district_name;
+        }
+        const sigungu = item.sigungu || '부산';
+        item.district_name = `${sigungu} ${item.project_type} 정비사업`;
+      }
+    }
+
     // 4) Full refresh
     await supabase.from('redevelopment_projects').delete().eq('source', 'busan_opendata');
 
@@ -101,7 +113,12 @@ export async function GET(req: NextRequest) {
       processed: allRows.length,
       created: inserted,
       failed: 0,
-      metadata: { api_name: 'busan_opendata', api_calls: Math.ceil(totalCount / 100) + 1, sampleFields },
+      metadata: {
+        api_name: 'busan_opendata',
+        api_calls: Math.ceil(totalCount / 100) + 1,
+        sampleFields: allRows[0] ? Object.keys(allRows[0]) : [],
+        sampleRow: allRows[0] || null,
+      },
     };
   });
 

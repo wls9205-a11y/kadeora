@@ -28,6 +28,8 @@ const CRON_NAMES: Record<string, string> = {
   'exchange-rate': '환율 기록',
   'stock-theme-daily': '테마 자동 갱신',
   'stock-daily-briefing': 'AI 일일 시황',
+  'blog-weekly-market': '블로그: 주간 시장 리뷰',
+  'blog-monthly-market': '블로그: 월간 시장 리뷰',
 };
 
 interface RefreshState {

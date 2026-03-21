@@ -23,6 +23,8 @@ const CRON_SEQUENCE = [
   { name: 'exchange-rate', path: '/api/cron/exchange-rate' },
   { name: 'stock-theme-daily', path: '/api/cron/stock-theme-daily' },
   { name: 'stock-daily-briefing', path: '/api/cron/stock-daily-briefing' },
+  { name: 'blog-weekly-market', path: '/api/cron/blog-weekly-market' },
+  { name: 'blog-monthly-market', path: '/api/cron/blog-monthly-market' },
 ];
 
 export async function POST() {

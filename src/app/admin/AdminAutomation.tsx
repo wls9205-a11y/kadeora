@@ -27,6 +27,8 @@ const CRON_DISPLAY: Record<string, string> = {
   'stock-theme-daily': '테마 자동 갱신',
   'exchange-rate': '환율 기록',
   'aggregate-trade-stats': '실거래가 집계',
+  'blog-weekly-market': '블로그: 주간 시장 리뷰',
+  'blog-monthly-market': '블로그: 월간 시장 리뷰',
 };
 
 export default function AdminAutomation() {

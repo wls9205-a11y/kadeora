@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import StockComments from '@/components/StockComments';
+import CandlestickChart from '@/components/charts/CandlestickChart';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
@@ -122,7 +123,30 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 차트 */}
       {tab === 'chart' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          {priceHistory.length >= 2 ? <MiniChart data={priceHistory} /> : (
+          {priceHistory.length >= 2 ? (
+            <>
+              {/* Candlestick if OHLC data available */}
+              {priceHistory.some((d: any) => d.open_price && d.high_price && d.low_price) ? (
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 8 }}>📊 캔들스틱 차트</div>
+                  <CandlestickChart
+                    data={priceHistory.filter((d: any) => d.open_price && d.high_price && d.low_price).map((d: any) => ({
+                      date: d.date,
+                      open: d.open_price,
+                      high: d.high_price,
+                      low: d.low_price,
+                      close: d.close_price,
+                      volume: d.volume || 0,
+                    }))}
+                    height={220}
+                    showVolume={true}
+                  />
+                </div>
+              ) : (
+                <MiniChart data={priceHistory} />
+              )}
+            </>
+          ) : (
             <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', fontSize: 13 }}>차트 데이터 준비 중</div>
           )}
         </div>
