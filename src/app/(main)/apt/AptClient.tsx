@@ -234,7 +234,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], unsol
         const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
         const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
-        const us = unsoldSummary;
+        const usRaw = unsoldSummary;
+        const us: any = typeof usRaw === 'string' ? (() => { try { return JSON.parse(usRaw); } catch { return null; } })()
+          : usRaw?.total != null ? usRaw
+          : usRaw?.data?.total != null ? usRaw.data : null;
 
         // 지역별 현황판 데이터 집계
         const unsoldRegionStats = regs.filter(r => r !== '전체').map(r => {
@@ -519,7 +522,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], unsol
                     <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{r.region}</span>
                   </div>
                   {/* 2행: 구역명 */}
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{r.district_name}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}</div>
                   {/* 3행: 시군구 + 세대수 + 시공사 */}
                   <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 2 }}>
                     {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ' · 세대수 미상'}{r.constructor ? ` · ${r.constructor}` : ''}
@@ -574,7 +577,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], unsol
               </div>
 
               {/* 제목 */}
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{r.district_name}</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}</h2>
               <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
                 {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}
               </div>

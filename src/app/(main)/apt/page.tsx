@@ -26,17 +26,17 @@ export default async function AptPage() {
     const sb = await createSupabaseServer();
 
     // Try reading from apt_cache first
-    const { data: cache } = await sb
-      .from('apt_cache')
-      .select('data, refreshed_at')
-      .eq('cache_type', 'apt_subscriptions')
-      .single();
+    try {
+      const { data: cache } = await sb
+        .from('apt_cache')
+        .select('data, refreshed_at')
+        .eq('cache_type', 'apt_subscriptions')
+        .maybeSingle();
+      if (cache?.data && Array.isArray(cache.data) && cache.data.length > 0) {
+        lastRefreshed = cache.refreshed_at;
+      }
+    } catch {}
 
-    if (cache?.data && Array.isArray(cache.data) && cache.data.length > 0) {
-      lastRefreshed = cache.refreshed_at;
-    }
-
-    // Always read from apt_subscriptions (the cache sync also writes there)
     const [aptsR, unsoldR, alertsR, redevelopmentR, unsoldSummaryR] = await Promise.all([
       sb.from('apt_subscriptions').select('*')
         .or(`rcept_endde.gte.${new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
