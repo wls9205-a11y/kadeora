@@ -1,21 +1,35 @@
-User-agent: *
+User-Agent: *
 Allow: /
-Disallow: /admin
+Allow: /feed/
+Allow: /stock/
+Allow: /apt/
+Allow: /blog/
+Allow: /discuss
 Disallow: /admin/
+Disallow: /payment/
 Disallow: /api/
-Disallow: /auth/
+Disallow: /profile/
 Disallow: /write
 Disallow: /onboarding
-Disallow: /payment
-Disallow: /profile
+Disallow: /shop/
 
-User-agent: Googlebot
+User-Agent: Googlebot
 Allow: /
+Allow: /feed/
+Allow: /stock/
+Allow: /apt/
+Allow: /blog/
+Disallow: /admin/
+Disallow: /api/
 
-User-agent: Bingbot
+User-Agent: Yeti
 Allow: /
+Allow: /feed/
+Allow: /stock/
+Allow: /apt/
+Allow: /blog/
+Disallow: /admin/
+Disallow: /api/
 
-User-agent: Yeti
-Allow: /
-
+Host: https://kadeora.app
 Sitemap: https://kadeora.app/sitemap.xml
