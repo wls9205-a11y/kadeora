@@ -199,6 +199,8 @@ export default function StockClient({ initialStocks }: Props) {
     if (sortBy === 'pct_desc') return Number(b.change_pct) - Number(a.change_pct);
     if (sortBy === 'pct_asc') return Number(a.change_pct) - Number(b.change_pct);
     if (sortBy === 'price_desc') return Number(b.price) - Number(a.price);
+    if (sortBy === 'market_cap_desc') return (b.market_cap || 0) - (a.market_cap || 0);
+    if (sortBy === 'market_cap_asc') return (a.market_cap || 0) - (b.market_cap || 0);
     return 0;
   }) : filtered;
 
@@ -355,7 +357,9 @@ export default function StockClient({ initialStocks }: Props) {
           borderRadius: 8, padding: '6px 10px', fontSize: 13, color: 'var(--text-primary)',
           cursor: 'pointer', outline: 'none', marginLeft: 'auto', flexShrink: 0,
         }}>
-          <option value="default">기본순</option>
+          <option value="default">기본순 (시총)</option>
+          <option value="market_cap_desc">시총 높은순</option>
+          <option value="market_cap_asc">시총 낮은순</option>
           <option value="pct_desc">등락률 ▲ 높은순</option>
           <option value="pct_asc">등락률 ▼ 낮은순</option>
           <option value="price_desc">가격 높은순</option>
@@ -417,6 +421,7 @@ export default function StockClient({ initialStocks }: Props) {
                     padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700,
                   }}>{s.market}</span>
                   {s.sector && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.sector}</span>}
+                  {s.market_cap > 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtCap(s.market_cap, s.currency)}</span>}
                 </div>
               </div>
               {/* 가격 + 변동 */}
