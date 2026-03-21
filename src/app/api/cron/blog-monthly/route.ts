@@ -149,7 +149,7 @@ ${table}
       if (budgetApts && budgetApts.length > 0) {
         const bTotalUnsold = budgetApts.reduce((s: number, a: any) => s + (a.tot_unsold_hshld_co ?? 0), 0);
         const bRegions = [...new Set(budgetApts.map((a: any) => a.region_nm))];
-        const bTable = budgetApts.map(a => `| [**${a.house_nm}**](/apt/unsold/${a.house_nm}) | ${a.region_nm} | ${(a.tot_unsold_hshld_co ?? 0).toLocaleString()} | ${a.sale_price_min ? (a.sale_price_min / 10000).toFixed(1) + '억' : '-'} |`).join('\n');
+        const bTable = budgetApts.map(a => `| **${a.house_nm}** | ${a.region_nm} | ${(a.tot_unsold_hshld_co ?? 0).toLocaleString()} | ${a.sale_price_min ? (a.sale_price_min / 10000).toFixed(1) + '억' : '-'} |`).join('\n');
         const bTitle = `${b.label} 미분양 아파트 총정리 — ${month} 가격대별 분석`;
         const bContent = `## ${b.label} 미분양 아파트 현황 (${month})
 
