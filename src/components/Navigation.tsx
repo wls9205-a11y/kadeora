@@ -27,7 +27,6 @@ const MOBILE_TABS = [
 const MORE_ITEMS = [
   { href: '/blog',          emoji: '📰', label: '블로그' },
   { href: '/hot',           emoji: '🔥', label: '이번주 HOT' },
-  { href: '/premium',       emoji: '💎', label: '프리미엄' },
   { href: '/shop/megaphone', emoji: '🛒', label: '상점' },
   { href: '/guide',         emoji: '📖', label: '가이드북' },
   { href: '/grades',        emoji: '🏅', label: '등급 안내' },
