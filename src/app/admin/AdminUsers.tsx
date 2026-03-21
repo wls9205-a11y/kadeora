@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 
 const cardStyle: React.CSSProperties = {
-  background: '#fff',
+  background: 'var(--bg-surface)',
   borderRadius: 12,
   padding: 20,
-  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+  border: '1px solid var(--border)',
 };
 
 interface User {
@@ -86,22 +86,22 @@ export default function AdminUsers() {
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
         {[
-          { label: '전체', value: users.length, color: '#1e293b' },
+          { label: '전체', value: users.length, color: 'var(--text-primary)' },
           { label: '실제 유저', value: realUsersList.length, color: '#10b981' },
-          { label: '시드', value: seedUsers.length, color: '#94a3b8' },
+          { label: '시드', value: seedUsers.length, color: 'var(--text-tertiary)' },
           { label: '정지됨', value: users.filter(u => u.is_deleted).length, color: '#ef4444' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, textAlign: 'center' }}>
             <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{s.label}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Grade Distribution Bar */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginBottom: 10 }}>등급 분포</div>
-        <div style={{ display: 'flex', height: 24, borderRadius: 12, overflow: 'hidden', background: '#f1f5f9' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>등급 분포</div>
+        <div style={{ display: 'flex', height: 24, borderRadius: 12, overflow: 'hidden', background: 'var(--bg-hover)' }}>
           {Object.entries(gradeMap).map(([grade, count]) => {
             const pct = users.length > 0 ? (count / users.length) * 100 : 0;
             if (pct < 1) return null;
@@ -129,7 +129,7 @@ export default function AdminUsers() {
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
           {Object.entries(gradeMap).map(([grade, count]) => (
-            <div key={grade} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#64748b' }}>
+            <div key={grade} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-secondary)' }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: gradeColors[grade] || '#94a3b8' }} />
               {grade} ({count})
             </div>
@@ -142,26 +142,26 @@ export default function AdminUsers() {
         {(['all', 'real', 'seed'] as const).map(t => (
           <button key={t} onClick={() => setUserType(t)} style={{
             padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
-            background: userType === t ? '#ff5b36' : '#f1f5f9',
-            color: userType === t ? '#fff' : '#64748b',
+            background: userType === t ? '#ff5b36' : 'var(--bg-hover)',
+            color: userType === t ? '#fff' : 'var(--text-secondary)',
           }}>
             {t === 'all' ? '전체' : t === 'real' ? `실제 (${realUsersList.length})` : `시드 (${seedUsers.length})`}
           </button>
         ))}
-        <div style={{ width: 1, height: 20, background: '#e2e8f0' }} />
+        <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
         {(['all', 'active', 'suspended'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
-            background: filter === f ? '#ff5b36' : '#f1f5f9',
-            color: filter === f ? '#fff' : '#64748b',
+            background: filter === f ? '#ff5b36' : 'var(--bg-hover)',
+            color: filter === f ? '#fff' : 'var(--text-secondary)',
           }}>
             {{ all: '전체', active: '정상', suspended: '정지됨' }[f]}
           </button>
         ))}
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="닉네임 검색"
           style={{
-            marginLeft: 'auto', padding: '6px 12px', fontSize: 13, background: '#f1f5f9',
-            border: '1px solid #e2e8f0', borderRadius: 6, color: '#1e293b', width: '100%', maxWidth: 180,
+            marginLeft: 'auto', padding: '6px 12px', fontSize: 13, background: 'var(--bg-hover)',
+            border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', width: '100%', maxWidth: 180,
           }}
         />
       </div>
@@ -169,11 +169,11 @@ export default function AdminUsers() {
       {/* Users Table */}
       <div style={{ ...cardStyle, overflow: 'auto', padding: 0 }}>
         {loading ? (
-          <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩 중...</div>
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#94a3b8', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 14px' }}>닉네임</th>
                 <th style={{ padding: '10px 14px' }}>등급</th>
                 <th style={{ padding: '10px 14px' }}>가입일</th>
@@ -185,15 +185,15 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {filtered.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9', opacity: u.is_deleted ? 0.5 : 1 }}>
-                  <td style={{ padding: '10px 14px', color: '#1e293b', fontWeight: 600 }}>
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--bg-hover)', opacity: u.is_deleted ? 0.5 : 1 }}>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>
                     {u.nickname || '미설정'}
-                    {isSeed(u.id) && <span style={{ fontSize: 9, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: '#f1f5f9', color: '#94a3b8' }}>시드</span>}
+                    {isSeed(u.id) && <span style={{ fontSize: 9, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>시드</span>}
                   </td>
-                  <td style={{ padding: '10px 14px', color: '#64748b' }}>{u.grade_title || '-'}</td>
-                  <td style={{ padding: '10px 14px', color: '#94a3b8' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
-                  <td style={{ padding: '10px 14px', color: '#64748b' }}>{u.posts_count ?? 0}</td>
-                  <td style={{ padding: '10px 14px', color: '#64748b' }}>{u.points ?? 0}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{u.grade_title || '-'}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-tertiary)' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{u.posts_count ?? 0}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{u.points ?? 0}</td>
                   <td style={{ padding: '10px 14px' }}>
                     <span style={{
                       fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700,

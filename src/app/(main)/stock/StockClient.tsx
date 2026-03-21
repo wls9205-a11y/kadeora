@@ -83,7 +83,12 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     }
     if (tab === 'watchlist') return list.filter(s => watchlistSymbols.includes(s.symbol));
     if (tab === 'm7') return list.filter(s => M7.includes(s.symbol));
-    return [...list].sort((a, b) => (b.market_cap ?? 0) - (a.market_cap ?? 0)).slice(0, 30);
+    return [...list].sort((a, b) => {
+      const aZero = a.price === 0 ? 1 : 0;
+      const bZero = b.price === 0 ? 1 : 0;
+      if (aZero !== bZero) return aZero - bZero;
+      return (b.market_cap ?? 0) - (a.market_cap ?? 0);
+    }).slice(0, 30);
   }
 
   const filteredStocks = getFilteredStocks();
@@ -106,13 +111,19 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           </div>
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
-            {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
-          </div>
-          {isGlobal && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
-          <div style={{ fontSize: 12, fontWeight: 600, color: pct > 0 ? '#22c55e' : pct < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>
-            {pct > 0 ? '▲' : pct < 0 ? '▼' : '—'} {Math.abs(pct).toFixed(2)}%
-          </div>
+          {s.price === 0 ? (
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>시세 미제공</span>
+          ) : (
+            <>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+                {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
+              </div>
+              {isGlobal && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
+              <div style={{ fontSize: 12, fontWeight: 600, color: pct > 0 ? '#22c55e' : pct < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>
+                {pct > 0 ? '▲' : pct < 0 ? '▼' : '—'} {Math.abs(pct).toFixed(2)}%
+              </div>
+            </>
+          )}
         </div>
         <Link href={`/stock/${encodeURIComponent(s.symbol)}`} onClick={e => e.stopPropagation()} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 999, background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)', textDecoration: 'none', flexShrink: 0 }}>상세</Link>
       </div>

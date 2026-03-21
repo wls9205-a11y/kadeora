@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 const cardStyle: React.CSSProperties = {
-  background: '#fff',
+  background: 'var(--bg-surface)',
   borderRadius: 12,
   padding: 20,
-  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+  border: '1px solid var(--border)',
 };
 
 const CRON_DISPLAY: Record<string, string> = {
@@ -69,7 +69,7 @@ export default function AdminAutomation() {
     });
   }, []);
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩 중...</div>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>;
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -83,7 +83,7 @@ export default function AdminAutomation() {
   return (
     <div>
       {/* Cron Status Cards */}
-      <div style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', marginBottom: 12 }}>크론 상태</div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>크론 상태</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12, marginBottom: 24 }}>
         {cronStatus.map(cs => (
           <div key={cs.name} style={{
@@ -91,7 +91,7 @@ export default function AdminAutomation() {
             borderLeft: `3px solid ${cs.latest.status === 'success' ? '#22c55e' : cs.latest.status === 'running' ? '#3b82f6' : '#ef4444'}`,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                 {CRON_DISPLAY[cs.name] || cs.name}
               </div>
               <span style={{
@@ -99,15 +99,15 @@ export default function AdminAutomation() {
                 background: cs.latest.status === 'success' ? '#22c55e' : cs.latest.status === 'running' ? '#3b82f6' : '#ef4444',
               }} />
             </div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>
               마지막: {cs.latest.started_at ? timeAgo(cs.latest.started_at) : '-'}
             </div>
-            <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#64748b' }}>
+            <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--text-secondary)' }}>
               <span>처리: {cs.latest.records_processed || 0}건</span>
               <span>성공률: {cs.successRate}%</span>
             </div>
             {cs.latest.duration_ms && (
-              <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 4 }}>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
                 소요: {(cs.latest.duration_ms / 1000).toFixed(1)}초
               </div>
             )}
@@ -118,7 +118,7 @@ export default function AdminAutomation() {
       {/* API Quotas */}
       {quotas.length > 0 && (
         <>
-          <div style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', marginBottom: 12 }}>API 할당량</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>API 할당량</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginBottom: 24 }}>
             {quotas.map(q => {
               const dailyPct = q.daily_limit ? Math.round((q.daily_used / q.daily_limit) * 100) : 0;
@@ -126,25 +126,25 @@ export default function AdminAutomation() {
               const barColor = (pct: number) => pct >= 90 ? '#ef4444' : pct >= 80 ? '#eab308' : '#22c55e';
               return (
                 <div key={q.api_name} style={cardStyle}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#1e293b', marginBottom: 10 }}>{q.api_name}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>{q.api_name}</div>
                   {q.daily_limit && (
                     <div style={{ marginBottom: 8 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#64748b', marginBottom: 4 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>
                         <span>일일</span>
                         <span>{q.daily_used}/{q.daily_limit} ({dailyPct}%)</span>
                       </div>
-                      <div style={{ height: 6, borderRadius: 3, background: '#e2e8f0', overflow: 'hidden' }}>
+                      <div style={{ height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${Math.min(dailyPct, 100)}%`, borderRadius: 3, background: barColor(dailyPct), transition: 'width 0.3s' }} />
                       </div>
                     </div>
                   )}
                   {q.monthly_limit && (
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#64748b', marginBottom: 4 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>
                         <span>월간</span>
                         <span>{q.monthly_used}/{q.monthly_limit} ({monthlyPct}%)</span>
                       </div>
-                      <div style={{ height: 6, borderRadius: 3, background: '#e2e8f0', overflow: 'hidden' }}>
+                      <div style={{ height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${Math.min(monthlyPct, 100)}%`, borderRadius: 3, background: barColor(monthlyPct), transition: 'width 0.3s' }} />
                       </div>
                     </div>
@@ -157,11 +157,11 @@ export default function AdminAutomation() {
       )}
 
       {/* Cron Log Table */}
-      <div style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', marginBottom: 12 }}>크론 실행 로그</div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>크론 실행 로그</div>
       <div style={{ ...cardStyle, overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#94a3b8', textAlign: 'left' }}>
+            <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
               <th style={{ padding: '8px 10px' }}>시간</th>
               <th style={{ padding: '8px 10px' }}>크론</th>
               <th style={{ padding: '8px 10px' }}>상태</th>
@@ -172,11 +172,11 @@ export default function AdminAutomation() {
           </thead>
           <tbody>
             {cronLogs.map((log, i) => (
-              <tr key={log.id || i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '8px 10px', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+              <tr key={log.id || i} style={{ borderBottom: '1px solid var(--bg-hover)' }}>
+                <td style={{ padding: '8px 10px', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
                   {log.started_at ? new Date(log.started_at).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                 </td>
-                <td style={{ padding: '8px 10px', color: '#1e293b', fontWeight: 600 }}>
+                <td style={{ padding: '8px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
                   {CRON_DISPLAY[log.cron_name] || log.cron_name}
                 </td>
                 <td style={{ padding: '8px 10px' }}>
@@ -186,10 +186,10 @@ export default function AdminAutomation() {
                     color: log.status === 'success' ? '#16a34a' : log.status === 'running' ? '#2563eb' : '#dc2626',
                   }}>{log.status}</span>
                 </td>
-                <td style={{ padding: '8px 10px', color: '#64748b' }}>
+                <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>
                   {log.duration_ms ? `${(log.duration_ms / 1000).toFixed(1)}s` : '-'}
                 </td>
-                <td style={{ padding: '8px 10px', color: '#64748b' }}>
+                <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>
                   {log.records_processed || 0}
                 </td>
                 <td style={{ padding: '8px 10px', color: '#ef4444', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

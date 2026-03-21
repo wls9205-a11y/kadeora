@@ -25,10 +25,20 @@
   .kd-card { padding: 12px 14px !important; }
 }
 
-/* 글씨 크기 (CSS 클래스 방식) */
-html.font-small { font-size: 14px; }
-html.font-medium { font-size: 16px; }
-html.font-large { font-size: 18px; }
+/* 글씨 크기 시스템 */
+.font-small { font-size: 13px; }
+.font-medium { font-size: 15px; }
+.font-large { font-size: 17px; }
+
+.font-large h1 { font-size: 1.6em; }
+.font-large h2 { font-size: 1.4em; }
+.font-large .card-title { font-size: 1.15em; }
+.font-large .price-text { font-size: 1.2em; }
+.font-large .tab-label { font-size: 1.05em; }
+.font-large input, .font-large textarea { font-size: 16px; }
+.font-large .post-card { padding: 16px; }
+.font-large .stock-card { min-height: 72px; }
+.font-large .chat-message { line-height: 1.8; }
 
 /* ========================================
    카더라 — 완전한 다크모드 CSS 변수 시스템

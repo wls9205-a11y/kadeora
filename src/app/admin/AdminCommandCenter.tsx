@@ -111,7 +111,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       {/* Header */}
       <div style={{
         background: '#0f172a',
@@ -178,7 +178,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           <span style={{ fontWeight: 700, color: refresh.summary.failCount > 0 ? '#ef4444' : '#22c55e' }}>
             {refresh.summary.failCount > 0 ? '⚠️' : '✅'} 전체 갱신 완료
           </span>
-          <span style={{ color: '#64748b' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>
             성공 {refresh.summary.successCount}개 / 실패 {refresh.summary.failCount}개 · {(refresh.elapsed / 1000).toFixed(1)}초
           </span>
           {refresh.results.filter(r => r.status !== 'success').length > 0 && (
@@ -187,8 +187,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             </span>
           )}
           <button onClick={() => setRefresh(prev => ({ ...prev, summary: null }))} style={{
-            marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 16,
-          }}>×</button>
+            marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 16,
+          }}>&times;</button>
         </div>
       )}
 
@@ -196,8 +196,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
       <div style={{
         display: 'flex',
         gap: 0,
-        background: '#fff',
-        borderBottom: '1px solid #e2e8f0',
+        background: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border)',
         padding: '0 24px',
       }}>
         {TABS.map(tab => (
@@ -211,7 +211,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 700,
-              color: activeTab === tab.id ? '#ff5b36' : '#64748b',
+              color: activeTab === tab.id ? '#ff5b36' : 'var(--text-secondary)',
               borderBottom: activeTab === tab.id ? '2px solid #ff5b36' : '2px solid transparent',
               display: 'flex',
               alignItems: 'center',

@@ -73,24 +73,38 @@ export function Navigation() {
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
+    const syncFontSize = (fontPref: string | null) => {
+      if (fontPref && ['small','medium','large'].includes(fontPref)) {
+        const current = localStorage.getItem('kd_font_size');
+        if (!current || current !== fontPref) {
+          localStorage.setItem('kd_font_size', fontPref);
+          setFontSize(fontPref);
+          applyFontClass(fontPref);
+        }
+      }
+    };
     sb.auth.getSession().then(async ({ data }) => {
       const u = data.session?.user ?? null;
       setUser(u);
       if (u) {
         const [pr, nr] = await Promise.all([
-          sb.from('profiles').select('nickname').eq('id', u.id).single(),
+          sb.from('profiles').select('nickname, font_size_preference').eq('id', u.id).single(),
           sb.from('notifications').select('id', { count:'exact', head:true }).eq('user_id', u.id).eq('is_read', false),
         ]);
         setNickname(pr.data?.nickname ?? null);
         setUnread(nr.count ?? 0);
+        syncFontSize(pr.data?.font_size_preference ?? null);
       }
     });
     const { data:{ subscription } } = sb.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         const s = createSupabaseBrowser();
-        s.from('profiles').select('nickname').eq('id', session.user.id).single()
-          .then(({ data:p }) => setNickname(p?.nickname ?? null));
+        s.from('profiles').select('nickname, font_size_preference').eq('id', session.user.id).single()
+          .then(({ data:p }) => {
+            setNickname(p?.nickname ?? null);
+            syncFontSize(p?.font_size_preference ?? null);
+          });
       } else { setNickname(null); setUnread(0); }
     });
     return () => subscription.unsubscribe();
