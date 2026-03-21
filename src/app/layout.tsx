@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: '카더라' },
   category: '금융, 부동산, 커뮤니티',
-  alternates: { canonical: 'https://kadeora.app', languages: { 'ko-KR': 'https://kadeora.app' } },
+  alternates: { languages: { 'ko-KR': 'https://kadeora.app' } },
   other: {
     'application-name': '카더라',
     'service-type': '금융·부동산 정보 커뮤니티',
@@ -77,7 +77,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="geo.placename" content="대한민국" />
         <meta name="geo.position" content="37.5665;126.9780" />
         <meta name="ICBM" content="37.5665, 126.9780" />
-        <link rel="canonical" href="https://kadeora.app" />
         {/* 다크모드 강제 적용 */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.classList.add('dark');})();` }} />
         {/* 글씨크기 SSR 적용 */}

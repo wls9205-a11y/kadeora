@@ -71,6 +71,7 @@ export async function generateMetadata({ params }: Props) {
     alternates: { canonical: `${SITE}/blog/${slug}` },
     openGraph: {
       title: post.title, description: post.excerpt || post.title, type: 'article',
+      siteName: '카더라', locale: 'ko_KR',
       publishedTime: post.created_at, url: `${SITE}/blog/${slug}`,
       images: [{ url: ogImage, width: 1200, height: 630, alt: post.image_alt || `카더라 — ${post.title}` }],
     },
