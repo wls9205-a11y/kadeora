@@ -25,10 +25,49 @@ export async function GET(req: NextRequest) {
 
       if (!apts || apts.length === 0) continue;
 
-      const table = apts.map(a => `| [${a.house_nm}](/apt/${a.house_manage_no}) | ${a.rcept_bgnde?.slice(5) ?? '-'} ~ ${a.rcept_endde?.slice(5) ?? '-'} | ${(a.tot_supply_hshld_co ?? 0).toLocaleString()} |`).join('\n');
-      const content = `## ${region} 아파트 청약 현황 (${month})\n\n| 단지명 | 접수 기간 | 세대수 |\n|---|---|---|\n${table}\n\n---\n\n[${region} 청약 전체 보기 →](/apt)\n[청약 알림 받기 →](/login)\n\n> 청약홈 공공데이터 기반.`;
+      const totalUnits = apts.reduce((s: number, a: any) => s + (a.tot_supply_hshld_co ?? 0), 0);
+      const table = apts.map(a => `| [**${a.house_nm}**](/apt/${a.house_manage_no}) | ${a.rcept_bgnde?.slice(5) ?? '-'} ~ ${a.rcept_endde?.slice(5) ?? '-'} | ${(a.tot_supply_hshld_co ?? 0).toLocaleString()} |`).join('\n');
+      const regTitle = `${region} 아파트 청약 ${apts.length}건 총정리 (${month})`;
+      const content = `## ${region} 아파트 청약 ${apts.length}건 — ${month} 일정 총정리
 
-      await admin.from('blog_posts').insert({ slug, title: `${region} 아파트 청약 ${apts.length}건 총정리 (${month})`, content, excerpt: `${month} ${region} 지역 청약 ${apts.length}건 일정 정리.`, category: 'apt', tags: [`${region} 청약`, `${region} 분양`, '아파트 청약'], source_type: 'auto' });
+${month} 기준 **${region}** 지역에서 접수 중이거나 접수 예정인 아파트 청약이 **${apts.length}건**, 총 **${totalUnits.toLocaleString()}세대** 규모입니다.
+
+**${region}**은 수도권/광역시 중에서도 분양 수요가 꾸준한 지역으로, 매 분기 다양한 단지가 공급되고 있습니다. 청약 가점이 높지 않더라도 추첨제를 활용하면 기회를 잡을 수 있으니, 관심 있는 단지는 미리 일정을 확인해두세요.
+
+---
+
+### ${region} 청약 일정표
+
+| 단지명 | 접수 기간 | 세대수 |
+|---|---|---|
+${table}
+
+---
+
+### ${region} 청약 분석
+
+${apts.length >= 3 ? `이번 달 **${region}**에는 ${apts.length}개 단지가 분양됩니다. 총 ${totalUnits.toLocaleString()}세대 규모로, 다양한 평형과 가격대의 선택지가 있습니다. 접수 일정이 겹치는 단지가 있을 수 있으니, 중복 청약 규정을 반드시 확인하세요.` : `${region} 지역의 분양 물량은 ${apts.length}건으로, 관심 있는 단지의 모집공고를 꼼꼼히 확인한 후 청약하시길 권합니다.`}
+
+**청약 준비 체크리스트:**
+1. 청약통장 가입 기간 및 납입 횟수 확인
+2. 무주택 요건 충족 여부 확인
+3. 소득 기준 (특별공급 대상자 여부)
+4. 가점 계산 및 전략 수립
+
+---
+
+### 관련 정보
+
+- [**${region}** 전체 청약 일정 →](/apt)
+- [**청약 마감 알림** 받기 →](/login)
+- [청약 커뮤니티 **토론** →](/feed?category=apt)
+- [전국 **미분양** 현황 →](/apt?tab=unsold)
+
+카더라에서 **${region} 청약 알림**을 설정하면 접수 마감 전 알려드립니다.
+
+> 청약홈(applyhome.co.kr) 공공데이터 기반. 정확한 정보는 청약홈에서 확인하세요.`;
+
+      await admin.from('blog_posts').insert({ slug, title: regTitle, content, excerpt: `${month} ${region} 지역 청약 ${apts.length}건 · ${totalUnits.toLocaleString()}세대.`, category: 'apt', tags: [`${region} 청약`, `${region} 분양`, '아파트 청약', '청약일정'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(regTitle)}&type=blog` });
       created++;
     }
 
