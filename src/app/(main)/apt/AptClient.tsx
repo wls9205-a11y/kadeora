@@ -234,7 +234,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
             <UnsoldStatsWidget />
 
             {/* 요약 */}
-            <div style={{ display: 'flex', gap: 16, marginBottom: 14, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', gap: 16, marginBottom: 14, padding: '10px 0' }}>
               <div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전국 미분양</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: '#f87171' }}>{total.toLocaleString()}세대</div>
