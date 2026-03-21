@@ -44,9 +44,13 @@ export default function ShareButtons({ title, postId, content }: Props) {
             buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: url, webUrl: url } }],
           });
         } else {
-          // SDK 완전 불가 — 링크 복사 fallback
-          await navigator.clipboard.writeText(url).catch(() => {});
-          setCopied(true); setTimeout(() => setCopied(false), 2000);
+          // SDK 완전 불가 — navigator.share → 링크 복사 fallback
+          if (navigator.share) {
+            try { await navigator.share({ title, url }); } catch {}
+          } else {
+            await navigator.clipboard.writeText(url).catch(() => {});
+            setCopied(true); setTimeout(() => setCopied(false), 2000);
+          }
         }
       }
     } else if (pid === 'x') {

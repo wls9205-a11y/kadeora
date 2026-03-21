@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('payments').select('amount', { count: 'exact' }).eq('status', 'DONE'),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', true),
-    supabase.from('posts').select('id, title, category, created_at, profiles(nickname)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+    supabase.from('posts').select('id, title, category, created_at, profiles!posts_author_id_fkey(nickname)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('posts').select('view_count').gte('created_at', new Date().toISOString().slice(0, 10)).eq('is_deleted', false),
   ]);
 

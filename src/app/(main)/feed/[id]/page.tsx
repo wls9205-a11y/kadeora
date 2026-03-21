@@ -305,7 +305,8 @@ export default async function FeedDetailPage({ params }: Props) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
             <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 14 }}>
-              <span style={{ fontSize: 14, fontWeight: 500 }}>{comments.length}</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+              <span style={{ fontWeight: 500 }}>{comments.length}</span>
             </Link>
           </div>
           {/* 우측: 공유 + 저장 */}
@@ -316,19 +317,9 @@ export default async function FeedDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Comments */}
+      {/* Comments — 로그인 여부 상관없이 댓글 목록 표시, 입력만 분기 */}
       <div style={{ marginBottom: 16 }}>
-        {currentUserId ? (
-          <CommentSection postId={post.id} initialComments={comments} />
-        ) : (
-          <div style={{ textAlign: 'center', padding: '32px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>이 글에 {comments.length}개의 댓글이 있습니다</div>
-            <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>댓글을 보려면 로그인하세요</div>
-            <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
-              카카오로 로그인
-            </Link>
-          </div>
-        )}
+        <CommentSection postId={post.id} initialComments={comments} />
       </div>
 
       {/* Related posts */}
