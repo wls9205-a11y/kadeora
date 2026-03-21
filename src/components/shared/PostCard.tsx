@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Eye } from 'lucide-react';
 import { getAvatarColor } from "@/lib/avatar";
-import { gradeEmoji as getGradeEmoji, gradeColor } from "@/lib/constants";
+import { gradeEmoji as getGradeEmoji, gradeColor, gradeTitle } from "@/lib/constants";
 
 export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; grade?: number; }
 export interface Post {
@@ -59,6 +59,7 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
           </div>
           <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{displayName}</span>
           <span style={{ fontSize: 12, color: gradeCol }}>{gradeEm}</span>
+          {(post.author?.grade ?? 1) >= 3 && <span style={{ fontSize: 10, color: gradeCol, fontWeight: 600 }}>{gradeTitle(post.author?.grade ?? 1)}</span>}
           <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--text-tertiary)" }}>
             {timeAgo(post.created_at)}
           </span>

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import MiniDiscuss from '@/components/MiniDiscuss';
 import StockComments from '@/components/StockComments';
+import ShareButtons from '@/components/ShareButtons';
 
 function fmtPrice(p: number, c: string) { return c === 'KRW' ? `₩${p.toLocaleString()}` : `$${p.toFixed(2)}`; }
 function fmtCap(v: number | null, c: string) {
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical: `https://kadeora.app/stock/${symbol}`,
     },
-    openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: 'https://kadeora.app/og-image.svg' }] },
+    openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: 'https://kadeora.app/images/brand/kadeora-wide.png' }] },
   };
 }
 
@@ -97,6 +98,10 @@ export default async function StockDetailPage({ params }: Props) {
       </div>
       <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 10, padding: 12, marginBottom: 20, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
         ⚠️ 본 정보는 투자 권유가 아니며, 투자에 따른 손익은 투자자 본인에게 귀속됩니다. 금융투자상품은 원금 손실이 발생할 수 있습니다.
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>공유</span>
+        <ShareButtons title={`${s.name} (${symbol}) 주가`} postId={symbol} />
       </div>
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <StockComments symbol={symbol} stockName={s.name} />
