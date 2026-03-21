@@ -314,7 +314,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                   </div>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
                   <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
-                    {(post.profiles?.grade ?? 1) >= 3 && <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1), fontWeight: 600 }}>{gradeTitle(post.profiles?.grade ?? 1)}</span>}
+                    <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1), fontWeight: 600 }}>{gradeTitle(post.profiles?.grade ?? 1)}</span>
                   <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
                 </div>
 
