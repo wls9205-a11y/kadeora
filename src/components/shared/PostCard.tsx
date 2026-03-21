@@ -20,7 +20,8 @@ export interface PostCardProps {
   variant?: "default" | "compact";
   showAuthor?: boolean;
 }
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (diff < 60) return "방금 전";
   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;

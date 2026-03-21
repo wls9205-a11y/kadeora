@@ -25,7 +25,8 @@ function parsePostId(param: string): number {
   return 0;
 }
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string | null | undefined) {
+  if (!dateStr) return '';
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 1) return '방금 전';
