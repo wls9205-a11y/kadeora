@@ -110,9 +110,34 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
       {/* ━━━ 청약 일정 탭 ━━━ */}
       {activeTab === 'sub' && (
         <div>
-          <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
-            {pill('전체', region, setRegion, `전체 ${apts.length}건`)}
-            {regionStats.map(r => pill(r.name, region, setRegion, `${r.name} ${r.count}건`))}
+          {/* 지역별 현황판 */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {apts.length}건</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+              <button onClick={() => setRegion('전체')} style={{
+                padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                border: region === '전체' ? '2px solid var(--brand)' : '1px solid var(--border)',
+                background: region === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+              }}>
+                <span style={{ fontSize: 16, fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--brand)' }}>{apts.length}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: region === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+              </button>
+              {regionStats.map(r => (
+                <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
+                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  border: region === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
+                  background: region === r.name ? 'var(--brand)' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: region === r.name ? '#fff' : 'var(--brand)' }}>{r.count}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
             {pill('전체', statusFilter, setStatusFilter)}

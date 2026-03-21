@@ -91,40 +91,38 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   };
 
   return (
-    <div style={{ marginTop: 8, paddingBottom: 80 }}>
+    <div style={{ marginTop: 8 }}>
       <h3 style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, margin: '0 0 12px' }}>
         댓글 {comments.length}
       </h3>
 
-      {/* 댓글 입력 — 하단 고정 */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 45, background: 'var(--bg-base)', borderTop: '1px solid var(--border)', padding: '8px 16px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+      {/* 댓글 입력 — 인라인 (댓글 목록 위) */}
+      <div style={{ marginBottom: 16 }}>
         {user ? (
-          <>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', maxWidth: 680, margin: '0 auto' }}>
-              <textarea
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                placeholder="댓글을 남겨보세요..."
-                maxLength={500}
-                rows={1}
-                style={{
-                  flex: 1, background: 'var(--bg-hover)', border: '1px solid var(--border)',
-                  borderRadius: 20, color: 'var(--text-primary)', padding: '8px 14px',
-                  fontSize: 14, resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box', minHeight: 38,
-                }}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-              />
-              <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
-                width: 36, height: 36, borderRadius: '50%', border: 'none', flexShrink: 0,
-                background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
-                color: content.trim() ? 'white' : 'var(--text-tertiary)',
-                cursor: content.trim() ? 'pointer' : 'default', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>↑</button>
-            </div>
-          </>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            <textarea
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              placeholder="댓글을 남겨보세요..."
+              maxLength={500}
+              rows={2}
+              style={{
+                flex: 1, background: 'var(--bg-hover)', border: '1px solid var(--border)',
+                borderRadius: 12, color: 'var(--text-primary)', padding: '10px 14px',
+                fontSize: 14, resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
+              }}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+            />
+            <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
+              padding: '10px 16px', borderRadius: 10, border: 'none', flexShrink: 0,
+              background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
+              color: content.trim() ? 'white' : 'var(--text-tertiary)',
+              cursor: content.trim() ? 'pointer' : 'default', fontSize: 13, fontWeight: 700,
+            }}>등록</button>
+          </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--text-secondary)', fontSize: 14 }}>
-            <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>로그인</a>하시면 댓글을 작성할 수 있습니다
+          <div style={{ textAlign: 'center', padding: '14px', background: 'var(--bg-surface)', borderRadius: 10, border: '1px solid var(--border)', fontSize: 13, color: 'var(--text-secondary)' }}>
+            <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하면 댓글을 남길 수 있어요
           </div>
         )}
       </div>
