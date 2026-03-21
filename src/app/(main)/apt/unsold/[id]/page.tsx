@@ -45,6 +45,19 @@ export default async function UnsoldDetailPage({ params }: Props) {
     }
   } catch { nearbySubscriptions = []; }
 
+  // 미분양 추이 데이터
+  let unsoldTrend: any[] = [];
+  try {
+    if (u.region_nm) {
+      const { data: trend } = await sb.from('unsold_monthly_stats')
+        .select('stat_month, total_unsold, after_completion')
+        .eq('region', u.region_nm)
+        .order('stat_month', { ascending: false })
+        .limit(3);
+      unsoldTrend = trend || [];
+    }
+  } catch {}
+
   const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
 
   return (
@@ -58,6 +71,50 @@ export default async function UnsoldDetailPage({ params }: Props) {
         </div>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{u.house_nm || '미분양 단지'}</h1>
         <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}{u.supply_addr ? ` · ${u.supply_addr}` : ''}</div>
+      </div>
+
+      {/* 현황 요약 */}
+      <div style={{ ...card, borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? '#EF4444' : (u.tot_unsold_hshld_co || 0) >= 1000 ? '#F59E0B' : '#10B981'}` }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 현황 요약</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>미분양 세대수</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
+          </div>
+          {unsoldTrend.length >= 2 && (() => {
+            const latest = unsoldTrend[0]?.total_unsold || 0;
+            const prev = unsoldTrend[1]?.total_unsold || 0;
+            const diff = latest - prev;
+            const pct = prev > 0 ? ((diff / prev) * 100).toFixed(1) : '0';
+            return (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>전월 대비</span>
+                <span style={{ fontWeight: 700, color: diff > 0 ? '#EF4444' : diff < 0 ? '#10B981' : 'var(--text-tertiary)' }}>
+                  {diff > 0 ? '+' : ''}{diff.toLocaleString()}세대 ({diff > 0 ? '↑' : diff < 0 ? '↓' : '-'}{pct}%)
+                </span>
+              </div>
+            );
+          })()}
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>미분양률</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{rate !== null ? `${rate}%` : '정보 없음'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>위험도</span>
+            <span style={{ fontWeight: 700 }}>
+              {(u.tot_unsold_hshld_co || 0) >= 3000
+                ? <span style={{ color: '#EF4444' }}>🔴 높음</span>
+                : (u.tot_unsold_hshld_co || 0) >= 1000
+                  ? <span style={{ color: '#F59E0B' }}>🟡 주의</span>
+                  : <span style={{ color: '#10B981' }}>🟢 안전</span>
+              }
+            </span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>총 공급</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{u.tot_supply_hshld_co ? `${u.tot_supply_hshld_co.toLocaleString()}세대` : '정보 없음'}</span>
+          </div>
+        </div>
       </div>
 
       {/* 미분양 현황 */}

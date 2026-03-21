@@ -73,6 +73,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
   const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
   const [selectedTrade, setSelectedTrade] = useState<any | null>(null);
+  const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
+  const [redevStage, setRedevStage] = useState('전체');
+  const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -81,6 +84,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         setAptUser(data.session.user);
         sb.from('apt_alerts').select('house_manage_no').eq('user_id', data.session.user.id)
           .then(({ data: a }) => { if (a) setMyAlerts(new Set(a.map(x => x.house_manage_no))); });
+        sb.from('apt_watchlist').select('item_type, item_id').eq('user_id', data.session.user.id)
+          .then(({ data: wl }) => setWatchlist(new Set((wl || []).map((w: any) => `${w.item_type}:${w.item_id}`))));
       }
     });
   }, []);
@@ -96,6 +101,21 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       await sb.from('apt_alerts').insert({ user_id: aptUser.id, house_manage_no: h, house_nm: apt.house_nm });
       setMyAlerts(p => new Set([...p, h]));
     }
+  };
+
+  const toggleWatchlist = async (itemType: string, itemId: string) => {
+    if (!aptUser) { alert('로그인 후 이용해주세요'); return; }
+    try {
+      const sb = createSupabaseBrowser();
+      const { data: existing } = await sb.from('apt_watchlist').select('id').eq('user_id', aptUser.id).eq('item_type', itemType).eq('item_id', itemId).maybeSingle();
+      if (existing) {
+        await sb.from('apt_watchlist').delete().eq('id', existing.id);
+      } else {
+        await sb.from('apt_watchlist').insert({ user_id: aptUser.id, item_type: itemType, item_id: itemId, notify_enabled: true });
+      }
+      const { data: wl } = await sb.from('apt_watchlist').select('item_type, item_id').eq('user_id', aptUser.id);
+      setWatchlist(new Set((wl || []).map((w: any) => `${w.item_type}:${w.item_id}`)));
+    } catch {}
   };
 
   const availableRegions = useMemo(() => ['전체', ...Array.from(new Set(apts.map(a => a.region_nm).filter(Boolean))).sort()], [apts]);
@@ -217,9 +237,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   ))}
                   {Array(firstDay).fill(null).map((_, i) => <div key={`e${i}`} />)}
                   {cells.map(c => (
-                    <div key={c.day} style={{
-                      textAlign: 'center', padding: '4px 2px', borderRadius: 6,
-                      background: c.apts.length > 0 ? 'rgba(59,130,246,0.1)' : 'transparent',
+                    <div key={c.day} onClick={() => c.apts.length > 0 && setSelectedCalDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(c.day).padStart(2, '0')}`)} style={{
+                      textAlign: 'center', padding: '4px 2px', borderRadius: 6, cursor: c.apts.length > 0 ? 'pointer' : 'default',
+                      background: selectedCalDate?.endsWith(`-${String(c.day).padStart(2, '0')}`) ? 'rgba(59,130,246,0.25)' : c.apts.length > 0 ? 'rgba(59,130,246,0.1)' : 'transparent',
                       border: c.day === now.getDate() ? '2px solid var(--brand)' : '1px solid transparent',
                     }}>
                       <div style={{ color: c.apts.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: c.apts.length > 0 ? 700 : 400 }}>{c.day}</div>
@@ -228,6 +248,22 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   ))}
                 </div>
               );
+            })()}
+            {selectedCalDate && (() => {
+              const dayApts = apts.filter(a => selectedCalDate >= String(a.rcept_bgnde || '').slice(0, 10) && selectedCalDate <= String(a.rcept_endde || '').slice(0, 10));
+              return dayApts.length > 0 ? (
+                <div style={{ marginTop: 12, padding: '12px', background: 'var(--bg-hover)', borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+                    {'\u{1F4C5}'} {selectedCalDate.slice(5).replace('-', '\uC6D4 ')}\uC77C \uCCAD\uC57D \uC77C\uC815 ({dayApts.length}\uAC74)
+                  </div>
+                  {dayApts.map(a => (
+                    <div key={a.id} style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{a.house_nm}</span>
+                      <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>{a.region_nm}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null;
             })()}
           </div>
 
@@ -271,6 +307,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>투기과열</span>}
                   {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(249,115,22,0.12)', color: '#fdba74', border: '1px solid rgba(249,115,22,0.2)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
+                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
+                    {watchlist.has(`subscription:${apt.id}`) ? '\u2B50' : '\u2606'}
+                  </button>
                 </div>
                 {/* 경쟁률 */}
                 {(apt.competition_rate_1st != null && Number(apt.competition_rate_1st) > 0) && (
@@ -398,7 +437,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
                     return months.map(m => {
                       const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
-                      const total = rows.reduce((sum: number, r: any) => sum + (r.unsold_count || 0), 0);
+                      const total = rows.reduce((sum: number, r: any) => sum + (r.total_unsold || 0), 0);
                       return { label: String(m).slice(5), value: total };
                     });
                   })()}
@@ -407,7 +446,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
                     return months.map(m => {
                       const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
-                      const total = rows.reduce((sum: number, r: any) => sum + (r.after_completion_count || 0), 0);
+                      const total = rows.reduce((sum: number, r: any) => sum + (r.after_completion || 0), 0);
                       return { label: String(m).slice(5), value: total };
                     });
                   })()}
@@ -427,17 +466,30 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const latestMonth = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].pop();
               const regionData = unsoldMonthly
                 .filter((s: any) => s.stat_month === latestMonth)
-                .map((s: any) => ({ label: s.region_nm || '', value: s.unsold_count || 0 }))
-                .sort((a: any, b: any) => b.value - a.value)
-                .slice(0, 17);
+                .map((s: any) => ({ label: s.region || '', value: s.total_unsold || 0 }))
+                .sort((a: any, b: any) => b.value - a.value);
               const max = Math.max(...regionData.map((d: any) => d.value), 1);
+              const getColor = (v: number) => v >= 5000 ? '#EF4444' : v >= 3000 ? '#F97316' : v >= 1000 ? '#F59E0B' : '#10B981';
               return regionData.length > 0 ? (
                 <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🗺️ 지역별 미분양 현황</div>
-                  <MiniBarChart data={regionData.map((d: any) => ({
-                    ...d,
-                    color: `hsl(${120 - (d.value / max) * 120}, 70%, 45%)`,
-                  }))} showValues={true} />
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>{'\u{1F5FA}\uFE0F'} 지역별 미분양 현황</div>
+                  {regionData.map((d: any) => (
+                    <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <div style={{ width: 40, fontSize: 11, color: 'var(--text-secondary)', textAlign: 'right', flexShrink: 0 }}>{d.label}</div>
+                      <div style={{ flex: 1, height: 28, background: 'var(--bg-hover)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ height: '100%', width: `${Math.max((d.value / max) * 100, 2)}%`, borderRadius: 6, background: getColor(d.value), transition: 'width 0.5s', display: 'flex', alignItems: 'center', paddingLeft: 8 }}>
+                          {d.value > max * 0.15 && <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{d.value.toLocaleString()}</span>}
+                        </div>
+                        {d.value <= max * 0.15 && <span style={{ position: 'absolute', left: `calc(${(d.value / max) * 100}% + 6px)`, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{d.value.toLocaleString()}</span>}
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#10B981', marginRight: 3 }} />~1000</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#F59E0B', marginRight: 3 }} />1000~3000</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#F97316', marginRight: 3 }} />3000~5000</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#EF4444', marginRight: 3 }} />5000+</span>
+                  </div>
                 </div>
               ) : null;
             })()}
@@ -473,6 +525,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
                     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
                     {priceStr && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
+                      {watchlist.has(`unsold:${u.id}`) ? '\u2B50' : '\u2606'}
+                    </button>
                   </div>
 
                   {/* 줄2: 지역 + 세대 */}
@@ -537,6 +592,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const filteredRedev = redevelopment.filter((r: any) => {
           if (redevType !== '전체' && r.project_type !== redevType) return false;
           if (redevRegion !== '전체' && r.region !== redevRegion) return false;
+          if (redevStage !== '전체' && r.stage !== redevStage) return false;
           return true;
         }).sort((a: any, b: any) => {
           const aOk = a.district_name && a.district_name !== '정보 준비중' && a.district_name !== '미상';
@@ -574,7 +630,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   const pct = Math.round((count / total) * 100);
                   const sc = STAGE_COLORS[stage] || { bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' };
                   return (
-                    <div key={stage} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 8, background: sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50 }}>
+                    <div key={stage} onClick={() => { setRedevStage(stage === redevStage ? '전체' : stage); setRedevPage(1); }} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 8, background: redevStage === stage ? sc.border : sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50, cursor: 'pointer', opacity: redevStage !== '전체' && redevStage !== stage ? 0.5 : 1 }}>
                       <div style={{ fontSize: 10, fontWeight: 700, color: sc.color }}>{stage.replace('인가', '')}</div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: sc.color, margin: '4px 0' }}>{count}</div>
                       <div style={{ fontSize: 9, color: sc.color, opacity: 0.7 }}>{pct}%</div>
@@ -659,6 +715,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
                     <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74', border: `1px solid ${r.project_type === '재개발' ? 'rgba(59,130,246,0.2)' : 'rgba(249,115,22,0.2)'}` }}>{r.project_type}</span>
                     <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{r.region}</span>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
+                      {watchlist.has(`redev:${r.id}`) ? '\u2B50' : '\u2606'}
+                    </button>
                   </div>
                   {/* 2행: 구역명 */}
                   <div style={{ fontSize: 15, fontWeight: 600, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 2 }}>
@@ -755,9 +814,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
                 {(() => {
-                  const regions = [...new Set(tradeMonthly.map((s: any) => s.region_nm))];
+                  const regions = [...new Set(tradeMonthly.map((s: any) => s.region))];
                   const selectedRegion = regions[0] || '';
-                  const data = tradeMonthly.filter((s: any) => s.region_nm === selectedRegion);
+                  const data = tradeMonthly.filter((s: any) => s.region === selectedRegion);
                   return (
                     <>
                       <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
@@ -782,13 +841,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {tradeMonthly.length > 0 && (() => {
               const latestMonth = [...new Set(tradeMonthly.map((s: any) => s.stat_month))].pop();
               const data = tradeMonthly
-                .filter((s: any) => s.stat_month === latestMonth && s.avg_price_per_py)
-                .sort((a: any, b: any) => (b.avg_price_per_py || 0) - (a.avg_price_per_py || 0))
+                .filter((s: any) => s.stat_month === latestMonth && s.avg_price_per_pyeong)
+                .sort((a: any, b: any) => (b.avg_price_per_pyeong || 0) - (a.avg_price_per_pyeong || 0))
                 .slice(0, 10)
                 .map((s: any) => ({
-                  label: s.region_nm,
-                  value: Math.round((s.avg_price_per_py || 0) / 10000),
-                  color: `hsl(${240 - (s.avg_price_per_py / Math.max(...tradeMonthly.filter((t: any) => t.stat_month === latestMonth).map((t: any) => t.avg_price_per_py || 1))) * 240}, 70%, 55%)`,
+                  label: s.region,
+                  value: Math.round((s.avg_price_per_pyeong || 0) / 10000),
+                  color: `hsl(${240 - (s.avg_price_per_pyeong / Math.max(...tradeMonthly.filter((t: any) => t.stat_month === latestMonth).map((t: any) => t.avg_price_per_pyeong || 1))) * 240}, 70%, 55%)`,
                 }));
               return data.length > 0 ? (
                 <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
@@ -826,6 +885,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     {isNew(t, 'transaction') && <NewBadge />}
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}>{t.trade_type || '매매'}</span>
                     <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{t.region_nm} {t.sigungu}</span>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
+                      {watchlist.has(`transaction:${t.id}`) ? '\u2B50' : '\u2606'}
+                    </button>
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{t.apt_name}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>

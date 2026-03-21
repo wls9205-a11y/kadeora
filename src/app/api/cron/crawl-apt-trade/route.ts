@@ -15,6 +15,24 @@ const LAWD_CODES: Record<string, string> = {
   '경기 시흥시':'41390','경기 김포시':'41570',
   '부산 해운대구':'26350','부산 부산진구':'26170','부산 남구':'26290',
   '부산 수영구':'26410','부산 동래구':'26260',
+  // 대구 (8개)
+  '대구 중구':'27110','대구 동구':'27140','대구 서구':'27170','대구 남구':'27200',
+  '대구 북구':'27230','대구 수성구':'27260','대구 달서구':'27290','대구 달성군':'27710',
+  // 인천 (10개)
+  '인천 중구':'28110','인천 동구':'28140','인천 미추홀구':'28177','인천 연수구':'28185',
+  '인천 남동구':'28200','인천 부평구':'28237','인천 계양구':'28245','인천 서구':'28260',
+  '인천 강화군':'28710','인천 옹진군':'28720',
+  // 광주 (5개)
+  '광주 동구':'29110','광주 서구':'29140','광주 남구':'29155','광주 북구':'29170',
+  '광주 광산구':'29200',
+  // 대전 (5개)
+  '대전 동구':'30110','대전 중구':'30140','대전 서구':'30170','대전 유성구':'30200',
+  '대전 대덕구':'30230',
+  // 울산 (5개)
+  '울산 중구':'31110','울산 남구':'31140','울산 동구':'31170','울산 북구':'31200',
+  '울산 울주군':'31710',
+  // 세종 (1개)
+  '세종시':'36110',
 };
 
 function parseXmlItems(xml: string): any[] {
@@ -58,7 +76,7 @@ export async function GET(req: NextRequest) {
     const entries = Object.entries(LAWD_CODES);
     let totalInserted = 0;
     let failed: string[] = [];
-    const BATCH = 10;
+    const BATCH = 15;
 
     async function fetchOne(label: string, lawdCd: string): Promise<number> {
       const [regionPart, sigunguPart] = label.split(' ');
@@ -83,7 +101,7 @@ export async function GET(req: NextRequest) {
       return count;
     }
 
-    // 4 그룹 × 10개 병렬
+    // 5 그룹 × 15개 병렬
     for (let i = 0; i < entries.length; i += BATCH) {
       const batch = entries.slice(i, i + BATCH);
       const results = await Promise.allSettled(batch.map(([name, code]) => fetchOne(name, code)));
