@@ -116,19 +116,7 @@ export default function WriteClient() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>← 돌아가기</Link>
         <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>글쓰기</span>
-        <button
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          style={{
-            padding: '8px 20px', borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700,
-            background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
-            color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-            cursor: canSubmit ? 'pointer' : 'not-allowed',
-            transition: 'all 0.15s',
-          }}
-        >
-          {loading ? '...' : '등록'}
-        </button>
+        <div style={{ width: 60 }} />
       </div>
 
       {/* 카테고리 칩 */}
@@ -226,8 +214,24 @@ export default function WriteClient() {
         )}
       </div>
 
+      {/* 등록 버튼 */}
+      <button
+        onClick={handleSubmit}
+        disabled={!canSubmit}
+        style={{
+          width: '100%', padding: '14px 0', borderRadius: 12, border: 'none',
+          fontSize: 15, fontWeight: 700, marginTop: 20,
+          background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
+          color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+          cursor: canSubmit ? 'pointer' : 'not-allowed',
+          transition: 'all 0.15s',
+        }}
+      >
+        {loading ? '등록 중...' : editId ? '수정하기' : '등록하기'}
+      </button>
+
       {/* 경고 */}
-      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 20, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 12, lineHeight: 1.5, textAlign: 'center' }}>
         광고, 비난, 도배성 글을 남기면 활동이 제한될 수 있어요.
       </div>
 
