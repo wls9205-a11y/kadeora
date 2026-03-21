@@ -114,6 +114,19 @@ export default function Sidebar() {
 
       <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
 
+      <Link href="/premium" style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '10px 14px', borderRadius: 10,
+        textDecoration: 'none', fontSize: 13,
+        color: isActive('/premium') ? '#8b5cf6' : 'var(--text-secondary)',
+        background: isActive('/premium') ? 'var(--bg-hover)' : 'transparent',
+        fontWeight: isActive('/premium') ? 700 : 400,
+      }}
+      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'}
+      onMouseLeave={e => { if (!isActive('/premium')) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+        <span>💎</span> 프리미엄
+      </Link>
+
       <Link href="/guide" style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: '10px 14px', borderRadius: 10,
