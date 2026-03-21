@@ -79,14 +79,22 @@ export async function GET(req: NextRequest) {
     if (fetchErr) { console.error('[blog-seed-guide] fetch error:', fetchErr); return NextResponse.json({ error: fetchErr.message }, { status: 500 }); }
     if (!seeds || seeds.length === 0) return NextResponse.json({ ok: true, created: 0, message: 'No pending guide seeds' });
 
+    console.log(`[blog-seed-guide] Found ${seeds.length} seeds, columns:`, Object.keys(seeds[0] || {}));
+
     let created = 0;
+    let skipped = 0;
     for (const seed of seeds) {
       try {
-        const slug = seed.blog_slug;
-        if (!slug) continue;
+        const slug = seed.blog_slug || seed.slug;
+        if (!slug) { skipped++; continue; }
 
         const { data: exists } = await admin.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
-        if (exists) { await admin.from('guide_seeds').update({ blog_generated: true }).eq('blog_slug', slug); continue; }
+        if (exists) {
+          // Update using whichever column exists
+          if (seed.blog_slug) await admin.from('guide_seeds').update({ blog_generated: true }).eq('blog_slug', slug);
+          else await admin.from('guide_seeds').update({ blog_generated: true }).eq('slug', slug);
+          continue;
+        }
 
         const cat = CATEGORY_MAP[seed.seed_category] || 'finance';
         const content = generateGuideContent(seed);
@@ -106,15 +114,16 @@ export async function GET(req: NextRequest) {
           meta_keywords: generateMetaKeywords(cat, tags),
         });
 
-        await admin.from('guide_seeds').update({ blog_generated: true }).eq('blog_slug', slug);
+        if (seed.blog_slug) await admin.from('guide_seeds').update({ blog_generated: true }).eq('blog_slug', slug);
+        else await admin.from('guide_seeds').update({ blog_generated: true }).eq('slug', slug);
         created++;
       } catch (e: any) {
-        console.error(`[blog-seed-guide] Error for ${seed.blog_slug}:`, e.message);
+        console.error(`[blog-seed-guide] Error for ${seed.blog_slug || seed.slug}:`, e.message);
       }
     }
 
-    console.log(`[blog-seed-guide] Created ${created}/${seeds.length}`);
-    return NextResponse.json({ ok: true, created, total: seeds.length });
+    console.log(`[blog-seed-guide] Created ${created}/${seeds.length}, skipped ${skipped}`);
+    return NextResponse.json({ ok: true, created, total: seeds.length, skipped });
   } catch (error: any) {
     console.error('[blog-seed-guide] Error:', error);
     return NextResponse.json({ error: String(error.message || error) }, { status: 500 });
