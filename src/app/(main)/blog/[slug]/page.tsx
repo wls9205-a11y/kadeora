@@ -1,25 +1,48 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { marked } from 'marked';
+import BlogCommentInput from '@/components/BlogCommentInput';
+import { getAvatarColor } from '@/lib/avatar';
 
 export const revalidate = 300;
-
 const SITE = 'https://kadeora.app';
 
+marked.setOptions({ breaks: true, gfm: true });
+
 interface Props { params: Promise<{ slug: string }> }
+
+function timeAgo(d: string) {
+  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+  if (m < 1) return '방금 전'; if (m < 60) return `${m}분 전`;
+  const h = Math.floor(m / 60); if (h < 24) return `${h}시간 전`;
+  return `${Math.floor(h / 24)}일 전`;
+}
+
+const CTA_BY_CAT: Record<string, string> = {
+  apt: '이 단지에 대해 어떻게 생각하세요?',
+  unsold: '이 단지에 대해 어떻게 생각하세요?',
+  stock: '이 종목 전망은 어떻다고 보시나요?',
+  general: '여러분의 의견을 남겨주세요',
+  finance: '여러분의 의견을 남겨주세요',
+};
 
 export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
-  const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at, cover_image').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
   return {
     title: `${post.title} | 카더라 블로그`,
     description: post.excerpt || post.title,
     keywords: (post.tags ?? []).join(', '),
     alternates: { canonical: `${SITE}/blog/${slug}` },
-    openGraph: { title: post.title, description: post.excerpt || post.title, type: 'article', publishedTime: post.created_at, url: `${SITE}/blog/${slug}` },
+    openGraph: {
+      title: post.title, description: post.excerpt || post.title, type: 'article',
+      publishedTime: post.created_at, url: `${SITE}/blog/${slug}`,
+      ...(post.cover_image ? { images: [{ url: post.cover_image, width: 1200, height: 630 }] } : {}),
+    },
   };
 }
 
@@ -31,15 +54,21 @@ export default async function BlogDetailPage({ params }: Props) {
   const { data: post } = await sb.from('blog_posts').select('*').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return notFound();
 
-  // 조회수 증가
   sb.from('blog_posts').update({ view_count: (post.view_count ?? 0) + 1 }).eq('id', post.id).then(() => {});
 
-  // 로그인 여부
   const { data: { user } } = await sb.auth.getUser();
   const isLoggedIn = !!user;
 
-  // 관련 글
   const { data: related } = await sb.from('blog_posts').select('slug, title').eq('category', post.category).eq('is_published', true).neq('id', post.id).order('created_at', { ascending: false }).limit(3);
+
+  // 댓글 조회 (blog_comments 테이블이 없으면 빈 배열)
+  let comments: any[] = [];
+  try {
+    const { data } = await sb.from('blog_comments')
+      .select('id, content, created_at, author_id, profiles!blog_comments_author_id_fkey(nickname)')
+      .eq('blog_post_id', post.id).order('created_at', { ascending: true });
+    comments = data ?? [];
+  } catch {}
 
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Article',
@@ -47,14 +76,13 @@ export default async function BlogDetailPage({ params }: Props) {
     datePublished: post.created_at, dateModified: post.updated_at,
     author: { '@type': 'Organization', name: '카더라', url: SITE },
     publisher: { '@type': 'Organization', name: '카더라', url: SITE },
-    url: `${SITE}/blog/${slug}`,
-    keywords: (post.tags ?? []).join(', '),
-    inLanguage: 'ko-KR',
+    url: `${SITE}/blog/${slug}`, keywords: (post.tags ?? []).join(', '), inLanguage: 'ko-KR',
   };
 
-  // 비로그인 시 50%만 노출
-  const fullContent = post.content;
-  const halfIndex = Math.floor(fullContent.length * 0.5);
+  // 마크다운 → HTML
+  const htmlFull = marked(post.content) as string;
+  const cutoff = Math.floor(htmlFull.length * 0.4);
+  const htmlTruncated = htmlFull.slice(0, cutoff);
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px' }}>
@@ -64,7 +92,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <Link href="/blog" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
       </div>
 
-      <article style={{ paddingBottom: 80 }}>
+      <article style={{ paddingBottom: 40 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px' }}>{post.title}</h1>
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
           <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
@@ -77,16 +105,12 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 본문 */}
+        {/* 본문 — 마크다운 렌더링 */}
         {isLoggedIn ? (
-          <div style={{ fontSize: 15, color: 'var(--text-primary)', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-            {fullContent}
-          </div>
+          <div className="blog-content" dangerouslySetInnerHTML={{ __html: htmlFull }} />
         ) : (
           <div style={{ position: 'relative' }}>
-            <div style={{ fontSize: 15, color: 'var(--text-primary)', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 400, overflow: 'hidden' }}>
-              {fullContent.slice(0, halfIndex)}
-            </div>
+            <div className="blog-content" style={{ maxHeight: 500, overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(transparent, var(--bg-base))' }} />
             <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>전체 글을 보려면 로그인하세요</div>
@@ -100,9 +124,61 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 면책 */}
         <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 24, padding: '8px 12px', background: 'var(--bg-hover)', borderRadius: 8, lineHeight: 1.5 }}>
-          본 콘텐츠는 투자 권유가 아니며 참고용입니다. 투자 판단과 손익은 투자자 본인에게 귀속됩니다. 데이터 출처: 청약홈, 국토교통부, 한국거래소
+          본 콘텐츠는 투자 권유가 아니며 참고용입니다. 데이터 출처: 청약홈, 국토교통부, 한국거래소
         </div>
       </article>
+
+      {/* 댓글 섹션 */}
+      <div id="blog-comments" style={{ marginBottom: 20 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 16px' }}>
+          {CTA_BY_CAT[post.category] ?? CTA_BY_CAT.general}
+        </p>
+
+        {/* 댓글 입력 */}
+        {isLoggedIn ? (
+          <BlogCommentInput blogPostId={post.id} />
+        ) : (
+          <div style={{ padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', marginBottom: 16, fontSize: 13, color: 'var(--text-secondary)' }}>
+            <Link href="/login" style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
+          </div>
+        )}
+
+        {/* 댓글 목록 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {comments.map((c: any) => {
+            const nick = (c.profiles as any)?.nickname ?? '사용자';
+            return (
+              <div key={c.id} style={{ display: 'flex', gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700 }}>
+                  {nick[0].toUpperCase()}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+                  </div>
+                  <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
+                </div>
+              </div>
+            );
+          })}
+          {comments.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-tertiary)', fontSize: 13 }}>
+              아직 의견이 없어요. 첫 의견을 남겨보세요!
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* CTA 배너 */}
+      <div style={{ padding: '20px 16px', margin: '20px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, textAlign: 'center' }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>매일 업데이트되는 투자 정보를 받아보세요</div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>청약 마감 알림 · 급등주 알림 · 미분양 업데이트</div>
+        <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+          카카오로 3초 가입
+        </Link>
+      </div>
 
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (

@@ -391,3 +391,22 @@ button:active,
 input, textarea, select {
   font-size: 16px !important;
 }
+
+/* ========================================
+   블로그 본문 마크다운
+   ======================================== */
+.blog-content h2 { font-size: 20px; font-weight: 800; margin: 28px 0 12px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+.blog-content h3 { font-size: 17px; font-weight: 700; margin: 20px 0 8px; color: var(--text-primary); }
+.blog-content p { margin: 10px 0; line-height: 1.8; }
+.blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+.blog-content thead { background: var(--bg-surface); }
+.blog-content th { font-weight: 700; padding: 10px 12px; border: 1px solid var(--border); text-align: left; white-space: nowrap; }
+.blog-content td { padding: 10px 12px; border: 1px solid var(--border); }
+.blog-content tr:nth-child(even) { background: var(--bg-hover); }
+.blog-content a { color: var(--brand); text-decoration: none; font-weight: 600; }
+.blog-content a:hover { text-decoration: underline; }
+.blog-content blockquote { border-left: 3px solid var(--brand); padding: 8px 12px; color: var(--text-secondary); font-size: 13px; margin: 16px 0; background: var(--bg-hover); border-radius: 0 8px 8px 0; }
+.blog-content hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.blog-content ul, .blog-content ol { padding-left: 20px; margin: 8px 0; }
+.blog-content li { margin: 4px 0; line-height: 1.7; }
+.blog-content strong { color: var(--text-primary); font-weight: 700; }
