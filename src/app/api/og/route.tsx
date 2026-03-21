@@ -8,6 +8,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   stock: '#ef4444',
   local: '#10b981',
   free: '#8b5cf6',
+  finance: '#10b981',
+  unsold: '#f59e0b',
+  general: '#8b5cf6',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -15,6 +18,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   apt: '청약',
   local: '우리동네',
   free: '자유',
+  finance: '재테크',
+  unsold: '미분양',
+  general: '정보',
 };
 
 export async function GET(req: NextRequest) {
