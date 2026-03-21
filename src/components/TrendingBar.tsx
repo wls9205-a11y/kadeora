@@ -34,7 +34,7 @@ export default function TrendingBar() {
       scrollbarWidth: 'none',
       msOverflowStyle: 'none',
       marginBottom: 10,
-      borderRadius: 4,
+      borderRadius: 10,
       border: '1px solid var(--border)',
     }}>
       <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, flexShrink: 0 }}>
