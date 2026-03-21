@@ -176,12 +176,25 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           ) : news.map((n: any) => (
             <a key={n.id} href={n.url} target="_blank" rel="noopener noreferrer"
               style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>{n.title}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, flex: 1 }}>{n.title}</div>
+                {n.sentiment_label && (
+                  <span style={{
+                    fontSize: 10, padding: '1px 6px', borderRadius: 8, fontWeight: 700, flexShrink: 0,
+                    background: n.sentiment_label === 'positive' ? 'rgba(34,197,94,0.15)' : n.sentiment_label === 'negative' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.1)',
+                    color: n.sentiment_label === 'positive' ? '#22c55e' : n.sentiment_label === 'negative' ? '#ef4444' : '#94a3b8',
+                  }}>
+                    {n.sentiment_label === 'positive' ? '🟢' : n.sentiment_label === 'negative' ? '🔴' : '⚪'}
+                    {n.sentiment_score ? ` ${Math.round(n.sentiment_score * 100)}%` : ''}
+                  </span>
+                )}
+              </div>
+              {n.ai_summary && <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.4 }}>{n.ai_summary}</div>}
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 6 }}>
                 <span>{n.source || '뉴스'}</span>
                 <span>{timeAgo(n.published_at)}</span>
-                {n.sentiment === 'positive' && <span>🟢</span>}
-                {n.sentiment === 'negative' && <span>🔴</span>}
+                {!n.sentiment_label && n.sentiment === 'positive' && <span>🟢</span>}
+                {!n.sentiment_label && n.sentiment === 'negative' && <span>🔴</span>}
               </div>
             </a>
           ))}

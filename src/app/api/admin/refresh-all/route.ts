@@ -19,6 +19,10 @@ const CRON_SEQUENCE = [
   { name: 'crawl-busan-redev', path: '/api/cron/crawl-busan-redev' },
   { name: 'seed-posts', path: '/api/cron/seed-posts' },
   { name: 'daily-stats', path: '/api/cron/daily-stats' },
+  { name: 'aggregate-trade-stats', path: '/api/cron/aggregate-trade-stats' },
+  { name: 'exchange-rate', path: '/api/cron/exchange-rate' },
+  { name: 'stock-theme-daily', path: '/api/cron/stock-theme-daily' },
+  { name: 'stock-daily-briefing', path: '/api/cron/stock-daily-briefing' },
 ];
 
 export async function POST() {

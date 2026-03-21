@@ -9,7 +9,7 @@ interface Stock {
 }
 interface Theme { id: number; theme_name: string; change_pct: number; is_hot: boolean; related_symbols?: string[]; description?: string; }
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
-interface Props { initialStocks: Stock[]; }
+interface Props { initialStocks: Stock[]; briefing?: any; exchangeHistory?: any[]; themeHistory?: any[]; }
 
 function fmt(n: number) { return n ? n.toLocaleString('ko-KR') : '0'; }
 function fmtCap(n: number, cur?: string) {
@@ -22,7 +22,7 @@ function isIdx(s: Stock) { return ['KOSPI','KOSDAQ','NASDAQ','S&P 500','DOW','NI
 const M7 = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA'];
 const SECTORS = ['all','반도체','바이오','금융','자동차','방산','IT/소프트웨어','에너지','2차전지','소비재','건설','통신','유틸리티','화학','미디어'];
 
-export default function StockClient({ initialStocks }: Props) {
+export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [mode, setMode] = useState<'domestic'|'global'>('domestic');
   const [domesticTab, setDomesticTab] = useState<'ranking'|'movers'|'themes'|'calendar'|'watchlist'>('ranking');
@@ -132,6 +132,54 @@ export default function StockClient({ initialStocks }: Props) {
         </button>
       </div>
 
+      {/* AI 일일 시황 */}
+      {briefing && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 18 }}>{briefing.sentiment === 'bullish' ? '🐂' : briefing.sentiment === 'bearish' ? '🐻' : '😐'}</span>
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>{briefing.title}</div>
+            <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700,
+              background: briefing.sentiment === 'bullish' ? 'rgba(34,197,94,0.15)' : briefing.sentiment === 'bearish' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.15)',
+              color: briefing.sentiment === 'bullish' ? '#22c55e' : briefing.sentiment === 'bearish' ? '#ef4444' : '#94a3b8',
+            }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>{briefing.summary}</div>
+          {/* Top movers badges */}
+          {briefing.top_movers && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {(briefing.top_movers.gainers || []).slice(0, 2).map((s: any) => (
+                <span key={s.symbol} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', color: '#22c55e', fontWeight: 600 }}>
+                  ▲ {s.name} +{s.change_pct?.toFixed(1)}%
+                </span>
+              ))}
+              {(briefing.top_movers.losers || []).slice(0, 2).map((s: any) => (
+                <span key={s.symbol} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 600 }}>
+                  ▼ {s.name} {s.change_pct?.toFixed(1)}%
+                </span>
+              ))}
+            </div>
+          )}
+          {/* Sector analysis bars */}
+          {briefing.sector_analysis?.length > 0 && (
+            <div style={{ marginTop: 10, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {briefing.sector_analysis.slice(0, 6).map((sec: any) => (
+                <div key={sec.name} style={{
+                  fontSize: 10, padding: '3px 8px', borderRadius: 6,
+                  background: (sec.avg_pct || 0) > 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                  color: (sec.avg_pct || 0) > 0 ? '#22c55e' : '#ef4444',
+                  fontWeight: 600,
+                }}>
+                  {sec.name} {(sec.avg_pct || 0) > 0 ? '+' : ''}{sec.avg_pct}%
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>
+            {briefing.briefing_date} 기준 · AI 자동 생성
+          </div>
+        </div>
+      )}
+
       {/* 국내/해외 메인 토글 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <button onClick={() => setMode('domestic')} style={{
@@ -166,7 +214,23 @@ export default function StockClient({ initialStocks }: Props) {
         })}
         <div style={{ padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, flexShrink: 0 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>원/달러</div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>₩{exchangeRate.toFixed(0)}</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
+            ₩{exchangeRate.toFixed(0)}
+            {/* Exchange rate sparkline */}
+            {exchangeHistory && exchangeHistory.length > 1 && (() => {
+              const rates = exchangeHistory.map((h: any) => h.rate);
+              const min = Math.min(...rates);
+              const max = Math.max(...rates);
+              const range = max - min || 1;
+              const points = rates.map((r: number, i: number) => `${(i / (rates.length - 1)) * 40},${20 - ((r - min) / range) * 18}`).join(' ');
+              const isUp = rates[rates.length - 1] > rates[0];
+              return (
+                <svg viewBox="0 0 40 20" style={{ width: 40, height: 20, verticalAlign: 'middle', marginLeft: 4 }}>
+                  <polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#22c55e'} strokeWidth="1.5" />
+                </svg>
+              );
+            })()}
+          </div>
         </div>
       </div>
 
@@ -236,10 +300,19 @@ export default function StockClient({ initialStocks }: Props) {
       {/* 테마 상세 탭 */}
       {isDomestic && domesticTab === 'themes' && (
         <div style={{ marginBottom: 16 }}>
-          {themes.map(t => (
+          {themes.map(t => {
+            const th = themeHistory?.find((h: any) => h.theme_name === t.theme_name);
+            return (
             <div key={t.id} style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot&&'🔥 '}{t.theme_name}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot&&'🔥 '}{t.theme_name}</span>
+                  {th?.prev_change_pct != null && (
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+                      전일 {(th.prev_change_pct > 0 ? '+' : '')}{Number(th.prev_change_pct).toFixed(1)}%
+                    </span>
+                  )}
+                </div>
                 <span style={{ fontSize: 14, fontWeight: 700, color: (t.change_pct??0)>0?'#22c55e':'#ef4444' }}>{(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%</span>
               </div>
               {t.description && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.description}</div>}
@@ -256,7 +329,8 @@ export default function StockClient({ initialStocks }: Props) {
                 </div>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
 

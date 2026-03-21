@@ -14,6 +14,8 @@ export default function AdminDashboard() {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [healthChecks, setHealthChecks] = useState<any[]>([]);
   const [dailyStats, setDailyStats] = useState<any[]>([]);
+  const [unsoldMonthly, setUnsoldMonthly] = useState<any[]>([]);
+  const [briefing, setBriefing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,11 +25,15 @@ export default function AdminDashboard() {
       sb.from('admin_alerts').select('*').order('created_at', { ascending: false }).limit(20),
       sb.from('health_checks').select('*'),
       sb.from('daily_stats').select('*').order('stat_date', { ascending: false }).limit(7),
-    ]).then(([dashRes, alertsRes, healthRes, statsRes]) => {
+      sb.from('unsold_monthly_stats').select('stat_month, unsold_count').order('stat_month', { ascending: true }),
+      sb.from('stock_daily_briefing').select('*').eq('market', 'KR').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
+    ]).then(([dashRes, alertsRes, healthRes, statsRes, unsoldRes, briefingRes]) => {
       setData(dashRes.data);
       setAlerts(alertsRes.data || []);
       setHealthChecks(healthRes.data || []);
       setDailyStats((statsRes.data || []).reverse());
+      setUnsoldMonthly(unsoldRes.data || []);
+      setBriefing(briefingRes.data);
       setLoading(false);
     });
   }, []);
@@ -141,6 +147,53 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Unsold Trend + Market Sentiment */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12, marginBottom: 20 }}>
+        {unsoldMonthly.length > 0 && (
+          <div style={cardStyle}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginBottom: 8 }}>미분양 추이</div>
+            {(() => {
+              const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
+              const data = months.map(m => {
+                const total = unsoldMonthly.filter((s: any) => s.stat_month === m).reduce((sum: number, r: any) => sum + (r.unsold_count || 0), 0);
+                return { label: String(m).slice(5), value: total };
+              });
+              const max = Math.max(...data.map(d => d.value), 1);
+              const W = 240, H = 60, P = 4;
+              const points = data.map((d, i) => `${P + (i / (data.length - 1)) * (W - P * 2)},${H - P - ((d.value / max) * (H - P * 2))}`).join(' ');
+              return (
+                <div>
+                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 60 }}>
+                    <polyline points={points} fill="none" stroke="#3b82f6" strokeWidth="2" />
+                    {data.map((d, i) => <circle key={i} cx={P + (i / (data.length - 1)) * (W - P * 2)} cy={H - P - ((d.value / max) * (H - P * 2))} r="3" fill="#3b82f6" />)}
+                  </svg>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#94a3b8', marginTop: 2 }}>
+                    {data.map(d => <span key={d.label}>{d.label}</span>)}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+        {briefing && (
+          <div style={cardStyle}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginBottom: 8 }}>시장 센티먼트</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 28 }}>{briefing.sentiment === 'bullish' ? '🐂' : briefing.sentiment === 'bearish' ? '🐻' : '😐'}</span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: '#1e293b' }}>{briefing.title}</div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{briefing.briefing_date}</div>
+              </div>
+              <span style={{
+                marginLeft: 'auto', fontSize: 11, padding: '3px 10px', borderRadius: 10, fontWeight: 700,
+                background: briefing.sentiment === 'bullish' ? '#dcfce7' : briefing.sentiment === 'bearish' ? '#fee2e2' : '#f1f5f9',
+                color: briefing.sentiment === 'bullish' ? '#16a34a' : briefing.sentiment === 'bearish' ? '#dc2626' : '#64748b',
+              }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Alerts Feed */}
       <div style={cardStyle}>

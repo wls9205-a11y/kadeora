@@ -22,6 +22,8 @@ export default async function AptPage() {
   let unsoldSummary: any = null;
   let alertCounts: Record<string, number> = {};
   let lastRefreshed: string | null = null;
+  let unsoldMonthly: any[] = [];
+  let tradeMonthly: any[] = [];
 
   try {
     const sb = await createSupabaseServer();
@@ -38,7 +40,7 @@ export default async function AptPage() {
       }
     } catch {}
 
-    const [aptsR, unsoldR, alertsR, redevelopmentR, unsoldSummaryR, transactionsR] = await Promise.all([
+    const [aptsR, unsoldR, alertsR, redevelopmentR, unsoldSummaryR, transactionsR, unsoldMonthlyR, tradeMonthlyR] = await Promise.all([
       sb.from('apt_subscriptions').select('*')
         .or(`rcept_endde.gte.${new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(300),
@@ -47,12 +49,16 @@ export default async function AptPage() {
       sb.from('redevelopment_projects').select('*').eq('is_active', true).order('total_households', { ascending: false }),
       sb.from('apt_cache').select('data').eq('cache_type', 'unsold_summary').maybeSingle(),
       sb.from('apt_transactions').select('*').order('deal_date', { ascending: false }).limit(200),
+      sb.from('unsold_monthly_stats').select('*').order('stat_month', { ascending: true }),
+      sb.from('apt_trade_monthly_stats').select('*').order('stat_month', { ascending: true }),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
     if (redevelopmentR.data?.length) redevelopment = redevelopmentR.data;
     if (unsoldSummaryR?.data) unsoldSummary = unsoldSummaryR.data;
     if (transactionsR.data?.length) transactions = transactionsR.data;
+    if (unsoldMonthlyR.data?.length) unsoldMonthly = unsoldMonthlyR.data;
+    if (tradeMonthlyR.data?.length) tradeMonthly = tradeMonthlyR.data;
     (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
   } catch {}
 
@@ -69,5 +75,5 @@ export default async function AptPage() {
   });
   const regionStats = Object.entries(regionDetail).sort((a, b) => b[1].total - a[1].total).map(([name, s]) => ({ name, ...s }));
 
-  return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} /><Disclaimer /></>;
+  return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} /><Disclaimer /></>;
 }

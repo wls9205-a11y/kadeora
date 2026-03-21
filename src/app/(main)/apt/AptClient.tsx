@@ -3,6 +3,8 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
+import MiniLineChart from '@/components/charts/MiniLineChart';
+import MiniBarChart from '@/components/charts/MiniBarChart';
 
 const NEW_HOURS: Record<string, number> = { subscription: 24, unsold: 168, redevelopment: 168, transaction: 72 };
 function isNew(item: any, type: string): boolean {
@@ -56,7 +58,7 @@ const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }
 };
 const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [], unsoldMonthly = [], tradeMonthly = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[] }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'unsold' | 'redev' | 'trade'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
@@ -191,6 +193,42 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {pill('open', statusFilter, setStatusFilter, '접수중')}
             {pill('upcoming', statusFilter, setStatusFilter, '예정')}
             {pill('closed', statusFilter, setStatusFilter, '마감')}
+          </div>
+
+          {/* 청약 캘린더 */}
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📅 이번 달 청약 일정</div>
+            {(() => {
+              const now = new Date();
+              const year = now.getFullYear();
+              const month = now.getMonth();
+              const firstDay = new Date(year, month, 1).getDay();
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              const cells: { day: number; apts: any[] }[] = [];
+              for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dayApts = apts.filter(a => dateStr >= String(a.rcept_bgnde || '').slice(0, 10) && dateStr <= String(a.rcept_endde || '').slice(0, 10));
+                cells.push({ day: d, apts: dayApts });
+              }
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, fontSize: 11 }}>
+                  {['일', '월', '화', '수', '목', '금', '토'].map(d => (
+                    <div key={d} style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontWeight: 700, padding: 4 }}>{d}</div>
+                  ))}
+                  {Array(firstDay).fill(null).map((_, i) => <div key={`e${i}`} />)}
+                  {cells.map(c => (
+                    <div key={c.day} style={{
+                      textAlign: 'center', padding: '4px 2px', borderRadius: 6,
+                      background: c.apts.length > 0 ? 'rgba(59,130,246,0.1)' : 'transparent',
+                      border: c.day === now.getDate() ? '2px solid var(--brand)' : '1px solid transparent',
+                    }}>
+                      <div style={{ color: c.apts.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: c.apts.length > 0 ? 700 : 400 }}>{c.day}</div>
+                      {c.apts.length > 0 && <div style={{ fontSize: 8, color: '#3B82F6', fontWeight: 700 }}>{c.apts.length}건</div>}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* 필터 결과 카운트 */}
@@ -351,6 +389,59 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             </div>
 
+            {/* 미분양 추이 차트 */}
+            {unsoldMonthly.length > 0 && (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📈 전국 미분양 추이 (6개월)</div>
+                <MiniLineChart
+                  data={(() => {
+                    const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
+                    return months.map(m => {
+                      const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
+                      const total = rows.reduce((sum: number, r: any) => sum + (r.unsold_count || 0), 0);
+                      return { label: String(m).slice(5), value: total };
+                    });
+                  })()}
+                  color="#3B82F6"
+                  secondaryData={(() => {
+                    const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
+                    return months.map(m => {
+                      const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
+                      const total = rows.reduce((sum: number, r: any) => sum + (r.after_completion_count || 0), 0);
+                      return { label: String(m).slice(5), value: total };
+                    });
+                  })()}
+                  secondaryColor="#EF4444"
+                  height={140}
+                  title=""
+                />
+                <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                  <span><span style={{ display: 'inline-block', width: 12, height: 2, background: '#3B82F6', marginRight: 4, verticalAlign: 'middle' }} />전체 미분양</span>
+                  <span><span style={{ display: 'inline-block', width: 12, height: 2, background: '#EF4444', marginRight: 4, verticalAlign: 'middle', borderTop: '1px dashed #EF4444' }} />준공후 미분양</span>
+                </div>
+              </div>
+            )}
+
+            {/* 지역별 미분양 히트맵 */}
+            {unsoldMonthly.length > 0 && (() => {
+              const latestMonth = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].pop();
+              const regionData = unsoldMonthly
+                .filter((s: any) => s.stat_month === latestMonth)
+                .map((s: any) => ({ label: s.region_nm || '', value: s.unsold_count || 0 }))
+                .sort((a: any, b: any) => b.value - a.value)
+                .slice(0, 17);
+              const max = Math.max(...regionData.map((d: any) => d.value), 1);
+              return regionData.length > 0 ? (
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🗺️ 지역별 미분양 현황</div>
+                  <MiniBarChart data={regionData.map((d: any) => ({
+                    ...d,
+                    color: `hsl(${120 - (d.value / max) * 120}, 70%, 45%)`,
+                  }))} showValues={true} />
+                </div>
+              ) : null;
+            })()}
+
             {/* 안내 + 필터 */}
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>최근 1년 기준 · 국토교통부 미분양주택현황 및 청약홈 공공데이터</div>
             <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>
@@ -473,19 +564,21 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             </div>
 
-            {/* 단계별 파이프라인 */}
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>단계별 현황</div>
-              <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end' }}>
+            {/* 재개발 단계별 파이프라인 */}
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏗️ 단계별 파이프라인</div>
+              <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
                 {STAGE_ORDER.map((stage, i) => {
-                  const cnt = stageCount[stage] || 0;
-                  const sc = STAGE_COLORS[stage] || STAGE_COLORS['정비구역지정'];
+                  const count = redevelopment.filter((r: any) => r.stage === stage).length;
+                  const total = redevelopment.length || 1;
+                  const pct = Math.round((count / total) * 100);
+                  const sc = STAGE_COLORS[stage] || { bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' };
                   return (
-                    <div key={stage} style={{ flex: 1, textAlign: 'center' }}>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: sc.color, marginBottom: 2 }}>{cnt}</div>
-                      <div style={{ height: 4, background: sc.border, borderRadius: 2, marginBottom: 4 }} />
-                      <div style={{ fontSize: 8, color: 'var(--text-tertiary)', lineHeight: 1.2 }}>{stage.length > 4 ? stage.slice(0, 4) + '\n' + stage.slice(4) : stage}</div>
-                      {i < STAGE_ORDER.length - 1 && <span />}
+                    <div key={stage} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 8, background: sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: sc.color }}>{stage.replace('인가', '')}</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: sc.color, margin: '4px 0' }}>{count}</div>
+                      <div style={{ fontSize: 9, color: sc.color, opacity: 0.7 }}>{pct}%</div>
+                      {i < STAGE_ORDER.length - 1 && <div style={{ position: 'absolute', right: -6, top: '50%', transform: 'translateY(-50%)', fontSize: 10, color: 'var(--text-tertiary)' }}>→</div>}
                     </div>
                   );
                 })}
@@ -657,6 +750,53 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 </div>
               )}
             </div>
+
+            {tradeMonthly.length > 0 && (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
+                {(() => {
+                  const regions = [...new Set(tradeMonthly.map((s: any) => s.region_nm))];
+                  const selectedRegion = regions[0] || '';
+                  const data = tradeMonthly.filter((s: any) => s.region_nm === selectedRegion);
+                  return (
+                    <>
+                      <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
+                        {regions.slice(0, 8).map(r => (
+                          <span key={r} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{r}</span>
+                        ))}
+                      </div>
+                      <MiniLineChart
+                        data={data.map((s: any) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))}
+                        color="#10B981"
+                        showValues={true}
+                        height={140}
+                      />
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>단위: 만원 → 억원</div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 평당가 비교 TOP 10 */}
+            {tradeMonthly.length > 0 && (() => {
+              const latestMonth = [...new Set(tradeMonthly.map((s: any) => s.stat_month))].pop();
+              const data = tradeMonthly
+                .filter((s: any) => s.stat_month === latestMonth && s.avg_price_per_py)
+                .sort((a: any, b: any) => (b.avg_price_per_py || 0) - (a.avg_price_per_py || 0))
+                .slice(0, 10)
+                .map((s: any) => ({
+                  label: s.region_nm,
+                  value: Math.round((s.avg_price_per_py || 0) / 10000),
+                  color: `hsl(${240 - (s.avg_price_per_py / Math.max(...tradeMonthly.filter((t: any) => t.stat_month === latestMonth).map((t: any) => t.avg_price_per_py || 1))) * 240}, 70%, 55%)`,
+                }));
+              return data.length > 0 ? (
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>💰 평당가 TOP 10 (만원)</div>
+                  <MiniBarChart data={data} defaultColor="#8B5CF6" />
+                </div>
+              ) : null;
+            })()}
 
             {/* 지역 필터 */}
             <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>

@@ -104,6 +104,22 @@
     {
       "path": "/api/cron/daily-reset",
       "schedule": "5 15 * * *"
+    },
+    {
+      "path": "/api/cron/stock-daily-briefing",
+      "schedule": "0 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/stock-theme-daily",
+      "schedule": "40 6 * * 1-5"
+    },
+    {
+      "path": "/api/cron/exchange-rate",
+      "schedule": "30 0 * * 1-5"
+    },
+    {
+      "path": "/api/cron/aggregate-trade-stats",
+      "schedule": "0 0 * * *"
     }
   ]
 }

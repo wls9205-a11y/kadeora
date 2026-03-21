@@ -23,6 +23,10 @@ const CRON_DISPLAY: Record<string, string> = {
   'blog-seed-guide': '블로그: 가이드',
   'blog-monthly-theme': '블로그: 월별 테마',
   'stock-price': '주식 시세',
+  'stock-daily-briefing': 'AI 일일 시황',
+  'stock-theme-daily': '테마 자동 갱신',
+  'exchange-rate': '환율 기록',
+  'aggregate-trade-stats': '실거래가 집계',
 };
 
 export default function AdminAutomation() {

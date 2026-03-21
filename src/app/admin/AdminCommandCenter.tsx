@@ -24,6 +24,10 @@ const CRON_NAMES: Record<string, string> = {
   'crawl-busan-redev': '부산 재개발 수집',
   'seed-posts': '시드 게시글 생성',
   'daily-stats': '일일 통계 캡처',
+  'aggregate-trade-stats': '실거래가 집계',
+  'exchange-rate': '환율 기록',
+  'stock-theme-daily': '테마 자동 갱신',
+  'stock-daily-briefing': 'AI 일일 시황',
 };
 
 interface RefreshState {
