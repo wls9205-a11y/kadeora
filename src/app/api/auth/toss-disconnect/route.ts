@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
     await admin.from('notifications').delete().eq('user_id', userId)
     await admin.from('push_subscriptions').delete().eq('user_id', userId)
 
-    console.log('[toss-disconnect] User disconnected:', userId)
     return NextResponse.json({ success: true })
   } catch (e: any) {
     console.error('[toss-disconnect] Error:', e.message)
