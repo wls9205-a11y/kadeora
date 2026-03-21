@@ -11,6 +11,10 @@ const CRON_BUTTONS = [
   { key: 'blog-monthly', icon: '📊', label: '월간', path: '/api/cron/blog-monthly' },
   { key: 'seed-finance', icon: '💰', label: '재테크 시드', path: '/api/admin/seed-finance-blogs' },
   { key: 'all', icon: '🔄', label: '전체 재생성', path: '' },
+  { key: 'blog-apt-landmark', icon: '🏢', label: '대장 아파트', path: '/api/cron/blog-apt-landmark' },
+  { key: 'blog-redevelopment', icon: '🏗️', label: '재개발/재건축', path: '/api/cron/blog-redevelopment' },
+  { key: 'blog-seed-guide', icon: '📖', label: '가이드/꿀팁', path: '/api/cron/blog-seed-guide' },
+  { key: 'blog-monthly-theme', icon: '🗓️', label: '월별 주제', path: '/api/cron/blog-monthly-theme' },
 ];
 
 export default function AdminBlogPage() {

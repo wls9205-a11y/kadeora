@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
-const ALLOWED_ENDPOINTS = ['/api/cron/seed-posts', '/api/cron/seed-comments', '/api/cron/seed-chat', '/api/stock-refresh', '/api/cron/blog-daily', '/api/cron/blog-apt-new', '/api/cron/blog-weekly', '/api/cron/blog-monthly', '/api/admin/seed-finance-blogs'];
+const ALLOWED_ENDPOINTS = [
+  '/api/cron/seed-posts', '/api/cron/seed-comments', '/api/cron/seed-chat', '/api/stock-refresh',
+  '/api/cron/blog-daily', '/api/cron/blog-apt-new', '/api/cron/blog-weekly', '/api/cron/blog-monthly',
+  '/api/admin/seed-finance-blogs',
+  '/api/cron/blog-apt-landmark', '/api/cron/blog-redevelopment', '/api/cron/blog-seed-guide', '/api/cron/blog-monthly-theme',
+];
 
 export async function POST(req: NextRequest) {
   // Admin auth check

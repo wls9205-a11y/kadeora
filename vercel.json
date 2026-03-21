@@ -3,6 +3,9 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     },
+    "src/app/api/cron/blog-*/*.ts": {
+      "maxDuration": 300
+    },
     "src/app/(main)/**/*.tsx": {
       "maxDuration": 30
     },
@@ -58,6 +61,10 @@
     {
       "path": "/api/cron/blog-afternoon",
       "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/blog-monthly-theme",
+      "schedule": "0 10 1 * *"
     }
   ]
 }
