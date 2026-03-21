@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import AptCommentInline from '@/components/AptCommentInline';
 import ShareButtons from '@/components/ShareButtons';
+import AptBookmarkButton from '@/components/AptBookmarkButton';
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -65,6 +66,8 @@ export default async function AptDetailPage({ params }: Props) {
     ['총공급', apt.tot_supply_hshld_co ? `${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : null],
   ].filter(r => r[1]);
 
+  const { data: { user: aptUser } } = await createSupabaseServer().then(s => s.auth.getUser());
+
   let relatedPosts: any[] = [];
   try {
     const sbRel = await createSupabaseServer();
@@ -99,6 +102,7 @@ export default async function AptDetailPage({ params }: Props) {
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(59,130,246,0.2)' }}>
           🏠 청약홈
         </a>
+        <AptBookmarkButton aptId={apt.id} isLoggedIn={!!aptUser} />
       </div>
 
       {/* 분양 일정 */}

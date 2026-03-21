@@ -18,9 +18,9 @@ export async function GET(req: NextRequest) {
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
     const { data: deadlines } = await admin.from('apt_subscriptions')
-      .select('house_nm, rcept_endde')
+      .select('id, house_nm, rcept_endde')
       .in('rcept_endde', [today, tomorrow])
-      .limit(5);
+      .limit(10);
 
     if (!deadlines || deadlines.length === 0) {
       return NextResponse.json({ sent: 0, message: 'No deadlines today/tomorrow' });
@@ -57,6 +57,31 @@ export async function GET(req: NextRequest) {
 
       for (const u of users) {
         notifications.push({ user_id: u.id, type: 'system', content });
+      }
+    }
+
+    // 관심단지 북마크 유저에게 추가 알림
+    const aptIds = deadlines.map((d: any) => d.id).filter(Boolean);
+    if (aptIds.length > 0) {
+      const { data: bookmarks } = await admin.from('apt_bookmarks')
+        .select('user_id, apt_id')
+        .in('apt_id', aptIds)
+        .eq('notify', true);
+
+      if (bookmarks && bookmarks.length > 0) {
+        const aptMap = new Map(deadlines.map((d: any) => [d.id, d]));
+        for (const bk of bookmarks) {
+          const apt = aptMap.get(bk.apt_id) as any;
+          if (!apt) continue;
+          const isToday = apt.rcept_endde === today;
+          notifications.push({
+            user_id: bk.user_id,
+            type: 'system',
+            content: isToday
+              ? `🧡 관심단지 ${apt.house_nm} 접수 오늘 마감!`
+              : `🧡 관심단지 ${apt.house_nm} 접수가 내일까지에요.`,
+          });
+        }
       }
     }
 
