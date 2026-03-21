@@ -320,11 +320,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
                 {/* 본문: 제목 + 본문 2줄 */}
                 {post.title && (
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
                     {post.title}
                   </div>
                 )}
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                   {post.content}
                 </div>
               </Link>

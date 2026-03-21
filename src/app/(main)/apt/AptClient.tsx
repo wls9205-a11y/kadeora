@@ -70,7 +70,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [tradePage, setTradePage] = useState(1);
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
-  const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' } | null>(null);
+  const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
   const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
   const [selectedTrade, setSelectedTrade] = useState<any | null>(null);
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
@@ -258,10 +258,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     📅 {selectedCalDate.slice(5).replace('-', '월 ')}일 청약 일정 ({dayApts.length}건)
                   </div>
                   {dayApts.map(a => (
-                    <div key={a.id} style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{a.house_nm}</span>
-                      <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>{a.region_nm}</span>
-                    </div>
+                    <a key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', padding: '6px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', cursor: 'pointer' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-link, #58a6ff)' }}>{a.house_nm}</span>
+                      <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.tot_supply_hshld_co?.toLocaleString() || '-'}세대</span>
+                    </a>
                   ))}
                 </div>
               ) : null;
@@ -308,8 +308,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>투기과열</span>}
                   {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(249,115,22,0.12)', color: '#fdba74', border: '1px solid rgba(249,115,22,0.2)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
-                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
-                    {watchlist.has(`subscription:${apt.id}`) ? '\u2B50' : '\u2606'}
+                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 20, background: watchlist.has(`subscription:${apt.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                    {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}
                   </button>
                 </div>
                 {/* 경쟁률 */}
@@ -526,8 +526,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
                     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
                     {priceStr && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
-                      {watchlist.has(`unsold:${u.id}`) ? '\u2B50' : '\u2606'}
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 20, background: watchlist.has(`unsold:${u.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                      {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
 
@@ -716,8 +716,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
                     <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74', border: `1px solid ${r.project_type === '재개발' ? 'rgba(59,130,246,0.2)' : 'rgba(249,115,22,0.2)'}` }}>{r.project_type}</span>
                     <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{r.region}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
-                      {watchlist.has(`redev:${r.id}`) ? '\u2B50' : '\u2606'}
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 20, background: watchlist.has(`redev:${r.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                      {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
                   {/* 2행: 구역명 */}
@@ -831,7 +831,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                         showValues={true}
                         height={140}
                       />
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>단위: 만원 → 억원</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>단위: 억원</div>
                     </>
                   );
                 })()}
@@ -853,7 +853,18 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               return data.length > 0 ? (
                 <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>💰 평당가 TOP 10 (만원/평)</div>
-                  <MiniBarChart data={data} defaultColor="#8B5CF6" />
+                  {data.map((d: any, i: number) => {
+                    const pct = (d.value / (data[0]?.value || 1)) * 100;
+                    return (
+                      <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <div style={{ width: 50, fontSize: 11, color: 'var(--text-secondary)', textAlign: 'right', flexShrink: 0 }}>{d.label}</div>
+                        <div style={{ flex: 1, height: 24, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: d.color || '#8B5CF6' }} />
+                        </div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', minWidth: 55, textAlign: 'right', flexShrink: 0 }}>{d.value.toLocaleString()}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : null;
             })()}
@@ -886,8 +897,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     {isNew(t, 'transaction') && <NewBadge />}
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}>{t.trade_type || '매매'}</span>
                     <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>{t.region_nm} {t.sigungu}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 2 }}>
-                      {watchlist.has(`transaction:${t.id}`) ? '\u2B50' : '\u2606'}
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 20, background: watchlist.has(`transaction:${t.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                      {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{t.apt_name}</div>
@@ -975,6 +986,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   요약 정보를 준비 중입니다
                 </div>
               )}
+
+              {/* 한줄평 */}
+              <button onClick={() => { setSelectedRedev(null); setCommentTarget({ houseKey: `redev_${r.id}`, houseNm: r.district_name || '정비사업', houseType: 'redev' as any }); }} style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer', marginBottom: 12, fontWeight: 600 }}>
+                💬 한줄평 작성하기
+              </button>
 
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center' }}>
                 본 정보는 참고용이며, 투자 판단의 근거로 사용하면 안 됩니다.

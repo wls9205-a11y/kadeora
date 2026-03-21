@@ -11,7 +11,7 @@ function timeAgo(d: string) {
   return `${Math.floor(h / 24)}일 전`;
 }
 
-interface Props { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold'; open: boolean; onClose: () => void; }
+interface Props { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev'; open: boolean; onClose: () => void; }
 
 export default function AptCommentSheet({ houseKey, houseNm, houseType, open, onClose }: Props) {
   const [comments, setComments] = useState<any[]>([]);

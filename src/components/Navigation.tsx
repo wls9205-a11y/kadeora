@@ -279,7 +279,7 @@ export function Navigation() {
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
                           display:'flex', alignItems:'center', gap:8, padding:'11px 16px',
-                          color:'var(--text-primary)', fontSize:14, textDecoration:'none',
+                          color:'var(--text-primary)', fontSize:'var(--fs-sm)', textDecoration:'none',
                           borderBottom:'1px solid var(--border)',
                           transition:'background 0.1s',
                         }}
@@ -364,7 +364,7 @@ export function Navigation() {
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
             }}>
               <item.Icon size={20} />
-              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              <span style={{ fontSize:'var(--fs-xs)', fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
         })}
@@ -389,7 +389,7 @@ export function Navigation() {
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
             }}>
               <item.Icon size={20} />
-              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              <span style={{ fontSize:'var(--fs-xs)', fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
           );
         })}
@@ -415,7 +415,7 @@ export function Navigation() {
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   <span style={{ fontSize:24 }}>{item.emoji}</span>
-                  <span style={{ fontSize:11, fontWeight:600 }}>{item.label}</span>
+                  <span style={{ fontSize:'var(--fs-xs)', fontWeight:600 }}>{item.label}</span>
                 </Link>
               ))}
             </div>

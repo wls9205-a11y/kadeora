@@ -68,14 +68,14 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
 
       {/* Title */}
       <h3 style={{
-        fontSize: 16, fontWeight: 700,
+        fontSize: 'var(--fs-md)', fontWeight: 700,
         margin: "0 0 5px", lineHeight: 1.4, color: "var(--text-primary)",
       }}>{post.title}</h3>
 
       {/* Content preview */}
       {variant !== "compact" && (
         <p style={{
-          fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.6,
+          fontSize: 'var(--fs-sm)', color: "var(--text-tertiary)", lineHeight: 1.6,
           margin: "0 0 10px",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any,
           overflow: "hidden",

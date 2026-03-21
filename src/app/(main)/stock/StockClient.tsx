@@ -100,7 +100,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 24, textAlign: 'center' }}>{rank}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{s.symbol}</span>
           </div>
           <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
@@ -113,11 +113,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>시세 미제공</span>
           ) : (
             <>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
               </div>
               {isGlobal && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
-              <div style={{ fontSize: 12, fontWeight: 600, color: pct > 0 ? '#22c55e' : pct < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: pct > 0 ? '#22c55e' : pct < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>
                 {pct > 0 ? '▲' : pct < 0 ? '▼' : '—'} {Math.abs(pct).toFixed(2)}%
               </div>
             </>
