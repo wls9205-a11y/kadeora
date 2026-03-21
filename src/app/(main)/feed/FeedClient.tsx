@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Share2, Search, User } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
-import { REGIONS, GRADE_EMOJI } from '@/lib/constants';
+import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -296,7 +296,8 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                     {displayName[0].toUpperCase()}
                   </div>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14 }}>{displayName}</span>
-                  <span style={{ fontSize: 13 }}>{gradeEmoji}</span>
+                  <span style={{ fontSize: 12, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
+                    {(post.profiles?.grade ?? 1) >= 3 && <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1), fontWeight: 600 }}>{gradeTitle(post.profiles?.grade ?? 1)}</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
                 </div>
 

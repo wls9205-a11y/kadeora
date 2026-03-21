@@ -126,11 +126,29 @@ export const DEMO_PRODUCTS: ShopProduct[] = [
   { id: 'premium-membership', name: '30일 프리미엄 멤버십', description: '광고 없는 깔끔한 환경 + 전용 채널 접근', price_krw: 9900, icon: '💎', is_active: true, created_at: new Date().toISOString() },
 ];
 
-// DB grade_definitions 테이블 기준 — 모든 파일에서 이 상수를 import할 것
-export const GRADE_EMOJI: Record<number, string> = {
-  1: '🌱', 2: '📡', 3: '🏘️', 4: '🏠', 5: '⚡',
-  6: '🔥', 7: '💎', 8: '🌟', 9: '👑', 10: '🚀',
+// DB grade_definitions 테이블 기준
+export const GRADE_MAP: Record<number, { title: string; emoji: string; color: string }> = {
+  1:  { title: '새싹',       emoji: '🌱', color: '#4CAF50' },
+  2:  { title: '정보통',     emoji: '📡', color: '#2196F3' },
+  3:  { title: '동네어른',   emoji: '🏘️', color: '#9C27B0' },
+  4:  { title: '소문난집',   emoji: '🏠', color: '#FF9800' },
+  5:  { title: '인플루언서', emoji: '⚡', color: '#F44336' },
+  6:  { title: '빅마우스',   emoji: '🔥', color: '#E91E63' },
+  7:  { title: '찐고수',     emoji: '💎', color: '#00BCD4' },
+  8:  { title: '전설',       emoji: '🌟', color: '#FFD700' },
+  9:  { title: '신의경지',   emoji: '👑', color: '#FF6B35' },
+  10: { title: '카더라신',   emoji: '🚀', color: '#7B2FBE' },
 };
+
+// 하위 호환
+export const GRADE_EMOJI: Record<number, string> = Object.fromEntries(
+  Object.entries(GRADE_MAP).map(([k, v]) => [Number(k), v.emoji])
+);
+
+export function gradeInfo(grade: number | null) { return GRADE_MAP[grade ?? 1] ?? GRADE_MAP[1]; }
+export function gradeEmoji(grade: number | null): string { return gradeInfo(grade).emoji; }
+export function gradeColor(grade: number | null): string { return gradeInfo(grade).color; }
+export function gradeTitle(grade: number | null): string { return gradeInfo(grade).title; }
 
 export const CATEGORY_STYLES: Record<string, { label: string; color: string; bg: string }> = {
   stock: { label: '주식', color: '#ef4444', bg: '#ef444415' },
