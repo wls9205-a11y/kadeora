@@ -11,6 +11,9 @@ const TEMPLATES = [
   { cat: 'stock', titleFn: (d: string) => `오늘 급등/급락 종목 TOP 5 (${d})`, tagsFn: () => ['급등주', '급락주', '주식'] },
   { cat: 'stock', titleFn: (d: string) => `섹터별 수익률 분석 (${d})`, tagsFn: () => ['섹터분석', '반도체', '2차전지'] },
   { cat: 'stock', titleFn: (d: string) => `미국 증시 마감 요약 (${d})`, tagsFn: () => ['나스닥', '다우존스', 'S&P500', '미국주식'] },
+  { cat: 'stock', titleFn: (d: string) => `오늘의 투자 포인트 — 시장 종합 브리핑 (${d})`, tagsFn: () => ['투자포인트', '시장분석', '브리핑'] },
+  { cat: 'stock', titleFn: (d: string) => `유럽·아시아 시장 동향 (${d})`, tagsFn: () => ['유럽증시', '아시아증시', '해외시장'] },
+  { cat: 'finance', titleFn: (d: string) => `환율 브리핑 — 원달러·원엔 (${d})`, tagsFn: () => ['환율', '원달러', '원엔', '외환'] },
 ];
 
 export async function GET(req: NextRequest) {

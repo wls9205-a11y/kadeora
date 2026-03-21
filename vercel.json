@@ -54,6 +54,10 @@
     {
       "path": "/api/cron/blog-monthly",
       "schedule": "0 9 1 * *"
+    },
+    {
+      "path": "/api/cron/blog-afternoon",
+      "schedule": "0 14 * * 1-5"
     }
   ]
 }
