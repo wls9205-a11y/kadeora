@@ -116,9 +116,9 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (showMention && mentionList.length > 0) { if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => Math.min(i + 1, mentionList.length - 1)); return; } if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => Math.max(i - 1, 0)); return; } if (e.key === 'Enter') { e.preventDefault(); selectMention(mentionList[mentionIndex].nickname); return; } if (e.key === 'Escape') { setShowMention(false); return; } } if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 160px)', minHeight: 400, maxHeight: 800 }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
       {/* Messages */}
-      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '6px 8px' }}>
+      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: 0, WebkitOverflowScrolling: 'touch' as any }}>
         {loadingMore && <div style={{ textAlign: 'center', padding: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>이전 메시지...</div>}
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '40px 0' }}>채팅 불러오는 중...</div>

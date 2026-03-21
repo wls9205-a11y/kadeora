@@ -153,17 +153,29 @@ export default function DiscussClient() {
   const regularTopics = topics.filter(t => !t.is_hot && !t.is_pinned);
   const isChat = tab !== 'poll';
 
+  // Fullscreen flex layout for chat tabs, normal scroll for poll tab
+  const containerStyle: React.CSSProperties = isChat ? {
+    maxWidth: 720, margin: '0 auto',
+    display: 'flex', flexDirection: 'column',
+    height: 'calc(100dvh - 104px)',
+    // fallback for browsers without dvh
+    minHeight: 'calc(100vh - 160px)',
+  } : {
+    maxWidth: 720, margin: '0 auto',
+  };
+
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <div style={{ marginBottom: 16 }}>
+    <div style={containerStyle}>
+      <div style={{ flexShrink: 0, marginBottom: isChat ? 8 : 16 }}>
         <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
         <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들</p>
       </div>
 
       {/* 탭 */}
       <div style={{
-        display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none',
+        display: 'flex', gap: 4, marginBottom: isChat ? 8 : 12, overflowX: 'auto', scrollbarWidth: 'none',
         background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '8px 10px',
+        flexShrink: 0,
       }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
@@ -175,7 +187,7 @@ export default function DiscussClient() {
         ))}
       </div>
 
-      {/* 채팅 탭 (전체/주식방/부동산방/자유방) */}
+      {/* 채팅 탭 — flex:1로 남은 공간 100% 채움 */}
       {isChat && <ChatRoom user={user} room={ROOM_MAP[tab] || 'lounge'} />}
 
       {/* 투표 탭 */}
