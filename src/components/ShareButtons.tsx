@@ -6,7 +6,9 @@ interface Props { title: string; postId: number | string; content?: string; }
 const PLATFORMS = [
   { id: 'kakao', label: '카카오톡', bg: '#FEE500', color: '#191919', emoji: '💬' },
   { id: 'x', label: 'X', bg: '#000000', color: '#ffffff', emoji: '𝕏' },
+  { id: 'facebook', label: '페이스북', bg: '#1877F2', color: '#ffffff', emoji: '📘' },
   { id: 'naver', label: '밴드', bg: '#03C75A', color: '#ffffff', emoji: '📢' },
+  { id: 'naverblog', label: '네이버', bg: '#03C75A', color: '#ffffff', emoji: '📝' },
   { id: 'copy', label: '링크복사', bg: '#374151', color: '#ffffff', emoji: '🔗' },
 ];
 
@@ -55,8 +57,12 @@ export default function ShareButtons({ title, postId, content }: Props) {
       }
     } else if (pid === 'x') {
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' via 카더라')}&url=${encodeURIComponent(url)}`, '_blank');
+    } else if (pid === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400');
     } else if (pid === 'naver') {
       window.open(`https://band.us/plugin/share?body=${encodeURIComponent(title + '\n' + url)}&route=shareButton`, '_blank');
+    } else if (pid === 'naverblog') {
+      window.open(`https://share.naver.com/web/shareView?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, '_blank', 'width=600,height=400');
     } else if (pid === 'copy') {
       await navigator.clipboard.writeText(url);
       setCopied(true); setTimeout(() => setCopied(false), 2000);
