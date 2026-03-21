@@ -163,6 +163,9 @@ export default function StockClient({ initialStocks }: Props) {
       return s.name.toLowerCase().includes(q) || s.symbol.toLowerCase().includes(q);
     })
     .sort((a, b) => {
+      // price=0(시세 대기중) 종목은 뒤로
+      if ((a.price ?? 0) === 0 && (b.price ?? 0) !== 0) return 1;
+      if ((a.price ?? 0) !== 0 && (b.price ?? 0) === 0) return -1;
       const dirMul = sortDir === 'asc' ? 1 : -1;
       if (sort === 'cap') {
         const rate = exchangeRate || 1380;
@@ -178,7 +181,7 @@ export default function StockClient({ initialStocks }: Props) {
   const isDown = (s: Stock) => (s.change_pct ?? 0) < 0;
 
   function fmtPrice(s: Stock) {
-    if (!s.price) return '-';
+    if (!s.price || s.price === 0) return '시세 대기중';
     const isUSD = s.currency === 'USD';
     if (isUSD && showKRW) {
       return '₩' + Math.round(s.price * exchangeRate).toLocaleString('ko-KR');

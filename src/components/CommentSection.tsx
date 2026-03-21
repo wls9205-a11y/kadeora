@@ -63,12 +63,13 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   };
 
   const handleDelete = async (commentId: number) => {
-    const sb = createSupabaseBrowser();
-    const { error: err } = await sb.from('comments').update({ is_deleted: true }).eq('id', commentId).eq('author_id', user!.id);
-    if (err) { error('삭제에 실패했습니다'); return; }
-    setComments(prev => prev.filter(c => c.id !== commentId));
-    setDeleteTarget(null);
-    success('댓글이 삭제되었습니다');
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+      if (!res.ok) { error('삭제에 실패했습니다'); return; }
+      setComments(prev => prev.filter(c => c.id !== commentId));
+      setDeleteTarget(null);
+      success('댓글이 삭제되었습니다');
+    } catch { error('오류가 발생했습니다'); }
   };
 
   const handleCommentLike = async (commentId: number, currentLikes: number) => {

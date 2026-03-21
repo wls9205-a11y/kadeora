@@ -42,10 +42,18 @@ export default async function AptPage() {
     (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
   } catch {}
 
-  // 지역별 건수 계산
-  const regionCounts: Record<string, number> = {};
-  apts.forEach((a: any) => { const r = a.region_nm || '기타'; regionCounts[r] = (regionCounts[r] || 0) + 1; });
-  const regionStats = Object.entries(regionCounts).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }));
+  // 지역별 + 상태별 통계 계산
+  const today = new Date().toISOString().slice(0, 10);
+  const regionDetail: Record<string, { total: number; open: number; upcoming: number; closed: number }> = {};
+  apts.forEach((a: any) => {
+    const r = a.region_nm || '기타';
+    if (!regionDetail[r]) regionDetail[r] = { total: 0, open: 0, upcoming: 0, closed: 0 };
+    regionDetail[r].total++;
+    if (String(a.rcept_endde ?? '') < today) regionDetail[r].closed++;
+    else if (String(a.rcept_bgnde ?? '') <= today) regionDetail[r].open++;
+    else regionDetail[r].upcoming++;
+  });
+  const regionStats = Object.entries(regionDetail).sort((a, b) => b[1].total - a[1].total).map(([name, s]) => ({ name, ...s }));
 
   return <><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} /><Disclaimer /></>;
 }

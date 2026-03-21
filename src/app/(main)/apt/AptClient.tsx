@@ -37,7 +37,7 @@ const SB = {
   closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
-export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; count: number }[] }) {
+export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRefreshed, regionStats = [] }: { apts: Apt[]; unsold?: any[]; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[] }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'unsold'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
@@ -128,13 +128,17 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
               </button>
               {regionStats.map(r => (
                 <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
-                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                   border: region === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
                   background: region === r.name ? 'var(--brand)' : 'var(--bg-surface)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: region === r.name ? '#fff' : 'var(--brand)' }}>{r.count}</span>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: region === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
                   <span style={{ fontSize: 10, fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                  <div style={{ fontSize: 8, display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+                    {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : '#22c55e' }}>접수{r.open}</span>}
+                    {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : '#3b82f6' }}>예정{r.upcoming}</span>}
+                  </div>
                 </button>
               ))}
             </div>
