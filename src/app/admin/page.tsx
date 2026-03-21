@@ -62,6 +62,18 @@ export default async function AdminDashboard() {
     seedCount = sc ?? 0;
   } catch {}
 
+  let weeklyActive = 0;
+  try {
+    const { data: wa } = await supabase.rpc('get_weekly_active_users');
+    weeklyActive = wa ?? 0;
+  } catch {}
+
+  let todayComments = 0;
+  try {
+    const { count: tc } = await supabase.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().slice(0, 10)).eq('is_deleted', false);
+    todayComments = tc ?? 0;
+  } catch {}
+
   const totalUsers = usersR.count ?? 0;
   const todayUsers = todayUsersR.count ?? 0;
   const totalPosts = postsR.count ?? 0;
@@ -101,7 +113,8 @@ export default async function AdminDashboard() {
     { label: '오늘 가입', value: todayUsers, icon: '🆕', color: '#10b981', sub: '신규 회원' },
     { label: '총 게시글', value: totalPosts, icon: '📝', color: '#3b82f6', sub: `오늘 +${todayPosts}개` },
     { label: '오늘 조회수', value: todayViews, icon: '👁️', color: '#8b5cf6', sub: '금일 누적' },
-    { label: '댓글', value: totalComments, icon: '💬', color: '#f59e0b' },
+    { label: '주간 활성', value: weeklyActive, icon: '📊', color: '#06b6d4', sub: '최근 7일 (실제 유저)' },
+    { label: '댓글', value: totalComments, icon: '💬', color: '#f59e0b', sub: `오늘 +${todayComments}개` },
     { label: '신고 대기', value: pendingCount, icon: '🚨', color: pendingCount > 0 ? '#ef4444' : '#10b981', sub: pendingCount > 0 ? '미처리 건' : '이상 없음' },
     { label: 'PWA 설치', value: pwaTotal, icon: '📲', color: '#06b6d4', sub: `푸시 구독 ${pushSubs}명` },
     { label: '결제', value: totalRevenue, icon: '💰', color: '#22c55e', sub: `총 ${paymentCount}건`, format: 'currency' as const },
