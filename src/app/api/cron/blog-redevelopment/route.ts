@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 300;
+
 export const dynamic = 'force-dynamic';
 
 function generateRedevelopmentBlog(zone: any): string {
@@ -73,7 +73,8 @@ ${zoneType} 투자는 사업 지연, 추가 분담금, 조합 분쟁 등의 리�
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

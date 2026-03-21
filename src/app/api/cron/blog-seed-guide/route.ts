@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 300;
+
 export const dynamic = 'force-dynamic';
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -63,7 +63,8 @@ function generateFaqs(title: string, category: string) {
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

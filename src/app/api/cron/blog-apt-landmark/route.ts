@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 300;
+
 export const dynamic = 'force-dynamic';
 
 function generateLandmarkBlog(apt: any): string {
@@ -81,7 +81,8 @@ ${sizePy}평형 기준 매매가는 약 ${priceBuy}입니다. 최근 거래 동�
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
