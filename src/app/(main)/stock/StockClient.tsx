@@ -178,6 +178,7 @@ export default function StockClient({ initialStocks }: Props) {
   const isDown = (s: Stock) => (s.change_pct ?? 0) < 0;
 
   function fmtPrice(s: Stock) {
+    if (!s.price) return '-';
     const isUSD = s.currency === 'USD';
     if (isUSD && showKRW) {
       return '₩' + Math.round(s.price * exchangeRate).toLocaleString('ko-KR');
