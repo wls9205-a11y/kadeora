@@ -172,6 +172,23 @@ export function Navigation() {
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
             <ThemeToggle />
 
+            {/* 더보기 (모바일 헤더) */}
+            <button
+              className="md:hidden"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="더보기"
+              style={{
+                width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
+                borderRadius:'50%', background:'var(--bg-hover)', border:'1px solid var(--border)',
+                color: menuOpen ? 'var(--brand)' : 'var(--text-secondary)',
+                cursor:'pointer', transition:'border-color 0.12s',
+              }}
+              onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
+              onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+
             {user ? (
               <>
                 {/* 알림 */}
@@ -358,16 +375,6 @@ export function Navigation() {
             </Link>
           );
         })}
-        {/* 더보기 */}
-        <button onClick={() => setMenuOpen(!menuOpen)} style={{
-          display:'flex', flexDirection:'column', alignItems:'center', gap:3,
-          padding:'10px 4px', background:'none', border:'none',
-          minHeight:56, justifyContent:'center', flex:1, cursor:'pointer',
-          color: menuOpen ? 'var(--brand)' : 'var(--text-tertiary)',
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-          <span style={{ fontSize:10, fontWeight: menuOpen ? 700 : 500, lineHeight:1.2 }}>더보기</span>
-        </button>
       </nav>
 
       {/* 더보기 시트 (모바일) */}
@@ -375,7 +382,7 @@ export function Navigation() {
         <div className="md:hidden" style={{ position:'fixed', inset:0, zIndex:201 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMenuOpen(false)} />
           <div style={{
-            position:'absolute', bottom:68, left:12, right:12,
+            position:'absolute', bottom:72, left:12, right:12,
             background:'var(--bg-surface)', border:'1px solid var(--border)',
             borderRadius:16, padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
           }}>
