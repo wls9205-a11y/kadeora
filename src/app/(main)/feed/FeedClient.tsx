@@ -275,6 +275,23 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         </Link>
       )}
 
+      {/* 가이드북 배너 */}
+      {!currentUserId && (
+        <Link href="/guide" style={{
+          display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+          background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.08) 100%)',
+          border: '1px solid rgba(139,92,246,0.15)', borderRadius: 12,
+          textDecoration: 'none', marginBottom: 10,
+        }}>
+          <span style={{ fontSize: 18 }}>📖</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>카더라 처음이신가요?</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>가이드북에서 활용법을 확인하세요</div>
+          </div>
+          <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>→</span>
+        </Link>
+      )}
+
       {/* 트렌딩 */}
       <TrendingBar />
 
@@ -288,32 +305,32 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const postHref = `/feed/${(post as any).slug || post.id}`;
           return (
             <div key={post.id} className="animate-fadeIn"
-              style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+              style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
               <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                 {/* 1행: 아바타 + 닉네임 + 등급 + 시간 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#fff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>
                     {displayName[0].toUpperCase()}
                   </div>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14 }}>{displayName}</span>
-                  <span style={{ fontSize: 12, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
+                  <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
                     {(post.profiles?.grade ?? 1) >= 3 && <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1), fontWeight: 600 }}>{gradeTitle(post.profiles?.grade ?? 1)}</span>}
-                  <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
                 </div>
 
-                {/* 본문: 제목 있으면 볼드 첫줄 + 본문 3줄 */}
+                {/* 본문: 제목 + 본문 2줄 */}
                 {post.title && (
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
                     {post.title}
                   </div>
                 )}
-                <div style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                   {post.content}
                 </div>
               </Link>
 
               {/* 인터랙션: 좋아요 + 댓글 + 공유 (3개만) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
                   style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0 }}>
                   <Heart size={18} fill={isLiked ? '#ef4444' : 'none'} stroke={isLiked ? '#ef4444' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : ''}

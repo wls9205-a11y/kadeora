@@ -14,6 +14,7 @@ import { getAvatarColor } from '@/lib/avatar';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import ReportButton from '@/components/ReportButton';
 import PostActions from '@/components/PostActions';
+import FontSizeControl from '@/components/FontSizeControl';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
@@ -114,7 +115,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
       const [{ data: commentsData }, { data: relatedData }] = await Promise.all([
         sb.from('comments')
-          .select('*, profiles!comments_author_id_fkey(id,nickname,avatar_url)')
+          .select('*, profiles!comments_author_id_fkey(id,nickname,avatar_url,grade)')
           .eq('post_id', numId)
           .eq('is_deleted', false)
           .order('created_at', { ascending: false })
@@ -231,9 +232,14 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         </div>
 
+        {/* 글자 크기 조절 */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+          <FontSizeControl />
+        </div>
+
         {/* Content body */}
         {currentUserId ? (
-          <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
+          <div style={{ fontSize: 'var(--content-font-size, 16px)' as any, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
             {post.content}
           </div>
         ) : (
@@ -318,6 +324,21 @@ export default async function FeedDetailPage({ params }: Props) {
       <div style={{ marginBottom: 16 }}>
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
+
+      {/* 프리미엄 배너 */}
+      <Link href="/premium" style={{
+        display: 'block', padding: '16px 20px', marginBottom: 16,
+        background: 'linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(249,115,22,0.1) 100%)',
+        border: '1px solid rgba(139,92,246,0.2)', borderRadius: 12,
+        textDecoration: 'none', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+          💎 프리미엄으로 더 많은 정보를 받아보세요
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+          광고 제거 · 블로그 전문 열람 · 급등주 알림
+        </div>
+      </Link>
 
       {/* Related posts */}
       {related.length > 0 && (

@@ -533,5 +533,5 @@ export type PostWithProfile = Post & {
 }
 
 export type CommentWithProfile = Comment & {
-  profiles: Pick<Profile, 'id' | 'nickname' | 'avatar_url'> | null
+  profiles: Pick<Profile, 'id' | 'nickname' | 'avatar_url' | 'grade'> | null
 }

@@ -93,6 +93,7 @@ export default function AptClient({ apts, unsold = [], alertCounts = {}, lastRef
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <span>전국 청약 일정과 미분양 현황</span>
           <a href="/apt/diagnose" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>🎯 가점 진단 →</a>
+          <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>🏠 청약홈 →</a>
         </div>
       </div>
 

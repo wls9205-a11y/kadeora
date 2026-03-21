@@ -32,7 +32,7 @@ export default function TrendingTicker() {
 
   return (
     <div style={{ background:'var(--bg-surface)', borderBottom:'1px solid var(--border)', padding:'5px 0', overflow:'hidden' }}>
-      <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 16px', display:'flex', alignItems:'center', gap:10 }}>
+      <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
         <span style={{ fontSize:11, fontWeight:800, color:'var(--text-inverse)', background:'var(--brand)', padding:'2px 8px', borderRadius:4, flexShrink:0 }}>🔥 실시간</span>
         <div style={{ flex:1, overflow:'hidden', height:22, position:'relative' }}>
           <a href={`/search?q=${encodeURIComponent(current?.keyword ?? '')}`}

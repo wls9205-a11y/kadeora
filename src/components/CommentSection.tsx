@@ -6,6 +6,7 @@ import { ConfirmModal } from '@/components/ConfirmModal';
 import type { CommentWithProfile } from '@/types/database';
 import type { User } from '@supabase/supabase-js';
 import ReportButton from '@/components/ReportButton';
+import { gradeEmoji } from '@/lib/constants';
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -142,7 +143,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                   <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
                     {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
                   </div>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{gradeEmoji(comment.profiles?.grade ?? null)} {comment.profiles?.nickname ?? '익명'}</span>
                   <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
