@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
+
+User-agent: Yeti
+Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
