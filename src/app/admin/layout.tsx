@@ -15,6 +15,7 @@ const menuGroups = [
     { href: '/admin/notifications', icon: '📢', label: '공지/전광판' },
     { href: '/admin/system', icon: '🔧', label: '시스템' },
     { href: '/admin/payments', icon: '💰', label: '결제' },
+    { href: '/admin/infra', icon: '🖥️', label: '인프라' },
   ]},
 ];
 
