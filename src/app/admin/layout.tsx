@@ -7,6 +7,7 @@ const menuGroups = [
   { section: '콘텐츠', items: [
     { href: '/admin/content', icon: '📝', label: '게시글' },
     { href: '/admin/comments', icon: '💬', label: '댓글' },
+    { href: '/admin/blog', icon: '📰', label: '블로그' },
     { href: '/admin/reports', icon: '🚨', label: '신고' },
   ]},
   { section: '사용자', items: [{ href: '/admin/users', icon: '👥', label: '회원' }] },
