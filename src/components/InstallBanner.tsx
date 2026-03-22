@@ -71,7 +71,7 @@ export default function InstallBanner() {
         position: 'fixed', bottom: 88, left: 12, right: 12, zIndex: 8000,
         background: 'linear-gradient(135deg, #2563EB, #60A5FA)',
         borderRadius: 16, padding: '14px 16px',
-        boxShadow: '0 8px 32px rgba(255,69,0,0.45)',
+        boxShadow: '0 8px 32px rgba(37,99,235,0.45)',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
         <div style={{ fontSize: 30, flexShrink: 0 }}>📲</div>

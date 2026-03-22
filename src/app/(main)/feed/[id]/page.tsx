@@ -259,8 +259,8 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {(post.category === 'apt' || post.category === 'stock') && (
           <div style={{
-            background: 'rgba(255,69,0,0.04)',
-            border: '1px solid rgba(255,69,0,0.12)',
+            background: 'rgba(37,99,235,0.04)',
+            border: '1px solid rgba(37,99,235,0.12)',
             borderRadius: 8,
             padding: '8px 12px',
             fontSize: 'var(--fs-xs)',

@@ -309,7 +309,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
         @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .cc-card{transition:border-color .2s,box-shadow .2s}
-        .cc-card:hover{border-color:rgba(255,91,54,0.25)}
+        .cc-card:hover{border-color:rgba(37,99,235,0.25)}
         .cc-btn{padding:7px 14px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
         .cc-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
         .cc-btn:active{transform:translateY(0)}

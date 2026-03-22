@@ -136,7 +136,7 @@ export default function NotificationsPage() {
                 display: 'flex', alignItems: 'flex-start', gap: 12,
                 padding: '14px 16px', borderRadius: 4, cursor: 'pointer',
                 background: n.is_read ? 'var(--bg-surface)' : 'var(--brand-light)',
-                border: `1px solid ${n.is_read ? 'var(--border)' : 'rgba(255,69,0,0.2)'}`,
+                border: `1px solid ${n.is_read ? 'var(--border)' : 'rgba(37,99,235,0.2)'}`,
                 transition: 'background 0.15s',
               }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}

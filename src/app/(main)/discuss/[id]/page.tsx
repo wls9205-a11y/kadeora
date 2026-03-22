@@ -162,7 +162,7 @@ export default function DiscussDetailPage() {
             }}>
             <div style={{
               position: 'absolute', left: 0, top: 0, height: '100%',
-              width: `${opt.pct}%`, background: opt.winning ? 'rgba(255,69,0,0.1)' : 'rgba(128,128,128,0.05)',
+              width: `${opt.pct}%`, background: opt.winning ? 'rgba(37,99,235,0.1)' : 'rgba(128,128,128,0.05)',
               borderRadius: 12, transition: 'width 0.3s',
             }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

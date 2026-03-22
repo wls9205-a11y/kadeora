@@ -181,8 +181,8 @@ export default function DiscussClient() {
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
             fontWeight: 700, fontSize: 'var(--fs-sm)',
-            background: tab === t.key ? 'var(--border)' : 'transparent',
-            color: tab === t.key ? 'var(--text-primary)' : 'var(--text-secondary)',
+            background: tab === t.key ? '#2563EB' : 'transparent',
+            color: tab === t.key ? '#fff' : 'var(--text-secondary)',
           }}>{t.label}</button>
         ))}
       </div>

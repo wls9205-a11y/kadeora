@@ -92,7 +92,7 @@ export default async function HotPage() {
                 textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12,
                 padding: isTop3 ? '14px 12px' : '10px 0',
                 borderBottom: i < (topPosts?.length ?? 0) - 1 ? '1px solid var(--border)' : 'none',
-                background: isTop3 ? 'rgba(255,69,0,0.04)' : 'transparent',
+                background: isTop3 ? 'rgba(37,99,235,0.06)' : 'transparent',
                 borderRadius: isTop3 ? 10 : 0,
                 marginBottom: isTop3 ? 4 : 0,
               }}>

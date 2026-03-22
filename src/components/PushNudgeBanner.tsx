@@ -29,7 +29,7 @@ export default function PushNudgeBanner() {
 
   if (!show) return null;
   return (
-    <div style={{ background: 'linear-gradient(135deg, rgba(255,69,0,0.12), rgba(255,100,0,0.06))', border: '1px solid rgba(255,69,0,0.25)', borderRadius: 12, padding: '12px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.12), rgba(37,99,235,0.06))', border: '1px solid rgba(37,99,235,0.25)', borderRadius: 12, padding: '12px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🔔 새 글 알림 받기</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2 }}>놓치는 소식 없이 받아보세요</div>

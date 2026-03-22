@@ -665,7 +665,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
                 <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
                   padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
-                  border: `1px solid ${ongoingSort === k ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
+                  border: `1px solid ${ongoingSort === k ? '#2563EB' : 'var(--border)'}`,
                   background: ongoingSort === k ? '#2563EB' : 'transparent',
                   color: ongoingSort === k ? '#fff' : 'var(--text-tertiary)',
                 }}>{l}</button>
@@ -771,7 +771,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(p => (
                   <button key={p} onClick={() => { setOngoingPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
                     padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
-                    border: `1px solid ${ongoingPage === p ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
+                    border: `1px solid ${ongoingPage === p ? '#2563EB' : 'var(--border)'}`,
                     background: ongoingPage === p ? '#2563EB' : 'transparent',
                     color: ongoingPage === p ? '#fff' : 'var(--text-tertiary)',
                   }}>{p}</button>
@@ -1660,7 +1660,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                               background: isCurrent ? stageColor.border : isPast ? 'var(--text-tertiary)' : 'var(--border)',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               border: isCurrent ? '2px solid var(--brand)' : 'none',
-                              boxShadow: isCurrent ? '0 0 8px rgba(255,91,54,0.4)' : 'none',
+                              boxShadow: isCurrent ? '0 0 8px rgba(37,99,235,0.4)' : 'none',
                             }}>
                               {(isPast || isCurrent) && <span style={{ color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>✓</span>}
                             </div>

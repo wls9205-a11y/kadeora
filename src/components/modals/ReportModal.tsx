@@ -94,7 +94,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                     display: 'flex', alignItems: 'center', gap: 10,
                     padding: '10px 14px', borderRadius: 10, cursor: 'pointer',
                     border: `1px solid ${reason === r.value ? 'var(--brand)' : 'var(--border)'}`,
-                    background: reason === r.value ? 'var(--brand-light)' : 'transparent',
+                    background: reason === r.value ? '#2563EB' : 'transparent',
                     transition: 'all 0.15s',
                   }}
                 >

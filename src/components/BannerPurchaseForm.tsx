@@ -197,7 +197,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
           {content.trim() && (
             <div style={{ marginTop: 12, borderRadius: 8, overflow: 'hidden', border: `1px solid ${selected.color}30` }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 10px', background: 'var(--bg-hover)' }}>미리보기</div>
-              <div style={{ background: selected.tier === 'urgent' ? '#0F1520' : selected.tier === 'premium' ? '#0F1520' : '#0F1520', height: 36, display: 'flex', alignItems: 'center', overflow: 'hidden', paddingLeft: 16 }}>
+              <div style={{ background: selected.tier === 'urgent' ? '#1A0A0E' : selected.tier === 'premium' ? '#1A1508' : '#0A1A12', height: 36, display: 'flex', alignItems: 'center', overflow: 'hidden', paddingLeft: 16 }}>
                 <span style={{ whiteSpace: 'nowrap', fontSize: 'var(--fs-sm)', fontWeight: 600, color: selected.color }}>{selected.icon}&nbsp;{content}</span>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
           {/* 미리보기 */}
           <div style={{ marginBottom: 16, borderRadius: 8, overflow: 'hidden', border: `1px solid ${selected.color}30` }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 10px', background: 'var(--bg-hover)' }}>전광판 미리보기</div>
-            <div style={{ background: selected.tier === 'urgent' ? '#0F1520' : selected.tier === 'premium' ? '#0F1520' : '#0F1520', height: 36, display: 'flex', alignItems: 'center', overflow: 'hidden', paddingLeft: 16 }}>
+            <div style={{ background: selected.tier === 'urgent' ? '#1A0A0E' : selected.tier === 'premium' ? '#1A1508' : '#0A1A12', height: 36, display: 'flex', alignItems: 'center', overflow: 'hidden', paddingLeft: 16 }}>
               <span style={{ whiteSpace: 'nowrap', fontSize: 'var(--fs-sm)', fontWeight: 600, color: selected.color }}>{selected.icon}&nbsp;{content}</span>
             </div>
           </div>

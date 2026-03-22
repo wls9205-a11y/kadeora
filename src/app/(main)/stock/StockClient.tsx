@@ -296,8 +296,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
           <button key={k} onClick={() => isDomestic ? setDomesticTab(k as any) : setGlobalTab(k as any)} style={{
             padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 700, fontSize: 'var(--fs-sm)',
-            background: currentTab === k ? 'var(--border)' : 'transparent',
-            color: currentTab === k ? 'var(--text-primary)' : 'var(--text-secondary)',
+            background: currentTab === k ? '#2563EB' : 'transparent',
+            color: currentTab === k ? '#fff' : 'var(--text-secondary)',
           }}>{l}</button>
         ))}
       </div>
