@@ -17,8 +17,8 @@ export default function FAQPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 0' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>자주 묻는 질문</h1>
-      <p style={{ color: 'var(--text-tertiary)', fontSize: 13, marginBottom: 32 }}>카더라 사용에 관해 자주 묻는 질문들을 모았습니다</p>
+      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>자주 묻는 질문</h1>
+      <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', marginBottom: 32 }}>카더라 사용에 관해 자주 묻는 질문들을 모았습니다</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {FAQS.map((faq, i) => (
@@ -29,7 +29,7 @@ export default function FAQPage() {
                 width: '100%', padding: '16px 20px', background: 'transparent', border: 'none',
                 color: 'var(--text-primary)', textAlign: 'left', cursor: 'pointer',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
-                fontSize: 15, fontWeight: 600, lineHeight: 1.4,
+                fontSize: 'var(--fs-md)', fontWeight: 600, lineHeight: 1.4,
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -37,15 +37,15 @@ export default function FAQPage() {
                 {faq.q}
               </span>
               <span style={{
-                fontSize: 18, flexShrink: 0, color: 'var(--text-tertiary)',
+                fontSize: 'var(--fs-lg)', flexShrink: 0, color: 'var(--text-tertiary)',
                 transform: open === i ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s',
               }}>▾</span>
             </button>
             {open === i && (
               <div style={{ padding: '0 20px 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }} className="animate-slideDown">
-                <span style={{ color: 'var(--success)', fontWeight: 800, flexShrink: 0, fontSize: 15 }}>A</span>
-                <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{faq.a}</p>
+                <span style={{ color: 'var(--success)', fontWeight: 800, flexShrink: 0, fontSize: 'var(--fs-md)' }}>A</span>
+                <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{faq.a}</p>
               </div>
             )}
           </div>
@@ -53,12 +53,12 @@ export default function FAQPage() {
       </div>
 
       <div style={{ marginTop: 40, padding: '24px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, textAlign: 'center' }}>
-        <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: 14 }}>찾는 답이 없으신가요?</p>
+        <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)' }}>찾는 답이 없으신가요?</p>
         <a href="mailto:support@kadeora.com" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '10px 20px', borderRadius: 8,
           background: 'var(--brand)', color: 'var(--text-inverse)',
-          textDecoration: 'none', fontSize: 14, fontWeight: 600,
+          textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600,
         }}>📧 문의하기</a>
       </div>
     </div>

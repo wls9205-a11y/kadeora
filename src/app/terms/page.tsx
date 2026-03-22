@@ -21,27 +21,27 @@ export default function TermsPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>이용약관</h1>
-      <p style={{ color: 'var(--text-tertiary)', fontSize: 13, marginBottom: 32 }}>최종 수정일: 2026년 3월 17일</p>
+      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>이용약관</h1>
+      <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', marginBottom: 32 }}>최종 수정일: 2026년 3월 17일</p>
       {sections.map(([title, content]) => (
         <div key={title} style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{title}</h2>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.8, whiteSpace: 'pre-line' }}>{content}</p>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{title}</h2>
+          <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.8, whiteSpace: 'pre-line' }}>{content}</p>
         </div>
       ))}
       <div style={{ marginTop: 40, padding: '16px 20px', borderRadius: 12, backgroundColor: 'var(--bg-sunken)', border: '1px solid var(--border)' }}>
-        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: 0 }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, margin: 0 }}>
           본 약관에 대한 문의는 서비스 내 고객센터를 이용해 주시기 바랍니다.
         </p>
       </div>
       <div style={{ marginTop: 24, padding: '16px 20px', borderRadius: 12, backgroundColor: 'var(--bg-sunken)', border: '1px solid var(--border)' }}>
-        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: 0 }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, margin: 0 }}>
           본 약관과 관련된 분쟁은 서울중앙지방법원을 제1심 관할법원으로 합니다.
         </p>
-        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '8px 0 0' }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '8px 0 0' }}>
           본 약관은 대한민국 법령에 따라 해석되고 적용됩니다.
         </p>
-        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '8px 0 0' }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '8px 0 0' }}>
           주식 시세: Naver Finance / Yahoo Finance API · 청약 정보: 청약홈(applyhome.co.kr) 공공데이터
         </p>
       </div>

@@ -40,19 +40,19 @@ function LoginForm({ redirect }: LoginFormProps) {
         <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
           카더라
         </div>
-        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>아는 사람만 아는 그 정보</p>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--fs-base)' }}>아는 사람만 아는 그 정보</p>
       </div>
 
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
-        <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>로그인</h2>
-        <p style={{ margin: '0 0 32px', color: 'var(--text-tertiary)', fontSize: 13, textAlign: 'center', lineHeight: 1.5 }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>로그인</h2>
+        <p style={{ margin: '0 0 32px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', textAlign: 'center', lineHeight: 1.5 }}>
           소셜 계정으로 간편하게 시작하세요
         </p>
 
         <button
           onClick={() => login('kakao')}
           disabled={!!loading}
-          style={{ width: '100%', padding: '14px 20px', marginBottom: 12, borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', marginBottom: 12, borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'kakao' ? (
             <div style={{ width: 20, height: 20, border: '2px solid #191919', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -67,7 +67,7 @@ function LoginForm({ redirect }: LoginFormProps) {
         <button
           onClick={() => login('google')}
           disabled={!!loading}
-          style={{ width: '100%', padding: '14px 20px', borderRadius: 12, border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', borderRadius: 12, border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'google' ? (
             <div style={{ width: 20, height: 20, border: '2px solid var(--text-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -83,12 +83,12 @@ function LoginForm({ redirect }: LoginFormProps) {
         </button>
 
         {error && (
-          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--error)', fontSize: 13 }}>
+          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--error)', fontSize: 'var(--fs-sm)' }}>
             ⚠ {error}
           </div>
         )}
 
-        <p style={{ margin: '24px 0 0', fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6 }}>
+        <p style={{ margin: '24px 0 0', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6 }}>
           로그인 시{' '}
           <a href="/terms" style={{ color: 'var(--brand)', textDecoration: 'none' }}>이용약관</a>
           {' '}및{' '}

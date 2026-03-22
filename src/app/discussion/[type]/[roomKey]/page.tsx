@@ -194,10 +194,10 @@ export default function DiscussionRoomPage() {
       {/* Coming Soon */}
       <div className="flex-1" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 300, gap: 12 }}>
         <div style={{ fontSize: 48 }}>💬</div>
-        <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
+        <p style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>
           토론방 오픈 준비중
         </p>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6 }}>
           곧 실시간 토론방이 오픈됩니다.<br />
           조금만 기다려주세요 🙏
         </p>
