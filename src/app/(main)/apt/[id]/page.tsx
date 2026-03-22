@@ -84,6 +84,17 @@ export default async function AptDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        name: `${apt.house_nm} 청약`,
+        description: `${apt.region_nm} ${apt.hssply_adres || ''} · ${apt.tot_supply_hshld_co ? `${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : ''}`,
+        startDate: apt.rcept_bgnde || undefined,
+        endDate: apt.rcept_endde || undefined,
+        location: { '@type': 'Place', name: apt.hssply_adres || apt.house_nm, address: apt.hssply_adres || apt.region_nm },
+        url: `https://kadeora.app/apt/${id}`,
+        organizer: { '@type': 'Organization', name: '청약홈', url: 'https://www.applyhome.co.kr' },
+      }) }} />
       {/* 헤더 */}
       <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>← 부동산</Link>
       <div style={{ marginBottom: 20 }}>
