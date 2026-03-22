@@ -92,12 +92,30 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const filteredStocks = getFilteredStocks();
   const currentTab = isDomestic ? domesticTab : globalTab;
 
+  const toggleWatchlist = useCallback(async (symbol: string) => {
+    const isWatched = watchlistSymbols.includes(symbol);
+    try {
+      const res = await fetch('/api/stock/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbol, action: isWatched ? 'remove' : 'add' }),
+      });
+      if (res.ok) {
+        setWatchlistSymbols(prev => isWatched ? prev.filter(s => s !== symbol) : [...prev, symbol]);
+      }
+    } catch {}
+  }, [watchlistSymbols]);
+
   function StockRow({ s, rank }: { s: Stock; rank: number }) {
     const pct = s.change_pct ?? 0;
     const isGlobal = s.currency === 'USD';
+    const isWatched = watchlistSymbols.includes(s.symbol);
     return (
-      <div onClick={() => setSelectedStock(s)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 24, textAlign: 'center' }}>{rank}</span>
+      <div onClick={() => setSelectedStock(s)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 22, textAlign: 'center' }}>{rank}</span>
+        <button onClick={e => { e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 18, lineHeight: 1, color: isWatched ? '#facc15' : 'var(--text-tertiary)', flexShrink: 0 }} title={isWatched ? '관심 해제' : '관심 추가'}>
+          {isWatched ? '★' : '☆'}
+        </button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>

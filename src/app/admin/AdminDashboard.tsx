@@ -177,7 +177,7 @@ export default function AdminDashboard() {
             {(() => {
               const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-6);
               const data = months.map(m => {
-                const total = unsoldMonthly.filter((s: any) => s.stat_month === m).reduce((sum: number, r: any) => sum + (r.unsold_count || 0), 0);
+                const total = unsoldMonthly.filter((s: any) => s.stat_month === m).reduce((sum: number, r: any) => sum + (r.total_unsold || 0), 0);
                 return { label: String(m).slice(5), value: total };
               });
               const max = Math.max(...data.map(d => d.value), 1);
