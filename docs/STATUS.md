@@ -1,7 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-22 세션 18 종료
-> **최신 커밋:** `973dd00`
+> **마지막 업데이트:** 2026-03-22 세션 19 종료
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -36,7 +35,7 @@
 
 ---
 
-## 크론 현황 (41개 등록, vercel.json)
+## 크론 현황 (42개 등록, vercel.json)
 
 ### 부동산
 | 크론 | 주기 | 상태 |
@@ -44,19 +43,19 @@
 | crawl-apt-subscription | 매일 06시 | ✅ 2,500건 |
 | crawl-apt-trade | 평일 08시 | ✅ 올해 전체, 200개 시군구 |
 | crawl-apt-resale | 주 1회 | ✅ 35개 시군구 확대 |
-| crawl-competition-rate | 매일 12시 | ✅ 신규 |
+| crawl-competition-rate | 매일 12시 | ✅ |
 | crawl-unsold-molit | 매월 1일 | ✅ |
 | crawl-seoul-redev | 주 1회 | ✅ |
 | crawl-busan-redev | 주 1회 | ✅ |
 | crawl-gyeonggi-redev | 주 1회 | ✅ |
-| crawl-nationwide-redev | 매주 월요일 | ⚠️ 0건 — API 수정 배포됨, 다음 실행 확인 |
-| aggregate-trade-stats | 매일 | ✅ RPC 수정 완료 |
+| crawl-nationwide-redev | 매주 월요일 | ⚠️ API 키 필요 |
+| aggregate-trade-stats | 매일 | ✅ |
 
 ### 주식
 | 크론 | 주기 | 상태 |
 |------|------|------|
-| stock-price | 평일 매일 | ✅ 150종목 |
-| stock-crawl | 평일 22시 | ⏳ STOCK_DATA_API_KEY 필요 |
+| stock-refresh | 평일 장중 5분마다 | ✅ KIS→Naver→Yahoo 3중 폴백 |
+| stock-price | 평일 매일 | ✅ 히스토리 스냅샷 |
 | stock-theme-daily | 매일 | ✅ |
 | stock-daily-briefing | 매일 | ✅ |
 | exchange-rate | 매일 | ✅ |
@@ -67,37 +66,33 @@
 | seed-posts | 30분마다 | ✅ |
 | seed-comments | 4시간마다 | ✅ |
 | seed-chat | 6시간마다 | ✅ |
-| daily-stats | 매일 14:55 | ✅ 필드명 수정 완료 |
+| daily-stats | 매일 14:55 | ✅ |
 | blog-* (10+개) | 다양 | ✅ AI 자동 생성 |
+
+### 시스템
+| 크론 | 주기 | 상태 |
+|------|------|------|
+| auto-grade | 매일 02시 | ✅ 신규 — 등급 자동 갱신 |
+| health-check | 30분마다 | ✅ |
+| cleanup | 매일 03시 | ✅ |
 
 ---
 
-## 세션 18 변경 요약 (29건 커밋)
+## 세션 19 변경 요약
 
-### UI/UX
-- 글씨 크기 상향 (보통 14→16px, 크게 16→18px)
-- fontSize CSS 변수 전면 전환 — 100+파일 1,000건
-- 반응형 CSS, loading/error 14개 페이지, JSON-LD SEO
-- 프로필 5개 탭 (글/댓글/⭐관심종목/🏠관심단지/🔖북마크)
+### 어드민 커맨드센터 전면 개편
+- 4탭 분리 → 단일 페이지 대시보드 통합
+- 원클릭 실행 8개, 크론 그룹별 상태, 접이식 패널 4개
+- 블로그 자동화(설정+큐+리라이팅), 유저, 알림/신고, 공지/SEO/도구
 
-### 부동산
-- 청약: 캘린더 월이동, 정렬3종, 경쟁률크론, 평형별테이블, 자동수집(106→2500)
-- 미분양: 지역별 TOP5 순위
-- 재개발: 진행률, 전국 크론
-- 실거래: 연단위 수집(3827건), 면적필터, 정렬4종, 최고가/최저가, 건축년도
+### 등급 자동 갱신 크론 신규
+- 포인트 + 게시글 + 댓글 기반 10단계 자동 승급 (강등 없음)
 
-### 주식
-- 한국식 색상, ⭐토글, 테마필터, 비슷한종목, 합법API전환
+### stock_quotes price=0 자동 비활성화
+- 7일 이상 price=0 → is_active=false
 
-### 블로그/피드/검색
-- 블로그: 커버이미지/검색/정렬/페이지네이션/인기글
-- 피드: 이미지썸네일, 인기글배너
-- 통합검색 블로그 추가
-
-### DB 마이그레이션 (적용 완료)
-- aggregate RPC: region→region_nm, area→exclusive_area
-- 품질 게이트: INSERT만 적용
-- redev unique index 추가
+### 모바일 반응형 CSS 강화
+- 노치 safe-area, 터치 44px, iOS 확대 방지, 스크롤바, 스켈레톤
 
 ---
 
@@ -110,15 +105,15 @@
 - [ ] STOCK_DATA_API_KEY 발급
 
 ### 코드
-- [ ] crawl-nationwide-redev 실행 결과 확인
+- [ ] crawl-nationwide-redev API 키 등록 후 실행 확인
+- [ ] auto-grade 크론 첫 실행 결과 확인
 - [ ] 모바일 실기기 반응형 테스트
-- [ ] stock_quotes price=0 99건 해결 (KIS 연동 후)
 
 ### 선택적 개선
 - [ ] 주식 캔들차트
 - [ ] 부동산 지도뷰
-- [ ] 푸시 알림 VAPID
-- [ ] 검색 결과 하이라이팅
+- [ ] 게시글 임시저장 (localStorage draft)
+- [ ] Full-Text Search (현재 ILIKE)
 
 ---
 
@@ -127,3 +122,5 @@
 - ThemeToggle은 default export (named import 금지)
 - 에러 시 catch에서 200 반환 (재시도 루프 방지)
 - 블로그는 다른 컴퓨터에서 크론으로 생성 중 — 함부로 삭제 금지
+- profiles.points 직접 UPDATE 절대 금지 → award_points/deduct_points RPC
+- 알림은 DB 트리거가 처리 — 수동 INSERT 금지 (팔로우만 예외)

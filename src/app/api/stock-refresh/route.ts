@@ -433,6 +433,16 @@ export async function GET(req: NextRequest) {
     // USD 갱신 실패 시 무시 — 국내 결과만 반환
   }
 
+  // price=0 종목 자동 비활성화 (7일 이상 시세 없으면)
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    await supabase
+      .from('stock_quotes')
+      .update({ is_active: false })
+      .eq('price', 0)
+      .lt('updated_at', sevenDaysAgo);
+  } catch {}
+
   // 최종 DB 조회
   const { data } = await supabase
     .from('stock_quotes')
