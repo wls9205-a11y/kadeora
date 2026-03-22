@@ -1,18 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#ff5b36"/>
-  <circle cx="90" cy="256" r="68" fill="#cc4422"/>
-  <circle cx="422" cy="256" r="68" fill="#cc4422"/>
-  <circle cx="90" cy="256" r="44" fill="#ff7a50"/>
-  <circle cx="422" cy="256" r="44" fill="#ff7a50"/>
-  <ellipse cx="256" cy="232" rx="152" ry="144" fill="#ff5b36"/>
-  <ellipse cx="256" cy="256" rx="120" ry="112" fill="#ff7a50"/>
-  <circle cx="200" cy="216" r="48" fill="#fff"/>
-  <circle cx="312" cy="216" r="48" fill="#fff"/>
-  <circle cx="204" cy="220" r="32" fill="#1a0800"/>
-  <circle cx="316" cy="220" r="32" fill="#1a0800"/>
-  <circle cx="216" cy="208" r="13" fill="#fff"/>
-  <circle cx="328" cy="208" r="13" fill="#fff"/>
-  <ellipse cx="256" cy="288" rx="44" ry="32" fill="#cc4422"/>
-  <path d="M216 324 Q256 360 296 324" stroke="#cc4422" stroke-width="16" fill="none" stroke-linecap="round"/>
-  <text x="256" y="440" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="72" font-weight="900" fill="#fff" letter-spacing="-2">KADEORA</text>
+  <defs>
+    <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#ng)"/>
+  <circle cx="160" cy="256" r="48" fill="white"/>
+  <circle cx="256" cy="256" r="48" fill="white"/>
+  <circle cx="352" cy="256" r="48" fill="white"/>
+  <text x="256" y="440" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="72" font-weight="900" fill="white" letter-spacing="-2">KADEORA</text>
 </svg>

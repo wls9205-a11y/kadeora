@@ -1,5 +1,11 @@
 <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
-  <rect width="72" height="72" rx="18" fill="#FF4500"/>
+  <defs>
+    <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="72" height="72" rx="18" fill="url(#ng)"/>
   <circle cx="18" cy="36" r="7" fill="white"/>
   <circle cx="36" cy="36" r="7" fill="white"/>
   <circle cx="54" cy="36" r="7" fill="white"/>
