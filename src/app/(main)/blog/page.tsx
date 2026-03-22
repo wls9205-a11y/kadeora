@@ -150,6 +150,14 @@ export default async function BlogPage({ searchParams }: Props) {
             <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.7 }}>({countMap[c.key] || 0})</span>
           </Link>
         ))}
+        <Link href="/blog/series" style={{
+          padding: '7px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 500,
+          background: 'var(--bg-surface)', color: 'var(--accent-blue)',
+          textDecoration: 'none', flexShrink: 0, border: '1px solid var(--accent-blue)',
+          display: 'flex', alignItems: 'center', gap: 4,
+        }}>
+          📚 시리즈
+        </Link>
       </div>
 
       {/* 정렬 토글 */}

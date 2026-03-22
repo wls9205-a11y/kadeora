@@ -1,6 +1,9 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -32,8 +35,8 @@ function stockColor(pct: number, isKR: boolean) {
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [mode, setMode] = useState<'domestic'|'global'>('domestic');
-  const [domesticTab, setDomesticTab] = useState<'ranking'|'movers'|'themes'|'calendar'|'watchlist'>('ranking');
-  const [globalTab, setGlobalTab] = useState<'ranking'|'movers'|'m7'|'watchlist'>('ranking');
+  const [domesticTab, setDomesticTab] = useState<'ranking'|'movers'|'themes'|'calendar'|'watchlist'|'portfolio'>('ranking');
+  const [globalTab, setGlobalTab] = useState<'ranking'|'movers'|'m7'|'watchlist'|'portfolio'>('ranking');
   const [domesticMarket, setDomesticMarket] = useState<'ALL'|'KOSPI'|'KOSDAQ'>('ALL');
   const [moversTab, setMoversTab] = useState<'up'|'down'|'volume'>('up');
   const [sectorFilter, setSectorFilter] = useState('all');
@@ -159,8 +162,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     );
   }
 
-  const domesticTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['themes','🔥 테마'],['calendar','📅 캘린더'],['watchlist','⭐ 관심']] as const;
-  const globalTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['m7','🏆 M7'],['watchlist','⭐ 관심']] as const;
+  const domesticTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['themes','🔥 테마'],['calendar','📅 캘린더'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
+  const globalTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['m7','🏆 M7'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
@@ -547,8 +550,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         </div>
       )}
 
+      {/* 포트폴리오 탭 */}
+      {currentTab === 'portfolio' && <PortfolioTab />}
+
       {/* 종목 리스트 */}
-      {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && (
+      {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && currentTab !== 'portfolio' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px' }}>
           {filteredStocks.length === 0 ? (
             <div style={{ padding: 40, textAlign: 'center' }}>

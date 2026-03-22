@@ -1,0 +1,248 @@
+'use client';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
+import Script from 'next/script';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { SkeletonChart } from '@/components/Skeleton';
+
+type Layer = 'subscription' | 'ongoing' | 'redevelopment' | 'unsold';
+const LAYER_CONF: Record<Layer, { label: string; icon: string; color: string }> = {
+  subscription: { label: '청약', icon: '📋', color: '#3B82F6' },
+  ongoing: { label: '분양중', icon: '🏗️', color: '#34D399' },
+  redevelopment: { label: '재개발', icon: '🔨', color: '#FB923C' },
+  unsold: { label: '미분양', icon: '🏚️', color: '#F87171' },
+};
+
+interface Pin { id: number | string; name: string; address: string; layer: Layer; lat?: number; lng?: number; extra?: string; }
+
+declare global {
+  interface Window { kakao: any; }
+}
+
+export default function MapClient() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const [sdkReady, setSdkReady] = useState(false);
+  const [layers, setLayers] = useState<Set<Layer>>(new Set(['subscription', 'redevelopment']));
+  const [pins, setPins] = useState<Pin[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
+
+  // 데이터 로드
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const sb = createSupabaseBrowser();
+    const allPins: Pin[] = [];
+
+    try {
+      if (layers.has('subscription')) {
+        const { data } = await sb.from('apt_subscriptions')
+          .select('id, house_nm, hssply_adres, region_nm, tot_supply_hshld_co, rcept_endde')
+          .order('rcept_endde', { ascending: false }).limit(100) as { data: any[] | null };
+        (data || []).forEach((d: any) => allPins.push({
+          id: d.id, name: d.house_nm, address: d.hssply_adres || d.region_nm || '',
+          layer: 'subscription', extra: `${d.tot_supply_hshld_co || '?'}세대 · ~${(d.rcept_endde || '').slice(5)}`,
+        }));
+      }
+
+      if (layers.has('redevelopment')) {
+        const { data } = await sb.from('redevelopment_projects')
+          .select('id, project_name, address, region, stage, total_households')
+          .eq('is_active', true).limit(100) as { data: any[] | null };
+        (data || []).forEach((d: any) => allPins.push({
+          id: `r${d.id}`, name: d.project_name || d.address || '', address: d.address || d.region || '',
+          layer: 'redevelopment', extra: d.stage || '진행중',
+        }));
+      }
+
+      if (layers.has('unsold')) {
+        const { data } = await sb.from('unsold_apts')
+          .select('id, complex_name, region, unsold_count')
+          .eq('is_active', true).limit(100) as { data: any[] | null };
+        (data || []).forEach((d: any) => allPins.push({
+          id: `u${d.id}`, name: d.complex_name || '', address: d.region || '',
+          layer: 'unsold', extra: `${d.unsold_count || 0}세대 미분양`,
+        }));
+      }
+    } catch { }
+
+    setPins(allPins);
+    setLoading(false);
+  }, [layers]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  // 카카오맵 초기화
+  useEffect(() => {
+    if (!sdkReady || !mapRef.current) return;
+    try {
+      const { kakao } = window;
+      if (!kakao?.maps) return;
+
+      kakao.maps.load(() => {
+        const map = new kakao.maps.Map(mapRef.current, {
+          center: new kakao.maps.LatLng(36.5, 127.5),
+          level: 12,
+        });
+        mapInstance.current = map;
+
+        const zoomControl = new kakao.maps.ZoomControl();
+        map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+      });
+    } catch { }
+  }, [sdkReady]);
+
+  // 핀 표시 (주소→좌표 변환 없이 리스트 방식)
+  // 카카오맵 주소 검색 서비스로 geocode
+  useEffect(() => {
+    if (!mapInstance.current || !window.kakao?.maps?.services) return;
+
+    // 기존 마커 제거
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+
+    const geocoder = new window.kakao.maps.services.Geocoder();
+
+    pins.slice(0, 50).forEach(pin => {
+      if (!pin.address) return;
+      geocoder.addressSearch(pin.address, (result: any, status: any) => {
+        if (status !== window.kakao.maps.services.Status.OK || !result.length) return;
+        const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
+        const conf = LAYER_CONF[pin.layer];
+
+        const marker = new window.kakao.maps.Marker({
+          map: mapInstance.current,
+          position: coords,
+          title: pin.name,
+        });
+
+        const infoContent = `<div style="padding:6px 10px;font-size:12px;font-weight:600;white-space:nowrap;background:#1e293b;color:#fff;border-radius:6px;border:1px solid ${conf.color}">${conf.icon} ${pin.name}</div>`;
+        const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent });
+
+        window.kakao.maps.event.addListener(marker, 'click', () => {
+          setSelectedPin(pin);
+          infowindow.open(mapInstance.current, marker);
+        });
+        window.kakao.maps.event.addListener(marker, 'mouseover', () => {
+          infowindow.open(mapInstance.current, marker);
+        });
+        window.kakao.maps.event.addListener(marker, 'mouseout', () => {
+          infowindow.close();
+        });
+
+        markersRef.current.push(marker);
+      });
+    });
+  }, [pins]);
+
+  const toggleLayer = (layer: Layer) => {
+    setLayers(prev => {
+      const next = new Set(prev);
+      if (next.has(layer)) next.delete(layer);
+      else next.add(layer);
+      return next;
+    });
+  };
+
+  const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+
+  return (
+    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+      <Script
+        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services&autoload=false`}
+        strategy="afterInteractive"
+        onLoad={() => setSdkReady(true)}
+      />
+
+      {/* 헤더 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div>
+          <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
+          <h1 style={{ margin: '4px 0 0', fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>🗺️ 부동산 지도</h1>
+        </div>
+      </div>
+
+      {/* 레이어 토글 */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+        {(Object.keys(LAYER_CONF) as Layer[]).map(l => {
+          const conf = LAYER_CONF[l];
+          const active = layers.has(l);
+          return (
+            <button key={l} onClick={() => toggleLayer(l)} style={{
+              padding: '6px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+              border: `1.5px solid ${active ? conf.color : 'var(--border)'}`,
+              background: active ? `${conf.color}15` : 'var(--bg-surface)',
+              color: active ? conf.color : 'var(--text-tertiary)',
+              cursor: 'pointer', flexShrink: 0,
+            }}>
+              {conf.icon} {conf.label} ({pins.filter(p => p.layer === l).length})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 지도 */}
+      <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div ref={mapRef} style={{ width: '100%', height: 500, background: 'var(--bg-hover)' }}>
+          {!sdkReady && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+              지도 로딩 중...
+            </div>
+          )}
+        </div>
+
+        {/* 선택된 핀 정보 */}
+        {selectedPin && (
+          <div style={{
+            position: 'absolute', bottom: 16, left: 16, right: 16,
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            borderRadius: 12, padding: 14, boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <span style={{
+                    fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4,
+                    background: `${LAYER_CONF[selectedPin.layer].color}20`,
+                    color: LAYER_CONF[selectedPin.layer].color,
+                  }}>
+                    {LAYER_CONF[selectedPin.layer].icon} {LAYER_CONF[selectedPin.layer].label}
+                  </span>
+                </div>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{selectedPin.name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{selectedPin.address}</div>
+                {selectedPin.extra && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 4 }}>{selectedPin.extra}</div>}
+              </div>
+              <button onClick={() => setSelectedPin(null)} style={{
+                background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18,
+              }}>✕</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 핀 리스트 (지도 아래) */}
+      {loading ? <SkeletonChart /> : (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>총 {pins.length}건</div>
+          <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+            {pins.slice(0, 30).map(pin => (
+              <div key={pin.id} onClick={() => setSelectedPin(pin)} style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+                borderBottom: '1px solid var(--border)', cursor: 'pointer',
+              }}>
+                <span style={{ fontSize: 16 }}>{LAYER_CONF[pin.layer].icon}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pin.name}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{pin.address}</div>
+                </div>
+                {pin.extra && <span style={{ fontSize: 'var(--fs-xs)', color: LAYER_CONF[pin.layer].color, fontWeight: 600, flexShrink: 0 }}>{pin.extra}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

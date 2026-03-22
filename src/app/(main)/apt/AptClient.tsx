@@ -6,6 +6,10 @@ import AptCommentSheet from '@/components/AptCommentSheet';
 import { haptic } from '@/lib/haptic';
 import MiniLineChart from '@/components/charts/MiniLineChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';
+import dynamic from 'next/dynamic';
+
+const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'), { ssr: false });
+const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), { ssr: false });
 
 const NEW_HOURS: Record<string, number> = { subscription: 24, ongoing: 168, unsold: 168, redevelopment: 168, transaction: 72 };
 function isNew(item: any, type: string): boolean {
@@ -191,6 +195,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 8 }}>
+          <a href="/apt/map" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🗺️ 지도</a>
           <a href="/apt/diagnose" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🎯 가점진단</a>
           <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>🏠 청약홈</a>
         </div>
@@ -2002,7 +2007,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmt(r.deal_amount)}</span>
                 </div>
               ))}
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 12 }}>국토교통부 실거래가 공개시스템 기준</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 12, marginBottom: 16 }}>국토교통부 실거래가 공개시스템 기준</div>
+
+              {/* 실거래가 전체 추이 차트 */}
+              <AptPriceTrendChart aptName={t.apt_name} region={t.region_nm} />
+
+              {/* 주민 리뷰 */}
+              <AptReviewSection aptName={t.apt_name} region={t.region_nm} />
             </div>
           </div>
         );

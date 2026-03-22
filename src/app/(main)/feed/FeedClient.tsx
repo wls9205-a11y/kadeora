@@ -13,6 +13,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
 import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
+import PersonalDashboard from '@/components/PersonalDashboard';
 
 function timeAgo(dateStr: string | null | undefined) {
   if (!dateStr) return '';
@@ -221,6 +222,9 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           </Link>
         </div>
       </div>
+
+      {/* 개인화 대시보드 */}
+      <PersonalDashboard />
 
       {/* 카테고리 pill 탭 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 2 }}>

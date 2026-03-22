@@ -105,6 +105,10 @@
       "schedule": "*/30 * * * *"
     },
     {
+      "path": "/api/cron/check-price-alerts",
+      "schedule": "*/15 9-16 * * 1-5"
+    },
+    {
       "path": "/api/cron/daily-stats",
       "schedule": "55 14 * * *"
     },

@@ -1,5 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+const CronDashboard = dynamic(() => import('@/components/CronDashboard'), { ssr: false });
 
 type DateFilter = 'today' | 'week' | 'month';
 const dateFilterLabel: Record<DateFilter, string> = { today: '오늘', week: '이번주', month: '이번달' };
@@ -251,6 +254,7 @@ export default function AdminSystemPage() {
     <div>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>⚙️ 시스템</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <CronDashboard />
         <SeedSection />
         <CronSection />
         <ManualControlSection />

@@ -1,0 +1,114 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { createSupabaseServer } from '@/lib/supabase-server';
+
+const admin = () => createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function GET() {
+  try {
+    const sb = await createSupabaseServer();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
+
+    const { data, error } = await admin().rpc('get_portfolio_summary', { p_user_id: user.id });
+    if (error) {
+      // RPC 없으면 직접 조인
+      const { data: holdings } = await admin().from('portfolio_holdings')
+        .select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      if (!holdings?.length) return NextResponse.json({ holdings: [], summary: { totalInvested: 0, totalCurrent: 0, totalPnl: 0, pnlPct: 0 } });
+
+      const symbols = holdings.map(h => h.symbol);
+      const { data: stocks } = await admin().from('stock_quotes')
+        .select('symbol,name,price,market,currency').in('symbol', symbols);
+      const stockMap = new Map(stocks?.map(s => [s.symbol, s]) || []);
+
+      const enriched = holdings.map(h => {
+        const s = stockMap.get(h.symbol);
+        const currentPrice = s?.price || 0;
+        const pnl = (currentPrice - h.buy_price) * h.quantity;
+        const pnlPct = h.buy_price > 0 ? ((currentPrice - h.buy_price) / h.buy_price * 100) : 0;
+        return { ...h, current_price: currentPrice, name: s?.name || h.symbol, market: s?.market, currency: s?.currency, pnl, pnl_pct: pnlPct };
+      });
+
+      const totalInvested = enriched.reduce((s, h) => s + h.buy_price * h.quantity, 0);
+      const totalCurrent = enriched.reduce((s, h) => s + h.current_price * h.quantity, 0);
+
+      return NextResponse.json({
+        holdings: enriched,
+        summary: {
+          totalInvested, totalCurrent,
+          totalPnl: totalCurrent - totalInvested,
+          pnlPct: totalInvested > 0 ? ((totalCurrent - totalInvested) / totalInvested * 100) : 0,
+        }
+      });
+    }
+
+    // RPC 성공
+    const totalInvested = (data || []).reduce((s: number, h: any) => s + (h.buy_price || 0) * (h.quantity || 0), 0);
+    const totalCurrent = (data || []).reduce((s: number, h: any) => s + (h.current_price || 0) * (h.quantity || 0), 0);
+
+    return NextResponse.json({
+      holdings: data || [],
+      summary: {
+        totalInvested, totalCurrent,
+        totalPnl: totalCurrent - totalInvested,
+        pnlPct: totalInvested > 0 ? ((totalCurrent - totalInvested) / totalInvested * 100) : 0,
+      }
+    });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const sb = await createSupabaseServer();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
+
+    const body = await req.json();
+    const { symbol, buy_price, quantity, memo } = body;
+    if (!symbol || !buy_price || !quantity) {
+      return NextResponse.json({ error: '종목, 매수가, 수량은 필수입니다' }, { status: 400 });
+    }
+
+    // 최대 50종목
+    const { count } = await admin().from('portfolio_holdings')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    if ((count || 0) >= 50) {
+      return NextResponse.json({ error: '포트폴리오는 최대 50종목까지 가능합니다' }, { status: 400 });
+    }
+
+    const { data, error } = await admin().from('portfolio_holdings').insert({
+      user_id: user.id, symbol,
+      buy_price: Number(buy_price), quantity: Number(quantity),
+      memo: memo || null,
+    }).select().single();
+
+    if (error) throw error;
+    return NextResponse.json({ holding: data });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const sb = await createSupabaseServer();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'id 필요' }, { status: 400 });
+
+    await admin().from('portfolio_holdings').delete().eq('id', id).eq('user_id', user.id);
+    return NextResponse.json({ success: true });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}

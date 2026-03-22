@@ -115,6 +115,22 @@ export default async function BlogDetailPage({ params }: Props) {
 
   const { data: related } = await sb.from('blog_posts').select('slug, title').eq('category', post.category).eq('is_published', true).neq('id', post.id).not('published_at', 'is', null).order('published_at', { ascending: false }).limit(3);
 
+  // 시리즈 정보
+  let seriesInfo: { series: any; posts: any[] } | null = null;
+  if (post.series_id) {
+    try {
+      const { data: series } = await sb.from('blog_series').select('*').eq('id', post.series_id).single();
+      if (series) {
+        const { data: seriesPosts } = await sb.from('blog_posts')
+          .select('id,title,slug,series_order')
+          .eq('series_id', post.series_id).eq('is_published', true)
+          .order('series_order', { ascending: true, nullsFirst: false })
+          .order('published_at', { ascending: true });
+        seriesInfo = { series, posts: seriesPosts || [] };
+      }
+    } catch { }
+  }
+
   // 댓글 조회 (blog_comments 테이블이 없으면 빈 배열)
   let comments: any[] = [];
   try {
@@ -326,6 +342,36 @@ export default async function BlogDetailPage({ params }: Props) {
           카카오로 3초 가입
         </Link>
       </div>
+
+      {/* 시리즈 네비게이션 */}
+      {seriesInfo && seriesInfo.posts.length > 1 && (() => {
+        const idx = seriesInfo.posts.findIndex((p: any) => p.id === post.id);
+        const prev = idx > 0 ? seriesInfo.posts[idx - 1] : null;
+        const next = idx < seriesInfo.posts.length - 1 ? seriesInfo.posts[idx + 1] : null;
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+            <Link href={`/blog/series/${seriesInfo.series.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', marginBottom: 10 }}>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)' }}>📚 시리즈</span>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{seriesInfo.series.title}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{idx + 1}/{seriesInfo.posts.length}</span>
+            </Link>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {prev && (
+                <Link href={`/blog/${prev.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
+                  <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>← 이전</div>
+                  <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prev.title}</div>
+                </Link>
+              )}
+              {next && (
+                <Link href={`/blog/${next.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)', textAlign: 'right' }}>
+                  <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>다음 →</div>
+                  <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{next.title}</div>
+                </Link>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (
