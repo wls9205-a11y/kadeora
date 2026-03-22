@@ -345,6 +345,21 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                   {post.content}
                 </div>
+                {/* 이미지 썸네일 */}
+                {(post as any).images && (post as any).images.length > 0 && (
+                  <div style={{ marginTop: 8, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+                    {((post as any).images as string[]).slice(0, 3).map((img: string, i: number) => (
+                      <div key={i} style={{ width: 80, height: 80, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)' }}>
+                        <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                      </div>
+                    ))}
+                    {(post as any).images.length > 3 && (
+                      <div style={{ width: 80, height: 80, borderRadius: 8, flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                        +{(post as any).images.length - 3}
+                      </div>
+                    )}
+                  </div>
+                )}
               </Link>
 
               {/* 인터랙션: 좋아요 + 댓글 + 공유 (3개만) */}

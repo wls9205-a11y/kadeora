@@ -96,6 +96,7 @@ export default function SearchClient() {
   const [acStocks, setAcStocks] = useState<StockResult[]>([]);
   const [acApts, setAcApts] = useState<AptResult[]>([]);
   const [acPosts, setAcPosts] = useState<PostWithProfile[]>([]);
+  const [acBlogs, setAcBlogs] = useState<{ id: number; slug: string; title: string; category: string; view_count: number }[]>([]);
   const [acLoading, setAcLoading] = useState(false);
   const acDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -129,6 +130,7 @@ export default function SearchClient() {
       setAcStocks([]);
       setAcApts([]);
       setAcPosts([]);
+      setAcBlogs([]);
       setAcOpen(false);
       return;
     }
@@ -139,6 +141,7 @@ export default function SearchClient() {
       setAcStocks(data.stocks ?? []);
       setAcApts(data.apts ?? []);
       setAcPosts(data.posts ?? []);
+      setAcBlogs(data.blogs ?? []);
       setAcOpen(true);
     } catch {
       setAcOpen(false);
@@ -360,6 +363,32 @@ export default function SearchClient() {
                       </div>
                     </div>
                   );
+
+            {/* Blog section */}
+            {acBlogs.length > 0 && (
+              <div>
+                {acSectionHeader('블로그')}
+                {acBlogs.map(blog => (
+                  <div
+                    key={blog.id}
+                    style={acItemStyle}
+                    onClick={() => handleAcNavigate(`/blog/${blog.slug}`)}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}>📝 블로그</span>
+                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {highlight(blog.title, inputVal)}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                      👀 {blog.view_count}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
                 })}
               </div>
             )}

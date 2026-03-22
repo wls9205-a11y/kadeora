@@ -22,7 +22,10 @@ export async function GET(req: NextRequest) {
     // Apt subscriptions search
     const aptsPromise = supabase.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde').or(`house_nm.ilike.%${query}%,region_nm.ilike.%${query}%`).limit(5);
 
-    const [postsResult, stocksResult, aptsResult] = await Promise.all([postsPromise, stocksPromise, aptsPromise]);
+    // Blog search
+    const blogsPromise = supabase.from('blog_posts').select('id, slug, title, excerpt, category, created_at, view_count').eq('is_published', true).ilike('title', `%${query}%`).order('view_count', { ascending: false }).limit(5);
+
+    const [postsResult, stocksResult, aptsResult, blogsResult] = await Promise.all([postsPromise, stocksPromise, aptsPromise, blogsPromise]);
 
     if (postsResult.error) { console.error('[Search GET] posts', postsResult.error); return NextResponse.json({ error: '검색에 실패했습니다.' }, { status: 500 }); }
 
@@ -34,6 +37,7 @@ export async function GET(req: NextRequest) {
       hasMore: (postsResult.count || 0) > page * limit,
       stocks: stocksResult.data || [],
       apts: aptsResult.data || [],
+      blogs: blogsResult.data || [],
     }, { headers: { 'Cache-Control': 'public, max-age=30' } });
   } catch (err) { console.error('[Search GET]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
