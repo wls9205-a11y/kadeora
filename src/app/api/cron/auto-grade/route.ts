@@ -114,33 +114,12 @@ export async function GET(req: NextRequest) {
 
       // 등급은 올라가기만 함 (강등 없음)
       if (newGrade > currentGrade) {
-        // service_role은 RLS 무시, 세션 변수로 트리거 바이패스
-        await supabase.rpc('exec_sql', {
-          query: `SET LOCAL app.allow_points_update = 'on'`
-        }).catch(() => {});
-        
-        const { error: updateErr } = await supabase
-          .from('profiles')
-          .update({ 
-            grade: newGrade, 
-            grade_title: GRADE_TITLES[newGrade] || '새싹' 
-          })
-          .eq('id', profile.id);
-        
-        if (!updateErr) {
-          upgraded++;
-        } else {
-          // 트리거 바이패스 실패 시 SQL로 직접 실행
-          await supabase.rpc('admin_set_grade', {
-            p_user_id: profile.id,
-            p_grade: newGrade,
-            p_grade_title: GRADE_TITLES[newGrade] || '새싹',
-          }).catch(() => {
-            // RPC도 없으면 raw SQL
-            supabase.from('profiles').update({ grade: newGrade, grade_title: GRADE_TITLES[newGrade] }).eq('id', profile.id);
-          });
-          upgraded++;
-        }
+        const { error: gradeErr } = await supabase.rpc('admin_set_grade', {
+          p_user_id: profile.id,
+          p_grade: newGrade,
+          p_grade_title: GRADE_TITLES[newGrade] || '새싹',
+        });
+        if (!gradeErr) upgraded++;
       } else {
         unchanged++;
       }
