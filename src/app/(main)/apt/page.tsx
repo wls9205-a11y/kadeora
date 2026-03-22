@@ -120,7 +120,7 @@ export default async function AptPage() {
       mvn_prearnge_ym: a.mvn_prearnge_ym || null,
       sale_price_min: null as number | null,
       sale_price_max: null as number | null,
-      constructor_nm: a.mdatrgbn_nm || null,
+      constructor_nm: a.constructor_nm || a.mdatrgbn_nm || null,
       pblanc_url: a.pblanc_url || null,
       contact_tel: null as string | null,
       link_id: a.id,

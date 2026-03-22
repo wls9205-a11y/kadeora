@@ -778,7 +778,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
                       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                         {o.address ? o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : ''}
-                        {o.total_supply > 0 ? ` · ${o.total_supply.toLocaleString()}세대` : ''}
+                        {o.total_supply > 0 ? ` · 일반분양 ${o.total_supply.toLocaleString()}세대` : ''}
+                        {o.constructor_nm ? ` · ${o.constructor_nm}` : ''}
                         {priceStr ? ` · ${priceStr}` : ''}
                       </div>
                       {/* 미분양률 바 */}

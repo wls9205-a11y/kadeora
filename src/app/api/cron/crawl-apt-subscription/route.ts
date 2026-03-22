@@ -13,13 +13,16 @@ export const maxDuration = 60;
  */
 
 function mapItem(item: Record<string, string>) {
+  const totSupply = parseInt(item.TOT_SUPLY_HSHLDCO || item.totSuplyHshldco || '0') || 0;
+  const area = parseFloat(item.EXCLUSE_AR || item.excluseAr || '0') || 0;
+  const price = parseInt(item.LTTOT_TOP_AMOUNT || item.lttotTopAmount || '0') || 0;
   return {
     house_manage_no: item.HOUSE_MANAGE_NO || item.houseManageNo || '',
     house_nm: item.HOUSE_NM || item.houseNm || '',
     region_cd: item.SUBSCRPT_AREA_CODE || item.subscrptAreaCode || '',
     region_nm: item.SUBSCRPT_AREA_CODE_NM || item.subscrptAreaCodeNm || '',
     supply_addr: item.HSSPLY_ADRES || item.hssplyAdres || '',
-    tot_supply_hshld_co: parseInt(item.TOT_SUPLY_HSHLDCO || item.totSuplyHshldco || '0') || 0,
+    tot_supply_hshld_co: totSupply,
     rcept_bgnde: item.RCEPT_BGNDE || item.rceptBgnde || '',
     rcept_endde: item.RCEPT_ENDDE || item.rceptEndde || '',
     spsply_rcept_bgnde: item.SPSPLY_RCEPT_BGNDE || item.spsplyRceptBgnde || null,
@@ -31,6 +34,16 @@ function mapItem(item: Record<string, string>) {
     hssply_adres: item.HSSPLY_ADRES || item.hssplyAdres || '',
     mvn_prearnge_ym: item.MVN_PREARNGE_YM || item.mvnPrearngeYm || null,
     pblanc_url: item.PBLANC_URL || item.pblancUrl || null,
+    // 신규 상세 필드
+    constructor_nm: item.CNSTRCT_ENTRPS_NM || item.cnstrctEntrpsNm || null,
+    developer_nm: item.BSNS_MBY_NM || item.bsnsMbyNm || null,
+    total_dong_co: parseInt(item.TOT_DONG_CO || '0') || null,
+    max_floor: parseInt(item.HGHST_GRND_FL_CO || '0') || null,
+    parking_co: parseInt(item.PARKNG_CO || '0') || null,
+    heating_type: item.HTN_FRMLA_DS_CD_NM || item.htnFrmlaDsCdNm || null,
+    is_price_limit: (item.PARCPRC_ULS_AT || '') === 'Y',
+    transfer_limit: item.RESIDE_SECD_NM || null,
+    model_house_addr: item.MDL_HOUSE_ADRES || item.mdlHouseAdres || null,
     fetched_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

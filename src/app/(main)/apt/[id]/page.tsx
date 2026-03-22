@@ -130,6 +130,48 @@ export default async function AptDetailPage({ params }: Props) {
         ))}
       </div>
 
+      {/* 단지 개요 (신규) */}
+      <div style={card}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏗️ 단지 개요</div>
+        {[
+          ['시공사', apt.constructor_nm],
+          ['시행사', apt.developer_nm],
+          ['일반분양 세대수', apt.tot_supply_hshld_co ? `${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : null],
+          ['총 세대수', apt.total_households ? `${Number(apt.total_households).toLocaleString()}세대` : null],
+          ['총 동수', apt.total_dong_co ? `${apt.total_dong_co}개 동` : null],
+          ['최고 층수', apt.max_floor ? `지상 ${apt.max_floor}층` : null],
+          ['주차대수', apt.parking_co ? `${Number(apt.parking_co).toLocaleString()}대${apt.tot_supply_hshld_co ? ` (세대당 ${(apt.parking_co / apt.tot_supply_hshld_co).toFixed(2)}대)` : ''}` : null],
+          ['난방방식', apt.heating_type],
+          ['입주예정', fmtYM(apt.mvn_prearnge_ym)],
+        ].filter(r => r[1]).map(([label, value], i, arr) => (
+          <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{label}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{value}</span>
+          </div>
+        ))}
+        {![apt.constructor_nm, apt.developer_nm, apt.total_dong_co, apt.max_floor, apt.parking_co].some(Boolean) && (
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 12 }}>
+            상세 단지 정보는 크론 수집 후 자동 업데이트됩니다
+          </div>
+        )}
+      </div>
+
+      {/* 분양 조건 (신규) */}
+      <div style={card}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 분양 조건</div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+          {apt.is_price_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(167,139,250,0.12)', color: '#A78BFA' }}>✓ 분양가상한제</span>}
+          {!apt.is_price_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(148,163,184,0.1)', color: 'var(--text-tertiary)' }}>분양가상한제 미적용</span>}
+          {apt.transfer_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(251,191,36,0.12)', color: '#FBBF24' }}>전매제한 {apt.transfer_limit}</span>}
+          {apt.residence_obligation && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(248,113,113,0.12)', color: '#F87171' }}>거주의무 {apt.residence_obligation}</span>}
+        </div>
+        {apt.model_house_addr && (
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+            🏠 견본주택: {apt.model_house_addr}
+          </div>
+        )}
+      </div>
+
       {/* 경쟁률 */}
       {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
         <div style={{ ...card, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
@@ -173,15 +215,23 @@ export default async function AptDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* 위치 */}
+      {/* 위치 및 교통 */}
       <div style={card}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 교통</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 주변환경</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 10 }}>{apt.hssply_adres}</div>
+        {(apt.nearest_station || apt.nearest_school) && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-hover)' }}>
+            {apt.nearest_station && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>🚆 최근접 역: <strong>{apt.nearest_station}</strong></div>}
+            {apt.nearest_school && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>🏫 초등학교: <strong>{apt.nearest_school}</strong></div>}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
           <a href={`https://map.kakao.com/?q=${encodeURIComponent(apt.hssply_adres || apt.house_nm)}`} target="_blank" rel="noopener noreferrer"
-            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>카카오맵</a>
+            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
           <a href={`https://map.naver.com/p/search/${encodeURIComponent(apt.hssply_adres || apt.house_nm)}`} target="_blank" rel="noopener noreferrer"
-            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>네이버지도</a>
+            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+          <a href={`https://www.google.com/maps/search/${encodeURIComponent(apt.hssply_adres || apt.house_nm)}`} target="_blank" rel="noopener noreferrer"
+            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🌍 구글맵</a>
         </div>
       </div>
 
