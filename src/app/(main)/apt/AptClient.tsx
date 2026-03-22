@@ -43,17 +43,17 @@ function fmtD(d: string | null | undefined): string {
 }
 
 const SB = {
-  open: { label: '접수중', bg: '#14532d', color: '#86efac', border: '#166534' },
-  upcoming: { label: '접수예정', bg: '#1e3a5f', color: '#93c5fd', border: '#1e40af' },
+  open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: '#4ADE80', border: '#34D399' },
+  upcoming: { label: '접수예정', bg: 'rgba(251,191,36,0.15)', color: '#FCD34D', border: '#FBBF24' },
   closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
 const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }> = {
   '정비구역지정': { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af', border: '#6b7280' },
-  '조합설립': { bg: 'rgba(96,165,250,0.15)', color: '#93c5fd', border: '#60A5FA' },
-  '사업시행인가': { bg: 'rgba(251,191,36,0.15)', color: '#fde047', border: '#FBBF24' },
-  '관리처분': { bg: 'rgba(251,146,60,0.15)', color: '#fdba74', border: '#FB923C' },
-  '착공': { bg: 'rgba(52,211,153,0.15)', color: '#86efac', border: '#34D399' },
+  '조합설립': { bg: 'rgba(96,165,250,0.2)', color: '#93C5FD', border: '#60A5FA' },
+  '사업시행인가': { bg: 'rgba(251,191,36,0.2)', color: '#FDE047', border: '#FBBF24' },
+  '관리처분': { bg: 'rgba(251,146,60,0.2)', color: '#FDBA74', border: '#FB923C' },
+  '착공': { bg: 'rgba(52,211,153,0.2)', color: '#86EFAC', border: '#34D399' },
   '준공': { bg: 'rgba(37,99,235,0.15)', color: '#2563EB', border: 'var(--brand)' },
 };
 const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
@@ -148,9 +148,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
       padding: '4px 12px', borderRadius: 16, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' as const, flexShrink: 0,
-      border: `1px solid ${sel === v ? 'var(--brand)' : 'var(--border)'}`,
-      background: sel === v ? 'var(--brand)' : 'transparent',
-      color: sel === v ? '#fff' : 'var(--text-tertiary)',
+      border: `1px solid ${sel === v ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
+      background: sel === v ? 'rgba(96,165,250,0.15)' : 'transparent',
+      color: sel === v ? '#93C5FD' : 'var(--text-tertiary)',
     }}>{label || v}</button>
   );
 
@@ -159,7 +159,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 8 }}>
-          <a href="/apt/diagnose" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(255,91,54,0.08)', border: '1px solid rgba(255,91,54,0.15)' }}>🎯 가점진단</a>
+          <a href="/apt/diagnose" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🎯 가점진단</a>
           <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>🏠 청약홈</a>
         </div>
       </div>
@@ -177,8 +177,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           return (
             <button key={k} onClick={() => setActiveTab(k)} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
-              background: activeTab === k ? 'var(--brand)' : 'transparent',
-              color: activeTab === k ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
+              background: activeTab === k ? 'var(--bg-elevated, #162544)' : 'transparent',
+              color: activeTab === k ? '#fff' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
+              boxShadow: activeTab === k ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
             }}>
               {l}
               {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#F87171' }} />}
@@ -226,35 +227,35 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>총 {apts.length}건</span>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {apts.length}건</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
               <button onClick={() => setRegion('전체')} style={{
                 padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                border: region === '전체' ? '2px solid var(--brand)' : '1px solid var(--border)',
-                background: region === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
+                border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+                background: region === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--brand)' }}>{apts.length}</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--text-primary)' }}>{apts.length}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
               </button>
               {regionStats.map(r => (
                 <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
                   padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                  border: region === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
-                  background: region === r.name ? 'var(--brand)' : 'var(--bg-surface)',
+                  border: region === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+                  background: region === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                   <div style={{ fontSize: 8, display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
                     {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : '#34D399' }}>접수{r.open}</span>}
-                    {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : '#60A5FA' }}>예정{r.upcoming}</span>}
+                    {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : '#FCD34D' }}>예정{r.upcoming}</span>}
                   </div>
                   {r.total > 0 && (
                     <div style={{ width: '100%', height: 3, background: region === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
                       <div style={{ height: '100%', background: '#34D399', width: `${(r.open / r.total) * 100}%` }} />
-                      <div style={{ height: '100%', background: '#60A5FA', width: `${(r.upcoming / r.total) * 100}%` }} />
+                      <div style={{ height: '100%', background: '#FCD34D', width: `${(r.upcoming / r.total) * 100}%` }} />
                     </div>
                   )}
                 </button>
@@ -343,7 +344,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               ]).map(s => (
                 <button key={s.key} onClick={() => setAptSort(s.key)} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                  background: aptSort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
+                  background: aptSort === s.key ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)',
                   color: aptSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
                 }}>{s.label}</button>
               ))}
@@ -524,7 +525,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
                 {[
                   { label: '전체', value: ongoingApts.length, color: 'var(--brand)' },
-                  { label: '분양중', value: allSubCount, color: '#60a5fa' },
+                  { label: '분양중', value: allSubCount, color: '#34D399' },
                   { label: '미분양', value: allUnsoldCount, color: '#F87171' },
                   { label: '수도권', value: capitalCount, color: 'var(--text-primary)' },
                   { label: '지방', value: localCount, color: 'var(--text-primary)' },
@@ -587,9 +588,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   const subPct = r.count > 0 ? (r.subCount / r.count) * 100 : 0;
                   return (
                     <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left' }}>
-                      <div style={{ width: 36, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? 'var(--brand)' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: ongoingRegion === r.name ? 700 : 400 }}>{r.name}</div>
+                      <div style={{ width: 36, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? '#60A5FA' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: ongoingRegion === r.name ? 700 : 400 }}>{r.name}</div>
                       <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
-                        <div style={{ height: '100%', width: `${(pct * subPct) / 100}%`, background: '#60a5fa' }} />
+                        <div style={{ height: '100%', width: `${(pct * subPct) / 100}%`, background: '#34D399' }} />
                         <div style={{ height: '100%', width: `${(pct * (100 - subPct)) / 100}%`, background: '#F87171' }} />
                       </div>
                       <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 28, textAlign: 'right' }}>{r.count}</div>
@@ -597,7 +598,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   );
                 })}
                 <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: '#60a5fa', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />분양중</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: '#34D399', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />분양중</span>
                   <span><span style={{ display: 'inline-block', width: 10, height: 3, background: '#F87171', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />미분양</span>
                 </div>
               </div>
@@ -615,24 +616,24 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 6, marginBottom: 10 }}>
               <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
                 padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                border: ongoingRegion === '전체' ? '2px solid var(--brand)' : '1px solid var(--border)',
-                background: ongoingRegion === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
+                border: ongoingRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+                background: ongoingRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
               }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--brand)' }}>{ongoingApts.length}</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
               </button>
               {regionCounts.map(r => (
                 <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
                   padding: '6px 4px', borderRadius: 10, cursor: 'pointer',
-                  border: ongoingRegion === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
-                  background: ongoingRegion === r.name ? 'var(--brand)' : 'var(--bg-surface)',
+                  border: ongoingRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+                  background: ongoingRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--brand)' }}>{r.count}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                   <div style={{ display: 'flex', gap: 2, fontSize: 8, color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                    {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#60a5fa' }}>분양{r.subCount}</span>}
+                    {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#34D399' }}>분양{r.subCount}</span>}
                     {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#F87171' }}>미분양{r.unsoldCount}</span>}
                   </div>
                   {r.count > 0 && (
@@ -650,8 +651,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
                 <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
                   padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
-                  border: `1px solid ${ongoingSort === k ? 'var(--brand)' : 'var(--border)'}`,
-                  background: ongoingSort === k ? 'var(--brand)' : 'transparent',
+                  border: `1px solid ${ongoingSort === k ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
+                  background: ongoingSort === k ? 'rgba(96,165,250,0.15)' : 'transparent',
                   color: ongoingSort === k ? '#fff' : 'var(--text-tertiary)',
                 }}>{l}</button>
               ))}
@@ -756,8 +757,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(p => (
                   <button key={p} onClick={() => { setOngoingPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
                     padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
-                    border: `1px solid ${ongoingPage === p ? 'var(--brand)' : 'var(--border)'}`,
-                    background: ongoingPage === p ? 'var(--brand)' : 'transparent',
+                    border: `1px solid ${ongoingPage === p ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
+                    background: ongoingPage === p ? 'rgba(96,165,250,0.15)' : 'transparent',
                     color: ongoingPage === p ? '#fff' : 'var(--text-tertiary)',
                   }}>{p}</button>
                 ))}
@@ -798,7 +799,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', maxHeight: '75vh', overflowY: 'auto' }}>
                     <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 12px' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'rgba(248,113,113,0.12)' : 'rgba(96,165,250,0.12)', color: isU ? '#f87171' : '#60a5fa' }}>{isU ? '미분양' : '분양중'}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'rgba(248,113,113,0.12)' : 'rgba(52,211,153,0.12)', color: isU ? '#f87171' : '#34D399' }}>{isU ? '미분양' : '분양중'}</span>
                       <button onClick={() => setSelectedOngoing(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>×</button>
                     </div>
                     <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{o.house_nm}</h2>
