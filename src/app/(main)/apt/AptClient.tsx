@@ -71,6 +71,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'>('date');
   const [subSearch, setSubSearch] = useState('');
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
+  const [unsoldSearch, setUnsoldSearch] = useState('');
   const [ongoingRegion, setOngoingRegion] = useState('전체');
   const [ongoingPage, setOngoingPage] = useState(1);
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
@@ -84,6 +85,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [tradePage, setTradePage] = useState(1);
   const [tradeAreaFilter, setTradeAreaFilter] = useState('전체');
   const [tradeSort, setTradeSort] = useState<'date'|'price_desc'|'price_asc'|'area'>('date');
+  const [tradeSearch, setTradeSearch] = useState('');
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
@@ -92,6 +94,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
   const [calOffset, setCalOffset] = useState(0); // 0=이번달, -1=지난달, 1=다음달
   const [redevStage, setRedevStage] = useState('전체');
+  const [redevSearch, setRedevSearch] = useState('');
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [tradeChartRegion, setTradeChartRegion] = useState('');
   const [premiumListings, setPremiumListings] = useState<any[]>([]);
@@ -987,7 +990,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏚️ 미분양 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>매월 국토교통부 통계 업데이트 시 반영됩니다</span></div>;
         const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
-        const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
+        const fu = (unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion)).filter((u: any) => {
+          if (!unsoldSearch) return true;
+          const q = unsoldSearch.toLowerCase();
+          return (u.house_nm || '').toLowerCase().includes(q) || (u.region_nm || '').toLowerCase().includes(q) || (u.sigungu_nm || '').toLowerCase().includes(q);
+        });
         const usRaw = unsoldSummary;
         const us: any = typeof usRaw === 'string' ? (() => { try { return JSON.parse(usRaw); } catch { return null; } })()
           : usRaw?.total != null ? usRaw
@@ -1227,10 +1234,14 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               ) : null;
             })()}
 
-            {/* 안내 + 필터 */}
+            {/* 안내 + 검색 + 필터 */}
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
-            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>
+            <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
               {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
+            </div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
+              총 <strong style={{ color: '#F87171' }}>{fu.length}</strong>건 · {fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0).toLocaleString()}세대
             </div>
 
             {/* 리스트 */}
@@ -1321,6 +1332,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           if (redevType !== '전체' && r.project_type !== redevType) return false;
           if (redevRegion !== '전체' && r.region !== redevRegion) return false;
           if (redevStage !== '전체' && r.stage !== redevStage) return false;
+          if (redevSearch) {
+            const q = redevSearch.toLowerCase();
+            if (!(r.district_name || '').toLowerCase().includes(q) && !(r.region || '').toLowerCase().includes(q) && !(r.sigungu || '').toLowerCase().includes(q) && !(r.constructor || '').toLowerCase().includes(q) && !(r.address || '').toLowerCase().includes(q)) return false;
+          }
           return true;
         }).sort((a: any, b: any) => {
           const aOk = a.district_name && a.district_name !== '정보 준비중' && a.district_name !== '미상';
@@ -1422,12 +1437,20 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             </div>
 
-            {/* 유형 필터 */}
-            <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
+            {/* 유형 필터 + 검색 */}
+            <div style={{ display: 'flex', gap: 5, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               {pill('전체', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재개발', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재건축', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
+              {/* 시공사 있는 것만 필터 */}
+              {(() => {
+                const withConstructor = filteredRedev.filter((r: any) => r.constructor);
+                return withConstructor.length > 0 ? (
+                  <span style={{ fontSize: 'var(--fs-xs)', color: '#34D399', fontWeight: 600, marginLeft: 'auto' }}>시공사 확정 {withConstructor.length}건</span>
+                ) : null;
+              })()}
             </div>
+            <input value={redevSearch} onChange={e => { setRedevSearch(e.target.value); setRedevPage(1); }} placeholder="구역명, 지역, 시공사 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
 
             {/* 안내 */}
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준 · 매주 월요일 자동 갱신</div>
@@ -1523,6 +1546,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             if (tradeAreaFilter === '~59' && area > 60) return false;
             if (tradeAreaFilter === '59~84' && (area <= 59 || area > 85)) return false;
             if (tradeAreaFilter === '84~' && area <= 84) return false;
+          }
+          if (tradeSearch) {
+            const q = tradeSearch.toLowerCase();
+            if (!(t.apt_name || '').toLowerCase().includes(q) && !(t.dong || '').toLowerCase().includes(q) && !(t.sigungu || '').toLowerCase().includes(q)) return false;
           }
           return true;
         });
@@ -1702,6 +1729,27 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               ) : null;
             })()}
 
+            {/* 검색 */}
+            <input value={tradeSearch} onChange={e => { setTradeSearch(e.target.value); setTradePage(1); }} placeholder="단지명, 동(법정동) 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+
+            {/* 요약 통계 카드 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+              <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.15)', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#60A5FA' }}>{fmtAmount(avgAmount)}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 거래가</div>
+              </div>
+              {maxTrade && (
+                <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.15)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#F87171' }}>{fmtAmount(maxTrade.deal_amount)}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>최고가 {maxTrade.apt_name?.slice(0, 8)}</div>
+                </div>
+              )}
+              <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.15)', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#34D399' }}>{totalCount.toLocaleString()}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래 건수</div>
+              </div>
+            </div>
+
             {/* 면적 필터 */}
             <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
               {[
@@ -1741,10 +1789,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const sameApt = filteredTrades.filter((x: any) => x.apt_name === t.apt_name && (x.deal_amount || 0) > 0);
               const maxPrice = sameApt.length > 1 ? Math.max(...sameApt.map((x: any) => x.deal_amount || 0)) : 0;
               const vsMax = maxPrice > 0 && amt > 0 && maxPrice !== amt ? Math.round(((amt - maxPrice) / maxPrice) * 100) : null;
+              const isMaxRecord = maxPrice > 0 && amt >= maxPrice && sameApt.length >= 2;
               return (
                 <div key={`${t.id || i}`} onClick={() => setSelectedTrade(t)} style={{
                   padding: '14px 16px', borderRadius: 14, marginBottom: 8,
-                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  background: isMaxRecord ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)',
+                  border: isMaxRecord ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
                   cursor: 'pointer', transition: 'background 0.15s',
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
@@ -1754,7 +1804,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                     {isNew(t, 'transaction') && <NewBadge />}
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'var(--accent-blue-bg)', color: '#93c5fd' }}>{t.trade_type || '매매'}</span>
-                    {vsMax !== null && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
+                    {isMaxRecord && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(251,191,36,0.15)', color: '#FBBF24', border: '1px solid rgba(251,191,36,0.3)' }}>🏆 신고가</span>}
+                    {vsMax !== null && !isMaxRecord && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
                     <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
                     <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                       {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
