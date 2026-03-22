@@ -706,13 +706,13 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>SEO</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10, marginBottom: 10 }}>
-                  {[{h:'/sitemap.xml',l:'sitemap.xml'},{h:'/blog-sitemap.xml',l:'블로그 sitemap'},{h:'/robots.txt',l:'robots.txt'},{h:'/api/og?title=테스트',l:'OG 미리보기'},{h:'/api/search?q=부동산&limit=3',l:'FTS 검색 테스트'}].map(lk=>(
+                  {[{h:'/sitemap.xml',l:'sitemap.xml'},{h:'/robots.txt',l:'robots.txt'},{h:'/api/og?title=테스트',l:'OG 미리보기'},{h:'/api/search?q=부동산&limit=3',l:'FTS 검색 테스트'}].map(lk=>(
                     <a key={lk.h} href={lk.h} target="_blank" style={{ color: '#60A5FA', padding: '3px 8px', borderRadius: 6, background: '#60A5FA10' }}>{lk.l}</a>
                   ))}
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>관리 페이지</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10 }}>
-                  {[{h:'/admin/content',l:'콘텐츠'},{h:'/admin/users',l:'유저'},{h:'/admin/reports',l:'신고'},{h:'/admin/comments',l:'댓글'},{h:'/admin/blog',l:'블로그'},{h:'/admin/infra',l:'인프라'},{h:'/admin/realestate',l:'부동산'},{h:'/admin/payments',l:'결제'},{h:'/admin/notifications',l:'알림'},{h:'/admin/system',l:'시스템'},{h:'/admin/consultant',l:'상담사'}].map(l=>(
+                  {[{h:'/admin/content',l:'콘텐츠'},{h:'/admin/users',l:'유저'},{h:'/admin/reports',l:'신고'},{h:'/admin/comments',l:'댓글'},{h:'/admin/blog',l:'블로그'},{h:'/admin/infra',l:'인프라'},{h:'/admin/realestate',l:'부동산'},{h:'/admin/payments',l:'결제'},{h:'/admin/notifications',l:'알림'},{h:'/admin/system',l:'시스템'}].map(l=>(
                     <a key={l.h} href={l.h} style={{ color: '#9DB0C7', padding: '3px 8px', borderRadius: 6, background: '#1E305040', textDecoration: 'none' }}>{l.l}</a>
                   ))}
                 </div>

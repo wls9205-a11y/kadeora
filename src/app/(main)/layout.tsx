@@ -1,20 +1,11 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
-import dynamic from 'next/dynamic';
 import { Navigation } from '@/components/Navigation';
 import TrendingTicker from '@/components/TrendingTicker';
 import { ToastProvider } from '@/components/Toast';
 import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
-
-// Lazy load: 초기 렌더링에 불필요한 컴포넌트
-const Sidebar = dynamic(() => import('@/components/Sidebar'), { ssr: false });
-const RightPanel = dynamic(() => import('@/components/RightPanel'), { ssr: false });
-const InstallBanner = dynamic(() => import('@/components/InstallBanner'), { ssr: false });
-const PWAInstallTracker = dynamic(() => import('@/components/PWAInstallTracker'), { ssr: false });
-const NoticeBanner = dynamic(() => import('@/components/NoticeBanner'), { ssr: false });
-const GuestCTA = dynamic(() => import('@/components/GuestCTA'), { ssr: false });
-const PageViewTracker = dynamic(() => import('@/components/PageViewTracker'), { ssr: false });
+import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, GuestCTA, PageViewTracker } from '@/components/ClientDynamics';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
