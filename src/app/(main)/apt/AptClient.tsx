@@ -474,7 +474,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3 }}>{apt.house_nm}</div>
                 {/* 주소 + 세대수 */}
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
-                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}
+                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · 일반분양 ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}
                 </div>
                 {/* 타임라인 바 */}
                 <div style={{ display: 'flex', gap: 2, fontSize: '9px', color: 'var(--text-tertiary)' }}>
@@ -906,7 +906,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
                       {[
-                        ['총 세대수', o.total_supply > 0 ? `${o.total_supply.toLocaleString()}세대` : '-'],
+                        ['공급 세대수', o.total_supply > 0 ? `${o.total_supply.toLocaleString()}세대 (일반분양)` : '-'],
                         ['미분양', o.unsold_count ? `${o.unsold_count.toLocaleString()}호` : '-'],
                         ['분양가', pMin ? `${pMin}${pMax && pMax !== pMin ? `~${pMax}` : ''}억` : '-'],
                         ['입주예정', mvn || '-'],
