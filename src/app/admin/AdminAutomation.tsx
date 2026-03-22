@@ -96,6 +96,45 @@ export default function AdminAutomation() {
     if (qs) setQueueStatus(qs);
   };
 
+  // 리라이팅
+  const [rewriteStatus, setRewriteStatus] = useState<{ running: boolean; rewritten: number; total: number; log: string[] }>({ running: false, rewritten: 0, total: 0, log: [] });
+  const [rewriteStats, setRewriteStats] = useState<{ total: number; done: number; remaining: number } | null>(null);
+
+  useEffect(() => {
+    if (!loading) {
+      const sb = createSupabaseBrowser();
+      Promise.all([
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).not('rewritten_at', 'is', null),
+      ]).then(([totalR, doneR]) => {
+        const total = totalR.count ?? 0;
+        const done = doneR.count ?? 0;
+        setRewriteStats({ total, done, remaining: total - done });
+      });
+    }
+  }, [loading, rewriteStatus.rewritten]);
+
+  const runRewrite = async (batchSize: number = 5) => {
+    if (rewriteStatus.running) return;
+    setRewriteStatus(prev => ({ ...prev, running: true, log: [...prev.log, '리라이팅 시작...'] }));
+    try {
+      const res = await fetch('/api/admin/blog-rewrite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batchSize }),
+      });
+      const data = await res.json();
+      setRewriteStatus(prev => ({
+        running: false,
+        rewritten: prev.rewritten + (data.rewritten || 0),
+        total: prev.total + (data.total || 0),
+        log: [...prev.log, `완료: ${data.rewritten}/${data.total}건 리라이팅`, ...(data.results || []).map((r: any) => `  ${r.slug}: ${r.status}`)],
+      }));
+    } catch (err: any) {
+      setRewriteStatus(prev => ({ ...prev, running: false, log: [...prev.log, `에러: ${err.message}`] }));
+    }
+  };
+
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>;
 
   const timeAgo = (date: string) => {
@@ -188,6 +227,50 @@ export default function AdminAutomation() {
           </div>
         </>
       )}
+
+      {/* 블로그 리라이팅 */}
+      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>✍️ AI 리라이팅</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div style={{ ...cardStyle, borderLeft: '3px solid #8b5cf6' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Claude API 리라이팅</div>
+          {rewriteStats && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
+              <div style={{ textAlign: 'center', padding: 8, background: 'var(--bg-hover)', borderRadius: 8 }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{rewriteStats.done}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>완료</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: 8, background: 'var(--bg-hover)', borderRadius: 8 }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#8b5cf6' }}>{rewriteStats.remaining}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>대기</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: 8, background: 'var(--bg-hover)', borderRadius: 8 }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{rewriteStats.total}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전체</div>
+              </div>
+            </div>
+          )}
+          {rewriteStats && rewriteStats.total > 0 && (
+            <div style={{ height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden', marginBottom: 12 }}>
+              <div style={{ height: '100%', width: `${Math.round((rewriteStats.done / rewriteStats.total) * 100)}%`, borderRadius: 3, background: '#8b5cf6', transition: 'width 0.3s' }} />
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => runRewrite(5)} disabled={rewriteStatus.running}
+              style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#8b5cf6', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: rewriteStatus.running ? 0.6 : 1 }}>
+              {rewriteStatus.running ? '처리 중...' : '5건 리라이팅'}
+            </button>
+            <button onClick={() => runRewrite(10)} disabled={rewriteStatus.running}
+              style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#6d28d9', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: rewriteStatus.running ? 0.6 : 1 }}>
+              10건
+            </button>
+          </div>
+          {rewriteStatus.log.length > 0 && (
+            <div style={{ marginTop: 10, maxHeight: 150, overflow: 'auto', fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', borderRadius: 8, padding: 8 }}>
+              {rewriteStatus.log.slice(-10).map((l, i) => <div key={i}>{l}</div>)}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Cron Status Cards */}
       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>크론 상태</div>

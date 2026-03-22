@@ -114,11 +114,26 @@ export default async function BlogDetailPage({ params }: Props) {
 
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Article',
-    headline: post.title, description: post.excerpt || '',
+    headline: post.title, description: post.meta_description || post.excerpt || '',
     datePublished: post.published_at || post.created_at, dateModified: post.updated_at,
-    author: { '@type': 'Organization', name: '카더라', url: SITE },
-    publisher: { '@type': 'Organization', name: '카더라', url: SITE },
-    url: `${SITE}/blog/${slug}`, keywords: (post.tags ?? []).join(', '), inLanguage: 'ko-KR',
+    author: {
+      '@type': 'Person',
+      name: post.author_name || '카더라 데이터팀',
+      jobTitle: post.author_role || '금융·부동산 데이터 분석',
+      url: `${SITE}/about`,
+      worksFor: { '@type': 'Organization', name: '카더라', url: SITE },
+    },
+    publisher: {
+      '@type': 'Organization', name: '카더라', url: SITE,
+      logo: { '@type': 'ImageObject', url: `${SITE}/logo.svg` },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${slug}` },
+    url: `${SITE}/blog/${slug}`,
+    image: post.cover_image || `${SITE}/og-image.png`,
+    keywords: (post.tags ?? []).join(', '),
+    inLanguage: 'ko-KR',
+    isAccessibleForFree: true,
+    articleSection: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
   };
 
   // 마크다운 → HTML
