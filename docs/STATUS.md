@@ -1,7 +1,7 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-22 (세션 18 종료 시점)
-> **최신 커밋:** `a1fd509` → Vercel 자동 배포
+> **마지막 업데이트:** 2026-03-22 (세션 18 종료)
+> **최신 커밋:** `d0771cd`
 
 ---
 
@@ -11,29 +11,7 @@
 |------|-----|
 | 앱 URL | https://kadeora.app |
 | 스택 | Next.js 15 App Router + Supabase Pro(서울) + Vercel Pro |
-| Supabase project_id | `tezftxakuwhsclarprlz` (ap-northeast-2) |
-| Vercel team_id | `team_oKdq68eA7PwgcxFs61wGPZ7j` |
-| Vercel project_id | `prj_2nDcTjEcgAEew1wYdvVF57VljxJQ` |
 | GitHub | wls9205-a11y/kadeora (main, public) |
-| 도메인 | kadeora.app |
-| 앱 성격 | 금융·부동산 정보 커뮤니티 (주식, 청약, 미분양, 재개발, 실거래가, 커뮤니티, 블로그) |
-
----
-
-## 사이트 상태
-
-| 페이지 | 상태 | 비고 |
-|--------|------|------|
-| /feed | ✅ | 인기글 배너, 무한스크롤, 좋아요/댓글/공유 |
-| /stock | ✅ | 한국식 색상, ⭐ 관심종목 토글, 비슷한 종목 |
-| /apt | ✅ | 마감임박 배너, 재개발 진행률, 실거래 평당가/차트 |
-| /discuss | ✅ | 찬반 투표 토론 |
-| /blog | ✅ | 커버이미지, 검색, 정렬, 페이지네이션, 인기글 |
-| /admin | ✅ | KPI, 크론 상태, 유저 관리, 신고 처리 |
-| sitemap | ✅ | 블로그+주식+청약 동적 URL 포함 |
-| 다크모드 | ✅ | CSS 변수 기반, 하드코딩 0건 |
-| 글씨 크기 | ✅ | 보통 base 16px, 크게 base 18px |
-| RLS | ✅ | 전 테이블 적용 |
 
 ---
 
@@ -41,52 +19,53 @@
 
 | 테이블 | 건수 | 비고 |
 |--------|------|------|
-| blog_posts | 2,055 | 커버이미지, 12개월 분산, 품질 게이트 |
-| stock_quotes | 249 | is_active=false 99건 (price=0) |
-| apt_subscriptions | 106 | 만료분 status='closed' |
-| redevelopment_projects | 945 | 6단계 파이프라인 |
-| posts | 3,741 | 카테고리 영문 통일 |
-| profiles | 111 | 등급 1~10, 포인트, 글씨 크기 설정 |
-| unsold_monthly_stats | 204 | 17시도 × 12개월 |
-| daily_stats | 2+ | 크론 fallback 강화됨 |
+| apt_subscriptions | 2,500 | 매일 06시 자동 수집, 공공데이터포털 |
+| apt_transactions | 3,827 | 전국 200개 시군구, 올해 1~3월 |
+| redevelopment_projects | 945 | 서울+경기+부산 (전국 확대 크론 배포됨) |
+| unsold_apts | 203 | 국토부 통계, 매월 갱신 |
+| stock_quotes | 249 (150활성) | 공공데이터 API 기반 |
+| blog_posts | 14,485+ (발행중) | 블로그 생성 크론 활발 |
+| posts | 3,747 | 커뮤니티 게시글 |
+| profiles | 111 | 사용자 |
 
 ---
 
-## 미해결 사항 (TODO)
+## 크론 현황 (41개 등록)
 
-### 관리자 수동 작업
-- [ ] Google Search Console — sitemap 제출
-- [ ] 네이버 서치어드바이저 — sitemap 제출
+| 크론 | 주기 | 상태 |
+|------|------|------|
+| crawl-apt-subscription | 매일 06시 | ✅ 2,500건 |
+| crawl-apt-trade | 평일 08시 | ✅ 올해 전체 월 수집 |
+| crawl-apt-resale | 주 1회 | ✅ 35개 시군구 확대 |
+| crawl-competition-rate | 매일 12시 | ✅ 신규 |
+| crawl-unsold-molit | 매월 1일 | ✅ |
+| crawl-seoul-redev | 주 1회 | ✅ 6,470건 |
+| crawl-busan-redev | 주 1회 | ✅ 328건 |
+| crawl-nationwide-redev | 주 1회 | 🔧 수정 배포됨, 다음 실행 확인 필요 |
+| aggregate-trade-stats | 매일 | ✅ RPC 수정 완료 |
+| stock-crawl | 평일 22시 | ⏳ API 키 필요 |
+| daily-stats | 매일 14:55 | ✅ fallback 강화 |
+
+---
+
+## 미해결 사항
+
+### 관리자 수동
+- [ ] Google/네이버 서치콘솔 sitemap 제출
 - [ ] 토스 라이브키 교체
-- [ ] Supabase Vanity URL 설정
-- [ ] VAPID 키 생성 (푸시 알림)
+- [ ] KIS API 키 발급 (실시간 주식 시세)
+- [ ] STOCK_DATA_API_KEY 발급 (공공데이터 주식)
 
-### 코드 작업
-- [ ] 부산 재개발 API 필드명 매핑 수정
-- [ ] stock_quotes 99개 price=0 — KIS API 연동
-- [ ] 지역별 거래가 추이 차트 구 탭 연동 확인
-- [ ] 프로필에 관심종목/관심단지 탭 추가
-- [ ] 상점 페이지 UI 개선
-- [ ] 주식 테마 클릭→종목 필터 연동
-
-### 블로그
-- [ ] 크론→빌더 RPC 전환 (6개 함수)
-- [ ] robots.txt/sitemap CDN 캐시 갱신 확인
+### 코드
+- [ ] crawl-nationwide-redev 다음 실행 결과 확인
+- [ ] 프로필 관심종목/관심단지 탭
+- [ ] 부산 재개발 API 필드명 매핑
 
 ---
 
-## 최근 세션 이력
+## 세션 18 (20건 커밋)
 
-| 세션 | 날짜 | 주요 작업 | 커밋 |
-|------|------|----------|------|
-| 16 | 03-21~22 | 블로그 시드 대량→정리, 품질 게이트, 빌더 RPC | 다수 |
-| 17 | 03-22 | 부동산 UI, 글씨 CSS 변수, title, SEO, 어드민 | 8회 |
-| 18 | 03-22 | 글씨 상향, 한국식 색상, 블로그 강화, 피드 인기글, 크론 | 7회 |
-
----
-
-## 알려진 이슈
-
-- 두 컴퓨터 동시 작업 시 import 충돌로 사이트 다운 전적 (세션 16)
-- stock_quotes is_active=false 99건은 UI 숨김, DB 잔존
-- 블로그 published_at 필터 다른 컴퓨터에서 추가됨 — 충돌 해결 완료
+글씨 크기 상향, 한국식 주식 색상, 블로그 대폭 강화, 피드 인기글, 
+fontSize CSS 변수 전면 전환(100+파일), 부동산 데이터 대폭 확장,
+실거래 올해 전체 수집, 경쟁률 크론, 면적필터, 반응형 CSS, 
+어드민 버그 수정, 데이터 출처 안내문구, 전국 재개발 크론 수정
