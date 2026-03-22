@@ -8,7 +8,7 @@ function DonutGauge({ value, max, label, color }: { value: number; max: number; 
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
-  const statusColor = percent > 80 ? '#F87171' : percent > 50 ? '#FBBF24' : color;
+  const statusColor = percent > 80 ? 'var(--accent-red)' : percent > 50 ? 'var(--accent-yellow)' : color;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -169,8 +169,8 @@ export default function InfraPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
           {[
-            { label: 'Bandwidth', value: '1TB', sub: '/ 월', barPct: 3, barColor: '#60A5FA' },
-            { label: 'Serverless', value: '1,000h', sub: '/ 월', barPct: 5, barColor: '#34D399' },
+            { label: 'Bandwidth', value: '1TB', sub: '/ 월', barPct: 3, barColor: 'var(--accent-blue)' },
+            { label: 'Serverless', value: '1,000h', sub: '/ 월', barPct: 5, barColor: 'var(--accent-green)' },
             { label: 'Edge Requests', value: '∞', sub: '', barPct: 0, barColor: '' },
           ].map(item => (
             <div key={item.label} style={{ padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.03)', textAlign: 'center' }}>
@@ -184,7 +184,7 @@ export default function InfraPage() {
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>여유로움</div>
                 </>
               ) : (
-                <div style={{ fontSize: 'var(--fs-xs)', color: '#34D399', marginTop: 3 }}>무제한</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)', marginTop: 3 }}>무제한</div>
               )}
             </div>
           ))}
@@ -198,7 +198,7 @@ export default function InfraPage() {
                 <div key={d.id || i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.02)' }}>
                   <span style={{
                     width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-                    background: d.state === 'READY' ? '#34D399' : d.state === 'ERROR' ? '#F87171' : '#FBBF24',
+                    background: d.state === 'READY' ? 'var(--accent-green)' : d.state === 'ERROR' ? 'var(--accent-red)' : 'var(--accent-yellow)',
                     boxShadow: d.state === 'READY' ? '0 0 6px rgba(52,211,153,0.4)' : d.state === 'ERROR' ? '0 0 6px rgba(248,113,113,0.4)' : 'none',
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -208,7 +208,7 @@ export default function InfraPage() {
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 600,
                     background: d.state === 'READY' ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)',
-                    color: d.state === 'READY' ? '#34D399' : '#F87171',
+                    color: d.state === 'READY' ? 'var(--accent-green)' : 'var(--accent-red)',
                   }}>{d.state}</span>
                 </div>
               ))}
@@ -217,7 +217,7 @@ export default function InfraPage() {
         ) : (
           <div style={{ textAlign: 'center', padding: 16 }}>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 6 }}>배포 정보를 보려면 VERCEL_TOKEN이 필요합니다</div>
-            <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-sm)', color: '#60A5FA', textDecoration: 'none' }}>→ Vercel 대시보드에서 확인</a>
+            <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)', textDecoration: 'none' }}>→ Vercel 대시보드에서 확인</a>
           </div>
         )}
       </div>
@@ -260,7 +260,7 @@ export default function InfraPage() {
         ) : (
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 16 }}>
             GitHub 데이터를 가져올 수 없습니다{' '}
-            <a href="https://github.com/wls9205-a11y/kadeora" target="_blank" rel="noopener noreferrer" style={{ color: '#A78BFA', textDecoration: 'none' }}>→ GitHub</a>
+            <a href="https://github.com/wls9205-a11y/kadeora" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-purple)', textDecoration: 'none' }}>→ GitHub</a>
           </div>
         )}
       </div>

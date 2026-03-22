@@ -69,14 +69,14 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
         padding: '6px 14px', borderRadius: 20,
         background: liked ? 'rgba(248,113,113,0.08)' : 'var(--bg-hover)',
         border: `1px solid ${liked ? 'rgba(248,113,113,0.3)' : 'var(--border)'}`,
-        color: liked ? '#F87171' : 'var(--text-secondary)',
+        color: liked ? 'var(--accent-red)' : 'var(--text-secondary)',
         cursor: loading ? 'not-allowed' : 'pointer',
         transition: 'all 0.15s',
         fontSize: 'var(--fs-sm)', fontWeight: 600,
         opacity: loading ? 0.7 : 1,
       }}
     >
-      <Heart size={15} fill={liked ? '#F87171' : 'none'} stroke={liked ? '#F87171' : 'currentColor'} />
+      <Heart size={15} fill={liked ? 'var(--accent-red)' : 'none'} stroke={liked ? 'var(--accent-red)' : 'currentColor'} />
       <span>{(count ?? 0).toLocaleString()}</span>
     </button>
   );

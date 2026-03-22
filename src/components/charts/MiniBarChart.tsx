@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function MiniBarChart({
-  data, width = 300, maxHeight = 200, defaultColor = '#60A5FA',
+  data, width = 300, maxHeight = 200, defaultColor = 'var(--accent-blue)',
   showValues = true, horizontal = true,
 }: Props) {
   if (!data || data.length === 0) return null;

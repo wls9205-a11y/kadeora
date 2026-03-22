@@ -175,7 +175,7 @@ export default function WriteClient() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '10px 14px', marginBottom: 12, borderRadius: 10,
           background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)',
-          fontSize: 'var(--fs-sm)', color: '#60A5FA',
+          fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)',
         }}>
           <span>📝 임시저장된 글을 불러왔어요</span>
           <button onClick={() => { setTitle(''); setContent(''); setTags([]); setDraftRestored(false); clearDraft(); }} style={{

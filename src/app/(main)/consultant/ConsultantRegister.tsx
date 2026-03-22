@@ -4,9 +4,9 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
 
 const TIERS = [
-  { id: 'basic', name: 'BASIC', price: 49000, icon: '🏢', color: '#60A5FA', features: ['카드 골드 하이라이트', '분양중 탭 상단 고정', '상담사 이름·연락처 표시', '월간 노출 리포트'] },
-  { id: 'pro', name: 'PRO', price: 149000, icon: '⭐', color: '#FBBF24', features: ['BASIC 전체 포함', '이미지 최대 3장 등록', '상담 예약 CTA 버튼', '노출/클릭 상세 리포트', '카카오톡 상담 연동'] },
-  { id: 'premium', name: 'PREMIUM', price: 299000, icon: '👑', color: '#A78BFA', features: ['PRO 전체 포함', '분양중 탭 배너 노출', '관심 유저 푸시 알림', 'AI 분양 분석 리포트', '전담 매니저 지원'] },
+  { id: 'basic', name: 'BASIC', price: 49000, icon: '🏢', color: 'var(--accent-blue)', features: ['카드 골드 하이라이트', '분양중 탭 상단 고정', '상담사 이름·연락처 표시', '월간 노출 리포트'] },
+  { id: 'pro', name: 'PRO', price: 149000, icon: '⭐', color: 'var(--accent-yellow)', features: ['BASIC 전체 포함', '이미지 최대 3장 등록', '상담 예약 CTA 버튼', '노출/클릭 상세 리포트', '카카오톡 상담 연동'] },
+  { id: 'premium', name: 'PREMIUM', price: 299000, icon: '👑', color: 'var(--accent-purple)', features: ['PRO 전체 포함', '분양중 탭 배너 노출', '관심 유저 푸시 알림', 'AI 분양 분석 리포트', '전담 매니저 지원'] },
 ];
 
 const REGIONS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
@@ -218,7 +218,7 @@ export default function ConsultantRegister() {
           </div>
 
           <div style={{ ...card, marginTop: 16, background: 'rgba(96,165,250,0.06)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#60A5FA', marginBottom: 8 }}>💡 왜 프리미엄 리스팅인가요?</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 8 }}>💡 왜 프리미엄 리스팅인가요?</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               분양 상담 1건 계약 시 수백~수천만 원의 수수료가 발생합니다.<br/>
               월 4.9만~29.9만 원으로 카더라의 분양 관심 유저에게 직접 노출되어,<br/>
@@ -255,10 +255,10 @@ export default function ConsultantRegister() {
               <div key={l.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'rgba(167,139,250,0.12)' : l.tier === 'pro' ? 'rgba(251,191,36,0.12)' : 'rgba(96,165,250,0.12)', color: l.tier === 'premium' ? '#A78BFA' : l.tier === 'pro' ? '#FBBF24' : '#60A5FA' }}>{l.tier.toUpperCase()}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'var(--accent-purple-bg)' : l.tier === 'pro' ? 'var(--accent-yellow-bg)' : 'var(--accent-blue-bg)', color: l.tier === 'premium' ? 'var(--accent-purple)' : l.tier === 'pro' ? 'var(--accent-yellow)' : 'var(--accent-blue)' }}>{l.tier.toUpperCase()}</span>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginLeft: 8 }}>{l.house_nm || '현장명'}</span>
                   </div>
-                  <span style={{ fontSize: 'var(--fs-xs)', color: l.is_active ? '#34D399' : '#F87171', fontWeight: 600 }}>{l.is_active ? '활성' : '만료'}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: l.is_active ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 600 }}>{l.is_active ? '활성' : '만료'}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 16, marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                   <span>👀 노출 {(l.impressions || 0).toLocaleString()}</span>

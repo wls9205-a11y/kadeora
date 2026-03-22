@@ -4,13 +4,13 @@ import { NextRequest } from 'next/server';
 export const runtime = 'edge';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  apt: '#34D399',
+  apt: 'var(--accent-green)',
   stock: '#38BDF8',
-  local: '#FBBF24',
-  free: '#A78BFA',
-  finance: '#34D399',
-  unsold: '#FBBF24',
-  general: '#A78BFA',
+  local: 'var(--accent-yellow)',
+  free: 'var(--accent-purple)',
+  finance: 'var(--accent-green)',
+  unsold: 'var(--accent-yellow)',
+  general: 'var(--accent-purple)',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
   const likes = searchParams.get('likes') ?? '0';
   const comments = searchParams.get('comments') ?? '0';
 
-  const catColor = CATEGORY_COLORS[category] ?? '#A78BFA';
+  const catColor = CATEGORY_COLORS[category] ?? 'var(--accent-purple)';
   const catLabel = CATEGORY_LABELS[category] ?? '';
 
   // Home OG image (no title param)
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
             <div style={{
-              width: 56, height: 56, borderRadius: 12, background: '#FB923C',
+              width: 56, height: 56, borderRadius: 12, background: 'var(--accent-orange)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 28, fontWeight: 900, color: '#fff',
             }}>K</div>
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
         {/* Top: logo + category */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 40, height: 40, borderRadius: 10, background: '#FB923C',
+            width: 40, height: 40, borderRadius: 10, background: 'var(--accent-orange)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 20, fontWeight: 900, color: '#fff',
           }}>K</div>

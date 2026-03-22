@@ -84,7 +84,7 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency)}</span>
           {!isStale && (
-            <span style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: isUp ? '#F87171' : isDown ? '#60A5FA' : 'var(--text-tertiary)' }}>
+            <span style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
           )}
@@ -138,9 +138,9 @@ export default async function StockDetailPage({ params }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
                     <div style={{ width: 24, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, height: '100%', background: isKR ? (simPct > 0 ? '#F87171' : '#60A5FA') : (simPct > 0 ? '#34D399' : '#F87171'), borderRadius: 2 }} />
+                      <div style={{ width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, height: '100%', background: isKR ? (simPct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)') : (simPct > 0 ? 'var(--accent-green)' : 'var(--accent-red)'), borderRadius: 2 }} />
                     </div>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isKR ? (simPct > 0 ? '#F87171' : simPct < 0 ? '#60A5FA' : 'var(--text-tertiary)') : (simPct > 0 ? '#34D399' : simPct < 0 ? '#F87171' : 'var(--text-tertiary)') }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isKR ? (simPct > 0 ? 'var(--accent-red)' : simPct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)') : (simPct > 0 ? 'var(--accent-green)' : simPct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)') }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
                   </div>

@@ -52,8 +52,8 @@ export default async function AptDetailPage({ params }: Props) {
   const status = !apt.rcept_bgnde ? 'upcoming' : today >= apt.rcept_bgnde && today <= apt.rcept_endde ? 'open' : today < apt.rcept_bgnde ? 'upcoming' : 'closed';
   const dday = apt.rcept_bgnde ? Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000) : null;
   const SB: Record<string, { label: string; bg: string; color: string; border: string }> = {
-    open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: '#4ADE80', border: '#34D399' },
-    upcoming: { label: '접수예정', bg: 'rgba(251,191,36,0.15)', color: '#FCD34D', border: '#FBBF24' },
+    open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: '#4ADE80', border: 'var(--accent-green)' },
+    upcoming: { label: '접수예정', bg: 'var(--accent-yellow-bg)', color: '#FCD34D', border: 'var(--accent-yellow)' },
     closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
   };
   const badge = SB[status];
@@ -119,7 +119,7 @@ export default async function AptDetailPage({ params }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <ShareButtons title={`${apt.house_nm} 청약`} postId={id} />
         <a href={apt.pblanc_url || 'https://www.applyhome.co.kr'} target="_blank" rel="noopener noreferrer"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(96,165,250,0.1)', color: '#60A5FA', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(96,165,250,0.2)' }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(96,165,250,0.2)' }}>
           🏠 청약홈
         </a>
         <AptBookmarkButton aptId={apt.id} isLoggedIn={!!aptUser} />
@@ -166,10 +166,10 @@ export default async function AptDetailPage({ params }: Props) {
       <div style={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 분양 조건</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-          {apt.is_price_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(167,139,250,0.12)', color: '#A78BFA' }}>✓ 분양가상한제</span>}
+          {apt.is_price_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>✓ 분양가상한제</span>}
           {!apt.is_price_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(148,163,184,0.1)', color: 'var(--text-tertiary)' }}>분양가상한제 미적용</span>}
-          {apt.transfer_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(251,191,36,0.12)', color: '#FBBF24' }}>전매제한 {apt.transfer_limit}</span>}
-          {apt.residence_obligation && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'rgba(248,113,113,0.12)', color: '#F87171' }}>거주의무 {apt.residence_obligation}</span>}
+          {apt.transfer_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)' }}>전매제한 {apt.transfer_limit}</span>}
+          {apt.residence_obligation && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>거주의무 {apt.residence_obligation}</span>}
         </div>
         {apt.model_house_addr && (
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
@@ -208,7 +208,7 @@ export default async function AptDetailPage({ params }: Props) {
                         <td style={{ padding: '6px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{t.type || t.area || '-'}</td>
                         <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.supply || 0).toLocaleString()}</td>
                         <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.apply || 0).toLocaleString()}</td>
-                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: (t.rate || 0) >= 10 ? '#F87171' : (t.rate || 0) >= 5 ? '#FB923C' : '#818CF8' }}>
+                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: (t.rate || 0) >= 10 ? 'var(--accent-red)' : (t.rate || 0) >= 5 ? 'var(--accent-orange)' : '#818CF8' }}>
                           {t.rate ? `${t.rate}:1` : '-'}
                         </td>
                       </tr>

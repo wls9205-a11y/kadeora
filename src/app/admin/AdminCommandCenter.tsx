@@ -80,7 +80,7 @@ const QUICK_ACTIONS = [
 
 const GROUPS_ORDER = ['시스템', '주식', '부동산', '콘텐츠', '블로그'];
 const GROUP_COLORS: Record<string, string> = {
-  '시스템': '#7D8DA3', '주식': '#FBBF24', '부동산': '#60A5FA', '콘텐츠': '#34D399', '블로그': '#A78BFA',
+  '시스템': '#7D8DA3', '주식': 'var(--accent-yellow)', '부동산': 'var(--accent-blue)', '콘텐츠': 'var(--accent-green)', '블로그': 'var(--accent-purple)',
 };
 
 /* ─────────────────────── Component ─────────────────────── */
@@ -163,10 +163,10 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
       ]);
 
       setKpis([
-        { label: 'DAU (페이지뷰)', value: dauR.count || 0, icon: '👁', color: '#60A5FA' },
-        { label: '오늘 가입', value: todayUsersR.count || 0, icon: '🆕', color: '#34D399' },
-        { label: '오늘 게시글', value: todayPostsR.count || 0, icon: '📝', color: '#A78BFA' },
-        { label: '오늘 댓글', value: todayCommentsR.count || 0, icon: '💬', color: '#FBBF24' },
+        { label: 'DAU (페이지뷰)', value: dauR.count || 0, icon: '👁', color: 'var(--accent-blue)' },
+        { label: '오늘 가입', value: todayUsersR.count || 0, icon: '🆕', color: 'var(--accent-green)' },
+        { label: '오늘 게시글', value: todayPostsR.count || 0, icon: '📝', color: 'var(--accent-purple)' },
+        { label: '오늘 댓글', value: todayCommentsR.count || 0, icon: '💬', color: 'var(--accent-yellow)' },
       ]);
 
       setDataCounts([
@@ -378,16 +378,16 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
             {healthChecks.map(hc => (
               <div key={hc.service_name} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: hc.status === 'ok' ? '#34D399' : hc.status === 'warning' ? '#FBBF24' : '#F87171', animation: hc.status !== 'ok' ? 'pulse-dot 1.5s infinite' : 'none' }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: hc.status === 'ok' ? 'var(--accent-green)' : hc.status === 'warning' ? 'var(--accent-yellow)' : 'var(--accent-red)', animation: hc.status !== 'ok' ? 'pulse-dot 1.5s infinite' : 'none' }} />
                 <span style={{ fontSize: 10, color: '#7D8DA3' }}>{hc.service_name}</span>
               </div>
             ))}
             <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 4 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: failCrons > 0 ? '#F87171' : '#34D399' }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: failCrons > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }} />
               <span style={{ fontSize: 10, color: '#7D8DA3' }}>크론 {successCrons}/{cronEntries.length}</span>
             </div>
-            {pendingReports > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#F87171', fontWeight: 700 }}>신고 {pendingReports}</span>}
-            {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(251,191,36,0.12)', color: '#FBBF24', fontWeight: 700 }}>알림 {unreadAlerts}</span>}
+            {pendingReports > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700 }}>신고 {pendingReports}</span>}
+            {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(251,191,36,0.12)', color: 'var(--accent-yellow)', fontWeight: 700 }}>알림 {unreadAlerts}</span>}
           </div>
           {lastRefresh && <span style={{ fontSize: 10, color: '#7D8DA3' }}>갱신: {lastRefresh.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span>}
           <button className="cc-btn" onClick={handleRefreshAll} disabled={refresh.running} style={{ background: refresh.running ? '#1E3050' : '#2563EB', color: '#fff', padding: '8px 16px' }}>
@@ -398,9 +398,9 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         {refresh.results.length > 0 && !refresh.running && (
           <div style={{ maxWidth: 1300, margin: '10px auto 0', padding: '8px 14px', borderRadius: 8, background: '#0F1D35', border: '1px solid #1E3050', display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
             {(() => { const fail = refresh.results.filter(r => r.status !== 'success'); return (<>
-              <span style={{ color: fail.length > 0 ? '#F87171' : '#34D399', fontWeight: 700 }}>{fail.length > 0 ? '⚠️' : '✅'} {refresh.results.filter(r => r.status === 'success').length}/{refresh.results.length} 성공</span>
+              <span style={{ color: fail.length > 0 ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 700 }}>{fail.length > 0 ? '⚠️' : '✅'} {refresh.results.filter(r => r.status === 'success').length}/{refresh.results.length} 성공</span>
               <span style={{ color: '#7D8DA3' }}>{(refresh.elapsed/1000).toFixed(1)}초</span>
-              {fail.length > 0 && <span style={{ color: '#F87171' }}>실패: {fail.map(f => CRON_MAP[f.name]?.display || f.name).join(', ')}</span>}
+              {fail.length > 0 && <span style={{ color: 'var(--accent-red)' }}>실패: {fail.map(f => CRON_MAP[f.name]?.display || f.name).join(', ')}</span>}
               <button onClick={() => setRefresh(prev => ({...prev, results: []}))} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#7D8DA3', cursor: 'pointer', fontSize: 14 }}>×</button>
             </>); })()}
           </div>
@@ -444,10 +444,10 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             {dailyStats.length > 1 ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {[
-                  { data: dailyStats.map(s => s.new_users||0), label: '가입', color: '#60A5FA' },
-                  { data: dailyStats.map(s => s.new_posts||0), label: '게시글', color: '#34D399' },
-                  { data: dailyStats.map(s => s.new_comments||0), label: '댓글', color: '#A78BFA' },
-                  { data: dailyStats.map(s => s.total_page_views||0), label: 'PV', color: '#FBBF24' },
+                  { data: dailyStats.map(s => s.new_users||0), label: '가입', color: 'var(--accent-blue)' },
+                  { data: dailyStats.map(s => s.new_posts||0), label: '게시글', color: 'var(--accent-green)' },
+                  { data: dailyStats.map(s => s.new_comments||0), label: '댓글', color: 'var(--accent-purple)' },
+                  { data: dailyStats.map(s => s.total_page_views||0), label: 'PV', color: 'var(--accent-yellow)' },
                 ].map(c => (
                   <div key={c.label}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#7D8DA3', marginBottom: 2 }}>
@@ -472,7 +472,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               const result = actionResults[a.id];
               return (
                 <button key={a.id} className="cc-btn" onClick={() => runQuickAction(a)} disabled={!!actionRunning}
-                  style={{ background: result ? (result.ok ? 'rgba(5,150,105,0.12)' : 'rgba(248,113,113,0.12)') : '#1E3050', color: result ? (result.ok ? '#34D399' : '#f87171') : '#9DB0C7', border: `1px solid ${result ? (result.ok ? 'rgba(5,150,105,0.25)' : 'rgba(248,113,113,0.25)') : '#2A4060'}` }}>
+                  style={{ background: result ? (result.ok ? 'rgba(5,150,105,0.12)' : 'rgba(248,113,113,0.12)') : '#1E3050', color: result ? (result.ok ? 'var(--accent-green)' : '#f87171') : '#9DB0C7', border: `1px solid ${result ? (result.ok ? 'rgba(5,150,105,0.25)' : 'rgba(248,113,113,0.25)') : '#2A4060'}` }}>
                   {actionRunning === a.id ? <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <span style={{ fontSize: 13 }}>{a.icon}</span>}
                   {result?.msg || a.label}
                 </button>
@@ -484,12 +484,12 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         {/* 데이터 품질 현황 + AI 요약 현황 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
           <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#60A5FA', marginBottom: 10, letterSpacing: 0.5 }}>📊 데이터 품질 현황</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 10, letterSpacing: 0.5 }}>📊 데이터 품질 현황</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, fontSize: 11 }}>
               {[
-                { icon: '🔨', label: '재개발(비활성)', value: qualityStats.redevInactive, color: '#F87171' },
-                { icon: '📉', label: '미분양(비활성)', value: qualityStats.unsoldInactive, color: '#F87171' },
-                { icon: '🏗️', label: '시공사 입력', value: qualityStats.subWithConstructor, color: '#34D399' },
+                { icon: '🔨', label: '재개발(비활성)', value: qualityStats.redevInactive, color: 'var(--accent-red)' },
+                { icon: '📉', label: '미분양(비활성)', value: qualityStats.unsoldInactive, color: 'var(--accent-red)' },
+                { icon: '🏗️', label: '시공사 입력', value: qualityStats.subWithConstructor, color: 'var(--accent-green)' },
               ].map(item => (
                 <div key={item.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1E305040' }}>
                   <div style={{ fontSize: 14 }}>{item.icon}</div>
@@ -499,18 +499,18 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               ))}
             </div>
             <div style={{ marginTop: 8, fontSize: 10, color: '#7D8DA3' }}>
-              실거래 시군구: <span style={{ color: '#60A5FA', fontWeight: 700 }}>231개</span> · 
-              FTS: <span style={{ color: '#34D399', fontWeight: 700 }}>활성</span> · 
-              청약 수집: <span style={{ color: '#34D399', fontWeight: 700 }}>10페이지</span>
+              실거래 시군구: <span style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>231개</span> · 
+              FTS: <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>활성</span> · 
+              청약 수집: <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>10페이지</span>
             </div>
           </div>
           <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', marginBottom: 10, letterSpacing: 0.5 }}>🤖 AI 한줄 분석 현황</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-purple)', marginBottom: 10, letterSpacing: 0.5 }}>🤖 AI 한줄 분석 현황</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, fontSize: 11 }}>
               {[
-                { label: '청약', done: qualityStats.aiSumSub, total: dataCounts.find(d => d.label === '청약')?.value || 0, color: '#60A5FA' },
-                { label: '재개발', done: qualityStats.aiSumRedev, total: dataCounts.find(d => d.label === '재개발(활성)')?.value || 0, color: '#34D399' },
-                { label: '미분양', done: qualityStats.aiSumUnsold, total: dataCounts.find(d => d.label === '미분양(활성)')?.value || 0, color: '#FBBF24' },
+                { label: '청약', done: qualityStats.aiSumSub, total: dataCounts.find(d => d.label === '청약')?.value || 0, color: 'var(--accent-blue)' },
+                { label: '재개발', done: qualityStats.aiSumRedev, total: dataCounts.find(d => d.label === '재개발(활성)')?.value || 0, color: 'var(--accent-green)' },
+                { label: '미분양', done: qualityStats.aiSumUnsold, total: dataCounts.find(d => d.label === '미분양(활성)')?.value || 0, color: 'var(--accent-yellow)' },
               ].map(item => {
                 const rate = item.total > 0 ? Math.round((item.done / item.total) * 100) : 0;
                 return (
@@ -549,7 +549,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                     const isFail = !isOk && !isRun;
                     return (
                       <div key={c.name} style={{ padding: '6px 10px', borderRadius: 8, background: isOk ? '#05966910' : isFail ? '#F8717110' : '#60A5FA10', border: `1px solid ${isOk ? '#05966925' : isFail ? '#F8717125' : '#60A5FA25'}`, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOk ? '#34D399' : isFail ? '#F87171' : '#60A5FA', animation: isRun ? 'pulse-dot 1s infinite' : 'none' }} />
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOk ? 'var(--accent-green)' : isFail ? 'var(--accent-red)' : 'var(--accent-blue)', animation: isRun ? 'pulse-dot 1s infinite' : 'none' }} />
                         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{c.display}</span>
                         <span style={{ color: '#7D8DA3', fontSize: 10 }}>{c.latest?.started_at ? timeAgo(c.latest.started_at) : '-'}</span>
                         <span style={{ color: '#7D8DA3', fontSize: 10 }}>{c.successRate}%</span>
@@ -569,7 +569,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             <button onClick={() => toggle('blog')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>📰</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>블로그 자동화</span>
-              {queueStatus && <span style={{ fontSize: 10, color: '#34D399', fontWeight: 700 }}>큐 {queueStatus.queue_ready ?? 0}</span>}
+              {queueStatus && <span style={{ fontSize: 10, color: 'var(--accent-green)', fontWeight: 700 }}>큐 {queueStatus.queue_ready ?? 0}</span>}
               <span style={{ fontSize: 14, color: '#7D8DA3', transform: expandedPanel === 'blog' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
             </button>
             {expandedPanel === 'blog' && blogConfig && (
@@ -592,7 +592,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                       </div>
                     ))}
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
-                      <button className="cc-btn" onClick={saveBlogConfig} disabled={configSaving} style={{ background: '#60A5FA', color: '#fff' }}>{configSaving ? '...' : '저장'}</button>
+                      <button className="cc-btn" onClick={saveBlogConfig} disabled={configSaving} style={{ background: 'var(--accent-blue)', color: '#fff' }}>{configSaving ? '...' : '저장'}</button>
                       {configMsg && <span style={{ fontSize: 10 }}>{configMsg}</span>}
                     </div>
                   </div>
@@ -602,8 +602,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                         {[
                           { v: queueStatus.published_today??0, l: '오늘 발행', c: '#E2E8F0' },
                           { v: queueStatus.remaining_today??0, l: '남은 쿼터', c: '#E2E8F0' },
-                          { v: queueStatus.queue_ready??0, l: '대기(가능)', c: '#34D399' },
-                          { v: queueStatus.queue_too_short??0, l: '대기(미달)', c: (queueStatus.queue_too_short??0)>0?'#F87171':'#7D8DA3' },
+                          { v: queueStatus.queue_ready??0, l: '대기(가능)', c: 'var(--accent-green)' },
+                          { v: queueStatus.queue_too_short??0, l: '대기(미달)', c: (queueStatus.queue_too_short??0)>0?'var(--accent-red)':'#7D8DA3' },
                         ].map(q => (
                           <div key={q.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1E305040' }}>
                             <div style={{ fontSize: 16, fontWeight: 800, color: q.c }}>{q.v}</div>
@@ -618,13 +618,13 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 {rewriteStats && (
                   <div style={{ borderTop: '1px solid #1E3050', paddingTop: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA' }}>✍️ AI 리라이팅</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-purple)' }}>✍️ AI 리라이팅</span>
                       <span style={{ fontSize: 10, color: '#7D8DA3' }}>{rewriteStats.done}/{rewriteStats.total} ({pct(rewriteStats.done,rewriteStats.total)}%)</span>
                     </div>
-                    <div className="cc-progress" style={{ marginBottom: 8 }}><div className="cc-progress-bar" style={{ width: `${pct(rewriteStats.done,rewriteStats.total)}%`, background: '#A78BFA' }} /></div>
+                    <div className="cc-progress" style={{ marginBottom: 8 }}><div className="cc-progress-bar" style={{ width: `${pct(rewriteStats.done,rewriteStats.total)}%`, background: 'var(--accent-purple)' }} /></div>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button className="cc-btn" onClick={() => runRewrite(5)} disabled={rewriteRunning} style={{ background: '#A78BFA', color: '#fff' }}>{rewriteRunning ? '처리 중...' : '5건'}</button>
-                      <button className="cc-btn" onClick={() => runRewrite(10)} disabled={rewriteRunning} style={{ background: '#A78BFA', color: '#fff' }}>10건</button>
+                      <button className="cc-btn" onClick={() => runRewrite(5)} disabled={rewriteRunning} style={{ background: 'var(--accent-purple)', color: '#fff' }}>{rewriteRunning ? '처리 중...' : '5건'}</button>
+                      <button className="cc-btn" onClick={() => runRewrite(10)} disabled={rewriteRunning} style={{ background: 'var(--accent-purple)', color: '#fff' }}>10건</button>
                     </div>
                     {rewriteLog.length > 0 && <div className="cc-scrollbar" style={{ marginTop: 6, maxHeight: 80, overflow: 'auto', fontSize: 10, color: '#7D8DA3', background: '#1E305040', borderRadius: 6, padding: 6 }}>{rewriteLog.slice(-5).map((l,i)=><div key={i}>{l}</div>)}</div>}
                   </div>
@@ -638,13 +638,13 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             <button onClick={() => toggle('users')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>👥</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>유저 관리</span>
-              <span style={{ fontSize: 10, color: '#34D399', fontWeight: 700 }}>실제 {realUsers.length}</span>
+              <span style={{ fontSize: 10, color: 'var(--accent-green)', fontWeight: 700 }}>실제 {realUsers.length}</span>
               <span style={{ fontSize: 14, color: '#7D8DA3', transform: expandedPanel === 'users' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
             </button>
             {expandedPanel === 'users' && (
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
-                  {[{l:'전체',v:users.length,c:'#E2E8F0'},{l:'실제',v:realUsers.length,c:'#34D399'},{l:'시드',v:users.length-realUsers.length,c:'#7D8DA3'},{l:'정지',v:users.filter(u=>u.is_deleted).length,c:'#F87171'}].map(s=>(
+                  {[{l:'전체',v:users.length,c:'#E2E8F0'},{l:'실제',v:realUsers.length,c:'var(--accent-green)'},{l:'시드',v:users.length-realUsers.length,c:'#7D8DA3'},{l:'정지',v:users.filter(u=>u.is_deleted).length,c:'var(--accent-red)'}].map(s=>(
                     <div key={s.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1E305040' }}>
                       <div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div>
                       <div style={{ fontSize: 8, color: '#7D8DA3' }}>{s.l}</div>
@@ -662,7 +662,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                     </div>
                   ))}
                 </div>
-                <a href="/admin/users" style={{ display: 'block', textAlign: 'center', marginTop: 8, fontSize: 10, color: '#60A5FA' }}>전체 유저 관리 →</a>
+                <a href="/admin/users" style={{ display: 'block', textAlign: 'center', marginTop: 8, fontSize: 10, color: 'var(--accent-blue)' }}>전체 유저 관리 →</a>
               </div>
             )}
           </div>
@@ -672,7 +672,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             <button onClick={() => toggle('alerts')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>🔔</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>알림 / 신고</span>
-              {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(251,191,36,0.12)', color: '#FBBF24', fontWeight: 700 }}>{unreadAlerts}</span>}
+              {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(251,191,36,0.12)', color: 'var(--accent-yellow)', fontWeight: 700 }}>{unreadAlerts}</span>}
               <span style={{ fontSize: 14, color: '#7D8DA3', transform: expandedPanel === 'alerts' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
             </button>
             {expandedPanel === 'alerts' && (
@@ -691,8 +691,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 </div>
                 {pendingReports > 0 && (
                   <div style={{ borderTop: '1px solid #1E3050', paddingTop: 8, marginTop: 8 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#F87171', marginBottom: 4 }}>미처리 신고 {pendingReports}건</div>
-                    <a href="/admin/reports" style={{ fontSize: 10, color: '#60A5FA' }}>신고 관리 →</a>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-red)', marginBottom: 4 }}>미처리 신고 {pendingReports}건</div>
+                    <a href="/admin/reports" style={{ fontSize: 10, color: 'var(--accent-blue)' }}>신고 관리 →</a>
                   </div>
                 )}
               </div>
@@ -716,7 +716,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>SEO</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10, marginBottom: 10 }}>
                   {[{h:'/sitemap.xml',l:'sitemap.xml'},{h:'/robots.txt',l:'robots.txt'},{h:'/api/og?title=테스트',l:'OG 미리보기'},{h:'/api/search?q=부동산&limit=3',l:'FTS 검색 테스트'}].map(lk=>(
-                    <a key={lk.h} href={lk.h} target="_blank" style={{ color: '#60A5FA', padding: '3px 8px', borderRadius: 6, background: '#60A5FA10' }}>{lk.l}</a>
+                    <a key={lk.h} href={lk.h} target="_blank" style={{ color: 'var(--accent-blue)', padding: '3px 8px', borderRadius: 6, background: '#60A5FA10' }}>{lk.l}</a>
                   ))}
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>관리 페이지</div>
@@ -738,7 +738,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               {quotas.map(q => {
                 const dp = q.daily_limit ? pct(q.daily_used,q.daily_limit) : 0;
                 const mp = q.monthly_limit ? pct(q.monthly_used,q.monthly_limit) : 0;
-                const bc = (p: number) => p >= 90 ? '#F87171' : p >= 70 ? '#FBBF24' : '#34D399';
+                const bc = (p: number) => p >= 90 ? 'var(--accent-red)' : p >= 70 ? 'var(--accent-yellow)' : 'var(--accent-green)';
                 return (
                   <div key={q.api_name} style={{ flex: '1 1 200px', minWidth: 180 }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{q.api_name}</div>
@@ -764,10 +764,10 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                   <tr key={log.id||i} style={{ borderBottom: '1px solid #1E305020' }}>
                     <td style={{ padding:'5px 8px',color:'#7D8DA3',whiteSpace:'nowrap' }}>{log.started_at ? new Date(log.started_at).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</td>
                     <td style={{ padding:'5px 8px',color:'var(--text-primary)',fontWeight:600 }}>{CRON_MAP[log.cron_name]?.display||log.cron_name}</td>
-                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:10,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'rgba(5,150,105,0.12)':log.status==='running'?'rgba(96,165,250,0.12)':'rgba(248,113,113,0.12)',color:log.status==='success'?'#34D399':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>
+                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:10,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'rgba(5,150,105,0.12)':log.status==='running'?'rgba(96,165,250,0.12)':'rgba(248,113,113,0.12)',color:log.status==='success'?'var(--accent-green)':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>
                     <td style={{ padding:'5px 8px',color:'#7D8DA3' }}>{log.duration_ms?`${(log.duration_ms/1000).toFixed(1)}s`:'-'}</td>
                     <td style={{ padding:'5px 8px',color:'#7D8DA3' }}>{log.records_processed||0}</td>
-                    <td style={{ padding:'5px 8px',color:'#F87171',maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{log.error_message||''}</td>
+                    <td style={{ padding:'5px 8px',color:'var(--accent-red)',maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{log.error_message||''}</td>
                   </tr>
                 ))}
               </tbody>

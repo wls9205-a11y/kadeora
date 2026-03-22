@@ -80,8 +80,8 @@ export default function AdminContent() {
       <div style={{ ...cardStyle, marginBottom: 20 }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>SEO 스코어카드</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-          <div>sitemap: <a href="/sitemap.xml" target="_blank" style={{ color: '#60A5FA' }}>/sitemap.xml</a></div>
-          <div>robots: <a href="/robots.txt" target="_blank" style={{ color: '#60A5FA' }}>/robots.txt</a></div>
+          <div>sitemap: <a href="/sitemap.xml" target="_blank" style={{ color: 'var(--accent-blue)' }}>/sitemap.xml</a></div>
+          <div>robots: <a href="/robots.txt" target="_blank" style={{ color: 'var(--accent-blue)' }}>/robots.txt</a></div>
           <div>OG 이미지: /api/og 엔드포인트 활성</div>
         </div>
       </div>
@@ -114,15 +114,15 @@ export default function AdminContent() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
-                    background: r.content_type === 'post' ? '#2563EB' : r.content_type === 'comment' ? '#FBBF24' : '#A78BFA',
+                    background: r.content_type === 'post' ? '#2563EB' : r.content_type === 'comment' ? 'var(--accent-yellow)' : 'var(--accent-purple)',
                     color: '#fff',
                   }}>{{ post: '게시글', comment: '댓글', chat: '채팅' }[r.content_type] || r.content_type}</span>
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: r.status === 'pending' ? 'rgba(251,191,36,0.3)' : r.status === 'resolved' ? 'rgba(52,211,153,0.12)' : 'rgba(148,163,184,0.15)',
-                    color: r.status === 'pending' ? '#FBBF24' : r.status === 'resolved' ? '#34D399' : '#7D8DA3',
+                    color: r.status === 'pending' ? 'var(--accent-yellow)' : r.status === 'resolved' ? 'var(--accent-green)' : '#7D8DA3',
                   }}>{{ pending: '미처리', resolved: '처리됨', dismissed: '기각' }[r.status] || r.status}</span>
-                  {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: 'rgba(248,113,113,0.1)', color: '#F87171' }}>자동숨김</span>}
+                  {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: 'rgba(248,113,113,0.1)', color: 'var(--accent-red)' }}>자동숨김</span>}
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{r.reason}</div>
                 {r.details && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2 }}>{r.details}</div>}
@@ -131,10 +131,10 @@ export default function AdminContent() {
                 </div>
                 {r.status === 'pending' && (
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                    <button onClick={() => handleReport(r.id, 'resolve')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #34D399', background: 'transparent', color: '#34D399', cursor: 'pointer', fontWeight: 700 }}>처리완료</button>
+                    <button onClick={() => handleReport(r.id, 'resolve')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #34D399', background: 'transparent', color: 'var(--accent-green)', cursor: 'pointer', fontWeight: 700 }}>처리완료</button>
                     <button onClick={() => handleReport(r.id, 'dismiss')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #9DB0C7', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 700 }}>기각</button>
                     {(r.post_id || r.comment_id) && (
-                      <button onClick={() => handleReport(r.id, 'hide_content')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: 'none', background: '#F87171', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>숨기기</button>
+                      <button onClick={() => handleReport(r.id, 'hide_content')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: 'none', background: 'var(--accent-red)', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>숨기기</button>
                     )}
                   </div>
                 )}

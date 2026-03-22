@@ -29,10 +29,10 @@ interface NoticeData {
 
 // 티어별 스타일
 const TIER_STYLES: Record<string, { color: string; bg: string; glow: string; icon: string; speed: number }> = {
-  free:     { color: '#34D399', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 35 },
-  standard: { color: '#34D399', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 30 },
-  premium:  { color: '#FBBF24', bg: 'linear-gradient(90deg, #0B1426 0%, #0F1520 50%, #0B1426 100%)', glow: '0 0 8px rgba(251,191,36,0.3)', icon: '⭐', speed: 28 },
-  urgent:   { color: '#F87171', bg: 'linear-gradient(90deg, #120E16 0%, #150D12 50%, #120E16 100%)', glow: '0 0 12px rgba(248,113,113,0.4)', icon: '🚨', speed: 22 },
+  free:     { color: 'var(--accent-green)', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 35 },
+  standard: { color: 'var(--accent-green)', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 30 },
+  premium:  { color: 'var(--accent-yellow)', bg: 'linear-gradient(90deg, #0B1426 0%, #0F1520 50%, #0B1426 100%)', glow: '0 0 8px rgba(251,191,36,0.3)', icon: '⭐', speed: 28 },
+  urgent:   { color: 'var(--accent-red)', bg: 'linear-gradient(90deg, #120E16 0%, #150D12 50%, #120E16 100%)', glow: '0 0 12px rgba(248,113,113,0.4)', icon: '🚨', speed: 22 },
 };
 
 export default function NoticeBanner() {
@@ -195,7 +195,7 @@ export default function NoticeBanner() {
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: tier === 'urgent' ? 'rgba(248,113,113,0.12)' : tier === 'premium' ? 'rgba(251,191,36,0.12)' : 'rgba(52,211,153,0.12)',
-                    color: tier === 'urgent' ? '#F87171' : tier === 'premium' ? '#FBBF24' : '#34D399',
+                    color: tier === 'urgent' ? 'var(--accent-red)' : tier === 'premium' ? 'var(--accent-yellow)' : 'var(--accent-green)',
                   }}>
                     {{ standard: '기본', premium: '프리미엄', urgent: '긴급' }[tier] || tier}
                   </span>

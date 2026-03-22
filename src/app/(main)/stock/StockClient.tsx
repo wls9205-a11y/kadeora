@@ -25,8 +25,8 @@ const SECTORS = ['all','반도체','바이오','금융','자동차','방산','IT
 // 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
 function stockColor(pct: number, isKR: boolean) {
   if (pct === 0) return 'var(--text-tertiary)';
-  if (isKR) return pct > 0 ? '#F87171' : '#60A5FA';
-  return pct > 0 ? '#34D399' : '#F87171';
+  if (isKR) return pct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)';
+  return pct > 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 }
 
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
@@ -121,7 +121,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     return (
       <div onClick={() => setSelectedStock(s)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 22, textAlign: 'center' }}>{rank}</span>
-        <button onClick={e => { e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 'var(--fs-lg)', lineHeight: 1, color: isWatched ? '#FBBF24' : 'var(--text-tertiary)', flexShrink: 0 }} title={isWatched ? '관심 해제' : '관심 추가'}>
+        <button onClick={e => { e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 'var(--fs-lg)', lineHeight: 1, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0 }} title={isWatched ? '관심 해제' : '관심 추가'}>
           {isWatched ? '★' : '☆'}
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -179,8 +179,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             const changePct = rates.length >= 2 ? ((rates[rates.length-1] - rates[rates.length-2]) / rates[rates.length-2] * 100) : 0;
             return (
               <>
-                <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? '#F87171' : '#34D399'} strokeWidth="1.5" /></svg>
-                {Math.abs(changePct) >= 0.1 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: changePct > 0 ? '#F87171' : '#34D399' }}>{changePct > 0 ? '▲' : '▼'}{Math.abs(changePct).toFixed(1)}%</span>}
+                <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? 'var(--accent-red)' : 'var(--accent-green)'} strokeWidth="1.5" /></svg>
+                {Math.abs(changePct) >= 0.1 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: changePct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>{changePct > 0 ? '▲' : '▼'}{Math.abs(changePct).toFixed(1)}%</span>}
               </>
             );
           })()}
@@ -194,8 +194,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             <span style={{ fontSize: 'var(--fs-lg)' }}>{briefing.sentiment === 'bullish' ? '🐂' : briefing.sentiment === 'bearish' ? '🐻' : '😐'}</span>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{briefing.title}</div>
             <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
-              background: briefing.sentiment === 'bullish' ? 'rgba(52,211,153,0.15)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.15)',
-              color: briefing.sentiment === 'bullish' ? '#34D399' : briefing.sentiment === 'bearish' ? '#F87171' : '#9DB0C7',
+              background: briefing.sentiment === 'bullish' ? 'var(--accent-green-bg)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.15)',
+              color: briefing.sentiment === 'bullish' ? 'var(--accent-green)' : briefing.sentiment === 'bearish' ? 'var(--accent-red)' : '#9DB0C7',
             }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
           </div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>{briefing.summary}</div>
@@ -203,12 +203,12 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {(briefing.key_movers || briefing.top_movers) && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {((briefing.key_movers || briefing.top_movers)?.gainers || []).slice(0, 2).map((s: any) => (
-                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(52,211,153,0.1)', color: '#34D399', fontWeight: 600 }}>
+                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
                   ▲ {s.name} +{s.change_pct?.toFixed(1)}%
                 </span>
               ))}
               {((briefing.key_movers || briefing.top_movers)?.losers || []).slice(0, 2).map((s: any) => (
-                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(248,113,113,0.1)', color: '#F87171', fontWeight: 600 }}>
+                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(248,113,113,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>
                   ▼ {s.name} {s.change_pct?.toFixed(1)}%
                 </span>
               ))}
@@ -221,7 +221,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 <div key={sec.name} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6,
                   background: (sec.avg_pct || 0) > 0 ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)',
-                  color: (sec.avg_pct || 0) > 0 ? '#F87171' : '#60A5FA',
+                  color: (sec.avg_pct || 0) > 0 ? 'var(--accent-red)' : 'var(--accent-blue)',
                   fontWeight: 600,
                 }}>
                   {sec.name} {(sec.avg_pct || 0) > 0 ? '+' : ''}{sec.avg_pct}%
@@ -245,7 +245,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         }}>🇰🇷 국내주식</button>
         <button onClick={() => { setMode('global'); setSearch(''); setSectorFilter('all'); }} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
-          background: !isDomestic ? '#60A5FA' : 'var(--bg-surface)',
+          background: !isDomestic ? 'var(--accent-blue)' : 'var(--bg-surface)',
           color: !isDomestic ? '#fff' : 'var(--text-tertiary)',
           border: !isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇺🇸 해외주식</button>
@@ -257,8 +257,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {[
             { label: '종목 수', value: sentimentStocks.length, color: 'var(--text-primary)' },
             { label: '평균 등락', value: `${(sentimentStocks.reduce((s, st) => s + (st.change_pct ?? 0), 0) / sentTotal) > 0 ? '+' : ''}${(sentimentStocks.reduce((s, st) => s + (st.change_pct ?? 0), 0) / sentTotal).toFixed(2)}%`, color: stockColor(sentimentStocks.reduce((s, st) => s + (st.change_pct ?? 0), 0) / sentTotal, isDomestic) },
-            { label: '상승', value: upCount, color: isDomestic ? '#F87171' : '#34D399' },
-            { label: '하락', value: downCount, color: isDomestic ? '#60A5FA' : '#F87171' },
+            { label: '상승', value: upCount, color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)' },
+            { label: '하락', value: downCount, color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)' },
           ].map(item => (
             <div key={item.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{item.label}</div>
@@ -326,14 +326,14 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {sentimentStocks.length > 0 && (
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
-            <span style={{ color: isDomestic ? '#F87171' : '#34D399', fontWeight: 600 }}>▲ {upCount}</span>
+            <span style={{ color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 600 }}>▲ {upCount}</span>
             <span>· — {flatCount}</span>
-            <span style={{ color: isDomestic ? '#60A5FA' : '#F87171', fontWeight: 600 }}>· ▼ {downCount}</span>
+            <span style={{ color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', fontWeight: 600 }}>· ▼ {downCount}</span>
           </div>
           <div style={{ display: 'flex', height: 4, borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? '#F87171' : '#34D399' }} />
+            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)' }} />
             <div style={{ width: `${(flatCount/sentTotal)*100}%`, background: 'var(--bg-hover)' }} />
-            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: isDomestic ? '#60A5FA' : '#F87171' }} />
+            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)' }} />
           </div>
         </div>
       )}
@@ -427,7 +427,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 return (
                   <div style={{ marginBottom: 8 }}>
                     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 30 }}>
-                      <polyline points={points} fill="none" stroke={isUp ? '#F87171' : '#60A5FA'} strokeWidth="1.5" strokeLinecap="round" />
+                      <polyline points={points} fill="none" stroke={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                       <span>{th.history[0]?.date?.slice(5) || ''}</span>
@@ -502,10 +502,10 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             const down5 = domesticStocks.filter(s => (s.change_pct ?? 0) <= -5).length;
             return (limitUp > 0 || limitDown > 0 || up5 > 0 || down5 > 0) ? (
               <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-                {limitUp > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(248,113,113,0.15)', color: '#F87171', fontWeight: 700 }}>🔺 상한가 {limitUp}</span>}
-                {limitDown > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.15)', color: '#60A5FA', fontWeight: 700 }}>🔻 하한가 {limitDown}</span>}
-                {up5 > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(248,113,113,0.08)', color: '#F87171', fontWeight: 600 }}>+5%↑ {up5}종목</span>}
-                {down5 > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.08)', color: '#60A5FA', fontWeight: 600 }}>-5%↓ {down5}종목</span>}
+                {limitUp > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(248,113,113,0.15)', color: 'var(--accent-red)', fontWeight: 700 }}>🔺 상한가 {limitUp}</span>}
+                {limitDown > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.15)', color: 'var(--accent-blue)', fontWeight: 700 }}>🔻 하한가 {limitDown}</span>}
+                {up5 > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(248,113,113,0.08)', color: 'var(--accent-red)', fontWeight: 600 }}>+5%↑ {up5}종목</span>}
+                {down5 > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.08)', color: 'var(--accent-blue)', fontWeight: 600 }}>-5%↓ {down5}종목</span>}
               </div>
             ) : null;
           })()}
@@ -531,7 +531,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {isDomestic && domesticTab === 'ranking' && (
         <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
           {(['ALL','KOSPI','KOSDAQ'] as const).map(m => (
-            <button key={m} onClick={() => setDomesticMarket(m)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: domesticMarket===m?(isDomestic?'var(--brand)':'#60A5FA'):'var(--bg-hover)', color: domesticMarket===m?'#fff':'var(--text-secondary)' }}>
+            <button key={m} onClick={() => setDomesticMarket(m)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: domesticMarket===m?(isDomestic?'var(--brand)':'var(--accent-blue)'):'var(--bg-hover)', color: domesticMarket===m?'#fff':'var(--text-secondary)' }}>
               {m==='ALL'?'전체':m}
             </button>
           ))}
@@ -662,10 +662,10 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
             {/* 관심종목 + 상세 버튼 */}
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => toggleWatchlist(selectedStock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 8, border: '1px solid var(--border)', background: watchlistSymbols.includes(selectedStock.symbol) ? 'rgba(251,191,36,0.15)' : 'var(--bg-hover)', color: watchlistSymbols.includes(selectedStock.symbol) ? '#FBBF24' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
+              <button onClick={() => toggleWatchlist(selectedStock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 8, border: '1px solid var(--border)', background: watchlistSymbols.includes(selectedStock.symbol) ? 'var(--accent-yellow-bg)' : 'var(--bg-hover)', color: watchlistSymbols.includes(selectedStock.symbol) ? 'var(--accent-yellow)' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
                 {watchlistSymbols.includes(selectedStock.symbol) ? '★ 관심종목 해제' : '☆ 관심종목 추가'}
               </button>
-              <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : '#60A5FA', color: '#fff', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
+              <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : 'var(--accent-blue)', color: '#fff', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
                 종목 상세 →
               </a>
             </div>

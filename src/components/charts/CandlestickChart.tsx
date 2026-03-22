@@ -85,16 +85,16 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
               시 {fmtNum(d.open, currency)}
             </span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: '#F87171' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)' }}>
               고 {fmtNum(d.high, currency)}
             </span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: '#60A5FA' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue)' }}>
               저 {fmtNum(d.low, currency)}
             </span>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isSelectedUp ? '#F87171' : '#60A5FA' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isSelectedUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
               종 {fmtNum(d.close, currency)}
             </span>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: isSelectedUp ? '#F87171' : '#60A5FA' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: isSelectedUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
               {changePct > 0 ? '+' : ''}{changePct.toFixed(2)}%
             </span>
             {d.volume != null && (

@@ -70,10 +70,10 @@ export default function AdminDashboard() {
 
   const d = data || {};
   const kpis = [
-    { label: 'DAU', value: d.dau || 0, color: '#60A5FA', icon: '📊' },
-    { label: '오늘 신규가입', value: d.today_signups || 0, color: '#34D399', icon: '🆕' },
-    { label: '오늘 게시글', value: d.today_posts || 0, color: '#A78BFA', icon: '📝' },
-    { label: '오늘 댓글', value: d.today_comments || 0, color: '#FBBF24', icon: '💬' },
+    { label: 'DAU', value: d.dau || 0, color: 'var(--accent-blue)', icon: '📊' },
+    { label: '오늘 신규가입', value: d.today_signups || 0, color: 'var(--accent-green)', icon: '🆕' },
+    { label: '오늘 게시글', value: d.today_posts || 0, color: 'var(--accent-purple)', icon: '📝' },
+    { label: '오늘 댓글', value: d.today_comments || 0, color: 'var(--accent-yellow)', icon: '💬' },
   ];
 
   const dataCounts = [
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
             }}>
               <span style={{
                 width: 10, height: 10, borderRadius: '50%',
-                background: hc.status === 'ok' ? '#34D399' : hc.status === 'warning' ? '#FBBF24' : '#F87171',
+                background: hc.status === 'ok' ? 'var(--accent-green)' : hc.status === 'warning' ? 'var(--accent-yellow)' : 'var(--accent-red)',
               }} />
               <div>
                 <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{hc.service_name}</div>
@@ -162,10 +162,10 @@ export default function AdminDashboard() {
         <div style={{ ...cardStyle, marginBottom: 20 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>7일 추이</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-            {renderMiniChart(dailyStats.map(s => s.new_users || 0), '신규가입', '#60A5FA')}
-            {renderMiniChart(dailyStats.map(s => s.new_posts || 0), '게시글', '#34D399')}
-            {renderMiniChart(dailyStats.map(s => s.new_comments || 0), '댓글', '#A78BFA')}
-            {renderMiniChart(dailyStats.map(s => s.total_page_views || 0), '페이지뷰', '#FBBF24')}
+            {renderMiniChart(dailyStats.map(s => s.new_users || 0), '신규가입', 'var(--accent-blue)')}
+            {renderMiniChart(dailyStats.map(s => s.new_posts || 0), '게시글', 'var(--accent-green)')}
+            {renderMiniChart(dailyStats.map(s => s.new_comments || 0), '댓글', 'var(--accent-purple)')}
+            {renderMiniChart(dailyStats.map(s => s.total_page_views || 0), '페이지뷰', 'var(--accent-yellow)')}
           </div>
         </div>
       )}
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
               <span style={{
                 marginLeft: 'auto', fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 10, fontWeight: 700,
                 background: briefing.sentiment === 'bullish' ? 'rgba(52,211,153,0.12)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.12)' : 'rgba(148,163,184,0.1)',
-                color: briefing.sentiment === 'bullish' ? '#059669' : briefing.sentiment === 'bearish' ? '#F87171' : '#7D8DA3',
+                color: briefing.sentiment === 'bullish' ? '#059669' : briefing.sentiment === 'bearish' ? 'var(--accent-red)' : '#7D8DA3',
               }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
             </div>
           </div>

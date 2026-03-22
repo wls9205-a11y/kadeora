@@ -67,7 +67,7 @@ export default function AdminUsersPage() {
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>전체</div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#34D399' }}>{realUsersList.length}</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-green)' }}>{realUsersList.length}</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>실제 유저</div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>

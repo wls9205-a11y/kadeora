@@ -14,7 +14,7 @@ function isNew(item: any, type: string): boolean {
   if (!ts) return false;
   return Date.now() - new Date(ts).getTime() < h * 60 * 60 * 1000;
 }
-const NewBadge = () => <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: '#F87171', color: '#fff', marginRight: 4, animation: 'pulse 2s infinite' }}>NEW</span>;
+const NewBadge = () => <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'var(--accent-red)', color: '#fff', marginRight: 4, animation: 'pulse 2s infinite' }}>NEW</span>;
 
 
 interface Apt {
@@ -49,17 +49,17 @@ function fmtD(d: string | null | undefined): string {
 }
 
 const SB = {
-  open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: '#4ADE80', border: '#34D399' },
-  upcoming: { label: '접수예정', bg: 'rgba(251,191,36,0.15)', color: '#FCD34D', border: '#FBBF24' },
+  open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: '#4ADE80', border: 'var(--accent-green)' },
+  upcoming: { label: '접수예정', bg: 'var(--accent-yellow-bg)', color: '#FCD34D', border: 'var(--accent-yellow)' },
   closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
 const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }> = {
   '정비구역지정': { bg: 'rgba(107,114,128,0.15)', color: '#9DB0C7', border: '#7D8DA3' },
-  '조합설립': { bg: 'rgba(96,165,250,0.2)', color: '#93C5FD', border: '#60A5FA' },
-  '사업시행인가': { bg: 'rgba(251,191,36,0.2)', color: '#FDE047', border: '#FBBF24' },
-  '관리처분': { bg: 'rgba(251,146,60,0.2)', color: '#FDBA74', border: '#FB923C' },
-  '착공': { bg: 'rgba(52,211,153,0.2)', color: '#86EFAC', border: '#34D399' },
+  '조합설립': { bg: 'rgba(96,165,250,0.2)', color: '#93C5FD', border: 'var(--accent-blue)' },
+  '사업시행인가': { bg: 'rgba(251,191,36,0.2)', color: '#FDE047', border: 'var(--accent-yellow)' },
+  '관리처분': { bg: 'rgba(251,146,60,0.2)', color: '#FDBA74', border: 'var(--accent-orange)' },
+  '착공': { bg: 'rgba(52,211,153,0.2)', color: '#86EFAC', border: 'var(--accent-green)' },
   '준공': { bg: 'rgba(37,99,235,0.15)', color: '#2563EB', border: 'var(--brand)' },
 };
 const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
@@ -210,7 +210,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   ? (() => { const total = (data as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0); return total > 999 ? `${(total/1000).toFixed(0)}k` : total; })()
                   : data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length
               }</span>}
-              {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#F87171' }} />}
+              {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-red)' }} />}
             </button>
           );
         })}
@@ -245,12 +245,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                   <div style={{ fontSize: 10, display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                    {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : '#34D399' }}>접수{r.open}</span>}
+                    {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : 'var(--accent-green)' }}>접수{r.open}</span>}
                     {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : '#FCD34D' }}>예정{r.upcoming}</span>}
                   </div>
                   {r.total > 0 && (
                     <div style={{ width: '100%', height: 3, background: region === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
-                      <div style={{ height: '100%', background: '#34D399', width: `${(r.open / r.total) * 100}%` }} />
+                      <div style={{ height: '100%', background: 'var(--accent-green)', width: `${(r.open / r.total) * 100}%` }} />
                       <div style={{ height: '100%', background: '#FCD34D', width: `${(r.upcoming / r.total) * 100}%` }} />
                     </div>
                   )}
@@ -269,19 +269,19 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               return diff >= 0 && diff <= 3 && getStatus(a) === 'open';
             }).sort((a, b) => new Date(a.rcept_endde).getTime() - new Date(b.rcept_endde).getTime());
             return urgent.length > 0 ? (
-              <div style={{ background: 'linear-gradient(135deg, rgba(248,113,113,0.1), rgba(251,146,60,0.1))', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#F87171', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ background: 'linear-gradient(135deg, var(--accent-red-bg), rgba(251,146,60,0.1))', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ animation: 'pulse 2s infinite' }}>🔥</span> 마감 임박 ({urgent.length}건)
                 </div>
                 {urgent.map(a => {
                   const diff = Math.ceil((new Date(a.rcept_endde).getTime() - today.getTime()) / 86400000);
                   return (
-                    <Link key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(248,113,113,0.1)', textDecoration: 'none', color: 'inherit' }}>
+                    <Link key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--accent-red-bg)', textDecoration: 'none', color: 'inherit' }}>
                       <div>
                         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.house_nm}</span>
                         <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{a.region_nm}</span>
                       </div>
-                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: diff === 0 ? '#F87171' : '#FB923C', flexShrink: 0 }}>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: diff === 0 ? 'var(--accent-red)' : 'var(--accent-orange)', flexShrink: 0 }}>
                         {diff === 0 ? '오늘 마감!' : `D-${diff}`}
                       </span>
                     </Link>
@@ -315,11 +315,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             const upcoming = thisWeek.filter(a => getStatus(a) === 'upcoming');
             if (thisWeek.length === 0) return null;
             return (
-              <div style={{ background: 'linear-gradient(135deg, rgba(96,165,250,0.08), rgba(52,211,153,0.08))', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#60A5FA', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.08))', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-blue)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                   📅 이번 주 청약 ({thisWeek.length}건)
-                  {opening.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'rgba(52,211,153,0.15)', color: '#34D399', fontWeight: 700 }}>접수중 {opening.length}</span>}
-                  {upcoming.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'rgba(251,191,36,0.15)', color: '#FCD34D', fontWeight: 700 }}>예정 {upcoming.length}</span>}
+                  {opening.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'var(--accent-green-bg)', color: 'var(--accent-green)', fontWeight: 700 }}>접수중 {opening.length}</span>}
+                  {upcoming.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'var(--accent-yellow-bg)', color: '#FCD34D', fontWeight: 700 }}>예정 {upcoming.length}</span>}
                 </div>
                 {thisWeek.slice(0, 5).map(a => {
                   const st = getStatus(a);
@@ -373,7 +373,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       border: calOffset === 0 && c.day === kstNow().getDate() ? '2px solid var(--brand)' : '1px solid transparent',
                     }}>
                       <div style={{ color: c.apts.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: c.apts.length > 0 ? 700 : 400 }}>{c.day}</div>
-                      {c.apts.length > 0 && <div style={{ fontSize: 10, color: '#60A5FA', fontWeight: 700 }}>{c.apts.length}건</div>}
+                      {c.apts.length > 0 && <div style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 700 }}>{c.apts.length}건</div>}
                     </div>
                   ))}
                 </div>
@@ -402,7 +402,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건
               {filtered.filter(a => getStatus(a) === 'open').length > 0 && (
-                <span style={{ color: '#34D399', fontWeight: 600, marginLeft: 8 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}건</span>
+                <span style={{ color: 'var(--accent-green)', fontWeight: 600, marginLeft: 8 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}건</span>
               )}
             </span>
             <div style={{ display: 'flex', gap: 4 }}>
@@ -434,7 +434,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               return null;
             })();
 
-            const accentColor = st === 'open' ? '#34D399' : st === 'upcoming' ? '#60A5FA' : 'var(--border)';
+            const accentColor = st === 'open' ? 'var(--accent-green)' : st === 'upcoming' ? 'var(--accent-blue)' : 'var(--border)';
             // 간략 주소: 전체 주소에서 구+동 추출
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
@@ -451,22 +451,22 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {isNew(apt, 'subscription') && <NewBadge />}
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'rgba(251,191,36,0.12)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? '#F87171' : dday <= 6 ? '#FBBF24' : 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'var(--accent-yellow-bg)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? 'var(--accent-red)' : dday <= 6 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>
                       {st === 'open' ? (dday === 0 ? '🔴 오늘 마감' : `⏰ D-${dday}`) : `D-${dday}`}
                     </span>
                   )}
-                  {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(167,139,250,0.12)', color: '#A78BFA' }}>분양가상한</span>}
-                  {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(248,113,113,0.12)', color: '#F87171' }}>투기과열</span>}
+                  {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>분양가상한</span>}
+                  {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>투기과열</span>}
                   {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(251,146,60,0.12)', color: '#fdba74' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{apt.region_nm}</span>
-                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`subscription:${apt.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
+                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`subscription:${apt.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                     {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}
                   </button>
                 </div>
                 {/* 경쟁률 */}
                 {(apt.competition_rate_1st != null && Number(apt.competition_rate_1st) > 0) && (
                   <div style={{ fontSize: 'var(--fs-xs)', marginBottom: 4, display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span style={{ color: Number(apt.competition_rate_1st) >= 10 ? '#F87171' : Number(apt.competition_rate_1st) >= 5 ? '#FB923C' : '#34D399', fontWeight: 800 }}>
+                    <span style={{ color: Number(apt.competition_rate_1st) >= 10 ? 'var(--accent-red)' : Number(apt.competition_rate_1st) >= 5 ? 'var(--accent-orange)' : 'var(--accent-green)', fontWeight: 800 }}>
                       {Number(apt.competition_rate_1st) >= 10 ? '🔥' : ''} 1순위 {Number(apt.competition_rate_1st).toFixed(1)}:1
                     </span>
                     {apt.competition_rate_2nd != null && Number(apt.competition_rate_2nd) > 0 && (
@@ -482,7 +482,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 </div>
                 {/* 타임라인 바 */}
                 <div style={{ display: 'flex', gap: 2, fontSize: '9px', color: 'var(--text-tertiary)' }}>
-                  {apt.spsply_rcept_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(167,139,250,0.08)' }}>특별 {fmtD(apt.spsply_rcept_bgnde)}</div>}
+                  {apt.spsply_rcept_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'var(--accent-purple-bg)' }}>특별 {fmtD(apt.spsply_rcept_bgnde)}</div>}
                   <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: st === 'open' ? 'rgba(96,165,250,0.15)' : 'rgba(148,163,184,0.06)', color: st === 'open' ? '#93c5fd' : undefined, fontWeight: st === 'open' ? 700 : 400 }}>접수 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)}</div>
                   {apt.przwner_presnatn_de && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(52,211,153,0.06)' }}>당첨 {fmtD(apt.przwner_presnatn_de)}</div>}
                   {apt.cntrct_cncls_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(251,191,36,0.06)' }}>계약 {fmtD(apt.cntrct_cncls_bgnde)}</div>}
@@ -562,7 +562,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           else pipeCounts['청약마감']++;
         });
         const pipeTotal = filtered.length || 1;
-        const pipeColors = ['#7D8DA3', '#60A5FA', '#FBBF24', '#FB923C', '#34D399'];
+        const pipeColors = ['#7D8DA3', 'var(--accent-blue)', 'var(--accent-yellow)', 'var(--accent-orange)', 'var(--accent-green)'];
 
         // ④ 분양가 TOP10
         const priceTop = [...filtered].filter(o => o.sale_price_max && o.sale_price_max > 0).sort((a, b) => (b.sale_price_max || 0) - (a.sale_price_max || 0)).slice(0, 10);
@@ -601,13 +601,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                     <div style={{ display: 'flex', gap: 2, fontSize: 10, color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                      {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#34D399' }}>분양{r.subCount}</span>}
-                      {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#F87171' }}>미분양{r.unsoldCount}</span>}
+                      {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : 'var(--accent-green)' }}>분양{r.subCount}</span>}
+                      {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : 'var(--accent-red)' }}>미분양{r.unsoldCount}</span>}
                     </div>
                     {r.count > 0 && (
                       <div style={{ width: '100%', height: 3, background: ongoingRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
                         <div style={{ height: '100%', background: '#60a5fa', width: `${(r.subCount / r.count) * 100}%` }} />
-                        <div style={{ height: '100%', background: '#F87171', width: `${(r.unsoldCount / r.count) * 100}%` }} />
+                        <div style={{ height: '100%', background: 'var(--accent-red)', width: `${(r.unsoldCount / r.count) * 100}%` }} />
                       </div>
                     )}
                   </button>
@@ -618,7 +618,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* ① 입주 임박 배너 */}
             {urgentMove.length > 0 && (
               <div style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(96,165,250,0.1))', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#34D399', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ animation: 'pulse 2s infinite' }}>🏠</span> 입주 임박 ({urgentMove.length}건)
                 </div>
                 {urgentMove.slice(0, 5).map((o: any) => (
@@ -627,7 +627,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{o.house_nm}</span>
                       <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{o.region_nm}</span>
                     </div>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: o.daysToMove <= 30 ? '#F87171' : '#34D399', flexShrink: 0 }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: o.daysToMove <= 30 ? 'var(--accent-red)' : 'var(--accent-green)', flexShrink: 0 }}>
                       {o.daysToMove <= 30 ? `D-${o.daysToMove}` : `${Math.ceil(o.daysToMove / 30)}개월 후`}
                     </span>
                   </div>
@@ -641,8 +641,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
                 {[
                   { label: '전체', value: filtered.length, color: 'var(--brand)' },
-                  { label: '분양중', value: allSubCount, color: '#34D399' },
-                  { label: '미분양', value: allUnsoldCount, color: '#F87171' },
+                  { label: '분양중', value: allSubCount, color: 'var(--accent-green)' },
+                  { label: '미분양', value: allUnsoldCount, color: 'var(--accent-red)' },
                   { label: '수도권', value: capitalCount, color: 'var(--text-primary)' },
                   { label: '지방', value: localCount, color: 'var(--text-primary)' },
                 ].map(s => (
@@ -704,18 +704,18 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   const subPct = r.count > 0 ? (r.subCount / r.count) * 100 : 0;
                   return (
                     <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left' }}>
-                      <div style={{ width: 36, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? '#60A5FA' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: ongoingRegion === r.name ? 700 : 400 }}>{r.name}</div>
+                      <div style={{ width: 36, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? 'var(--accent-blue)' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: ongoingRegion === r.name ? 700 : 400 }}>{r.name}</div>
                       <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
-                        <div style={{ height: '100%', width: `${(pct * subPct) / 100}%`, background: '#34D399' }} />
-                        <div style={{ height: '100%', width: `${(pct * (100 - subPct)) / 100}%`, background: '#F87171' }} />
+                        <div style={{ height: '100%', width: `${(pct * subPct) / 100}%`, background: 'var(--accent-green)' }} />
+                        <div style={{ height: '100%', width: `${(pct * (100 - subPct)) / 100}%`, background: 'var(--accent-red)' }} />
                       </div>
                       <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 28, textAlign: 'right' }}>{r.count}</div>
                     </button>
                   );
                 })}
                 <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: '#34D399', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />분양중</span>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: '#F87171', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />미분양</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: 'var(--accent-green)', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />분양중</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: 'var(--accent-red)', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />미분양</span>
                 </div>
               </div>
             )}
@@ -757,7 +757,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const mvnStr = o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(0, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : null;
               const wlKey = isUnsold ? `unsold:${o.link_id}` : `sub:${o.link_id}`;
               const isWatched = watchlist.has(wlKey);
-              const accentColor = isUnsold ? '#F87171' : '#60A5FA';
+              const accentColor = isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)';
               const premiumMatch = premiumListings.find((pl: any) => String(pl.listing_id) === String(o.link_id) && pl.listing_type === (isUnsold ? 'unsold' : 'subscription'));
               const isPremium = !!premiumMatch;
 
@@ -765,7 +765,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{
                   background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03))' : 'var(--bg-surface)',
                   border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8,
-                  borderLeft: `4px solid ${isPremium ? '#FBBF24' : accentColor}`, cursor: 'pointer',
+                  borderLeft: `4px solid ${isPremium ? 'var(--accent-yellow)' : accentColor}`, cursor: 'pointer',
                   boxShadow: isPremium ? '0 0 12px rgba(251,191,36,0.08)' : undefined,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
@@ -773,10 +773,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                         {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FBBF24,#F59E0B)', color: '#1a1a1a', marginRight: 4 }}>PREMIUM</span>}
                         {isNew(o, 'ongoing') && <NewBadge />}
-                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'rgba(248,113,113,0.12)' : 'rgba(96,165,250,0.12)', color: isUnsold ? '#f87171' : '#60a5fa', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? '#f87171' : '#60a5fa', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
                           {isUnsold ? '미분양' : '분양중'}
                         </span>
-                        {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#FBBF24' }}>🔥 {o.competition_rate}:1</span>}
+                        {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)' }}>🔥 {o.competition_rate}:1</span>}
                         <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
                       </div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
@@ -792,9 +792,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                         return (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                             <div style={{ flex: 1, height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
-                              <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#F87171' : rate > 40 ? '#FB923C' : '#FBBF24' }} />
+                              <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
                             </div>
-                            <span style={{ fontSize: '10px', fontWeight: 700, color: '#F87171' }}>미분양 {o.unsold_count.toLocaleString()}호 ({rate}%)</span>
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent-red)' }}>미분양 {o.unsold_count.toLocaleString()}호 ({rate}%)</span>
                           </div>
                         );
                       })()}
@@ -826,27 +826,27 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       {/* 인근 시세 비교 */}
                       {o.nearby_avg_price && o.sale_price_min && (() => {
                         const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
-                        return diff > 0 ? <div style={{ marginTop: 4, fontSize: '10px', color: '#34D399', fontWeight: 600 }}>📊 인근 시세 대비 약 {diff}% 저렴</div> : null;
+                        return diff > 0 ? <div style={{ marginTop: 4, fontSize: '10px', color: 'var(--accent-green)', fontWeight: 600 }}>📊 인근 시세 대비 약 {diff}% 저렴</div> : null;
                       })()}
                       {/* 프리미엄 상담사 CTA */}
                       {isPremium && premiumMatch?.consultant && (
                         <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 6, padding: '6px 10px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontSize: 12, lineHeight: 1 }}>👔</span>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#FBBF24' }}>
+                            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)' }}>
                               {premiumMatch.consultant.is_verified && <span style={{ marginRight: 3 }}>✓</span>}
                               {premiumMatch.consultant.company || '분양 상담사'} · {premiumMatch.consultant.name}
                             </div>
                             {premiumMatch.description && <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{premiumMatch.description}</div>}
                           </div>
                           {(premiumMatch.cta_phone || premiumMatch.consultant.phone) && (
-                            <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#FBBF24', padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
+                            <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
                           )}
                         </div>
                       )}
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(isUnsold ? 'unsold' : 'sub', String(o.link_id)); }} style={{
-                      fontSize: 'var(--fs-lg)', background: isWatched ? 'rgba(251,191,36,0.15)' : 'transparent',
+                      fontSize: 'var(--fs-lg)', background: isWatched ? 'var(--accent-yellow-bg)' : 'transparent',
                       border: isWatched ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)',
                       borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
                     }}>{isWatched ? '⭐' : '☆'}</button>
@@ -876,7 +876,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 상담사 CTA 배너 */}
             <a href="/consultant" style={{
               display: 'block', marginTop: 16, padding: 20, borderRadius: 14, textDecoration: 'none',
-              background: 'linear-gradient(135deg, rgba(167,139,250,0.08), rgba(96,165,250,0.08))',
+              background: 'linear-gradient(135deg, var(--accent-purple-bg), var(--accent-blue-bg))',
               border: '1px solid rgba(167,139,250,0.2)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -885,7 +885,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>분양 상담사이신가요?</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.4 }}>프리미엄 리스팅으로 분양 관심 고객에게 직접 노출되세요. 월 4.9만원~</div>
                 </div>
-                <span style={{ fontSize: 'var(--fs-sm)', color: '#A78BFA', fontWeight: 700, flexShrink: 0 }}>등록 →</span>
+                <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-purple)', fontWeight: 700, flexShrink: 0 }}>등록 →</span>
               </div>
             </a>
 
@@ -903,7 +903,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', maxHeight: '75vh', overflowY: 'auto' }}>
                     <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 12px' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'rgba(248,113,113,0.12)' : 'rgba(52,211,153,0.12)', color: isU ? '#f87171' : '#34D399' }}>{isU ? '미분양' : '분양중'}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? '#f87171' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
                       <button onClick={() => setSelectedOngoing(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>×</button>
                     </div>
                     <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{o.house_nm}</h2>
@@ -929,7 +929,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
                       return diff > 0 ? (
                         <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
-                          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#34D399' }}>📊 인근 시세 대비 약 {diff}% 저렴</div>
+                          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-green)' }}>📊 인근 시세 대비 약 {diff}% 저렴</div>
                           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>지역 평균 실거래가 {(o.nearby_avg_price / 10000).toFixed(1)}억 기준</div>
                         </div>
                       ) : null;
@@ -993,7 +993,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#F87171' }}>{total.toLocaleString()}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
                   <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
                 </button>
@@ -1004,12 +1004,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#F87171' }}>{r.unitCount.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                     <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
                     {total > 0 && (
                       <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
-                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : '#F87171', width: `${(r.unitCount / total) * 100}%` }} />
+                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
                       </div>
                     )}
                   </button>
@@ -1034,7 +1034,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   </div>
                   <div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>준공후(악성)</div>
-                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{filteredAfterCompletion.toLocaleString()}호</div>
+                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{filteredAfterCompletion.toLocaleString()}호</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>단지 수</div>
@@ -1058,7 +1058,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
                     <span style={{ flex: 1, fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.name}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#F87171' }}>{r.unitCount.toLocaleString()}호</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}호</span>
                     <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
                   </div>
                 ))}
@@ -1069,7 +1069,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             <div style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 미분양 현황</span>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#F87171' }}>총 {total.toLocaleString()}세대</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6 }}>
                 <button onClick={() => setUnsoldRegion('전체')} style={{
@@ -1078,7 +1078,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#F87171' }}>{total.toLocaleString()}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
                   <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
                 </button>
@@ -1089,12 +1089,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#F87171' }}>{r.unitCount.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                     <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
                     {total > 0 && (
                       <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
-                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : '#F87171', width: `${(r.unitCount / total) * 100}%` }} />
+                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
                       </div>
                     )}
                   </button>
@@ -1129,8 +1129,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   title=""
                 />
                 <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                  <span><span style={{ display: 'inline-block', width: 12, height: 2, background: '#60A5FA', marginRight: 4, verticalAlign: 'middle' }} />전체 미분양</span>
-                  <span><span style={{ display: 'inline-block', width: 12, height: 2, background: '#F87171', marginRight: 4, verticalAlign: 'middle', borderTop: '1px dashed #F87171' }} />준공후 미분양</span>
+                  <span><span style={{ display: 'inline-block', width: 12, height: 2, background: 'var(--accent-blue)', marginRight: 4, verticalAlign: 'middle' }} />전체 미분양</span>
+                  <span><span style={{ display: 'inline-block', width: 12, height: 2, background: 'var(--accent-red)', marginRight: 4, verticalAlign: 'middle', borderTop: '1px dashed #F87171' }} />준공후 미분양</span>
                 </div>
               </div>
             )}
@@ -1143,13 +1143,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 .map((s: any) => ({ label: s.region || '', value: s.total_unsold || 0 }))
                 .sort((a: any, b: any) => b.value - a.value);
               const max = Math.max(...regionData.map((d: any) => d.value), 1);
-              const getColor = (v: number) => v >= 5000 ? '#F87171' : v >= 3000 ? '#FB923C' : v >= 1000 ? '#FBBF24' : '#34D399';
+              const getColor = (v: number) => v >= 5000 ? 'var(--accent-red)' : v >= 3000 ? 'var(--accent-orange)' : v >= 1000 ? 'var(--accent-yellow)' : 'var(--accent-green)';
               return regionData.length > 0 ? (
                 <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>{'\u{1F5FA}\uFE0F'} 지역별 미분양 현황</div>
                   {regionData.map((d: any) => (
                     <div key={d.label} onClick={() => setUnsoldRegion(d.label === unsoldRegion ? '전체' : d.label)} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, cursor: 'pointer', opacity: unsoldRegion !== '전체' && unsoldRegion !== d.label ? 0.5 : 1, transition: 'opacity 0.15s' }}>
-                      <div style={{ width: 40, fontSize: 'var(--fs-xs)', color: unsoldRegion === d.label ? '#60A5FA' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: unsoldRegion === d.label ? 700 : 400 }}>{d.label}</div>
+                      <div style={{ width: 40, fontSize: 'var(--fs-xs)', color: unsoldRegion === d.label ? 'var(--accent-blue)' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: unsoldRegion === d.label ? 700 : 400 }}>{d.label}</div>
                       <div style={{ flex: 1, height: 28, background: 'var(--bg-hover)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
                         <div style={{ height: '100%', width: `${Math.max((d.value / max) * 100, 2)}%`, borderRadius: 6, background: getColor(d.value), transition: 'width 0.5s', display: 'flex', alignItems: 'center', paddingLeft: 8 }}>
                           {d.value > max * 0.15 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff' }}>{d.value.toLocaleString()}</span>}
@@ -1159,10 +1159,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     </div>
                   ))}
                   <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#34D399', marginRight: 3 }} />~1000</span>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#FBBF24', marginRight: 3 }} />1000~3000</span>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#FB923C', marginRight: 3 }} />3000~5000</span>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: '#F87171', marginRight: 3 }} />5000+</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-green)', marginRight: 3 }} />~1000</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-yellow)', marginRight: 3 }} />1000~3000</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-orange)', marginRight: 3 }} />3000~5000</span>
+                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-red)', marginRight: 3 }} />5000+</span>
                   </div>
                 </div>
               ) : null;
@@ -1182,7 +1182,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
 
               const unsoldCount = u.tot_unsold_hshld_co || 0;
-              const dangerColor = unsoldCount >= 1000 ? '#F87171' : unsoldCount >= 500 ? '#FB923C' : unsoldCount >= 100 ? '#FBBF24' : '#34D399';
+              const dangerColor = unsoldCount >= 1000 ? 'var(--accent-red)' : unsoldCount >= 500 ? 'var(--accent-orange)' : unsoldCount >= 100 ? 'var(--accent-yellow)' : 'var(--accent-green)';
 
               return (
                 <div key={u.id} style={{
@@ -1197,12 +1197,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                     <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
-                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'rgba(248,113,113,0.12)', color: '#F87171', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
                       {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} 미분양 {unsoldCount.toLocaleString()}세대
                     </span>
-                    {u.after_completion_unsold > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 8, background: 'rgba(248,113,113,0.08)', color: '#F87171', fontWeight: 600 }}>악성 {u.after_completion_unsold}호</span>}
+                    {u.after_completion_unsold > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 8, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>악성 {u.after_completion_unsold}호</span>}
                     {priceStr && <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
                       {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
@@ -1217,8 +1217,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {/* 미분양률 바 */}
                   {rate !== null && (
                     <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 10 }}>
-                      <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#F87171' : rate > 40 ? '#FB923C' : '#FBBF24' }} />
-                      <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#F87171' }}>{rate}%</span>
+                      <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
+                      <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-red)' }}>{rate}%</span>
                     </div>
                   )}
 
@@ -1311,13 +1311,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                     <div style={{ fontSize: 10, display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                      {r.redev > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : '#60A5FA' }}>개발{r.redev}</span>}
-                      {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : '#34D399' }}>건축{r.rebuild}</span>}
+                      {r.redev > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : 'var(--accent-blue)' }}>개발{r.redev}</span>}
+                      {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : 'var(--accent-green)' }}>건축{r.rebuild}</span>}
                     </div>
                     {r.total > 0 && (
                       <div style={{ width: '100%', height: 3, background: redevRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
-                        <div style={{ height: '100%', background: '#60A5FA', width: `${(r.redev / r.total) * 100}%` }} />
-                        <div style={{ height: '100%', background: '#34D399', width: `${(r.rebuild / r.total) * 100}%` }} />
+                        <div style={{ height: '100%', background: 'var(--accent-blue)', width: `${(r.redev / r.total) * 100}%` }} />
+                        <div style={{ height: '100%', background: 'var(--accent-green)', width: `${(r.rebuild / r.total) * 100}%` }} />
                       </div>
                     )}
                   </button>
@@ -1332,11 +1332,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전체</div>
               </div>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#60A5FA' }}>{redevCount}</div>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-blue)' }}>{redevCount}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>재개발</div>
               </div>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#FB923C' }}>{rebuildCount}</div>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-orange)' }}>{rebuildCount}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>재건축</div>
               </div>
             </div>
@@ -1403,7 +1403,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 6, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74' }}>{r.project_type}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: sc.color }}>{progress}%</span>
                     <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`redev:${r.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`redev:${r.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                       {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
@@ -1538,7 +1538,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     )}
                     {r.count > 0 && (
                       <div style={{ width: '100%', height: 3, background: tradeRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
-                        <div style={{ height: '100%', background: tradeRegion === r.name ? '#fff' : '#60A5FA', width: `${(r.count / transactions.length) * 100}%` }} />
+                        <div style={{ height: '100%', background: tradeRegion === r.name ? '#fff' : 'var(--accent-blue)', width: `${(r.count / transactions.length) * 100}%` }} />
                       </div>
                     )}
                   </button>
@@ -1559,11 +1559,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균가</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{maxTrade ? fmtAmount(maxTrade.deal_amount) : '-'}</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{maxTrade ? fmtAmount(maxTrade.deal_amount) : '-'}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#60A5FA' }}>{minTrade ? fmtAmount(minTrade.deal_amount) : '-'}</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-blue)' }}>{minTrade ? fmtAmount(minTrade.deal_amount) : '-'}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
@@ -1633,7 +1633,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                         <div style={{ width: 50, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textAlign: 'right', flexShrink: 0 }}>{d.label}</div>
                         <div style={{ flex: 1, height: 24, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: d.color || '#A78BFA' }} />
+                          <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: d.color || 'var(--accent-purple)' }} />
                         </div>
                         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 55, textAlign: 'right', flexShrink: 0 }}>{d.value.toLocaleString()}</div>
                       </div>
@@ -1677,7 +1677,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 카드 리스트 */}
             {pagedTrades.map((t: any, i: number) => {
               const amt = t.deal_amount || 0;
-              const borderColor = amt >= 100000 ? '#F87171' : amt >= 50000 ? '#FB923C' : amt >= 30000 ? '#FBBF24' : '#34D399';
+              const borderColor = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)';
               // 같은 단지 최고가 대비
               const sameApt = filteredTrades.filter((x: any) => x.apt_name === t.apt_name && (x.deal_amount || 0) > 0);
               const maxPrice = sameApt.length > 1 ? Math.max(...sameApt.map((x: any) => x.deal_amount || 0)) : 0;
@@ -1694,10 +1694,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {/* 상단: 배지 + 지역 + 관심 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                     {isNew(t, 'transaction') && <NewBadge />}
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'rgba(96,165,250,0.12)', color: '#93c5fd' }}>{t.trade_type || '매매'}</span>
-                    {vsMax !== null && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'rgba(248,113,113,0.12)' : 'rgba(96,165,250,0.12)', color: vsMax >= 0 ? '#F87171' : '#60A5FA' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'var(--accent-blue-bg)', color: '#93c5fd' }}>{t.trade_type || '매매'}</span>
+                    {vsMax !== null && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
                     <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                       {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
@@ -1771,8 +1771,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ` · 세대수 ${r.stage === '정비구역지정' || r.stage === '조합설립' ? '미확정' : '확인 필요'}`}
               </div>
               {r.ai_summary && (
-                <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(96,165,250,0.08), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}>
-                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#60A5FA', marginBottom: 3 }}>🤖 AI 분석</div>
+                <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 3 }}>🤖 AI 분석</div>
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{r.ai_summary}</div>
                 </div>
               )}
@@ -1907,7 +1907,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 </div>
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평당가</div>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#60A5FA', marginTop: 2 }}>{t.exclusive_area > 0 && t.deal_amount > 0 ? fmtAmt(Math.round(t.deal_amount / (t.exclusive_area / 3.3058))) : '-'}</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-blue)', marginTop: 2 }}>{t.exclusive_area > 0 && t.deal_amount > 0 ? fmtAmt(Math.round(t.deal_amount / (t.exclusive_area / 3.3058))) : '-'}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
@@ -1926,17 +1926,17 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 const minP = Math.min(...prices);
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 16 }}>
-                    <div style={{ background: 'rgba(248,113,113,0.08)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
+                    <div style={{ background: 'var(--accent-red-bg)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
                       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
-                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#F87171' }}>{fmtAmt(maxP)}</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)' }}>{fmtAmt(maxP)}</div>
                     </div>
-                    <div style={{ background: 'rgba(96,165,250,0.08)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
+                    <div style={{ background: 'var(--accent-blue-bg)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
                       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
-                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#60A5FA' }}>{fmtAmt(minP)}</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-blue)' }}>{fmtAmt(minP)}</div>
                     </div>
-                    <div style={{ background: 'rgba(167,139,250,0.08)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
+                    <div style={{ background: 'var(--accent-purple-bg)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
                       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균가</div>
-                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#A78BFA' }}>{fmtAmt(avg)}</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-purple)' }}>{fmtAmt(avg)}</div>
                     </div>
                   </div>
                 );
@@ -1962,12 +1962,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 12, marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>📈 거래가 추이</span>
-                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? '#F87171' : '#60A5FA' }}>{isUp ? '▲' : '▼'} {changePct}%</span>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>{isUp ? '▲' : '▼'} {changePct}%</span>
                     </div>
                     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 60 }}>
-                      <polyline points={points} fill="none" stroke={isUp ? '#F87171' : '#60A5FA'} strokeWidth="2" strokeLinecap="round" />
+                      <polyline points={points} fill="none" stroke={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} strokeWidth="2" strokeLinecap="round" />
                       {prices.map((p: number, i: number) => (
-                        <circle key={i} cx={P + (i / (prices.length - 1)) * (W - P * 2)} cy={H - P - ((p - min) / range) * (H - P * 2)} r="3" fill={isUp ? '#F87171' : '#60A5FA'} />
+                        <circle key={i} cx={P + (i / (prices.length - 1)) * (W - P * 2)} cy={H - P - ((p - min) / range) * (H - P * 2)} r="3" fill={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} />
                       ))}
                     </svg>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>

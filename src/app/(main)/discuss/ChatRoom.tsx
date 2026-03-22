@@ -17,9 +17,9 @@ interface ChatMsg {
 const PAGE_SIZE = 100;
 // DB grade_definitions 기준
 const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }> = {
-  1:{title:'새싹',emoji:'🌱',color:'#34D399'},2:{title:'정보통',emoji:'📡',color:'#60A5FA'},
-  3:{title:'동네어른',emoji:'🏘️',color:'#A78BFA'},4:{title:'소문난집',emoji:'🏠',color:'#FBBF24'},
-  5:{title:'인플루언서',emoji:'⚡',color:'#F87171'},6:{title:'빅마우스',emoji:'🔥',color:'#FB7185'},
+  1:{title:'새싹',emoji:'🌱',color:'var(--accent-green)'},2:{title:'정보통',emoji:'📡',color:'var(--accent-blue)'},
+  3:{title:'동네어른',emoji:'🏘️',color:'var(--accent-purple)'},4:{title:'소문난집',emoji:'🏠',color:'var(--accent-yellow)'},
+  5:{title:'인플루언서',emoji:'⚡',color:'var(--accent-red)'},6:{title:'빅마우스',emoji:'🔥',color:'#FB7185'},
   7:{title:'찐고수',emoji:'💎',color:'#22D3EE'},8:{title:'전설',emoji:'🌟',color:'#FCD34D'},
   9:{title:'신의경지',emoji:'👑',color:'#818CF8'},10:{title:'카더라신',emoji:'🚀',color:'#C084FC'},
 };
@@ -182,7 +182,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                   </div>
                   <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', margin: '0 0 5px', lineHeight: 1.5, wordBreak: 'break-word' }}>{renderContent(msg.content)}</p>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, background: liked ? 'rgba(248,113,113,0.07)' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? '#F87171' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
+                    <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, background: liked ? 'rgba(248,113,113,0.07)' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
                       {liked ? '❤️' : '🤍'} {lc > 0 ? lc : ''}
                     </button>
                     {user && (
@@ -256,7 +256,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                   placeholder={replyTarget ? `@${replyTarget.nickname}에게 답글...` : '소문 남기기... (@멘션, Enter 전송)'}
                   maxLength={300} rows={1}
                   style={{ width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', padding: '8px 58px 8px 12px', fontSize: 'var(--fs-sm)', fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5, minHeight: 38 }} />
-                <button onClick={send} disabled={!input.trim() || sending} style={{ position: 'absolute', right: 6, bottom: 6, padding: '3px 10px', borderRadius: 6, border: 'none', background: input.trim() ? (replyTarget ? '#A78BFA' : 'var(--brand)') : 'transparent', color: input.trim() ? 'white' : 'var(--text-tertiary)', fontWeight: 700, fontSize: 'var(--fs-xs)', cursor: input.trim() ? 'pointer' : 'default' }}>{replyTarget ? '↩' : '↑'}</button>
+                <button onClick={send} disabled={!input.trim() || sending} style={{ position: 'absolute', right: 6, bottom: 6, padding: '3px 10px', borderRadius: 6, border: 'none', background: input.trim() ? (replyTarget ? 'var(--accent-purple)' : 'var(--brand)') : 'transparent', color: input.trim() ? 'white' : 'var(--text-tertiary)', fontWeight: 700, fontSize: 'var(--fs-xs)', cursor: input.trim() ? 'pointer' : 'default' }}>{replyTarget ? '↩' : '↑'}</button>
               </div>
             </div>
           </div>

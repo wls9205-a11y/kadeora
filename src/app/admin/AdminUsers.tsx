@@ -77,8 +77,8 @@ export default function AdminUsers() {
     gradeMap[g] = (gradeMap[g] || 0) + 1;
   }
   const gradeColors: Record<string, string> = {
-    '뉴비': '#9DB0C7', '초보자': '#60A5FA', '주민': '#34D399', '터줏대감': '#FBBF24',
-    '인싸': '#A78BFA', '핵인싸': '#F87171', '미설정': '#CBD5E1',
+    '뉴비': '#9DB0C7', '초보자': 'var(--accent-blue)', '주민': 'var(--accent-green)', '터줏대감': 'var(--accent-yellow)',
+    '인싸': 'var(--accent-purple)', '핵인싸': 'var(--accent-red)', '미설정': '#CBD5E1',
   };
 
   return (
@@ -87,9 +87,9 @@ export default function AdminUsers() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
         {[
           { label: '전체', value: users.length, color: 'var(--text-primary)' },
-          { label: '실제 유저', value: realUsersList.length, color: '#34D399' },
+          { label: '실제 유저', value: realUsersList.length, color: 'var(--accent-green)' },
           { label: '시드', value: seedUsers.length, color: 'var(--text-tertiary)' },
-          { label: '정지됨', value: users.filter(u => u.is_deleted).length, color: '#F87171' },
+          { label: '정지됨', value: users.filter(u => u.is_deleted).length, color: 'var(--accent-red)' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color }}>{s.value}</div>
@@ -198,17 +198,17 @@ export default function AdminUsers() {
                     <span style={{
                       fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                       background: u.is_deleted ? 'rgba(248,113,113,0.12)' : 'rgba(52,211,153,0.12)',
-                      color: u.is_deleted ? '#F87171' : '#059669',
+                      color: u.is_deleted ? 'var(--accent-red)' : '#059669',
                     }}>{u.is_deleted ? '정지' : '정상'}</span>
                   </td>
                   <td style={{ padding: '10px 14px' }}>
                     <div style={{ display: 'flex', gap: 4 }}>
                       {u.is_deleted ? (
-                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #34D399', background: 'transparent', color: '#34D399', cursor: 'pointer', fontWeight: 600 }}>복구</button>
+                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #34D399', background: 'transparent', color: 'var(--accent-green)', cursor: 'pointer', fontWeight: 600 }}>복구</button>
                       ) : (
-                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #F87171', background: 'transparent', color: '#F87171', cursor: 'pointer', fontWeight: 600 }}>정지</button>
+                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #F87171', background: 'transparent', color: 'var(--accent-red)', cursor: 'pointer', fontWeight: 600 }}>정지</button>
                       )}
-                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #60A5FA', background: 'transparent', color: '#60A5FA', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
+                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #60A5FA', background: 'transparent', color: 'var(--accent-blue)', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
                     </div>
                   </td>
                 </tr>

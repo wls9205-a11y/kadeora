@@ -57,7 +57,7 @@ export default function AdminCommentsPage() {
                   <td style={{ padding: '10px 14px', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>{new Date(c.created_at).toLocaleDateString('ko-KR')}</td>
                   <td style={{ padding: '10px 14px' }}>
                     {!c.is_deleted && (
-                      <button onClick={() => deleteComment(c.id)} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 6, border: 'none', background: '#F87171', color: 'white', cursor: 'pointer', fontWeight: 600 }}>삭제</button>
+                      <button onClick={() => deleteComment(c.id)} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 6, border: 'none', background: 'var(--accent-red)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>삭제</button>
                     )}
                   </td>
                 </tr>

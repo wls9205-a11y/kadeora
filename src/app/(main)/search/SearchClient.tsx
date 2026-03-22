@@ -389,7 +389,7 @@ export default function SearchClient() {
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(167,139,250,0.15)', color: '#A78BFA' }}>📝 블로그</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(167,139,250,0.15)', color: 'var(--accent-purple)' }}>📝 블로그</span>
                       <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {highlight(blog.title, inputVal)}
                       </span>
@@ -412,7 +412,7 @@ export default function SearchClient() {
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(251,146,60,0.15)', color: '#FB923C' }}>🏗️ {r.project_type}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(251,146,60,0.15)', color: 'var(--accent-orange)' }}>🏗️ {r.project_type}</span>
                       <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(r.district_name || '', inputVal)}</span>
                     </div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{r.region} · {r.stage}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}</div>

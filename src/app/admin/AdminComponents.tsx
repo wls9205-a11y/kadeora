@@ -21,7 +21,7 @@ export function ActionBtn({ label, onClick, variant='default', size='md' }: {
   label: string; onClick: () => Promise<void>; variant?: 'default'|'danger'|'success'; size?: 'sm'|'md';
 }) {
   const [state, setState] = useState<'idle'|'loading'|'ok'|'err'>('idle');
-  const colors = { default:'var(--brand)', danger:'#F87171', success:'#34D399' };
+  const colors = { default:'var(--brand)', danger:'var(--accent-red)', success:'var(--accent-green)' };
   const handle = async () => {
     setState('loading');
     try { await onClick(); setState('ok'); } catch { setState('err'); }
@@ -31,7 +31,7 @@ export function ActionBtn({ label, onClick, variant='default', size='md' }: {
     <button onClick={handle} disabled={state==='loading'} style={{
       padding: size==='sm'?'4px 10px':'7px 16px', borderRadius:6, border:'none',
       cursor: state==='loading'?'default':'pointer', fontSize: size==='sm'?11:13, fontWeight:700,
-      background: state==='ok'?'#34D399': state==='err'?'#F87171': colors[variant],
+      background: state==='ok'?'var(--accent-green)': state==='err'?'var(--accent-red)': colors[variant],
       color:'white', opacity: state==='loading'?0.7:1, minWidth: size==='sm'?60:80,
     }}>
       {state==='loading'?'처리중...': state==='ok'?'✓ 완료': state==='err'?'✗ 실패': label}
@@ -41,8 +41,8 @@ export function ActionBtn({ label, onClick, variant='default', size='md' }: {
 
 export function Badge({ label, type='default' }: { label: string; type?: 'success'|'danger'|'warning'|'info'|'default' }) {
   const c: Record<string, {bg:string;color:string}> = {
-    success:{bg:'rgba(52,211,153,0.12)',color:'#34D399'}, danger:{bg:'rgba(248,113,113,0.12)',color:'#F87171'},
-    warning:{bg:'rgba(251,191,36,0.12)',color:'#FBBF24'}, info:{bg:'rgba(96,165,250,0.12)',color:'#60A5FA'},
+    success:{bg:'rgba(52,211,153,0.12)',color:'var(--accent-green)'}, danger:{bg:'rgba(248,113,113,0.12)',color:'var(--accent-red)'},
+    warning:{bg:'rgba(251,191,36,0.12)',color:'var(--accent-yellow)'}, info:{bg:'rgba(96,165,250,0.12)',color:'var(--accent-blue)'},
     default:{bg:'var(--bg-hover)',color:'var(--text-tertiary)'},
   };
   const s = c[type]||c.default;

@@ -7,8 +7,8 @@ export const metadata: Metadata = {
 };
 
 const GRADE_COLORS: Record<number, string> = {
-  1: '#34D399', 2: '#60A5FA', 3: '#A78BFA', 4: '#FBBF24',
-  5: '#F87171', 6: '#FB7185', 7: '#22D3EE', 8: '#FCD34D',
+  1: 'var(--accent-green)', 2: 'var(--accent-blue)', 3: 'var(--accent-purple)', 4: 'var(--accent-yellow)',
+  5: 'var(--accent-red)', 6: '#FB7185', 7: '#22D3EE', 8: '#FCD34D',
   9: '#818CF8', 10: '#C084FC',
 };
 

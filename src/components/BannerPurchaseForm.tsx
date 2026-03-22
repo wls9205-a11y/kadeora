@@ -14,7 +14,7 @@ const BANNER_TIERS = [
     cashPrice: 4900,
     maxImpressions: 2,
     durationDays: null,
-    color: '#34D399',
+    color: 'var(--accent-green)',
     icon: '📡',
     priority: 10,
   },
@@ -27,7 +27,7 @@ const BANNER_TIERS = [
     cashPrice: 9900,
     maxImpressions: 5,
     durationDays: null,
-    color: '#34D399',
+    color: 'var(--accent-green)',
     icon: '📡',
     priority: 10,
   },
@@ -40,7 +40,7 @@ const BANNER_TIERS = [
     cashPrice: 29900,
     maxImpressions: null,
     durationDays: 3,
-    color: '#FBBF24',
+    color: 'var(--accent-yellow)',
     icon: '⭐',
     priority: 50,
   },
@@ -53,7 +53,7 @@ const BANNER_TIERS = [
     cashPrice: 19900,
     maxImpressions: 10,
     durationDays: null,
-    color: '#F87171',
+    color: 'var(--accent-red)',
     icon: '🚨',
     priority: 100,
   },
@@ -174,7 +174,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{t.desc}</div>
                 {t.pointPrice && userPoints < t.pointPrice && (
-                  <div style={{ fontSize: 'var(--fs-xs)', color: '#F87171', marginTop: 4 }}>포인트 부족 ({(t.pointPrice - userPoints).toLocaleString()}P 더 필요)</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', marginTop: 4 }}>포인트 부족 ({(t.pointPrice - userPoints).toLocaleString()}P 더 필요)</div>
                 )}
               </div>
             ))}
@@ -254,7 +254,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
           </div>
 
           {!selected.pointPrice && (
-            <div style={{ padding: '10px 14px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.18)', borderRadius: 8, marginBottom: 16, fontSize: 'var(--fs-xs)', color: '#FBBF24' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.18)', borderRadius: 8, marginBottom: 16, fontSize: 'var(--fs-xs)', color: 'var(--accent-yellow)' }}>
               💳 현금 결제 상품은 토스페이먼츠 라이브 전환 후 이용 가능합니다. 현재는 포인트 결제 상품만 구매 가능합니다.
             </div>
           )}

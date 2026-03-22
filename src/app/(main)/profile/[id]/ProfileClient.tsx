@@ -12,7 +12,7 @@ import { validateNickname } from '@/lib/nickname-filter';
 
 
 const GRADE_COLORS: Record<number, string> = {
-  1:'#34D399',2:'#60A5FA',3:'#A78BFA',4:'#FBBF24',5:'#F87171',
+  1:'var(--accent-green)',2:'var(--accent-blue)',3:'var(--accent-purple)',4:'var(--accent-yellow)',5:'var(--accent-red)',
   6:'#FB7185',7:'#22D3EE',8:'#FCD34D',9:'#818CF8',10:'#C084FC',
 };
 const GRADE_TITLES: Record<number, string> = {
@@ -89,7 +89,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const gradeNum = profile.grade ?? 1;
-  const gradeColor = GRADE_COLORS[gradeNum] ?? '#34D399';
+  const gradeColor = GRADE_COLORS[gradeNum] ?? 'var(--accent-green)';
   const gradeEmoji = GRADE_EMOJI[gradeNum] ?? '🌱';
   const gradeTitle = GRADE_TITLES[gradeNum] ?? '새싹';
   const currentPoints = profile.points ?? 0;
@@ -603,7 +603,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {watchStocks.map((s: any, i: number) => {
                 const isUp = (s.change_pct || 0) >= 0;
-                const color = s.market === 'KR' ? (isUp ? '#F87171' : '#60A5FA') : (isUp ? '#34D399' : '#F87171');
+                const color = s.market === 'KR' ? (isUp ? 'var(--accent-red)' : 'var(--accent-blue)') : (isUp ? 'var(--accent-green)' : 'var(--accent-red)');
                 return (
                   <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ textDecoration: 'none' }}>
                     <div style={{ padding: '12px 0', borderBottom: i < watchStocks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -84,7 +84,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
             <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
               {PLATFORMS.map(p => (
                 <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 60 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? '#34D399' : p.bg, color: p.color, fontSize: 'var(--fs-xl)', fontWeight: 900 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: 'var(--fs-xl)', fontWeight: 900 }}>
                     {p.id === 'copy' && copied ? '✓' : p.emoji}
                   </div>
                   <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>

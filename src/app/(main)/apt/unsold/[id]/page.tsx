@@ -67,20 +67,20 @@ export default async function UnsoldDetailPage({ params }: Props) {
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(248,113,113,0.15)', color: '#F87171', border: '1px solid rgba(248,113,113,0.3)' }}>미분양</span>
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(248,113,113,0.15)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.3)' }}>미분양</span>
         </div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{u.house_nm || '미분양 단지'}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}{u.supply_addr ? ` · ${u.supply_addr}` : ''}</div>
         {u.ai_summary && (
           <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(248,113,113,0.08), rgba(251,146,60,0.06))', border: '1px solid rgba(248,113,113,0.15)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#F87171', marginBottom: 3 }}>🤖 AI 분석</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-red)', marginBottom: 3 }}>🤖 AI 분석</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{u.ai_summary}</div>
           </div>
         )}
       </div>
 
       {/* 현황 요약 */}
-      <div style={{ ...card, borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? '#F87171' : (u.tot_unsold_hshld_co || 0) >= 1000 ? '#FBBF24' : '#34D399'}` }}>
+      <div style={{ ...card, borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? 'var(--accent-red)' : (u.tot_unsold_hshld_co || 0) >= 1000 ? 'var(--accent-yellow)' : 'var(--accent-green)'}` }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 현황 요약</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 'var(--fs-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -95,7 +95,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
             return (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>전월 대비</span>
-                <span style={{ fontWeight: 700, color: diff > 0 ? '#F87171' : diff < 0 ? '#34D399' : 'var(--text-tertiary)' }}>
+                <span style={{ fontWeight: 700, color: diff > 0 ? 'var(--accent-red)' : diff < 0 ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>
                   {diff > 0 ? '+' : ''}{diff.toLocaleString()}세대 ({diff > 0 ? '↑' : diff < 0 ? '↓' : '-'}{pct}%)
                 </span>
               </div>
@@ -109,10 +109,10 @@ export default async function UnsoldDetailPage({ params }: Props) {
             <span style={{ color: 'var(--text-secondary)' }}>위험도</span>
             <span style={{ fontWeight: 700 }}>
               {(u.tot_unsold_hshld_co || 0) >= 3000
-                ? <span style={{ color: '#F87171' }}>🔴 높음</span>
+                ? <span style={{ color: 'var(--accent-red)' }}>🔴 높음</span>
                 : (u.tot_unsold_hshld_co || 0) >= 1000
-                  ? <span style={{ color: '#FBBF24' }}>🟡 주의</span>
-                  : <span style={{ color: '#34D399' }}>🟢 안전</span>
+                  ? <span style={{ color: 'var(--accent-yellow)' }}>🟡 주의</span>
+                  : <span style={{ color: 'var(--accent-green)' }}>🟢 안전</span>
               }
             </span>
           </div>
@@ -128,7 +128,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양</div>
-            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)' }}>세대</span></div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)' }}>세대</span></div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>총공급</div>
@@ -136,12 +136,12 @@ export default async function UnsoldDetailPage({ params }: Props) {
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양률</div>
-            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: rate && rate > 70 ? '#F87171' : rate && rate > 40 ? '#FB923C' : '#FBBF24' }}>{rate ?? '-'}%</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: rate && rate > 70 ? 'var(--accent-red)' : rate && rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }}>{rate ?? '-'}%</div>
           </div>
         </div>
         {rate !== null && (
           <div style={{ height: 6, background: 'var(--bg-hover)', borderRadius: 3 }}>
-            <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#F87171' : rate > 40 ? '#FB923C' : '#FBBF24' }} />
+            <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
           </div>
         )}
       </div>
@@ -153,7 +153,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'rgba(37,99,235,0.08)' }}>💡 {u.key_features}</div>
         )}
         {u.discount_info && (
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#34D399', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)' }}>🏷️ {u.discount_info}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-green)', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)' }}>🏷️ {u.discount_info}</div>
         )}
         {[
           ['시공사', u.constructor_nm],

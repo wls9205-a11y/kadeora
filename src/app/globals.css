@@ -225,9 +225,24 @@ html.font-large {
   --info:           #60A5FA;
   --info-bg:        #0C1C32;
   --font-base:      15px;
+  /* 주식 시세 */
   --stock-up:       #F87171;
   --stock-down:     #60A5FA;
   --stock-flat:     #9DB0C7;
+  /* 시맨틱 액센트 (카테고리/상태별) */
+  --accent-green:   #34D399;
+  --accent-green-bg: rgba(52,211,153,0.12);
+  --accent-purple:  #A78BFA;
+  --accent-purple-bg: rgba(167,139,250,0.12);
+  --accent-orange:  #FB923C;
+  --accent-orange-bg: rgba(251,146,60,0.12);
+  --accent-yellow:  #FBBF24;
+  --accent-yellow-bg: rgba(251,191,36,0.12);
+  --accent-red:     #F87171;
+  --accent-red-bg:  rgba(248,113,113,0.12);
+  --accent-blue:    #60A5FA;
+  --accent-blue-bg: rgba(96,165,250,0.12);
+  /* 네비게이션 */
   --nav-bg:         #0F1D35;
   --nav-border:     #1E3050;
   --nav-text:       #E2E8F0;

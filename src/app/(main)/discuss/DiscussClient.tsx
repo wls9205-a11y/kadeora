@@ -24,9 +24,9 @@ const ROOM_MAP: Record<string, string> = {
 
 const CAT_STYLE: Record<string, { bg: string; color: string; label: string }> = {
   stock: { bg: 'rgba(56,189,248,0.12)', color: '#38BDF8', label: '📊 주식' },
-  apt: { bg: 'rgba(52,211,153,0.12)', color: '#34D399', label: '🏢 부동산' },
-  economy: { bg: 'rgba(251,191,36,0.12)', color: '#FBBF24', label: '💹 경제' },
-  free: { bg: 'rgba(167,139,250,0.12)', color: '#A78BFA', label: '✏️ 자유' },
+  apt: { bg: 'rgba(52,211,153,0.12)', color: 'var(--accent-green)', label: '🏢 부동산' },
+  economy: { bg: 'rgba(251,191,36,0.12)', color: 'var(--accent-yellow)', label: '💹 경제' },
+  free: { bg: 'rgba(167,139,250,0.12)', color: 'var(--accent-purple)', label: '✏️ 자유' },
 };
 
 function timeAgo(d: string) {

@@ -93,7 +93,7 @@ export default function UnsoldStatsWidget() {
             {'\uD83D\uDCCA'} {stats.region} 미분양 현황
           </div>
           <div style={{
-            fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171', marginBottom: 6,
+            fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)', marginBottom: 6,
           }}>
             월평균 {stats.monthlyAvg.toLocaleString()}세대
           </div>
