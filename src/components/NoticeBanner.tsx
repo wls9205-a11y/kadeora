@@ -104,16 +104,16 @@ export default function NoticeBanner() {
             whiteSpace: 'nowrap',
             animation: 'kd-marquee-v2 35s linear infinite',
             paddingLeft: '100%',
-            fontSize: 14,
+            fontSize: 'var(--fs-base)',
             fontWeight: 600,
             color: 'var(--success)',
             letterSpacing: '0.03em',
           }}
         >
           <span>📡&nbsp;{notice.content}</span>
-          <span style={{ margin: '0 60px', color: 'var(--text-tertiary)', fontSize: 14 }}>◆</span>
+          <span style={{ margin: '0 60px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>◆</span>
           <span>📡&nbsp;{notice.content}</span>
-          <span style={{ margin: '0 60px', color: 'var(--text-tertiary)', fontSize: 14 }}>◆</span>
+          <span style={{ margin: '0 60px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>◆</span>
           <span>📡&nbsp;{notice.content}</span>
         </div>
         <style>{`@keyframes kd-marquee-v2 { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }`}</style>
@@ -157,7 +157,7 @@ export default function NoticeBanner() {
             >
               <span
                 style={{
-                  fontSize: 14,
+                  fontSize: 'var(--fs-base)',
                   fontWeight: 700,
                   color: 'var(--text-primary)',
                 }}
@@ -170,7 +170,7 @@ export default function NoticeBanner() {
                   background: 'none',
                   border: 'none',
                   color: 'var(--text-tertiary)',
-                  fontSize: 18,
+                  fontSize: 'var(--fs-lg)',
                   cursor: 'pointer',
                 }}
               >
@@ -199,7 +199,7 @@ export default function NoticeBanner() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 14,
+                      fontSize: 'var(--fs-base)',
                       fontWeight: 700,
                       color: 'var(--text-primary)',
                     }}
@@ -209,7 +209,7 @@ export default function NoticeBanner() {
                   {notice.author.grade_title && (
                     <div
                       style={{
-                        fontSize: 12,
+                        fontSize: 'var(--fs-sm)',
                         color: 'var(--text-secondary)',
                         marginTop: 2,
                       }}
@@ -221,7 +221,7 @@ export default function NoticeBanner() {
                 <a
                   href={`/profile/${notice.author.id}`}
                   style={{
-                    fontSize: 12,
+                    fontSize: 'var(--fs-sm)',
                     color: 'var(--brand)',
                     textDecoration: 'none',
                     fontWeight: 600,
@@ -239,7 +239,7 @@ export default function NoticeBanner() {
             {/* Notice content */}
             <div
               style={{
-                fontSize: 14,
+                fontSize: 'var(--fs-base)',
                 lineHeight: 1.7,
                 color: 'var(--text-primary)',
                 whiteSpace: 'pre-line',
@@ -261,7 +261,7 @@ export default function NoticeBanner() {
                   borderRadius: 10,
                   textDecoration: 'none',
                   marginBottom: 16,
-                  fontSize: 13,
+                  fontSize: 'var(--fs-sm)',
                   color: 'var(--brand)',
                   fontWeight: 600,
                 }}
@@ -274,7 +274,7 @@ export default function NoticeBanner() {
             {notice.is_paid && (
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 'var(--fs-xs)',
                   color: 'var(--text-tertiary)',
                   textAlign: 'center',
                   marginBottom: 12,
@@ -294,7 +294,7 @@ export default function NoticeBanner() {
                 border: '1px solid var(--border)',
                 background: 'var(--bg-hover)',
                 color: 'var(--text-secondary)',
-                fontSize: 14,
+                fontSize: 'var(--fs-base)',
                 fontWeight: 600,
                 cursor: 'pointer',
               }}

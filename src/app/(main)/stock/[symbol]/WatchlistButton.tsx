@@ -32,7 +32,7 @@ export default function StockWatchlistButton({ symbol }: { symbol: string }) {
       border: watched ? '1px solid var(--brand)' : '1px solid var(--border)',
       background: watched ? 'rgba(255,75,54,0.1)' : 'var(--bg-surface)',
       color: watched ? 'var(--brand)' : 'var(--text-secondary)',
-      fontSize: 13, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+      fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
       opacity: loading ? 0.6 : 1,
     }}>
       {watched ? '⭐ 관심종목' : '☆ 관심종목 추가'}

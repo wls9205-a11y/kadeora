@@ -1,7 +1,7 @@
 export default function Disclaimer() {
   return (
     <p style={{
-      fontSize: 10,
+      fontSize: 'var(--fs-xs)',
       color: 'var(--text-tertiary)',
       textAlign: 'center',
       padding: '6px 16px',

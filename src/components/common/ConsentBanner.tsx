@@ -64,10 +64,10 @@ export function ConsentBanner() {
     >
       <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 260 }}>
-          <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
+          <p style={{ margin: "0 0 4px", fontSize: 'var(--fs-base)', fontWeight: 700, color: "var(--text-primary)" }}>
             개인정보 수집 및 이용 동의
           </p>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: "var(--text-secondary)", lineHeight: 1.6 }}>
             카더라는 서비스 개선을 위해 검색어, 페이지 열람 기록 등 행태정보를 수집합니다.
             수집된 정보는 익명화 처리됩니다.{" "}
             <strong style={{ color: "var(--text-primary)" }}>거부하셔도 서비스 이용에 제한이 없습니다.</strong>{" "}
@@ -79,7 +79,7 @@ export function ConsentBanner() {
             onClick={() => handleConsent(false)}
             disabled={loading}
             className="kd-btn kd-btn-ghost"
-            style={{ fontSize: 13 }}
+            style={{ fontSize: 'var(--fs-sm)' }}
           >
             거부
           </button>
@@ -87,7 +87,7 @@ export function ConsentBanner() {
             onClick={() => handleConsent(true)}
             disabled={loading}
             className="kd-btn kd-btn-primary"
-            style={{ fontSize: 13, fontWeight: 700 }}
+            style={{ fontSize: 'var(--fs-sm)', fontWeight: 700 }}
           >
             {loading ? "저장 중..." : "동의"}
           </button>

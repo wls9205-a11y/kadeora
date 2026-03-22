@@ -69,17 +69,17 @@ export default async function BlogPage({ searchParams }: Props) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📝 블로그</h1>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{totalCount.toLocaleString()}개의 글</span>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📝 블로그</h1>
+        <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{totalCount.toLocaleString()}개의 글</span>
       </div>
-      <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '0 0 16px' }}>매일 업데이트되는 투자 정보</p>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>매일 업데이트되는 투자 정보</p>
 
       {/* 검색 */}
       <form action="/blog" method="GET" style={{ marginBottom: 14 }}>
         {category !== 'all' && <input type="hidden" name="category" value={category} />}
         {sort !== 'latest' && <input type="hidden" name="sort" value={sort} />}
         <input name="q" defaultValue={q} placeholder="블로그 검색 (제목)" style={{
-          width: '100%', padding: '10px 14px', fontSize: 14, borderRadius: 10,
+          width: '100%', padding: '10px 14px', fontSize: 'var(--fs-base)', borderRadius: 10,
           border: '1px solid var(--border)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', boxSizing: 'border-box',
         }} />
@@ -90,14 +90,14 @@ export default async function BlogPage({ searchParams }: Props) {
         {CATS.map(c => (
           <Link key={c.key} href={`/blog${c.key !== 'all' ? `?category=${c.key}` : ''}${sort !== 'latest' ? `${c.key !== 'all' ? '&' : '?'}sort=${sort}` : ''}${q ? `${c.key !== 'all' || sort !== 'latest' ? '&' : '?'}q=${q}` : ''}`}
             style={{
-              padding: '7px 14px', borderRadius: 999, fontSize: 13, fontWeight: category === c.key ? 700 : 500,
+              padding: '7px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: category === c.key ? 700 : 500,
               background: category === c.key ? 'var(--text-primary)' : 'var(--bg-surface)',
               color: category === c.key ? 'var(--bg-base, #fff)' : 'var(--text-secondary)',
               textDecoration: 'none', flexShrink: 0, border: category === c.key ? 'none' : '1px solid var(--border)',
               display: 'flex', alignItems: 'center', gap: 4,
             }}>
             <span>{c.icon}</span> {c.label}
-            <span style={{ fontSize: 10, opacity: 0.7 }}>({countMap[c.key] || 0})</span>
+            <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.7 }}>({countMap[c.key] || 0})</span>
           </Link>
         ))}
       </div>
@@ -110,7 +110,7 @@ export default async function BlogPage({ searchParams }: Props) {
         ].map(s => (
           <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
             style={{
-              padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+              padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,
               background: sort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
               color: sort === s.key ? '#fff' : 'var(--text-tertiary)',
               textDecoration: 'none', border: 'none',
@@ -123,16 +123,16 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 인기글 하이라이트 (첫 페이지, 검색 아닐 때) */}
       {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 인기 글</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 인기 글</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {(popularPosts ?? []).map((p: any, i: number) => (
               <Link key={p.id} href={`/blog/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
-                <span style={{ fontSize: 16, fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 22 }}>{i + 1}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-                <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 22 }}>{i + 1}</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>
                   {CATS.find(c => c.key === p.category)?.label || p.category}
                 </span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>👀 {p.view_count}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>👀 {p.view_count}</span>
               </Link>
             ))}
           </div>
@@ -141,7 +141,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 검색 결과 안내 */}
       {q && (
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12 }}>
           &quot;{q}&quot; 검색 결과 {(posts ?? []).length}건
         </div>
       )}
@@ -176,21 +176,21 @@ export default async function BlogPage({ searchParams }: Props) {
                   {/* 카테고리 뱃지 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <span style={{
-                      fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10,
+                      fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 10,
                       background: `${catColor}15`, color: catColor, border: `1px solid ${catColor}30`,
                     }}>
                       {CATS.find(c => c.key === p.category)?.icon} {CATS.find(c => c.key === p.category)?.label || p.category}
                     </span>
                     {p.view_count >= 100 && (
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>🔥</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>🔥</span>
                     )}
                   </div>
                   {/* 제목 */}
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{p.title}</div>
+                  <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{p.title}</div>
                   {/* 요약 */}
-                  {p.excerpt && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as any }}>{p.excerpt}</div>}
+                  {p.excerpt && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as any }}>{p.excerpt}</div>}
                   {/* 메타 */}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                     <span>{new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
                     {p.view_count > 0 && <span>👀 {p.view_count}</span>}
                     {(p.tags ?? []).slice(0, 2).map((t: string) => <span key={t} style={{ background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>#{t}</span>)}
@@ -206,14 +206,14 @@ export default async function BlogPage({ searchParams }: Props) {
       <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20, marginBottom: 20 }}>
         {pageNum > 1 && (
           <Link href={`/blog?${category !== 'all' ? `category=${category}&` : ''}${sort !== 'latest' ? `sort=${sort}&` : ''}${q ? `q=${q}&` : ''}page=${pageNum - 1}`}
-            style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+            style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
             ← 이전
           </Link>
         )}
-        <span style={{ padding: '8px 14px', fontSize: 13, color: 'var(--text-tertiary)' }}>{pageNum} 페이지</span>
+        <span style={{ padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{pageNum} 페이지</span>
         {hasMore && (
           <Link href={`/blog?${category !== 'all' ? `category=${category}&` : ''}${sort !== 'latest' ? `sort=${sort}&` : ''}${q ? `q=${q}&` : ''}page=${pageNum + 1}`}
-            style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+            style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
             다음 →
           </Link>
         )}

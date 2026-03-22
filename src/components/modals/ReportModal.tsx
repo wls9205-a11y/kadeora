@@ -66,23 +66,23 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
         {submitted ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+            <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
               신고가 접수되었습니다
             </h3>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.6 }}>
               24시간 내 1차 검토 후 72시간 내 처리 결과를 안내드립니다.
             </p>
             <button
               onClick={onClose}
               className="kd-btn kd-btn-primary"
-              style={{ padding: '10px 24px', fontSize: 13 }}
+              style={{ padding: '10px 24px', fontSize: 'var(--fs-sm)' }}
             >
               확인
             </button>
           </div>
         ) : (
           <>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
+            <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
               🚨 콘텐츠 신고
             </h3>
 
@@ -107,7 +107,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                     style={{ accentColor: 'var(--brand)' }}
                   />
                   <span style={{
-                    fontSize: 13,
+                    fontSize: 'var(--fs-sm)',
                     color: reason === r.value ? 'var(--brand)' : 'var(--text-secondary)',
                     fontWeight: reason === r.value ? 600 : 400,
                   }}>
@@ -126,7 +126,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
               style={{
                 width: '100%', padding: '10px 14px', borderRadius: 10, boxSizing: 'border-box',
                 border: '1px solid var(--border)', background: 'var(--bg-base)',
-                color: 'var(--text-primary)', fontSize: 13, outline: 'none', resize: 'none',
+                color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', resize: 'none',
                 marginBottom: 16, fontFamily: 'inherit', lineHeight: 1.5,
               }}
               onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
@@ -137,7 +137,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
               <button
                 onClick={onClose}
                 className="kd-btn kd-btn-ghost"
-                style={{ fontSize: 13 }}
+                style={{ fontSize: 'var(--fs-sm)' }}
               >
                 취소
               </button>
@@ -146,7 +146,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                 disabled={!reason || submitting}
                 className="kd-btn kd-btn-danger"
                 style={{
-                  fontSize: 13,
+                  fontSize: 'var(--fs-sm)',
                   opacity: reason ? 1 : 0.5,
                   cursor: reason ? 'pointer' : 'not-allowed',
                 }}

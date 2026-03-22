@@ -30,20 +30,20 @@ export default async function AdminPaymentsPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>💳 결제 내역</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>💳 결제 내역</h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
         <div style={card}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>총 결제 건수</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{all.length}건</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 4 }}>총 결제 건수</div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{all.length}건</div>
         </div>
         <div style={card}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>총 결제 금액</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{totalAmount.toLocaleString()}원</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 4 }}>총 결제 금액</div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{totalAmount.toLocaleString()}원</div>
         </div>
         <div style={card}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>이번 달</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{monthAmount.toLocaleString()}원</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 4 }}>이번 달</div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{monthAmount.toLocaleString()}원</div>
         </div>
       </div>
 
@@ -51,11 +51,11 @@ export default async function AdminPaymentsPage() {
         {all.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-tertiary)' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>{'💳'}</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>아직 결제 내역이 없습니다</div>
-            <div style={{ fontSize: 13 }}>전광판 상품이 등록되면 여기에 표시됩니다.</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>아직 결제 내역이 없습니다</div>
+            <div style={{ fontSize: 'var(--fs-sm)' }}>전광판 상품이 등록되면 여기에 표시됩니다.</div>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 500 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)', minWidth: 500 }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 12px' }}>결제일</th>
@@ -73,9 +73,9 @@ export default async function AdminPaymentsPage() {
                   <td style={{ padding: '10px 8px', color: 'var(--text-secondary)' }}>{p.user_id?.slice(0, 8) || '-'}</td>
                   <td style={{ padding: '10px 8px', color: 'var(--text-primary)' }}>{p.product_id || '-'}</td>
                   <td style={{ padding: '10px 8px', color: 'var(--text-primary)', fontWeight: 700, textAlign: 'right' }}>{(p.amount || 0).toLocaleString()}원</td>
-                  <td style={{ padding: '10px 8px', color: 'var(--text-tertiary)', fontSize: 11 }}>{p.order_id || '-'}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{p.order_id || '-'}</td>
                   <td style={{ padding: '10px 8px' }}>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 600, background: statusColor(p.status), color: 'var(--text-inverse)' }}>{p.status}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 600, background: statusColor(p.status), color: 'var(--text-inverse)' }}>{p.status}</span>
                   </td>
                 </tr>
               ))}
@@ -84,7 +84,7 @@ export default async function AdminPaymentsPage() {
         )}
       </div>
 
-      <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
         결제 취소는 토스페이먼츠 대시보드(dashboard.tosspayments.com)에서 처리하세요.
       </p>
     </div>

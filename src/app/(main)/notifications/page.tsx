@@ -95,11 +95,11 @@ export default function NotificationsPage() {
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>
             🔔 알림
           </h1>
           {unreadCount > 0 && (
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>
+            <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
               읽지 않은 알림 {unreadCount}개
             </p>
           )}
@@ -108,7 +108,7 @@ export default function NotificationsPage() {
           <button onClick={markAllRead} style={{
             padding: '7px 14px', borderRadius: 20, border: '1px solid var(--border)',
             background: 'transparent', color: 'var(--text-secondary)',
-            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
           }}>
             모두 읽음
           </button>
@@ -124,8 +124,8 @@ export default function NotificationsPage() {
       ) : notifs.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>🔔</div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>아직 알림이 없어요</div>
-          <div style={{ fontSize: 13 }}>댓글, 좋아요, 팔로우 알림이 여기 표시돼요</div>
+          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>아직 알림이 없어요</div>
+          <div style={{ fontSize: 'var(--fs-sm)' }}>댓글, 좋아요, 팔로우 알림이 여기 표시돼요</div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -142,14 +142,14 @@ export default function NotificationsPage() {
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={e => (e.currentTarget.style.background = n.is_read ? 'var(--bg-surface)' : 'var(--brand-light)')}
             >
-              <span style={{ fontSize: 20, flexShrink: 0 }}>
+              <span style={{ fontSize: 'var(--fs-xl)', flexShrink: 0 }}>
                 {TYPE_ICON[n.type] ?? '🔔'}
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.4 }}>
                   {n.content}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 4 }}>
                   {timeAgo(n.created_at)}
                 </div>
               </div>

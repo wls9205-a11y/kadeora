@@ -92,8 +92,8 @@ export default function OnboardingClient() {
         {/* 진행 바 */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Step {step} / {TOTAL}</span>
-            <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600 }}>{stepLabels[step - 1]}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>Step {step} / {TOTAL}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>{stepLabels[step - 1]}</span>
           </div>
           <div style={{ height: 4, background: 'var(--border)', borderRadius: 2 }}>
             <div style={{ height: '100%', borderRadius: 2, background: 'var(--brand)', width: `${(step / TOTAL) * 100}%`, transition: 'width 0.3s ease' }} />
@@ -103,19 +103,19 @@ export default function OnboardingClient() {
         {/* Step 1: 닉네임 */}
         {step === 1 && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>안녕하세요! 👋</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 32px', lineHeight: 1.6 }}>
+            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>안녕하세요! 👋</h1>
+            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 32px', lineHeight: 1.6 }}>
               카더라에서 사용할 닉네임을 설정해주세요.<br />닉네임은 나중에 프로필에서 변경할 수 있습니다.
             </p>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
               닉네임 <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="2~20자" maxLength={20}
-              className="kd-input" style={{ fontSize: 16, marginBottom: 8 }} autoFocus
+              className="kd-input" style={{ fontSize: 'var(--fs-base)', marginBottom: 8 }} autoFocus
               onKeyDown={e => e.key === 'Enter' && nickname.trim().length >= 2 && setStep(2)} />
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
             <button onClick={() => { const v = validateNickname(nickname); if (!v.valid) { error(v.error!); return; } setStep(2); }}
-              className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 24, padding: '13px', fontSize: 15, fontWeight: 700 }}>
+              className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 24, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
               다음 →
             </button>
           </div>
@@ -124,14 +124,14 @@ export default function OnboardingClient() {
         {/* Step 2: 관심 분야 */}
         {step === 2 && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>관심 분야를 선택해주세요 📊</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>최대 5개 선택 ({selectedInterests.length}/5)</p>
+            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>관심 분야를 선택해주세요 📊</h1>
+            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>최대 5개 선택 ({selectedInterests.length}/5)</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
               {INTERESTS.map(({ key, label }) => {
                 const sel = selectedInterests.includes(key);
                 return (
                   <button key={key} onClick={() => toggleInterest(key)} style={{
-                    padding: '12px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 14, fontWeight: 600,
+                    padding: '12px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 'var(--fs-base)', fontWeight: 600,
                     background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
                     border: `1px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
                     color: sel ? 'var(--brand)' : 'var(--text-secondary)',
@@ -142,7 +142,7 @@ export default function OnboardingClient() {
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(1)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={() => setStep(3)} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 15, fontWeight: 700 }}>다음 →</button>
+              <button onClick={() => setStep(3)} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>다음 →</button>
             </div>
           </div>
         )}
@@ -150,8 +150,8 @@ export default function OnboardingClient() {
         {/* Step 3: 연령대 */}
         {step === 3 && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>연령대를 알려주세요 🎂</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>
+            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>연령대를 알려주세요 🎂</h1>
+            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>
               맞춤 콘텐츠와 화면 설정에 활용됩니다.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
@@ -159,7 +159,7 @@ export default function OnboardingClient() {
                 const sel = ageGroup === value;
                 return (
                   <button key={value} onClick={() => setAgeGroup(value)} style={{
-                    padding: '14px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 15, fontWeight: 600,
+                    padding: '14px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 'var(--fs-md)', fontWeight: 600,
                     background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
                     border: `1px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
                     color: sel ? 'var(--brand)' : 'var(--text-secondary)',
@@ -169,13 +169,13 @@ export default function OnboardingClient() {
               })}
             </div>
             {(ageGroup === '50s' || ageGroup === '60+') && (
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
                 💡 글씨 크기가 &apos;크게&apos;로 자동 설정됩니다. 나중에 설정에서 변경할 수 있어요.
               </div>
             )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(2)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={() => ageGroup ? setStep(4) : error('연령대를 선택해주세요')} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 15, fontWeight: 700 }}>다음 →</button>
+              <button onClick={() => ageGroup ? setStep(4) : error('연령대를 선택해주세요')} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>다음 →</button>
             </div>
           </div>
         )}
@@ -183,21 +183,21 @@ export default function OnboardingClient() {
         {/* Step 4: 지역 + 마케팅 */}
         {step === 4 && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>거의 다 됐어요! 🎯</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+            <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>거의 다 됐어요! 🎯</h1>
+            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
+            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
               거주 지역 <span style={{ color: 'var(--error)' }}>*</span>
-              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'var(--error)', color: 'var(--text-inverse)', marginLeft: 6, fontWeight: 700 }}>필수</span>
+              <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 4, background: 'var(--error)', color: 'var(--text-inverse)', marginLeft: 6, fontWeight: 700 }}>필수</span>
             </label>
             {!region && (
-              <div style={{ fontSize: 11, color: 'var(--brand)', marginBottom: 6 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', marginBottom: 6 }}>
                 📍 지역을 선택해야 맞춤 피드를 받을 수 있어요
               </div>
             )}
             <select value={region} onChange={e => setRegion(e.target.value)} style={{
               width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 20,
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 14, fontFamily: 'inherit',
+              color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
             }}>
               <option value="">지역을 선택해주세요</option>
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
@@ -211,19 +211,19 @@ export default function OnboardingClient() {
               <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)}
                 style={{ marginTop: 2, accentColor: 'var(--brand)', flexShrink: 0 }} />
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
-                  마케팅 정보 수신 동의 <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-tertiary)' }}>(선택)</span>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
+                  마케팅 정보 수신 동의 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 400, color: 'var(--text-tertiary)' }}>(선택)</span>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>새 기능, 이벤트, 투자 인사이트 등을 이메일로 받아보세요</div>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>새 기능, 이벤트, 투자 인사이트 등을 이메일로 받아보세요</div>
               </div>
             </label>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12, textAlign: 'center' as const }}>
+            <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12, textAlign: 'center' as const }}>
               🔔 버튼을 누르면 알림 허용 여부를 물어봐요. 허용하면 새 소식을 바로 받을 수 있어요!
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(3)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
               <button onClick={handleComplete} disabled={saving || !region}
-                style={{ flex: 2, padding: '16px', fontSize: 16, fontWeight: 800, border: 'none', borderRadius: 12, cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, #FF4500, #FF6B35)', boxShadow: '0 4px 16px rgba(255,69,0,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
+                style={{ flex: 2, padding: '16px', fontSize: 'var(--fs-base)', fontWeight: 800, border: 'none', borderRadius: 12, cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, #FF4500, #FF6B35)', boxShadow: '0 4px 16px rgba(255,69,0,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
                 {saving ? '저장 중...' : !region ? '지역을 선택해주세요' : '카더라 시작하기 🚀'}
               </button>
             </div>

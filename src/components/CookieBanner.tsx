@@ -38,9 +38,9 @@ export default function CookieBanner() {
         flexWrap: 'wrap',
       }}
     >
-      <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: 0 }}>
         카더라는 서비스 개선을 위해 쿠키를 사용합니다.{' '}
-        <Link href="/privacy" style={{ fontSize: 12, color: 'var(--brand)' }}>
+        <Link href="/privacy" style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)' }}>
           개인정보처리방침
         </Link>
       </p>
@@ -55,7 +55,7 @@ export default function CookieBanner() {
             border: 'none',
             cursor: 'pointer',
             fontWeight: 600,
-            fontSize: 13,
+            fontSize: 'var(--fs-sm)',
           }}
         >
           동의
@@ -69,7 +69,7 @@ export default function CookieBanner() {
             borderRadius: 6,
             border: '1px solid var(--border)',
             cursor: 'pointer',
-            fontSize: 13,
+            fontSize: 'var(--fs-sm)',
           }}
         >
           거부

@@ -79,10 +79,10 @@ export default function ShopClient() {
       <ComingSoonBanner feature="토스페이먼츠 결제" description="사업자 등록 심사 완료 후 즉시 활성화됩니다." eta="2026년 4월 예정" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🛒 커뮤니티 상점</h1>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>게시글 노출 및 특별 기능을 구매하세요</p>
+          <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🛒 커뮤니티 상점</h1>
+          <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>게시글 노출 및 특별 기능을 구매하세요</p>
         </div>
-        {isDemo && <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: 'var(--brand)', border: '1px solid rgba(59,130,246,0.3)' }}>💡 미리보기</span>}
+        {isDemo && <span style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: 'var(--brand)', border: '1px solid rgba(59,130,246,0.3)' }}>💡 미리보기</span>}
       </div>
 
       {/* 카테고리 탭 */}
@@ -90,7 +90,7 @@ export default function ShopClient() {
         {categories.map(cat => (
           <button key={cat} onClick={() => setSelectedCategory(cat)} style={{
             padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-            fontSize: 13, fontWeight: 600,
+            fontSize: 'var(--fs-sm)', fontWeight: 600,
             background: selectedCategory === cat ? 'var(--brand)' : 'var(--bg-surface)',
             color: selectedCategory === cat ? 'var(--text-inverse)' : 'var(--text-secondary)',
             outline: `1px solid ${selectedCategory === cat ? 'var(--brand)' : 'var(--border)'}`,
@@ -119,17 +119,17 @@ export default function ShopClient() {
             }}
           >
             <div style={{ fontSize: 36, marginBottom: 12 }}>{p.icon ?? '🎁'}</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.description}</p>
+            <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</h3>
+            <p style={{ margin: '0 0 16px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.description}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>
                 {(p.price_krw ?? 0).toLocaleString()}
-                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>원</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-secondary)' }}>원</span>
               </div>
               <button onClick={() => setConfirmProduct(p)} style={{
                 padding: '8px 16px', borderRadius: 8, border: 'none',
                 background: 'var(--brand)', color: 'var(--text-inverse)',
-                fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer',
                 transition: 'opacity 0.15s',
               }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
@@ -140,7 +140,7 @@ export default function ShopClient() {
         ))}
       </div>
 
-      <p style={{ marginTop: 20, fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'right' }}>
+      <p style={{ marginTop: 20, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'right' }}>
         ※ 결제는 토스페이먼츠로 진행됩니다. 구매 전 이용약관을 확인해주세요.
       </p>
 

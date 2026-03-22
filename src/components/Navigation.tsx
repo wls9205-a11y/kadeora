@@ -127,7 +127,7 @@ export function Navigation() {
     height: 48,
     display: 'flex' as const,
     alignItems: 'center' as const,
-    fontSize: 14,
+    fontSize: 'var(--fs-base)',
     fontWeight: 700,
     color: active ? 'var(--brand)' : 'var(--nav-text)',
     textDecoration: 'none' as const,

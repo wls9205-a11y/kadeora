@@ -34,52 +34,52 @@ export default function AdminPushNotification() {
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
       borderRadius: 8, padding: 20, marginTop: 20,
     }}>
-      <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <h3 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
         🔔 전체 공지 발송
       </h3>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div>
-          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>제목</label>
+          <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>제목</label>
           <input value={title} onChange={e => setTitle(e.target.value)}
             placeholder="공지 제목 (예: 서버 점검 안내)"
             className="kd-input"
-            style={{ fontSize: 14 }}
+            style={{ fontSize: 'var(--fs-base)' }}
           />
         </div>
         <div>
-          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>내용</label>
+          <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>내용</label>
           <textarea value={body} onChange={e => setBody(e.target.value)}
             placeholder="공지 내용을 입력하세요..."
             rows={3}
             style={{
               width: '100%', padding: '10px 14px', resize: 'vertical',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              borderRadius: 4, color: 'var(--text-primary)', fontSize: 14,
+              borderRadius: 4, color: 'var(--text-primary)', fontSize: 'var(--fs-base)',
               fontFamily: 'inherit',
             }}
           />
         </div>
         <div>
-          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>이동 URL (클릭 시)</label>
+          <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>이동 URL (클릭 시)</label>
           <input value={url} onChange={e => setUrl(e.target.value)}
             placeholder="/feed"
             className="kd-input"
-            style={{ fontSize: 14 }}
+            style={{ fontSize: 'var(--fs-base)' }}
           />
         </div>
         <button onClick={send} disabled={loading}
           style={{
             padding: '10px 20px', background: loading ? 'var(--border)' : 'var(--brand)',
             color: 'var(--text-inverse)', border: 'none', borderRadius: 8,
-            fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+            fontSize: 'var(--fs-base)', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
           {loading ? '발송 중...' : '📢 전체 유저에게 공지 발송'}
         </button>
         {result && (
           <div style={{
-            padding: '10px 14px', borderRadius: 4, fontSize: 13,
+            padding: '10px 14px', borderRadius: 4, fontSize: 'var(--fs-sm)',
             background: result.startsWith('✅') ? 'var(--success-bg)' : 'var(--error-bg)',
             color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)',
             border: `1px solid ${result.startsWith('✅') ? 'var(--success)' : 'var(--error)'}`,
@@ -87,7 +87,7 @@ export default function AdminPushNotification() {
         )}
       </div>
 
-      <p style={{ margin: '12px 0 0', fontSize: 12, color: 'var(--text-tertiary)' }}>
+      <p style={{ margin: '12px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
         * 발송 시 모든 유저의 앱 내 알림에 공지가 추가됩니다.<br/>
         * Web Push (브라우저 백그라운드 알림)는 VAPID 키 설정 후 활성화됩니다.
       </p>

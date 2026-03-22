@@ -82,7 +82,7 @@ export default function PushNotificationSetup() {
         border: subscribed ? '1px solid var(--success)' : '1px solid var(--border)',
         background: subscribed ? 'var(--success-bg)' : 'var(--bg-hover)',
         color: subscribed ? 'var(--success)' : 'var(--text-primary)',
-        fontSize: 14, fontWeight: 600, opacity: loading ? 0.6 : 1,
+        fontSize: 'var(--fs-base)', fontWeight: 600, opacity: loading ? 0.6 : 1,
         transition: 'all 0.15s', width: '100%',
       }}
     >

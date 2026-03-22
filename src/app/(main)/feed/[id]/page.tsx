@@ -197,7 +197,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
       {/* Back link */}
       <div style={{ marginBottom: 20 }}>
-        <Link href="/feed" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 피드</Link>
+        <Link href="/feed" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 피드</Link>
       </div>
 
       {/* Post article */}
@@ -213,22 +213,22 @@ export default async function FeedDetailPage({ params }: Props) {
             width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
             background: getAvatarColor(post.profiles?.nickname ?? '익명'),
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, fontWeight: 700, color: '#fff',
+            fontSize: 'var(--fs-base)', fontWeight: 700, color: '#fff',
           }}>
             {(post.profiles?.nickname ?? '익')[0].toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
               {post.profiles?.nickname ?? '익명'}
             </span>
             <span style={{ marginLeft: 4 }}>{GRADE_EMOJI[post.profiles?.grade as number] || '🌱'}</span>
-            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
               {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
           </div>
           <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
             <PostActions postId={post.id} isOwner={currentUserId === post.author_id} />
-            <ReportButton postId={post.id} style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'transparent', border: 'none', cursor: 'pointer' }} />
+            <ReportButton postId={post.id} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', background: 'transparent', border: 'none', cursor: 'pointer' }} />
           </div>
         </div>
 
@@ -244,13 +244,13 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         ) : (
           <div style={{ position: 'relative', margin: '0 0 24px' }}>
-            <div style={{ fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 120, overflow: 'hidden' }}>
+            <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 120, overflow: 'hidden' }}>
               {post.content}
             </div>
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, background: 'linear-gradient(transparent, var(--bg-base))' }} />
             <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>전체 글을 보려면 로그인하세요</div>
-              <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>전체 글을 보려면 로그인하세요</div>
+              <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
                 카카오로 로그인
               </Link>
             </div>
@@ -263,7 +263,7 @@ export default async function FeedDetailPage({ params }: Props) {
             border: '1px solid rgba(255,69,0,0.12)',
             borderRadius: 8,
             padding: '8px 12px',
-            fontSize: 11,
+            fontSize: 'var(--fs-xs)',
             color: 'var(--text-tertiary)',
             marginBottom: 24,
             lineHeight: 1.5,
@@ -309,7 +309,7 @@ export default async function FeedDetailPage({ params }: Props) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <LikeButton postId={post.id} initialCount={post.likes_count ?? 0} />
-          <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 14 }}>
+          <Link href="#comments" style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
             <span style={{ fontWeight: 500 }}>{comments.length}</span>
           </Link>
@@ -328,11 +328,11 @@ export default async function FeedDetailPage({ params }: Props) {
       {/* Related posts */}
       {related.length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
+          <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
           {related.map((r: any, i: number) => (
             <Link key={r.id} href={`/feed/${r.slug || r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
-              <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>🤍 {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
+              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>🤍 {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
             </Link>
           ))}
         </div>

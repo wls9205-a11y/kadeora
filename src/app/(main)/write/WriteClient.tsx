@@ -114,10 +114,10 @@ export default function WriteClient() {
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
       {/* 상단 바 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>← 돌아가기</Link>
-        <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>글쓰기</span>
+        <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600 }}>← 돌아가기</Link>
+        <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>글쓰기</span>
         <button onClick={handleSubmit} disabled={!canSubmit} style={{
-          padding: '7px 16px', borderRadius: 12, border: 'none', fontSize: 13, fontWeight: 700,
+          padding: '7px 16px', borderRadius: 12, border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
           background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
           color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           cursor: canSubmit ? 'pointer' : 'not-allowed',
@@ -128,7 +128,7 @@ export default function WriteClient() {
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 2 }}>
         {CATEGORIES.map(c => (
           <button key={c.value} onClick={() => setCategory(c.value)} style={{
-            padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+            padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,
             cursor: 'pointer', flexShrink: 0, border: 'none',
             background: category === c.value ? 'var(--brand)' : 'var(--bg-hover)',
             color: category === c.value ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -139,7 +139,7 @@ export default function WriteClient() {
         ))}
         {category === 'local' && (
           <select value={regionId} onChange={e => setRegionId(e.target.value)}
-            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 999, padding: '4px 10px', fontSize: 12, color: 'var(--text-primary)', flexShrink: 0 }}>
+            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 999, padding: '4px 10px', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flexShrink: 0 }}>
             {REGIONS.filter(r => r.value !== 'all').map(r => (
               <option key={r.value} value={r.value}>{r.label}</option>
             ))}
@@ -155,7 +155,7 @@ export default function WriteClient() {
         placeholder="제목을 입력하세요"
         maxLength={100}
         style={{
-          width: '100%', fontSize: 18, fontWeight: 700, padding: '12px 16px',
+          width: '100%', fontSize: 'var(--fs-lg)', fontWeight: 700, padding: '12px 16px',
           border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-surface)',
           color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
           transition: 'border-color 0.2s',
@@ -178,7 +178,7 @@ export default function WriteClient() {
         style={{
           width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 12, color: 'var(--text-primary)', padding: '12px 16px', marginTop: 8,
-          fontSize: 15, resize: 'none', fontFamily: 'inherit',
+          fontSize: 'var(--fs-md)', resize: 'none', fontFamily: 'inherit',
           lineHeight: 1.8, boxSizing: 'border-box', minHeight: 200, outline: 'none',
           transition: 'border-color 0.2s',
         }}
@@ -194,12 +194,12 @@ export default function WriteClient() {
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
           {tags.map(t => (
             <span key={t} style={{
-              fontSize: 12, padding: '3px 10px', borderRadius: 999,
+              fontSize: 'var(--fs-sm)', padding: '3px 10px', borderRadius: 999,
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
               display: 'inline-flex', alignItems: 'center', gap: 4,
             }}>
               #{t}
-              <button onClick={() => setTags(prev => prev.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0 }}>×</button>
+              <button onClick={() => setTags(prev => prev.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: 0 }}>×</button>
             </span>
           ))}
         </div>
@@ -217,7 +217,7 @@ export default function WriteClient() {
             }}
             placeholder="태그 입력 (최대 5개, Enter로 추가)"
             style={{
-              width: '100%', padding: '8px 12px', fontSize: 13,
+              width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box',
             }}
@@ -231,7 +231,7 @@ export default function WriteClient() {
         disabled={!canSubmit}
         style={{
           width: '100%', padding: '14px 0', borderRadius: 12, border: 'none',
-          fontSize: 15, fontWeight: 700, marginTop: 20,
+          fontSize: 'var(--fs-md)', fontWeight: 700, marginTop: 20,
           background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
           color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           cursor: canSubmit ? 'pointer' : 'not-allowed',
@@ -242,7 +242,7 @@ export default function WriteClient() {
       </button>
 
       {/* 경고 */}
-      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 12, lineHeight: 1.5, textAlign: 'center' }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 12, lineHeight: 1.5, textAlign: 'center' }}>
         광고, 비난, 도배성 글을 남기면 활동이 제한될 수 있어요.
       </div>
 
@@ -254,17 +254,17 @@ export default function WriteClient() {
         display: 'flex', alignItems: 'center', gap: 12, zIndex: 50,
       }}>
         <button onClick={() => document.querySelector<HTMLInputElement>('[data-image-input]')?.click()}
-          type="button" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 13, padding: '4px 0' }}>
+          type="button" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', padding: '4px 0' }}>
           <Camera size={18} /> 사진
         </button>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
           <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)}
             style={{ width: 13, height: 13, accentColor: 'var(--brand)' }} />
           익명
         </label>
 
-        <span style={{ fontSize: 11, color: content.length > 4500 ? 'var(--warning)' : 'var(--text-tertiary)' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', color: content.length > 4500 ? 'var(--warning)' : 'var(--text-tertiary)' }}>
           {content.length}/5000
         </span>
       </div>

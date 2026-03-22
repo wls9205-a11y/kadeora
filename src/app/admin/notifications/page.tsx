@@ -13,7 +13,7 @@ function getDateRange(filter: DateFilter): string {
 
 const dateFilterLabel: Record<DateFilter, string> = { today: '오늘', week: '이번주', month: '이번달' };
 
-const sectionHeader: React.CSSProperties = { fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 };
+const sectionHeader: React.CSSProperties = { fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 };
 const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
 
 function DateFilterButtons({ value, onChange }: { value: DateFilter; onChange: (v: DateFilter) => void }) {
@@ -21,7 +21,7 @@ function DateFilterButtons({ value, onChange }: { value: DateFilter; onChange: (
     <div style={{ display: 'flex', gap: 4 }}>
       {(['today', 'week', 'month'] as DateFilter[]).map(f => (
         <button key={f} onClick={() => onChange(f)} style={{
-          padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+          padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
           background: value === f ? 'var(--brand)' : 'var(--bg-hover)',
           color: value === f ? '#fff' : 'var(--text-secondary)',
         }}>{dateFilterLabel[f]}</button>
@@ -33,7 +33,7 @@ function DateFilterButtons({ value, onChange }: { value: DateFilter; onChange: (
 function StatusBadge({ active }: { active: boolean }) {
   return (
     <span style={{
-      fontSize: 10, padding: '2px 8px', borderRadius: 8, fontWeight: 600,
+      fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 8, fontWeight: 600,
       background: active ? 'rgba(34,197,94,0.15)' : 'transparent',
       color: active ? 'var(--success)' : 'var(--text-tertiary)',
       border: `1px solid ${active ? 'var(--success)' : 'var(--border)'}`,
@@ -88,34 +88,34 @@ function NoticeSection() {
     <div style={card}>
       <h2 style={sectionHeader}>📡 공지 전광판 관리</h2>
       <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="전광판에 표시할 공지 내용을 입력하세요..." rows={3}
-        style={{ width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', padding: '10px 12px', fontSize: 14, resize: 'vertical', boxSizing: 'border-box' }} />
+        style={{ width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', padding: '10px 12px', fontSize: 'var(--fs-base)', resize: 'vertical', boxSizing: 'border-box' }} />
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
         <button onClick={() => setPreview(p => !p)} disabled={!content.trim()}
-          style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer' }}>
+          style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
           {preview ? '미리보기 닫기' : '미리보기'}
         </button>
         <button onClick={handleSave} disabled={saving || !content.trim()}
-          style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: saving ? 'var(--bg-hover)' : 'var(--brand)', color: saving ? 'var(--text-tertiary)' : '#fff', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
+          style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: saving ? 'var(--bg-hover)' : 'var(--brand)', color: saving ? 'var(--text-tertiary)' : '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
           {saving ? '저장 중...' : '전광판 등록'}
         </button>
       </div>
       {preview && content.trim() && (
         <div style={{ marginTop: 12, borderRadius: 8, overflow: 'hidden', border: '1px solid #1a3a1a' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 10px', background: 'var(--bg-hover)' }}>미리보기</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 10px', background: 'var(--bg-hover)' }}>미리보기</div>
           <div style={{ background: '#0a1a0a', height: 32, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-            <div style={{ whiteSpace: 'nowrap', animation: 'kd-notice-preview 20s linear infinite', paddingLeft: '100%', fontSize: 12, fontWeight: 600, color: '#4ade80' }}>
+            <div style={{ whiteSpace: 'nowrap', animation: 'kd-notice-preview 20s linear infinite', paddingLeft: '100%', fontSize: 'var(--fs-sm)', fontWeight: 600, color: '#4ade80' }}>
               📡&nbsp;{content}<span style={{ margin: '0 48px', color: '#166534' }}>◆</span>📡&nbsp;{content}
             </div>
           </div>
           <style>{`@keyframes kd-notice-preview { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }`}</style>
         </div>
       )}
-      {result && <p style={{ marginTop: 8, fontSize: 13, color: result.includes('등록') ? 'var(--success)' : 'var(--error)' }}>{result}</p>}
+      {result && <p style={{ marginTop: 8, fontSize: 'var(--fs-sm)', color: result.includes('등록') ? 'var(--success)' : 'var(--error)' }}>{result}</p>}
 
       {/* History Toggle */}
       <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
         <button onClick={() => setShowHistory(p => !p)} style={{
-          background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+          background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
           color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6, padding: 0,
         }}>
           공지사항 내역 {showHistory ? '▲' : '▼'}
@@ -124,7 +124,7 @@ function NoticeSection() {
           <div style={{ marginTop: 8 }}>
             <DateFilterButtons value={dateFilter} onChange={setDateFilter} />
             <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                     <th style={{ padding: '6px 10px', fontWeight: 600 }}>내용</th>
@@ -145,7 +145,7 @@ function NoticeSection() {
                       <td style={{ padding: '8px 10px' }}><StatusBadge active={n.is_active} /></td>
                       <td style={{ padding: '8px 10px' }}>
                         {!n.is_active && (
-                          <button onClick={() => reactivate(n.id)} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 6, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer' }}>재활성</button>
+                          <button onClick={() => reactivate(n.id)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 6, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer' }}>재활성</button>
                         )}
                       </td>
                     </tr>
@@ -200,7 +200,7 @@ function PushSection() {
     setTimeout(() => setResult(''), 3000);
   };
 
-  const inp: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, boxSizing: 'border-box' };
+  const inp: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box' };
 
   const LogoSvg = ({ size = 20 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#FF4500"/><circle cx="10" cy="16" r="4" fill="white"/><circle cx="16" cy="16" r="4" fill="white"/><circle cx="22" cy="16" r="4" fill="white"/></svg>
@@ -216,11 +216,11 @@ function PushSection() {
       <h2 style={sectionHeader}>📣 푸시 알림 발송</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>발송 대상</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 6 }}>발송 대상</div>
           <div style={{ display: 'flex', gap: 6 }}>
             {([{ key: 'all' as const, label: '전체' }, { key: 'web' as const, label: '웹' }, { key: 'app' as const, label: '앱' }]).map(t => (
               <button key={t.key} onClick={() => setSendTarget(t.key)} style={{
-                flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 700,
                 border: `1.5px solid ${sendTarget === t.key ? 'var(--brand)' : 'var(--border)'}`,
                 background: sendTarget === t.key ? 'var(--brand)' : 'var(--bg-hover)',
                 color: sendTarget === t.key ? '#fff' : 'var(--text-secondary)', cursor: 'pointer',
@@ -237,40 +237,40 @@ function PushSection() {
         {(title.trim() || body.trim()) && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
             <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 12 }}>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Android</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Android</div>
               <div style={{ background: '#2a2a3e', borderRadius: 8, padding: '8px 10px', display: 'flex', gap: 8 }}>
                 <div style={{ width: 28, height: 28, borderRadius: 6, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={16} /></div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{title || '제목'}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', lineHeight: 1.3 }}>{body || '내용'}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff' }}>{title || '제목'}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.3 }}>{body || '내용'}</div>
                 </div>
               </div>
             </div>
             <div style={{ background: '#1c1c1e', borderRadius: 12, padding: 12 }}>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>iPhone</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>iPhone</div>
               <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <div style={{ width: 22, height: 22, borderRadius: 5, background: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={12} /></div>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>카더라</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>카더라</span>
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#fff' }}>{title || '제목'}</div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>{body || '내용'}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: '#fff' }}>{title || '제목'}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>{body || '내용'}</div>
               </div>
             </div>
           </div>
         )}
 
         <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()}
-          style={{ padding: '12px 0', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer', opacity: sending ? 0.7 : 1 }}>
+          style={{ padding: '12px 0', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 'var(--fs-base)', fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer', opacity: sending ? 0.7 : 1 }}>
           {sending ? '발송 중...' : `${sendTarget === 'all' ? '전체' : sendTarget === 'web' ? '웹' : '앱'} 발송`}
         </button>
-        {result && <div style={{ fontSize: 13, color: result.includes('발송 실패') ? 'var(--error)' : 'var(--success)', padding: '4px 0' }}>{result}</div>}
+        {result && <div style={{ fontSize: 'var(--fs-sm)', color: result.includes('발송 실패') ? 'var(--error)' : 'var(--success)', padding: '4px 0' }}>{result}</div>}
       </div>
 
       {/* History Toggle */}
       <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
         <button onClick={() => setShowHistory(p => !p)} style={{
-          background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+          background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
           color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6, padding: 0,
         }}>
           푸시 발송 내역 {showHistory ? '▲' : '▼'}
@@ -279,7 +279,7 @@ function PushSection() {
           <div style={{ marginTop: 8 }}>
             <DateFilterButtons value={dateFilter} onChange={setDateFilter} />
             <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                     <th style={{ padding: '6px 10px', fontWeight: 600 }}>제목</th>
@@ -302,7 +302,7 @@ function PushSection() {
                         <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>{l.click_count}</td>
                         <td style={{ padding: '8px 10px' }}>
                           <span style={{
-                            fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 6,
+                            fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6,
                             background: ctr >= 10 ? 'rgba(34,197,94,0.15)' : ctr >= 5 ? 'rgba(245,158,11,0.15)' : 'transparent',
                             color: ctr >= 10 ? 'var(--success)' : ctr >= 5 ? 'var(--warning)' : 'var(--text-tertiary)',
                           }}>{ctr}%</span>
@@ -324,7 +324,7 @@ function PushSection() {
 export default function AdminNotificationsPage() {
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>📢 알림·공지</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>📢 알림·공지</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <NoticeSection />
         <PushSection />

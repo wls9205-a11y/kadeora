@@ -52,31 +52,31 @@ export default function AdminUsersPage() {
     .filter(u => !search || (u.nickname || '').includes(search));
 
   const tab = (v: string, l: string) => ({
-    padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+    padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
     background: filter === v ? 'var(--brand)' : 'var(--bg-hover)',
     color: filter === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
   });
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>유저 관리</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>유저 관리</h1>
       {/* 유저 통계 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{totalUsers}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>전체</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{totalUsers}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>전체</div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: '#10b981' }}>{realUsersList.length}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>실제 유저</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#10b981' }}>{realUsersList.length}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>실제 유저</div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-tertiary)' }}>{seedUsers.length}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>시드</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-tertiary)' }}>{seedUsers.length}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>시드</div>
         </div>
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--success)' }}>{regionSetCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>지역 설정 {regionPct}%</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--success)' }}>{regionSetCount}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>지역 설정 {regionPct}%</div>
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export default function AdminUsersPage() {
         {/* 유저 타입 필터 */}
         {(['all', 'real', 'seed'] as const).map(t => (
           <button key={t} onClick={() => setUserType(t)} style={{
-            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: userType === t ? 'var(--brand)' : 'var(--bg-hover)',
             color: userType === t ? 'var(--text-inverse)' : 'var(--text-secondary)',
           }}>{t === 'all' ? '전체' : t === 'real' ? `실제 (${realUsersList.length})` : `시드 (${seedUsers.length})`}</button>
@@ -94,14 +94,14 @@ export default function AdminUsersPage() {
         <button onClick={() => setFilter('active')} style={tab('active', '정상')}>정상</button>
         <button onClick={() => setFilter('suspended')} style={tab('suspended', '정지됨')}>정지됨</button>
         <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)} style={{
-          padding: '6px 10px', fontSize: 12, background: 'var(--bg-hover)',
+          padding: '6px 10px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)',
           border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', cursor: 'pointer',
         }}>
           <option value="all">지역: 전체</option>
           {regions.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="닉네임 검색" style={{
-          marginLeft: 'auto', padding: '6px 12px', fontSize: 13, background: 'var(--bg-hover)',
+          marginLeft: 'auto', padding: '6px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)',
           border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', width: '100%', maxWidth: 180, boxSizing: 'border-box' as const,
         }} />
       </div>
@@ -109,7 +109,7 @@ export default function AdminUsersPage() {
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 12px' }}>닉네임</th>
@@ -132,17 +132,17 @@ export default function AdminUsersPage() {
                   <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.posts_count ?? 0}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.points ?? 0}</td>
                   <td style={{ padding: '10px 12px' }}>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 600,
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 600,
                       background: u.is_deleted ? 'var(--error)' : 'var(--success)',
                       color: 'var(--text-inverse)' }}>{u.is_deleted ? '정지' : '정상'}</span>
                   </td>
                   <td style={{ padding: '10px 12px', display: 'flex', gap: 4 }}>
                     {u.is_deleted ? (
-                      <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--success)', background: 'transparent', color: 'var(--success)', cursor: 'pointer' }}>복구</button>
+                      <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--success)', background: 'transparent', color: 'var(--success)', cursor: 'pointer' }}>복구</button>
                     ) : (
-                      <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--error)', background: 'transparent', color: 'var(--error)', cursor: 'pointer' }}>정지</button>
+                      <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--error)', background: 'transparent', color: 'var(--error)', cursor: 'pointer' }}>정지</button>
                     )}
-                    <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--brand)', background: 'transparent', color: 'var(--brand)', cursor: 'pointer' }}>포인트 수정</button>
+                    <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--brand)', background: 'transparent', color: 'var(--brand)', cursor: 'pointer' }}>포인트 수정</button>
                   </td>
                 </tr>
               ))}

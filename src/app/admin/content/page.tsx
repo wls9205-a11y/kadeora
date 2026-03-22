@@ -102,19 +102,19 @@ export default function AdminContentPage() {
   }, [currentPage]);
 
   const tabStyle = (active: boolean) => ({
-    padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700,
+    padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-base)', fontWeight: 700,
     background: active ? 'var(--brand)' : 'var(--bg-hover)',
     color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
   });
   const pillStyle = (v: string, cur: string) => ({
-    padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+    padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
     background: cur === v ? 'var(--brand)' : 'var(--bg-hover)',
     color: cur === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
   });
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>📝 콘텐츠 관리</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>📝 콘텐츠 관리</h1>
 
       {/* Main tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -132,7 +132,7 @@ export default function AdminContentPage() {
             <button onClick={() => setStatusFilter('hidden')} style={pillStyle('hidden', statusFilter)}>숨김</button>
           </div>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="제목 검색" style={{
-            width: '100%', padding: '8px 12px', fontSize: 13, background: 'var(--bg-hover)',
+            width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)',
             border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', marginBottom: 12, boxSizing: 'border-box',
           }} />
 
@@ -142,14 +142,14 @@ export default function AdminContentPage() {
               display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px', marginBottom: 10,
               background: 'var(--bg-hover)', borderRadius: 8, border: '1px solid var(--border)',
             }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
                 {selectedIds.size}개 선택됨
               </span>
               <button
                 onClick={bulkHide}
                 disabled={bulkLoading}
                 style={{
-                  fontSize: 12, padding: '5px 14px', borderRadius: 6, border: 'none',
+                  fontSize: 'var(--fs-sm)', padding: '5px 14px', borderRadius: 6, border: 'none',
                   background: 'var(--error)', color: '#fff', cursor: bulkLoading ? 'not-allowed' : 'pointer',
                   fontWeight: 700, opacity: bulkLoading ? 0.6 : 1,
                 }}
@@ -159,7 +159,7 @@ export default function AdminContentPage() {
               <button
                 onClick={() => setSelectedIds(new Set())}
                 style={{
-                  fontSize: 12, padding: '5px 12px', borderRadius: 6, border: '1px solid var(--border)',
+                  fontSize: 'var(--fs-sm)', padding: '5px 12px', borderRadius: 6, border: '1px solid var(--border)',
                   background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600,
                 }}
               >
@@ -172,7 +172,7 @@ export default function AdminContentPage() {
             {loading ? (
               <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 600 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)', minWidth: 600 }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                     <th style={{ padding: '10px 8px', width: 36 }}>
@@ -208,22 +208,22 @@ export default function AdminContentPage() {
                       <td style={{ padding: '10px 8px', color: 'var(--text-tertiary)' }}>{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
                       <td style={{ padding: '10px 8px', color: 'var(--text-secondary)', textAlign: 'right' }}>{p.view_count}</td>
                       <td style={{ padding: '10px 8px' }}>
-                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 600,
+                        <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 600,
                           background: p.is_deleted ? 'var(--error)' : 'var(--success)', color: 'var(--text-inverse)' }}>
                           {p.is_deleted ? '숨김' : '정상'}
                         </span>
                       </td>
                       <td style={{ padding: '10px 8px', display: 'flex', gap: 4 }}>
                         {p.is_deleted ? (
-                          <button onClick={() => action(p.id, 'restore')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--success)', background: 'transparent', color: 'var(--success)', cursor: 'pointer' }}>복구</button>
+                          <button onClick={() => action(p.id, 'restore')} style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--success)', background: 'transparent', color: 'var(--success)', cursor: 'pointer' }}>복구</button>
                         ) : (
-                          <button onClick={() => action(p.id, 'hide')} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid var(--error)', background: 'transparent', color: 'var(--error)', cursor: 'pointer' }}>숨김</button>
+                          <button onClick={() => action(p.id, 'hide')} style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--error)', background: 'transparent', color: 'var(--error)', cursor: 'pointer' }}>숨김</button>
                         )}
                         <button onClick={async () => {
                           if (!confirm('정말 삭제하시겠습니까?')) return;
                           await fetch(`/api/admin/posts/${p.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'hide' }) });
                           setPosts(prev => prev.filter(x => x.id !== p.id));
-                        }} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: 'none', background: 'var(--error)', color: '#fff', cursor: 'pointer' }}>삭제</button>
+                        }} style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 6, border: 'none', background: 'var(--error)', color: '#fff', cursor: 'pointer' }}>삭제</button>
                       </td>
                     </tr>
                   ))}
@@ -234,12 +234,12 @@ export default function AdminContentPage() {
           {!loading && totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 16 }}>
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: currentPage === 1 ? 'var(--bg-hover)' : 'var(--bg-surface)', color: currentPage === 1 ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
+                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: currentPage === 1 ? 'var(--bg-hover)' : 'var(--bg-surface)', color: currentPage === 1 ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
                 ← 이전
               </button>
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>{currentPage} / {totalPages}</span>
+              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', fontWeight: 600 }}>{currentPage} / {totalPages}</span>
               <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: currentPage === totalPages ? 'var(--bg-hover)' : 'var(--bg-surface)', color: currentPage === totalPages ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
+                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: currentPage === totalPages ? 'var(--bg-hover)' : 'var(--bg-surface)', color: currentPage === totalPages ? 'var(--text-tertiary)' : 'var(--text-primary)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
                 다음 →
               </button>
             </div>
@@ -254,7 +254,7 @@ export default function AdminContentPage() {
           ) : chatMsgs.length === 0 ? (
             <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>채팅 메시지가 없습니다</div>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 400 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)', minWidth: 400 }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                   <th style={{ padding: '10px 12px' }}>닉네임</th>
@@ -276,7 +276,7 @@ export default function AdminContentPage() {
                       {new Date(m.created_at).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td style={{ padding: '10px 8px' }}>
-                      <button onClick={() => deleteChat(m.id)} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: 'none', background: 'var(--error)', color: '#fff', cursor: 'pointer' }}>삭제</button>
+                      <button onClick={() => deleteChat(m.id)} style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 6, border: 'none', background: 'var(--error)', color: '#fff', cursor: 'pointer' }}>삭제</button>
                     </td>
                   </tr>
                 ))}

@@ -111,7 +111,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
   if (!user) {
     return (
       <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
+        <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', marginBottom: 12 }}>
           전광판 등록은 로그인이 필요합니다
         </div>
         <a
@@ -124,7 +124,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
             borderRadius: 8,
             textDecoration: 'none',
             fontWeight: 600,
-            fontSize: 14,
+            fontSize: 'var(--fs-base)',
           }}
         >
           로그인
@@ -138,7 +138,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
       {/* Step 1: Select product */}
       {step === 'select' && (
         <div>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>
+          <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>
             전광판 노출권 선택
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -167,21 +167,21 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  <span style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>
                     📡 {p.name}
                   </span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)' }}>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)' }}>
                     {p.point_cost.toLocaleString()}P
                   </span>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.description}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{p.description}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
                   또는 {p.price_krw.toLocaleString()}원
                 </div>
               </div>
             ))}
             {products.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-tertiary)', fontSize: 13 }}>
+              <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
                 현재 등록 가능한 상품이 없습니다
               </div>
             )}
@@ -192,10 +192,10 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
       {/* Step 2: Compose message */}
       {step === 'compose' && selectedProduct && (
         <div>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+          <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
             전광판 내용 작성
           </h3>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 16 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>
             {selectedProduct.name} ({selectedProduct.point_cost}P)
           </div>
 
@@ -212,21 +212,21 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
               border: '1px solid var(--border)',
               background: 'var(--bg-base)',
               color: 'var(--text-primary)',
-              fontSize: 14,
+              fontSize: 'var(--fs-base)',
               fontFamily: 'inherit',
               resize: 'none',
               boxSizing: 'border-box',
               lineHeight: 1.5,
             }}
           />
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4 }}>
             {content.length}/100
           </div>
 
           {/* Link a post */}
           {myPosts.length > 0 && (
             <div style={{ marginTop: 12 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+              <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
                 연결할 게시글 (선택)
               </label>
               <select
@@ -239,7 +239,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                   border: '1px solid var(--border)',
                   background: 'var(--bg-base)',
                   color: 'var(--text-primary)',
-                  fontSize: 13,
+                  fontSize: 'var(--fs-sm)',
                   fontFamily: 'inherit',
                 }}
               >
@@ -263,7 +263,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                 border: '1px solid var(--border)',
                 background: 'var(--bg-hover)',
                 color: 'var(--text-secondary)',
-                fontSize: 14,
+                fontSize: 'var(--fs-base)',
                 fontWeight: 600,
                 cursor: 'pointer',
               }}
@@ -280,7 +280,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                 border: 'none',
                 background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
                 color: content.trim() ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-                fontSize: 14,
+                fontSize: 'var(--fs-base)',
                 fontWeight: 600,
                 cursor: content.trim() ? 'pointer' : 'not-allowed',
               }}
@@ -294,21 +294,21 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
       {/* Step 3: Confirm */}
       {step === 'confirm' && selectedProduct && (
         <div>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>
+          <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>
             등록 확인
           </h3>
 
           {/* Preview */}
           <div style={{ marginBottom: 16, borderRadius: 8, overflow: 'hidden', border: '1px solid #1a3a1a' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 10px', background: 'var(--bg-hover)' }}>미리보기</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 10px', background: 'var(--bg-hover)' }}>미리보기</div>
             <div style={{ background: '#0a1a0a', height: 32, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-              <div style={{ whiteSpace: 'nowrap', fontSize: 12, fontWeight: 600, color: '#4ade80', paddingLeft: 16 }}>
+              <div style={{ whiteSpace: 'nowrap', fontSize: 'var(--fs-sm)', fontWeight: 600, color: '#4ade80', paddingLeft: 16 }}>
                 📡&nbsp;{content}
               </div>
             </div>
           </div>
 
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '14px 16px', marginBottom: 16, fontSize: 13 }}>
+          <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '14px 16px', marginBottom: 16, fontSize: 'var(--fs-sm)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               <span style={{ color: 'var(--text-secondary)' }}>상품</span>
               <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedProduct.name}</span>
@@ -329,7 +329,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                 border: '1px solid var(--border)',
                 background: 'var(--bg-hover)',
                 color: 'var(--text-secondary)',
-                fontSize: 14,
+                fontSize: 'var(--fs-base)',
                 fontWeight: 600,
                 cursor: 'pointer',
               }}
@@ -346,7 +346,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                 border: 'none',
                 background: submitting ? 'var(--bg-hover)' : 'var(--brand)',
                 color: submitting ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-                fontSize: 14,
+                fontSize: 'var(--fs-base)',
                 fontWeight: 700,
                 cursor: submitting ? 'not-allowed' : 'pointer',
               }}

@@ -131,20 +131,20 @@ export default function DiscussDetailPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* Back */}
-      <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 13, padding: '8px 0', marginBottom: 8 }}>
+      <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: '8px 0', marginBottom: 8 }}>
         ← 돌아가기
       </button>
 
       {/* Topic */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-          <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{CAT_LABEL[topic.category] || topic.category}</span>
-          {topic.is_hot && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{CAT_LABEL[topic.category] || topic.category}</span>
+          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
 
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.4 }}>{topic.title}</h1>
-        {topic.description && <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>{topic.description}</p>}
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 16 }}>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.4 }}>{topic.title}</h1>
+        {topic.description && <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>{topic.description}</p>}
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>
           {timeAgo(topic.created_at)} · 👁 {topic.view_count || 0} · 🗳 {total}명 참여
         </div>
 
@@ -166,11 +166,11 @@ export default function DiscussDetailPage() {
               borderRadius: 12, transition: 'width 0.3s',
             }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: myVote === opt.key ? 700 : 500, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 700 : 500, color: 'var(--text-primary)' }}>
                 {myVote === opt.key && '✓ '}{opt.label}
               </span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>
-                {opt.pct}% <span style={{ fontSize: 11, fontWeight: 400 }}>({opt.count}명)</span>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>
+                {opt.pct}% <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 400 }}>({opt.count}명)</span>
               </span>
             </div>
           </button>
@@ -179,7 +179,7 @@ export default function DiscussDetailPage() {
 
       {/* Comments */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
+        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
 
         {/* Input */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -187,14 +187,14 @@ export default function DiscussDetailPage() {
             <>
               <input value={input} onChange={e => setInput(e.target.value)} placeholder="의견을 남겨보세요" maxLength={500}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleComment(); } }}
-                style={{ flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 14, fontFamily: 'inherit' }} />
+                style={{ flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit' }} />
               <button onClick={handleComment} disabled={!input.trim() || sending}
-                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>
+                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 'var(--fs-base)', cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>
                 전송
               </button>
             </>
           ) : (
-            <div style={{ flex: 1, textAlign: 'center', padding: 12, color: 'var(--text-tertiary)', fontSize: 13 }}>
+            <div style={{ flex: 1, textAlign: 'center', padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
               <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 의견을 남길 수 있습니다
             </div>
           )}
@@ -207,21 +207,21 @@ export default function DiscussDetailPage() {
             const grade = (c.profiles as any)?.grade ?? 1;
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-base)' }}>
                   {GRADE_EMOJI[grade] || '🌱'}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
                   </div>
-                  <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
+                  <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
                 </div>
               </div>
             );
           })}
           {comments.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-tertiary)', fontSize: 13 }}>
+            <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
               아직 의견이 없어요. 첫 의견을 남겨보세요!
             </div>
           )}

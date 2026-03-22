@@ -147,28 +147,28 @@ export default async function BlogDetailPage({ params }: Props) {
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
       <div style={{ marginBottom: 16 }}>
-        <Link href="/blog" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
+        <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
       </div>
 
       <article style={{ paddingBottom: 40 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px' }}>{post.title}</h1>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
+        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px' }}>{post.title}</h1>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
           <span>{new Date(post.published_at || post.created_at).toLocaleDateString('ko-KR')}</span>
           <span>조회 {post.view_count ?? 0}</span>
         </div>
 
         {(post.tags ?? []).length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-            {post.tags.map((t: string) => <span key={t} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>#{t}</span>)}
+            {post.tags.map((t: string) => <span key={t} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>#{t}</span>)}
           </div>
         )}
 
         {/* 목차 */}
         {toc.length >= 3 && (
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>목차</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>목차</div>
             {toc.map((item, i) => (
-              <a key={i} href={`#${item.id}`} style={{ display: 'block', padding: '3px 0', paddingLeft: item.level === 3 ? 16 : 0, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', lineHeight: 1.5 }}>
+              <a key={i} href={`#${item.id}`} style={{ display: 'block', padding: '3px 0', paddingLeft: item.level === 3 ? 16 : 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', textDecoration: 'none', lineHeight: 1.5 }}>
                 {item.text}
               </a>
             ))}
@@ -183,9 +183,9 @@ export default async function BlogDetailPage({ params }: Props) {
             <div className="blog-content" style={{ maxHeight: 500, overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(transparent, var(--bg-base))' }} />
             <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>전체 글을 보려면 로그인하세요</div>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>청약 마감 알림도 받을 수 있어요</div>
-              <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>전체 글을 보려면 로그인하세요</div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>청약 마감 알림도 받을 수 있어요</div>
+              <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
                 카카오로 가입
               </Link>
             </div>
@@ -197,7 +197,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
         {post.source_type === 'auto' && (
-          <div style={{ marginTop: 24, padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+          <div style={{ marginTop: 24, padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
             <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 한국거래소 등)를 기반으로 자동 작성되었습니다. 
             {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
             {post.source_ref && <> · 출처: {post.source_ref}</>}
@@ -207,7 +207,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 공유 */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>공유하기</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>공유하기</span>
           <ShareButtons title={post.title} postId={slug} />
         </div>
       </article>
@@ -215,8 +215,8 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 댓글 섹션 */}
       <BlogCommentCTA commentCount={comments.length} />
       <div id="blog-comments" style={{ marginBottom: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 16px' }}>
+        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
           {CTA_BY_CAT[post.category] ?? CTA_BY_CAT.general}
         </p>
 
@@ -224,7 +224,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {isLoggedIn ? (
           <BlogCommentInput blogPostId={post.id} />
         ) : (
-          <div style={{ padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', marginBottom: 16, fontSize: 13, color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', marginBottom: 16, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
             <Link href="/login" style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
           </div>
         )}
@@ -235,21 +235,21 @@ export default async function BlogDetailPage({ params }: Props) {
             const nick = (c.profiles as any)?.nickname ?? '사용자';
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>
                   {nick[0].toUpperCase()}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
                   </div>
-                  <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
+                  <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
                 </div>
               </div>
             );
           })}
           {comments.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-tertiary)', fontSize: 13 }}>
+            <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
               아직 의견이 없어요. 첫 의견을 남겨보세요!
             </div>
           )}
@@ -258,9 +258,9 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* CTA 배너 */}
       <div style={{ padding: '20px 16px', margin: '20px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, textAlign: 'center' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>매일 업데이트되는 투자 정보를 받아보세요</div>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>청약 마감 알림 · 급등주 알림 · 미분양 업데이트</div>
-        <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+        <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>매일 업데이트되는 투자 정보를 받아보세요</div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>청약 마감 알림 · 급등주 알림 · 미분양 업데이트</div>
+        <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
           카카오로 3초 가입
         </Link>
       </div>
@@ -268,9 +268,9 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>관련 글</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>관련 글</div>
           {related!.map((r: any) => (
-            <Link key={r.slug} href={`/blog/${r.slug}`} style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', fontSize: 13, color: 'var(--text-primary)' }}>
+            <Link key={r.slug} href={`/blog/${r.slug}`} style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>
               {r.title}
             </Link>
           ))}

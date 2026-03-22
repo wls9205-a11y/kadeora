@@ -41,11 +41,11 @@ export default function AttendanceBanner() {
       borderRadius: 4,
     }}>
       <div>
-        <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 600 }}>
           {done ? '✅ 출석 완료 +10P' : '🗓 오늘 출석체크 하셨나요?'}
         </div>
         {!done && (
-          <div style={{ fontSize: 11, color: 'var(--brand)', marginTop: 2 }}>+10P 적립</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', marginTop: 2 }}>+10P 적립</div>
         )}
       </div>
       {!done && (
@@ -58,7 +58,7 @@ export default function AttendanceBanner() {
             border: 'none',
             background: 'var(--brand)',
             color: 'var(--text-inverse)',
-            fontSize: 12,
+            fontSize: 'var(--fs-sm)',
             fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,

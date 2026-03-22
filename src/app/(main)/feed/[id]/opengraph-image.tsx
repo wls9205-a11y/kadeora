@@ -39,7 +39,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: '#FF4500' }} />
             ))}
           </div>
-          <span style={{ fontSize: 24, fontWeight: 800, color: '#FF4500' }}>카더라</span>
+          <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#FF4500' }}>카더라</span>
         </div>
 
         <div style={{
@@ -49,10 +49,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 32 }}>
-          {category && <span style={{ fontSize: 18, color: '#8b949e' }}>{category}</span>}
-          <span style={{ fontSize: 18, color: '#8b949e' }}>@{nickname}</span>
-          <span style={{ fontSize: 18, color: '#8b949e' }}>❤ {likes}</span>
-          <span style={{ marginLeft: 'auto', fontSize: 16, color: '#6e7681' }}>kadeora.app</span>
+          {category && <span style={{ fontSize: 'var(--fs-lg)', color: '#8b949e' }}>{category}</span>}
+          <span style={{ fontSize: 'var(--fs-lg)', color: '#8b949e' }}>@{nickname}</span>
+          <span style={{ fontSize: 'var(--fs-lg)', color: '#8b949e' }}>❤ {likes}</span>
+          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-base)', color: '#6e7681' }}>kadeora.app</span>
         </div>
       </div>
     ),

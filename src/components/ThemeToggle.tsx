@@ -8,7 +8,7 @@ export default function ThemeToggle() {
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       style={{
         background: 'none', border: 'none', cursor: 'pointer',
-        fontSize: 18, padding: 4, color: 'var(--text-secondary)',
+        fontSize: 'var(--fs-lg)', padding: 4, color: 'var(--text-secondary)',
       }}
       title={theme === 'dark' ? '라이트 모드' : '다크 모드'}
     >

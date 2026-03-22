@@ -235,9 +235,9 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
           {renderAvatar(nick, isReply ? 28 : 36)}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-              <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>{nick}</span>
+              <span style={{ fontWeight: 700, fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>{nick}</span>
               <span style={{
-                fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
                 background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
               }}>{GL(grade)}</span>
               {userId && userId !== c.author_id && (
@@ -246,23 +246,23 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                   border: `1px solid var(--brand)`,
                   background: followingIds.has(c.author_id) ? 'var(--brand)' : 'transparent',
                   color: followingIds.has(c.author_id) ? 'white' : 'var(--brand)',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                 }}>
                   {followingIds.has(c.author_id) ? '팔로잉' : '팔로우'}
                 </button>
               )}
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(c.created_at)}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(c.created_at)}</span>
             </div>
-            <div style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 6, wordBreak: 'break-word' }}>
+            <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 6, wordBreak: 'break-word' }}>
               {c.content}
             </div>
             {/* action bar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, color: 'var(--text-tertiary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
               <button
                 onClick={() => toggleLike(c.id)}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  fontSize: 12, color: liked ? '#ef4444' : 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
+                  fontSize: 'var(--fs-sm)', color: liked ? '#ef4444' : 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
                 }}
               >
                 {liked ? '❤️' : '🤍'} {c.likes_count > 0 ? c.likes_count : ''}
@@ -272,7 +272,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                   onClick={() => handleExpand(c.id)}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
+                    fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
                   }}
                 >
                   💬 {c.replies_count > 0 ? c.replies_count : ''}
@@ -280,14 +280,14 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
               )}
               <button
                 onClick={() => { if (navigator.share) navigator.share({ text: c.content }); else navigator.clipboard.writeText(c.content); }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: 'var(--text-tertiary)' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}
               >
                 공유
               </button>
               <div style={{ position: 'relative', marginLeft: 'auto' }}>
                 <button
                   onClick={() => setMenuId(showMenu ? null : c.id)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', fontSize: 14, color: 'var(--text-tertiary)' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', fontSize: 'var(--fs-base)', color: 'var(--text-tertiary)' }}
                 >⋯</button>
                 {showMenu && (
                   <div style={{
@@ -297,17 +297,17 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                   }}>
                     <button
                       onClick={() => { handleBookmark(c.content); setMenuId(null); }}
-                      style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 13, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                     >북마크</button>
                     {isOwn ? (
                       <button
                         onClick={() => deleteComment(c.id, c.parent_id)}
-                        style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 13, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                        style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >삭제</button>
                     ) : (
                       <button
                         onClick={() => reportComment(c.id)}
-                        style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 13, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                        style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >신고</button>
                     )}
                   </div>
@@ -325,7 +325,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                       key={emoji}
                       onClick={() => sendReaction(c.id, emoji)}
                       style={{
-                        padding: '4px 8px', borderRadius: 20, fontSize: 16, cursor: 'pointer',
+                        padding: '4px 8px', borderRadius: 20, fontSize: 'var(--fs-base)', cursor: 'pointer',
                         border: userReactions[c.id] === emoji ? '2px solid var(--brand)' : '1px solid var(--border)',
                         background: userReactions[c.id] === emoji ? 'var(--bg-hover)' : 'transparent',
                       }}
@@ -345,7 +345,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                       onKeyDown={e => { if (e.key === 'Enter') sendReply(c.id); }}
                       placeholder="답글 남기기..."
                       style={{
-                        flex: 1, padding: '6px 10px', fontSize: 13, borderRadius: 8,
+                        flex: 1, padding: '6px 10px', fontSize: 'var(--fs-sm)', borderRadius: 8,
                         border: '1px solid var(--border)', background: 'var(--bg-base)',
                         color: 'var(--text-primary)', boxSizing: 'border-box',
                       }}
@@ -354,7 +354,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                       onClick={() => sendReply(c.id)}
                       disabled={!(replyInputs[c.id] || '').trim()}
                       style={{
-                        padding: '6px 12px', borderRadius: 8, border: 'none', fontSize: 12,
+                        padding: '6px 12px', borderRadius: 8, border: 'none', fontSize: 'var(--fs-sm)',
                         fontWeight: 700, cursor: 'pointer', flexShrink: 0,
                         background: 'var(--brand)', color: 'var(--text-inverse)',
                         opacity: (replyInputs[c.id] || '').trim() ? 1 : 0.5,
@@ -372,7 +372,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
 
   return (
     <div>
-      <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
         💬 {stockName} 한줄평
       </div>
 
@@ -383,7 +383,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
             key={key}
             onClick={() => setSort(key)}
             style={{
-              padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+              padding: '5px 14px', borderRadius: 20, fontSize: 'var(--fs-sm)', fontWeight: 600,
               cursor: 'pointer', border: 'none',
               background: sort === key ? 'var(--brand)' : 'var(--bg-hover)',
               color: sort === key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -405,19 +405,19 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
               placeholder="한줄평 남기기..."
               rows={1}
               style={{
-                width: '100%', padding: '8px 12px', fontSize: 13, borderRadius: 10,
+                width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', borderRadius: 10,
                 border: '1px solid var(--border)', background: 'var(--bg-base)',
                 color: 'var(--text-primary)', boxSizing: 'border-box',
                 resize: 'none', overflow: 'hidden', lineHeight: 1.5,
               }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{input.length}/200</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{input.length}/200</span>
               <button
                 onClick={handleSend}
                 disabled={sending || !input.trim()}
                 style={{
-                  padding: '6px 16px', borderRadius: 8, border: 'none', fontSize: 12,
+                  padding: '6px 16px', borderRadius: 8, border: 'none', fontSize: 'var(--fs-sm)',
                   fontWeight: 700, cursor: 'pointer',
                   background: 'var(--brand)', color: 'var(--text-inverse)',
                   opacity: sending || !input.trim() ? 0.5 : 1,
@@ -432,7 +432,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
           style={{
             display: 'block', textAlign: 'center', padding: '12px 0', marginBottom: 14,
             borderRadius: 10, border: '1px dashed var(--border)',
-            fontSize: 13, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none',
+            fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', textDecoration: 'none',
           }}
         >
           로그인하고 한줄평 남기기
@@ -441,7 +441,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
 
       {/* comment list */}
       {comments.length === 0 ? (
-        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: 24 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 24 }}>
           아직 한줄평이 없어요. 첫 번째 한줄평을 남겨보세요!
         </div>
       ) : (

@@ -37,7 +37,7 @@ export default function TrendingBar() {
       borderRadius: 10,
       border: '1px solid var(--border)',
     }}>
-      <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, flexShrink: 0 }}>
+      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600, flexShrink: 0 }}>
         🔥 지금 뜨는
       </span>
       {keywords.map((kw) => (
@@ -45,7 +45,7 @@ export default function TrendingBar() {
           key={kw.keyword}
           onClick={() => router.push(`/search?q=${encodeURIComponent(kw.keyword)}`)}
           style={{
-            fontSize: 12,
+            fontSize: 'var(--fs-sm)',
             padding: '4px 10px',
             borderRadius: 16,
             background: 'var(--bg-hover)',

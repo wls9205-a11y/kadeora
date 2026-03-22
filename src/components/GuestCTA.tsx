@@ -23,15 +23,15 @@ export default function GuestCTA() {
         boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
       }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>댓글·좋아요·알림 받고 싶다면?</div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>카더라 회원이 되면 더 많은 기능을 쓸 수 있어요</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>댓글·좋아요·알림 받고 싶다면?</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>카더라 회원이 되면 더 많은 기능을 쓸 수 있어요</div>
         </div>
         <Link href="/login" style={{
           background: 'var(--brand)', color: 'var(--text-inverse)', padding: '8px 16px', borderRadius: 10,
-          fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
+          fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
         }}>1초 가입</Link>
         <button onClick={() => { setShow(false); localStorage.setItem('kd_guest_cta', String(Date.now() + 24 * 60 * 60 * 1000)); }}
-          style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 18, cursor: 'pointer', padding: 4 }}>×</button>
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer', padding: 4 }}>×</button>
       </div>
     </div>
   );

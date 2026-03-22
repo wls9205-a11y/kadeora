@@ -5,7 +5,7 @@ export function AdminLineChart({ data, label, color = 'var(--brand)' }: {
   label: string;
   color?: string;
 }) {
-  if (!data.length) return <div style={{ color: 'var(--text-tertiary)', fontSize: 12, padding: 20 }}>데이터 없음</div>;
+  if (!data.length) return <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: 20 }}>데이터 없음</div>;
   const max = Math.max(...data.map(d => d.count), 1);
   const W = 560, H = 140, PL = 36, PR = 12, PT = 12, PB = 32;
   const iW = W - PL - PR, iH = H - PT - PB;
@@ -18,7 +18,7 @@ export function AdminLineChart({ data, label, color = 'var(--brand)' }: {
   const areaD = `${pathD} L${pts[pts.length - 1].x},${PT + iH} L${pts[0].x},${PT + iH} Z`;
   return (
     <div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{label}</div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
         {[0, Math.round(max / 2), max].map(v => {
           const y = PT + iH - (v / max) * iH;
@@ -57,7 +57,7 @@ export function AdminDonutChart({ data, label }: {
   });
   return (
     <div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <svg width={140} height={140} viewBox="0 0 140 140" style={{ flexShrink: 0 }}>
           {slices.map(s => <path key={s.key} d={s.pathD} fill={s.color} />)}
@@ -66,7 +66,7 @@ export function AdminDonutChart({ data, label }: {
         </svg>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {slices.map(s => (
-            <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+            <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-sm)' }}>
               <div style={{ width: 10, height: 10, borderRadius: 2, background: s.color, flexShrink: 0 }} />
               <span style={{ color: 'var(--text-secondary)' }}>{s.label}</span>
               <span style={{ color: 'var(--text-primary)', fontWeight: 600, marginLeft: 'auto' }}>{s.count}</span>

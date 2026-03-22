@@ -67,17 +67,17 @@ export default function InstallBanner() {
       }}>
         <div style={{ fontSize: 30, flexShrink: 0 }}>📲</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-inverse)', marginBottom: 2 }}>앱처럼 사용하기</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)' }}>홈화면에 추가하면 푸시 알림도 받을 수 있어요!</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-inverse)', marginBottom: 2 }}>앱처럼 사용하기</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'rgba(255,255,255,0.9)' }}>홈화면에 추가하면 푸시 알림도 받을 수 있어요!</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
           <button onClick={() => { hap('light'); handleInstall(); }} style={{
             padding: '8px 14px', background: 'var(--bg-primary)', color: '#FF4500',
-            border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer',
+            border: 'none', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 800, cursor: 'pointer',
           }}>{isIOS ? '방법 보기' : '📲 설치하기'}</button>
           <button onClick={handleDismiss} style={{
             padding: '3px 0', background: 'transparent',
-            color: 'rgba(255,255,255,0.7)', border: 'none', fontSize: 11, cursor: 'pointer', textAlign: 'center',
+            color: 'rgba(255,255,255,0.7)', border: 'none', fontSize: 'var(--fs-xs)', cursor: 'pointer', textAlign: 'center',
           }}>나중에</button>
         </div>
       </div>
@@ -90,20 +90,20 @@ export default function InstallBanner() {
             background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '20px 24px 40px',
           }}>
             <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }} />
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>📲 홈화면에 추가하기</div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>Safari에서 아래 순서로 따라하세요</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>📲 홈화면에 추가하기</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 20 }}>Safari에서 아래 순서로 따라하세요</div>
             {[
               { n: '1', text: 'Safari 하단 가운데 공유 버튼(⬆️) 탭' },
               { n: '2', text: '스크롤해서 "홈 화면에 추가" 탭' },
               { n: '3', text: '오른쪽 상단 "추가" 탭 — 완료!' },
             ].map(s => (
               <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
-                <span style={{ fontSize: 14, color: 'var(--text-primary)' }}>{s.text}</span>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
+                <span style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{s.text}</span>
               </div>
             ))}
             <button onClick={() => { hap('light'); setShowIOSGuide(false); handleDismiss(); logInstall('ios'); setTimeout(requestPush, 1000); }}
-              style={{ marginTop: 20, width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+              style={{ marginTop: 20, width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700, cursor: 'pointer' }}>
               알겠어요!
             </button>
           </div>

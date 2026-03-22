@@ -25,16 +25,16 @@ export default function SeedDataManager() {
 
   const btn = (target: string, label: string, color: string) => (
     <button key={target} onClick={() => handleDelete(target)} disabled={!!deleting}
-      style={{ flex: 1, padding: '8px 0', borderRadius: 8, border: `1px solid ${color}`, background: 'transparent', color, fontSize: 12, fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting === target ? 0.5 : 1 }}>
+      style={{ flex: 1, padding: '8px 0', borderRadius: 8, border: `1px solid ${color}`, background: 'transparent', color, fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting === target ? 0.5 : 1 }}>
       {deleting === target ? '삭제중...' : label}
     </button>
   );
 
-  if (!stats) return <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: 16 }}>로딩 중...</div>;
+  if (!stats) return <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', padding: 16 }}>로딩 중...</div>;
 
   return (
     <div>
-      <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🧪 시드 데이터 관리</h2>
+      <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🧪 시드 데이터 관리</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
         {[
           { label: '시드 유저', value: stats.users, icon: '👤' },
@@ -43,9 +43,9 @@ export default function SeedDataManager() {
           { label: '시드 좋아요', value: stats.likes, icon: '❤️' },
         ].map(s => (
           <div key={s.label} style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 10, textAlign: 'center' }}>
-            <div style={{ fontSize: 16 }}>{s.icon}</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.label}</div>
+            <div style={{ fontSize: 'var(--fs-base)' }}>{s.icon}</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -56,15 +56,15 @@ export default function SeedDataManager() {
         {btn('users', '유저 삭제', 'var(--error)')}
       </div>
       {!confirmAll ? (
-        <button onClick={() => setConfirmAll(true)} style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: '2px solid var(--error)', background: 'transparent', color: 'var(--error)', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={() => setConfirmAll(true)} style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: '2px solid var(--error)', background: 'transparent', color: 'var(--error)', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>
           ⚠️ 전체 일괄 삭제
         </button>
       ) : (
-        <button onClick={() => handleDelete('all')} disabled={!!deleting} style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: 'none', background: 'var(--error)', color: 'var(--text-inverse)', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={() => handleDelete('all')} disabled={!!deleting} style={{ width: '100%', padding: '10px 0', borderRadius: 8, border: 'none', background: 'var(--error)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>
           {deleting === 'all' ? '삭제 중...' : '🚨 정말 전체 삭제합니다 (되돌릴 수 없음)'}
         </button>
       )}
-      {result && <div style={{ fontSize: 12, color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', marginTop: 6 }}>{result}</div>}
+      {result && <div style={{ fontSize: 'var(--fs-sm)', color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', marginTop: 6 }}>{result}</div>}
     </div>
   );
 }

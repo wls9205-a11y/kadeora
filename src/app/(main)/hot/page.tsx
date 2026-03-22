@@ -75,13 +75,13 @@ export default async function HotPage() {
     <HotClient>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
-        <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>{dateRange}</p>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
+        <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{dateRange}</p>
       </div>
 
       {/* 전국 TOP 5 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>전국 TOP 5</h2>
+        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>전국 TOP 5</h2>
         {(topPosts ?? []).length === 0 ? (
           <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 20 }}>이번 주 데이터가 아직 없어요</p>
         ) : (
@@ -101,7 +101,7 @@ export default async function HotPage() {
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: isTop3 ? 15 : 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {CATEGORY_LABEL[post.category] ?? ''} · {(post.profiles as any)?.nickname ?? '익명'}
                   </div>
                 </div>
@@ -120,17 +120,17 @@ export default async function HotPage() {
         if (!posts || posts.length === 0) return null;
         return (
           <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>📍 {region} TOP 3</h2>
+            <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📍 {region} TOP 3</h2>
             {posts.map((post: any, i: number) => (
                 <Link key={post.id} href={`/feed/${post.slug || post.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  <span style={{ fontSize: 20, width: 28, textAlign: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 'var(--fs-xl)', width: 28, textAlign: 'center', flexShrink: 0 }}>
                     {MEDAL[i + 1] ?? `${i + 1}`}
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{(post.profiles as any)?.nickname ?? '익명'}</div>
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{(post.profiles as any)?.nickname ?? '익명'}</div>
                   </div>
-                  <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>
+                  <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>
                 </Link>
               ))}
           </div>

@@ -62,21 +62,21 @@ export default async function UnsoldDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      <Link href="/apt" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>← 부동산</Link>
+      <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>← 부동산</Link>
 
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}>미분양</span>
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}>미분양</span>
         </div>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{u.house_nm || '미분양 단지'}</h1>
-        <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}{u.supply_addr ? ` · ${u.supply_addr}` : ''}</div>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{u.house_nm || '미분양 단지'}</h1>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}{u.supply_addr ? ` · ${u.supply_addr}` : ''}</div>
       </div>
 
       {/* 현황 요약 */}
       <div style={{ ...card, borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? '#EF4444' : (u.tot_unsold_hshld_co || 0) >= 1000 ? '#F59E0B' : '#10B981'}` }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 현황 요약</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13 }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 현황 요약</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 'var(--fs-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--text-secondary)' }}>미분양 세대수</span>
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
@@ -121,16 +121,16 @@ export default async function UnsoldDetailPage({ params }: Props) {
       <div style={card}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#f87171' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}<span style={{ fontSize: 12 }}>세대</span></div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#f87171' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)' }}>세대</span></div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3 }}>총공급</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-'}<span style={{ fontSize: 12 }}>세대</span></div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>총공급</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{u.tot_supply_hshld_co ? u.tot_supply_hshld_co.toLocaleString() : '-'}<span style={{ fontSize: 'var(--fs-sm)' }}>세대</span></div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양률</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: rate && rate > 70 ? '#ef4444' : rate && rate > 40 ? '#f97316' : '#eab308' }}>{rate ?? '-'}%</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양률</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: rate && rate > 70 ? '#ef4444' : rate && rate > 40 ? '#f97316' : '#eab308' }}>{rate ?? '-'}%</div>
           </div>
         </div>
         {rate !== null && (
@@ -142,7 +142,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
 
       {/* 분양 정보 */}
       <div style={card}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 분양 정보</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 분양 정보</div>
         {[
           ['분양가', (pMin || pMax) ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''} 원` : null],
           ['준공예정', u.completion_ym ? `${u.completion_ym.slice(0, 4)}년 ${parseInt(u.completion_ym.slice(4, 6))}월` : null],
@@ -150,8 +150,8 @@ export default async function UnsoldDetailPage({ params }: Props) {
           ['문의', u.contact_tel],
         ].filter(r => r[1]).map(([label, value], i, arr) => (
           <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{label}</span>
-            {label === '문의' ? <a href={`tel:${value}`} style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none' }}>📞 {value}</a> : <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{value}</span>}
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{label}</span>
+            {label === '문의' ? <a href={`tel:${value}`} style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', textDecoration: 'none' }}>📞 {value}</a> : <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{value}</span>}
           </div>
         ))}
       </div>
@@ -159,13 +159,13 @@ export default async function UnsoldDetailPage({ params }: Props) {
       {/* 위치 */}
       {(u.supply_addr || u.house_nm) && (
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치</div>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 10 }}>{u.supply_addr || u.house_nm}</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 10 }}>{u.supply_addr || u.house_nm}</div>
           <div style={{ display: 'flex', gap: 8 }}>
             <a href={`https://map.kakao.com/?q=${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>카카오맵</a>
+              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>카카오맵</a>
             <a href={`https://map.naver.com/search/${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>네이버지도</a>
+              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>네이버지도</a>
           </div>
         </div>
       )}
@@ -178,11 +178,11 @@ export default async function UnsoldDetailPage({ params }: Props) {
       {/* 관련 게시글 */}
       {relatedPosts.length > 0 && (
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
           {relatedPosts.map((rp: any) => (
             <Link key={rp.id} href={`/feed/${rp.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{rp.title}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{new Date(rp.created_at).toLocaleDateString('ko-KR')}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{rp.title}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{new Date(rp.created_at).toLocaleDateString('ko-KR')}</div>
             </Link>
           ))}
         </div>
@@ -191,11 +191,11 @@ export default async function UnsoldDetailPage({ params }: Props) {
       {/* 근처 청약 */}
       {nearbySubscriptions.length > 0 && (
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏠 근처 청약</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏠 근처 청약</div>
           {nearbySubscriptions.map((ns: any) => (
             <Link key={ns.id} href={`/apt/${ns.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{ns.house_nm}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{ns.region_nm}{ns.rcept_bgnde ? ` · ${ns.rcept_bgnde} ~ ${ns.rcept_endde}` : ''}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{ns.house_nm}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{ns.region_nm}{ns.rcept_bgnde ? ` · ${ns.rcept_bgnde} ~ ${ns.rcept_endde}` : ''}</div>
             </Link>
           ))}
         </div>
@@ -203,8 +203,8 @@ export default async function UnsoldDetailPage({ params }: Props) {
 
       {/* 외부 링크 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-        {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--brand)', color: 'var(--brand)', textDecoration: 'none', fontSize: 14, fontWeight: 700, textAlign: 'center' }}>분양 홈페이지 바로가기 →</a>}
-        {u.contact_tel && <a href={`tel:${u.contact_tel}`} style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 14, fontWeight: 600, textAlign: 'center' }}>📞 전화문의</a>}
+        {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--brand)', color: 'var(--brand)', textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 700, textAlign: 'center' }}>분양 홈페이지 바로가기 →</a>}
+        {u.contact_tel && <a href={`tel:${u.contact_tel}`} style={{ padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600, textAlign: 'center' }}>📞 전화문의</a>}
       </div>
     </div>
   );

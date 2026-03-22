@@ -73,7 +73,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
         onClick={() => setOpen(true)}
         aria-label="신고"
         style={{
-          fontSize: 12,
+          fontSize: 'var(--fs-sm)',
           opacity: 0.5,
           background: 'none',
           border: 'none',
@@ -114,7 +114,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
               margin: '0 16px',
             }}
           >
-            <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
               신고하기
             </h3>
 
@@ -126,7 +126,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    fontSize: 14,
+                    fontSize: 'var(--fs-base)',
                     color: 'var(--text-primary)',
                     cursor: 'pointer',
                   }}
@@ -157,7 +157,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                   borderRadius: 8,
                   color: 'var(--text-primary)',
                   padding: '10px 12px',
-                  fontSize: 13,
+                  fontSize: 'var(--fs-sm)',
                   resize: 'vertical',
                   fontFamily: 'inherit',
                   lineHeight: 1.5,
@@ -169,7 +169,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
 
             {result && (
               <div style={{
-                fontSize: 13,
+                fontSize: 'var(--fs-sm)',
                 color: result.includes('접수') ? 'var(--success)' : 'var(--error)',
                 marginBottom: 12,
               }}>
@@ -182,7 +182,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                 onClick={() => { setOpen(false); setReason(''); setDetails(''); setResult(''); }}
                 style={{
                   padding: '8px 16px',
-                  fontSize: 13,
+                  fontSize: 'var(--fs-sm)',
                   borderRadius: 8,
                   border: '1px solid var(--border)',
                   background: 'var(--bg-base)',
@@ -197,7 +197,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                 disabled={loading || !reason}
                 style={{
                   padding: '8px 16px',
-                  fontSize: 13,
+                  fontSize: 'var(--fs-sm)',
                   borderRadius: 8,
                   border: 'none',
                   background: 'var(--error)',

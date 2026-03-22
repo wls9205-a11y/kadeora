@@ -76,41 +76,41 @@ export default function MiniDiscuss({ roomKey, roomTitle }: Props) {
 
   return (
     <div style={{ marginTop: 24 }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
         💬 {roomTitle}
-        {messages.length > 0 && <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 400 }}>{messages.length}개</span>}
+        {messages.length > 0 && <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>{messages.length}개</span>}
       </div>
       <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 12, marginBottom: 10, maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13, padding: '16px 0' }}>첫 번째 의견을 남겨보세요 👋</div>
+          <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: '16px 0' }}>첫 번째 의견을 남겨보세요 👋</div>
         ) : messages.map(m => (
           <div key={m.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>{GRADE_EMOJI[m.profiles?.grade ?? 1]}</span>
+            <span style={{ fontSize: 'var(--fs-lg)', flexShrink: 0 }}>{GRADE_EMOJI[m.profiles?.grade ?? 1]}</span>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{m.profiles?.nickname ?? '익명'}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date(m.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>{m.profiles?.nickname ?? '익명'}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{new Date(m.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
-              <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6 }}>{m.content}</div>
+              <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{m.content}</div>
             </div>
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
-      {error && <div style={{ fontSize: 12, color: 'var(--error)', marginBottom: 8 }}>{error}</div>}
+      {error && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--error)', marginBottom: 8 }}>{error}</div>}
       {userId ? (
         <div style={{ display: 'flex', gap: 8 }}>
           <input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="의견을 남겨보세요..." maxLength={200}
-            style={{ flex: 1, padding: '10px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, color: 'var(--text-primary)', fontSize: 14 }} />
+            style={{ flex: 1, padding: '10px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }} />
           <button onClick={handleSend} disabled={sending || !input.trim()}
-            style={{ background: input.trim() && !sending ? 'var(--brand)' : 'var(--bg-hover)', color: input.trim() && !sending ? 'var(--text-inverse)' : 'var(--text-tertiary)', border: 'none', borderRadius: 20, padding: '10px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+            style={{ background: input.trim() && !sending ? 'var(--brand)' : 'var(--bg-hover)', color: input.trim() && !sending ? 'var(--text-inverse)' : 'var(--text-tertiary)', border: 'none', borderRadius: 20, padding: '10px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 'var(--fs-base)', flexShrink: 0 }}>
             {sending ? '...' : '전송'}
           </button>
         </div>
       ) : (
-        <a href="/login" style={{ display: 'block', textAlign: 'center', padding: 12, background: 'var(--bg-hover)', borderRadius: 12, fontSize: 13, color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인 후 참여하기 →</a>
+        <a href="/login" style={{ display: 'block', textAlign: 'center', padding: 12, background: 'var(--bg-hover)', borderRadius: 12, fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인 후 참여하기 →</a>
       )}
     </div>
   );

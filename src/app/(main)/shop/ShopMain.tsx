@@ -61,7 +61,7 @@ export default function ShopMain() {
     const isExchanging = exchanging === p.id;
     return (
       <div key={p.id} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ fontSize: 22 }}>{p.icon ?? '🎁'}</div>
+        <div style={{ fontSize: 'var(--fs-xl)' }}>{p.icon ?? '🎁'}</div>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</div>
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.4, flex: 1 }}>{p.description}</div>
         <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--brand)' }}>{p.point_price.toLocaleString()}P</div>

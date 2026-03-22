@@ -25,7 +25,7 @@ export default function AdminReportsPage() {
   const tabs = ['all', 'pending', 'resolved', 'dismissed'];
   const tabLabel: Record<string, string> = { all: '전체', pending: '미처리', resolved: '처리완료', dismissed: '기각' };
   const pillStyle = (v: string) => ({
-    padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+    padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
     background: filter === v ? 'var(--brand)' : 'var(--bg-hover)',
     color: filter === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
   });
@@ -39,7 +39,7 @@ export default function AdminReportsPage() {
     const info = map[type] || { label: type, bg: 'var(--text-tertiary)' };
     return (
       <span style={{
-        fontSize: 11, padding: '2px 10px', borderRadius: 10, fontWeight: 700,
+        fontSize: 'var(--fs-xs)', padding: '2px 10px', borderRadius: 10, fontWeight: 700,
         background: info.bg, color: '#fff',
       }}>
         {info.label}
@@ -56,7 +56,7 @@ export default function AdminReportsPage() {
     const info = map[status] || { bg: 'var(--text-tertiary)' };
     return (
       <span style={{
-        fontSize: 11, padding: '2px 10px', borderRadius: 10, fontWeight: 700,
+        fontSize: 'var(--fs-xs)', padding: '2px 10px', borderRadius: 10, fontWeight: 700,
         background: info.bg, color: '#fff',
       }}>
         {tabLabel[status] || status}
@@ -66,7 +66,7 @@ export default function AdminReportsPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>🚨 신고 관리</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>🚨 신고 관리</h1>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
         {tabs.map(t => <button key={t} onClick={() => setFilter(t)} style={pillStyle(t)}>{tabLabel[t]}</button>)}
       </div>
@@ -90,26 +90,26 @@ export default function AdminReportsPage() {
                 {typeBadge(r.content_type)}
                 {statusBadge(r.status)}
                 {r.auto_hidden && (
-                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 600, background: 'var(--error)', color: '#fff' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 600, background: 'var(--error)', color: '#fff' }}>
                     자동숨김
                   </span>
                 )}
               </div>
 
               {/* Reason */}
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
                 {r.reason}
               </div>
 
               {/* Details */}
               {r.details && (
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8, lineHeight: 1.5 }}>
                   {r.details}
                 </div>
               )}
 
               {/* Reporter + date */}
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>
                 {r.reporter?.nickname ? `신고자: ${r.reporter.nickname}` : '신고자: -'}
                 {' · '}
                 {new Date(r.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -121,7 +121,7 @@ export default function AdminReportsPage() {
                   <button
                     onClick={() => action(r.id, 'resolve')}
                     style={{
-                      fontSize: 12, padding: '6px 14px', borderRadius: 6, fontWeight: 700,
+                      fontSize: 'var(--fs-sm)', padding: '6px 14px', borderRadius: 6, fontWeight: 700,
                       border: '1px solid var(--success)', background: 'transparent', color: 'var(--success)', cursor: 'pointer',
                     }}
                   >
@@ -130,7 +130,7 @@ export default function AdminReportsPage() {
                   <button
                     onClick={() => action(r.id, 'dismiss')}
                     style={{
-                      fontSize: 12, padding: '6px 14px', borderRadius: 6, fontWeight: 700,
+                      fontSize: 'var(--fs-sm)', padding: '6px 14px', borderRadius: 6, fontWeight: 700,
                       border: '1px solid var(--text-tertiary)', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer',
                     }}
                   >
@@ -140,7 +140,7 @@ export default function AdminReportsPage() {
                     <button
                       onClick={() => action(r.id, 'hide_content')}
                       style={{
-                        fontSize: 12, padding: '6px 14px', borderRadius: 6, fontWeight: 700,
+                        fontSize: 'var(--fs-sm)', padding: '6px 14px', borderRadius: 6, fontWeight: 700,
                         border: 'none', background: 'var(--error)', color: '#fff', cursor: 'pointer',
                       }}
                     >

@@ -34,11 +34,11 @@ export default function UnsoldFetchButton({ hasKey }: { hasKey: boolean }) {
         width: '100%', padding: '10px 0', borderRadius: 8, border: 'none',
         background: loading ? 'var(--bg-hover)' : 'var(--brand)',
         color: loading ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-        fontSize: 13, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+        fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
       }}>
         {loading ? '수집 중... (최대 60초)' : '🔄 전국 미분양 데이터 수집 (통계누리)'}
       </button>
-      {result && <div style={{ fontSize: 12, color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', marginTop: 6 }}>{result}</div>}
+      {result && <div style={{ fontSize: 'var(--fs-sm)', color: result.startsWith('✅') ? 'var(--success)' : 'var(--error)', marginTop: 6 }}>{result}</div>}
     </div>
   );
 }

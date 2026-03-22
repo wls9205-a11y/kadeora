@@ -47,20 +47,20 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
       {showAuthor && (
         <div style={{
           display: "flex", alignItems: "center", gap: 6,
-          fontSize: 13, marginBottom: 6,
+          fontSize: 'var(--fs-sm)', marginBottom: 6,
         }}>
           <div style={{
             width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
             background: avatarColor,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 12, fontWeight: 700, color: "#fff",
+            fontSize: 'var(--fs-sm)', fontWeight: 700, color: "#fff",
           }}>
             {displayName[0].toUpperCase()}
           </div>
           <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{displayName}</span>
-          <span style={{ fontSize: 12, color: gradeCol }}>{gradeEm}</span>
-          <span style={{ fontSize: 10, color: gradeCol, fontWeight: 600 }}>{gradeTitle(post.author?.grade ?? 1)}</span>
-          <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--text-tertiary)" }}>
+          <span style={{ fontSize: 'var(--fs-sm)', color: gradeCol }}>{gradeEm}</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: gradeCol, fontWeight: 600 }}>{gradeTitle(post.author?.grade ?? 1)}</span>
+          <span style={{ marginLeft: "auto", fontSize: 'var(--fs-sm)', color: "var(--text-tertiary)" }}>
             {timeAgo(post.created_at)}
           </span>
         </div>
@@ -85,7 +85,7 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
       {/* Footer */}
       <div style={{
         display: "flex", alignItems: "center", gap: 14,
-        fontSize: 12, color: "var(--text-tertiary)",
+        fontSize: 'var(--fs-sm)', color: "var(--text-tertiary)",
       }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Heart size={14} /> {post.likes_count}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MessageCircle size={14} /> {post.comments_count}</span>

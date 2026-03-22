@@ -31,7 +31,7 @@ export default function FeedbackButton() {
         color: 'var(--text-inverse)',
         border: 'none',
         cursor: 'pointer',
-        fontSize: 24,
+        fontSize: 'var(--fs-2xl)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
         display: 'flex',
         alignItems: 'center',

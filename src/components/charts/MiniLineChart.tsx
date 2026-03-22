@@ -50,7 +50,7 @@ export default function MiniLineChart({
 
   return (
     <div>
-      {title && <div style={{ fontSize: 12, fontWeight: 700, color: '#1e293b', marginBottom: 6 }}>{title}</div>}
+      {title && <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#1e293b', marginBottom: 6 }}>{title}</div>}
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height }}>
         {/* Grid lines */}
         {[0.25, 0.5, 0.75].map(pct => (

@@ -46,7 +46,7 @@ export default function AdminQuickPanel() {
         padding: '8px 14px', borderRadius: 10, border: '1px solid var(--border)',
         background: loading === label ? 'var(--bg-hover)' : 'transparent',
         color: loading === label ? 'var(--text-tertiary)' : color,
-        fontSize: 12, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+        fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
         opacity: loading && loading !== label ? 0.5 : 1,
       }}>
       {loading === label ? '...' : label}
@@ -55,16 +55,16 @@ export default function AdminQuickPanel() {
 
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '16px 20px', marginBottom: 16 }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>빠른 관리</div>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>빠른 관리</div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {btn('전체 새로고침', refreshAll)}
         {btn('시드 게시글', () => triggerCron('/api/cron/seed-posts', '시드 게시글'))}
         {btn('시드 댓글', () => triggerCron('/api/cron/seed-comments', '시드 댓글'))}
         {btn('주식 시세', () => triggerCron('/api/stock-refresh', '주식 시세'))}
       </div>
-      {msg && <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{msg}</div>}
+      {msg && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 8 }}>{msg}</div>}
       {results && (
-        <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <div style={{ marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           {results.map(r => (
             <span key={r.name} style={{ marginRight: 12 }}>
               {r.ok ? '✓' : '✗'} {r.name}

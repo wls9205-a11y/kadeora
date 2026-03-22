@@ -31,11 +31,11 @@ export default function PushNudgeBanner() {
   return (
     <div style={{ background: 'linear-gradient(135deg, rgba(255,69,0,0.12), rgba(255,100,0,0.06))', border: '1px solid rgba(255,69,0,0.25)', borderRadius: 12, padding: '12px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>🔔 새 글 알림 받기</div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>놓치는 소식 없이 받아보세요</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🔔 새 글 알림 받기</div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2 }}>놓치는 소식 없이 받아보세요</div>
       </div>
-      <button onClick={handleEnable} style={{ padding: '7px 14px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>알림 설정</button>
-      <button onClick={() => { localStorage.setItem('push_nudge_dismissed_at', String(Date.now())); setShow(false); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}>나중에</button>
+      <button onClick={handleEnable} style={{ padding: '7px 14px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>알림 설정</button>
+      <button onClick={() => { localStorage.setItem('push_nudge_dismissed_at', String(Date.now())); setShow(false); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', flexShrink: 0 }}>나중에</button>
     </div>
   );
 }

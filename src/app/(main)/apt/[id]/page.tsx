@@ -82,24 +82,24 @@ export default async function AptDetailPage({ params }: Props) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* 헤더 */}
-      <Link href="/apt" style={{ fontSize: 13, color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>← 부동산</Link>
+      <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>← 부동산</Link>
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}>{badge.label}</span>
-          {status === 'upcoming' && dday !== null && dday >= 0 && <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)' }}>D-{dday}</span>}
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}>{badge.label}</span>
+          {status === 'upcoming' && dday !== null && dday >= 0 && <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>D-{dday}</span>}
           {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 10 }}>{Number(apt.competition_rate_1st).toFixed(1)}:1</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 10 }}>{Number(apt.competition_rate_1st).toFixed(1)}:1</span>
           )}
         </div>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{apt.house_nm}</h1>
-        <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{apt.region_nm} · {apt.hssply_adres}{apt.tot_supply_hshld_co ? ` · ${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : ''}</div>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{apt.house_nm}</h1>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{apt.region_nm} · {apt.hssply_adres}{apt.tot_supply_hshld_co ? ` · ${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : ''}</div>
       </div>
 
       {/* 공유 + 청약홈 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <ShareButtons title={`${apt.house_nm} 청약`} postId={id} />
         <a href={apt.pblanc_url || 'https://www.applyhome.co.kr'} target="_blank" rel="noopener noreferrer"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(59,130,246,0.2)' }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(59,130,246,0.2)' }}>
           🏠 청약홈
         </a>
         <AptBookmarkButton aptId={apt.id} isLoggedIn={!!aptUser} />
@@ -107,11 +107,11 @@ export default async function AptDetailPage({ params }: Props) {
 
       {/* 분양 일정 */}
       <div style={card}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📅 분양 일정</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📅 분양 일정</div>
         {rows.map(([label, value], i) => (
           <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{label}</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{value}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{label}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{value}</span>
           </div>
         ))}
       </div>
@@ -119,20 +119,20 @@ export default async function AptDetailPage({ params }: Props) {
       {/* 경쟁률 */}
       {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
         <div style={{ ...card, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏆 청약 경쟁률</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: '#818cf8' }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 13, color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏆 청약 경쟁률</div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#818cf8' }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
         </div>
       )}
 
       {/* 위치 */}
       <div style={card}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 교통</div>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 10 }}>{apt.hssply_adres}</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 교통</div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 10 }}>{apt.hssply_adres}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <a href={`https://map.kakao.com/?q=${encodeURIComponent(apt.hssply_adres || apt.house_nm)}`} target="_blank" rel="noopener noreferrer"
-            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>카카오맵</a>
+            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>카카오맵</a>
           <a href={`https://map.naver.com/search/${encodeURIComponent(apt.hssply_adres || apt.house_nm)}`} target="_blank" rel="noopener noreferrer"
-            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>네이버지도</a>
+            style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>네이버지도</a>
         </div>
       </div>
 
@@ -144,11 +144,11 @@ export default async function AptDetailPage({ params }: Props) {
       {/* 관련 게시글 */}
       {relatedPosts.length > 0 && (
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
           {relatedPosts.map((rp: any) => (
             <Link key={rp.id} href={`/feed/${rp.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{rp.title}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{new Date(rp.created_at).toLocaleDateString('ko-KR')}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{rp.title}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{new Date(rp.created_at).toLocaleDateString('ko-KR')}</div>
             </Link>
           ))}
         </div>

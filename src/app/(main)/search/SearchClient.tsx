@@ -219,7 +219,7 @@ export default function SearchClient() {
   };
 
   const acSectionHeader = (label: string) => (
-    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', padding: '8px 12px', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)', padding: '8px 12px', textTransform: 'uppercase', letterSpacing: 0.5 }}>
       {label}
     </div>
   );
@@ -233,7 +233,7 @@ export default function SearchClient() {
   return (
     <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <h1 style={{ margin: '0 0 20px', fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
+      <h1 style={{ margin: '0 0 20px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
 
       {/* Search input */}
       <div style={{ position: 'relative', marginBottom: 16 }}>
@@ -245,15 +245,15 @@ export default function SearchClient() {
           onFocus={() => { if (inputVal.length >= 2) setAcOpen(true); }}
           placeholder="검색어를 입력하세요 (2글자 이상)"
           className="kd-input"
-          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingLeft: 44, fontSize: 16, padding: '14px 14px 14px 44px' }}
+          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingLeft: 44, fontSize: 'var(--fs-base)', padding: '14px 14px 14px 44px' }}
           autoFocus
         />
-        <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 18, pointerEvents: 'none' }}>🔍</span>
+        <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-lg)', pointerEvents: 'none' }}>🔍</span>
         {inputVal && (
           <button
             onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); }}
             aria-label="검색어 지우기"
-            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18 }}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}
           >✕</button>
         )}
 
@@ -283,7 +283,7 @@ export default function SearchClient() {
             )}
 
             {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && results.length === 0 && (
-              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>🔍 검색 결과가 없어요</div>
+              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>🔍 검색 결과가 없어요</div>
             )}
 
             {/* Stocks section */}
@@ -300,15 +300,15 @@ export default function SearchClient() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{highlight(stock.name, inputVal)}</span>
-                        {stock.currency === 'USD' && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 2, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, marginLeft: 4 }}>해외</span>}
-                        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{highlight(stock.symbol, inputVal)}</span>
-                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>{stock.market}</span>
+                        <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(stock.name, inputVal)}</span>
+                        {stock.currency === 'USD' && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 4px', borderRadius: 2, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700, marginLeft: 4 }}>해외</span>}
+                        <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{highlight(stock.symbol, inputVal)}</span>
+                        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{stock.market}</span>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{stock.currency === 'USD' ? `$${stock.price}` : `₩${stock.price?.toLocaleString()}`}</span>
+                        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{stock.currency === 'USD' ? `$${stock.price}` : `₩${stock.price?.toLocaleString()}`}</span>
                         {stock.change_pct != null && (
-                          <span style={{ fontSize: 12, marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #EF4444)', fontWeight: 600 }}>
+                          <span style={{ fontSize: 'var(--fs-sm)', marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #EF4444)', fontWeight: 600 }}>
                             {stock.change_pct >= 0 ? '+' : ''}{(stock.change_pct ?? 0).toFixed(2)}%
                           </span>
                         )}
@@ -331,8 +331,8 @@ export default function SearchClient() {
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{highlight(apt.house_nm, inputVal)}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                    <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(apt.house_nm, inputVal)}</div>
+                    <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                       {highlight(apt.region_nm, inputVal)}
                       {apt.rcept_bgnde && <span style={{ marginLeft: 8 }}>{apt.rcept_bgnde} ~ {apt.rcept_endde}</span>}
                     </div>
@@ -356,8 +356,8 @@ export default function SearchClient() {
                       onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                        <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {highlight(post.title, inputVal)}
                         </span>
                       </div>
@@ -377,12 +377,12 @@ export default function SearchClient() {
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}>📝 블로그</span>
-                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}>📝 블로그</span>
+                      <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {highlight(blog.title, inputVal)}
                       </span>
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                       👀 {blog.view_count}
                     </div>
                   </div>
@@ -401,7 +401,7 @@ export default function SearchClient() {
         {[['all', '전체'], ['stock', '주식'], ['apt', '청약'], ['free', '자유']].map(([k, l]) => (
           <button key={k} onClick={() => { setCategory(k); setPage(0); }}
             style={{
-              padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
               background: category === k ? 'var(--brand)' : 'var(--bg-surface)',
               color: category === k ? 'var(--text-inverse)' : 'var(--text-secondary)',
               border: `1px solid ${category === k ? 'var(--brand)' : 'var(--border)'}`,
@@ -413,7 +413,7 @@ export default function SearchClient() {
 
       {/* Results header */}
       {query.length >= 2 && (
-        <div style={{ marginBottom: 14, fontSize: 13, color: 'var(--text-secondary)' }}>
+        <div style={{ marginBottom: 14, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
           {loading && results.length === 0
             ? '검색 중...'
             : total > 0
@@ -437,16 +437,16 @@ export default function SearchClient() {
                 onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                  <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
-                <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {highlight(post.title, query)}
                 </h3>
-                <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                <p style={{ margin: '0 0 10px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                   {highlight(post.content.slice(0, 200), query)}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)' }}>
+                <div style={{ display: 'flex', gap: 12, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
                   <span>조회수 {post.view_count}</span>
                   <span>❤️ {post.likes_count}</span>
                   <span>💬 {post.comments_count}</span>
@@ -473,10 +473,10 @@ export default function SearchClient() {
           {recentSearches.length > 0 && (
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>최근 검색어</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>최근 검색어</span>
                 <button
                   onClick={() => { clearRecentSearches(); setRecentSearches([]); }}
-                  style={{ background: 'none', border: 'none', fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer' }}
+                  style={{ background: 'none', border: 'none', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', cursor: 'pointer' }}
                 >전체 삭제</button>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -485,7 +485,7 @@ export default function SearchClient() {
                     key={s}
                     onClick={() => { setInputVal(s); handleInputChange(s); }}
                     style={{
-                      padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      padding: '6px 14px', borderRadius: 20, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                       background: 'var(--bg-surface)', color: 'var(--text-secondary)',
                       border: '1px solid var(--border)', transition: 'all 0.15s',
                     }}
@@ -497,14 +497,14 @@ export default function SearchClient() {
 
           {/* Popular searches */}
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>인기 검색어</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>인기 검색어</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {POPULAR.map((s, i) => (
                 <button
                   key={s}
                   onClick={() => { setInputVal(s); handleInputChange(s); }}
                   style={{
-                    padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    padding: '6px 14px', borderRadius: 20, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                     background: 'var(--bg-surface)', color: 'var(--text-secondary)',
                     border: '1px solid var(--border)', transition: 'all 0.15s',
                   }}
@@ -514,7 +514,7 @@ export default function SearchClient() {
           </div>
 
           {/* Hint */}
-          <div style={{ textAlign: 'center', padding: '32px 0 0', color: 'var(--text-tertiary)', fontSize: 13 }}>
+          <div style={{ textAlign: 'center', padding: '32px 0 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
             주식, 청약, 재테크 관련 글을 검색할 수 있습니다
           </div>
         </div>

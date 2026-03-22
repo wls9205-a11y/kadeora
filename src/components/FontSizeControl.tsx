@@ -30,14 +30,14 @@ export default function FontSizeControl() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginRight: 4 }}>글자</span>
+      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginRight: 4 }}>글자</span>
       {SIZES.map(s => (
         <button
           key={s.value}
           onClick={() => change(s.value)}
           style={{
             padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-            fontSize: 11, fontWeight: size === s.value ? 700 : 400,
+            fontSize: 'var(--fs-xs)', fontWeight: size === s.value ? 700 : 400,
             background: size === s.value ? 'var(--brand)' : 'var(--bg-hover)',
             color: size === s.value ? '#fff' : 'var(--text-tertiary)',
           }}

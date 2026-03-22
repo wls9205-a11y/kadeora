@@ -33,23 +33,23 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>👀</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
               더 보려면 가입하세요
             </div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
               주식 시세 · 청약 알림 · 실시간 토론<br />
               무료로 모든 기능을 이용할 수 있어요
             </div>
             <Link href="/login" style={{
               display: 'block', padding: '12px 0', borderRadius: 12,
-              background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 15,
+              background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-md)',
               textDecoration: 'none', marginBottom: 10,
             }}>
               카카오로 3초 가입
             </Link>
             <button onClick={() => setShowGate(false)} style={{
               background: 'none', border: 'none', color: 'var(--text-tertiary)',
-              fontSize: 13, cursor: 'pointer', padding: '8px 0',
+              fontSize: 'var(--fs-sm)', cursor: 'pointer', padding: '8px 0',
             }}>
               나중에 할게요
             </button>

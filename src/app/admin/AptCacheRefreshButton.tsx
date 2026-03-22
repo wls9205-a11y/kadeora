@@ -45,14 +45,14 @@ export default function AptCacheRefreshButton({ hasKey }: { hasKey: boolean }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+      <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
         부동산 데이터 갱신
       </h2>
-      <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12 }}>
         청약홈 API에서 최신 데이터를 가져와 apt_cache 테이블에 저장합니다.
       </div>
       {!hasKey && (
-        <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 8, padding: '8px 12px', background: 'var(--warning-bg)', borderRadius: 8, border: '1px solid var(--warning)' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--warning)', marginBottom: 8, padding: '8px 12px', background: 'var(--warning-bg)', borderRadius: 8, border: '1px solid var(--warning)' }}>
           APT_DATA_API_KEY 환경변수가 설정되지 않았습니다. data.go.kr에서 발급 후 등록하세요.
         </div>
       )}
@@ -65,7 +65,7 @@ export default function AptCacheRefreshButton({ hasKey }: { hasKey: boolean }) {
           border: 'none',
           background: refreshing ? 'var(--bg-hover)' : 'var(--brand)',
           color: refreshing ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-          fontSize: 13,
+          fontSize: 'var(--fs-sm)',
           fontWeight: 700,
           cursor: refreshing || !hasKey ? 'not-allowed' : 'pointer',
           opacity: !hasKey ? 0.5 : 1,
@@ -77,7 +77,7 @@ export default function AptCacheRefreshButton({ hasKey }: { hasKey: boolean }) {
         <p
           style={{
             marginTop: 8,
-            fontSize: 13,
+            fontSize: 'var(--fs-sm)',
             color: result.includes('완료') ? 'var(--success)' : 'var(--error)',
             fontWeight: 600,
           }}

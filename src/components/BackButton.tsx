@@ -6,7 +6,7 @@ export default function BackButton({ label = '← 뒤로' }: { label?: string })
   return (
     <button onClick={() => router.back()} style={{
       display: 'inline-flex', alignItems: 'center', gap: 6,
-      fontSize: 14, color: 'var(--text-secondary)',
+      fontSize: 'var(--fs-base)', color: 'var(--text-secondary)',
       background: 'var(--bg-hover)', border: 'none',
       borderRadius: 8, padding: '8px 12px', cursor: 'pointer', marginBottom: 16,
     }}>{label}</button>

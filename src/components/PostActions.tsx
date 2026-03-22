@@ -21,11 +21,11 @@ export default function PostActions({ postId, isOwner }: { postId: number; isOwn
 
   return (
     <div style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 20, padding: '4px 8px' }}>⋯</button>
+      <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xl)', padding: '4px 8px' }}>⋯</button>
       {open && (
         <div style={{ position: 'absolute', right: 0, top: 32, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', minWidth: 120, zIndex: 50, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
-          <button onClick={() => { router.push(`/write?edit=${postId}`); setOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--text-primary)', textAlign: 'left' }}>✏️ 수정</button>
-          <button onClick={() => { handleDelete(); setOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#ef4444', textAlign: 'left', borderTop: '1px solid var(--border)' }}>🗑️ 삭제</button>
+          <button onClick={() => { router.push(`/write?edit=${postId}`); setOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-base)', color: 'var(--text-primary)', textAlign: 'left' }}>✏️ 수정</button>
+          <button onClick={() => { handleDelete(); setOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-base)', color: '#ef4444', textAlign: 'left', borderTop: '1px solid var(--border)' }}>🗑️ 삭제</button>
         </div>
       )}
     </div>

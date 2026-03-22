@@ -102,7 +102,7 @@ export default function AdminBlogPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>블로그 관리</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>블로그 관리</h1>
 
       {/* KPI */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
@@ -113,16 +113,16 @@ export default function AdminBlogPage() {
           { label: '카테고리', value: cats.length },
         ].map(k => (
           <div key={k.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, textAlign: 'center' }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: (k as any).color ?? 'var(--text-primary)' }}>{k.value}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{k.label}</div>
-            {(k as any).sub && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{(k as any).sub}</div>}
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: (k as any).color ?? 'var(--text-primary)' }}>{k.value}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{k.label}</div>
+            {(k as any).sub && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{(k as any).sub}</div>}
           </div>
         ))}
       </div>
 
       {/* 크론 버튼 6개 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>블로그 자동 생성</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>블로그 자동 생성</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           {CRON_BUTTONS.map(btn => (
             <button key={btn.key} onClick={() => runCron(btn.key)} disabled={!!running}
@@ -133,34 +133,34 @@ export default function AdminBlogPage() {
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                 opacity: running && running !== btn.key ? 0.5 : 1,
               }}>
-              <span style={{ fontSize: 22 }}>{btn.icon}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{btn.label}</span>
-              {running === btn.key && <span style={{ fontSize: 10, color: 'var(--brand)' }}>생성 중...</span>}
+              <span style={{ fontSize: 'var(--fs-xl)' }}>{btn.icon}</span>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{btn.label}</span>
+              {running === btn.key && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)' }}>생성 중...</span>}
             </button>
           ))}
         </div>
-        {msg && <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 10, textAlign: 'center' }}>{msg}</div>}
+        {msg && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 10, textAlign: 'center' }}>{msg}</div>}
       </div>
 
       {/* 카테고리 필터 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto' }}>
-        <button onClick={() => setCatFilter('all')} style={{ padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: catFilter === 'all' ? 700 : 500, background: catFilter === 'all' ? 'var(--text-primary)' : 'var(--bg-hover)', color: catFilter === 'all' ? 'var(--bg-base)' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}>전체 ({total})</button>
+        <button onClick={() => setCatFilter('all')} style={{ padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: catFilter === 'all' ? 700 : 500, background: catFilter === 'all' ? 'var(--text-primary)' : 'var(--bg-hover)', color: catFilter === 'all' ? 'var(--bg-base)' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}>전체 ({total})</button>
         {cats.map(c => (
-          <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: catFilter === c ? 700 : 500, background: catFilter === c ? 'var(--text-primary)' : 'var(--bg-hover)', color: catFilter === c ? 'var(--bg-base)' : 'var(--text-secondary)', border: 'none', cursor: 'pointer', flexShrink: 0 }}>{c} ({posts.filter(p => p.category === c).length})</button>
+          <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: catFilter === c ? 700 : 500, background: catFilter === c ? 'var(--text-primary)' : 'var(--bg-hover)', color: catFilter === c ? 'var(--bg-base)' : 'var(--text-secondary)', border: 'none', cursor: 'pointer', flexShrink: 0 }}>{c} ({posts.filter(p => p.category === c).length})</button>
         ))}
       </div>
 
       {/* 목록 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
           <thead>
             <tr style={{ background: 'var(--bg-hover)', textAlign: 'left' }}>
-              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11, color: 'var(--text-tertiary)' }}>제목</th>
-              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11, color: 'var(--text-tertiary)' }}>분류</th>
-              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11, color: 'var(--text-tertiary)' }}>글자</th>
-              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11, color: 'var(--text-tertiary)' }}>조회</th>
-              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11, color: 'var(--text-tertiary)' }}>날짜</th>
-              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 11, color: 'var(--text-tertiary)' }}></th>
+              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>제목</th>
+              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>분류</th>
+              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>글자</th>
+              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>조회</th>
+              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>날짜</th>
+              <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}></th>
             </tr>
           </thead>
           <tbody>
@@ -173,12 +173,12 @@ export default function AdminBlogPage() {
                 <td style={{ padding: '10px 12px', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   <a href={`/blog/${p.slug}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 500 }}>{p.title}</a>
                 </td>
-                <td style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontSize: 11 }}>{p.category}</td>
-                <td style={{ padding: '10px 12px', color: (p.content_length ?? 0) >= 1500 ? '#10b981' : '#ef4444', fontSize: 11, fontWeight: 700 }}>{(p.content_length ?? 0).toLocaleString()}</td>
-                <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', fontSize: 11 }}>{p.view_count}</td>
-                <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', fontSize: 11, whiteSpace: 'nowrap' }}>{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
+                <td style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)' }}>{p.category}</td>
+                <td style={{ padding: '10px 12px', color: (p.content_length ?? 0) >= 1500 ? '#10b981' : '#ef4444', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{(p.content_length ?? 0).toLocaleString()}</td>
+                <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{p.view_count}</td>
+                <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', whiteSpace: 'nowrap' }}>{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
                 <td style={{ padding: '10px 12px' }}>
-                  <button onClick={() => deletePost(p.id)} style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
+                  <button onClick={() => deletePost(p.id)} style={{ fontSize: 'var(--fs-xs)', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
                 </td>
               </tr>
             ))}

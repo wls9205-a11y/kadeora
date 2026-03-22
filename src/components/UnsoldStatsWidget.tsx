@@ -38,7 +38,7 @@ export default function UnsoldStatsWidget() {
             style={{
               padding: '4px 12px',
               borderRadius: 16,
-              fontSize: 12,
+              fontSize: 'var(--fs-sm)',
               fontWeight: 600,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
@@ -88,17 +88,17 @@ export default function UnsoldStatsWidget() {
           padding: '16px',
         }}>
           <div style={{
-            fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8,
+            fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8,
           }}>
             {'\uD83D\uDCCA'} {stats.region} 미분양 현황
           </div>
           <div style={{
-            fontSize: 22, fontWeight: 800, color: '#f87171', marginBottom: 6,
+            fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#f87171', marginBottom: 6,
           }}>
             월평균 {stats.monthlyAvg.toLocaleString()}세대
           </div>
           <div style={{
-            display: 'flex', gap: 16, fontSize: 12, color: 'var(--text-tertiary)',
+            display: 'flex', gap: 16, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)',
           }}>
             <span>총 {stats.totalUnits.toLocaleString()}세대</span>
             <span>{stats.siteCount}개 현장</span>

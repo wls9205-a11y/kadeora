@@ -54,18 +54,18 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', maxHeight: '70vh', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s ease' }}>
         <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 12px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>✏️ {houseNm} 한줄평</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 18, cursor: 'pointer' }}>×</button>
+          <span style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>✏️ {houseNm} 한줄평</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>×</button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', marginBottom: 12 }}>
-          {comments.length === 0 && <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-tertiary)', fontSize: 14 }}>첫 한줄평을 남겨보세요! 👋</div>}
+          {comments.length === 0 && <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>첫 한줄평을 남겨보세요! 👋</div>}
           {comments.map((c: any) => (
             <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)' }}>{c.nickname}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{c.nickname}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
               </div>
-              <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
+              <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
             </div>
           ))}
         </div>
@@ -73,15 +73,15 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
           <div>
             <div style={{ position: 'relative' }}>
               <textarea value={text} onChange={e => setText(e.target.value.slice(0, 200))} rows={2} maxLength={200} placeholder="이 현장 어때요? (200자)"
-                style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
-              <span style={{ position: 'absolute', right: 10, bottom: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>{text.length}/200</span>
+                style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              <span style={{ position: 'absolute', right: 10, bottom: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{text.length}/200</span>
             </div>
-            <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 8, width: '100%', padding: '10px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
+            <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 8, width: '100%', padding: '10px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 8, fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
               {sending ? '등록 중...' : '등록'}
             </button>
           </div>
         ) : (
-          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: 12 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 12 }}>
             <a href="/login" style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요
           </div>
         )}

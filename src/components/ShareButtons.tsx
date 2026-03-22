@@ -80,18 +80,18 @@ export default function ShareButtons({ title, postId, content }: Props) {
           <div onClick={() => setOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
           <div style={{ position: 'relative', background: 'var(--bg-surface)', zIndex: 1, borderRadius: '20px 20px 0 0', padding: '20px 24px 40px', maxWidth: 480, width: '100%', margin: '0 auto' }}>
             <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 20px' }} />
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>공유하기</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>공유하기</div>
             <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
               {PLATFORMS.map(p => (
                 <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 60 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? '#10b981' : p.bg, color: p.color, fontSize: 22, fontWeight: 900 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? '#10b981' : p.bg, color: p.color, fontSize: 'var(--fs-xl)', fontWeight: 900 }}>
                     {p.id === 'copy' && copied ? '✓' : p.emoji}
                   </div>
-                  <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>
                 </button>
               ))}
             </div>
-            <div style={{ marginTop: 20, padding: '10px 14px', background: 'var(--bg-hover)', borderRadius: 8, fontSize: 12, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</div>
+            <div style={{ marginTop: 20, padding: '10px 14px', background: 'var(--bg-hover)', borderRadius: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</div>
           </div>
         </div>
       )}

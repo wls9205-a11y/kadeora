@@ -45,7 +45,7 @@ export default function AptBookmarkButton({ aptId, isLoggedIn }: Props) {
       disabled={loading}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4,
-        padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600,
+        padding: '4px 10px', borderRadius: 8, fontSize: 'var(--fs-xs)', fontWeight: 600,
         cursor: loading ? 'not-allowed' : 'pointer',
         border: bookmarked ? '1px solid rgba(249,115,22,0.3)' : '1px solid var(--border)',
         background: bookmarked ? 'rgba(249,115,22,0.12)' : 'var(--bg-hover)',

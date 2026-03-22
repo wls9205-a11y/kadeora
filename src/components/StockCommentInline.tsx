@@ -67,7 +67,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
 
   return (
     <div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
         💬 {stockName} 한줄평
       </div>
 
@@ -79,7 +79,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
             onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
             placeholder="한줄평 남기기 (100자)"
             style={{
-              flex: 1, padding: '8px 12px', fontSize: 13, borderRadius: 8,
+              flex: 1, padding: '8px 12px', fontSize: 'var(--fs-sm)', borderRadius: 8,
               border: '1px solid var(--border)', background: 'var(--bg-base)',
               color: 'var(--text-primary)', boxSizing: 'border-box',
             }}
@@ -88,7 +88,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
             onClick={handleSend}
             disabled={sending || !input.trim()}
             style={{
-              padding: '8px 14px', borderRadius: 8, border: 'none', fontSize: 12,
+              padding: '8px 14px', borderRadius: 8, border: 'none', fontSize: 'var(--fs-sm)',
               fontWeight: 700, cursor: 'pointer', flexShrink: 0,
               background: 'var(--brand)', color: 'var(--text-inverse)',
               opacity: sending || !input.trim() ? 0.5 : 1,
@@ -96,33 +96,33 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
           >{sending ? '...' : '등록'}</button>
         </div>
       ) : (
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>
           <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>로그인</a>하고 한줄평을 남겨보세요
         </div>
       )}
 
       {comments.length === 0 ? (
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', padding: 16 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 16 }}>
           아직 한줄평이 없어요. 첫 번째 한줄평을 남겨보세요!
         </div>
       ) : (
         comments.map(c => {
           const nick = (c.profiles as any)?.nickname ?? '사용자';
           return (
-            <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+            <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{
                     width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
                     background: avatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700, color: '#fff',
+                    fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff',
                   }}>{nick[0]}</div>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
                   {userId === c.author_id && (
-                    <button onClick={() => deleteComment(c.id)} style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
+                    <button onClick={() => deleteComment(c.id)} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
                   )}
                 </div>
               </div>

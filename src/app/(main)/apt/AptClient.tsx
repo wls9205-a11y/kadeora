@@ -13,7 +13,7 @@ function isNew(item: any, type: string): boolean {
   if (!ts) return false;
   return Date.now() - new Date(ts).getTime() < h * 60 * 60 * 1000;
 }
-const NewBadge = () => <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: '#ef4444', color: '#fff', marginRight: 4, animation: 'pulse 2s infinite' }}>NEW</span>;
+const NewBadge = () => <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: '#ef4444', color: '#fff', marginRight: 4, animation: 'pulse 2s infinite' }}>NEW</span>;
 
 
 interface Apt {
@@ -138,7 +138,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 8 }}>
           <a href="/apt/diagnose" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(255,91,54,0.08)', border: '1px solid rgba(255,91,54,0.15)' }}>🎯 가점진단</a>
           <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>🏠 청약홈</a>
@@ -215,7 +215,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 background: region === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               }}>
-                <span style={{ fontSize: 16, fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--brand)' }}>{apts.length}</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--brand)' }}>{apts.length}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
               </button>
               {regionStats.map(r => (
@@ -225,7 +225,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   background: region === r.name ? 'var(--brand)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: region === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                   <div style={{ fontSize: 8, display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
                     {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : '#22c55e' }}>접수{r.open}</span>}
@@ -264,7 +264,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 cells.push({ day: d, apts: dayApts });
               }
               return (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, fontSize: 11 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, fontSize: 'var(--fs-xs)' }}>
                   {['일', '월', '화', '수', '목', '금', '토'].map(d => (
                     <div key={d} style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontWeight: 700, padding: 4 }}>{d}</div>
                   ))}
@@ -340,7 +340,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>투기과열</span>}
                   {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(249,115,22,0.12)', color: '#fdba74', border: '1px solid rgba(249,115,22,0.2)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
-                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 20, background: watchlist.has(`subscription:${apt.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`subscription:${apt.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
                     {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}
                   </button>
                 </div>
@@ -380,7 +380,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 미분양 탭 ━━━ */}
       {activeTab === 'unsold' && (() => {
-        if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏚️ 미분양 데이터를 수집 중입니다<br/><span style={{ fontSize: 12 }}>매월 국토교통부 통계 업데이트 시 반영됩니다</span></div>;
+        if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏚️ 미분양 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>매월 국토교통부 통계 업데이트 시 반영됩니다</span></div>;
         const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
         const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
@@ -405,19 +405,19 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전국</div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--brand)' }}>{(us.total || total).toLocaleString()}호</div>
+                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{(us.total || total).toLocaleString()}호</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>준공후(악성)</div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: '#ef4444' }}>{(us.after_completion || 0).toLocaleString()}호</div>
+                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#ef4444' }}>{(us.after_completion || 0).toLocaleString()}호</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>수도권</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{(us.capital || 0).toLocaleString()}</div>
+                    <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{(us.capital || 0).toLocaleString()}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지방</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{(us.local || 0).toLocaleString()}</div>
+                    <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{(us.local || 0).toLocaleString()}</div>
                   </div>
                 </div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>{us.month ? `${us.month.slice(0,4)}.${us.month.slice(4)}` : us.year ? `${us.year}년` : ''} 기준 · 국토교통부 통계누리</div>
@@ -555,10 +555,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 >
                   {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
+                    <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
                     <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
                     {priceStr && <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 20, background: watchlist.has(`unsold:${u.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
                       {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
@@ -597,7 +597,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 재개발·재건축 탭 ━━━ */}
       {activeTab === 'redev' && (() => {
-        if (!redevelopment.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏗️ 재개발·재건축 데이터를 수집 중입니다<br/><span style={{ fontSize: 12 }}>각 지자체 정비사업 데이터 연동 시 표시됩니다</span></div>;
+        if (!redevelopment.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏗️ 재개발·재건축 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>각 지자체 정비사업 데이터 연동 시 표시됩니다</span></div>;
 
         const redevCount = redevelopment.filter((r: any) => r.project_type === '재개발').length;
         const rebuildCount = redevelopment.filter((r: any) => r.project_type === '재건축').length;
@@ -640,15 +640,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 현황 요약 */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전체</div>
               </div>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#3b82f6' }}>{redevCount}</div>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#3b82f6' }}>{redevCount}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>재개발</div>
               </div>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#f97316' }}>{rebuildCount}</div>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#f97316' }}>{rebuildCount}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>재건축</div>
               </div>
             </div>
@@ -665,8 +665,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   return (
                     <div key={stage} onClick={() => { setRedevStage(stage === redevStage ? '전체' : stage); setRedevPage(1); }} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 8, background: redevStage === stage ? sc.border : sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50, cursor: 'pointer', opacity: redevStage !== '전체' && redevStage !== stage ? 0.5 : 1 }}>
                       <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: sc.color }}>{stage.replace('인가', '')}</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: sc.color, margin: '4px 0' }}>{count}</div>
-                      <div style={{ fontSize: 9, color: sc.color, opacity: 0.7 }}>{pct}%</div>
+                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: sc.color, margin: '4px 0' }}>{count}</div>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: sc.color, opacity: 0.7 }}>{pct}%</div>
                       {i < STAGE_ORDER.length - 1 && <div style={{ position: 'absolute', right: -6, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>→</div>}
                     </div>
                   );
@@ -687,7 +687,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   background: redevRegion === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: redevRegion === '전체' ? '#fff' : 'var(--brand)' }}>{redevelopment.length}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? '#fff' : 'var(--brand)' }}>{redevelopment.length}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
                   <span style={{ fontSize: 8, color: redevRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{totalHouseholds.toLocaleString()}세대</span>
                 </button>
@@ -698,7 +698,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     background: redevRegion === r.name ? 'var(--brand)' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
-                    <span style={{ fontSize: 16, fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                     <div style={{ fontSize: 8, display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
                       {r.redev > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : '#3b82f6' }}>개발{r.redev}</span>}
@@ -748,7 +748,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74', border: `1px solid ${r.project_type === '재개발' ? 'rgba(59,130,246,0.2)' : 'rgba(249,115,22,0.2)'}` }}>{r.project_type}</span>
                     <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{r.region}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 20, background: watchlist.has(`redev:${r.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`redev:${r.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
                       {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
@@ -790,7 +790,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 실거래가 탭 ━━━ */}
       {activeTab === 'trade' && (() => {
-        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>💰 실거래가 데이터를 수집 중입니다<br/><span style={{ fontSize: 12 }}>국토교통부 실거래가 API에서 주기적으로 수집합니다</span></div>;
+        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>💰 실거래가 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>국토교통부 실거래가 API에서 주기적으로 수집합니다</span></div>;
 
         const tradeRegs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
         const filteredTrades = tradeRegion === '전체' ? transactions : transactions.filter((t: any) => t.region_nm === tradeRegion);
@@ -822,15 +822,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 최근 거래 현황</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래 건수</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 거래가</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{Object.keys(regionAvgs).length}</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{Object.keys(regionAvgs).length}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 수</div>
                 </div>
               </div>
@@ -929,7 +929,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     {isNew(t, 'transaction') && <NewBadge />}
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}>{t.trade_type || '매매'}</span>
                     <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{t.region_nm} {t.sigungu}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 20, background: watchlist.has(`transaction:${t.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`transaction:${t.id}`) ? 'rgba(234,179,8,0.15)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
                       {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
@@ -978,11 +978,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74' }}>{r.project_type}</span>
-                <button onClick={() => setSelectedRedev(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18, padding: 4 }}>✕</button>
+                <button onClick={() => setSelectedRedev(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)', padding: 4 }}>✕</button>
               </div>
 
               {/* 제목 */}
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}</h2>
+              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}</h2>
               {r.address && (
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 4 }}>
                   📍 {r.address}
@@ -1019,7 +1019,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                               border: isCurrent ? '2px solid var(--brand)' : 'none',
                               boxShadow: isCurrent ? '0 0 8px rgba(255,91,54,0.4)' : 'none',
                             }}>
-                              {(isPast || isCurrent) && <span style={{ color: '#fff', fontSize: 10, fontWeight: 800 }}>✓</span>}
+                              {(isPast || isCurrent) && <span style={{ color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>✓</span>}
                             </div>
                             <div style={{ fontSize: 8, color: isCurrent ? 'var(--brand)' : isPast ? 'var(--text-secondary)' : 'var(--text-tertiary)', fontWeight: isCurrent ? 800 : 400, lineHeight: 1.2 }}>
                               {stage.replace('사업시행인가', '시행인가').replace('정비구역지정', '구역지정').replace('관리처분', '관리처분')}
@@ -1040,7 +1040,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   r.expected_completion && ['🗓️ 예상 준공', r.expected_completion],
                   r.notes && ['📝 비고', r.notes],
                 ].filter(Boolean).map(([label, value]: any) => (
-                  <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+                  <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
                     <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, width: 70 }}>{label}</span>
                     <span style={{ color: 'var(--text-primary)' }}>{value}</span>
                   </div>
@@ -1084,8 +1084,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             <div style={{ position: 'relative', width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: 20 }}
               onClick={e => e.stopPropagation()}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h2 style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.apt_name}</h2>
-                <button onClick={() => setSelectedTrade(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18 }}>✕</button>
+                <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.apt_name}</h2>
+                <button onClick={() => setSelectedTrade(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
 
@@ -1111,7 +1111,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                         <circle key={i} cx={P + (i / (prices.length - 1)) * (W - P * 2)} cy={H - P - ((p - min) / range) * (H - P * 2)} r="3" fill={isUp ? '#ef4444' : '#3b82f6'} />
                       ))}
                     </svg>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
                       <span>{fmtAmt(prices[0])}</span>
                       <span>{fmtAmt(prices[prices.length - 1])}</span>
                     </div>
@@ -1121,7 +1121,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>거래 이력 ({related.length}건)</div>
               {related.map((r: any, i: number) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>
                   <span style={{ color: 'var(--text-secondary)' }}>{r.exclusive_area}㎡ · {r.floor}층</span>
                   <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmt(r.deal_amount)}</span>

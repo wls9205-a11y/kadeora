@@ -56,26 +56,26 @@ export default function RightPanel() {
               width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
               background: getAvatarColor(profile.nickname), display: 'flex',
               alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 14, fontWeight: 700,
+              color: '#fff', fontSize: 'var(--fs-base)', fontWeight: 700,
             }}>
               {profile.nickname[0]?.toUpperCase()}
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.nickname}</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.nickname}</span>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                 {GRADE_EMOJI[profile.grade] ?? '🌱'} {gradeTitle(profile.grade)} · {(profile.points ?? 0).toLocaleString()}P
               </div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             <Link href={`/profile/${profile.id}`} style={{
-              flex: 1, textAlign: 'center', fontSize: 11, fontWeight: 600, padding: '6px 0', borderRadius: 8,
+              flex: 1, textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '6px 0', borderRadius: 8,
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
             }}>내 프로필</Link>
             <Link href="/write" style={{
-              flex: 1, textAlign: 'center', fontSize: 11, fontWeight: 600, padding: '6px 0', borderRadius: 8,
+              flex: 1, textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '6px 0', borderRadius: 8,
               background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none',
             }}>글쓰기</Link>
           </div>
@@ -83,9 +83,9 @@ export default function RightPanel() {
       )}
       {isLoggedIn === false && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px', textAlign: 'center' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>카더라와 함께하세요!</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>카더라와 함께하세요!</div>
           <Link href="/login" style={{
-            display: 'block', padding: '8px 0', borderRadius: 8, fontSize: 12, fontWeight: 700,
+            display: 'block', padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none',
           }}>로그인 / 회원가입</Link>
         </div>
@@ -93,11 +93,11 @@ export default function RightPanel() {
 
       {/* 인기 검색어 (5개) */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>인기 검색어</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>인기 검색어</div>
         {display.map((item, i) => (
           <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '4px 0' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, minWidth: 14, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{i + 1}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.keyword}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, minWidth: 14, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{i + 1}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.keyword}</span>
           </Link>
         ))}
       </div>
@@ -105,23 +105,23 @@ export default function RightPanel() {
       {/* 등급 안내 (항상 펼침) */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
         <div style={{
-          padding: '10px 14px', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)',
+          padding: '10px 14px', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)',
         }}>
           등급 안내
         </div>
         <div style={{ padding: '0 14px 12px' }}>
           {GRADES.map((g, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', fontSize: 12 }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', fontSize: 'var(--fs-sm)' }}>
               <span>{g.emoji}</span>
               <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{g.title}</span>
-              <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)', fontSize: 10 }}>{g.pts}</span>
+              <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{g.pts}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* 푸터 정보 */}
-      <div style={{ padding: '8px 4px', fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+      <div style={{ padding: '8px 4px', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
         <Link href="/guide" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>가이드</Link>
         {' · '}
         <Link href="/terms" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>이용약관</Link>

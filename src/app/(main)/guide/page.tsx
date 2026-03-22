@@ -54,43 +54,43 @@ export default function GuidePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
-        <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
+        <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>
       </div>
 
       {/* 앱 설치 방법 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>📲 앱 설치 방법</h2>
+        <h2 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📲 앱 설치 방법</h2>
         {Object.entries(INSTALL_STEPS).map(([platform, steps]) => (
           <div key={platform} style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
               {platform === 'ios' ? '🍎 iPhone / iPad' : platform === 'android' ? '🤖 Android' : '💻 PC / Mac'}
             </div>
             {steps.map(s => (
               <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '6px 0' }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.title}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{s.desc}</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{s.title}</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{s.desc}</div>
                 </div>
               </div>
             ))}
           </div>
         ))}
-        <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+        <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           설치 후 혜택: 🔔 실시간 푸시 알림 · ⚡ 앱처럼 빠른 실행 · 🚫 앱스토어 다운로드 불필요
         </div>
       </div>
 
       {/* 주요 기능 소개 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>주요 기능</h2>
+        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>주요 기능</h2>
         {FEATURES.map((f, i) => (
           <div key={f.title} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < FEATURES.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: 20, flexShrink: 0, lineHeight: 1 }}>{f.icon}</span>
+            <span style={{ fontSize: 'var(--fs-xl)', flexShrink: 0, lineHeight: 1 }}>{f.icon}</span>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{f.title}</div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.5 }}>{f.desc}</div>
+              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{f.title}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.5 }}>{f.desc}</div>
             </div>
           </div>
         ))}
@@ -98,8 +98,8 @@ export default function GuidePage() {
 
       {/* 등급 안내 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>🏅 회원 등급 안내</h2>
-        <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-secondary)' }}>활동 포인트에 따라 등급이 올라갑니다</p>
+        <h2 style={{ margin: '0 0 4px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🏅 회원 등급 안내</h2>
+        <p style={{ margin: '0 0 12px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>활동 포인트에 따라 등급이 올라갑니다</p>
         {[
           { lv: 1, name: '새싹', pts: '0P', emoji: '🌱' },
           { lv: 2, name: '소문쟁이', pts: '100P', emoji: '🌿' },
@@ -113,16 +113,16 @@ export default function GuidePage() {
           { lv: 10, name: '카더라신', pts: '100,000P', emoji: '🚀' },
         ].map((g, i, arr) => (
           <div key={g.lv} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <span style={{ fontSize: 18, width: 28, textAlign: 'center' as const }}>{g.emoji}</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>Lv.{g.lv} {g.name}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{g.pts}~</span>
+            <span style={{ fontSize: 'var(--fs-lg)', width: 28, textAlign: 'center' as const }}>{g.emoji}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>Lv.{g.lv} {g.name}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{g.pts}~</span>
           </div>
         ))}
       </div>
 
       {/* 포인트 획득 방법 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>💰 포인트 획득 방법</h2>
+        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>💰 포인트 획득 방법</h2>
         {[
           { action: '출석체크', pts: '+10P', note: '7일 연속 +30P, 30일 연속 +100P' },
           { action: '게시글 작성', pts: '+5P', note: '' },
@@ -133,9 +133,9 @@ export default function GuidePage() {
           { action: '일일 초대 1등', pts: '+100P', note: '매일 가장 많이 초대한 유저' },
         ].map((p, i, arr) => (
           <div key={p.action} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>{p.action}</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)' }}>{p.pts}</span>
-            {p.note && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{p.note}</span>}
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>{p.action}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{p.pts}</span>
+            {p.note && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{p.note}</span>}
           </div>
         ))}
       </div>

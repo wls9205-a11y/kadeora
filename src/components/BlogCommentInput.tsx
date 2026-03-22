@@ -43,13 +43,13 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
           style={{
             flex: 1, background: 'var(--bg-hover)', border: '1px solid var(--border)',
             borderRadius: 12, color: 'var(--text-primary)', padding: '10px 14px',
-            fontSize: 14, resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
+            fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
           }}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
         />
         <button onClick={handleSubmit} disabled={loading || !content.trim()}
           style={{
-            padding: '10px 16px', borderRadius: 12, border: 'none', fontSize: 13, fontWeight: 700,
+            padding: '10px 16px', borderRadius: 12, border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
             color: content.trim() ? 'white' : 'var(--text-tertiary)',
             cursor: content.trim() && !loading ? 'pointer' : 'default', flexShrink: 0,
@@ -57,7 +57,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
           {loading ? '...' : '등록'}
         </button>
       </div>
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4 }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4 }}>
         {content.length}/1000
       </div>
     </div>

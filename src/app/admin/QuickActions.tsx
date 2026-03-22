@@ -18,7 +18,7 @@ export default function QuickActions() {
 
   return (
     <div style={{ marginTop: 24 }}>
-      <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--text-primary)' }}>빠른 작업</h3>
+      <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, marginBottom: 12, color: 'var(--text-primary)' }}>빠른 작업</h3>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {quickActions.map(qa => (
           <button
@@ -34,7 +34,7 @@ export default function QuickActions() {
               border: '1px solid var(--border)',
               background: 'var(--bg-surface)',
               color: 'var(--text-primary)',
-              fontSize: 13,
+              fontSize: 'var(--fs-sm)',
               fontWeight: 600,
               cursor: loadingKey === qa.key ? 'wait' : 'pointer',
             }}
