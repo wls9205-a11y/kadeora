@@ -434,6 +434,21 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             )}
 
+            {/* 미분양 지역별 TOP5 */}
+            {unsoldRegionStats.length > 0 && (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏚️ 미분양 많은 지역 TOP5</div>
+                {unsoldRegionStats.slice(0, 5).map((r, i) => (
+                  <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
+                    <span style={{ flex: 1, fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.name}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#ef4444' }}>{r.unitCount.toLocaleString()}호</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* 지역별 현황판 */}
             <div style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -818,6 +833,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         // 요약 통계
         const totalCount = filteredTrades.length;
         const avgAmount = totalCount > 0 ? Math.round(filteredTrades.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
+        const maxTrade = filteredTrades.reduce((max: any, t: any) => (!max || (t.deal_amount || 0) > (max.deal_amount || 0)) ? t : max, null as any);
+        const minTrade = filteredTrades.filter((t: any) => (t.deal_amount || 0) > 0).reduce((min: any, t: any) => (!min || (t.deal_amount || 0) < (min.deal_amount || 0)) ? t : min, null as any);
 
         function fmtAmount(amt: number): string {
           if (!amt) return '-';
@@ -839,20 +856,33 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 대시보드 */}
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 최근 거래 현황</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 10 }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래 건수</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 거래가</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균가</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#ef4444' }}>{maxTrade ? fmtAmount(maxTrade.deal_amount) : '-'}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#3b82f6' }}>{minTrade ? fmtAmount(minTrade.deal_amount) : '-'}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{Object.keys(regionAvgs).length}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 수</div>
                 </div>
               </div>
+              {maxTrade && (
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
+                  🏆 최고가: {maxTrade.apt_name} ({maxTrade.region_nm}) {maxTrade.exclusive_area}㎡ {maxTrade.floor}층
+                </div>
+              )}
               {Object.keys(regionAvgs).length > 1 && (
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {Object.entries(regionAvgs).sort((a, b) => b[1].sum / b[1].cnt - a[1].sum / a[1].cnt).slice(0, 3).map(([r, v]) => (
@@ -966,7 +996,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
                     전용 {t.exclusive_area}㎡ | <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(amt)}</strong>
                     {t.exclusive_area > 0 && amt > 0 && <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}> · 평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</span>}
-                    {' '}| {t.floor}층 | {t.deal_date}
+                    {' '}| {t.floor}층{t.built_year ? ` | ${t.built_year}년식` : ''} | {t.deal_date}
                   </div>
                 </div>
               );
