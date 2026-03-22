@@ -155,7 +155,7 @@
 
 ### 긴급
 - [ ] Vercel ERROR 배포 정리 (동시 빌드 큐 문제 — 대시보드에서 Cancel)
-- [ ] Supabase SQL Editor에서 20260322_consultant_premium.sql 마이그레이션 실행
+- [x] consultant_premium 마이그레이션 — 이미 실행됨 확인 ✅
 - [ ] 분양중 카드에 프리미엄 리스팅 골드 하이라이트 + 상담사 CTA 연동
 
 ### 관리자 수동
