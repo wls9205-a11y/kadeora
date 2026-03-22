@@ -97,6 +97,10 @@ export default function SearchClient() {
   const [acApts, setAcApts] = useState<AptResult[]>([]);
   const [acPosts, setAcPosts] = useState<PostWithProfile[]>([]);
   const [acBlogs, setAcBlogs] = useState<{ id: number; slug: string; title: string; category: string; view_count: number }[]>([]);
+  const [acRedevs, setAcRedevs] = useState<any[]>([]);
+  const [acUnsolds, setAcUnsolds] = useState<any[]>([]);
+  const [acTrades, setAcTrades] = useState<any[]>([]);
+  const [acDiscuss, setAcDiscuss] = useState<any[]>([]);
   const [acLoading, setAcLoading] = useState(false);
   const acDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -131,6 +135,10 @@ export default function SearchClient() {
       setAcApts([]);
       setAcPosts([]);
       setAcBlogs([]);
+      setAcRedevs([]);
+      setAcUnsolds([]);
+      setAcTrades([]);
+      setAcDiscuss([]);
       setAcOpen(false);
       return;
     }
@@ -142,6 +150,10 @@ export default function SearchClient() {
       setAcApts(data.apts ?? []);
       setAcPosts(data.posts ?? []);
       setAcBlogs(data.blogs ?? []);
+      setAcRedevs(data.redevelopments ?? []);
+      setAcUnsolds(data.unsolds ?? []);
+      setAcTrades(data.transactions ?? []);
+      setAcDiscuss(data.discussions ?? []);
       setAcOpen(true);
     } catch {
       setAcOpen(false);
@@ -251,7 +263,7 @@ export default function SearchClient() {
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-lg)', pointerEvents: 'none' }}>🔍</span>
         {inputVal && (
           <button
-            onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); setAcBlogs([]); }}
+            onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); setAcBlogs([]); setAcRedevs([]); setAcUnsolds([]); setAcTrades([]); setAcDiscuss([]); }}
             aria-label="검색어 지우기"
             style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}
           >✕</button>
@@ -276,13 +288,13 @@ export default function SearchClient() {
               overflowY: 'auto' as const,
             }}
           >
-            {acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && acBlogs.length === 0 && (
+            {acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && acBlogs.length === 0 && acRedevs.length === 0 && acUnsolds.length === 0 && acTrades.length === 0 && acDiscuss.length === 0 && (
               <div style={{ padding: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <div style={{ width: 20, height: 20, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
               </div>
             )}
 
-            {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && acBlogs.length === 0 && results.length === 0 && (
+            {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && acBlogs.length === 0 && acRedevs.length === 0 && acUnsolds.length === 0 && acTrades.length === 0 && acDiscuss.length === 0 && results.length === 0 && (
               <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>🔍 검색 결과가 없어요</div>
             )}
 
@@ -385,6 +397,73 @@ export default function SearchClient() {
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                       👀 {blog.view_count}
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 재개발 섹션 */}
+            {acRedevs.length > 0 && (
+              <div>
+                {acSectionHeader('재개발·재건축')}
+                {acRedevs.map((r: any) => (
+                  <div key={r.id} style={acItemStyle}
+                    onClick={() => { handleAcNavigate('/apt'); }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(251,146,60,0.15)', color: '#FB923C' }}>🏗️ {r.project_type}</span>
+                      <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(r.district_name || '', inputVal)}</span>
+                    </div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{r.region} · {r.stage}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 미분양 섹션 */}
+            {acUnsolds.length > 0 && (
+              <div>
+                {acSectionHeader('미분양')}
+                {acUnsolds.map((u: any) => (
+                  <div key={u.id} style={acItemStyle}
+                    onClick={() => handleAcNavigate(`/apt/unsold/${u.id}`)}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                    <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(u.house_nm || '', inputVal)}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{highlight(u.region_nm || '', inputVal)}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''} · {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대 미분양</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 실거래 섹션 */}
+            {acTrades.length > 0 && (
+              <div>
+                {acSectionHeader('실거래')}
+                {acTrades.map((t: any) => (
+                  <div key={t.id} style={acItemStyle}
+                    onClick={() => { handleAcNavigate('/apt'); }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                    <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(t.apt_name || '', inputVal)}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{t.region_nm} · {t.deal_amount >= 10000 ? `${(t.deal_amount / 10000).toFixed(1)}억` : `${(t.deal_amount || 0).toLocaleString()}만`} · {t.exclusive_area}㎡ · {t.deal_date}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 토론 섹션 */}
+            {acDiscuss.length > 0 && (
+              <div>
+                {acSectionHeader('토론')}
+                {acDiscuss.map((d: any) => (
+                  <div key={d.id} style={acItemStyle}
+                    onClick={() => handleAcNavigate('/discuss')}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                    <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(d.title || '', inputVal)}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>찬성 {d.vote_yes || 0} · 반대 {d.vote_no || 0}</div>
                   </div>
                 ))}
               </div>

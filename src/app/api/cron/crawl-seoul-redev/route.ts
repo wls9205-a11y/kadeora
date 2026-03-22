@@ -85,6 +85,7 @@ export async function GET(req: NextRequest) {
       sigungu: extractGu(r.PSTN_NM),
       project_type: getProjectType(r.SCLSF || '') || '재개발',
       stage: '기타',
+      total_households: (() => { const v = r.TOT_HSHLD_CO || r.HSHLD_CO || r.PLAN_HSHLD_CO || r.HO_CNT || null; const n = v ? parseInt(v) : null; return n && n > 0 && n < 100000 ? n : null; })(),
       area_sqm: parseFloat(r.AREA_CHG_AFTR || r.AREA_EXS || '0') || null,
       address: r.PSTN_NM || null,
       notes: r.SCLSF || null,
