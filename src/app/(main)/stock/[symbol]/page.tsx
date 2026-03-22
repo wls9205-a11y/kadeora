@@ -45,7 +45,7 @@ export default async function StockDetailPage({ params }: Props) {
 
   // Parallel fetch all data
   const [histR, aiR, newsR, flowR, discR, similarR] = await Promise.all([
-    sb.from('stock_price_history').select('date, close_price').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
+    sb.from('stock_price_history').select('date, close_price, open_price, high_price, low_price, volume, change_pct').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
     sb.from('stock_ai_comments').select('*').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('stock_news').select('*').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
     sb.from('stock_investor_flow').select('*').eq('symbol', symbol).order('date', { ascending: false }).limit(5),
@@ -53,11 +53,18 @@ export default async function StockDetailPage({ params }: Props) {
     s.sector ? sb.from('stock_quotes').select('symbol, name, price, change_pct, market_cap, currency').eq('sector', s.sector).neq('symbol', symbol).gt('price', 0).order('market_cap', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
   ]);
 
+  // 52주 최고/최저 (price_history에서 계산)
+  const priceHist = (histR.data || []).map((d: any) => Number(d.close_price)).filter((p: number) => p > 0);
+  const high52 = priceHist.length ? Math.max(...priceHist) : null;
+  const low52 = priceHist.length ? Math.min(...priceHist) : null;
+
   const items = [
     { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency) },
     { label: '거래량', value: s.volume ? Number(s.volume).toLocaleString() : '-' },
     { label: '섹터', value: s.sector || '-' },
-    { label: '업데이트', value: s.updated_at && !s.updated_at.startsWith('2000-01-01') ? new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-' },
+    { label: '전일대비', value: s.change_amt ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
+    ...(high52 ? [{ label: '기간 최고', value: s.currency === 'USD' ? `$${high52.toFixed(2)}` : `₩${high52.toLocaleString()}` }] : []),
+    ...(low52 ? [{ label: '기간 최저', value: s.currency === 'USD' ? `$${low52.toFixed(2)}` : `₩${low52.toLocaleString()}` }] : []),
   ];
 
   return (
@@ -91,7 +98,7 @@ export default async function StockDetailPage({ params }: Props) {
       </div>
 
       {/* 기본 정보 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
         {items.map(({ label, value }) => (
           <div key={label} style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>{label}</div>

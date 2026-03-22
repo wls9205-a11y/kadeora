@@ -189,14 +189,14 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           </div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>{briefing.summary}</div>
           {/* Top movers badges */}
-          {briefing.top_movers && (
+          {(briefing.key_movers || briefing.top_movers) && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {(briefing.top_movers.gainers || []).slice(0, 2).map((s: any) => (
+              {((briefing.key_movers || briefing.top_movers)?.gainers || []).slice(0, 2).map((s: any) => (
                 <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', color: '#22c55e', fontWeight: 600 }}>
                   ▲ {s.name} +{s.change_pct?.toFixed(1)}%
                 </span>
               ))}
-              {(briefing.top_movers.losers || []).slice(0, 2).map((s: any) => (
+              {((briefing.key_movers || briefing.top_movers)?.losers || []).slice(0, 2).map((s: any) => (
                 <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 600 }}>
                   ▼ {s.name} {s.change_pct?.toFixed(1)}%
                 </span>
@@ -338,9 +338,9 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot&&'🔥 '}{t.theme_name}</span>
-                  {th?.prev_change_pct != null && (
+                  {(th?.avg_change_rate != null || th?.prev_change_pct != null) && (
                     <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                      전일 {(th.prev_change_pct > 0 ? '+' : '')}{Number(th.prev_change_pct).toFixed(1)}%
+                      전일 {(Number(th.avg_change_rate ?? th.prev_change_pct) > 0 ? '+' : '')}{Number(th.avg_change_rate ?? th.prev_change_pct).toFixed(1)}%
                     </span>
                   )}
                 </div>

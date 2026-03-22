@@ -40,11 +40,11 @@ export async function GET(req: NextRequest) {
     }, { onConflict: 'currency_pair' });
 
     // Record history
-    await supabase.from('exchange_rate_history').upsert({
+    await supabase.from('exchange_rate_history').insert({
       currency_pair: 'USD/KRW',
-      rate_date: today,
       rate,
-    }, { onConflict: 'currency_pair,rate_date' });
+      recorded_at: new Date().toISOString(),
+    });
 
     return { processed: 1, created: 1, failed: 0, metadata: { rate, api_calls: apiCalls } };
   });

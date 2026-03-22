@@ -89,7 +89,7 @@ ${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${t.a
       title,
       summary,
       sentiment,
-      top_movers: movers,
+      key_movers: movers,
       sector_analysis: sectorAnalysis,
     }, { onConflict: 'briefing_date,market' });
 

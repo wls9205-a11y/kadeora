@@ -106,7 +106,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: signalColor }}>{signalLabel}</span>
                 </div>
-                <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.content}</p>
+                <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>
                   {new Date(aiComment.created_at).toLocaleDateString('ko-KR')} 기준 · AI 분석은 참고용
                 </div>

@@ -37,13 +37,13 @@ async function fetchBriefing() {
 
 async function fetchExchangeHistory() {
   const sb = await createSupabaseServer();
-  const since = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const since = new Date(Date.now() - 7 * 86400000).toISOString();
   const { data } = await sb
     .from('exchange_rate_history')
     .select('*')
-    .eq('pair', 'USD/KRW')
-    .gte('date', since)
-    .order('date', { ascending: true });
+    .eq('currency_pair', 'USD/KRW')
+    .gte('recorded_at', since)
+    .order('recorded_at', { ascending: true });
   return data ?? [];
 }
 
@@ -52,7 +52,7 @@ async function fetchThemeHistory() {
   const { data } = await sb
     .from('stock_theme_history')
     .select('*')
-    .order('date', { ascending: false })
+    .order('recorded_date', { ascending: false })
     .limit(20);
   return data ?? [];
 }

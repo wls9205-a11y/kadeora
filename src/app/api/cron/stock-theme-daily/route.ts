@@ -32,13 +32,13 @@ export async function GET(req: NextRequest) {
         return Math.abs(cur) > Math.abs(bestVal) ? sym : best;
       }, symbols[0]);
 
+      // stock_theme_history: 실제 DB 컬럼은 recorded_date, avg_change_rate, top_stocks
       await supabase.from('stock_theme_history').upsert({
         theme_name: theme.theme_name,
-        history_date: today,
-        avg_change_pct: avg,
-        top_symbol: topSymbol,
-        stock_count: pcts.length,
-      }, { onConflict: 'theme_name,history_date' });
+        recorded_date: today,
+        avg_change_rate: avg,
+        top_stocks: { top_symbol: topSymbol, stock_count: pcts.length, symbols: symbols.slice(0, 5) },
+      }, { onConflict: 'theme_name,recorded_date' });
 
       // Update theme's change_pct
       await supabase.from('stock_themes').update({ change_pct: avg }).eq('id', theme.id);

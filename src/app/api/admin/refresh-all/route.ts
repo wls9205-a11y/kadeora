@@ -31,6 +31,9 @@ const CRON_SEQUENCE = [
   { name: 'blog-weekly-market', path: '/api/cron/blog-weekly-market' },
   { name: 'blog-monthly-market', path: '/api/cron/blog-monthly-market' },
   { name: 'auto-grade', path: '/api/cron/auto-grade' },
+  { name: 'invest-calendar', path: '/api/cron/invest-calendar-refresh' },
+  { name: 'stock-news', path: '/api/cron/stock-news-crawl' },
+  { name: 'stock-flow', path: '/api/cron/stock-flow-crawl' },
 ];
 
 export async function POST() {
