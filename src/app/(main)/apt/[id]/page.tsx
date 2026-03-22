@@ -58,12 +58,15 @@ export default async function AptDetailPage({ params }: Props) {
   };
   const badge = SB[status];
   const rows = [
+    ['분양유형', apt.mdatrgbn_nm || null],
     ['청약접수', apt.rcept_bgnde && apt.rcept_endde ? `${apt.rcept_bgnde} ~ ${apt.rcept_endde}` : null],
     ['특별공급', apt.spsply_rcept_bgnde ? `${apt.spsply_rcept_bgnde} ~ ${apt.spsply_rcept_endde}` : null],
     ['당첨자발표', apt.przwner_presnatn_de],
     ['계약', apt.cntrct_cncls_bgnde ? `${apt.cntrct_cncls_bgnde} ~ ${apt.cntrct_cncls_endde}` : null],
     ['입주예정', fmtYM(apt.mvn_prearnge_ym)],
     ['총공급', apt.tot_supply_hshld_co ? `${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : null],
+    ['특별공급', apt.special_supply_total ? `${Number(apt.special_supply_total).toLocaleString()}세대` : null],
+    ['일반공급', apt.general_supply_total ? `${Number(apt.general_supply_total).toLocaleString()}세대` : null],
   ].filter(r => r[1]);
 
   const { data: { user: aptUser } } = await createSupabaseServer().then(s => s.auth.getUser());
@@ -120,7 +123,42 @@ export default async function AptDetailPage({ params }: Props) {
       {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
         <div style={{ ...card, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏆 청약 경쟁률</div>
-          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#818cf8' }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#818cf8', marginBottom: 12 }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
+          {apt.total_apply_count && apt.supply_count && (
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>
+              총 지원 {Number(apt.total_apply_count).toLocaleString()}명 / 공급 {Number(apt.supply_count).toLocaleString()}세대
+            </div>
+          )}
+          {/* 평형별 경쟁률 */}
+          {apt.house_type_info && Array.isArray(apt.house_type_info) && apt.house_type_info.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>평형별 경쟁률</div>
+              <div style={{ overflow: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                      <th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary)' }}>평형</th>
+                      <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>공급</th>
+                      <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>지원</th>
+                      <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>경쟁률</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(apt.house_type_info as any[]).map((t: any, i: number) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '6px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{t.type || t.area || '-'}</td>
+                        <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.supply || 0).toLocaleString()}</td>
+                        <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.apply || 0).toLocaleString()}</td>
+                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: (t.rate || 0) >= 10 ? '#ef4444' : (t.rate || 0) >= 5 ? '#f97316' : '#818cf8' }}>
+                          {t.rate ? `${t.rate}:1` : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

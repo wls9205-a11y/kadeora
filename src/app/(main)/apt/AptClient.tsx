@@ -68,6 +68,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [redevPage, setRedevPage] = useState(1);
   const [tradeRegion, setTradeRegion] = useState('전체');
   const [tradePage, setTradePage] = useState(1);
+  const [tradeAreaFilter, setTradeAreaFilter] = useState('전체');
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
@@ -793,7 +794,16 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>💰 실거래가 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>국토교통부 실거래가 API에서 주기적으로 수집합니다</span></div>;
 
         const tradeRegs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
-        const filteredTrades = tradeRegion === '전체' ? transactions : transactions.filter((t: any) => t.region_nm === tradeRegion);
+        const filteredTrades = transactions.filter((t: any) => {
+          if (tradeRegion !== '전체' && t.region_nm !== tradeRegion) return false;
+          if (tradeAreaFilter !== '전체') {
+            const area = t.exclusive_area || 0;
+            if (tradeAreaFilter === '~59' && area > 60) return false;
+            if (tradeAreaFilter === '59~84' && (area <= 59 || area > 85)) return false;
+            if (tradeAreaFilter === '84~' && area <= 84) return false;
+          }
+          return true;
+        });
         const pagedTrades = filteredTrades.slice(0, tradePage * 20);
 
         // 요약 통계
@@ -902,8 +912,18 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             })()}
 
             {/* 지역 필터 */}
-            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>
+            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
               {tradeRegs.map(r => pill(r, tradeRegion, (v) => { setTradeRegion(v); setTradePage(1); }))}
+            </div>
+
+            {/* 면적 필터 */}
+            <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
+              {[
+                { key: '전체', label: '전체 면적' },
+                { key: '~59', label: '~59㎡ (소형)' },
+                { key: '59~84', label: '59~84㎡ (중형)' },
+                { key: '84~', label: '84㎡~ (대형)' },
+              ].map(a => pill(a.key, tradeAreaFilter, (v) => { setTradeAreaFilter(v); setTradePage(1); }, a.label))}
             </div>
 
             {/* 결과 */}
