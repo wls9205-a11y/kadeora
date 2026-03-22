@@ -94,7 +94,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       const bZero = b.price === 0 ? 1 : 0;
       if (aZero !== bZero) return aZero - bZero;
       return (b.market_cap ?? 0) - (a.market_cap ?? 0);
-    }).slice(0, 30);
+    }).slice(0, 50);
   }
 
   const filteredStocks = getFilteredStocks();
@@ -171,7 +171,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             const range = max - min || 1;
             const points = rates.map((r: number, i: number) => `${(i / (rates.length - 1)) * 32},${16 - ((r - min) / range) * 14}`).join(' ');
             const isUp = rates[rates.length - 1] > rates[0];
-            return <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? '#F87171' : '#34D399'} strokeWidth="1.5" /></svg>;
+            const changePct = rates.length >= 2 ? ((rates[rates.length-1] - rates[rates.length-2]) / rates[rates.length-2] * 100) : 0;
+            return (
+              <>
+                <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? '#F87171' : '#34D399'} strokeWidth="1.5" /></svg>
+                {Math.abs(changePct) >= 0.1 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: changePct > 0 ? '#F87171' : '#34D399' }}>{changePct > 0 ? '▲' : '▼'}{Math.abs(changePct).toFixed(1)}%</span>}
+              </>
+            );
           })()}
         </div>
       </div>
@@ -257,6 +263,37 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           );
         })}
       </div>
+
+      {/* 섹터 히트맵 (국내) */}
+      {isDomestic && (() => {
+        const sectorMap = new Map<string, { up: number; down: number; flat: number; totalPct: number; count: number }>();
+        domesticStocks.forEach(s => {
+          if (!s.sector) return;
+          const cur = sectorMap.get(s.sector) || { up: 0, down: 0, flat: 0, totalPct: 0, count: 0 };
+          const pct = s.change_pct ?? 0;
+          if (pct > 0) cur.up++; else if (pct < 0) cur.down++; else cur.flat++;
+          cur.totalPct += pct; cur.count++;
+          sectorMap.set(s.sector, cur);
+        });
+        const sectors = Array.from(sectorMap.entries()).map(([name, d]) => ({ name, avg: d.count > 0 ? d.totalPct / d.count : 0, ...d })).sort((a, b) => b.avg - a.avg);
+        if (sectors.length < 2) return null;
+        return (
+          <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
+            {sectors.map(s => (
+              <button key={s.name} onClick={() => { setSectorFilter(s.name === sectorFilter ? 'all' : s.name); setDomesticTab('ranking'); }} style={{
+                padding: '6px 10px', borderRadius: 8, border: sectorFilter === s.name ? '1px solid var(--brand)' : '1px solid var(--border)',
+                background: sectorFilter === s.name ? 'rgba(37,99,235,0.1)' : s.avg > 1 ? 'rgba(248,113,113,0.08)' : s.avg < -1 ? 'rgba(96,165,250,0.08)' : 'var(--bg-surface)',
+                cursor: 'pointer', flexShrink: 0, minWidth: 70, textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{s.name}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: stockColor(s.avg, true), marginTop: 2 }}>
+                  {s.avg > 0 ? '+' : ''}{s.avg.toFixed(1)}%
+                </div>
+              </button>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* 상승/하락 비율 */}
       {sentimentStocks.length > 0 && (
@@ -434,7 +471,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px' }}>
           {filteredStocks.length === 0 ? (
             <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>
-              {currentTab === 'watchlist' ? '관심종목을 추가해보세요' : '검색 결과가 없어요'}
+              {currentTab === 'watchlist' ? '⭐ 관심종목을 추가해보세요' : search ? `"${search}" 검색 결과가 없어요` : '데이터를 불러오는 중...'}
+              {search && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 8, color: 'var(--text-tertiary)' }}>종목명, 종목코드, 섹터로 검색해보세요</div>}
             </div>
           ) : filteredStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
         </div>
@@ -479,32 +517,57 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 종목 모달 */}
       {selectedStock && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setSelectedStock(null)}>
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, maxWidth: 480, width: '100%' }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={() => setSelectedStock(null)}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: 24, width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+            {/* 핸들 바 */}
+            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{selectedStock.name}</h2>
-                <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{selectedStock.symbol} · {selectedStock.market}</span>
+                <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.symbol}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.market}</span>
+                  {selectedStock.sector && <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.sector}</span>}
+                </div>
               </div>
               <button onClick={() => setSelectedStock(null)} style={{ background: 'none', border: 'none', fontSize: 'var(--fs-xl)', cursor: 'pointer', color: 'var(--text-secondary)' }}>✕</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>현재가</div>
-                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {selectedStock.currency === 'USD' ? `$${selectedStock.price?.toFixed(2)}` : `₩${fmt(selectedStock.price)}`}
-                </div>
+
+            {/* 가격 + 등락 */}
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 12 }}>
+              <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)' }}>
+                {selectedStock.currency === 'USD' ? `$${selectedStock.price?.toFixed(2)}` : `₩${fmt(selectedStock.price)}`}
               </div>
-              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>등락률</div>
-                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: stockColor(selectedStock.change_pct??0, isDomestic) }}>
-                  {(selectedStock.change_pct??0)>0?'▲':'▼'} {Math.abs(selectedStock.change_pct??0).toFixed(2)}%
-                </div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: stockColor(selectedStock.change_pct??0, isDomestic), marginTop: 4 }}>
+                {(selectedStock.change_pct??0)>0?'▲':'▼'} {selectedStock.change_amt ? `${(selectedStock.change_amt>0?'+':'')}${fmt(Math.abs(selectedStock.change_amt))}` : ''} ({Math.abs(selectedStock.change_pct??0).toFixed(2)}%)
               </div>
             </div>
-            <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ display: 'block', textAlign: 'center', background: isDomestic ? 'var(--brand)' : '#60A5FA', color: '#fff', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>
-              종목 상세 보기
-            </a>
+
+            {/* 상세 지표 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>시가총액</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{fmtCap(selectedStock.market_cap, selectedStock.currency)}</div>
+              </div>
+              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래량</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{selectedStock.volume ? fmt(selectedStock.volume) : '-'}</div>
+              </div>
+              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전일대비</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockColor(selectedStock.change_pct??0, isDomestic), marginTop: 2 }}>{selectedStock.change_amt ? `${selectedStock.change_amt>0?'+':''}${fmt(selectedStock.change_amt)}` : '-'}</div>
+              </div>
+            </div>
+
+            {/* 관심종목 + 상세 버튼 */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => toggleWatchlist(selectedStock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 8, border: '1px solid var(--border)', background: watchlistSymbols.includes(selectedStock.symbol) ? 'rgba(251,191,36,0.15)' : 'var(--bg-hover)', color: watchlistSymbols.includes(selectedStock.symbol) ? '#FBBF24' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
+                {watchlistSymbols.includes(selectedStock.symbol) ? '★ 관심종목 해제' : '☆ 관심종목 추가'}
+              </button>
+              <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : '#60A5FA', color: '#fff', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
+                종목 상세 →
+              </a>
+            </div>
           </div>
         </div>
       )}

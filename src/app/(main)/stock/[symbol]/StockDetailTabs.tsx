@@ -97,6 +97,12 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 개요 */}
       {tab === 'overview' && (
         <div>
+          {/* 미니 차트 (개요 상단) */}
+          {priceHistory.length >= 2 && (
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+              <MiniChart data={priceHistory} />
+            </div>
+          )}
           {aiComment && (() => {
             const signalColor = aiComment.signal === 'bullish' ? '#059669' : aiComment.signal === 'bearish' ? '#F87171' : 'var(--text-tertiary)';
             const signalLabel = aiComment.signal === 'bullish' ? '🟢 매수 우위' : aiComment.signal === 'bearish' ? '🔴 매도 우위' : '🟡 중립';
