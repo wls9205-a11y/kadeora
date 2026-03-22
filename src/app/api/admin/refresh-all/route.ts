@@ -21,6 +21,7 @@ const CRON_SEQUENCE = [
   { name: 'crawl-busan-redev', path: '/api/cron/crawl-busan-redev' },
   { name: 'crawl-nationwide-redev', path: '/api/cron/crawl-nationwide-redev' },
   { name: 'crawl-apt-subscription', path: '/api/cron/crawl-apt-subscription' },
+  { name: 'crawl-competition-rate', path: '/api/cron/crawl-competition-rate' },
   { name: 'seed-posts', path: '/api/cron/seed-posts' },
   { name: 'daily-stats', path: '/api/cron/daily-stats' },
   { name: 'aggregate-trade-stats', path: '/api/cron/aggregate-trade-stats' },
