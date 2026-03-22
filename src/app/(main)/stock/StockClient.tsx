@@ -43,6 +43,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/stock/themes').then(r => r.ok ? r.json() : null).then(d => { if (d?.themes) setThemes(d.themes); }).catch(() => {});
@@ -279,7 +280,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🔥 오늘의 테마</div>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
             {themes.map(t => (
-              <div key={t.id} onClick={() => setDomesticTab('themes')} style={{ minWidth: 110, padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, flexShrink: 0, cursor: 'pointer' }}>
+              <div key={t.id} onClick={() => { setDomesticTab('themes'); setSelectedTheme(t.theme_name); }} style={{ minWidth: 110, padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, flexShrink: 0, cursor: 'pointer' }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot && '🔥'}{t.theme_name}</div>
                 <div style={{ fontSize: 12, fontWeight: 700, marginTop: 3, color: stockColor(t.change_pct??0, true) }}>
                   {(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%
@@ -323,10 +324,17 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 테마 상세 탭 */}
       {isDomestic && domesticTab === 'themes' && (
         <div style={{ marginBottom: 16 }}>
-          {themes.map(t => {
+          {/* 테마 필터 칩 */}
+          <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            <button onClick={() => setSelectedTheme(null)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: !selectedTheme ? 'var(--brand)' : 'var(--bg-hover)', color: !selectedTheme ? '#fff' : 'var(--text-tertiary)' }}>전체</button>
+            {themes.map(t => (
+              <button key={t.id} onClick={() => setSelectedTheme(selectedTheme === t.theme_name ? null : t.theme_name)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: selectedTheme === t.theme_name ? 'var(--brand)' : 'var(--bg-hover)', color: selectedTheme === t.theme_name ? '#fff' : 'var(--text-tertiary)' }}>{t.is_hot ? '🔥' : ''}{t.theme_name}</button>
+            ))}
+          </div>
+          {themes.filter(t => !selectedTheme || t.theme_name === selectedTheme).map(t => {
             const th = themeHistory?.find((h: any) => h.theme_name === t.theme_name);
             return (
-            <div key={t.id} style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 8 }}>
+            <div key={t.id} style={{ padding: 16, background: 'var(--bg-surface)', border: selectedTheme === t.theme_name ? '2px solid var(--brand)' : '1px solid var(--border)', borderRadius: 12, marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot&&'🔥 '}{t.theme_name}</span>
