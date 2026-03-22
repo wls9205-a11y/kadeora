@@ -284,38 +284,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             </div>
           </div>
 
-          {/* 🔥 마감 임박 배너 */}
-          {(() => {
-            const today = kstNow();
-            const urgent = filtered.filter(a => {
-              if (!a.rcept_endde) return false;
-              const end = new Date(a.rcept_endde);
-              const diff = Math.ceil((end.getTime() - today.getTime()) / 86400000);
-              return diff >= 0 && diff <= 3 && getStatus(a) === 'open';
-            }).sort((a, b) => new Date(a.rcept_endde).getTime() - new Date(b.rcept_endde).getTime());
-            return urgent.length > 0 ? (
-              <div style={{ background: 'linear-gradient(135deg, var(--accent-red-bg), rgba(251,146,60,0.1))', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ animation: 'pulse 2s infinite' }}>🔥</span> 마감 임박 ({urgent.length}건)
-                </div>
-                {urgent.map(a => {
-                  const diff = Math.ceil((new Date(a.rcept_endde).getTime() - today.getTime()) / 86400000);
-                  return (
-                    <Link key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--accent-red-bg)', textDecoration: 'none', color: 'inherit' }}>
-                      <div>
-                        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.house_nm}</span>
-                        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{a.region_nm}</span>
-                      </div>
-                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: diff === 0 ? 'var(--accent-red)' : 'var(--accent-orange)', flexShrink: 0 }}>
-                        {diff === 0 ? '오늘 마감!' : `D-${diff}`}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : null;
-          })()}
-
           <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
             {pill('전체', statusFilter, setStatusFilter)}
             {pill('open', statusFilter, setStatusFilter, '접수중')}
@@ -720,31 +688,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             )}
 
-            {/* ⑤ 지역별 히트맵 바 */}
-            {regionCounts.length > 0 && (
-              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🗺️ 지역별 분양중 현황</div>
-                {regionCounts.map((r) => {
-                  const pct = (r.count / maxRegionCount) * 100;
-                  const subPct = r.count > 0 ? (r.subCount / r.count) * 100 : 0;
-                  return (
-                    <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left' }}>
-                      <div style={{ width: 36, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? 'var(--accent-blue)' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: ongoingRegion === r.name ? 700 : 400 }}>{r.name}</div>
-                      <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
-                        <div style={{ height: '100%', width: `${(pct * subPct) / 100}%`, background: 'var(--accent-green)' }} />
-                        <div style={{ height: '100%', width: `${(pct * (100 - subPct)) / 100}%`, background: 'var(--accent-red)' }} />
-                      </div>
-                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 28, textAlign: 'right' }}>{r.count}</div>
-                    </button>
-                  );
-                })}
-                <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: 'var(--accent-green)', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />분양중</span>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: 'var(--accent-red)', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />미분양</span>
-                </div>
-              </div>
-            )}
-
             {/* 검색바 */}
             <div style={{ position: 'relative', marginBottom: 10 }}>
               <input type="text" value={ongoingSearch} onChange={e => { setOngoingSearch(e.target.value); setOngoingPage(1); }} placeholder="단지명, 지역, 시공사 검색..."
@@ -1000,10 +943,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           : usRaw?.total != null ? usRaw
           : usRaw?.data?.total != null ? usRaw.data : null;
 
-        // 위험도 계산
-        const highRisk = unsold.filter((u: any) => (u.tot_unsold_hshld_co || 0) >= 500);
-        const medRisk = unsold.filter((u: any) => { const c = u.tot_unsold_hshld_co || 0; return c >= 100 && c < 500; });
-
         // 지역별 현황판 데이터 집계
         const unsoldRegionStats = regs.filter(r => r !== '전체').map(r => {
           const items = unsold.filter((u: any) => (u.region_nm || '기타') === r);
@@ -1013,39 +952,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
         return (
           <div>
-            {/* 위험도 요약 카드 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
-              <div style={{ padding: '12px 8px', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{highRisk.length}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: '#F87171', fontWeight: 600 }}>고위험 (500+)</div>
-              </div>
-              <div style={{ padding: '12px 8px', borderRadius: 10, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#FBBF24' }}>{medRisk.length}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: '#FBBF24', fontWeight: 600 }}>주의 (100~499)</div>
-              </div>
-              <div style={{ padding: '12px 8px', borderRadius: 10, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#34D399' }}>{total.toLocaleString()}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: '#34D399', fontWeight: 600 }}>전체 미분양</div>
-              </div>
-            </div>
-
-            {/* 전월 대비 */}
-            {unsoldMonthly.length >= 2 && (() => {
-              const latest = unsoldMonthly[unsoldMonthly.length - 1];
-              const prev = unsoldMonthly[unsoldMonthly.length - 2];
-              if (!latest || !prev) return null;
-              const diff = (latest.total_unsold || 0) - (prev.total_unsold || 0);
-              const pct = prev.total_unsold > 0 ? ((diff / prev.total_unsold) * 100).toFixed(1) : '0';
-              return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, background: diff > 0 ? 'rgba(248,113,113,0.06)' : 'rgba(52,211,153,0.06)', border: `1px solid ${diff > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)'}`, marginBottom: 12 }}>
-                  <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: diff > 0 ? '#F87171' : '#34D399' }}>{diff > 0 ? '▲' : diff < 0 ? '▼' : '─'}</span>
-                  <div>
-                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>전월 대비 {diff > 0 ? '+' : ''}{diff.toLocaleString()}세대 ({pct}%)</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{prev.stat_month || ''} → {latest.stat_month || ''}</div>
-                  </div>
-                </div>
-              );
-            })()}
             {/* 지역별 현황 */}
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
