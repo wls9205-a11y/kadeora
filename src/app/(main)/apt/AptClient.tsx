@@ -67,6 +67,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [ongoingRegion, setOngoingRegion] = useState('전체');
   const [ongoingPage, setOngoingPage] = useState(1);
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
+  const [ongoingSearch, setOngoingSearch] = useState('');
+  const [ongoingStatus, setOngoingStatus] = useState('전체');
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
   const [redevPage, setRedevPage] = useState(1);
@@ -422,7 +424,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         if (!ongoingApts.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏢 분양중 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>청약 마감 후 입주 전 현장 및 미분양 현장이 표시됩니다</span></div>;
 
         const regs = ['전체', ...Array.from(new Set(ongoingApts.map((o: any) => o.region_nm || '기타'))).sort()];
-        const filtered = ongoingRegion === '전체' ? ongoingApts : ongoingApts.filter((o: any) => (o.region_nm || '기타') === ongoingRegion);
+        // 검색 + 지역 + 상태 필터 적용
+        let filtered = ongoingRegion === '전체' ? ongoingApts : ongoingApts.filter((o: any) => (o.region_nm || '기타') === ongoingRegion);
+        if (ongoingSearch.trim()) {
+          const q = ongoingSearch.trim().toLowerCase();
+          filtered = filtered.filter((o: any) => (o.house_nm || '').toLowerCase().includes(q) || (o.address || '').toLowerCase().includes(q) || (o.region_nm || '').toLowerCase().includes(q) || (o.constructor_nm || '').toLowerCase().includes(q));
+        }
+        if (ongoingStatus !== '전체') {
+          filtered = filtered.filter((o: any) => ongoingStatus === '미분양' ? o.source === 'unsold' : o.source === 'subscription');
+        }
         const totalSites = filtered.length;
         const totalUnsoldUnits = filtered.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0);
         const fromSub = filtered.filter((o: any) => o.source === 'subscription').length;
@@ -449,17 +459,33 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 종합 현황 */}
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 전국 분양중 현황</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
                 <div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>분양중 현장</div>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{ongoingApts.length.toLocaleString()}곳</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전체</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--brand)' }}>{ongoingApts.length}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양 세대</div>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#ef4444' }}>{ongoingApts.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0).toLocaleString()}호</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>분양중</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#60a5fa' }}>{ongoingApts.filter((o: any) => o.source === 'subscription').length}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#ef4444' }}>{ongoingApts.filter((o: any) => o.source === 'unsold').length}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>잔여세대</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#f59e0b' }}>{ongoingApts.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0).toLocaleString()}</div>
                 </div>
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준</div>
+            </div>
+
+            {/* 검색바 */}
+            <div style={{ position: 'relative', marginBottom: 10 }}>
+              <input type="text" value={ongoingSearch} onChange={e => { setOngoingSearch(e.target.value); setOngoingPage(1); }} placeholder="단지명, 지역, 시공사 검색..."
+                style={{ width: '100%', padding: '9px 12px 9px 32px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>🔍</span>
+              {ongoingSearch && <button onClick={() => setOngoingSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>✕</button>}
             </div>
 
             {/* 지역별 TOP5 */}
@@ -483,7 +509,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             </div>
 
             {/* 정렬 */}
-            <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto' }}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 8, overflowX: 'auto' }}>
               {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
                 <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
                   padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
@@ -492,6 +518,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   color: ongoingSort === k ? '#fff' : 'var(--text-tertiary)',
                 }}>{l}</button>
               ))}
+            </div>
+
+            {/* 상태 필터 */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+              {['전체', '분양중', '미분양'].map(s => pill(s, ongoingStatus, (v) => { setOngoingStatus(v); setOngoingPage(1); }))}
             </div>
 
             {/* 결과 수 */}
