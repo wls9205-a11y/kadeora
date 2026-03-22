@@ -164,7 +164,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
           <div style={{ display: 'flex', gap: 8 }}>
             <a href={`https://map.kakao.com/?q=${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
               style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>카카오맵</a>
-            <a href={`https://map.naver.com/search/${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
+            <a href={`https://map.naver.com/p/search/${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
               style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>네이버지도</a>
           </div>
         </div>
