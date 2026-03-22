@@ -11,10 +11,12 @@ export const metadata: Metadata = {
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
 export const revalidate = 3600;
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { unstable_cache } from 'next/cache';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 
-export default async function AptPage() {
+async function fetchAptData() {
+  const sb = await createSupabaseServer();
   let apts: any[] = [];
   let unsold: any[] = [];
   let redevelopment: any[] = [];
@@ -41,16 +43,16 @@ export default async function AptPage() {
     } catch {}
 
     const [aptsR, unsoldR, alertsR, redevelopmentR, unsoldSummaryR, transactionsR, unsoldMonthlyR, tradeMonthlyR] = await Promise.all([
-      sb.from('apt_subscriptions').select('*')
+      sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(1000),
-      sb.from('unsold_apts').select('*').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
+      sb.from('unsold_apts').select('id, house_nm, region_nm, tot_supply_hshld_co, tot_unsold_hshld_co, supply_addr, hssply_adres, completion_ym, sale_price_min, sale_price_max, pblanc_url, contact_tel, created_at, is_active').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
       sb.from('apt_alerts').select('house_manage_no'),
-      sb.from('redevelopment_projects').select('*').eq('is_active', true).order('total_households', { ascending: false }),
+      sb.from('redevelopment_projects').select('id, district_name, region, sigungu, project_type, stage, area_sqm, total_households, constructor, approval_date, expected_completion, address, is_active, created_at, updated_at, latitude, longitude').eq('is_active', true).order('total_households', { ascending: false }),
       sb.from('apt_cache').select('data').eq('cache_type', 'unsold_summary').maybeSingle(),
-      sb.from('apt_transactions').select('*').gte('deal_date', `${new Date(Date.now() + 9 * 60 * 60 * 1000).getFullYear()}-01-01`).order('deal_date', { ascending: false }).limit(5000),
-      sb.from('unsold_monthly_stats').select('*').order('stat_month', { ascending: true }),
-      sb.from('apt_trade_monthly_stats').select('*').order('stat_month', { ascending: true }),
+      sb.from('apt_transactions').select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, created_at').gte('deal_date', `${new Date(Date.now() + 9 * 60 * 60 * 1000).getFullYear()}-01-01`).order('deal_date', { ascending: false }).limit(3000),
+      sb.from('unsold_monthly_stats').select('stat_month, region, total_unsold, total_after_completion').order('stat_month', { ascending: true }),
+      sb.from('apt_trade_monthly_stats').select('stat_month, region, total_deals, avg_price, total_amount').order('stat_month', { ascending: true }),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
@@ -172,5 +174,12 @@ export default async function AptPage() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
+  return { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts };
+}
+
+const getCachedAptData = unstable_cache(fetchAptData, ['apt-page-data', 'v2'], { revalidate: 3600 });
+
+export default async function AptPage() {
+  const { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts } = await getCachedAptData();
   return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} ongoingApts={ongoingApts} /><Disclaimer /></>;
 }

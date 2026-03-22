@@ -59,15 +59,11 @@ export default async function BlogPage({ searchParams }: Props) {
   const perPage = 20;
   const sb = await createSupabaseServer();
 
-  // 카테고리별 건수
-  const countPromises = CATS.filter(c => c.key !== 'all').map(async c => {
-    const { count } = await sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).eq('category', c.key);
-    return { key: c.key, count: count || 0 };
-  });
-  const catCounts = await Promise.all(countPromises);
-  const totalCount = catCounts.reduce((s, c) => s + c.count, 0);
-  const countMap: Record<string, number> = { all: totalCount };
-  catCounts.forEach(c => { countMap[c.key] = c.count; });
+  // 카테고리별 건수 (단일 RPC로 5개 쿼리 → 1개)
+  const { data: catCountsRaw } = await sb.rpc('blog_category_counts');
+  const countMap: Record<string, number> = { all: 0 };
+  (catCountsRaw || []).forEach((c: any) => { countMap[c.category] = Number(c.cnt); countMap.all += Number(c.cnt); });
+  const totalCount = countMap.all;
 
   // 인기글 (최근 30일 내 조회수 TOP 5)
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
