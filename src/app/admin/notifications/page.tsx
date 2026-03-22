@@ -34,7 +34,7 @@ function StatusBadge({ active }: { active: boolean }) {
   return (
     <span style={{
       fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 8, fontWeight: 600,
-      background: active ? 'rgba(34,197,94,0.15)' : 'transparent',
+      background: active ? 'rgba(52,211,153,0.15)' : 'transparent',
       color: active ? 'var(--success)' : 'var(--text-tertiary)',
       border: `1px solid ${active ? 'var(--success)' : 'var(--border)'}`,
     }}>
@@ -303,7 +303,7 @@ function PushSection() {
                         <td style={{ padding: '8px 10px' }}>
                           <span style={{
                             fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6,
-                            background: ctr >= 10 ? 'rgba(34,197,94,0.15)' : ctr >= 5 ? 'rgba(245,158,11,0.15)' : 'transparent',
+                            background: ctr >= 10 ? 'rgba(52,211,153,0.15)' : ctr >= 5 ? 'rgba(251,191,36,0.15)' : 'transparent',
                             color: ctr >= 10 ? 'var(--success)' : ctr >= 5 ? 'var(--warning)' : 'var(--text-tertiary)',
                           }}>{ctr}%</span>
                         </td>

@@ -373,7 +373,7 @@ export default function AdminAutomation() {
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: log.status === 'success' ? '#dcfce7' : log.status === 'running' ? '#dbeafe' : '#fee2e2',
-                    color: log.status === 'success' ? '#059669' : log.status === 'running' ? '#2563eb' : '#dc2626',
+                    color: log.status === 'success' ? '#059669' : log.status === 'running' ? '#2563eb' : '#F87171',
                   }}>{log.status}</span>
                 </td>
                 <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>

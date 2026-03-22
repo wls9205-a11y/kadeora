@@ -126,8 +126,8 @@ export default function AdminDashboard() {
             <div key={hc.service_name} style={{
               padding: '10px 16px',
               borderRadius: 10,
-              background: hc.status === 'ok' ? 'rgba(34,197,94,0.1)' : hc.status === 'warning' ? 'rgba(234,179,8,0.1)' : 'rgba(248,113,113,0.1)',
-              border: `1px solid ${hc.status === 'ok' ? 'rgba(34,197,94,0.3)' : hc.status === 'warning' ? 'rgba(234,179,8,0.3)' : 'rgba(248,113,113,0.3)'}`,
+              background: hc.status === 'ok' ? 'rgba(52,211,153,0.1)' : hc.status === 'warning' ? 'rgba(251,191,36,0.1)' : 'rgba(248,113,113,0.1)',
+              border: `1px solid ${hc.status === 'ok' ? 'rgba(52,211,153,0.3)' : hc.status === 'warning' ? 'rgba(251,191,36,0.3)' : 'rgba(248,113,113,0.3)'}`,
               display: 'flex',
               alignItems: 'center',
               gap: 8,
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
               <span style={{
                 marginLeft: 'auto', fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 10, fontWeight: 700,
                 background: briefing.sentiment === 'bullish' ? '#dcfce7' : briefing.sentiment === 'bearish' ? '#fee2e2' : '#f1f5f9',
-                color: briefing.sentiment === 'bullish' ? '#059669' : briefing.sentiment === 'bearish' ? '#dc2626' : '#64748b',
+                color: briefing.sentiment === 'bullish' ? '#059669' : briefing.sentiment === 'bearish' ? '#F87171' : '#64748b',
               }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
             </div>
           </div>
@@ -228,8 +228,8 @@ export default function AdminDashboard() {
               <div key={a.id} style={{
                 padding: '10px 14px',
                 borderRadius: 8,
-                background: a.is_read ? 'var(--bg-base)' : a.severity === 'error' ? 'rgba(248,113,113,0.1)' : a.severity === 'warning' ? 'rgba(234,179,8,0.1)' : 'rgba(34,197,94,0.1)',
-                border: `1px solid ${a.is_read ? 'var(--border)' : a.severity === 'error' ? 'rgba(248,113,113,0.3)' : a.severity === 'warning' ? 'rgba(234,179,8,0.3)' : 'rgba(34,197,94,0.3)'}`,
+                background: a.is_read ? 'var(--bg-base)' : a.severity === 'error' ? 'rgba(248,113,113,0.1)' : a.severity === 'warning' ? 'rgba(251,191,36,0.1)' : 'rgba(52,211,153,0.1)',
+                border: `1px solid ${a.is_read ? 'var(--border)' : a.severity === 'error' ? 'rgba(248,113,113,0.3)' : a.severity === 'warning' ? 'rgba(251,191,36,0.3)' : 'rgba(52,211,153,0.3)'}`,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,

@@ -52,7 +52,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           {category && <span style={{ fontSize: 'var(--fs-lg)', color: '#8b949e' }}>{category}</span>}
           <span style={{ fontSize: 'var(--fs-lg)', color: '#8b949e' }}>@{nickname}</span>
           <span style={{ fontSize: 'var(--fs-lg)', color: '#8b949e' }}>❤ {likes}</span>
-          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-base)', color: '#6e7681' }}>kadeora.app</span>
+          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-base)', color: '#64748B' }}>kadeora.app</span>
         </div>
       </div>
     ),

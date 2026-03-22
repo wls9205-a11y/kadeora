@@ -82,7 +82,7 @@ export default function ShopClient() {
           <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🛒 커뮤니티 상점</h1>
           <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>게시글 노출 및 특별 기능을 구매하세요</p>
         </div>
-        {isDemo && <span style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 999, background: 'rgba(59,130,246,0.1)', color: 'var(--brand)', border: '1px solid rgba(59,130,246,0.3)' }}>💡 미리보기</span>}
+        {isDemo && <span style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.1)', color: 'var(--brand)', border: '1px solid rgba(96,165,250,0.3)' }}>💡 미리보기</span>}
       </div>
 
       {/* 카테고리 탭 */}

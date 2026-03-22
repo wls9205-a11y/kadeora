@@ -217,7 +217,7 @@ export default function ConsultantRegister() {
             <button onClick={() => setStep('register')} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>← 프로필 수정</button>
           </div>
 
-          <div style={{ ...card, marginTop: 16, background: 'rgba(59,130,246,0.06)' }}>
+          <div style={{ ...card, marginTop: 16, background: 'rgba(96,165,250,0.06)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#60A5FA', marginBottom: 8 }}>💡 왜 프리미엄 리스팅인가요?</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               분양 상담 1건 계약 시 수백~수천만 원의 수수료가 발생합니다.<br/>
@@ -255,7 +255,7 @@ export default function ConsultantRegister() {
               <div key={l.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'rgba(139,92,246,0.12)' : l.tier === 'pro' ? 'rgba(245,158,11,0.12)' : 'rgba(59,130,246,0.12)', color: l.tier === 'premium' ? '#A78BFA' : l.tier === 'pro' ? '#FBBF24' : '#60A5FA' }}>{l.tier.toUpperCase()}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'rgba(167,139,250,0.12)' : l.tier === 'pro' ? 'rgba(251,191,36,0.12)' : 'rgba(96,165,250,0.12)', color: l.tier === 'premium' ? '#A78BFA' : l.tier === 'pro' ? '#FBBF24' : '#60A5FA' }}>{l.tier.toUpperCase()}</span>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginLeft: 8 }}>{l.house_nm || '현장명'}</span>
                   </div>
                   <span style={{ fontSize: 'var(--fs-xs)', color: l.is_active ? '#34D399' : '#F87171', fontWeight: 600 }}>{l.is_active ? '활성' : '만료'}</span>

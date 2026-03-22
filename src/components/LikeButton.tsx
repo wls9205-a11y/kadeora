@@ -67,8 +67,8 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
       style={{
         display: 'flex', alignItems: 'center', gap: 5,
         padding: '6px 14px', borderRadius: 20,
-        background: liked ? 'rgba(239,68,68,0.08)' : 'var(--bg-hover)',
-        border: `1px solid ${liked ? 'rgba(239,68,68,0.3)' : 'var(--border)'}`,
+        background: liked ? 'rgba(248,113,113,0.08)' : 'var(--bg-hover)',
+        border: `1px solid ${liked ? 'rgba(248,113,113,0.3)' : 'var(--border)'}`,
         color: liked ? '#F87171' : 'var(--text-secondary)',
         cursor: loading ? 'not-allowed' : 'pointer',
         transition: 'all 0.15s',

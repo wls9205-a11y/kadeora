@@ -5,8 +5,8 @@ export default function BlogCommentCTA({ commentCount }: { commentCount: number 
   return (
     <div style={{
       margin: '24px 0', padding: '20px', borderRadius: 16, textAlign: 'center',
-      background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.08) 100%)',
-      border: '1px solid rgba(139,92,246,0.15)',
+      background: 'linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(96,165,250,0.08) 100%)',
+      border: '1px solid rgba(167,139,250,0.15)',
     }}>
       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
         이 글에 대해 어떻게 생각하세요?

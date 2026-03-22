@@ -83,7 +83,7 @@ function LoginForm({ redirect }: LoginFormProps) {
         </button>
 
         {error && (
-          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--error)', fontSize: 'var(--fs-sm)' }}>
+          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--error)', fontSize: 'var(--fs-sm)' }}>
             ⚠ {error}
           </div>
         )}

@@ -97,11 +97,11 @@ export default function InfraPage() {
       {/* === Supabase === */}
       <div style={{
         padding: 24, borderRadius: 16,
-        background: 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(17,24,39,0.95) 100%)',
-        border: '1px solid rgba(34,197,94,0.15)',
+        background: 'linear-gradient(135deg, rgba(52,211,153,0.08) 0%, rgba(17,24,39,0.95) 100%)',
+        border: '1px solid rgba(52,211,153,0.15)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,197,94,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)' }}>⚡</div>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(52,211,153,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)' }}>⚡</div>
           <div>
             <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>Supabase</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>Pro Plan · Seoul Region</div>
@@ -115,10 +115,10 @@ export default function InfraPage() {
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 24 }}>
                 <DonutGauge value={db.db_size_bytes} max={DB_LIMIT} label={`${db.db_size_pretty} / 8GB`} color="#34D399" />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, flex: 1, minWidth: 200 }}>
-                  <StatCard icon="🔌" value={db.active_connections ?? 0} label="활성 커넥션" bg="rgba(59,130,246,0.08)" />
-                  <StatCard icon="⚡" value={`${db.cache_hit_ratio ?? 0}%`} label="캐시 히트율" bg="rgba(34,197,94,0.08)" />
-                  <StatCard icon="📊" value={db.total_rows ?? 0} label="총 행 수" bg="rgba(139,92,246,0.08)" />
-                  <StatCard icon="📁" value={db.index_size ?? '0'} label="인덱스" bg="rgba(249,115,22,0.08)" />
+                  <StatCard icon="🔌" value={db.active_connections ?? 0} label="활성 커넥션" bg="rgba(96,165,250,0.08)" />
+                  <StatCard icon="⚡" value={`${db.cache_hit_ratio ?? 0}%`} label="캐시 히트율" bg="rgba(52,211,153,0.08)" />
+                  <StatCard icon="📊" value={db.total_rows ?? 0} label="총 행 수" bg="rgba(167,139,250,0.08)" />
+                  <StatCard icon="📁" value={db.index_size ?? '0'} label="인덱스" bg="rgba(251,146,60,0.08)" />
                 </div>
               </div>
             </div>
@@ -126,10 +126,10 @@ export default function InfraPage() {
             {/* 주간 활성 유저 */}
             <div style={{
               marginBottom: 20, padding: 16, borderRadius: 12,
-              background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.12)',
+              background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.12)',
               display: 'flex', alignItems: 'center', gap: 14,
             }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(234,179,8,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-2xl)' }}>👥</div>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(251,191,36,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-2xl)' }}>👥</div>
               <div>
                 <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{data.weeklyActive ?? 0}명</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>주간 활성 유저 (최근 7일, 실제 유저)</div>
@@ -199,7 +199,7 @@ export default function InfraPage() {
                   <span style={{
                     width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
                     background: d.state === 'READY' ? '#34D399' : d.state === 'ERROR' ? '#F87171' : '#FBBF24',
-                    boxShadow: d.state === 'READY' ? '0 0 6px rgba(34,197,94,0.4)' : d.state === 'ERROR' ? '0 0 6px rgba(239,68,68,0.4)' : 'none',
+                    boxShadow: d.state === 'READY' ? '0 0 6px rgba(52,211,153,0.4)' : d.state === 'ERROR' ? '0 0 6px rgba(248,113,113,0.4)' : 'none',
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.meta || '배포'}</div>
@@ -207,7 +207,7 @@ export default function InfraPage() {
                   </div>
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 600,
-                    background: d.state === 'READY' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                    background: d.state === 'READY' ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)',
                     color: d.state === 'READY' ? '#34D399' : '#F87171',
                   }}>{d.state}</span>
                 </div>
@@ -225,11 +225,11 @@ export default function InfraPage() {
       {/* === GitHub === */}
       <div style={{
         padding: 24, borderRadius: 16,
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(17,24,39,0.95) 100%)',
-        border: '1px solid rgba(139,92,246,0.15)',
+        background: 'linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(17,24,39,0.95) 100%)',
+        border: '1px solid rgba(167,139,250,0.15)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)' }}>🐙</div>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(167,139,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)' }}>🐙</div>
           <div>
             <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>GitHub</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>wls9205-a11y/kadeora</div>
@@ -239,9 +239,9 @@ export default function InfraPage() {
         {github ? (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
-              <StatCard icon="💾" value={github.size_pretty} label="레포 크기" bg="rgba(139,92,246,0.08)" />
-              <StatCard icon="🐛" value={github.open_issues} label="Open Issues" bg="rgba(234,179,8,0.08)" />
-              <StatCard icon="🌿" value={github.default_branch} label="기본 브랜치" bg="rgba(34,197,94,0.08)" />
+              <StatCard icon="💾" value={github.size_pretty} label="레포 크기" bg="rgba(167,139,250,0.08)" />
+              <StatCard icon="🐛" value={github.open_issues} label="Open Issues" bg="rgba(251,191,36,0.08)" />
+              <StatCard icon="🌿" value={github.default_branch} label="기본 브랜치" bg="rgba(52,211,153,0.08)" />
             </div>
 
             <details>
@@ -249,7 +249,7 @@ export default function InfraPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {(github.recent_commits ?? []).map((c: any, i: number) => (
                   <div key={c.sha || i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.02)' }}>
-                    <code style={{ fontSize: 'var(--fs-xs)', color: '#a78bfa', fontFamily: 'monospace', background: 'rgba(139,92,246,0.1)', padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{c.sha}</code>
+                    <code style={{ fontSize: 'var(--fs-xs)', color: '#a78bfa', fontFamily: 'monospace', background: 'rgba(167,139,250,0.1)', padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>{c.sha}</code>
                     <div style={{ flex: 1, fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.message}</div>
                     <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{c.date ? new Date(c.date).toLocaleDateString('ko-KR') : ''}</span>
                   </div>
@@ -268,10 +268,10 @@ export default function InfraPage() {
       {/* === 바로가기 === */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
         {[
-          { icon: '⚡', label: 'Supabase', sub: 'DB 대시보드', href: 'https://supabase.com/dashboard/project/tezftxakuwhsclarprlz', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.15)' },
+          { icon: '⚡', label: 'Supabase', sub: 'DB 대시보드', href: 'https://supabase.com/dashboard/project/tezftxakuwhsclarprlz', bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.15)' },
           { icon: '▲', label: 'Vercel', sub: '배포 / Analytics', href: 'https://vercel.com/dashboard', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.08)' },
-          { icon: '🐙', label: 'GitHub', sub: '소스코드', href: 'https://github.com/wls9205-a11y/kadeora', bg: 'rgba(139,92,246,0.08)', border: 'rgba(139,92,246,0.15)' },
-          { icon: '📊', label: 'GA4', sub: '트래픽 분석', href: 'https://analytics.google.com', bg: 'rgba(234,179,8,0.08)', border: 'rgba(234,179,8,0.15)' },
+          { icon: '🐙', label: 'GitHub', sub: '소스코드', href: 'https://github.com/wls9205-a11y/kadeora', bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.15)' },
+          { icon: '📊', label: 'GA4', sub: '트래픽 분석', href: 'https://analytics.google.com', bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.15)' },
         ].map(link => (
           <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" style={{
             display: 'block', padding: 16, borderRadius: 12, textDecoration: 'none', textAlign: 'center',

@@ -198,7 +198,7 @@ export default function AdminUsers() {
                     <span style={{
                       fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                       background: u.is_deleted ? '#fee2e2' : '#dcfce7',
-                      color: u.is_deleted ? '#dc2626' : '#16a34a',
+                      color: u.is_deleted ? '#F87171' : '#059669',
                     }}>{u.is_deleted ? '정지' : '정상'}</span>
                   </td>
                   <td style={{ padding: '10px 14px' }}>

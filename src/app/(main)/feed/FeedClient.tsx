@@ -279,8 +279,8 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       {!currentUserId && (
         <Link href="/guide" style={{
           display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.08) 100%)',
-          border: '1px solid rgba(139,92,246,0.15)', borderRadius: 12,
+          background: 'linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(96,165,250,0.08) 100%)',
+          border: '1px solid rgba(167,139,250,0.15)', borderRadius: 12,
           textDecoration: 'none', marginBottom: 10,
         }}>
           <span style={{ fontSize: 'var(--fs-lg)' }}>📖</span>

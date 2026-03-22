@@ -183,7 +183,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             <span style={{ fontSize: 'var(--fs-lg)' }}>{briefing.sentiment === 'bullish' ? '🐂' : briefing.sentiment === 'bearish' ? '🐻' : '😐'}</span>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{briefing.title}</div>
             <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
-              background: briefing.sentiment === 'bullish' ? 'rgba(34,197,94,0.15)' : briefing.sentiment === 'bearish' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.15)',
+              background: briefing.sentiment === 'bullish' ? 'rgba(52,211,153,0.15)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.15)',
               color: briefing.sentiment === 'bullish' ? '#34D399' : briefing.sentiment === 'bearish' ? '#F87171' : '#94a3b8',
             }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
           </div>
@@ -192,12 +192,12 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {(briefing.key_movers || briefing.top_movers) && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {((briefing.key_movers || briefing.top_movers)?.gainers || []).slice(0, 2).map((s: any) => (
-                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', color: '#34D399', fontWeight: 600 }}>
+                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(52,211,153,0.1)', color: '#34D399', fontWeight: 600 }}>
                   ▲ {s.name} +{s.change_pct?.toFixed(1)}%
                 </span>
               ))}
               {((briefing.key_movers || briefing.top_movers)?.losers || []).slice(0, 2).map((s: any) => (
-                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#F87171', fontWeight: 600 }}>
+                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(248,113,113,0.1)', color: '#F87171', fontWeight: 600 }}>
                   ▼ {s.name} {s.change_pct?.toFixed(1)}%
                 </span>
               ))}
@@ -209,7 +209,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               {briefing.sector_analysis.slice(0, 6).map((sec: any) => (
                 <div key={sec.name} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6,
-                  background: (sec.avg_pct || 0) > 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                  background: (sec.avg_pct || 0) > 0 ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)',
                   color: (sec.avg_pct || 0) > 0 ? '#F87171' : '#60A5FA',
                   fontWeight: 600,
                 }}>

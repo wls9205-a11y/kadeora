@@ -75,7 +75,7 @@ export default function EnvCheckCard() {
                     <span style={{
                       fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 600,
                       background: v.set ? '#dcfce7' : '#fef2f2',
-                      color: v.set ? '#16a34a' : '#dc2626',
+                      color: v.set ? '#059669' : '#F87171',
                     }}>
                       {v.set ? '✅ 설정됨' : '❌ 미설정'}
                     </span>

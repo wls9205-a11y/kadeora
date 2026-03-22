@@ -122,7 +122,7 @@ export default function AdminContent() {
                     background: r.status === 'pending' ? '#fde68a' : r.status === 'resolved' ? '#dcfce7' : '#e2e8f0',
                     color: r.status === 'pending' ? '#92400e' : r.status === 'resolved' ? '#16a34a' : '#64748b',
                   }}>{{ pending: '미처리', resolved: '처리됨', dismissed: '기각' }[r.status] || r.status}</span>
-                  {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: '#fee2e2', color: '#dc2626' }}>자동숨김</span>}
+                  {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: 'rgba(248,113,113,0.1)', color: '#F87171' }}>자동숨김</span>}
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{r.reason}</div>
                 {r.details && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2 }}>{r.details}</div>}
