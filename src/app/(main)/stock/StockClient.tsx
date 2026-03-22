@@ -63,7 +63,15 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     } catch {}
   }, []);
 
-  useEffect(() => { refresh(); const id = setInterval(refresh, 5 * 60 * 1000); return () => clearInterval(id); }, [refresh]);
+  useEffect(() => {
+    refresh();
+    const id = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') refresh();
+    }, 5 * 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
+  }, [refresh]);
 
   const isDomestic = mode === 'domestic';
   const domesticStocks = stocks.filter(s => (s.market === 'KOSPI' || s.market === 'KOSDAQ') && !isIdx(s));

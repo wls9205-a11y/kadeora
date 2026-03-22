@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${s.name} (${symbol}) 주가`,
     description: `${s.name} 현재가 ${p} ${ch}. ${s.market} 상장.`,
     alternates: { canonical: `https://kadeora.app/stock/${symbol}` },
-    openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: 'https://kadeora.app/images/brand/kadeora-wide.png' }] },
+    openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: `https://kadeora.app/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock` }] },
   };
 }
 

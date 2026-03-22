@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { SkeletonList } from '@/components/Skeleton';
+import EmptyState from '@/components/shared/EmptyState';
 
 interface Holding {
   id: string; symbol: string; buy_price: number; quantity: number;
@@ -134,9 +135,7 @@ export default function PortfolioTab() {
 
       {/* 보유 종목 리스트 */}
       {holdings.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-          아직 등록된 종목이 없습니다. 종목을 추가해서 수익률을 추적해보세요!
-        </div>
+        <EmptyState icon="💰" title="등록된 종목이 없습니다" description="종목을 추가해서 수익률을 추적해보세요!" actionLabel="종목 추가" actionHref="#" />
       ) : (
         holdings.map(h => {
           const isProfit = h.pnl >= 0;

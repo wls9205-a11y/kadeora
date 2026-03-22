@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Props) {
     unsold: `${SITE}/images/brand/kadeora-full.png`,
     general: `${SITE}/images/brand/kadeora-hero.png`,
   };
-  const ogImage = post.cover_image || BRAND_COVERS[post.category] || BRAND_COVERS.general;
+  const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}`;
   return {
     title: `${post.title} | 블로그`,
     description: post.meta_description || post.excerpt || post.title,

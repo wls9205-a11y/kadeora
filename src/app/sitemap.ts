@@ -10,11 +10,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
     '/guide', '/search', '/faq', '/terms', '/privacy',
+    '/apt/map', '/apt/diagnose', '/blog/series',
   ].map(path => ({
     url: `${BASE}${path}`,
     lastModified: now,
     changeFrequency: path === '' ? 'daily' : 'weekly',
     priority: path === '' ? 1 : path === '/feed' || path === '/stock' || path === '/apt' ? 0.9 : 0.7,
+  }));
+
+  // 지역별 SEO 랜딩 페이지
+  const REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주','강남구','서초구','송파구','마포구','용산구','성남시','수원시','고양시','화성시','평택시','해운대구','부산진구','동래구'];
+  const regionPages: MetadataRoute.Sitemap = REGIONS.map(r => ({
+    url: `${BASE}/apt/region/${encodeURIComponent(r)}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
   }));
 
   let blogPages: MetadataRoute.Sitemap = [];
@@ -27,13 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const [blogsR, stocksR, aptsR] = await Promise.all([
+    const [blogsR, stocksR, aptsR, seriesR] = await Promise.all([
       supabase.from('blog_posts').select('slug, updated_at, published_at')
         .eq('is_published', true).not('published_at', 'is', null)
         .lte('published_at', now.toISOString())
         .order('published_at', { ascending: false }).limit(50000),
       supabase.from('stock_quotes').select('symbol, updated_at'),
       supabase.from('apt_subscriptions').select('house_manage_no, created_at').order('rcept_bgnde', { ascending: false }).limit(5000),
+      supabase.from('blog_series').select('slug, created_at').eq('is_active', true),
     ]);
 
     blogPages = (blogsR.data || []).map(b => {
@@ -60,7 +71,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     }));
+
+    const seriesPages = (seriesR.data || []).map((s: any) => ({
+      url: `${BASE}/blog/series/${s.slug}`,
+      lastModified: new Date(s.created_at || Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }));
+    blogPages = [...blogPages, ...seriesPages];
   } catch {}
 
-  return [...staticPages, ...blogPages, ...stockPages, ...aptPages];
+  return [...staticPages, ...regionPages, ...blogPages, ...stockPages, ...aptPages];
 }

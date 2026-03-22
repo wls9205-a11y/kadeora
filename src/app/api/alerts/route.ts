@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServer } from '@/lib/supabase-server';
-
-const admin = () => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
 
-    const { data } = await admin().from('price_alerts')
+    const { data } = await getSupabaseAdmin().from('price_alerts')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
@@ -26,6 +23,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
@@ -39,14 +37,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 유저당 알림 최대 20개
-    const { count } = await admin().from('price_alerts')
+    const { count } = await getSupabaseAdmin().from('price_alerts')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id).eq('is_active', true);
     if ((count || 0) >= 20) {
       return NextResponse.json({ error: '알림은 최대 20개까지 설정 가능합니다' }, { status: 400 });
     }
 
-    const { data, error } = await admin().from('price_alerts').insert({
+    const { data, error } = await getSupabaseAdmin().from('price_alerts').insert({
       user_id: user.id,
       alert_type, target_symbol, target_apt_id, condition,
       threshold: threshold || null,
@@ -69,7 +67,7 @@ export async function DELETE(req: NextRequest) {
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id 필요' }, { status: 400 });
 
-    await admin().from('price_alerts')
+    await getSupabaseAdmin().from('price_alerts')
       .update({ is_active: false })
       .eq('id', id).eq('user_id', user.id);
 

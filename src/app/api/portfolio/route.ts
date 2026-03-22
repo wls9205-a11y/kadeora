@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { sanitizeText } from '@/lib/sanitize';
 
-const admin = () => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
 
-    const { data, error } = await admin().rpc('get_portfolio_summary', { p_user_id: user.id });
+    const { data, error } = await getSupabaseAdmin().rpc('get_portfolio_summary', { p_user_id: user.id });
     if (error) {
       // RPC 없으면 직접 조인
-      const { data: holdings } = await admin().from('portfolio_holdings')
+      const { data: holdings } = await getSupabaseAdmin().from('portfolio_holdings')
         .select('*').eq('user_id', user.id).order('created_at', { ascending: false });
       if (!holdings?.length) return NextResponse.json({ holdings: [], summary: { totalInvested: 0, totalCurrent: 0, totalPnl: 0, pnlPct: 0 } });
 
       const symbols = holdings.map(h => h.symbol);
-      const { data: stocks } = await admin().from('stock_quotes')
+      const { data: stocks } = await getSupabaseAdmin().from('stock_quotes')
         .select('symbol,name,price,market,currency').in('symbol', symbols);
       const stockMap = new Map(stocks?.map(s => [s.symbol, s]) || []);
 
@@ -64,6 +62,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
@@ -74,19 +73,25 @@ export async function POST(req: NextRequest) {
     if (!symbol || !buy_price || !quantity) {
       return NextResponse.json({ error: '종목, 매수가, 수량은 필수입니다' }, { status: 400 });
     }
+    if (Number(buy_price) <= 0 || Number(quantity) <= 0) {
+      return NextResponse.json({ error: '매수가와 수량은 0보다 커야 합니다' }, { status: 400 });
+    }
+    if (String(symbol).length > 20) {
+      return NextResponse.json({ error: '종목코드가 너무 깁니다' }, { status: 400 });
+    }
 
     // 최대 50종목
-    const { count } = await admin().from('portfolio_holdings')
+    const { count } = await getSupabaseAdmin().from('portfolio_holdings')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id);
     if ((count || 0) >= 50) {
       return NextResponse.json({ error: '포트폴리오는 최대 50종목까지 가능합니다' }, { status: 400 });
     }
 
-    const { data, error } = await admin().from('portfolio_holdings').insert({
-      user_id: user.id, symbol,
+    const { data, error } = await getSupabaseAdmin().from('portfolio_holdings').insert({
+      user_id: user.id, symbol: String(symbol).toUpperCase().trim(),
       buy_price: Number(buy_price), quantity: Number(quantity),
-      memo: memo || null,
+      memo: memo ? sanitizeText(String(memo)).slice(0, 200) : null,
     }).select().single();
 
     if (error) throw error;
@@ -97,6 +102,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
@@ -106,7 +112,7 @@ export async function DELETE(req: NextRequest) {
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id 필요' }, { status: 400 });
 
-    await admin().from('portfolio_holdings').delete().eq('id', id).eq('user_id', user.id);
+    await getSupabaseAdmin().from('portfolio_holdings').delete().eq('id', id).eq('user_id', user.id);
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

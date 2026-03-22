@@ -96,13 +96,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast, success, error, info }}>
       {children}
-      <div style={{
+      <div role="log" aria-live="polite" aria-atomic="false" style={{
         position: 'fixed', bottom: 80, right: 20, zIndex: 9999,
         display: 'flex', flexDirection: 'column', gap: 8,
         alignItems: 'flex-end', pointerEvents: 'none',
       }}>
         {toasts.map(t => (
-          <div key={t.id} style={{ pointerEvents: 'auto' }}>
+          <div key={t.id} role="alert" style={{ pointerEvents: 'auto' }}>
             <ToastItem toast={t} onRemove={remove} />
           </div>
         ))}
