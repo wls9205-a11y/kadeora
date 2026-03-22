@@ -228,14 +228,14 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <button onClick={() => setMode('domestic')} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
-          background: isDomestic ? 'var(--brand)' : 'var(--bg-surface)',
-          color: isDomestic ? '#fff' : 'var(--text-secondary)',
+          background: isDomestic ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+          color: isDomestic ? '#E2E8F0' : 'var(--text-tertiary)',
           border: isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇰🇷 국내주식</button>
         <button onClick={() => setMode('global')} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
           background: !isDomestic ? '#60A5FA' : 'var(--bg-surface)',
-          color: !isDomestic ? '#fff' : 'var(--text-secondary)',
+          color: !isDomestic ? '#E2E8F0' : 'var(--text-tertiary)',
           border: !isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇺🇸 해외주식</button>
       </div>
@@ -326,9 +326,9 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         <div style={{ marginBottom: 16 }}>
           {/* 테마 필터 칩 */}
           <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
-            <button onClick={() => setSelectedTheme(null)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: !selectedTheme ? 'var(--brand)' : 'var(--bg-hover)', color: !selectedTheme ? '#fff' : 'var(--text-tertiary)' }}>전체</button>
+            <button onClick={() => setSelectedTheme(null)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: !selectedTheme ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)', color: !selectedTheme ? '#93C5FD' : 'var(--text-tertiary)' }}>전체</button>
             {themes.map(t => (
-              <button key={t.id} onClick={() => setSelectedTheme(selectedTheme === t.theme_name ? null : t.theme_name)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: selectedTheme === t.theme_name ? 'var(--brand)' : 'var(--bg-hover)', color: selectedTheme === t.theme_name ? '#fff' : 'var(--text-tertiary)' }}>{t.is_hot ? '🔥' : ''}{t.theme_name}</button>
+              <button key={t.id} onClick={() => setSelectedTheme(selectedTheme === t.theme_name ? null : t.theme_name)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: selectedTheme === t.theme_name ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)', color: selectedTheme === t.theme_name ? '#93C5FD' : 'var(--text-tertiary)' }}>{t.is_hot ? '🔥' : ''}{t.theme_name}</button>
             ))}
           </div>
           {themes.filter(t => !selectedTheme || t.theme_name === selectedTheme).map(t => {
@@ -396,7 +396,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {currentTab === 'movers' && (
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           {([['up','📈 상승'],['down','📉 하락'],['volume','🔥 거래량']] as const).map(([k,l]) => (
-            <button key={k} onClick={() => setMoversTab(k)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: moversTab===k?'var(--brand)':'var(--bg-hover)', color: moversTab===k?'#fff':'var(--text-secondary)' }}>{l}</button>
+            <button key={k} onClick={() => setMoversTab(k)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: moversTab===k?'rgba(96,165,250,0.15)':'var(--bg-hover)', color: moversTab===k?'#93C5FD':'var(--text-secondary)' }}>{l}</button>
           ))}
         </div>
       )}

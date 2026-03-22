@@ -52,8 +52,8 @@ export default async function AptDetailPage({ params }: Props) {
   const status = !apt.rcept_bgnde ? 'upcoming' : today >= apt.rcept_bgnde && today <= apt.rcept_endde ? 'open' : today < apt.rcept_bgnde ? 'upcoming' : 'closed';
   const dday = apt.rcept_bgnde ? Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000) : null;
   const SB: Record<string, { label: string; bg: string; color: string; border: string }> = {
-    open: { label: '접수중', bg: '#14532d', color: '#86efac', border: '#166534' },
-    upcoming: { label: '접수예정', bg: '#1e3a5f', color: '#93c5fd', border: '#1e40af' },
+    open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: '#4ADE80', border: '#34D399' },
+    upcoming: { label: '접수예정', bg: 'rgba(251,191,36,0.15)', color: '#FCD34D', border: '#FBBF24' },
     closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
   };
   const badge = SB[status];

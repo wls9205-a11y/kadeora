@@ -44,7 +44,7 @@ export default function UnsoldStatsWidget() {
               whiteSpace: 'nowrap',
               flexShrink: 0,
               border: `1px solid ${region === r ? 'var(--brand)' : 'var(--border)'}`,
-              background: region === r ? 'var(--brand)' : 'transparent',
+              background: region === r ? 'rgba(96,165,250,0.15)' : 'transparent',
               color: region === r ? '#fff' : 'var(--text-tertiary)',
             }}
           >
@@ -93,7 +93,7 @@ export default function UnsoldStatsWidget() {
             {'\uD83D\uDCCA'} {stats.region} 미분양 현황
           </div>
           <div style={{
-            fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#f87171', marginBottom: 6,
+            fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171', marginBottom: 6,
           }}>
             월평균 {stats.monthlyAvg.toLocaleString()}세대
           </div>

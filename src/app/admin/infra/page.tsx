@@ -14,7 +14,7 @@ function DonutGauge({ value, max, label, color }: { value: number; max: number; 
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ position: 'relative', width: 128, height: 128 }}>
         <svg width="128" height="128" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx="60" cy="60" r={radius} fill="none" stroke="#374151" strokeWidth="8" />
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="#1E3050" strokeWidth="8" />
           <circle cx="60" cy="60" r={radius} fill="none" stroke={statusColor} strokeWidth="8"
             strokeDasharray={circumference} strokeDashoffset={offset}
             strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />
@@ -49,7 +49,7 @@ function TableBar({ name, sizeBytes, maxBytes, size, rows }: { name: string; siz
         <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>{name}</span>
         <span style={{ color: 'var(--text-tertiary)' }}>{(rows ?? 0).toLocaleString()}행 · {size}</span>
       </div>
-      <div style={{ height: 6, background: '#1f2937', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: 6, background: '#162544', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{
           height: '100%', borderRadius: 3,
           background: 'linear-gradient(90deg, #34D399, #34D399)',
@@ -178,7 +178,7 @@ export default function InfraPage() {
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>{item.label} {item.sub}</div>
               {item.barPct > 0 ? (
                 <>
-                  <div style={{ height: 5, background: '#1f2937', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ height: 5, background: '#162544', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ height: '100%', background: item.barColor, borderRadius: 3, width: `${item.barPct}%` }} />
                   </div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>여유로움</div>

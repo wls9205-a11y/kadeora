@@ -655,7 +655,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: isOpen ? '#14532d' : isClosed ? 'var(--bg-hover)' : '#1e3a5f', color: isOpen ? '#86efac' : isClosed ? 'var(--text-tertiary)' : '#93c5fd' }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? '#4ADE80' : isClosed ? 'var(--text-tertiary)' : '#FCD34D' }}>
                           {isOpen ? '접수중' : isClosed ? '마감' : '접수예정'}
                         </span>
                         {a.rcept_bgnde && (

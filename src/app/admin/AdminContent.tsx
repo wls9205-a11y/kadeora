@@ -108,8 +108,8 @@ export default function AdminContent() {
             {filteredReports.map(r => (
               <div key={r.id} style={{
                 padding: '12px 14px', borderRadius: 8,
-                background: r.status === 'pending' ? '#fffbeb' : 'var(--bg-base)',
-                border: `1px solid ${r.status === 'pending' ? '#fde68a' : 'var(--border)'}`,
+                background: r.status === 'pending' ? 'rgba(251,191,36,0.08)' : 'var(--bg-base)',
+                border: `1px solid ${r.status === 'pending' ? 'rgba(251,191,36,0.3)' : 'var(--border)'}`,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{
@@ -119,8 +119,8 @@ export default function AdminContent() {
                   }}>{{ post: '게시글', comment: '댓글', chat: '채팅' }[r.content_type] || r.content_type}</span>
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
-                    background: r.status === 'pending' ? '#fde68a' : r.status === 'resolved' ? '#dcfce7' : '#e2e8f0',
-                    color: r.status === 'pending' ? '#92400e' : r.status === 'resolved' ? '#16a34a' : '#64748b',
+                    background: r.status === 'pending' ? 'rgba(251,191,36,0.3)' : r.status === 'resolved' ? 'rgba(52,211,153,0.12)' : 'rgba(148,163,184,0.15)',
+                    color: r.status === 'pending' ? '#FBBF24' : r.status === 'resolved' ? '#34D399' : '#64748b',
                   }}>{{ pending: '미처리', resolved: '처리됨', dismissed: '기각' }[r.status] || r.status}</span>
                   {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: 'rgba(248,113,113,0.1)', color: '#F87171' }}>자동숨김</span>}
                 </div>

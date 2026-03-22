@@ -260,7 +260,7 @@ export default function AdminAutomation() {
               {rewriteStatus.running ? '처리 중...' : '5건 리라이팅'}
             </button>
             <button onClick={() => runRewrite(10)} disabled={rewriteStatus.running}
-              style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#6d28d9', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: rewriteStatus.running ? 0.6 : 1 }}>
+              style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#A78BFA', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: rewriteStatus.running ? 0.6 : 1 }}>
               10건
             </button>
           </div>
@@ -372,7 +372,7 @@ export default function AdminAutomation() {
                 <td style={{ padding: '8px 10px' }}>
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
-                    background: log.status === 'success' ? '#dcfce7' : log.status === 'running' ? '#dbeafe' : '#fee2e2',
+                    background: log.status === 'success' ? 'rgba(52,211,153,0.12)' : log.status === 'running' ? 'rgba(96,165,250,0.12)' : 'rgba(248,113,113,0.12)',
                     color: log.status === 'success' ? '#059669' : log.status === 'running' ? '#2563eb' : '#F87171',
                   }}>{log.status}</span>
                 </td>

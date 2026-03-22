@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 28, fontWeight: 900, color: '#fff',
             }}>K</div>
-            <span style={{ fontSize: 48, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-1px' }}>
+            <span style={{ fontSize: 48, fontWeight: 900, color: '#E2E8F0', letterSpacing: '-1px' }}>
               카더라
             </span>
           </div>
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 20, fontWeight: 900, color: '#fff',
           }}>K</div>
-          <span style={{ fontSize: 24, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.5px' }}>
+          <span style={{ fontSize: 24, fontWeight: 900, color: '#E2E8F0', letterSpacing: '-0.5px' }}>
             카더라
           </span>
           {catLabel && (
@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
         <div style={{
           fontSize: title.length > 50 ? 34 : title.length > 30 ? 40 : 48,
           fontWeight: 800,
-          color: '#f1f5f9',
+          color: '#E2E8F0',
           lineHeight: 1.35,
           maxWidth: 1000,
           display: '-webkit-box',

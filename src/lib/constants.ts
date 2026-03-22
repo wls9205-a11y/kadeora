@@ -189,9 +189,9 @@ export const REGIONS = [
 export const GRADE_INFO: Record<string, { icon: string; color: string }> = {
   '씨앗': { icon: '🌱', color: '#94A3B8' },
   '새싹': { icon: '🌿', color: '#34D399' },
-  '브론즈': { icon: '🥉', color: '#CD7F32' },
-  '실버': { icon: '🥈', color: '#C0C0C0' },
+  '브론즈': { icon: '🥉', color: '#FBBF24' },
+  '실버': { icon: '🥈', color: '#94A3B8' },
   '골드': { icon: '🥇', color: '#FCD34D' },
   '플래티넘': { icon: '💎', color: '#A78BFA' },
-  '다이아': { icon: '🔷', color: '#00BFFF' },
+  '다이아': { icon: '🔷', color: '#22D3EE' },
 };

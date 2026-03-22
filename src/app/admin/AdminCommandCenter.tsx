@@ -341,7 +341,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: failCrons > 0 ? '#F87171' : '#34D399' }} />
               <span style={{ fontSize: 10, color: '#64748b' }}>크론 {successCrons}/{cronEntries.length}</span>
             </div>
-            {pendingReports > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: '#F8717120', color: '#f87171', fontWeight: 700 }}>신고 {pendingReports}</span>}
+            {pendingReports > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#f87171', fontWeight: 700 }}>신고 {pendingReports}</span>}
             {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: '#FBBF2420', color: '#fbbf24', fontWeight: 700 }}>알림 {unreadAlerts}</span>}
           </div>
           {lastRefresh && <span style={{ fontSize: 10, color: '#475569' }}>갱신: {lastRefresh.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span>}
@@ -427,7 +427,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               const result = actionResults[a.id];
               return (
                 <button key={a.id} className="cc-btn" onClick={() => runQuickAction(a)} disabled={!!actionRunning}
-                  style={{ background: result ? (result.ok ? '#05966920' : '#F8717120') : '#1E3050', color: result ? (result.ok ? '#4ade80' : '#f87171') : '#94a3b8', border: `1px solid ${result ? (result.ok ? '#05966940' : '#F8717140') : '#2A4060'}` }}>
+                  style={{ background: result ? (result.ok ? 'rgba(5,150,105,0.12)' : 'rgba(248,113,113,0.12)') : '#1E3050', color: result ? (result.ok ? '#34D399' : '#f87171') : '#94a3b8', border: `1px solid ${result ? (result.ok ? 'rgba(5,150,105,0.25)' : 'rgba(248,113,113,0.25)') : '#2A4060'}` }}>
                   {actionRunning === a.id ? <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <span style={{ fontSize: 13 }}>{a.icon}</span>}
                   {result?.msg || a.label}
                 </button>
@@ -530,7 +530,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                     <div className="cc-progress" style={{ marginBottom: 8 }}><div className="cc-progress-bar" style={{ width: `${pct(rewriteStats.done,rewriteStats.total)}%`, background: '#A78BFA' }} /></div>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button className="cc-btn" onClick={() => runRewrite(5)} disabled={rewriteRunning} style={{ background: '#A78BFA', color: '#fff' }}>{rewriteRunning ? '처리 중...' : '5건'}</button>
-                      <button className="cc-btn" onClick={() => runRewrite(10)} disabled={rewriteRunning} style={{ background: '#6d28d9', color: '#fff' }}>10건</button>
+                      <button className="cc-btn" onClick={() => runRewrite(10)} disabled={rewriteRunning} style={{ background: '#A78BFA', color: '#fff' }}>10건</button>
                     </div>
                     {rewriteLog.length > 0 && <div className="cc-scrollbar" style={{ marginTop: 6, maxHeight: 80, overflow: 'auto', fontSize: 9, color: '#475569', background: '#1E305040', borderRadius: 6, padding: 6 }}>{rewriteLog.slice(-5).map((l,i)=><div key={i}>{l}</div>)}</div>}
                   </div>
@@ -670,7 +670,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                   <tr key={log.id||i} style={{ borderBottom: '1px solid #1E305020' }}>
                     <td style={{ padding:'5px 8px',color:'#64748b',whiteSpace:'nowrap' }}>{log.started_at ? new Date(log.started_at).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</td>
                     <td style={{ padding:'5px 8px',color:'#e2e8f0',fontWeight:600 }}>{CRON_MAP[log.cron_name]?.display||log.cron_name}</td>
-                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:9,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'#05966920':log.status==='running'?'#60A5FA20':'#F8717120',color:log.status==='success'?'#4ade80':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>
+                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:9,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'rgba(5,150,105,0.12)':log.status==='running'?'rgba(96,165,250,0.12)':'rgba(248,113,113,0.12)',color:log.status==='success'?'#34D399':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>
                     <td style={{ padding:'5px 8px',color:'#64748b' }}>{log.duration_ms?`${(log.duration_ms/1000).toFixed(1)}s`:'-'}</td>
                     <td style={{ padding:'5px 8px',color:'#64748b' }}>{log.records_processed||0}</td>
                     <td style={{ padding:'5px 8px',color:'#f87171',maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{log.error_message||''}</td>

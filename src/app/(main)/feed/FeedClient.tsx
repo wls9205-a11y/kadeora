@@ -251,10 +251,10 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               <button key={r.value}
                 onClick={() => router.push(`/feed${r.value === 'all' ? '?category=local' : `?category=local&region=${r.value}`}`)}
                 style={{
-                  padding: '5px 12px', borderRadius: 999, border: `1px solid ${isActive ? 'var(--brand)' : 'var(--border)'}`, cursor: 'pointer', flexShrink: 0,
+                  padding: '5px 12px', borderRadius: 999, border: `1px solid ${isActive ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`, cursor: 'pointer', flexShrink: 0,
                   fontWeight: 600, fontSize: 'var(--fs-xs)', fontFamily: 'inherit',
-                  background: isActive ? 'var(--brand)' : 'transparent',
-                  color: isActive ? '#fff' : 'var(--text-tertiary)',
+                  background: isActive ? 'rgba(96,165,250,0.15)' : 'transparent',
+                  color: isActive ? '#93C5FD' : 'var(--text-tertiary)',
                 }}>
                 {r.label}
               </button>

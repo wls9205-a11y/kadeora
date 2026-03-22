@@ -51,7 +51,7 @@ export default function EnvCheckCard() {
       {error && <div style={{ color: 'var(--error)', fontSize: 'var(--fs-sm)', marginBottom: 8 }}>{error}</div>}
 
       {data && missingCount > 0 && (
-        <div style={{ padding: '10px 14px', borderRadius: 8, background: 'var(--error-bg, #fef2f2)', border: '1px solid var(--error, #F87171)', marginBottom: 12, fontSize: 'var(--fs-sm)', color: 'var(--error, #F87171)', fontWeight: 600 }}>
+        <div style={{ padding: '10px 14px', borderRadius: 8, background: 'var(--error-bg, rgba(248,113,113,0.08))', border: '1px solid var(--error, #F87171)', marginBottom: 12, fontSize: 'var(--fs-sm)', color: 'var(--error, #F87171)', fontWeight: 600 }}>
           ⚠️ 미설정 환경변수 {missingCount}개 — 일부 기능이 동작하지 않을 수 있습니다
         </div>
       )}
@@ -74,7 +74,7 @@ export default function EnvCheckCard() {
                   <td style={{ padding: '8px 12px', textAlign: 'center' }}>
                     <span style={{
                       fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 600,
-                      background: v.set ? '#dcfce7' : '#fef2f2',
+                      background: v.set ? 'rgba(52,211,153,0.12)' : 'rgba(248,113,113,0.08)',
                       color: v.set ? '#059669' : '#F87171',
                     }}>
                       {v.set ? '✅ 설정됨' : '❌ 미설정'}

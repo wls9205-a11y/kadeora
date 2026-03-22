@@ -217,7 +217,7 @@ export default function DiscussClient() {
                 {['stock', 'apt', 'economy', 'free'].map(c => (
                   <button key={c} onClick={() => setNewCat(c)} style={{
                     padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer',
-                    background: newCat === c ? 'var(--brand)' : 'var(--bg-hover)',
+                    background: newCat === c ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)',
                     color: newCat === c ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>{(CAT_STYLE[c] || CAT_STYLE.free).label}</button>
                 ))}
