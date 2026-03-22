@@ -53,8 +53,6 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'blog-rewrite':          { display: 'AI 리라이팅',      group: '블로그' },
   'blog-weekly-market':    { display: '주간 시장 리뷰',   group: '블로그' },
   'blog-monthly-market':   { display: '월간 시장 리뷰',   group: '블로그' },
-  'blog-weekly':           { display: '주간 블로그 (구형)', group: '블로그' },
-  'blog-monthly':          { display: '월간 블로그 (구형)', group: '블로그' },
   'blog-apt-new':          { display: '신규 분양 블로그',  group: '블로그' },
   'blog-apt-landmark':     { display: '랜드마크 블로그',   group: '블로그' },
   'blog-redevelopment':    { display: '재개발 블로그',    group: '블로그' },

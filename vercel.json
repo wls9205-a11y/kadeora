@@ -53,14 +53,6 @@
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/cron/blog-weekly",
-      "schedule": "0 8 * * 1"
-    },
-    {
-      "path": "/api/cron/blog-monthly",
-      "schedule": "0 9 1 * *"
-    },
-    {
       "path": "/api/cron/blog-publish-queue",
       "schedule": "0 9 * * *"
     },
