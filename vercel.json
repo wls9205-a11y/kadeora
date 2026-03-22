@@ -201,6 +201,7 @@
       "schedule": "0 2 * * *"
     },
     {
+    {
       "path": "/api/cron/invest-calendar-refresh",
       "schedule": "0 3 1 * *"
     },
@@ -211,6 +212,10 @@
     {
       "path": "/api/cron/stock-flow-crawl",
       "schedule": "30 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/expire-listings",
+      "schedule": "0 3 * * *"
     }
   ]
 }
