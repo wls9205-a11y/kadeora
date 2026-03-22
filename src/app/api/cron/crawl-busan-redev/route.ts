@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
           sigungu: find(r, ['guNm', 'sggNm', 'gu', 'gugun']) || null,
           project_type: isRebuild ? '재건축' : '재개발',
           stage: stageMap[find(r, ['stepSe', 'bsnsStep', 'stepNm', 'sttusSe']) || ''] || '기타',
-          total_households: (() => { const v = find(r, ['totHshldCo', 'hshldCo', 'planHshldCo']); return v ? parseInt(v) : null; })(),
+          total_households: (() => { const v = find(r, ['totHshldCo', 'hshldCo', 'planHshldCo', 'houseCnt', 'totalHouseCnt', 'totHo', 'planHo', 'planCo', 'hoCnt']); const n = v ? parseInt(v) : null; return n && n > 0 && n < 100000 ? n : null; })(),
           constructor: r.cnstrctEntrps || r.builder || null,
           address: r.adres || r.lcAdres || null,
           notes: r.rm || null,

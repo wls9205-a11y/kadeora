@@ -115,6 +115,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     }
   };
 
+  const [toast, setToast] = useState<string | null>(null);
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
+
   const toggleWatchlist = async (itemType: string, itemId: string) => {
     if (!aptUser) { alert('로그인 후 이용해주세요'); return; }
     try {
@@ -122,9 +125,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       const { data: existing } = await sb.from('apt_watchlist').select('id').eq('user_id', aptUser.id).eq('item_type', itemType).eq('item_id', itemId).maybeSingle();
       if (existing) {
         await sb.from('apt_watchlist').delete().eq('id', existing.id);
+        showToast('관심단지에서 해제했습니다');
       } else {
         await sb.from('apt_watchlist').insert({ user_id: aptUser.id, item_type: itemType, item_id: itemId, notify_enabled: true });
+        showToast('⭐ 관심단지 등록! 새 소식이 있으면 알림을 보내드립니다');
       }
+      haptic('medium');
       const { data: wl } = await sb.from('apt_watchlist').select('item_type, item_id').eq('user_id', aptUser.id);
       setWatchlist(new Set((wl || []).map((w: any) => `${w.item_type}:${w.item_id}`)));
     } catch {}
@@ -1126,7 +1132,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             })}
 
             {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>해당 지역 데이터가 없습니다</div>}
-            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>📊 데이터 출처: 국토교통부 미분양주택현황 통계 (stat.molit.go.kr) · 매월 말 발표 기준, 2~3개월 지연 반영 · 개별 단지 정보는 청약홈(applyhome.co.kr) 병행 수집</p>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>📊 데이터 출처: 국토교통부 미분양주택현황 통계 (stat.molit.go.kr) · 매월 말 발표 기준, 2~3개월 지연 반영 · 개별 단지 정보는 청약홈(applyhome.co.kr) 병행 수집<br/>⚠️ 본 정보는 참고용이며 투자 권유가 아닙니다. 투자에 따른 손익은 투자자 본인에게 귀속됩니다.</p>
           </div>
         );
       })()}
@@ -1318,7 +1324,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
             {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>조건에 맞는 프로젝트가 없습니다</div>}
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-              📊 데이터 출처: 서울시 열린데이터광장(openapi.seoul.go.kr) · 경기도 공공데이터(openapi.gg.go.kr) · 부산시 공공데이터(apis.data.go.kr) · 매주 월요일 갱신 · 실제 진행 상황은 해당 조합 또는 지자체에 직접 확인하세요
+              📊 데이터 출처: 서울시 열린데이터광장(openapi.seoul.go.kr) · 경기도 공공데이터(openapi.gg.go.kr) · 부산시 공공데이터(apis.data.go.kr) · 매주 월요일 갱신 · 실제 진행 상황은 해당 조합 또는 지자체에 직접 확인하세요<br/>⚠️ 본 정보는 참고용이며 투자 권유가 아닙니다. 투자에 따른 손익은 투자자 본인에게 귀속됩니다.
             </p>
           </div>
         );
@@ -1591,7 +1597,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             )}
 
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-              📊 데이터 출처: 국토교통부 실거래가 공개시스템 (rt.molit.go.kr) · 공공데이터포털 API (apis.data.go.kr) · 전국 약 200개 시군구 · 평일 매일 08시 자동 수집 · 2026년 1월~현재 거래 기준 · 실제 거래가와 차이가 있을 수 있습니다
+              📊 데이터 출처: 국토교통부 실거래가 공개시스템 (rt.molit.go.kr) · 공공데이터포털 API (apis.data.go.kr) · 전국 약 200개 시군구 · 평일 매일 08시 자동 수집 · 2026년 1월~현재 거래 기준 · 실제 거래가와 차이가 있을 수 있습니다<br/>⚠️ 본 정보는 참고용이며 투자 권유가 아닙니다. 투자에 따른 손익은 투자자 본인에게 귀속됩니다.
             </p>
           </div>
         );
@@ -1789,6 +1795,17 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           open={!!commentTarget}
           onClose={() => setCommentTarget(null)}
         />
+      )}
+
+      {/* 토스트 알림 */}
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--bg-elevated, #1e293b)', color: '#fff', padding: '12px 20px',
+          borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 600, zIndex: 9999,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
+          animation: 'fadeIn 0.2s ease-out',
+        }}>{toast}</div>
       )}
     </div>
   );
