@@ -31,9 +31,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       supabase.from('blog_posts').select('slug, updated_at, published_at')
         .eq('is_published', true).not('published_at', 'is', null)
         .lte('published_at', now.toISOString())
-        .order('published_at', { ascending: false }).limit(5000),
+        .order('published_at', { ascending: false }).limit(50000),
       supabase.from('stock_quotes').select('symbol, updated_at'),
-      supabase.from('apt_subscriptions').select('house_manage_no, created_at').order('rcept_bgnde', { ascending: false }).limit(500),
+      supabase.from('apt_subscriptions').select('house_manage_no, created_at').order('rcept_bgnde', { ascending: false }).limit(5000),
     ]);
 
     blogPages = (blogsR.data || []).map(b => ({
