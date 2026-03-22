@@ -4,7 +4,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const revalidate = 300;
 export const metadata: Metadata = {
-  title: '카더라 블로그 — 주식·청약·부동산 정보',
+  title: '블로그 — 주식·청약·부동산 정보',
   description: '코스피 코스닥 시세, 아파트 청약 일정, 미분양 현황, 재테크 정보를 매일 업데이트합니다.',
 };
 
