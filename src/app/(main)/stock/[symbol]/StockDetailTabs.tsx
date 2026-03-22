@@ -68,6 +68,127 @@ function MiniChart({ data }: { data: { date: string; close_price: number }[] }) 
   );
 }
 
+const PERIODS = [
+  { key: '1w', label: '1주', days: 7 },
+  { key: '1m', label: '1개월', days: 30 },
+  { key: '3m', label: '3개월', days: 90 },
+  { key: 'all', label: '전체', days: 999 },
+] as const;
+
+function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: string }) {
+  const [chartType, setChartType] = useState<'candle' | 'line'>('candle');
+  const [period, setPeriod] = useState<string>('all');
+
+  const hasOHLC = priceHistory.some((d: any) => d.open_price && d.high_price && d.low_price);
+
+  const periodDays = PERIODS.find(p => p.key === period)?.days ?? 999;
+  const slicedData = periodDays >= 999
+    ? priceHistory
+    : priceHistory.slice(-periodDays);
+
+  if (slicedData.length < 2) {
+    return (
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+          📊 거래 데이터가 쌓이면 차트가 표시됩니다
+          <br /><span style={{ fontSize: 'var(--fs-xs)' }}>보통 상장 후 2~3일 내에 업데이트</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+      {/* 컨트롤 바: 차트 타입 토글 + 기간 선택 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+        {/* 차트 타입 토글 */}
+        {hasOHLC && (
+          <div style={{ display: 'flex', background: 'var(--bg-hover)', borderRadius: 8, padding: 2 }}>
+            {(['candle', 'line'] as const).map(t => (
+              <button key={t} onClick={() => setChartType(t)} style={{
+                padding: '5px 12px', border: 'none', borderRadius: 6, cursor: 'pointer',
+                fontSize: 'var(--fs-xs)', fontWeight: 600,
+                background: chartType === t ? 'var(--brand)' : 'transparent',
+                color: chartType === t ? '#fff' : 'var(--text-tertiary)',
+                transition: 'all 0.15s',
+              }}>
+                {t === 'candle' ? '🕯️ 캔들' : '📈 라인'}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 기간 선택 */}
+        <div style={{ display: 'flex', gap: 4 }}>
+          {PERIODS.map(p => (
+            <button key={p.key} onClick={() => setPeriod(p.key)} style={{
+              padding: '4px 10px', border: 'none', borderRadius: 6, cursor: 'pointer',
+              fontSize: 'var(--fs-xs)', fontWeight: 600,
+              background: period === p.key ? 'var(--brand)' : 'var(--bg-hover)',
+              color: period === p.key ? '#fff' : 'var(--text-tertiary)',
+              transition: 'all 0.15s',
+            }}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 차트 렌더링 */}
+      {chartType === 'candle' && hasOHLC ? (
+        <CandlestickChart
+          data={slicedData.filter((d: any) => d.open_price && d.high_price && d.low_price).map((d: any) => ({
+            date: d.date,
+            open: Number(d.open_price),
+            high: Number(d.high_price),
+            low: Number(d.low_price),
+            close: Number(d.close_price),
+            volume: Number(d.volume) || 0,
+          }))}
+          height={260}
+          showVolume={true}
+          currency={currency}
+        />
+      ) : (
+        <MiniChart data={slicedData} />
+      )}
+
+      {/* 변동 요약 */}
+      {slicedData.length >= 2 && (() => {
+        const first = Number(slicedData[0].close_price);
+        const last = Number(slicedData[slicedData.length - 1].close_price);
+        const change = last - first;
+        const changePct = first > 0 ? (change / first * 100) : 0;
+        const high = Math.max(...slicedData.map((d: any) => Number(d.high_price || d.close_price)));
+        const low = Math.min(...slicedData.map((d: any) => Number(d.low_price || d.close_price)).filter((v: number) => v > 0));
+        const isUp = change >= 0;
+        return (
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기간 변동</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? '#F87171' : '#60A5FA', marginTop: 2 }}>
+                {isUp ? '+' : ''}{changePct.toFixed(2)}%
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#F87171', marginTop: 2 }}>
+                {currency === 'USD' ? `$${high.toFixed(2)}` : `₩${high.toLocaleString()}`}
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#60A5FA', marginTop: 2 }}>
+                {currency === 'USD' ? `$${low.toFixed(2)}` : `₩${low.toLocaleString()}`}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
 const TABS = [
   { key: 'overview', label: '개요' },
   { key: 'chart', label: '차트' },
@@ -134,34 +255,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
 
       {/* 차트 */}
       {tab === 'chart' && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          {priceHistory.length >= 2 ? (
-            <>
-              {/* Candlestick if OHLC data available */}
-              {priceHistory.some((d: any) => d.open_price && d.high_price && d.low_price) ? (
-                <div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 8 }}>📊 캔들스틱 차트</div>
-                  <CandlestickChart
-                    data={priceHistory.filter((d: any) => d.open_price && d.high_price && d.low_price).map((d: any) => ({
-                      date: d.date,
-                      open: d.open_price,
-                      high: d.high_price,
-                      low: d.low_price,
-                      close: d.close_price,
-                      volume: d.volume || 0,
-                    }))}
-                    height={220}
-                    showVolume={true}
-                  />
-                </div>
-              ) : (
-                <MiniChart data={priceHistory} />
-              )}
-            </>
-          ) : (
-            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📊 거래 데이터가 쌓이면 차트가 표시됩니다<br/><span style={{ fontSize: 'var(--fs-xs)' }}>보통 상장 후 2~3일 내에 업데이트</span></div>
-          )}
-        </div>
+        <ChartTab priceHistory={priceHistory} currency={currency} />
       )}
 
       {/* 수급 */}

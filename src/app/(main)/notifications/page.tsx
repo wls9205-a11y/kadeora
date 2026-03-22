@@ -12,6 +12,9 @@ interface Notif {
   content: string;
   is_read: boolean;
   created_at: string;
+  link?: string | null;
+  message?: string | null;
+  title?: string | null;
 }
 
 function timeAgo(d: string) {
@@ -31,11 +34,10 @@ const TYPE_ICON: Record<string, string> = {
 };
 
 function getNotifLink(n: Notif): string {
-  // 댓글/좋아요/답글 알림 → 피드
-  if (n.type === 'comment' || n.type === 'like' || n.type === 'post_like' || n.type === 'reply' || n.type === 'comment_like') return '/feed';
-  // 팔로우 알림 → 프로필
+  // DB 트리거가 link 컬럼에 경로를 저장함 (예: /feed/123)
+  if (n.link) return n.link;
+  // fallback: 팔로우 → 프로필, 나머지 → 피드
   if (n.type === 'follow') return '/profile';
-  // 시스템/마케팅 알림 → 피드
   return '/feed';
 }
 
@@ -54,7 +56,7 @@ export default function NotificationsPage() {
       if (u) {
         const { data: n } = await sb
           .from('notifications')
-          .select('*')
+          .select('id, type, content, is_read, created_at, link, message, title')
           .eq('user_id', u.id)
           .order('created_at', { ascending: false })
           .limit(50);
@@ -147,7 +149,7 @@ export default function NotificationsPage() {
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                  {n.content}
+                  {n.message || n.content}
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 4 }}>
                   {timeAgo(n.created_at)}
