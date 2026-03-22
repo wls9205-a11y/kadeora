@@ -435,33 +435,34 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
               <Link key={apt.id} href={`/apt/${apt.house_manage_no || apt.id}`} style={{
-                display: 'block', padding: '12px 16px', borderRadius: 12, marginBottom: 6,
-                background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                borderLeft: `4px solid ${accentColor}`,
-                opacity: st === 'closed' ? 0.6 : 1,
+                display: 'block', padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
+                background: st === 'open' ? 'linear-gradient(135deg, var(--bg-surface), rgba(96,165,250,0.04))' : 'var(--bg-surface)',
+                border: st === 'open' ? '1.5px solid rgba(96,165,250,0.3)' : '1px solid var(--border)',
+                opacity: st === 'closed' ? 0.55 : 1,
                 textDecoration: 'none', color: 'inherit',
+                transition: 'transform 0.1s, box-shadow 0.15s',
               }}>
-                {/* 1행: 상태 + D-day + 지역 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                {/* 1행: 상태배지 + D-day + 특성 + 지역 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap' }}>
                   {isNew(apt, 'subscription') && <NewBadge />}
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: dday <= 2 ? '#F87171' : dday <= 6 ? '#FBBF24' : 'var(--text-secondary)' }}>
-                      {st === 'open' ? (dday === 0 ? '오늘 마감' : `마감 D-${dday}`) : `D-${dday}`}
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'rgba(251,191,36,0.12)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? '#F87171' : dday <= 6 ? '#FBBF24' : 'var(--text-secondary)' }}>
+                      {st === 'open' ? (dday === 0 ? '🔴 오늘 마감' : `⏰ D-${dday}`) : `D-${dday}`}
                     </span>
                   )}
-                  {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', color: '#A78BFA', border: '1px solid rgba(167,139,250,0.2)' }}>분양가상한</span>}
-                  {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#F87171', border: '1px solid rgba(248,113,113,0.2)' }}>투기과열</span>}
-                  {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(251,146,60,0.12)', color: '#fdba74', border: '1px solid rgba(251,146,60,0.2)' }}>조정대상</span>}
-                  <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
-                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`subscription:${apt.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                  {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(167,139,250,0.12)', color: '#A78BFA' }}>분양가상한</span>}
+                  {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(248,113,113,0.12)', color: '#F87171' }}>투기과열</span>}
+                  {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(251,146,60,0.12)', color: '#fdba74' }}>조정대상</span>}
+                  <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{apt.region_nm}</span>
+                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`subscription:${apt.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                     {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}
                   </button>
                 </div>
                 {/* 경쟁률 */}
                 {(apt.competition_rate_1st != null && Number(apt.competition_rate_1st) > 0) && (
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span style={{ color: Number(apt.competition_rate_1st) >= 10 ? '#F87171' : Number(apt.competition_rate_1st) >= 5 ? '#FB923C' : '#34D399', fontWeight: 700 }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', marginBottom: 4, display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span style={{ color: Number(apt.competition_rate_1st) >= 10 ? '#F87171' : Number(apt.competition_rate_1st) >= 5 ? '#FB923C' : '#34D399', fontWeight: 800 }}>
                       {Number(apt.competition_rate_1st) >= 10 ? '🔥' : ''} 1순위 {Number(apt.competition_rate_1st).toFixed(1)}:1
                     </span>
                     {apt.competition_rate_2nd != null && Number(apt.competition_rate_2nd) > 0 && (
@@ -469,18 +470,18 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     )}
                   </div>
                 )}
-                {/* 2행: 단지명 */}
-                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{apt.house_nm}</div>
-                {/* 3행: 간략주소 + 세대수 */}
-                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 2 }}>
+                {/* 단지명 */}
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3 }}>{apt.house_nm}</div>
+                {/* 주소 + 세대수 */}
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
                   {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}
                 </div>
-                {/* 4행: 일정 타임라인 */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
-                  {apt.spsply_rcept_bgnde && <span>특별공급 {fmtD(apt.spsply_rcept_bgnde)}</span>}
-                  <span>접수 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)}</span>
-                  {apt.przwner_presnatn_de && <span>당첨발표 {fmtD(apt.przwner_presnatn_de)}</span>}
-                  {apt.cntrct_cncls_bgnde && <span>계약 {fmtD(apt.cntrct_cncls_bgnde)}~{fmtD(apt.cntrct_cncls_endde)}</span>}
+                {/* 타임라인 바 */}
+                <div style={{ display: 'flex', gap: 2, fontSize: '9px', color: 'var(--text-tertiary)' }}>
+                  {apt.spsply_rcept_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(167,139,250,0.08)' }}>특별 {fmtD(apt.spsply_rcept_bgnde)}</div>}
+                  <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: st === 'open' ? 'rgba(96,165,250,0.15)' : 'rgba(148,163,184,0.06)', color: st === 'open' ? '#93c5fd' : undefined, fontWeight: st === 'open' ? 700 : 400 }}>접수 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)}</div>
+                  {apt.przwner_presnatn_de && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(52,211,153,0.06)' }}>당첨 {fmtD(apt.przwner_presnatn_de)}</div>}
+                  {apt.cntrct_cncls_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(251,191,36,0.06)' }}>계약 {fmtD(apt.cntrct_cncls_bgnde)}</div>}
                 </div>
               </Link>
             );
@@ -1375,53 +1376,46 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 카드 리스트 (20건씩 페이지네이션) */}
             {filteredRedev.slice(0, redevPage * 20).map((r: any) => {
               const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
+              const stageIdx = STAGE_ORDER.indexOf(r.stage);
+              const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
               return (
                 <div key={r.id} onClick={() => setSelectedRedev(r)} style={{
-                  padding: '12px 16px', borderRadius: 12, marginBottom: 6,
+                  padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  borderLeft: `4px solid ${sc.border}`, cursor: 'pointer',
-                  transition: 'background 0.15s',
+                  cursor: 'pointer', transition: 'background 0.15s',
+                  position: 'relative', overflow: 'hidden',
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
                 >
-                  {/* 1행: 단계 + 유형 + 지역 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74', border: `1px solid ${r.project_type === '재개발' ? 'rgba(96,165,250,0.2)' : 'rgba(251,146,60,0.2)'}` }}>{r.project_type}</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{r.region}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`redev:${r.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                  {/* 상단 진행률 바 (전체 너비) */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3 }}>
+                    <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${sc.border}, var(--brand))` }} />
+                  </div>
+                  {/* 1행: 단계 + 유형 + 진행률 + 지역 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, marginTop: 2 }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: sc.bg, color: sc.color }}>{r.stage}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 6, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74' }}>{r.project_type}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: sc.color }}>{progress}%</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`redev:${r.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                       {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
-                  {/* 2행: 구역명 */}
-                  <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 2 }}>
+                  {/* 구역명 */}
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3 }}>
                     {r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '📋 정보 준비중'}
                   </div>
-                  {/* 3행: 시군구 + 세대수 + 시공사 */}
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 2 }}>
+                  {/* 시군구 + 세대수 + 시공사 */}
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>
                     {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ' · 세대수 미정'}{r.constructor ? ` · ${r.constructor}` : ''}
                   </div>
-                  {/* 4행: 비고/예상준공 */}
+                  {/* 비고/예상준공 */}
                   {(r.notes || r.expected_completion) && (
-                    <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
                       {r.notes}{r.expected_completion ? (r.notes ? `, ${r.expected_completion}` : r.expected_completion) : ''}
                     </div>
                   )}
-                  {/* 진행률 바 */}
-                  {(() => {
-                    const idx = STAGE_ORDER.indexOf(r.stage);
-                    if (idx < 0) return null;
-                    const progress = Math.round(((idx + 1) / STAGE_ORDER.length) * 100);
-                    return (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-                        <div style={{ flex: 1, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${sc.border}, var(--brand))`, borderRadius: 2 }} />
-                        </div>
-                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: sc.color, flexShrink: 0 }}>{progress}%</span>
-                      </div>
-                    );
-                  })()}
                 </div>
               );
             })}
@@ -1676,30 +1670,39 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const vsMax = maxPrice > 0 && amt > 0 && maxPrice !== amt ? Math.round(((amt - maxPrice) / maxPrice) * 100) : null;
               return (
                 <div key={`${t.id || i}`} onClick={() => setSelectedTrade(t)} style={{
-                  padding: '12px 16px', borderRadius: 12, marginBottom: 6,
+                  padding: '14px 16px', borderRadius: 14, marginBottom: 8,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  borderLeft: `4px solid ${borderColor}`, cursor: 'pointer',
-                  transition: 'background 0.15s',
+                  cursor: 'pointer', transition: 'background 0.15s',
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  {/* 상단: 배지 + 지역 + 관심 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                     {isNew(t, 'transaction') && <NewBadge />}
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(96,165,250,0.15)', color: '#93c5fd', border: '1px solid rgba(96,165,250,0.2)' }}>{t.trade_type || '매매'}</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{t.region_nm} {t.sigungu}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`transaction:${t.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'rgba(96,165,250,0.12)', color: '#93c5fd' }}>{t.trade_type || '매매'}</span>
+                    {vsMax !== null && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'rgba(248,113,113,0.12)' : 'rgba(96,165,250,0.12)', color: vsMax >= 0 ? '#F87171' : '#60A5FA' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
+                    <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                       {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
-                  <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{t.apt_name}</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', wordBreak: 'break-all' }}>
-                    전용 {t.exclusive_area}㎡ | <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(amt)}</strong>
-                    {t.exclusive_area > 0 && amt > 0 && <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}> · 평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</span>}
-                    {vsMax !== null && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, marginLeft: 4, color: vsMax >= 0 ? '#F87171' : '#60A5FA' }}>최고가 대비 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
+                  {/* 단지명 + 금액 (좌우 분리) */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 4 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 2 }}>{t.apt_name}</div>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                        전용 {t.exclusive_area}㎡ · {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: borderColor, lineHeight: 1.2 }}>{fmtAmount(amt)}</div>
+                      {t.exclusive_area > 0 && amt > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 1 }}>평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</div>}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                    {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''} · {t.deal_date}
+                  {/* 하단 날짜 */}
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--border)' }}>
+                    📅 {t.deal_date}
                   </div>
                 </div>
               );
