@@ -4,7 +4,7 @@ export default defineConfig({
   appName: 'kadeora',
   brand: {
     displayName: '카더라',
-    primaryColor: '#ff5b36',
+    primaryColor: '#2563EB',
     icon: 'https://kadeora.app/icons/icon-192.png',
   },
   web: {

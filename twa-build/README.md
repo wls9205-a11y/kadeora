@@ -23,7 +23,7 @@ bubblewrap init --manifest https://kadeora.app/manifest.json
 | Launcher name | 카더라 |
 | Display mode | standalone |
 | Orientation | portrait |
-| Theme color | #FF4500 |
+| Theme color | #0F1D35 |
 | Background color | #0d1117 |
 | Start URL | /feed |
 | Icon URL | https://kadeora.app/icons/icon-512.png |
