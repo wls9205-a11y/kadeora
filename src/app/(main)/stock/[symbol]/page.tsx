@@ -43,13 +43,13 @@ export default async function StockDetailPage({ params }: Props) {
   const isDown = changePct < 0;
   const isStale = !s.updated_at || s.updated_at.startsWith('2000-01-01');
 
-  // Parallel fetch all data
+  // Parallel fetch all data (필요 컬럼만 select)
   const [histR, aiR, newsR, flowR, discR, similarR] = await Promise.all([
     sb.from('stock_price_history').select('date, close_price, open_price, high_price, low_price, volume, change_pct').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
-    sb.from('stock_ai_comments').select('*').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
-    sb.from('stock_news').select('*').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
-    sb.from('stock_investor_flow').select('*').eq('symbol', symbol).order('date', { ascending: false }).limit(5),
-    sb.from('stock_disclosures').select('*').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
+    sb.from('stock_ai_comments').select('id, symbol, comment, content, signal, created_at').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    sb.from('stock_news').select('id, title, url, source, published_at, sentiment, sentiment_label, sentiment_score, ai_summary').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
+    sb.from('stock_investor_flow').select('id, date, foreign_buy, foreign_sell, inst_buy, inst_sell').eq('symbol', symbol).order('date', { ascending: false }).limit(5),
+    sb.from('stock_disclosures').select('id, title, disclosure_type, source, published_at, created_at').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
     s.sector ? sb.from('stock_quotes').select('symbol, name, price, change_pct, market_cap, currency').eq('sector', s.sector).neq('symbol', symbol).gt('price', 0).order('market_cap', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
   ]);
 
