@@ -152,3 +152,25 @@
 | 8 | 구 green | 0건 |
 | 9 | 구 보라 | 0건 |
 | 10 | 구 기타 | 0건 |
+
+---
+
+## 추가 작업: 다크모드 단일 확정 + 텍스트 컬러 전수 검사
+
+### 라이트모드 완전 제거
+- ThemeProvider: 항상 `dark` 클래스 고정
+- ThemeToggle: `null` 반환 (UI에서 토글 사라짐)
+- globals.css: `.light` CSS 변수 블록 삭제
+- styles/globals.css: `:root` 다크 단일, `[data-theme="dark"]` / `prefers-color-scheme` 분기 전부 제거
+- tailwind.config.ts: `darkMode: 'class'` 제거
+- layout.tsx: `themeColor` 다크 단일 (`#0B1426`)
+- 라이트모드 참조 잔존 **0건** 확인
+
+### 텍스트 컬러 전수 검사 결과
+- 모든 tsx/ts 파일의 `color:` 하드코딩 전수 조사
+- OG route: `#475569` → `#64748B` (네이비 배경 가독성 부족)
+- AdminCommandCenter: `#e2e8f0` → `var(--text-primary)` 7건
+- `#facc15` → `#FBBF24` 통일
+- 소문자 hex 대문자 통일
+- 라이트전용 어두운 텍스트(`#1E293B`, `#1F2937` 등) **0건** 확인
+- 네이비 배경에서 가독성 부족한 텍스트 **0건** (모든 텍스트 WCAG AA 충족)
