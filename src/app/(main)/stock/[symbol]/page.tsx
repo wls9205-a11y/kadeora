@@ -84,7 +84,7 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency)}</span>
           {!isStale && (
-            <span style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: isUp ? '#ef4444' : isDown ? '#3b82f6' : 'var(--text-tertiary)' }}>
+            <span style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: isUp ? '#F87171' : isDown ? '#60A5FA' : 'var(--text-tertiary)' }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
           )}
@@ -136,7 +136,7 @@ export default async function StockDetailPage({ params }: Props) {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, marginLeft: 8, color: isKR ? (simPct > 0 ? '#ef4444' : simPct < 0 ? '#3b82f6' : 'var(--text-tertiary)') : (simPct > 0 ? '#22c55e' : simPct < 0 ? '#ef4444' : 'var(--text-tertiary)') }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, marginLeft: 8, color: isKR ? (simPct > 0 ? '#F87171' : simPct < 0 ? '#60A5FA' : 'var(--text-tertiary)') : (simPct > 0 ? '#34D399' : simPct < 0 ? '#F87171' : 'var(--text-tertiary)') }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
                   </div>

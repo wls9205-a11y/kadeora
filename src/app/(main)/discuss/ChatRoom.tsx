@@ -17,11 +17,11 @@ interface ChatMsg {
 const PAGE_SIZE = 100;
 // DB grade_definitions 기준
 const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }> = {
-  1:{title:'새싹',emoji:'🌱',color:'#4CAF50'},2:{title:'정보통',emoji:'📡',color:'#2196F3'},
-  3:{title:'동네어른',emoji:'🏘️',color:'#9C27B0'},4:{title:'소문난집',emoji:'🏠',color:'#FF9800'},
-  5:{title:'인플루언서',emoji:'⚡',color:'#F44336'},6:{title:'빅마우스',emoji:'🔥',color:'#E91E63'},
-  7:{title:'찐고수',emoji:'💎',color:'#FFD700'},8:{title:'전설',emoji:'🌟',color:'#2563EB'},
-  9:{title:'신의경지',emoji:'👑',color:'#9C27B0'},10:{title:'카더라신',emoji:'🚀',color:'#2563EB'},
+  1:{title:'새싹',emoji:'🌱',color:'#34D399'},2:{title:'정보통',emoji:'📡',color:'#60A5FA'},
+  3:{title:'동네어른',emoji:'🏘️',color:'#A78BFA'},4:{title:'소문난집',emoji:'🏠',color:'#FBBF24'},
+  5:{title:'인플루언서',emoji:'⚡',color:'#F87171'},6:{title:'빅마우스',emoji:'🔥',color:'#FB7185'},
+  7:{title:'찐고수',emoji:'💎',color:'#22D3EE'},8:{title:'전설',emoji:'🌟',color:'#FCD34D'},
+  9:{title:'신의경지',emoji:'👑',color:'#818CF8'},10:{title:'카더라신',emoji:'🚀',color:'#C084FC'},
 };
 function avc(uid: string | null) { return getAvatarColor(uid ?? ''); }
 function timeAgo(d: string) { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return '방금'; if (m < 60) return m + '분 전'; if (m < 1440) return Math.floor(m / 60) + '시간 전'; return Math.floor(m / 1440) + '일 전'; }
@@ -162,7 +162,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                   </div>
                   <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', margin: '0 0 5px', lineHeight: 1.5, wordBreak: 'break-word' }}>{renderContent(msg.content)}</p>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, background: liked ? '#ff444412' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? '#ff4444' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
+                    <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, background: liked ? '#F8717112' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? '#F87171' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
                       {liked ? '❤️' : '🤍'} {lc > 0 ? lc : ''}
                     </button>
                     {user && (

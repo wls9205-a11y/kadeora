@@ -42,7 +42,7 @@ export default function PushSubscribeButton() {
     <button onClick={handleSubscribe} disabled={status === 'loading'}
       style={{
         padding: '11px 16px',
-        background: 'linear-gradient(135deg, #ef4444, #f97316)',
+        background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
         color: '#fff', border: 'none', borderRadius: 10,
         fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer', width: '100%', marginTop: 8,
         boxShadow: '0 4px 12px rgba(239,68,68,0.25)',

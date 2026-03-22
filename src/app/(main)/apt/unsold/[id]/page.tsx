@@ -74,7 +74,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
       </div>
 
       {/* 현황 요약 */}
-      <div style={{ ...card, borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? '#EF4444' : (u.tot_unsold_hshld_co || 0) >= 1000 ? '#F59E0B' : '#10B981'}` }}>
+      <div style={{ ...card, borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? '#F87171' : (u.tot_unsold_hshld_co || 0) >= 1000 ? '#FBBF24' : '#34D399'}` }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 현황 요약</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 'var(--fs-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -89,7 +89,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
             return (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>전월 대비</span>
-                <span style={{ fontWeight: 700, color: diff > 0 ? '#EF4444' : diff < 0 ? '#10B981' : 'var(--text-tertiary)' }}>
+                <span style={{ fontWeight: 700, color: diff > 0 ? '#F87171' : diff < 0 ? '#34D399' : 'var(--text-tertiary)' }}>
                   {diff > 0 ? '+' : ''}{diff.toLocaleString()}세대 ({diff > 0 ? '↑' : diff < 0 ? '↓' : '-'}{pct}%)
                 </span>
               </div>
@@ -103,10 +103,10 @@ export default async function UnsoldDetailPage({ params }: Props) {
             <span style={{ color: 'var(--text-secondary)' }}>위험도</span>
             <span style={{ fontWeight: 700 }}>
               {(u.tot_unsold_hshld_co || 0) >= 3000
-                ? <span style={{ color: '#EF4444' }}>🔴 높음</span>
+                ? <span style={{ color: '#F87171' }}>🔴 높음</span>
                 : (u.tot_unsold_hshld_co || 0) >= 1000
-                  ? <span style={{ color: '#F59E0B' }}>🟡 주의</span>
-                  : <span style={{ color: '#10B981' }}>🟢 안전</span>
+                  ? <span style={{ color: '#FBBF24' }}>🟡 주의</span>
+                  : <span style={{ color: '#34D399' }}>🟢 안전</span>
               }
             </span>
           </div>
@@ -130,12 +130,12 @@ export default async function UnsoldDetailPage({ params }: Props) {
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양률</div>
-            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: rate && rate > 70 ? '#ef4444' : rate && rate > 40 ? '#f97316' : '#eab308' }}>{rate ?? '-'}%</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: rate && rate > 70 ? '#F87171' : rate && rate > 40 ? '#FB923C' : '#FBBF24' }}>{rate ?? '-'}%</div>
           </div>
         </div>
         {rate !== null && (
           <div style={{ height: 6, background: 'var(--bg-hover)', borderRadius: 3 }}>
-            <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#ef4444' : rate > 40 ? '#f97316' : '#eab308' }} />
+            <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#F87171' : rate > 40 ? '#FB923C' : '#FBBF24' }} />
           </div>
         )}
       </div>

@@ -194,7 +194,7 @@ export default function NoticeBanner() {
                 {notice.is_paid && (
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
-                    background: tier === 'urgent' ? '#ef444420' : tier === 'premium' ? '#f59e0b20' : '#22c55e20',
+                    background: tier === 'urgent' ? 'rgba(248,113,113,0.12)' : tier === 'premium' ? 'rgba(251,191,36,0.12)' : 'rgba(52,211,153,0.12)',
                     color: tier === 'urgent' ? '#f87171' : tier === 'premium' ? '#fbbf24' : '#4ade80',
                   }}>
                     {{ standard: '기본', premium: '프리미엄', urgent: '긴급' }[tier] || tier}

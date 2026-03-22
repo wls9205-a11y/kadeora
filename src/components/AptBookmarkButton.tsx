@@ -49,7 +49,7 @@ export default function AptBookmarkButton({ aptId, isLoggedIn }: Props) {
         cursor: loading ? 'not-allowed' : 'pointer',
         border: bookmarked ? '1px solid rgba(249,115,22,0.3)' : '1px solid var(--border)',
         background: bookmarked ? 'rgba(249,115,22,0.12)' : 'var(--bg-hover)',
-        color: bookmarked ? '#f97316' : 'var(--text-tertiary)',
+        color: bookmarked ? '#FB923C' : 'var(--text-tertiary)',
         transition: 'all 0.15s',
         opacity: loading ? 0.6 : 1,
       }}

@@ -34,7 +34,7 @@ export default function AdminReportsPage() {
     const map: Record<string, { label: string; bg: string }> = {
       post: { label: '게시글', bg: 'var(--brand)' },
       comment: { label: '댓글', bg: 'var(--warning)' },
-      chat: { label: '채팅', bg: '#8b5cf6' },
+      chat: { label: '채팅', bg: '#A78BFA' },
     };
     const info = map[type] || { label: type, bg: 'var(--text-tertiary)' };
     return (

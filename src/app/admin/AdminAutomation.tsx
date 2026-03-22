@@ -154,7 +154,7 @@ export default function AdminAutomation() {
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📰 블로그 발행 설정</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, marginBottom: 24 }}>
             {/* 설정 카드 */}
-            <div style={{ ...cardStyle, borderLeft: '3px solid #3b82f6' }}>
+            <div style={{ ...cardStyle, borderLeft: '3px solid #60A5FA' }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>발행 제어</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
@@ -187,7 +187,7 @@ export default function AdminAutomation() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                   <button onClick={saveBlogConfig} disabled={configSaving}
-                    style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#3b82f6', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer', opacity: configSaving ? 0.6 : 1 }}>
+                    style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#60A5FA', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer', opacity: configSaving ? 0.6 : 1 }}>
                     {configSaving ? '저장 중...' : '설정 저장'}
                   </button>
                   {configMsg && <span style={{ fontSize: 'var(--fs-xs)' }}>{configMsg}</span>}
@@ -197,7 +197,7 @@ export default function AdminAutomation() {
 
             {/* 큐 상태 카드 */}
             {queueStatus && (
-              <div style={{ ...cardStyle, borderLeft: '3px solid #22c55e' }}>
+              <div style={{ ...cardStyle, borderLeft: '3px solid #34D399' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>발행 큐 현황</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
@@ -209,11 +209,11 @@ export default function AdminAutomation() {
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>오늘 남은 쿼터</div>
                   </div>
                   <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
-                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#22c55e' }}>{queueStatus.queue_ready ?? 0}</div>
+                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#34D399' }}>{queueStatus.queue_ready ?? 0}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>대기 중 (발행 가능)</div>
                   </div>
                   <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
-                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: queueStatus.queue_too_short > 0 ? '#ef4444' : 'var(--text-tertiary)' }}>{queueStatus.queue_too_short ?? 0}</div>
+                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: queueStatus.queue_too_short > 0 ? '#F87171' : 'var(--text-tertiary)' }}>{queueStatus.queue_too_short ?? 0}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>대기 중 (길이 미달)</div>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export default function AdminAutomation() {
       {/* 블로그 리라이팅 */}
       <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>✍️ AI 리라이팅</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div style={{ ...cardStyle, borderLeft: '3px solid #8b5cf6' }}>
+        <div style={{ ...cardStyle, borderLeft: '3px solid #A78BFA' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Claude API 리라이팅</div>
           {rewriteStats && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
@@ -240,7 +240,7 @@ export default function AdminAutomation() {
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>완료</div>
               </div>
               <div style={{ textAlign: 'center', padding: 8, background: 'var(--bg-hover)', borderRadius: 8 }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: '#8b5cf6' }}>{rewriteStats.remaining}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#A78BFA' }}>{rewriteStats.remaining}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>대기</div>
               </div>
               <div style={{ textAlign: 'center', padding: 8, background: 'var(--bg-hover)', borderRadius: 8 }}>
@@ -251,12 +251,12 @@ export default function AdminAutomation() {
           )}
           {rewriteStats && rewriteStats.total > 0 && (
             <div style={{ height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden', marginBottom: 12 }}>
-              <div style={{ height: '100%', width: `${Math.round((rewriteStats.done / rewriteStats.total) * 100)}%`, borderRadius: 3, background: '#8b5cf6', transition: 'width 0.3s' }} />
+              <div style={{ height: '100%', width: `${Math.round((rewriteStats.done / rewriteStats.total) * 100)}%`, borderRadius: 3, background: '#A78BFA', transition: 'width 0.3s' }} />
             </div>
           )}
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => runRewrite(5)} disabled={rewriteStatus.running}
-              style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#8b5cf6', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: rewriteStatus.running ? 0.6 : 1 }}>
+              style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#A78BFA', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: rewriteStatus.running ? 0.6 : 1 }}>
               {rewriteStatus.running ? '처리 중...' : '5건 리라이팅'}
             </button>
             <button onClick={() => runRewrite(10)} disabled={rewriteStatus.running}
@@ -278,7 +278,7 @@ export default function AdminAutomation() {
         {cronStatus.map(cs => (
           <div key={cs.name} style={{
             ...cardStyle,
-            borderLeft: `3px solid ${cs.latest.status === 'success' ? '#22c55e' : cs.latest.status === 'running' ? '#3b82f6' : '#ef4444'}`,
+            borderLeft: `3px solid ${cs.latest.status === 'success' ? '#34D399' : cs.latest.status === 'running' ? '#60A5FA' : '#F87171'}`,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -286,7 +286,7 @@ export default function AdminAutomation() {
               </div>
               <span style={{
                 width: 10, height: 10, borderRadius: '50%',
-                background: cs.latest.status === 'success' ? '#22c55e' : cs.latest.status === 'running' ? '#3b82f6' : '#ef4444',
+                background: cs.latest.status === 'success' ? '#34D399' : cs.latest.status === 'running' ? '#60A5FA' : '#F87171',
               }} />
             </div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
@@ -313,7 +313,7 @@ export default function AdminAutomation() {
             {quotas.map(q => {
               const dailyPct = q.daily_limit ? Math.round((q.daily_used / q.daily_limit) * 100) : 0;
               const monthlyPct = q.monthly_limit ? Math.round((q.monthly_used / q.monthly_limit) * 100) : 0;
-              const barColor = (pct: number) => pct >= 90 ? '#ef4444' : pct >= 80 ? '#eab308' : '#22c55e';
+              const barColor = (pct: number) => pct >= 90 ? '#F87171' : pct >= 80 ? '#FBBF24' : '#34D399';
               return (
                 <div key={q.api_name} style={cardStyle}>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>{q.api_name}</div>
@@ -373,7 +373,7 @@ export default function AdminAutomation() {
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: log.status === 'success' ? '#dcfce7' : log.status === 'running' ? '#dbeafe' : '#fee2e2',
-                    color: log.status === 'success' ? '#16a34a' : log.status === 'running' ? '#2563eb' : '#dc2626',
+                    color: log.status === 'success' ? '#059669' : log.status === 'running' ? '#2563eb' : '#dc2626',
                   }}>{log.status}</span>
                 </td>
                 <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>
@@ -382,7 +382,7 @@ export default function AdminAutomation() {
                 <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>
                   {log.records_processed || 0}
                 </td>
-                <td style={{ padding: '8px 10px', color: '#ef4444', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '8px 10px', color: '#F87171', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {log.error_message || ''}
                 </td>
               </tr>

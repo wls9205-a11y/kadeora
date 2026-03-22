@@ -70,10 +70,10 @@ export default function AdminDashboard() {
 
   const d = data || {};
   const kpis = [
-    { label: 'DAU', value: d.dau || 0, color: '#3b82f6', icon: '📊' },
-    { label: '오늘 신규가입', value: d.today_signups || 0, color: '#10b981', icon: '🆕' },
-    { label: '오늘 게시글', value: d.today_posts || 0, color: '#8b5cf6', icon: '📝' },
-    { label: '오늘 댓글', value: d.today_comments || 0, color: '#f59e0b', icon: '💬' },
+    { label: 'DAU', value: d.dau || 0, color: '#60A5FA', icon: '📊' },
+    { label: '오늘 신규가입', value: d.today_signups || 0, color: '#34D399', icon: '🆕' },
+    { label: '오늘 게시글', value: d.today_posts || 0, color: '#A78BFA', icon: '📝' },
+    { label: '오늘 댓글', value: d.today_comments || 0, color: '#FBBF24', icon: '💬' },
   ];
 
   const dataCounts = [
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
             }}>
               <span style={{
                 width: 10, height: 10, borderRadius: '50%',
-                background: hc.status === 'ok' ? '#22c55e' : hc.status === 'warning' ? '#eab308' : '#ef4444',
+                background: hc.status === 'ok' ? '#34D399' : hc.status === 'warning' ? '#FBBF24' : '#F87171',
               }} />
               <div>
                 <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{hc.service_name}</div>
@@ -162,10 +162,10 @@ export default function AdminDashboard() {
         <div style={{ ...cardStyle, marginBottom: 20 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>7일 추이</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-            {renderMiniChart(dailyStats.map(s => s.new_users || 0), '신규가입', '#3b82f6')}
-            {renderMiniChart(dailyStats.map(s => s.new_posts || 0), '게시글', '#10b981')}
-            {renderMiniChart(dailyStats.map(s => s.new_comments || 0), '댓글', '#8b5cf6')}
-            {renderMiniChart(dailyStats.map(s => s.total_page_views || 0), '페이지뷰', '#f59e0b')}
+            {renderMiniChart(dailyStats.map(s => s.new_users || 0), '신규가입', '#60A5FA')}
+            {renderMiniChart(dailyStats.map(s => s.new_posts || 0), '게시글', '#34D399')}
+            {renderMiniChart(dailyStats.map(s => s.new_comments || 0), '댓글', '#A78BFA')}
+            {renderMiniChart(dailyStats.map(s => s.total_page_views || 0), '페이지뷰', '#FBBF24')}
           </div>
         </div>
       )}
@@ -187,8 +187,8 @@ export default function AdminDashboard() {
               return (
                 <div>
                   <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 60 }}>
-                    <polyline points={points} fill="none" stroke="#3b82f6" strokeWidth="2" />
-                    {data.map((d, i) => <circle key={i} cx={P + (i / (data.length - 1)) * (W - P * 2)} cy={H - P - ((d.value / max) * (H - P * 2))} r="3" fill="#3b82f6" />)}
+                    <polyline points={points} fill="none" stroke="#60A5FA" strokeWidth="2" />
+                    {data.map((d, i) => <circle key={i} cx={P + (i / (data.length - 1)) * (W - P * 2)} cy={H - P - ((d.value / max) * (H - P * 2))} r="3" fill="#60A5FA" />)}
                   </svg>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {data.map(d => <span key={d.label}>{d.label}</span>)}
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
               <span style={{
                 marginLeft: 'auto', fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 10, fontWeight: 700,
                 background: briefing.sentiment === 'bullish' ? '#dcfce7' : briefing.sentiment === 'bearish' ? '#fee2e2' : '#f1f5f9',
-                color: briefing.sentiment === 'bullish' ? '#16a34a' : briefing.sentiment === 'bearish' ? '#dc2626' : '#64748b',
+                color: briefing.sentiment === 'bullish' ? '#059669' : briefing.sentiment === 'bearish' ? '#dc2626' : '#64748b',
               }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
             </div>
           </div>

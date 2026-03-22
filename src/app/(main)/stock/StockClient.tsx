@@ -25,8 +25,8 @@ const SECTORS = ['all','반도체','바이오','금융','자동차','방산','IT
 // 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
 function stockColor(pct: number, isKR: boolean) {
   if (pct === 0) return 'var(--text-tertiary)';
-  if (isKR) return pct > 0 ? '#ef4444' : '#3b82f6';
-  return pct > 0 ? '#22c55e' : '#ef4444';
+  if (isKR) return pct > 0 ? '#F87171' : '#60A5FA';
+  return pct > 0 ? '#34D399' : '#F87171';
 }
 
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
@@ -171,7 +171,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             const range = max - min || 1;
             const points = rates.map((r: number, i: number) => `${(i / (rates.length - 1)) * 32},${16 - ((r - min) / range) * 14}`).join(' ');
             const isUp = rates[rates.length - 1] > rates[0];
-            return <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#22c55e'} strokeWidth="1.5" /></svg>;
+            return <svg viewBox="0 0 32 16" style={{ width: 32, height: 16, verticalAlign: 'middle' }}><polyline points={points} fill="none" stroke={isUp ? '#F87171' : '#34D399'} strokeWidth="1.5" /></svg>;
           })()}
         </div>
       </div>
@@ -184,7 +184,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{briefing.title}</div>
             <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
               background: briefing.sentiment === 'bullish' ? 'rgba(34,197,94,0.15)' : briefing.sentiment === 'bearish' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.15)',
-              color: briefing.sentiment === 'bullish' ? '#22c55e' : briefing.sentiment === 'bearish' ? '#ef4444' : '#94a3b8',
+              color: briefing.sentiment === 'bullish' ? '#34D399' : briefing.sentiment === 'bearish' ? '#F87171' : '#94a3b8',
             }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
           </div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>{briefing.summary}</div>
@@ -192,12 +192,12 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {(briefing.key_movers || briefing.top_movers) && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {((briefing.key_movers || briefing.top_movers)?.gainers || []).slice(0, 2).map((s: any) => (
-                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', color: '#22c55e', fontWeight: 600 }}>
+                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', color: '#34D399', fontWeight: 600 }}>
                   ▲ {s.name} +{s.change_pct?.toFixed(1)}%
                 </span>
               ))}
               {((briefing.key_movers || briefing.top_movers)?.losers || []).slice(0, 2).map((s: any) => (
-                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 600 }}>
+                <span key={s.symbol} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#F87171', fontWeight: 600 }}>
                   ▼ {s.name} {s.change_pct?.toFixed(1)}%
                 </span>
               ))}
@@ -210,7 +210,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 <div key={sec.name} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6,
                   background: (sec.avg_pct || 0) > 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-                  color: (sec.avg_pct || 0) > 0 ? '#ef4444' : '#3b82f6',
+                  color: (sec.avg_pct || 0) > 0 ? '#F87171' : '#60A5FA',
                   fontWeight: 600,
                 }}>
                   {sec.name} {(sec.avg_pct || 0) > 0 ? '+' : ''}{sec.avg_pct}%
@@ -234,7 +234,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         }}>🇰🇷 국내주식</button>
         <button onClick={() => setMode('global')} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
-          background: !isDomestic ? '#3b82f6' : 'var(--bg-surface)',
+          background: !isDomestic ? '#60A5FA' : 'var(--bg-surface)',
           color: !isDomestic ? '#fff' : 'var(--text-secondary)',
           border: !isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇺🇸 해외주식</button>
@@ -262,14 +262,14 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {sentimentStocks.length > 0 && (
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
-            <span style={{ color: isDomestic ? '#ef4444' : '#22c55e', fontWeight: 600 }}>▲ {upCount}</span>
+            <span style={{ color: isDomestic ? '#F87171' : '#34D399', fontWeight: 600 }}>▲ {upCount}</span>
             <span>· — {flatCount}</span>
-            <span style={{ color: isDomestic ? '#3b82f6' : '#ef4444', fontWeight: 600 }}>· ▼ {downCount}</span>
+            <span style={{ color: isDomestic ? '#60A5FA' : '#F87171', fontWeight: 600 }}>· ▼ {downCount}</span>
           </div>
           <div style={{ display: 'flex', height: 4, borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? '#ef4444' : '#22c55e' }} />
+            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? '#F87171' : '#34D399' }} />
             <div style={{ width: `${(flatCount/sentTotal)*100}%`, background: 'var(--bg-hover)' }} />
-            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: isDomestic ? '#3b82f6' : '#ef4444' }} />
+            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: isDomestic ? '#60A5FA' : '#F87171' }} />
           </div>
         </div>
       )}
@@ -414,7 +414,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {isDomestic && domesticTab === 'ranking' && (
         <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
           {(['ALL','KOSPI','KOSDAQ'] as const).map(m => (
-            <button key={m} onClick={() => setDomesticMarket(m)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: domesticMarket===m?(isDomestic?'var(--brand)':'#3b82f6'):'var(--bg-hover)', color: domesticMarket===m?'#fff':'var(--text-secondary)' }}>
+            <button key={m} onClick={() => setDomesticMarket(m)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: domesticMarket===m?(isDomestic?'var(--brand)':'#60A5FA'):'var(--bg-hover)', color: domesticMarket===m?'#fff':'var(--text-secondary)' }}>
               {m==='ALL'?'전체':m}
             </button>
           ))}
@@ -502,7 +502,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 </div>
               </div>
             </div>
-            <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ display: 'block', textAlign: 'center', background: isDomestic ? 'var(--brand)' : '#3b82f6', color: '#fff', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>
+            <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ display: 'block', textAlign: 'center', background: isDomestic ? 'var(--brand)' : '#60A5FA', color: '#fff', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>
               종목 상세 보기
             </a>
           </div>

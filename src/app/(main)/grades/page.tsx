@@ -7,9 +7,9 @@ export const metadata: Metadata = {
 };
 
 const GRADE_COLORS: Record<number, string> = {
-  1: '#4CAF50', 2: '#2196F3', 3: '#9C27B0', 4: '#FF9800',
-  5: '#F44336', 6: '#E91E63', 7: '#00BCD4', 8: '#FFD700',
-  9: '#2563EB', 10: '#7B2FBE',
+  1: '#34D399', 2: '#60A5FA', 3: '#A78BFA', 4: '#FBBF24',
+  5: '#F87171', 6: '#FB7185', 7: '#22D3EE', 8: '#FCD34D',
+  9: '#818CF8', 10: '#C084FC',
 };
 
 export default async function GradesPage() {

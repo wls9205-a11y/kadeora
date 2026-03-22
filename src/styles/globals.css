@@ -260,13 +260,13 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--k
   font-size: 11px; font-weight: 700;
   white-space: nowrap;
 }
-.kd-badge-stock  { background:rgba(59,130,246,0.15);  color:#3B82F6; }
-.kd-badge-apt    { background:rgba(16,185,129,0.15);  color:#10B981; }
-.kd-badge-free   { background:rgba(139,92,246,0.15);  color:#8B5CF6; }
+.kd-badge-stock  { background:rgba(59,130,246,0.15);  color:#60A5FA; }
+.kd-badge-apt    { background:rgba(16,185,129,0.15);  color:#34D399; }
+.kd-badge-free   { background:rgba(139,92,246,0.15);  color:#A78BFA; }
 .kd-badge-hot    { background:var(--kd-danger-dim);   color:var(--kd-danger); }
 .kd-badge-new    { background:var(--kd-success-dim);  color:var(--kd-success); }
-.kd-badge-kospi  { background:rgba(59,130,246,0.15);  color:#3B82F6; }
-.kd-badge-kosdaq { background:rgba(16,185,129,0.15);  color:#10B981; }
+.kd-badge-kospi  { background:rgba(59,130,246,0.15);  color:#60A5FA; }
+.kd-badge-kosdaq { background:rgba(16,185,129,0.15);  color:#34D399; }
 
 /* ── 토스트 ── */
 .kd-toast {

@@ -108,7 +108,7 @@ export default function AdminBlogPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
         {[
           { label: '총 글', value: total, sub: `오늘 +${todayCount}` },
-          { label: '평균 길이', value: `${avgLen.toLocaleString()}자`, sub: avgLen >= 1500 ? '목표 달성' : '1500자 미달', color: avgLen >= 1500 ? '#10b981' : '#ef4444' },
+          { label: '평균 길이', value: `${avgLen.toLocaleString()}자`, sub: avgLen >= 1500 ? '목표 달성' : '1500자 미달', color: avgLen >= 1500 ? '#34D399' : '#F87171' },
           { label: '총 조회', value: totalViews.toLocaleString() },
           { label: '카테고리', value: cats.length },
         ].map(k => (
@@ -174,11 +174,11 @@ export default function AdminBlogPage() {
                   <a href={`/blog/${p.slug}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 500 }}>{p.title}</a>
                 </td>
                 <td style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)' }}>{p.category}</td>
-                <td style={{ padding: '10px 12px', color: (p.content_length ?? 0) >= 1500 ? '#10b981' : '#ef4444', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{(p.content_length ?? 0).toLocaleString()}</td>
+                <td style={{ padding: '10px 12px', color: (p.content_length ?? 0) >= 1500 ? '#34D399' : '#F87171', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{(p.content_length ?? 0).toLocaleString()}</td>
                 <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{p.view_count}</td>
                 <td style={{ padding: '10px 12px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', whiteSpace: 'nowrap' }}>{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
                 <td style={{ padding: '10px 12px' }}>
-                  <button onClick={() => deletePost(p.id)} style={{ fontSize: 'var(--fs-xs)', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
+                  <button onClick={() => deletePost(p.id)} style={{ fontSize: 'var(--fs-xs)', color: '#F87171', background: 'none', border: 'none', cursor: 'pointer' }}>삭제</button>
                 </td>
               </tr>
             ))}

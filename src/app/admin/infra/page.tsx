@@ -8,7 +8,7 @@ function DonutGauge({ value, max, label, color }: { value: number; max: number; 
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
-  const statusColor = percent > 80 ? '#EF4444' : percent > 50 ? '#F59E0B' : color;
+  const statusColor = percent > 80 ? '#F87171' : percent > 50 ? '#FBBF24' : color;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -52,7 +52,7 @@ function TableBar({ name, sizeBytes, maxBytes, size, rows }: { name: string; siz
       <div style={{ height: 6, background: '#1f2937', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{
           height: '100%', borderRadius: 3,
-          background: 'linear-gradient(90deg, #22c55e, #34d399)',
+          background: 'linear-gradient(90deg, #34D399, #34D399)',
           width: `${Math.max(percent, 2)}%`,
           transition: 'width 0.7s ease',
         }} />
@@ -113,7 +113,7 @@ export default function InfraPage() {
             {/* 도넛 게이지 + KPI */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 24 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 24 }}>
-                <DonutGauge value={db.db_size_bytes} max={DB_LIMIT} label={`${db.db_size_pretty} / 8GB`} color="#10B981" />
+                <DonutGauge value={db.db_size_bytes} max={DB_LIMIT} label={`${db.db_size_pretty} / 8GB`} color="#34D399" />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, flex: 1, minWidth: 200 }}>
                   <StatCard icon="🔌" value={db.active_connections ?? 0} label="활성 커넥션" bg="rgba(59,130,246,0.08)" />
                   <StatCard icon="⚡" value={`${db.cache_hit_ratio ?? 0}%`} label="캐시 히트율" bg="rgba(34,197,94,0.08)" />
@@ -169,8 +169,8 @@ export default function InfraPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
           {[
-            { label: 'Bandwidth', value: '1TB', sub: '/ 월', barPct: 3, barColor: '#3b82f6' },
-            { label: 'Serverless', value: '1,000h', sub: '/ 월', barPct: 5, barColor: '#22c55e' },
+            { label: 'Bandwidth', value: '1TB', sub: '/ 월', barPct: 3, barColor: '#60A5FA' },
+            { label: 'Serverless', value: '1,000h', sub: '/ 월', barPct: 5, barColor: '#34D399' },
             { label: 'Edge Requests', value: '∞', sub: '', barPct: 0, barColor: '' },
           ].map(item => (
             <div key={item.label} style={{ padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.03)', textAlign: 'center' }}>
@@ -184,7 +184,7 @@ export default function InfraPage() {
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>여유로움</div>
                 </>
               ) : (
-                <div style={{ fontSize: 'var(--fs-xs)', color: '#22c55e', marginTop: 3 }}>무제한</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: '#34D399', marginTop: 3 }}>무제한</div>
               )}
             </div>
           ))}
@@ -198,7 +198,7 @@ export default function InfraPage() {
                 <div key={d.id || i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.02)' }}>
                   <span style={{
                     width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-                    background: d.state === 'READY' ? '#22c55e' : d.state === 'ERROR' ? '#ef4444' : '#eab308',
+                    background: d.state === 'READY' ? '#34D399' : d.state === 'ERROR' ? '#F87171' : '#FBBF24',
                     boxShadow: d.state === 'READY' ? '0 0 6px rgba(34,197,94,0.4)' : d.state === 'ERROR' ? '0 0 6px rgba(239,68,68,0.4)' : 'none',
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -208,7 +208,7 @@ export default function InfraPage() {
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 600,
                     background: d.state === 'READY' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-                    color: d.state === 'READY' ? '#22c55e' : '#ef4444',
+                    color: d.state === 'READY' ? '#34D399' : '#F87171',
                   }}>{d.state}</span>
                 </div>
               ))}
@@ -217,7 +217,7 @@ export default function InfraPage() {
         ) : (
           <div style={{ textAlign: 'center', padding: 16 }}>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 6 }}>배포 정보를 보려면 VERCEL_TOKEN이 필요합니다</div>
-            <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-sm)', color: '#3b82f6', textDecoration: 'none' }}>→ Vercel 대시보드에서 확인</a>
+            <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-sm)', color: '#60A5FA', textDecoration: 'none' }}>→ Vercel 대시보드에서 확인</a>
           </div>
         )}
       </div>
@@ -260,7 +260,7 @@ export default function InfraPage() {
         ) : (
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 16 }}>
             GitHub 데이터를 가져올 수 없습니다{' '}
-            <a href="https://github.com/wls9205-a11y/kadeora" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'none' }}>→ GitHub</a>
+            <a href="https://github.com/wls9205-a11y/kadeora" target="_blank" rel="noopener noreferrer" style={{ color: '#A78BFA', textDecoration: 'none' }}>→ GitHub</a>
           </div>
         )}
       </div>

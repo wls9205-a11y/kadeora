@@ -18,7 +18,7 @@ const CATS = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  stock: '#3b82f6', apt: '#22c55e', unsold: '#f97316', finance: '#8b5cf6', general: '#64748b',
+  stock: '#60A5FA', apt: '#34D399', unsold: '#FB923C', finance: '#A78BFA', general: '#64748b',
 };
 
 interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string }> }
@@ -182,7 +182,7 @@ export default async function BlogPage({ searchParams }: Props) {
                       {CATS.find(c => c.key === p.category)?.icon} {CATS.find(c => c.key === p.category)?.label || p.category}
                     </span>
                     {p.view_count >= 100 && (
-                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>🔥</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 10, background: 'rgba(248,113,113,0.1)', color: '#F87171' }}>🔥</span>
                     )}
                   </div>
                   {/* 제목 */}

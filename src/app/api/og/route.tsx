@@ -4,13 +4,13 @@ import { NextRequest } from 'next/server';
 export const runtime = 'edge';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  apt: '#3b82f6',
-  stock: '#ef4444',
-  local: '#10b981',
-  free: '#8b5cf6',
-  finance: '#10b981',
-  unsold: '#f59e0b',
-  general: '#8b5cf6',
+  apt: '#34D399',
+  stock: '#38BDF8',
+  local: '#FBBF24',
+  free: '#A78BFA',
+  finance: '#34D399',
+  unsold: '#FBBF24',
+  general: '#A78BFA',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
   const likes = searchParams.get('likes') ?? '0';
   const comments = searchParams.get('comments') ?? '0';
 
-  const catColor = CATEGORY_COLORS[category] ?? '#8b5cf6';
+  const catColor = CATEGORY_COLORS[category] ?? '#A78BFA';
   const catLabel = CATEGORY_LABELS[category] ?? '';
 
   // Home OG image (no title param)
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
             <div style={{
-              width: 56, height: 56, borderRadius: 12, background: '#f97316',
+              width: 56, height: 56, borderRadius: 12, background: '#FB923C',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 28, fontWeight: 900, color: '#fff',
             }}>K</div>
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
         {/* Top: logo + category */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 40, height: 40, borderRadius: 10, background: '#f97316',
+            width: 40, height: 40, borderRadius: 10, background: '#FB923C',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 20, fontWeight: 900, color: '#fff',
           }}>K</div>
@@ -145,7 +145,7 @@ export async function GET(req: NextRequest) {
               <>
                 <div style={{
                   width: 38, height: 38, borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${catColor}, #f97316)`,
+                  background: `linear-gradient(135deg, ${catColor}, #FB923C)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 16, fontWeight: 700, color: 'white',
                 }}>

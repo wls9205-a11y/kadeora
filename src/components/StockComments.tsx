@@ -262,7 +262,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 onClick={() => toggleLike(c.id)}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  fontSize: 'var(--fs-sm)', color: liked ? '#ef4444' : 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
+                  fontSize: 'var(--fs-sm)', color: liked ? '#F87171' : 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 3,
                 }}
               >
                 {liked ? '❤️' : '🤍'} {c.likes_count > 0 ? c.likes_count : ''}
@@ -302,7 +302,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                     {isOwn ? (
                       <button
                         onClick={() => deleteComment(c.id, c.parent_id)}
-                        style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                        style={{ display: 'block', width: '100%', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: '#F87171', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >삭제</button>
                     ) : (
                       <button

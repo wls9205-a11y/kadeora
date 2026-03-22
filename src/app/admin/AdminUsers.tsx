@@ -77,8 +77,8 @@ export default function AdminUsers() {
     gradeMap[g] = (gradeMap[g] || 0) + 1;
   }
   const gradeColors: Record<string, string> = {
-    '뉴비': '#94a3b8', '초보자': '#3b82f6', '주민': '#10b981', '터줏대감': '#f59e0b',
-    '인싸': '#8b5cf6', '핵인싸': '#ef4444', '미설정': '#cbd5e1',
+    '뉴비': '#94A3B8', '초보자': '#60A5FA', '주민': '#34D399', '터줏대감': '#FBBF24',
+    '인싸': '#A78BFA', '핵인싸': '#F87171', '미설정': '#CBD5E1',
   };
 
   return (
@@ -87,9 +87,9 @@ export default function AdminUsers() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
         {[
           { label: '전체', value: users.length, color: 'var(--text-primary)' },
-          { label: '실제 유저', value: realUsersList.length, color: '#10b981' },
+          { label: '실제 유저', value: realUsersList.length, color: '#34D399' },
           { label: '시드', value: seedUsers.length, color: 'var(--text-tertiary)' },
-          { label: '정지됨', value: users.filter(u => u.is_deleted).length, color: '#ef4444' },
+          { label: '정지됨', value: users.filter(u => u.is_deleted).length, color: '#F87171' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color }}>{s.value}</div>
@@ -204,11 +204,11 @@ export default function AdminUsers() {
                   <td style={{ padding: '10px 14px' }}>
                     <div style={{ display: 'flex', gap: 4 }}>
                       {u.is_deleted ? (
-                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', cursor: 'pointer', fontWeight: 600 }}>복구</button>
+                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #34D399', background: 'transparent', color: '#34D399', cursor: 'pointer', fontWeight: 600 }}>복구</button>
                       ) : (
-                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontWeight: 600 }}>정지</button>
+                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #F87171', background: 'transparent', color: '#F87171', cursor: 'pointer', fontWeight: 600 }}>정지</button>
                       )}
-                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #3b82f6', background: 'transparent', color: '#3b82f6', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
+                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #60A5FA', background: 'transparent', color: '#60A5FA', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
                     </div>
                   </td>
                 </tr>

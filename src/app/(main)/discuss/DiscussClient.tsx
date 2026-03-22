@@ -23,10 +23,10 @@ const ROOM_MAP: Record<string, string> = {
 };
 
 const CAT_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  stock: { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6', label: '📊 주식' },
-  apt: { bg: 'rgba(16,185,129,0.15)', color: '#10b981', label: '🏢 부동산' },
-  economy: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b', label: '💹 경제' },
-  free: { bg: 'rgba(139,92,246,0.15)', color: '#8b5cf6', label: '✏️ 자유' },
+  stock: { bg: 'rgba(56,189,248,0.12)', color: '#38BDF8', label: '📊 주식' },
+  apt: { bg: 'rgba(52,211,153,0.12)', color: '#34D399', label: '🏢 부동산' },
+  economy: { bg: 'rgba(251,191,36,0.12)', color: '#FBBF24', label: '💹 경제' },
+  free: { bg: 'rgba(167,139,250,0.12)', color: '#A78BFA', label: '✏️ 자유' },
 };
 
 function timeAgo(d: string) {

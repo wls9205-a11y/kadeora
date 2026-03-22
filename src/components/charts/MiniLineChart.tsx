@@ -16,8 +16,8 @@ interface Props {
 }
 
 export default function MiniLineChart({
-  data, width = 300, height = 120, color = '#3B82F6',
-  secondaryData, secondaryColor = '#EF4444',
+  data, width = 300, height = 120, color = '#60A5FA',
+  secondaryData, secondaryColor = '#F87171',
   showDots = true, showLabels = true, showValues = false, title,
 }: Props) {
   if (!data || data.length < 2) return null;

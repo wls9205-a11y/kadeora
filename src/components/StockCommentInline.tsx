@@ -21,7 +21,7 @@ function timeAgo(d: string) {
 function avatarColor(name: string) {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-  const colors = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899'];
+  const colors = ['#3B82F6','#F59E0B','#10B981','#8B5CF6','#EC4899','#06B6D4','#F97316','#14B8A6'];
   return colors[Math.abs(h) % colors.length];
 }
 

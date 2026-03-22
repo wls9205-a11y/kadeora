@@ -113,7 +113,7 @@ export default async function AptDetailPage({ params }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <ShareButtons title={`${apt.house_nm} 청약`} postId={id} />
         <a href={apt.pblanc_url || 'https://www.applyhome.co.kr'} target="_blank" rel="noopener noreferrer"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(59,130,246,0.2)' }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(59,130,246,0.1)', color: '#60A5FA', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(59,130,246,0.2)' }}>
           🏠 청약홈
         </a>
         <AptBookmarkButton aptId={apt.id} isLoggedIn={!!aptUser} />
@@ -160,7 +160,7 @@ export default async function AptDetailPage({ params }: Props) {
                         <td style={{ padding: '6px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{t.type || t.area || '-'}</td>
                         <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.supply || 0).toLocaleString()}</td>
                         <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.apply || 0).toLocaleString()}</td>
-                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: (t.rate || 0) >= 10 ? '#ef4444' : (t.rate || 0) >= 5 ? '#f97316' : '#818cf8' }}>
+                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: (t.rate || 0) >= 10 ? '#F87171' : (t.rate || 0) >= 5 ? '#FB923C' : '#818cf8' }}>
                           {t.rate ? `${t.rate}:1` : '-'}
                         </td>
                       </tr>

@@ -128,16 +128,16 @@ export const DEMO_PRODUCTS: ShopProduct[] = [
 
 // DB grade_definitions 테이블 기준
 export const GRADE_MAP: Record<number, { title: string; emoji: string; color: string }> = {
-  1:  { title: '새싹',       emoji: '🌱', color: '#4CAF50' },
-  2:  { title: '정보통',     emoji: '📡', color: '#2196F3' },
-  3:  { title: '동네어른',   emoji: '🏘️', color: '#9C27B0' },
-  4:  { title: '소문난집',   emoji: '🏠', color: '#FF9800' },
-  5:  { title: '인플루언서', emoji: '⚡', color: '#F44336' },
-  6:  { title: '빅마우스',   emoji: '🔥', color: '#E91E63' },
-  7:  { title: '찐고수',     emoji: '💎', color: '#00BCD4' },
-  8:  { title: '전설',       emoji: '🌟', color: '#FFD700' },
-  9:  { title: '신의경지',   emoji: '👑', color: '#2563EB' },
-  10: { title: '카더라신',   emoji: '🚀', color: '#7B2FBE' },
+  1:  { title: '새싹',       emoji: '🌱', color: '#34D399' },
+  2:  { title: '정보통',     emoji: '📡', color: '#60A5FA' },
+  3:  { title: '동네어른',   emoji: '🏘️', color: '#A78BFA' },
+  4:  { title: '소문난집',   emoji: '🏠', color: '#FBBF24' },
+  5:  { title: '인플루언서', emoji: '⚡', color: '#F87171' },
+  6:  { title: '빅마우스',   emoji: '🔥', color: '#FB7185' },
+  7:  { title: '찐고수',     emoji: '💎', color: '#22D3EE' },
+  8:  { title: '전설',       emoji: '🌟', color: '#FCD34D' },
+  9:  { title: '신의경지',   emoji: '👑', color: '#818CF8' },
+  10: { title: '카더라신',   emoji: '🚀', color: '#C084FC' },
 };
 
 // 하위 호환
@@ -151,17 +151,17 @@ export function gradeColor(grade: number | null): string { return gradeInfo(grad
 export function gradeTitle(grade: number | null): string { return gradeInfo(grade).title; }
 
 export const CATEGORY_STYLES: Record<string, { label: string; color: string; bg: string }> = {
-  stock: { label: '주식', color: '#ef4444', bg: '#ef444415' },
-  apt: { label: '부동산', color: '#3b82f6', bg: '#3b82f615' },
-  local: { label: '우리동네', color: '#10b981', bg: '#10b98115' },
-  free: { label: '자유', color: '#8b5cf6', bg: '#8b5cf615' },
+  stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.12)' },
+  apt: { label: '부동산', color: '#34D399', bg: 'rgba(52,211,153,0.12)' },
+  local: { label: '우리동네', color: '#FBBF24', bg: 'rgba(251,191,36,0.12)' },
+  free: { label: '자유', color: '#A78BFA', bg: 'rgba(167,139,250,0.12)' },
 };
 
 export const CATEGORY_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  apt: { label: '청약', color: '#10B981', bg: 'rgba(16,185,129,0.15)' },
-  stock: { label: '주식', color: '#3B82F6', bg: 'rgba(59,130,246,0.15)' },
-  local: { label: '우리동네', color: '#F59E0B', bg: 'rgba(245,158,11,0.15)' },
-  free: { label: '자유', color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)' },
+  apt: { label: '청약', color: '#34D399', bg: 'rgba(52,211,153,0.12)' },
+  stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.12)' },
+  local: { label: '우리동네', color: '#FBBF24', bg: 'rgba(251,191,36,0.12)' },
+  free: { label: '자유', color: '#A78BFA', bg: 'rgba(167,139,250,0.12)' },
   all: { label: '전체', color: '#94A3B8', bg: 'transparent' },
 };
 
@@ -188,10 +188,10 @@ export const REGIONS = [
 
 export const GRADE_INFO: Record<string, { icon: string; color: string }> = {
   '씨앗': { icon: '🌱', color: '#94A3B8' },
-  '새싹': { icon: '🌿', color: '#10B981' },
+  '새싹': { icon: '🌿', color: '#34D399' },
   '브론즈': { icon: '🥉', color: '#CD7F32' },
   '실버': { icon: '🥈', color: '#C0C0C0' },
-  '골드': { icon: '🥇', color: '#FFD700' },
-  '플래티넘': { icon: '💎', color: '#8B5CF6' },
+  '골드': { icon: '🥇', color: '#FCD34D' },
+  '플래티넘': { icon: '💎', color: '#A78BFA' },
   '다이아': { icon: '🔷', color: '#00BFFF' },
 };

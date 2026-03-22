@@ -174,7 +174,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{t.desc}</div>
                 {t.pointPrice && userPoints < t.pointPrice && (
-                  <div style={{ fontSize: 'var(--fs-xs)', color: '#ef4444', marginTop: 4 }}>포인트 부족 ({(t.pointPrice - userPoints).toLocaleString()}P 더 필요)</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: '#F87171', marginTop: 4 }}>포인트 부족 ({(t.pointPrice - userPoints).toLocaleString()}P 더 필요)</div>
                 )}
               </div>
             ))}
@@ -254,7 +254,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
           </div>
 
           {!selected.pointPrice && (
-            <div style={{ padding: '10px 14px', background: '#f59e0b15', border: '1px solid #f59e0b30', borderRadius: 8, marginBottom: 16, fontSize: 'var(--fs-xs)', color: '#f59e0b' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.18)', borderRadius: 8, marginBottom: 16, fontSize: 'var(--fs-xs)', color: '#FBBF24' }}>
               💳 현금 결제 상품은 토스페이먼츠 라이브 전환 후 이용 가능합니다. 현재는 포인트 결제 상품만 구매 가능합니다.
             </div>
           )}

@@ -12,8 +12,8 @@ import { validateNickname } from '@/lib/nickname-filter';
 
 
 const GRADE_COLORS: Record<number, string> = {
-  1:'#4CAF50',2:'#2196F3',3:'#9C27B0',4:'#FF9800',5:'#F44336',
-  6:'#E91E63',7:'#00BCD4',8:'#FFD700',9:'#2563EB',10:'#7B2FBE',
+  1:'#34D399',2:'#60A5FA',3:'#A78BFA',4:'#FBBF24',5:'#F87171',
+  6:'#FB7185',7:'#22D3EE',8:'#FCD34D',9:'#818CF8',10:'#C084FC',
 };
 const GRADE_TITLES: Record<number, string> = {
   1:'새싹',2:'정보통',3:'동네어른',4:'소문난집',5:'인플루언서',
@@ -89,7 +89,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const gradeNum = profile.grade ?? 1;
-  const gradeColor = GRADE_COLORS[gradeNum] ?? '#4CAF50';
+  const gradeColor = GRADE_COLORS[gradeNum] ?? '#34D399';
   const gradeEmoji = GRADE_EMOJI[gradeNum] ?? '🌱';
   const gradeTitle = GRADE_TITLES[gradeNum] ?? '새싹';
   const currentPoints = profile.points ?? 0;
@@ -603,7 +603,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {watchStocks.map((s: any, i: number) => {
                 const isUp = (s.change_pct || 0) >= 0;
-                const color = s.market === 'KR' ? (isUp ? '#ef4444' : '#3b82f6') : (isUp ? '#22c55e' : '#ef4444');
+                const color = s.market === 'KR' ? (isUp ? '#F87171' : '#60A5FA') : (isUp ? '#34D399' : '#F87171');
                 return (
                   <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ textDecoration: 'none' }}>
                     <div style={{ padding: '12px 0', borderBottom: i < watchStocks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

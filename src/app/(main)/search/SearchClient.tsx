@@ -308,7 +308,7 @@ export default function SearchClient() {
                       <div style={{ textAlign: 'right' }}>
                         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{stock.currency === 'USD' ? `$${stock.price}` : `₩${stock.price?.toLocaleString()}`}</span>
                         {stock.change_pct != null && (
-                          <span style={{ fontSize: 'var(--fs-sm)', marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #EF4444)', fontWeight: 600 }}>
+                          <span style={{ fontSize: 'var(--fs-sm)', marginLeft: 6, color: stock.change_pct >= 0 ? 'var(--success)' : 'var(--error, #F87171)', fontWeight: 600 }}>
                             {stock.change_pct >= 0 ? '+' : ''}{(stock.change_pct ?? 0).toFixed(2)}%
                           </span>
                         )}
@@ -377,7 +377,7 @@ export default function SearchClient() {
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}>📝 블로그</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(139,92,246,0.15)', color: '#A78BFA' }}>📝 블로그</span>
                       <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {highlight(blog.title, inputVal)}
                       </span>
