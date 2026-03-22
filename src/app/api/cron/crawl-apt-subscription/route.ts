@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     let totalSynced = 0;
 
     // 1. APT 분양정보 상세 — 페이지별 최대 500건씩
-    for (let page = 1; page <= 5; page++) {
+    for (let page = 1; page <= 10; page++) {
       try {
         const url = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${encodeURIComponent(APT_API_KEY)}&page=${page}&perPage=500`;
         const res = await fetch(url);

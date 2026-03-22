@@ -43,12 +43,12 @@ export default async function AptPage() {
     const [aptsR, unsoldR, alertsR, redevelopmentR, unsoldSummaryR, transactionsR, unsoldMonthlyR, tradeMonthlyR] = await Promise.all([
       sb.from('apt_subscriptions').select('*')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
-        .order('rcept_bgnde', { ascending: false }).limit(300),
+        .order('rcept_bgnde', { ascending: false }).limit(1000),
       sb.from('unsold_apts').select('*').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
       sb.from('apt_alerts').select('house_manage_no'),
       sb.from('redevelopment_projects').select('*').eq('is_active', true).order('total_households', { ascending: false }),
       sb.from('apt_cache').select('data').eq('cache_type', 'unsold_summary').maybeSingle(),
-      sb.from('apt_transactions').select('*').gte('deal_date', `${new Date(Date.now() + 9 * 60 * 60 * 1000).getFullYear()}-01-01`).order('deal_date', { ascending: false }).limit(2000),
+      sb.from('apt_transactions').select('*').gte('deal_date', `${new Date(Date.now() + 9 * 60 * 60 * 1000).getFullYear()}-01-01`).order('deal_date', { ascending: false }).limit(5000),
       sb.from('unsold_monthly_stats').select('*').order('stat_month', { ascending: true }),
       sb.from('apt_trade_monthly_stats').select('*').order('stat_month', { ascending: true }),
     ]);
