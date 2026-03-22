@@ -47,16 +47,21 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
 };
 
 const QUICK_ACTIONS = [
-  { id: 'seed-posts',    label: '시드 게시글',  path: '/api/cron/seed-posts',    icon: '📝' },
-  { id: 'seed-comments', label: '시드 댓글',    path: '/api/cron/seed-comments', icon: '💬' },
+  { id: 'health-check',  label: '헬스체크',     path: '/api/cron/health-check',  icon: '🩺' },
+  { id: 'daily-stats',   label: '일일 통계',    path: '/api/cron/daily-stats',   icon: '📊' },
+  { id: 'auto-grade',    label: '등급 갱신',    path: '/api/cron/auto-grade',    icon: '⭐' },
+  { id: 'ai-summary',    label: 'AI 분석 생성', path: '/api/cron/apt-ai-summary', icon: '🤖' },
+  { id: 'apt-sub',       label: '청약 수집',    path: '/api/cron/crawl-apt-subscription', icon: '🏠' },
+  { id: 'apt-trade',     label: '실거래 수집',  path: '/api/cron/crawl-apt-trade', icon: '💰' },
+  { id: 'apt-comp',      label: '경쟁률 수집',  path: '/api/cron/crawl-competition-rate', icon: '🏆' },
+  { id: 'unsold',        label: '미분양 수집',  path: '/api/cron/crawl-unsold-molit', icon: '📉' },
+  { id: 'expire',        label: '리스팅 만료',  path: '/api/cron/expire-listings', icon: '⏰' },
   { id: 'stock-refresh', label: '주식 시세',    path: '/api/stock-refresh',      icon: '📈' },
   { id: 'exchange-rate', label: '환율 기록',    path: '/api/cron/exchange-rate',  icon: '💱' },
-  { id: 'apt-sub',       label: '청약 수집',    path: '/api/cron/crawl-apt-subscription', icon: '🏠' },
-  { id: 'daily-stats',   label: '일일 통계',    path: '/api/cron/daily-stats',   icon: '📊' },
+  { id: 'seed-posts',    label: '시드 게시글',  path: '/api/cron/seed-posts',    icon: '📝' },
+  { id: 'seed-comments', label: '시드 댓글',    path: '/api/cron/seed-comments', icon: '💬' },
   { id: 'blog-daily',    label: '블로그 발행',  path: '/api/cron/blog-daily',    icon: '📰' },
-  { id: 'health-check',  label: '헬스체크',     path: '/api/cron/health-check',  icon: '🩺' },
-  { id: 'ai-summary',    label: 'AI 분석 생성', path: '/api/cron/apt-ai-summary', icon: '🤖' },
-  { id: 'auto-grade',    label: '등급 갱신',    path: '/api/cron/auto-grade',    icon: '⭐' },
+  { id: 'aggregate',     label: '거래 집계',    path: '/api/cron/aggregate-trade-stats', icon: '📋' },
 ];
 
 const GROUPS_ORDER = ['시스템', '주식', '부동산', '콘텐츠', '블로그'];
@@ -107,6 +112,9 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         configRes, queueRes,
         rewriteTotalR, rewriteDoneR,
         usersListRes, reportsRes,
+        aiSumSubR, aiSumRedevR, aiSumUnsoldR,
+        redevInactiveR, unsoldInactiveR,
+        subWithConstructorR,
       ] = await Promise.all([
         sb.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', today),
@@ -130,6 +138,13 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).not('rewritten_at', 'is', null),
         sb.from('profiles').select('id, nickname, grade_title, created_at, is_deleted, points').order('created_at', { ascending: false }).limit(200),
         sb.from('reports').select('id, reason, content_type, status, auto_hidden, created_at').order('created_at', { ascending: false }).limit(20),
+        // 세션22 추가 쿼리
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('ai_summary', 'is', null),
+        sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).not('ai_summary', 'is', null),
+        sb.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true).not('ai_summary', 'is', null),
+        sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', false),
+        sb.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', false),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('constructor_nm', 'is', null),
       ]);
 
       setKpis([
@@ -443,28 +458,52 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           </div>
         </div>
 
-        {/* 세션 22 변경사항 요약 */}
-        <div className="cc-card" style={{ background: 'linear-gradient(135deg, #0F1D35, #1A2744)', borderRadius: 12, padding: '14px 16px', border: '1px solid rgba(96,165,250,0.2)', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#60A5FA', marginBottom: 10, letterSpacing: 0.5 }}>🔧 세션 22 주요 변경사항</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 11 }}>
-            {[
-              { icon: '🤖', label: 'AI 한줄 분석', desc: '청약/미분양/재개발' },
-              { icon: '🔍', label: 'Full-Text Search', desc: 'FTS + ILIKE 폴백' },
-              { icon: '🏅', label: '프리미엄 골드', desc: '분양중 카드 연동' },
-              { icon: '📊', label: '데이터 전수조사', desc: '부정확 54건 정리' },
-              { icon: '🎨', label: '카드 디자인', desc: '3탭 리뉴얼' },
-              { icon: '📦', label: 'DB 확장', desc: '30+ 컬럼 추가' },
-              { icon: '📈', label: '시군구 확대', desc: '67→231개' },
-              { icon: '⭐', label: '등급 자동 갱신', desc: '배치+승급알림' },
-            ].map(item => (
-              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, background: '#1E305040' }}>
-                <span style={{ fontSize: 14 }}>{item.icon}</span>
-                <div>
-                  <div style={{ fontWeight: 700, color: '#E2E8F0' }}>{item.label}</div>
-                  <div style={{ fontSize: 10, color: '#7D8DA3' }}>{item.desc}</div>
+        {/* 데이터 품질 현황 + AI 요약 현황 */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#60A5FA', marginBottom: 10, letterSpacing: 0.5 }}>📊 데이터 품질 현황</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, fontSize: 11 }}>
+              {[
+                { icon: '🔨', label: '재개발(비활성)', value: (redevInactiveR?.count || 0), color: '#F87171' },
+                { icon: '📉', label: '미분양(비활성)', value: (unsoldInactiveR?.count || 0), color: '#F87171' },
+                { icon: '🏗️', label: '시공사 입력', value: (subWithConstructorR?.count || 0), color: '#34D399' },
+              ].map(item => (
+                <div key={item.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1E305040' }}>
+                  <div style={{ fontSize: 14 }}>{item.icon}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: item.color }}>{item.value.toLocaleString()}</div>
+                  <div style={{ fontSize: 9, color: '#7D8DA3', fontWeight: 600 }}>{item.label}</div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 10, color: '#7D8DA3' }}>
+              실거래 시군구: <span style={{ color: '#60A5FA', fontWeight: 700 }}>231개</span> · 
+              FTS: <span style={{ color: '#34D399', fontWeight: 700 }}>활성</span> · 
+              청약 수집: <span style={{ color: '#34D399', fontWeight: 700 }}>10페이지</span>
+            </div>
+          </div>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', marginBottom: 10, letterSpacing: 0.5 }}>🤖 AI 한줄 분석 현황</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, fontSize: 11 }}>
+              {[
+                { label: '청약', done: aiSumSubR?.count || 0, total: aptSubR?.count || 0, color: '#60A5FA' },
+                { label: '재개발', done: aiSumRedevR?.count || 0, total: redevR?.count || 0, color: '#34D399' },
+                { label: '미분양', done: aiSumUnsoldR?.count || 0, total: unsoldR?.count || 0, color: '#FBBF24' },
+              ].map(item => {
+                const rate = item.total > 0 ? Math.round((item.done / item.total) * 100) : 0;
+                return (
+                  <div key={item.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1E305040' }}>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: item.color }}>{rate}%</div>
+                    <div style={{ fontSize: 9, color: '#7D8DA3', fontWeight: 600 }}>{item.label} ({item.done}/{item.total})</div>
+                    <div className="cc-progress" style={{ marginTop: 4 }}>
+                      <div className="cc-progress-bar" style={{ width: `${rate}%`, background: item.color }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 10, color: '#7D8DA3' }}>
+              매일 05시 자동 생성 · 규칙 기반 분석
+            </div>
           </div>
         </div>
 
@@ -653,13 +692,13 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>SEO</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10, marginBottom: 10 }}>
-                  {[{h:'/sitemap.xml',l:'sitemap.xml'},{h:'/robots.txt',l:'robots.txt'},{h:'/api/og?title=테스트',l:'OG 미리보기'}].map(lk=>(
+                  {[{h:'/sitemap.xml',l:'sitemap.xml'},{h:'/blog-sitemap.xml',l:'블로그 sitemap'},{h:'/robots.txt',l:'robots.txt'},{h:'/api/og?title=테스트',l:'OG 미리보기'},{h:'/api/search?q=부동산&limit=3',l:'FTS 검색 테스트'}].map(lk=>(
                     <a key={lk.h} href={lk.h} target="_blank" style={{ color: '#60A5FA', padding: '3px 8px', borderRadius: 6, background: '#60A5FA10' }}>{lk.l}</a>
                   ))}
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>관리 페이지</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10 }}>
-                  {[{h:'/admin/content',l:'콘텐츠'},{h:'/admin/users',l:'유저'},{h:'/admin/reports',l:'신고'},{h:'/admin/blog',l:'블로그'},{h:'/admin/infra',l:'인프라'},{h:'/admin/realestate',l:'부동산'},{h:'/admin/payments',l:'결제'},{h:'/admin/notifications',l:'알림'},{h:'/admin/system',l:'시스템'}].map(l=>(
+                  {[{h:'/admin/content',l:'콘텐츠'},{h:'/admin/users',l:'유저'},{h:'/admin/reports',l:'신고'},{h:'/admin/comments',l:'댓글'},{h:'/admin/blog',l:'블로그'},{h:'/admin/infra',l:'인프라'},{h:'/admin/realestate',l:'부동산'},{h:'/admin/payments',l:'결제'},{h:'/admin/notifications',l:'알림'},{h:'/admin/system',l:'시스템'},{h:'/admin/consultant',l:'상담사'}].map(l=>(
                     <a key={l.h} href={l.h} style={{ color: '#9DB0C7', padding: '3px 8px', borderRadius: 6, background: '#1E305040', textDecoration: 'none' }}>{l.l}</a>
                   ))}
                 </div>
