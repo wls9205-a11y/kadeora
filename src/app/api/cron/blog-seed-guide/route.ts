@@ -1,3 +1,4 @@
+import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
@@ -133,7 +134,7 @@ export async function GET(req: NextRequest) {
         const content = generateGuideContent(seed);
         const tags = seed.tags || [seed.seed_category].filter(Boolean);
 
-        await admin.from('blog_posts').insert({
+        const insertResult = await safeBlogInsert(admin, {
           slug, title: seed.title,
           content: ensureMinLength(content, cat),
           excerpt: seed.meta_description || `${seed.title} 완전 정리 2026`,
@@ -144,9 +145,11 @@ export async function GET(req: NextRequest) {
           meta_keywords: generateMetaKeywords(cat, tags),
         });
 
-        if (seed.blog_slug) await admin.from('guide_seeds').update({ blog_generated: true }).eq('blog_slug', slug);
-        else await admin.from('guide_seeds').update({ blog_generated: true }).eq('slug', slug);
-        created++;
+        if (insertResult.success) {
+          if (seed.blog_slug) await admin.from('guide_seeds').update({ blog_generated: true }).eq('blog_slug', slug);
+          else await admin.from('guide_seeds').update({ blog_generated: true }).eq('slug', slug);
+          created++;
+        }
       } catch (e: any) {
         console.error(`[blog-seed-guide] Error for ${seed.blog_slug || seed.slug}:`, e.message);
       }

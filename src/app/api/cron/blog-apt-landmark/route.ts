@@ -1,3 +1,4 @@
+import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';

@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
-  const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at, cover_image, image_alt, meta_description, meta_keywords').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at, published_at, cover_image, image_alt, meta_description, meta_keywords').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
   const BRAND_COVERS: Record<string, string> = {
     stock: `${SITE}/images/brand/kadeora-wide.png`,
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: Props) {
     openGraph: {
       title: post.title, description: post.excerpt || post.title, type: 'article',
       siteName: '카더라', locale: 'ko_KR',
-      publishedTime: post.created_at, url: `${SITE}/blog/${slug}`,
+      publishedTime: post.published_at || post.created_at, url: `${SITE}/blog/${slug}`,
       images: [{ url: ogImage, width: 1200, height: 630, alt: post.image_alt || `카더라 — ${post.title}` }],
     },
     twitter: {
@@ -101,7 +101,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const { data: { user } } = await sb.auth.getUser();
   const isLoggedIn = !!user;
 
-  const { data: related } = await sb.from('blog_posts').select('slug, title').eq('category', post.category).eq('is_published', true).neq('id', post.id).order('created_at', { ascending: false }).limit(3);
+  const { data: related } = await sb.from('blog_posts').select('slug, title').eq('category', post.category).eq('is_published', true).neq('id', post.id).not('published_at', 'is', null).order('published_at', { ascending: false }).limit(3);
 
   // 댓글 조회 (blog_comments 테이블이 없으면 빈 배열)
   let comments: any[] = [];
@@ -115,7 +115,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Article',
     headline: post.title, description: post.excerpt || '',
-    datePublished: post.created_at, dateModified: post.updated_at,
+    datePublished: post.published_at || post.created_at, dateModified: post.updated_at,
     author: { '@type': 'Organization', name: '카더라', url: SITE },
     publisher: { '@type': 'Organization', name: '카더라', url: SITE },
     url: `${SITE}/blog/${slug}`, keywords: (post.tags ?? []).join(', '), inLanguage: 'ko-KR',
@@ -153,7 +153,7 @@ export default async function BlogDetailPage({ params }: Props) {
       <article style={{ paddingBottom: 40 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px' }}>{post.title}</h1>
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
-          <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
+          <span>{new Date(post.published_at || post.created_at).toLocaleDateString('ko-KR')}</span>
           <span>조회 {post.view_count ?? 0}</span>
         </div>
 
@@ -194,6 +194,16 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* FAQ 아코디언 */}
         {showFaq && <BlogFaqAccordion items={faqItems} />}
+
+        {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
+        {post.source_type === 'auto' && (
+          <div style={{ marginTop: 24, padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+            <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 한국거래소 등)를 기반으로 자동 작성되었습니다. 
+            {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
+            {post.source_ref && <> · 출처: {post.source_ref}</>}
+            <br />정확한 투자·거래 판단은 공식 자료를 직접 확인해주세요.
+          </div>
+        )}
 
         {/* 공유 */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8 }}>

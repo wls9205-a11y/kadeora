@@ -22,8 +22,10 @@ export default async function BlogPage({ searchParams }: Props) {
   const { category = 'all' } = await searchParams;
   const sb = await createSupabaseServer();
 
-  let q = sb.from('blog_posts').select('id, slug, title, excerpt, category, tags, created_at, view_count')
-    .eq('is_published', true).order('created_at', { ascending: false }).limit(30);
+  let q = sb.from('blog_posts').select('id, slug, title, excerpt, category, tags, created_at, published_at, view_count')
+    .eq('is_published', true).not('published_at', 'is', null)
+    .lte('published_at', new Date().toISOString())
+    .order('published_at', { ascending: false }).limit(30);
   if (category !== 'all') q = q.eq('category', category);
   const { data: posts } = await q;
 
@@ -57,7 +59,7 @@ export default async function BlogPage({ searchParams }: Props) {
               <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>{p.title}</div>
               {p.excerpt && <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{p.excerpt}</div>}
               <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>
-                <span>{new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
+                <span>{new Date(p.published_at || p.created_at).toLocaleDateString('ko-KR')}</span>
                 {p.view_count > 0 && <span>조회 {p.view_count}</span>}
                 {(p.tags ?? []).slice(0, 2).map((t: string) => <span key={t} style={{ background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>#{t}</span>)}
               </div>

@@ -1,3 +1,4 @@
+import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
@@ -30,17 +31,17 @@ export async function GET(req: NextRequest) {
       const fullTitle = `${t.title} — ${today}`;
       const content = ensureMinLength(`# ${fullTitle}\n\n${fullTitle}에 대한 유용한 정보를 정리했습니다.\n\n오늘의 핵심 포인트를 확인해보세요.\n\n---\n\n카더라에서 매일 업데이트되는 재테크 정보를 받아보세요.`, t.cat);
 
-      await admin.from('blog_posts').insert({
+      const result = await safeBlogInsert(admin, {
         slug, title: fullTitle, content,
         excerpt: `${today} ${t.title}. 카더라에서 확인하세요.`,
-        category: t.cat, tags: t.tags, source_type: 'auto',
+        category: t.cat, tags: t.tags,
         cron_type: 'afternoon', data_date: dateSlug,
         cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(fullTitle)}&type=blog`,
         image_alt: generateImageAlt(t.cat, fullTitle),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords(t.cat, t.tags),
       });
-      created++;
+      if (result.success) created++;
     }
 
     return NextResponse.json({ ok: true, created });

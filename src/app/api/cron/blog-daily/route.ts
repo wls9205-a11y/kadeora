@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
+import { safeBlogInsert } from '@/lib/blog-safe-insert';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,33 +50,27 @@ export async function GET(req: NextRequest) {
 
     let created = 0;
     for (let i = 0; i < TEMPLATES.length; i++) {
-      if (i >= contents.length) break; // contents 배열 범위 초과 방지
+      if (i >= contents.length) break;
       const t = TEMPLATES[i];
       const slug = `${t.cat}-${dateSlug}-${i + 1}`;
-      const { data: existing } = await admin.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
-      if (existing) continue;
-
       const blogTitle = t.titleFn(today);
       const finalContent = ensureMinLength(contents[i], t.cat);
-      await admin.from('blog_posts').insert({
+      const result = await safeBlogInsert(admin, {
         slug, title: blogTitle, content: finalContent,
-        excerpt: finalContent.slice(0, 100).replace(/[#|*\n]/g, ''),
-        category: t.cat, tags: t.tagsFn(), source_type: 'auto',
+        category: t.cat, tags: t.tagsFn(),
         cron_type: 'daily', data_date: dateSlug,
         cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(blogTitle)}&type=blog`,
         image_alt: generateImageAlt(t.cat, blogTitle),
         meta_description: generateMetaDesc(finalContent),
         meta_keywords: generateMetaKeywords(t.cat, t.tagsFn()),
       });
-      created++;
+      if (result.success) created++;
     }
 
     // 종목별 개별 블로그 (등락률 ±3% 이상)
     const bigMovers = (stocks ?? []).filter(s => Math.abs(s.change_pct ?? 0) >= 3);
     for (const s of bigMovers.slice(0, 5)) {
       const stockSlug = `stock-${s.symbol}-${dateSlug}`;
-      const { data: se } = await admin.from('blog_posts').select('id').eq('slug', stockSlug).maybeSingle();
-      if (se) continue;
       const dir = (s.change_pct ?? 0) > 0 ? '급등' : '급락';
       const dirArrow = (s.change_pct ?? 0) > 0 ? '▲' : '▼';
       const absPct = Math.abs(s.change_pct ?? 0).toFixed(2);
@@ -120,17 +115,17 @@ ${(s.change_pct ?? 0) > 0 ? `이번 상승은 실적 개선 기대감, 업종 �
 
 > 투자 권유가 아니며 참고용입니다. 모든 투자 판단과 손익은 투자자 본인에게 귀속됩니다.`;
       const finalStockContent = ensureMinLength(stockContent, 'stock');
-      await admin.from('blog_posts').insert({
+      const result = await safeBlogInsert(admin, {
         slug: stockSlug, title: stockTitle, content: finalStockContent,
         excerpt: `${s.name} ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(1)}%. ${today} 시세 분석.`,
-        category: 'stock', tags: [s.name, dir, s.market, '주식'], source_type: 'auto',
+        category: 'stock', tags: [s.name, dir, s.market, '주식'],
         cron_type: 'daily-stock', data_date: dateSlug, source_ref: s.symbol,
         cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(stockTitle)}&type=blog`,
         image_alt: generateImageAlt('stock', stockTitle),
         meta_description: generateMetaDesc(finalStockContent),
         meta_keywords: generateMetaKeywords('stock', [s.name, dir, s.market, '주식']),
       });
-      created++;
+      if (result.success) created++;
     }
 
     return NextResponse.json({ ok: true, created });

@@ -1,3 +1,4 @@
+import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { withCronLogging } from '@/lib/cron-logger';

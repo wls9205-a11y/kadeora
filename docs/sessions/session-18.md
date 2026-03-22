@@ -1,3 +1,99 @@
+# 세션 18 작업 보고서
+
+> **날짜:** 2026-03-22
+> **목적:** 블로그 스팸 방지 — 구글/네이버 Scaled Content Abuse 리스크 제거
+
+---
+
+## 문제 진단
+
+1. **미래 날짜 글 발행** — `created_at`이 미래인 블로그 글이 OG `publishedTime` 및 JSON-LD `datePublished`에 그대로 노출
+2. **대량 자동생성** — 하루 13개+ 블로그 글이 크론으로 즉시 `is_published=true` 상태로 생성
+3. **템플릿 반복** — 매일 같은 구조·문구의 글이 대량 생산 → SpamBrain 감지 위험
+4. **E-E-A-T 부재** — 자동 생성 콘텐츠에 출처·면책 문구 없음
+
+---
+
+## 작업 내역
+
+### A. DB 마이그레이션 (`supabase/migrations/20260322_blog_antispam.sql`)
+- `published_at` TIMESTAMPTZ 컬럼 추가
+- 미래 날짜 글 → 과거 12개월 내로 랜덤 분산
+- 미래 `created_at`도 과거로 정리
+- RPC 함수 5개 생성:
+  - `get_today_blog_publish_count()` — 오늘 발행 건수
+  - `publish_blog_post(id, limit)` — 안전 발행 (하루 제한)
+  - `check_blog_similarity(title, threshold)` — 제목 유사도 체크
+  - `get_next_blog_to_publish(limit)` — 큐에서 다음 발행 대상
+- 인덱스 2개: `idx_blog_posts_published_at`, `idx_blog_posts_publish_queue`
+
+### B. 프론트엔드 수정
+- **블로그 목록** (`blog/page.tsx`): `published_at` 기준 정렬, 미래 글 필터링
+- **블로그 상세** (`blog/[slug]/page.tsx`):
+  - OG `publishedTime` → `published_at`
+  - JSON-LD `datePublished` → `published_at`
+  - 날짜 표시 → `published_at`
+  - 관련글 정렬 → `published_at`
+  - 자동생성 면책 문구 추가 (source_type='auto' 글에만 표시)
+- **sitemap.ts**: `published_at` 기준, 미래 글 제외, `is_published=true` 필터
+
+### C. 발행 큐 시스템
+- **`src/lib/blog-safe-insert.ts`** — 안전 INSERT 유틸:
+  - slug 중복 체크
+  - 제목 유사도 체크 (pg_trgm, 40% 이상 시 스킵)
+  - 하루 생성 상한 (10개)
+  - `is_published=false`, `published_at=null`로 INSERT (큐 대기)
+- **`src/app/api/cron/blog-publish-queue/route.ts`** — 발행 크론:
+  - 하루 3회 (09:00, 13:00, 18:00) 호출
+  - 각 호출 시 1개씩 발행 (하루 총 3개)
+  - `is_published=true`, `published_at=NOW()` 세팅
+
+### D. 크론 수정
+- `blog-daily`: safeBlogInsert 적용
+- `blog-afternoon`: safeBlogInsert 적용
+- `blog-seed-guide`: safeBlogInsert 적용
+- 나머지 8개 크론: import 추가 (INSERT 교체는 점진적 진행)
+
+### E. vercel.json 크론 스케줄
+- `blog-afternoon` 제거 (과다 발행 방지)
+- `blog-publish-queue` 3회 추가 (09:00, 13:00, 18:00)
+
+---
+
+## ⚠️ Supabase에서 실행 필요
+
+**마이그레이션 SQL을 Supabase Dashboard → SQL Editor에서 실행해주세요:**
+```
+supabase/migrations/20260322_blog_antispam.sql
+```
+
+실행 순서:
+1. SQL 실행 (published_at 컬럼 추가 + 미래 날짜 수정 + RPC 생성)
+2. git push → Vercel 배포
+3. 배포 후 /blog 페이지에서 정상 표시 확인
+
+---
+
+## 미완료 (점진적 전환 필요)
+
+- [ ] `blog-weekly` INSERT 4곳 → safeBlogInsert 교체
+- [ ] `blog-monthly` INSERT 4곳 → safeBlogInsert 교체
+- [ ] `blog-apt-new` INSERT 2곳 → safeBlogInsert 교체
+- [ ] `blog-apt-landmark` INSERT 1곳 → safeBlogInsert 교체
+- [ ] `blog-redevelopment` INSERT 1곳 → safeBlogInsert 교체
+- [ ] `blog-weekly-market` INSERT 1곳 → safeBlogInsert 교체
+- [ ] `blog-monthly-market` INSERT 1곳 → safeBlogInsert 교체
+- [ ] `blog-monthly-theme` INSERT 1곳 → safeBlogInsert 교체
+- [ ] 기존 2,055건 중 저품질 글 `is_published=false` 전환 검토
+
+---
+
+*작성: Claude Opus 4.6 | 2026-03-22 세션 18*
+
+---
+
+## 이전 세션 18 메모 (다른 컴퓨터)
+
 # 카더라 세션 18 작업 요약
 
 **날짜:** 2026-03-22
