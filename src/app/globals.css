@@ -106,6 +106,90 @@ html.font-small [style*="fontSize:12"] { font-size: 10px !important; }
 html.font-large input, html.font-large textarea { font-size: 20px !important; }
 
 /* ========================================
+   글씨 크기별 레이아웃 간격 CSS 변수
+   글씨가 커지면 간격도 넓어지고, 작아지면 좁아짐
+   ======================================== */
+:root {
+  --sp-xs: 4px;
+  --sp-sm: 8px;
+  --sp-md: 12px;
+  --sp-lg: 16px;
+  --sp-xl: 20px;
+  --sp-2xl: 24px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --btn-h: 40px;
+  --card-p: 14px;
+  --touch-min: 44px;
+}
+
+html.font-small {
+  --sp-xs: 3px;
+  --sp-sm: 6px;
+  --sp-md: 10px;
+  --sp-lg: 14px;
+  --sp-xl: 18px;
+  --sp-2xl: 20px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --btn-h: 36px;
+  --card-p: 12px;
+  --touch-min: 40px;
+}
+
+html.font-large {
+  --sp-xs: 6px;
+  --sp-sm: 10px;
+  --sp-md: 16px;
+  --sp-lg: 20px;
+  --sp-xl: 24px;
+  --sp-2xl: 32px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --btn-h: 48px;
+  --card-p: 18px;
+  --touch-min: 48px;
+}
+
+/* 모바일 + font-large: 간격/글씨 조정 (화면이 좁으니까) */
+@media (max-width: 640px) {
+  html.font-large {
+    --fs-xs: 14px;
+    --fs-sm: 16px;
+    --fs-base: 18px;
+    --fs-md: 20px;
+    --fs-lg: 22px;
+    --fs-xl: 26px;
+    --fs-2xl: 32px;
+    --sp-md: 14px;
+    --sp-lg: 18px;
+    --sp-xl: 22px;
+    --sp-2xl: 28px;
+    --card-p: 16px;
+  }
+  html.font-small {
+    --fs-xs: 10px;
+    --fs-sm: 12px;
+    --fs-base: 14px;
+    --fs-md: 15px;
+    --fs-lg: 17px;
+    --fs-xl: 20px;
+    --fs-2xl: 24px;
+  }
+}
+
+/* 데스크탑 + font-large: 넉넉한 간격 */
+@media (min-width: 1024px) {
+  html.font-large {
+    --card-p: 20px;
+    --sp-2xl: 36px;
+  }
+}
+
+/* ========================================
    카더라 — 완전한 다크모드 CSS 변수 시스템
    슬로건: 대한민국 소리소문 정보 커뮤니티
    핵심: 배경-카드-인풋 3단계 명도차 + 경계선 + 그림자
@@ -554,3 +638,119 @@ input, textarea, select {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ========================================
+   글씨 크기 연동 유틸리티 클래스
+   카드, 버튼, 입력필드, 모달 등에서 사용
+   ======================================== */
+
+/* 카드 컨테이너 — 글씨 크기에 따라 패딩/간격 자동 조절 */
+.kd-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--card-p);
+  margin-bottom: var(--sp-md);
+}
+
+/* 버튼 — 글씨 크기에 따라 높이/패딩 자동 조절 */
+.kd-btn {
+  min-height: var(--btn-h);
+  padding: var(--sp-sm) var(--sp-lg);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-xs);
+}
+.kd-btn-primary { background: var(--brand); color: #fff; }
+.kd-btn-secondary { background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border); }
+
+/* 필 (태그, 카테고리) */
+.kd-pill {
+  padding: var(--sp-xs) var(--sp-md);
+  border-radius: 999px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 입력 필드 */
+.kd-input {
+  width: 100%;
+  padding: var(--sp-sm) var(--sp-md);
+  font-size: var(--fs-base);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  min-height: var(--btn-h);
+  box-sizing: border-box;
+}
+
+/* 섹션 간격 */
+.kd-section { margin-bottom: var(--sp-lg); }
+.kd-section-title {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--sp-sm);
+}
+
+/* 리스트 아이템 */
+.kd-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-sm) 0;
+  border-bottom: 1px solid var(--border);
+}
+.kd-list-item:last-child { border-bottom: none; }
+
+/* 탭 바 */
+.kd-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  border: 1px solid var(--border);
+  margin-bottom: var(--sp-md);
+}
+.kd-tab {
+  flex: 1;
+  padding: var(--sp-sm) 0;
+  border-radius: calc(var(--radius-sm) - 2px);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  min-height: var(--touch-min);
+}
+.kd-tab.active {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.4);
+}
+
+/* 모바일: font-large 일 때 탭 글씨 축소 (화면에 5개 들어가야 하니까) */
+@media (max-width: 640px) {
+  html.font-large .kd-tab { font-size: var(--fs-xs); padding: var(--sp-xs) 0; }
+  html.font-large .kd-pill { font-size: var(--fs-xs); padding: var(--sp-xs) var(--sp-sm); }
+}
+
+/* font-large: 모달/바텀시트 간격 확대 */
+html.font-large .bottom-sheet { padding: var(--sp-xl) !important; }
+html.font-large .kd-card { padding: var(--card-p); }
+
+/* font-small: 전체적으로 밀도 높임 */
+html.font-small .kd-card { padding: var(--card-p); }
+html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
+
