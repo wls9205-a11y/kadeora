@@ -80,13 +80,16 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
     // Optimistic update
     setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes_count: currentLikes + 1 } : c));
     try {
-      const sb = createSupabaseBrowser();
-      const { error: err } = await sb.from('comments').update({ likes_count: currentLikes + 1 }).eq('id', commentId);
-      if (err) {
+      const res = await fetch(`/api/comments/${commentId}/like`, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes_count: data.likes_count ?? currentLikes + 1 } : c));
+      } else {
         // rollback
         setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes_count: currentLikes } : c));
-        error('오류가 발생했습니다');
       }
+    } catch {
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, likes_count: currentLikes } : c));
     } finally {
       setLikingIds(prev => { const s = new Set(prev); s.delete(commentId); return s; });
     }
