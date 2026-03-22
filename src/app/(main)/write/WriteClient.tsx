@@ -33,6 +33,51 @@ export default function WriteClient() {
   const [userId, setUserId] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [draftRestored, setDraftRestored] = useState(false);
+
+  // 임시저장 키
+  const DRAFT_KEY = 'kd_write_draft';
+
+  // 임시저장 복원
+  useEffect(() => {
+    if (editId) return; // 수정 모드면 복원 안 함
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        const age = Date.now() - (draft.savedAt || 0);
+        if (age < 24 * 60 * 60 * 1000) { // 24시간 이내
+          if (draft.title) setTitle(draft.title);
+          if (draft.content) setContent(draft.content);
+          if (draft.category) setCategory(draft.category);
+          if (draft.tags?.length) setTags(draft.tags);
+          if (draft.isAnonymous) setIsAnonymous(draft.isAnonymous);
+          setDraftRestored(true);
+        } else {
+          localStorage.removeItem(DRAFT_KEY);
+        }
+      }
+    } catch {}
+  }, [editId]);
+
+  // 내용 변경 시 자동 저장 (debounce 1초)
+  useEffect(() => {
+    if (editId) return;
+    if (!title && !content) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          title, content, category, tags, isAnonymous, savedAt: Date.now(),
+        }));
+      } catch {}
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [title, content, category, tags, isAnonymous, editId]);
+
+  // 임시저장 삭제 (등록 성공 시)
+  const clearDraft = () => {
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
+  };
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -89,12 +134,12 @@ export default function WriteClient() {
       if (editId) {
         const res = await fetch(`/api/posts/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '수정 실패');
-        success('수정되었습니다'); router.push(`/feed/${editId}`);
+        success('수정되었습니다'); clearDraft(); router.push(`/feed/${editId}`);
       } else {
         const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '작성 실패');
         const { post } = await res.json();
-        success('작성되었습니다'); router.push(`/feed/${post.slug || post.id}`);
+        success('작성되었습니다'); clearDraft(); router.push(`/feed/${post.slug || post.id}`);
       }
       router.refresh();
     } catch (e: unknown) {
@@ -123,6 +168,21 @@ export default function WriteClient() {
           cursor: canSubmit ? 'pointer' : 'not-allowed',
         }}>{loading ? '...' : '등록'}</button>
       </div>
+
+      {/* 임시저장 복원 알림 */}
+      {draftRestored && !editId && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 14px', marginBottom: 12, borderRadius: 10,
+          background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)',
+          fontSize: 'var(--fs-sm)', color: '#60A5FA',
+        }}>
+          <span>📝 임시저장된 글을 불러왔어요</span>
+          <button onClick={() => { setTitle(''); setContent(''); setTags([]); setDraftRestored(false); clearDraft(); }} style={{
+            background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
+          }}>삭제</button>
+        </div>
+      )}
 
       {/* 카테고리 칩 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 2 }}>
