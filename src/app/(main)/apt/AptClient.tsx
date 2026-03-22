@@ -205,7 +205,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
             }}>
               {l}
-              {data.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 2, opacity: 0.7 }}>{data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length}</span>}
+              {data.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 2, opacity: 0.7 }}>{
+                type === 'unsold'
+                  ? (() => { const total = (data as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0); return total > 999 ? `${(total/1000).toFixed(0)}k` : total; })()
+                  : data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length
+              }</span>}
               {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#F87171' }} />}
             </button>
           );
