@@ -143,9 +143,19 @@ export default async function UnsoldDetailPage({ params }: Props) {
       {/* 분양 정보 */}
       <div style={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 분양 정보</div>
+        {u.key_features && (
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'rgba(37,99,235,0.08)' }}>💡 {u.key_features}</div>
+        )}
+        {u.discount_info && (
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#34D399', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)' }}>🏷️ {u.discount_info}</div>
+        )}
         {[
+          ['시공사', u.constructor_nm],
+          ['시행사', u.developer_nm],
           ['분양가', (pMin || pMax) ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''} 원` : null],
+          ['평당 분양가', u.price_per_pyeong ? `${Math.round(u.price_per_pyeong).toLocaleString()}만원/평` : null],
           ['준공예정', u.completion_ym ? `${u.completion_ym.slice(0, 4)}년 ${parseInt(u.completion_ym.slice(4, 6))}월` : null],
+          ['최근접 역', u.nearest_station],
           ['주소', u.supply_addr],
           ['문의', u.contact_tel],
         ].filter(r => r[1]).map(([label, value], i, arr) => (
@@ -159,13 +169,18 @@ export default async function UnsoldDetailPage({ params }: Props) {
       {/* 위치 */}
       {(u.supply_addr || u.house_nm) && (
         <div style={card}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 주변환경</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 10 }}>{u.supply_addr || u.house_nm}</div>
+          {u.nearest_station && (
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'var(--bg-hover)' }}>🚆 최근접 역: <strong>{u.nearest_station}</strong></div>
+          )}
           <div style={{ display: 'flex', gap: 8 }}>
             <a href={`https://map.kakao.com/?q=${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>카카오맵</a>
+              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
             <a href={`https://map.naver.com/p/search/${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>네이버지도</a>
+              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+            <a href={`https://www.google.com/maps/search/${encodeURIComponent(u.supply_addr || u.house_nm)}`} target="_blank" rel="noopener noreferrer"
+              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🌍 구글맵</a>
           </div>
         </div>
       )}

@@ -1810,9 +1810,19 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 {[
                   r.address && ['📍 주소', r.address],
                   r.constructor && ['🏗️ 시공사', r.constructor],
-                  r.area_sqm && ['📐 면적', `${r.area_sqm.toLocaleString()}㎡`],
-                  r.stage && ['📅 단계', r.stage],
+                  r.developer && ['🏢 시행사', r.developer],
+                  r.total_dong && ['🏠 동수', `${r.total_dong}개 동`],
+                  r.max_floor && ['📏 최고층', `지상 ${r.max_floor}층`],
+                  r.total_households && ['👥 세대수', `${r.total_households.toLocaleString()}세대`],
+                  r.floor_area_ratio && ['📐 용적률', `${r.floor_area_ratio}%`],
+                  r.building_coverage && ['📐 건폐율', `${r.building_coverage}%`],
+                  r.land_area && ['🗺️ 부지면적', `${r.land_area.toLocaleString()}㎡`],
+                  r.nearest_station && ['🚆 최근접 역', r.nearest_station],
+                  r.nearest_school && ['🏫 초등학교', r.nearest_school],
+                  r.estimated_move_in && ['🗓️ 입주예정', r.estimated_move_in],
                   r.expected_completion && ['🗓️ 예상 준공', r.expected_completion],
+                  r.transfer_limit && ['🔒 전매제한', r.transfer_limit],
+                  r.stage && ['📅 현재 단계', r.stage],
                   r.notes && ['📝 비고', r.notes],
                 ].filter(Boolean).map(([label, value]: any) => (
                   <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
@@ -1822,11 +1832,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 ))}
               </div>
 
-              {/* 요약 */}
-              {r.summary ? (
+              {/* 요약 / 핵심 특징 */}
+              {(r.summary || r.key_features) ? (
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📋 사업 요약</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{r.summary}</div>
+                  {r.key_features && <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', marginBottom: 6 }}>💡 {r.key_features}</div>}
+                  {r.summary && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{r.summary}</div>}
                 </div>
               ) : (
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: '12px 0', marginBottom: 16 }}>
@@ -1894,6 +1905,37 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <span>🏢 {t.floor}층</span>
                 {t.built_year && <span>🏗️ {t.built_year}년식</span>}
                 {t.trade_type && <span>📋 {t.trade_type}</span>}
+              </div>
+
+              {/* 단지 가격 통계 */}
+              {related.length >= 2 && (() => {
+                const prices = related.map((r: any) => r.deal_amount || 0).filter((v: number) => v > 0);
+                if (prices.length < 2) return null;
+                const avg = Math.round(prices.reduce((s: number, v: number) => s + v, 0) / prices.length);
+                const maxP = Math.max(...prices);
+                const minP = Math.min(...prices);
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 16 }}>
+                    <div style={{ background: 'rgba(248,113,113,0.08)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#F87171' }}>{fmtAmt(maxP)}</div>
+                    </div>
+                    <div style={{ background: 'rgba(96,165,250,0.08)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#60A5FA' }}>{fmtAmt(minP)}</div>
+                    </div>
+                    <div style={{ background: 'rgba(167,139,250,0.08)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균가</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#A78BFA' }}>{fmtAmt(avg)}</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 지도 바로가기 */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+                <a href={`https://map.kakao.com/?q=${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+                <a href={`https://map.naver.com/p/search/${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
               </div>
 
               {/* 가격 추이 미니차트 */}
