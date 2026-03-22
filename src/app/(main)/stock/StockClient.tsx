@@ -341,7 +341,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 서브 탭 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '6px 8px' }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
-          <button key={k} onClick={() => isDomestic ? setDomesticTab(k as any) : setGlobalTab(k as any)} style={{
+          <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as any) : setGlobalTab(k as any); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
             padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 700, fontSize: 'var(--fs-sm)',
             background: currentTab === k ? '#2563EB' : 'transparent',
             color: currentTab === k ? '#fff' : 'var(--text-secondary)',
@@ -352,7 +352,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 캘린더 탭 */}
       {isDomestic && domesticTab === 'calendar' && (
         <div style={{ marginBottom: 16 }}>
-          {calendarEvents.length === 0 ? <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>예정된 이벤트가 없습니다</div> :
+          {calendarEvents.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40 }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>📅</div>
+              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>예정된 이벤트가 없습니다</div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>실적 발표, 배당, IPO 등 주요 일정이 등록되면 표시됩니다</div>
+            </div>
+          ) :
           calendarEvents.map(ev => (
             <div key={ev.id} style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 6, alignItems: 'center' }}>
               <div style={{ textAlign: 'center', flexShrink: 0, width: 44 }}>
@@ -447,21 +453,43 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 등락률 서브탭 */}
       {currentTab === 'movers' && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-          {([['up','📈 상승'],['down','📉 하락'],['volume','🔥 거래량']] as const).map(([k,l]) => (
-            <button key={k} onClick={() => setMoversTab(k)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: moversTab===k?'#2563EB':'var(--bg-hover)', color: moversTab===k?'#fff':'var(--text-secondary)' }}>{l}</button>
-          ))}
+        <div>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+            {([['up','📈 상승'],['down','📉 하락'],['volume','🔥 거래량']] as const).map(([k,l]) => (
+              <button key={k} onClick={() => setMoversTab(k)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: moversTab===k?'#2563EB':'var(--bg-hover)', color: moversTab===k?'#fff':'var(--text-secondary)' }}>{l}</button>
+            ))}
+          </div>
+          {isDomestic && (() => {
+            const limitUp = domesticStocks.filter(s => (s.change_pct ?? 0) >= 29.5).length;
+            const limitDown = domesticStocks.filter(s => (s.change_pct ?? 0) <= -29.5).length;
+            const up5 = domesticStocks.filter(s => (s.change_pct ?? 0) >= 5).length;
+            const down5 = domesticStocks.filter(s => (s.change_pct ?? 0) <= -5).length;
+            return (limitUp > 0 || limitDown > 0 || up5 > 0 || down5 > 0) ? (
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                {limitUp > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(248,113,113,0.15)', color: '#F87171', fontWeight: 700 }}>🔺 상한가 {limitUp}</span>}
+                {limitDown > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.15)', color: '#60A5FA', fontWeight: 700 }}>🔻 하한가 {limitDown}</span>}
+                {up5 > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(248,113,113,0.08)', color: '#F87171', fontWeight: 600 }}>+5%↑ {up5}종목</span>}
+                {down5 > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.08)', color: '#60A5FA', fontWeight: 600 }}>-5%↓ {down5}종목</span>}
+              </div>
+            ) : null;
+          })()}
         </div>
       )}
 
       {/* 섹터 필터 (시총/등락률) */}
-      {(currentTab === 'ranking' || currentTab === 'movers') && isDomestic && (
+      {(currentTab === 'ranking' || currentTab === 'movers') && (() => {
+        const targetStocks = isDomestic ? domesticStocks : globalStocks;
+        const sectorSet = new Set(targetStocks.map(s => s.sector).filter(Boolean));
+        const sectorList = ['all', ...Array.from(sectorSet).sort()];
+        if (sectorList.length < 3) return null;
+        return (
         <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-          {SECTORS.map(s => (
+          {sectorList.map(s => (
             <button key={s} onClick={() => setSectorFilter(s)} style={{ padding: '4px 10px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: sectorFilter===s?'var(--text-primary)':'var(--bg-hover)', color: sectorFilter===s?'var(--bg-base)':'var(--text-tertiary)' }}>{s==='all'?'전체':s}</button>
           ))}
         </div>
-      )}
+        );
+      })()}
 
       {/* KOSPI/KOSDAQ 토글 (국내 시총 탭) */}
       {isDomestic && domesticTab === 'ranking' && (
@@ -486,9 +514,27 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px' }}>
           {filteredStocks.length === 0 ? (
-            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>
-              {currentTab === 'watchlist' ? '⭐ 관심종목을 추가해보세요' : search ? `"${search}" 검색 결과가 없어요` : '데이터를 불러오는 중...'}
-              {search && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 8, color: 'var(--text-tertiary)' }}>종목명, 종목코드, 섹터로 검색해보세요</div>}
+            <div style={{ padding: 40, textAlign: 'center' }}>
+              {currentTab === 'watchlist' ? (
+                <div>
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>⭐</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>관심종목을 추가해보세요</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>종목 목록에서 ☆ 버튼을 눌러 추가할 수 있어요</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>🔥 인기 종목</div>
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {(isDomestic ? domesticStocks : globalStocks).slice(0, 5).map(s => (
+                      <button key={s.symbol} onClick={() => toggleWatchlist(s.symbol)} style={{ fontSize: 'var(--fs-xs)', padding: '6px 12px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
+                        ☆ {s.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ color: 'var(--text-tertiary)' }}>
+                  {search ? `"${search}" 검색 결과가 없어요` : '데이터를 불러오는 중...'}
+                  {search && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 8 }}>종목명, 종목코드, 섹터로 검색해보세요</div>}
+                </div>
+              )}
             </div>
           ) : filteredStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
         </div>

@@ -187,7 +187,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         ].map(({ k, l, type, data }) => {
           const hasNew = (data as any[]).some((item: any) => isNew(item, type));
           return (
-            <button key={k} onClick={() => { setActiveTab(k); haptic('light'); }} style={{
+            <button key={k} onClick={() => { setActiveTab(k); haptic('light'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
               background: activeTab === k ? '#2563EB' : 'transparent',
               color: activeTab === k ? '#fff' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
@@ -412,7 +412,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             const h = apt.house_manage_no || String(apt.id);
             const ac = alertCounts[h] || 0;
             const my = myAlerts.has(h);
-            const dday = !apt.rcept_bgnde ? null : Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000);
+            const dday = (() => {
+              if (st === 'open' && apt.rcept_endde) return Math.ceil((new Date(apt.rcept_endde).getTime() - Date.now()) / 86400000);
+              if (st === 'upcoming' && apt.rcept_bgnde) return Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000);
+              return null;
+            })();
 
             const accentColor = st === 'open' ? '#34D399' : st === 'upcoming' ? '#60A5FA' : 'var(--border)';
             // 간략 주소: 전체 주소에서 구+동 추출
@@ -430,7 +434,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {isNew(apt, 'subscription') && <NewBadge />}
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: dday <= 2 ? '#F87171' : dday <= 6 ? '#FBBF24' : 'var(--text-secondary)' }}>D-{dday}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: dday <= 2 ? '#F87171' : dday <= 6 ? '#FBBF24' : 'var(--text-secondary)' }}>
+                      {st === 'open' ? (dday === 0 ? '오늘 마감' : `마감 D-${dday}`) : `D-${dday}`}
+                    </span>
                   )}
                   {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', color: '#A78BFA', border: '1px solid rgba(167,139,250,0.2)' }}>분양가상한</span>}
                   {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#F87171', border: '1px solid rgba(248,113,113,0.2)' }}>투기과열</span>}
@@ -1619,6 +1625,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {pagedTrades.map((t: any, i: number) => {
               const amt = t.deal_amount || 0;
               const borderColor = amt >= 100000 ? '#F87171' : amt >= 50000 ? '#FB923C' : amt >= 30000 ? '#FBBF24' : '#34D399';
+              // 같은 단지 최고가 대비
+              const sameApt = filteredTrades.filter((x: any) => x.apt_name === t.apt_name && (x.deal_amount || 0) > 0);
+              const maxPrice = sameApt.length > 1 ? Math.max(...sameApt.map((x: any) => x.deal_amount || 0)) : 0;
+              const vsMax = maxPrice > 0 && amt > 0 && maxPrice !== amt ? Math.round(((amt - maxPrice) / maxPrice) * 100) : null;
               return (
                 <div key={`${t.id || i}`} onClick={() => setSelectedTrade(t)} style={{
                   padding: '12px 16px', borderRadius: 12, marginBottom: 6,
@@ -1641,6 +1651,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', wordBreak: 'break-all' }}>
                     전용 {t.exclusive_area}㎡ | <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(amt)}</strong>
                     {t.exclusive_area > 0 && amt > 0 && <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}> · 평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</span>}
+                    {vsMax !== null && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, marginLeft: 4, color: vsMax >= 0 ? '#F87171' : '#60A5FA' }}>최고가 대비 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
                   </div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''} · {t.deal_date}
