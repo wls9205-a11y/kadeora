@@ -37,16 +37,22 @@ export default function AdminAutomation() {
   const [quotas, setQuotas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 블로그 발행 설정
+  const [blogConfig, setBlogConfig] = useState<any>(null);
+  const [queueStatus, setQueueStatus] = useState<any>(null);
+  const [configSaving, setConfigSaving] = useState(false);
+  const [configMsg, setConfigMsg] = useState('');
+
   useEffect(() => {
     const sb = createSupabaseBrowser();
     Promise.all([
-      // Latest status per cron: get recent logs grouped by cron_name
       sb.from('cron_logs').select('*').order('started_at', { ascending: false }).limit(200),
       sb.from('api_quotas').select('*'),
-    ]).then(([logsRes, quotasRes]) => {
+      sb.from('blog_publish_config').select('*').eq('id', 1).single(),
+      sb.rpc('blog_queue_status'),
+    ]).then(([logsRes, quotasRes, configRes, queueRes]) => {
       const allLogs = logsRes.data || [];
 
-      // Get latest per cron_name
       const latestMap = new Map<string, any>();
       for (const log of allLogs) {
         if (!latestMap.has(log.cron_name)) {
@@ -54,7 +60,6 @@ export default function AdminAutomation() {
         }
       }
 
-      // Calculate success rate per cron (last 10)
       const statusArr = Array.from(latestMap.entries()).map(([name, latest]) => {
         const recentLogs = allLogs.filter((l: any) => l.cron_name === name).slice(0, 10);
         const successCount = recentLogs.filter((l: any) => l.status === 'success').length;
@@ -65,9 +70,31 @@ export default function AdminAutomation() {
       setCronStatus(statusArr);
       setCronLogs(allLogs.slice(0, 50));
       setQuotas(quotasRes.data || []);
+      setBlogConfig(configRes.data);
+      setQueueStatus(queueRes.data);
       setLoading(false);
     });
   }, []);
+
+  const saveBlogConfig = async () => {
+    if (!blogConfig) return;
+    setConfigSaving(true);
+    setConfigMsg('');
+    const sb = createSupabaseBrowser();
+    const { error } = await sb.from('blog_publish_config').update({
+      daily_publish_limit: blogConfig.daily_publish_limit,
+      daily_create_limit: blogConfig.daily_create_limit,
+      min_content_length: blogConfig.min_content_length,
+      title_similarity_threshold: blogConfig.title_similarity_threshold,
+      auto_publish_enabled: blogConfig.auto_publish_enabled,
+      updated_at: new Date().toISOString(),
+    }).eq('id', 1);
+    setConfigSaving(false);
+    setConfigMsg(error ? `❌ ${error.message}` : '✅ 저장 완료');
+    // 큐 상태 갱신
+    const { data: qs } = await sb.rpc('blog_queue_status');
+    if (qs) setQueueStatus(qs);
+  };
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>;
 
@@ -82,6 +109,86 @@ export default function AdminAutomation() {
 
   return (
     <div>
+      {/* 블로그 발행 설정 */}
+      {blogConfig && (
+        <>
+          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📰 블로그 발행 설정</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, marginBottom: 24 }}>
+            {/* 설정 카드 */}
+            <div style={{ ...cardStyle, borderLeft: '3px solid #3b82f6' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>발행 제어</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)' }}>
+                  <input type="checkbox" checked={blogConfig.auto_publish_enabled} onChange={e => setBlogConfig({ ...blogConfig, auto_publish_enabled: e.target.checked })} />
+                  자동 발행 활성화
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 100 }}>하루 발행 수</span>
+                  <input type="number" min={1} max={50} value={blogConfig.daily_publish_limit} onChange={e => setBlogConfig({ ...blogConfig, daily_publish_limit: parseInt(e.target.value) || 3 })}
+                    style={{ width: 60, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }} />
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>개/일</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 100 }}>하루 생성 상한</span>
+                  <input type="number" min={1} max={50} value={blogConfig.daily_create_limit} onChange={e => setBlogConfig({ ...blogConfig, daily_create_limit: parseInt(e.target.value) || 10 })}
+                    style={{ width: 60, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }} />
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>개/일</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 100 }}>최소 글자 수</span>
+                  <input type="number" min={500} max={3000} step={100} value={blogConfig.min_content_length} onChange={e => setBlogConfig({ ...blogConfig, min_content_length: parseInt(e.target.value) || 1200 })}
+                    style={{ width: 70, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }} />
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>자</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 100 }}>유사도 임계값</span>
+                  <input type="number" min={0.1} max={0.9} step={0.05} value={blogConfig.title_similarity_threshold} onChange={e => setBlogConfig({ ...blogConfig, title_similarity_threshold: parseFloat(e.target.value) || 0.4 })}
+                    style={{ width: 60, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }} />
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>(0.4 = 40%)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                  <button onClick={saveBlogConfig} disabled={configSaving}
+                    style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#3b82f6', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: configSaving ? 0.6 : 1 }}>
+                    {configSaving ? '저장 중...' : '설정 저장'}
+                  </button>
+                  {configMsg && <span style={{ fontSize: 11 }}>{configMsg}</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* 큐 상태 카드 */}
+            {queueStatus && (
+              <div style={{ ...cardStyle, borderLeft: '3px solid #22c55e' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>발행 큐 현황</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{queueStatus.published_today ?? 0}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>오늘 발행</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{queueStatus.remaining_today ?? 0}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>오늘 남은 쿼터</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: '#22c55e' }}>{queueStatus.queue_ready ?? 0}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>대기 중 (발행 가능)</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: queueStatus.queue_too_short > 0 ? '#ef4444' : 'var(--text-tertiary)' }}>{queueStatus.queue_too_short ?? 0}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>대기 중 (길이 미달)</div>
+                  </div>
+                </div>
+                {queueStatus.queue_ready > 0 && (
+                  <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                    현재 속도로 큐 소진까지 약 {Math.ceil((queueStatus.queue_ready) / (queueStatus.daily_limit || 3))}일
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
       {/* Cron Status Cards */}
       <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>크론 상태</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12, marginBottom: 24 }}>
