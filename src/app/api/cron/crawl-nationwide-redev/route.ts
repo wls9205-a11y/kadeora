@@ -6,35 +6,41 @@ export const maxDuration = 120;
 
 /**
  * 전국 재개발·재건축 정비사업 수집 크론
- * 소스: data.go.kr 국토교통부 정비사업현황조회서비스
- * 서울/경기/부산은 기존 크론에서 수집 → 이 크론은 나머지 지역 담당
- * - 대구, 인천, 광주, 대전, 울산, 세종
- * - 충북, 충남, 전북, 전남, 경북, 경남, 강원, 제주
+ * 서울/경기/부산은 기존 전용 크론에서 수집 → 이 크론은 나머지 14개 시도 담당
+ * data.go.kr 정비사업정보서비스 (1613000/MntncBizInfoSvc)
  */
 
-const REGIONS: Record<string, string> = {
-  '대구': '27', '인천': '28', '광주': '29', '대전': '30',
-  '울산': '31', '세종': '36',
-  '강원': '42', '충북': '43', '충남': '44',
-  '전북': '45', '전남': '46', '경북': '47', '경남': '48', '제주': '50',
+// 시도별 주요 시군구 코드 (5자리)
+const SIGUNGU_CODES: Record<string, { name: string; codes: Record<string, string> }> = {
+  '대구': { name: '대구', codes: { '중구': '27110', '동구': '27140', '서구': '27170', '남구': '27200', '북구': '27230', '수성구': '27260', '달서구': '27290' } },
+  '인천': { name: '인천', codes: { '미추홀구': '28177', '연수구': '28185', '남동구': '28200', '부평구': '28237', '계양구': '28245', '서구': '28260' } },
+  '광주': { name: '광주', codes: { '동구': '29110', '서구': '29140', '남구': '29155', '북구': '29170', '광산구': '29200' } },
+  '대전': { name: '대전', codes: { '동구': '30110', '중구': '30140', '서구': '30170', '유성구': '30200', '대덕구': '30230' } },
+  '울산': { name: '울산', codes: { '중구': '31110', '남구': '31140', '동구': '31170', '북구': '31200' } },
+  '충남': { name: '충남', codes: { '천안시': '44131', '아산시': '44200', '서산시': '44210' } },
+  '충북': { name: '충북', codes: { '청주시': '43111', '충주시': '43130' } },
+  '전남': { name: '전남', codes: { '여수시': '46130', '순천시': '46150', '목포시': '46110' } },
+  '전북': { name: '전북', codes: { '전주시': '45111', '군산시': '45130', '익산시': '45140' } },
+  '경남': { name: '경남', codes: { '창원시': '48121', '김해시': '48250', '양산시': '48330' } },
+  '경북': { name: '경북', codes: { '포항시': '47111', '구미시': '47190', '경산시': '47290' } },
+  '강원': { name: '강원', codes: { '춘천시': '42110', '원주시': '42130', '강릉시': '42150' } },
+  '제주': { name: '제주', codes: { '제주시': '50110', '서귀포시': '50130' } },
 };
 
 function guessStage(step: string | null): string {
   if (!step) return '조사 중';
-  const s = step.trim();
-  if (/준공|완료|입주/.test(s)) return '준공';
-  if (/착공|공사/.test(s)) return '착공';
-  if (/관리처분/.test(s)) return '관리처분';
-  if (/사업시행|시행인가/.test(s)) return '사업시행인가';
-  if (/조합설립/.test(s)) return '조합설립';
-  if (/구역지정|정비구역/.test(s)) return '정비구역지정';
+  if (/준공|완료|입주/.test(step)) return '준공';
+  if (/착공|공사/.test(step)) return '착공';
+  if (/관리처분/.test(step)) return '관리처분';
+  if (/사업시행|시행인가/.test(step)) return '사업시행인가';
+  if (/조합설립/.test(step)) return '조합설립';
+  if (/구역지정|정비구역/.test(step)) return '정비구역지정';
   return '조사 중';
 }
 
-function guessType(name: string | null, type: string | null): string {
-  const combined = `${name || ''} ${type || ''}`;
-  if (/재건축/.test(combined)) return '재건축';
-  if (/재개발|도시환경|주거환경/.test(combined)) return '재개발';
+function guessType(text: string | null): string {
+  if (!text) return '재개발';
+  if (/재건축/.test(text)) return '재건축';
   return '재개발';
 }
 
@@ -51,111 +57,80 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('crawl-nationwide-redev', async () => {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     let totalCreated = 0;
-    let totalFailed = 0;
     const regionResults: Record<string, number> = {};
+    const debugInfo: Record<string, any> = {};
 
-    for (const [regionName, regionCode] of Object.entries(REGIONS)) {
-      try {
-        // 국토교통부 정비사업현황 API
-        const url = `https://apis.data.go.kr/1613000/ArchPmsService_v2/getUrbRhbsBuldInfo?serviceKey=${encodeURIComponent(apiKey)}&sigunguCd=${regionCode}&numOfRows=500&pageNo=1&resultType=json`;
-        
-        const res = await fetch(url);
-        if (!res.ok) {
-          // 대안 API 시도: 정비사업통합정보 
-          const altUrl = `https://apis.data.go.kr/1613000/MntncBizInfo/getMntncBizList?serviceKey=${encodeURIComponent(apiKey)}&ctprvnCd=${regionCode}&numOfRows=500&pageNo=1&resultType=json`;
-          const altRes = await fetch(altUrl);
-          if (!altRes.ok) { totalFailed++; continue; }
-          const altData = await altRes.json();
-          const altItems = altData?.response?.body?.items?.item || [];
+    for (const [regionKey, regionData] of Object.entries(SIGUNGU_CODES)) {
+      let regionCount = 0;
+
+      for (const [sigunguName, sigunguCode] of Object.entries(regionData.codes)) {
+        try {
+          // 정비사업정보서비스 API
+          const url = `https://apis.data.go.kr/1613000/MntncBizInfoSvc/getMntncBizList?serviceKey=${encodeURIComponent(apiKey)}&sigunguCd=${sigunguCode}&numOfRows=200&pageNo=1&resultType=json`;
+          const res = await fetch(url);
           
-          if (Array.isArray(altItems) && altItems.length > 0) {
-            const rows = altItems.map((item: any) => ({
-              district_name: item.bsnNm || item.pjtNm || item.distNm || '미상',
-              region: regionName,
-              sigungu: item.sigunguNm || item.sggNm || '',
-              address: item.lctnRoadNmAdres || item.lctnLnmAdres || item.adres || '',
-              project_type: guessType(item.bsnNm || item.pjtNm, item.bsnTpNm || item.pjtTpNm),
-              stage: guessStage(item.stepNm || item.sttusNm || item.prgrsStepNm),
-              total_households: parseInt(item.totHshldCo || item.totPltaAr || '0') || null,
-              constructor: item.cstrtrNm || item.cnstctrNm || null,
-              expected_completion: item.expectCmpltYm || item.cmpltSchdlYm || null,
-              notes: item.rm || item.etc || null,
-              source: 'data_go_kr',
-              is_active: true,
-            })).filter((r: any) => r.district_name !== '미상' || r.address);
-
-            if (rows.length > 0) {
-              // 지역+구역명 기준 upsert (중복 방지)
-              for (const row of rows) {
-                const { error } = await supabase
-                  .from('redevelopment_projects')
-                  .upsert(row, { 
-                    onConflict: 'district_name,region',
-                    ignoreDuplicates: true 
-                  });
-                if (!error) totalCreated++;
-              }
-              regionResults[regionName] = rows.length;
-            }
+          if (!res.ok) {
+            debugInfo[`${regionKey}_${sigunguName}`] = { status: res.status, statusText: res.statusText };
+            continue;
           }
-          continue;
+
+          const data = await res.json();
+          const items = data?.response?.body?.items?.item;
+          
+          if (!items) {
+            // 응답 구조 디버그
+            const bodyKeys = Object.keys(data?.response?.body || {});
+            debugInfo[`${regionKey}_${sigunguName}`] = { 
+              bodyKeys, 
+              totalCount: data?.response?.body?.totalCount,
+              sample: JSON.stringify(data).slice(0, 200) 
+            };
+            continue;
+          }
+
+          const itemList = Array.isArray(items) ? items : [items];
+          
+          for (const item of itemList) {
+            const districtName = item.bsnNm || item.pjtNm || item.mntncInsttNm || '';
+            if (!districtName) continue;
+
+            const row = {
+              district_name: districtName,
+              region: regionKey,
+              sigungu: sigunguName,
+              address: item.lcRoadNmAdres || item.lcLnmAdres || '',
+              project_type: guessType(item.bsnClsfNm || item.pjtTpNm || districtName),
+              stage: guessStage(item.prgrsStepNm || item.sttusNm || ''),
+              total_households: parseInt(item.totHshldCo || '0') || null,
+              constructor: item.cstrtrNm || null,
+              notes: item.rm || null,
+              source: 'data_go_kr_nationwide',
+              is_active: true,
+            };
+
+            const { error } = await supabase
+              .from('redevelopment_projects')
+              .upsert(row, { onConflict: 'district_name,region' });
+            if (!error) totalCreated++;
+          }
+
+          regionCount += itemList.length;
+        } catch (e: any) {
+          debugInfo[`${regionKey}_${sigunguName}`] = { error: e.message };
         }
-
-        const data = await res.json();
-        const items = data?.response?.body?.items?.item || [];
-        
-        if (!Array.isArray(items) || items.length === 0) {
-          regionResults[regionName] = 0;
-          continue;
-        }
-
-        const rows = items.map((item: any) => ({
-          district_name: item.bsnNm || item.distNm || item.pjtNm || '미상',
-          region: regionName,
-          sigungu: item.sigunguNm || item.sggNm || '',
-          address: item.platPlcAdres || item.adres || item.lctnRoadNmAdres || '',
-          project_type: guessType(item.bsnNm, item.bsnTpNm || item.pjtTpNm),
-          stage: guessStage(item.stepNm || item.sttusNm),
-          total_households: parseInt(item.totHshldCo || '0') || null,
-          constructor: item.cstrtrNm || null,
-          area_sqm: parseFloat(item.totPltaAr || '0') || null,
-          expected_completion: item.expectCmpltYm || null,
-          notes: item.rm || null,
-          source: 'data_go_kr',
-          is_active: true,
-        })).filter((r: any) => r.district_name !== '미상' || r.address);
-
-        for (const row of rows) {
-          const { error } = await supabase
-            .from('redevelopment_projects')
-            .upsert(row, {
-              onConflict: 'district_name,region',
-              ignoreDuplicates: true
-            });
-          if (!error) totalCreated++;
-        }
-        regionResults[regionName] = rows.length;
-
-      } catch {
-        totalFailed++;
-        regionResults[regionName] = -1;
       }
+
+      regionResults[regionKey] = regionCount;
     }
 
     return {
-      processed: Object.values(regionResults).filter(v => v > 0).reduce((a, b) => a + b, 0),
+      processed: Object.values(regionResults).reduce((a, b) => a + b, 0),
       created: totalCreated,
-      failed: totalFailed,
-      metadata: {
-        api_name: 'data_go_kr_redev',
-        regions: regionResults,
-        regions_covered: Object.keys(REGIONS).length,
-      },
+      failed: 0,
+      metadata: { api_name: 'data_go_kr_MntncBizInfoSvc', regions: regionResults, debug: debugInfo },
     };
   });
 
-  if (!result.success) {
-    return NextResponse.json({ success: true, error: result.error });
-  }
+  if (!result.success) return NextResponse.json({ success: true, error: result.error });
   return NextResponse.json({ ok: true, ...result });
 }

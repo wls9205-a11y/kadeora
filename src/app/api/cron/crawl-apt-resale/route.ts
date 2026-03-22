@@ -5,9 +5,18 @@ import { withCronLogging } from '@/lib/cron-logger';
 const LAWD_CODES: Record<string, string> = {
   '서울 강남구':'11680','서울 서초구':'11650','서울 송파구':'11710','서울 강동구':'11740',
   '서울 마포구':'11440','서울 영등포구':'11560','서울 용산구':'11170',
+  '서울 성동구':'11200','서울 광진구':'11215','서울 동작구':'11590',
   '경기 수원시':'41111','경기 성남시':'41131','경기 화성시':'41590','경기 평택시':'41220',
-  '경기 용인시':'41461','경기 고양시':'41281',
-  '부산 해운대구':'26350','부산 부산진구':'26170',
+  '경기 용인시':'41461','경기 고양시':'41281','경기 김포시':'41570','경기 시흥시':'41390',
+  '부산 해운대구':'26350','부산 부산진구':'26170','부산 수영구':'26410',
+  '대구 수성구':'27260','대구 달서구':'27290',
+  '인천 연수구':'28185','인천 서구':'28260','인천 남동구':'28200',
+  '대전 유성구':'30200','대전 서구':'30170',
+  '광주 광산구':'29200','광주 북구':'29170',
+  '울산 남구':'31140',
+  '충남 천안시':'44131','충남 아산시':'44200',
+  '경남 창원시':'48121','경남 김해시':'48250',
+  '세종시':'36110',
 };
 
 function parseXmlItems(xml: string): any[] {
@@ -41,10 +50,10 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('crawl-apt-resale', async () => {
     const now = new Date();
-    const months = [
-      `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`,
-      `${now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()}${String(now.getMonth() === 0 ? 12 : now.getMonth()).padStart(2, '0')}`,
-    ];
+    const months: string[] = [];
+    for (let m = 1; m <= now.getMonth() + 1; m++) {
+      months.push(`${now.getFullYear()}${String(m).padStart(2, '0')}`);
+    }
 
     const entries = Object.entries(LAWD_CODES);
     let totalInserted = 0;
