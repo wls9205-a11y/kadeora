@@ -80,7 +80,7 @@
 
 ---
 
-## 세션 22 변경 요약 (12건 커밋)
+## 세션 22 변경 요약 (12건+ 커밋)
 
 ### 1. 20개 항목 전수 검사 + 수정
 - #1 햅틱: 탭 전환 + 관심단지에 haptic 추가
@@ -134,6 +134,24 @@
 - 전 탭 투자 면책 조항
 - 모바일 반응형 강화
 
+### 4. 프리미엄 리스팅 골드 하이라이트 연동
+- 분양중 카드: premiumListings fetch → 매칭 시 골드 보더/PREMIUM 배지
+- 상담사 CTA (회사명/이름/전화버튼) 카드 내 표시
+- 노출(impression) + 전화 클릭 추적 PATCH 연동
+
+### 5. auto-grade 크론 개선
+- admin_set_grade RPC 의존 제거 → profiles 직접 update
+- .in() 배치 처리 (200명씩), 승급 시 notifications 알림 자동 생성
+
+### 6. Full-Text Search 전환
+- posts + blog_posts: tsvector GENERATED 컬럼 + GIN 인덱스 마이그레이션
+- search_posts_fts / search_blogs_fts RPC 함수
+- 검색 API: FTS 우선 → ILIKE 폴백 구조
+- ⚠️ Supabase에서 마이그레이션 SQL 실행 필요 (`20260323_fulltext_search.sql`)
+
+### 7. expire-listings 크론 안정화
+- RPC 실패 시 직접 update 폴백 추가
+
 ---
 
 ## 세션 21 변경 요약 (24건 커밋, 160+ 파일)
@@ -157,9 +175,10 @@
 
 ### 긴급
 - [ ] Vercel ERROR 배포 정리 (동시 빌드 큐)
-- [ ] 분양중 카드에 프리미엄 리스팅 골드 하이라이트 연동
+- [x] 분양중 카드에 프리미엄 리스팅 골드 하이라이트 연동 ✅ 세션 22
 
 ### 관리자 수동
+- [ ] **Supabase에서 FTS 마이그레이션 SQL 실행** (`20260323_fulltext_search.sql`)
 - [ ] Google/네이버 서치콘솔 sitemap 제출
 - [ ] 토스 라이브키 교체
 - [ ] KIS_APP_KEY + KIS_APP_SECRET 환경변수
@@ -167,10 +186,11 @@
 
 ### 코드
 - [ ] crawl-nationwide-redev API 키 등록 후 실행
-- [ ] 시드 유저 DB UUID도 자연스럽게 마이그레이션 (현재 fallback만 변경)
-- [ ] Full-Text Search (현재 ILIKE → pg_trgm GIN 인덱스는 추가됨)
+- [ ] 시드 유저 DB UUID 마이그레이션
+- [x] Full-Text Search (FTS RPC + ILIKE 폴백) ✅ 세션 22
+- [x] auto-grade 크론 개선 (배치+직접update+승급알림) ✅ 세션 22
 - [ ] 부동산 지도뷰
-- [ ] 주식 캔들차트 (CandlestickChart 컴포넌트 있으나 OHLC 데이터 부족)
+- [ ] 주식 캔들차트
 
 ---
 

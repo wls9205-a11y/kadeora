@@ -76,28 +76,34 @@ export async function GET(req: NextRequest) {
       return { processed: 0, created: 0, failed: 1, metadata: { error: profileErr?.message } };
     }
 
-    // 유저별 게시글/댓글 수 조회
+    // 유저별 게시글/댓글 수 조회 (배치 처리 — Supabase .in() 제한 대응)
     const userIds = profiles.map(p => p.id);
-    
-    // 게시글 수 집계
-    const { data: postCounts } = await supabase
-      .from('posts')
-      .select('author_id')
-      .eq('is_deleted', false)
-      .in('author_id', userIds);
-
+    const batchSize = 200;
     const postCountMap: Record<string, number> = {};
-    for (const p of (postCounts || [])) {
-      postCountMap[p.author_id] = (postCountMap[p.author_id] || 0) + 1;
-    }
-
-    // 댓글 수 집계
-    const { data: commentCounts } = await supabase
-      .from('comments')
-      .select('author_id')
-      .in('author_id', userIds);
-
     const commentCountMap: Record<string, number> = {};
+
+    for (let i = 0; i < userIds.length; i += batchSize) {
+      const batch = userIds.slice(i, i + batchSize);
+
+      const { data: postCounts } = await supabase
+        .from('posts')
+        .select('author_id')
+        .eq('is_deleted', false)
+        .in('author_id', batch);
+
+      for (const p of (postCounts || [])) {
+        postCountMap[p.author_id] = (postCountMap[p.author_id] || 0) + 1;
+      }
+
+      const { data: commentCounts } = await supabase
+        .from('comments')
+        .select('author_id')
+        .in('author_id', batch);
+
+      for (const c of (commentCounts || [])) {
+        commentCountMap[c.author_id] = (commentCountMap[c.author_id] || 0) + 1;
+      }
+    }
     for (const c of (commentCounts || [])) {
       commentCountMap[c.author_id] = (commentCountMap[c.author_id] || 0) + 1;
     }
@@ -114,12 +120,24 @@ export async function GET(req: NextRequest) {
 
       // 등급은 올라가기만 함 (강등 없음)
       if (newGrade > currentGrade) {
-        const { error: gradeErr } = await supabase.rpc('admin_set_grade', {
-          p_user_id: profile.id,
-          p_grade: newGrade,
-          p_grade_title: GRADE_TITLES[newGrade] || '새싹',
-        });
-        if (!gradeErr) upgraded++;
+        const { error: gradeErr } = await supabase
+          .from('profiles')
+          .update({
+            grade: newGrade,
+            grade_title: GRADE_TITLES[newGrade] || '새싹',
+          })
+          .eq('id', profile.id);
+
+        if (!gradeErr) {
+          upgraded++;
+          // 등급 승급 알림
+          await supabase.from('notifications').insert({
+            user_id: profile.id,
+            type: 'grade_up',
+            title: `🎉 ${GRADE_TITLES[newGrade]} 등급으로 승급!`,
+            body: `축하합니다! 활발한 활동 덕분에 등급 ${currentGrade} → ${newGrade}(${GRADE_TITLES[newGrade]})로 승급했습니다.`,
+          }).then(() => {});
+        }
       } else {
         unchanged++;
       }

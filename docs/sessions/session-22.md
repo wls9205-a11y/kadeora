@@ -88,14 +88,16 @@
 - 전 탭 투자 면책 조항
 
 ## 수정 파일 목록
-- `src/app/(main)/apt/AptClient.tsx` — 부동산 전체
+- `src/app/(main)/apt/AptClient.tsx` — 부동산 전체 + 프리미엄 골드 하이라이트
 - `src/app/(main)/stock/StockClient.tsx` — 주식 목록
 - `src/app/(main)/stock/[symbol]/page.tsx` — 주식 상세
 - `src/app/(main)/stock/[symbol]/StockDetailTabs.tsx` — 주식 상세 탭
 - `src/app/(main)/search/SearchClient.tsx` — 검색 UI
 - `src/app/(main)/discuss/ChatRoom.tsx` — 채팅방
-- `src/app/api/search/route.ts` — 검색 API
+- `src/app/api/search/route.ts` — 검색 API (FTS 전환)
 - `src/app/api/analytics/pageview/route.ts` — 페이지뷰
+- `src/app/api/cron/auto-grade/route.ts` — 등급 자동 갱신 (개선)
+- `src/app/api/cron/expire-listings/route.ts` — 만료 리스팅 (폴백 추가)
 - `src/app/api/cron/seed-comments/route.ts` — 시드 댓글
 - `src/app/api/cron/seed-chat/route.ts` — 시드 채팅
 - `src/app/api/cron/crawl-busan-redev/route.ts` — 부산 재개발
@@ -105,5 +107,28 @@
 - `src/components/ShareButtons.tsx` — 공유 버튼
 - `src/components/InstallBanner.tsx` — 설치 배너
 - `vercel.json` — 크론 정리
+- `supabase/migrations/20260323_fulltext_search.sql` — FTS 마이그레이션 (신규)
+
+---
+
+## Part 4: 추가 작업 (병행 세션)
+
+### 프리미엄 리스팅 골드 하이라이트 연동
+- `premiumListings` state + `/api/consultant/listing` fetch
+- 카드 매칭 시: 골드 보더 + PREMIUM 배지 + 상담사 CTA + 전화 버튼
+- 노출/클릭 추적 PATCH 연동
+
+### auto-grade 크론 개선
+- `admin_set_grade` RPC → `profiles` 직접 update
+- `.in()` 배치 200명씩, 승급 알림 자동 생성
+
+### Full-Text Search 전환
+- posts + blog_posts: tsvector GENERATED + GIN 인덱스
+- `search_posts_fts()` / `search_blogs_fts()` RPC
+- 검색 API: FTS 우선 → ILIKE 폴백
+- ⚠️ Supabase에서 SQL 실행 필요
+
+### expire-listings 크론 안정화
+- RPC 실패 시 직접 update 폴백
 
 *작성: Claude Opus 4.6 | 2026-03-23*

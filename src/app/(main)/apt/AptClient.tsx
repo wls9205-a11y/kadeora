@@ -93,6 +93,17 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [redevStage, setRedevStage] = useState('전체');
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [tradeChartRegion, setTradeChartRegion] = useState('');
+  const [premiumListings, setPremiumListings] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/consultant/listing').then(r => r.json()).then(d => {
+      const listings = d.listings || [];
+      setPremiumListings(listings);
+      listings.forEach((pl: any) => {
+        fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: pl.id, type: 'impression' }) }).catch(() => {});
+      });
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -742,15 +753,20 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const wlKey = isUnsold ? `unsold:${o.link_id}` : `sub:${o.link_id}`;
               const isWatched = watchlist.has(wlKey);
               const accentColor = isUnsold ? '#F87171' : '#60A5FA';
+              const premiumMatch = premiumListings.find((pl: any) => String(pl.listing_id) === String(o.link_id) && pl.listing_type === (isUnsold ? 'unsold' : 'subscription'));
+              const isPremium = !!premiumMatch;
 
               return (
                 <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{
-                  background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8,
-                  borderLeft: `4px solid ${accentColor}`, cursor: 'pointer',
+                  background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03))' : 'var(--bg-surface)',
+                  border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8,
+                  borderLeft: `4px solid ${isPremium ? '#FBBF24' : accentColor}`, cursor: 'pointer',
+                  boxShadow: isPremium ? '0 0 12px rgba(251,191,36,0.08)' : undefined,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                        {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FBBF24,#F59E0B)', color: '#1a1a1a', marginRight: 4 }}>PREMIUM</span>}
                         {isNew(o, 'ongoing') && <NewBadge />}
                         <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'rgba(248,113,113,0.12)' : 'rgba(96,165,250,0.12)', color: isUnsold ? '#f87171' : '#60a5fa', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
                           {isUnsold ? '미분양' : '분양중'}
@@ -806,6 +822,22 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                         const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
                         return diff > 0 ? <div style={{ marginTop: 4, fontSize: '10px', color: '#34D399', fontWeight: 600 }}>📊 인근 시세 대비 약 {diff}% 저렴</div> : null;
                       })()}
+                      {/* 프리미엄 상담사 CTA */}
+                      {isPremium && premiumMatch?.consultant && (
+                        <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 6, padding: '6px 10px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 12, lineHeight: 1 }}>👔</span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#FBBF24' }}>
+                              {premiumMatch.consultant.is_verified && <span style={{ marginRight: 3 }}>✓</span>}
+                              {premiumMatch.consultant.company || '분양 상담사'} · {premiumMatch.consultant.name}
+                            </div>
+                            {premiumMatch.description && <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{premiumMatch.description}</div>}
+                          </div>
+                          {(premiumMatch.cta_phone || premiumMatch.consultant.phone) && (
+                            <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#FBBF24', padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(isUnsold ? 'unsold' : 'sub', String(o.link_id)); }} style={{
                       fontSize: 'var(--fs-lg)', background: isWatched ? 'rgba(251,191,36,0.15)' : 'transparent',
