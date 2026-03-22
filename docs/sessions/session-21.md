@@ -253,3 +253,9 @@
 ### DB 직접 수정
 - 서울 재개발 104건: stage '기타' → '정비구역지정'
 - consultant_premium 마이그레이션: 이미 실행됨 확인
+
+### DB 추가 작업 (Supabase 직접)
+- 검색 인덱스 추가: unsold_apts, redevelopment_projects, blog_posts, apt_transactions (GIN trgm)
+- 필터 인덱스 추가: unsold (active+region), redev (active+stage)
+- 크론 상태 전수 확인: 전체 정상, aggregate-trade-stats 간헐적 실패 → 현재 수정됨
+- consultant_premium 테이블: 이미 존재 확인
