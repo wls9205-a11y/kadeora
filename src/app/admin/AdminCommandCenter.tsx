@@ -9,15 +9,25 @@ interface RefreshState { running: boolean; current: string; done: number; total:
 
 /* ─────────────────────── Constants ─────────────────────── */
 const CRON_MAP: Record<string, { display: string; group: string }> = {
+  // ─── 시스템 ───
   'health-check':          { display: '헬스체크',         group: '시스템' },
   'daily-stats':           { display: '일일 통계',        group: '시스템' },
-  'seed-posts':            { display: '시드 게시글',      group: '콘텐츠' },
-  'seed-comments':         { display: '시드 댓글',        group: '콘텐츠' },
-  'seed-chat':             { display: '시드 채팅',        group: '콘텐츠' },
+  'daily-reset':           { display: 'API 리셋/로그정리', group: '시스템' },
+  'auto-grade':            { display: '등급 자동 갱신',    group: '시스템' },
+  'expire-listings':       { display: '리스팅 만료 처리',  group: '시스템' },
+  'cleanup':               { display: '데이터 정리',      group: '시스템' },
+  'cleanup-pageviews':     { display: 'PV 정리 (주간)',   group: '시스템' },
+  'invite-reward':         { display: '초대 보상 (미사용)', group: '시스템' },
+  // ─── 주식 ───
   'stock-price':           { display: '주식 시세',        group: '주식' },
+  'stock-refresh':         { display: '주식 실시간',      group: '주식' },
+  'stock-crawl':           { display: '주식 종가 수집',    group: '주식' },
   'stock-theme-daily':     { display: '테마 갱신',        group: '주식' },
   'stock-daily-briefing':  { display: 'AI 시황',          group: '주식' },
+  'stock-news-crawl':      { display: '주식 뉴스 생성',   group: '주식' },
+  'stock-flow-crawl':      { display: '수급 추정',        group: '주식' },
   'exchange-rate':         { display: '환율 기록',        group: '주식' },
+  // ─── 부동산 ───
   'crawl-apt-trade':       { display: '실거래 수집',      group: '부동산' },
   'crawl-apt-resale':      { display: '재매매 수집',      group: '부동산' },
   'crawl-apt-subscription':{ display: '청약 수집',        group: '부동산' },
@@ -28,22 +38,28 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'crawl-gyeonggi-redev':  { display: '경기 재개발',      group: '부동산' },
   'crawl-nationwide-redev': { display: '전국 재개발',     group: '부동산' },
   'aggregate-trade-stats': { display: '거래 집계',        group: '부동산' },
+  'apt-ai-summary':        { display: 'AI 한줄 분석',     group: '부동산' },
+  'push-apt-deadline':     { display: '청약 마감 알림',    group: '부동산' },
+  'invest-calendar-refresh': { display: '투자 캘린더',    group: '부동산' },
+  // ─── 콘텐츠 ───
+  'seed-posts':            { display: '시드 게시글',      group: '콘텐츠' },
+  'seed-comments':         { display: '시드 댓글',        group: '콘텐츠' },
+  'seed-chat':             { display: '시드 채팅',        group: '콘텐츠' },
+  'push-daily-reminder':   { display: '매일 리마인더',    group: '콘텐츠' },
+  // ─── 블로그 ───
   'blog-daily':            { display: '블로그 자동발행',   group: '블로그' },
+  'blog-afternoon':        { display: '오후 블로그',      group: '블로그' },
   'blog-publish-queue':    { display: '발행 큐 처리',     group: '블로그' },
   'blog-rewrite':          { display: 'AI 리라이팅',      group: '블로그' },
   'blog-weekly-market':    { display: '주간 시장 리뷰',   group: '블로그' },
   'blog-monthly-market':   { display: '월간 시장 리뷰',   group: '블로그' },
+  'blog-weekly':           { display: '주간 블로그 (구형)', group: '블로그' },
+  'blog-monthly':          { display: '월간 블로그 (구형)', group: '블로그' },
   'blog-apt-new':          { display: '신규 분양 블로그',  group: '블로그' },
   'blog-apt-landmark':     { display: '랜드마크 블로그',   group: '블로그' },
   'blog-redevelopment':    { display: '재개발 블로그',    group: '블로그' },
   'blog-seed-guide':       { display: '가이드 블로그',    group: '블로그' },
   'blog-monthly-theme':    { display: '월별 테마 블로그',  group: '블로그' },
-  'auto-grade':            { display: '등급 자동 갱신',    group: '시스템' },
-  'apt-ai-summary':        { display: 'AI 한줄 분석',     group: '부동산' },
-  'expire-listings':       { display: '리스팅 만료 처리',  group: '시스템' },
-  'stock-refresh':         { display: '주식 실시간',      group: '주식' },
-  'push-apt-deadline':     { display: '청약 마감 알림',    group: '부동산' },
-  'cleanup':               { display: '데이터 정리',      group: '시스템' },
 };
 
 const QUICK_ACTIONS = [
