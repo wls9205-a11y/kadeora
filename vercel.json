@@ -168,6 +168,14 @@
     {
       "path": "/api/cron/seed-comments",
       "schedule": "30 */4 * * *"
+    },
+    {
+      "path": "/api/cron/crawl-apt-subscription",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/crawl-nationwide-redev",
+      "schedule": "0 7 * * 1"
     }
   ]
 }
