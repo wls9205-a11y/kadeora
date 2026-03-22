@@ -108,6 +108,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
   const [rewriteRunning, setRewriteRunning] = useState(false);
   const [rewriteLog, setRewriteLog] = useState<string[]>([]);
   const [expandedPanel, setExpandedPanel] = useState<string | null>(null);
+  const [qualityStats, setQualityStats] = useState<{ redevInactive: number; unsoldInactive: number; subWithConstructor: number; aiSumSub: number; aiSumRedev: number; aiSumUnsold: number }>({ redevInactive: 0, unsoldInactive: 0, subWithConstructor: 0, aiSumSub: 0, aiSumRedev: 0, aiSumUnsold: 0 });
   const [noticeText, setNoticeText] = useState('');
   const [noticeSaving, setNoticeSaving] = useState(false);
 
@@ -200,6 +201,14 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
       setRewriteStats({ total: rewriteTotalR.count ?? 0, done: rewriteDoneR.count ?? 0 });
       setUsers(usersListRes.data || []);
       setReports(reportsRes.data || []);
+      setQualityStats({
+        redevInactive: redevInactiveR?.count || 0,
+        unsoldInactive: unsoldInactiveR?.count || 0,
+        subWithConstructor: subWithConstructorR?.count || 0,
+        aiSumSub: aiSumSubR?.count || 0,
+        aiSumRedev: aiSumRedevR?.count || 0,
+        aiSumUnsold: aiSumUnsoldR?.count || 0,
+      });
       setLastRefresh(new Date());
     } catch (e) { console.error('Admin load error', e); }
     setLoading(false);
@@ -478,9 +487,9 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             <div style={{ fontSize: 11, fontWeight: 700, color: '#60A5FA', marginBottom: 10, letterSpacing: 0.5 }}>📊 데이터 품질 현황</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, fontSize: 11 }}>
               {[
-                { icon: '🔨', label: '재개발(비활성)', value: (redevInactiveR?.count || 0), color: '#F87171' },
-                { icon: '📉', label: '미분양(비활성)', value: (unsoldInactiveR?.count || 0), color: '#F87171' },
-                { icon: '🏗️', label: '시공사 입력', value: (subWithConstructorR?.count || 0), color: '#34D399' },
+                { icon: '🔨', label: '재개발(비활성)', value: qualityStats.redevInactive, color: '#F87171' },
+                { icon: '📉', label: '미분양(비활성)', value: qualityStats.unsoldInactive, color: '#F87171' },
+                { icon: '🏗️', label: '시공사 입력', value: qualityStats.subWithConstructor, color: '#34D399' },
               ].map(item => (
                 <div key={item.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1E305040' }}>
                   <div style={{ fontSize: 14 }}>{item.icon}</div>
@@ -499,9 +508,9 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             <div style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', marginBottom: 10, letterSpacing: 0.5 }}>🤖 AI 한줄 분석 현황</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, fontSize: 11 }}>
               {[
-                { label: '청약', done: aiSumSubR?.count || 0, total: aptSubR?.count || 0, color: '#60A5FA' },
-                { label: '재개발', done: aiSumRedevR?.count || 0, total: redevR?.count || 0, color: '#34D399' },
-                { label: '미분양', done: aiSumUnsoldR?.count || 0, total: unsoldR?.count || 0, color: '#FBBF24' },
+                { label: '청약', done: qualityStats.aiSumSub, total: dataCounts.find(d => d.label === '청약')?.value || 0, color: '#60A5FA' },
+                { label: '재개발', done: qualityStats.aiSumRedev, total: dataCounts.find(d => d.label === '재개발(활성)')?.value || 0, color: '#34D399' },
+                { label: '미분양', done: qualityStats.aiSumUnsold, total: dataCounts.find(d => d.label === '미분양(활성)')?.value || 0, color: '#FBBF24' },
               ].map(item => {
                 const rate = item.total > 0 ? Math.round((item.done / item.total) * 100) : 0;
                 return (
