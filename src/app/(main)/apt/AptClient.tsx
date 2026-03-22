@@ -69,6 +69,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
   const [ongoingSearch, setOngoingSearch] = useState('');
   const [ongoingStatus, setOngoingStatus] = useState('전체');
+  const [selectedOngoing, setSelectedOngoing] = useState<any | null>(null);
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
   const [redevPage, setRedevPage] = useState(1);
@@ -424,61 +425,183 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         if (!ongoingApts.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏢 분양중 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>청약 마감 후 입주 전 현장 및 미분양 현장이 표시됩니다</span></div>;
 
         const regs = ['전체', ...Array.from(new Set(ongoingApts.map((o: any) => o.region_nm || '기타'))).sort()];
-        // 검색 + 지역 + 상태 필터 적용
         let filtered = ongoingRegion === '전체' ? ongoingApts : ongoingApts.filter((o: any) => (o.region_nm || '기타') === ongoingRegion);
         if (ongoingSearch.trim()) {
           const q = ongoingSearch.trim().toLowerCase();
           filtered = filtered.filter((o: any) => (o.house_nm || '').toLowerCase().includes(q) || (o.address || '').toLowerCase().includes(q) || (o.region_nm || '').toLowerCase().includes(q) || (o.constructor_nm || '').toLowerCase().includes(q));
         }
-        if (ongoingStatus !== '전체') {
-          filtered = filtered.filter((o: any) => ongoingStatus === '미분양' ? o.source === 'unsold' : o.source === 'subscription');
-        }
+        if (ongoingStatus !== '전체') filtered = filtered.filter((o: any) => ongoingStatus === '미분양' ? o.source === 'unsold' : o.source === 'subscription');
         const totalSites = filtered.length;
         const totalUnsoldUnits = filtered.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0);
-        const fromSub = filtered.filter((o: any) => o.source === 'subscription').length;
-        const fromUnsold = filtered.filter((o: any) => o.source === 'unsold').length;
+        const allSubCount = ongoingApts.filter((o: any) => o.source === 'subscription').length;
+        const allUnsoldCount = ongoingApts.filter((o: any) => o.source === 'unsold').length;
         const PER_PAGE = 20;
-        // 정렬 적용
         const sorted = [...filtered].sort((a, b) => {
           if (ongoingSort === 'unsold') return (b.unsold_count || 0) - (a.unsold_count || 0);
           if (ongoingSort === 'price') return (b.sale_price_max || 0) - (a.sale_price_max || 0);
           if (ongoingSort === 'competition') return (b.competition_rate || 0) - (a.competition_rate || 0);
-          return (b.total_supply || 0) - (a.total_supply || 0); // default: supply
+          return (b.total_supply || 0) - (a.total_supply || 0);
         });
         const totalPages = Math.ceil(sorted.length / PER_PAGE);
         const paged = sorted.slice((ongoingPage - 1) * PER_PAGE, ongoingPage * PER_PAGE);
 
-        // 지역별 현장 수 집계
+        // 지역별 집계
         const regionCounts = regs.filter(r => r !== '전체').map(r => {
           const items = ongoingApts.filter((o: any) => (o.region_nm || '기타') === r);
-          return { name: r, count: items.length, unsoldUnits: items.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0) };
+          const subC = items.filter((o: any) => o.source === 'subscription').length;
+          const unsC = items.filter((o: any) => o.source === 'unsold').length;
+          return { name: r, count: items.length, subCount: subC, unsoldCount: unsC, unsoldUnits: items.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0) };
         }).sort((a, b) => b.count - a.count);
+        const maxRegionCount = Math.max(...regionCounts.map(r => r.count), 1);
+
+        // ① 입주 임박 현장
+        const todayD = new Date();
+        const urgentMove = ongoingApts.filter((o: any) => {
+          if (!o.mvn_prearnge_ym) return false;
+          const mvn = String(o.mvn_prearnge_ym).replace(/[^0-9]/g, '').slice(0, 6);
+          if (mvn.length < 6) return false;
+          const mvnDate = new Date(parseInt(mvn.slice(0, 4)), parseInt(mvn.slice(4, 6)) - 1, 1);
+          const diffMs = mvnDate.getTime() - todayD.getTime();
+          const diffDays = Math.ceil(diffMs / 86400000);
+          return diffDays >= 0 && diffDays <= 90;
+        }).map((o: any) => {
+          const mvn = String(o.mvn_prearnge_ym).replace(/[^0-9]/g, '').slice(0, 6);
+          const mvnDate = new Date(parseInt(mvn.slice(0, 4)), parseInt(mvn.slice(4, 6)) - 1, 1);
+          return { ...o, daysToMove: Math.ceil((mvnDate.getTime() - todayD.getTime()) / 86400000) };
+        }).sort((a: any, b: any) => a.daysToMove - b.daysToMove);
+
+        // ③ 단계별 파이프라인
+        const todayPipe = new Date().toISOString().slice(0, 10);
+        const pipeStages = ['청약마감', '당첨발표', '계약중', '공사중', '입주예정'];
+        const pipeCounts: Record<string, number> = {};
+        pipeStages.forEach(s => { pipeCounts[s] = 0; });
+        ongoingApts.forEach((o: any) => {
+          if (o.source === 'unsold') { pipeCounts['공사중']++; return; }
+          const dates = [o.rcept_endde, o.przwner_presnatn_de, o.cntrct_cncls_endde, o.mvn_prearnge_ym].map(d => d ? String(d).slice(0, 10) : '');
+          if (dates[3] && dates[3] <= todayPipe) pipeCounts['입주예정']++;
+          else if (dates[2] && dates[2] <= todayPipe) pipeCounts['공사중']++;
+          else if (dates[1] && dates[1] <= todayPipe) pipeCounts['계약중']++;
+          else if (dates[0] && dates[0] <= todayPipe) pipeCounts['당첨발표']++;
+          else pipeCounts['청약마감']++;
+        });
+        const pipeTotal = ongoingApts.length || 1;
+        const pipeColors = ['#6b7280', '#3b82f6', '#eab308', '#f97316', '#22c55e'];
+
+        // ④ 분양가 TOP10
+        const priceTop = [...ongoingApts].filter(o => o.sale_price_max && o.sale_price_max > 0).sort((a, b) => (b.sale_price_max || 0) - (a.sale_price_max || 0)).slice(0, 10);
+        const maxPrice = priceTop[0]?.sale_price_max || 1;
+
+        // 수도권/지방 집계
+        const capitalRegions = ['서울', '경기', '인천'];
+        const capitalCount = ongoingApts.filter((o: any) => capitalRegions.some(c => (o.region_nm || '').includes(c))).length;
+        const localCount = ongoingApts.length - capitalCount;
 
         return (
           <div>
-            {/* 종합 현황 */}
+            {/* ① 입주 임박 배너 */}
+            {urgentMove.length > 0 && (
+              <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1))', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#22c55e', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ animation: 'pulse 2s infinite' }}>🏠</span> 입주 임박 ({urgentMove.length}건)
+                </div>
+                {urgentMove.slice(0, 5).map((o: any) => (
+                  <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(34,197,94,0.1)', cursor: 'pointer' }}>
+                    <div>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{o.house_nm}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{o.region_nm}</span>
+                    </div>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: o.daysToMove <= 30 ? '#dc2626' : '#22c55e', flexShrink: 0 }}>
+                      {o.daysToMove <= 30 ? `D-${o.daysToMove}` : `${Math.ceil(o.daysToMove / 30)}개월 후`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 종합 현황 + 수도권/지방 */}
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 전국 분양중 현황</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
-                <div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전체</div>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--brand)' }}>{ongoingApts.length}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>분양중</div>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#60a5fa' }}>{ongoingApts.filter((o: any) => o.source === 'subscription').length}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양</div>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#ef4444' }}>{ongoingApts.filter((o: any) => o.source === 'unsold').length}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>잔여세대</div>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#f59e0b' }}>{ongoingApts.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0).toLocaleString()}</div>
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
+                {[
+                  { label: '전체', value: ongoingApts.length, color: 'var(--brand)' },
+                  { label: '분양중', value: allSubCount, color: '#60a5fa' },
+                  { label: '미분양', value: allUnsoldCount, color: '#ef4444' },
+                  { label: '수도권', value: capitalCount, color: 'var(--text-primary)' },
+                  { label: '지방', value: localCount, color: 'var(--text-primary)' },
+                ].map(s => (
+                  <div key={s.label} style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: s.color }}>{s.value}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
+                  </div>
+                ))}
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준</div>
             </div>
+
+            {/* ③ 단계별 파이프라인 */}
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 분양 진행 단계</div>
+              <div style={{ display: 'flex', gap: 3, alignItems: 'stretch' }}>
+                {pipeStages.map((stage, i) => {
+                  const count = pipeCounts[stage] || 0;
+                  const pct = Math.round((count / pipeTotal) * 100);
+                  return (
+                    <div key={stage} style={{ flex: Math.max(pct, 10), textAlign: 'center', padding: '8px 2px', borderRadius: 6, background: `${pipeColors[i]}22`, border: `1px solid ${pipeColors[i]}44`, position: 'relative', minWidth: 48 }}>
+                      <div style={{ fontSize: '9px', fontWeight: 600, color: pipeColors[i] }}>{stage}</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: pipeColors[i], margin: '2px 0' }}>{count}</div>
+                      <div style={{ fontSize: '8px', color: pipeColors[i], opacity: 0.7 }}>{pct}%</div>
+                      {i < pipeStages.length - 1 && <div style={{ position: 'absolute', right: -4, top: '50%', transform: 'translateY(-50%)', fontSize: '8px', color: 'var(--text-tertiary)' }}>→</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ④ 분양가 TOP10 바 차트 */}
+            {priceTop.length > 0 && (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>💰 분양가 TOP {Math.min(priceTop.length, 10)}</div>
+                {priceTop.map((d: any, i: number) => {
+                  const pct = ((d.sale_price_max || 0) / maxPrice) * 100;
+                  const pAmt = (d.sale_price_max / 10000).toFixed(1);
+                  return (
+                    <div key={d.id} onClick={() => setSelectedOngoing(d)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer' }}>
+                      <div style={{ width: 14, fontSize: '10px', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', textAlign: 'right' }}>{i + 1}</div>
+                      <div style={{ width: 80, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{d.house_nm}</div>
+                      <div style={{ flex: 1, height: 20, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: `hsl(${240 - (pct / 100) * 240}, 70%, 55%)` }} />
+                      </div>
+                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{pAmt}억</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ⑤ 지역별 히트맵 바 */}
+            {regionCounts.length > 0 && (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🗺️ 지역별 분양중 현황</div>
+                {regionCounts.map((r) => {
+                  const pct = (r.count / maxRegionCount) * 100;
+                  const subPct = r.count > 0 ? (r.subCount / r.count) * 100 : 0;
+                  return (
+                    <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left' }}>
+                      <div style={{ width: 36, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? 'var(--brand)' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: ongoingRegion === r.name ? 700 : 400 }}>{r.name}</div>
+                      <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
+                        <div style={{ height: '100%', width: `${(pct * subPct) / 100}%`, background: '#60a5fa' }} />
+                        <div style={{ height: '100%', width: `${(pct * (100 - subPct)) / 100}%`, background: '#ef4444' }} />
+                      </div>
+                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 28, textAlign: 'right' }}>{r.count}</div>
+                    </button>
+                  );
+                })}
+                <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: '#60a5fa', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />분양중</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 3, background: '#ef4444', marginRight: 3, verticalAlign: 'middle', borderRadius: 1 }} />미분양</span>
+                </div>
+              </div>
+            )}
 
             {/* 검색바 */}
             <div style={{ position: 'relative', marginBottom: 10 }}>
@@ -488,28 +611,42 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               {ongoingSearch && <button onClick={() => setOngoingSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>✕</button>}
             </div>
 
-            {/* 지역별 TOP5 */}
-            {regionCounts.length > 0 && (
-              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 분양중 많은 지역 TOP5</div>
-                {regionCounts.slice(0, 5).map((r, i) => (
-                  <button key={r.name} onClick={() => { setOngoingRegion(r.name); setOngoingPage(1); }} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none', width: '100%', background: 'none', border: i < 4 ? undefined : 'none', borderTop: 'none', borderLeft: 'none', borderRight: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
-                    <span style={{ flex: 1, fontSize: 'var(--fs-sm)', fontWeight: 600, color: ongoingRegion === r.name ? 'var(--brand)' : 'var(--text-primary)' }}>{r.name}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{r.count}곳</span>
-                    {r.unsoldUnits > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: '#ef4444' }}>{r.unsoldUnits.toLocaleString()}호</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* 지역 필터 */}
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 8, paddingBottom: 4 }}>
-              {regs.map(r => pill(r, ongoingRegion, (v) => { setOngoingRegion(v); setOngoingPage(1); }))}
+            {/* ② 지역 그리드 현황판 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 6, marginBottom: 10 }}>
+              <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
+                padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                border: ongoingRegion === '전체' ? '2px solid var(--brand)' : '1px solid var(--border)',
+                background: ongoingRegion === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+              }}>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--brand)' }}>{ongoingApts.length}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+              </button>
+              {regionCounts.map(r => (
+                <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
+                  padding: '6px 4px', borderRadius: 10, cursor: 'pointer',
+                  border: ongoingRegion === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
+                  background: ongoingRegion === r.name ? 'var(--brand)' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                }}>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--brand)' }}>{r.count}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                  <div style={{ display: 'flex', gap: 2, fontSize: 8, color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+                    {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#60a5fa' }}>분양{r.subCount}</span>}
+                    {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#ef4444' }}>미분양{r.unsoldCount}</span>}
+                  </div>
+                  {r.count > 0 && (
+                    <div style={{ width: '100%', height: 3, background: ongoingRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 1 }}>
+                      <div style={{ height: '100%', background: '#60a5fa', width: `${(r.subCount / r.count) * 100}%` }} />
+                      <div style={{ height: '100%', background: '#ef4444', width: `${(r.unsoldCount / r.count) * 100}%` }} />
+                    </div>
+                  )}
+                </button>
+              ))}
             </div>
 
-            {/* 정렬 */}
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8, overflowX: 'auto' }}>
+            {/* 정렬 + 상태 필터 */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto' }}>
               {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
                 <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
                   padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
@@ -519,8 +656,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 }}>{l}</button>
               ))}
             </div>
-
-            {/* 상태 필터 */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
               {['전체', '분양중', '미분양'].map(s => pill(s, ongoingStatus, (v) => { setOngoingStatus(v); setOngoingPage(1); }))}
             </div>
@@ -530,97 +665,86 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               {ongoingRegion !== '전체' ? `${ongoingRegion} ` : '전체 '}{totalSites}곳{totalUnsoldUnits > 0 ? ` · 미분양 ${totalUnsoldUnits.toLocaleString()}호` : ''}
             </div>
 
-            {/* 현장 리스트 */}
+            {/* ⑥⑦ 카드 리스트 (borderLeft + 클릭 모달) */}
             {paged.map((o: any) => {
               const isUnsold = o.source === 'unsold';
               const pMin = o.sale_price_min ? Math.round(o.sale_price_min / 10000 * 10) / 10 : null;
               const pMax = o.sale_price_max ? Math.round(o.sale_price_max / 10000 * 10) / 10 : null;
               const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
               const mvnStr = o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(0, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : null;
-              const linkHref = isUnsold ? `/apt/unsold/${o.link_id}` : `/apt/${o.link_id}`;
               const wlKey = isUnsold ? `unsold:${o.link_id}` : `sub:${o.link_id}`;
               const isWatched = watchlist.has(wlKey);
+              const accentColor = isUnsold ? '#ef4444' : '#3b82f6';
 
               return (
-                <div key={o.id} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 10 }}>
+                <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8,
+                  borderLeft: `4px solid ${accentColor}`, cursor: 'pointer',
+                }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                    <a href={linkHref} style={{ flex: 1, textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                         {isNew(o, 'ongoing') && <NewBadge />}
-                        <span style={{
-                          fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 7px', borderRadius: 4,
-                          background: isUnsold ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)',
-                          color: isUnsold ? '#f87171' : '#60a5fa',
-                          border: `1px solid ${isUnsold ? 'rgba(239,68,68,0.25)' : 'rgba(59,130,246,0.25)'}`,
-                        }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)', color: isUnsold ? '#f87171' : '#60a5fa', border: `1px solid ${isUnsold ? 'rgba(239,68,68,0.25)' : 'rgba(59,130,246,0.25)'}` }}>
                           {isUnsold ? '미분양' : '분양중'}
                         </span>
-                        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
+                        {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#f59e0b' }}>🔥 {o.competition_rate}:1</span>}
+                        <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
                       </div>
-                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
-                      {o.address && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>{o.address}</div>}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 'var(--fs-xs)' }}>
-                        {o.total_supply > 0 && <span style={{ color: 'var(--text-secondary)' }}>총 {o.total_supply.toLocaleString()}세대</span>}
-                        {o.unsold_count != null && o.unsold_count > 0 && <span style={{ color: '#ef4444', fontWeight: 700 }}>미분양 {o.unsold_count.toLocaleString()}호</span>}
-                        {priceStr && <span style={{ color: 'var(--text-secondary)' }}>{priceStr}</span>}
-                        {mvnStr && <span style={{ color: 'var(--text-secondary)' }}>입주 {mvnStr}</span>}
-                        {o.constructor_nm && <span style={{ color: 'var(--text-tertiary)' }}>{o.constructor_nm}</span>}
-                        {o.competition_rate && <span style={{ color: '#f59e0b', fontWeight: 700 }}>경쟁률 {o.competition_rate}:1</span>}
+                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
+                        {o.address ? o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ') : ''}
+                        {o.total_supply > 0 ? ` · ${o.total_supply.toLocaleString()}세대` : ''}
+                        {priceStr ? ` · ${priceStr}` : ''}
                       </div>
-                      {/* 분양 진행 단계 프로그레스바 */}
+                      {/* 미분양률 바 */}
+                      {isUnsold && o.unsold_count > 0 && o.total_supply > 0 && (() => {
+                        const rate = Math.round((o.unsold_count / o.total_supply) * 100);
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                            <div style={{ flex: 1, height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
+                              <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#ef4444' : rate > 40 ? '#f97316' : '#eab308' }} />
+                            </div>
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: '#ef4444' }}>미분양 {o.unsold_count.toLocaleString()}호 ({rate}%)</span>
+                          </div>
+                        );
+                      })()}
+                      {/* 프로그레스바 */}
                       {!isUnsold && (() => {
                         const stages = [
-                          { key: 'rcept', label: '접수', date: o.rcept_bgnde },
-                          { key: 'end', label: '마감', date: o.rcept_endde },
-                          { key: 'winner', label: '당첨', date: o.przwner_presnatn_de },
-                          { key: 'contract', label: '계약', date: o.cntrct_cncls_bgnde },
-                          { key: 'move', label: '입주', date: o.mvn_prearnge_ym },
+                          { key: 'r', label: '접수', date: o.rcept_bgnde },
+                          { key: 'e', label: '마감', date: o.rcept_endde },
+                          { key: 'w', label: '당첨', date: o.przwner_presnatn_de },
+                          { key: 'c', label: '계약', date: o.cntrct_cncls_bgnde },
+                          { key: 'm', label: '입주', date: o.mvn_prearnge_ym },
                         ];
-                        const todayStr = new Date().toISOString().slice(0, 10);
-                        let currentIdx = 0;
-                        stages.forEach((s, i) => { if (s.date && String(s.date).slice(0, 10) <= todayStr) currentIdx = i + 1; });
-                        if (currentIdx > stages.length - 1) currentIdx = stages.length - 1;
-                        const pct = Math.min(100, Math.round((currentIdx / (stages.length - 1)) * 100));
+                        const td = new Date().toISOString().slice(0, 10);
+                        let ci = 0;
+                        stages.forEach((s, i) => { if (s.date && String(s.date).slice(0, 10) <= td) ci = i + 1; });
+                        ci = Math.min(ci, stages.length - 1);
+                        const pc = Math.min(100, Math.round((ci / (stages.length - 1)) * 100));
                         return (
-                          <div style={{ marginTop: 8 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                              {stages.map((s, i) => (
-                                <span key={s.key} style={{ fontSize: '9px', color: i <= currentIdx ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: i === currentIdx ? 800 : 400 }}>{s.label}</span>
-                              ))}
+                          <div style={{ marginTop: 2 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                              {stages.map((s, i) => <span key={s.key} style={{ fontSize: '8px', color: i <= ci ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: i === ci ? 800 : 400 }}>{s.label}</span>)}
                             </div>
-                            <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
-                              <div style={{ height: '100%', borderRadius: 2, width: `${pct}%`, background: 'var(--brand)', transition: 'width 0.3s' }} />
+                            <div style={{ height: 3, background: 'var(--bg-hover)', borderRadius: 2 }}>
+                              <div style={{ height: '100%', borderRadius: 2, width: `${pc}%`, background: 'var(--brand)' }} />
                             </div>
                           </div>
                         );
                       })()}
                       {/* 인근 시세 비교 */}
                       {o.nearby_avg_price && o.sale_price_min && (() => {
-                        const avg = o.nearby_avg_price; // 만원 단위
-                        const saleMin = o.sale_price_min; // 만원 단위
-                        const diff = Math.round(((avg - saleMin) / avg) * 100);
-                        if (diff <= 0) return null;
-                        return (
-                          <div style={{ marginTop: 6, fontSize: 'var(--fs-xs)', color: '#10b981', fontWeight: 600 }}>
-                            📊 인근 시세 대비 약 {diff}% 저렴 <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(지역 평균 {(avg / 10000).toFixed(1)}억)</span>
-                          </div>
-                        );
+                        const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
+                        return diff > 0 ? <div style={{ marginTop: 4, fontSize: '10px', color: '#10b981', fontWeight: 600 }}>📊 인근 시세 대비 약 {diff}% 저렴</div> : null;
                       })()}
-                    </a>
+                    </div>
                     <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(isUnsold ? 'unsold' : 'sub', String(o.link_id)); }} style={{
-                      fontSize: 'var(--fs-xl)', background: isWatched ? 'rgba(234,179,8,0.15)' : 'transparent',
+                      fontSize: 'var(--fs-lg)', background: isWatched ? 'rgba(234,179,8,0.15)' : 'transparent',
                       border: isWatched ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)',
-                      borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1,
-                    }}>
-                      {isWatched ? '⭐' : '☆'}
-                    </button>
-                  </div>
-                  {/* 하단 액션 */}
-                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                    {o.pblanc_url && <a href={o.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(255,91,54,0.2)', background: 'rgba(255,91,54,0.06)' }}>공고 →</a>}
-                    {o.contact_tel && <a href={`tel:${o.contact_tel}`} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-hover)' }}>📞 문의</a>}
-                    <button onClick={() => setCommentTarget({ houseKey: isUnsold ? `unsold_${o.link_id}` : `sub_${o.link_id}`, houseNm: o.house_nm || '현장', houseType: isUnsold ? 'unsold' : 'sub' })}
-                      style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-hover)', cursor: 'pointer' }}>💬 한줄평</button>
+                      borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
+                    }}>{isWatched ? '⭐' : '☆'}</button>
                   </div>
                 </div>
               );
@@ -629,7 +753,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {/* 페이지네이션 */}
             {totalPages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginTop: 12 }}>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(p => (
                   <button key={p} onClick={() => { setOngoingPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
                     padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                     border: `1px solid ${ongoingPage === p ? 'var(--brand)' : 'var(--border)'}`,
@@ -643,6 +767,65 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
               청약홈·국토교통부 미분양 통계 기준 · 청약 마감 후 입주 전 현장 + 미분양 현장 통합 · 정확한 분양 정보는 각 현장에 직접 확인하세요
             </p>
+
+            {/* ⑦ 모달 상세 */}
+            {selectedOngoing && (() => {
+              const o = selectedOngoing;
+              const isU = o.source === 'unsold';
+              const pMin = o.sale_price_min ? (o.sale_price_min / 10000).toFixed(1) : null;
+              const pMax = o.sale_price_max ? (o.sale_price_max / 10000).toFixed(1) : null;
+              const mvn = o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(0, 4)}년 ${parseInt(String(o.mvn_prearnge_ym).slice(4, 6))}월` : null;
+              const linkH = isU ? `/apt/unsold/${o.link_id}` : `/apt/${o.link_id}`;
+              return (
+                <>
+                  <div onClick={() => setSelectedOngoing(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }} />
+                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', maxHeight: '75vh', overflowY: 'auto' }}>
+                    <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 12px' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)', color: isU ? '#f87171' : '#60a5fa' }}>{isU ? '미분양' : '분양중'}</span>
+                      <button onClick={() => setSelectedOngoing(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>×</button>
+                    </div>
+                    <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{o.house_nm}</h2>
+                    <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+                      {[
+                        ['총 세대수', o.total_supply > 0 ? `${o.total_supply.toLocaleString()}세대` : '-'],
+                        ['미분양', o.unsold_count ? `${o.unsold_count.toLocaleString()}호` : '-'],
+                        ['분양가', pMin ? `${pMin}${pMax && pMax !== pMin ? `~${pMax}` : ''}억` : '-'],
+                        ['입주예정', mvn || '-'],
+                        ['시공사', o.constructor_nm || '-'],
+                        ['경쟁률', o.competition_rate ? `${o.competition_rate}:1` : '-'],
+                      ].map(([label, value]) => (
+                        <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                          <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{label}</span>
+                          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {o.nearby_avg_price && o.sale_price_min && (() => {
+                      const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
+                      return diff > 0 ? (
+                        <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
+                          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#10b981' }}>📊 인근 시세 대비 약 {diff}% 저렴</div>
+                          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>지역 평균 실거래가 {(o.nearby_avg_price / 10000).toFixed(1)}억 기준</div>
+                        </div>
+                      ) : null;
+                    })()}
+
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                      <a href={linkH} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>자세히 보기 →</a>
+                      {o.pblanc_url && <a href={o.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>공고 보기</a>}
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => { setSelectedOngoing(null); toggleWatchlist(isU ? 'unsold' : 'sub', String(o.link_id)); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>⭐ 관심단지</button>
+                      <button onClick={() => { setSelectedOngoing(null); setCommentTarget({ houseKey: isU ? `unsold_${o.link_id}` : `sub_${o.link_id}`, houseNm: o.house_nm || '현장', houseType: isU ? 'unsold' : 'sub' }); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>💬 한줄평</button>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         );
       })()}
