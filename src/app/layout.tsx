@@ -68,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" className="dark" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 RSS" href="/feed.xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png?v=2" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=2" />
         <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png?v=2" />
