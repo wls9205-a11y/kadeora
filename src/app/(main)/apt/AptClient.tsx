@@ -75,6 +75,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
   const [selectedTrade, setSelectedTrade] = useState<any | null>(null);
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
+  const [calOffset, setCalOffset] = useState(0); // 0=이번달, -1=지난달, 1=다음달
   const [redevStage, setRedevStage] = useState('전체');
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [tradeChartRegion, setTradeChartRegion] = useState('');
@@ -251,11 +252,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
           {/* 청약 캘린더 */}
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📅 이번 달 청약 일정</div>
             {(() => {
               const now = new Date();
-              const year = now.getFullYear();
-              const month = now.getMonth();
+              const targetDate = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
+              const year = targetDate.getFullYear();
+              const month = targetDate.getMonth();
+              const monthLabel = `${year}년 ${month + 1}월`;
               const firstDay = new Date(year, month, 1).getDay();
               const daysInMonth = new Date(year, month + 1, 0).getDate();
               const cells: { day: number; apts: any[] }[] = [];
@@ -265,6 +267,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 cells.push({ day: d, apts: dayApts });
               }
               return (
+                <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <button onClick={() => { setCalOffset(p => p - 1); setSelectedCalDate(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-lg)', color: 'var(--text-secondary)', padding: '4px 8px' }}>‹</button>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📅 {monthLabel}</div>
+                  <button onClick={() => { setCalOffset(p => p + 1); setSelectedCalDate(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-lg)', color: 'var(--text-secondary)', padding: '4px 8px' }}>›</button>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, fontSize: 'var(--fs-xs)' }}>
                   {['일', '월', '화', '수', '목', '금', '토'].map(d => (
                     <div key={d} style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontWeight: 700, padding: 4 }}>{d}</div>
@@ -274,13 +282,14 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <div key={c.day} onClick={() => c.apts.length > 0 && setSelectedCalDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(c.day).padStart(2, '0')}`)} style={{
                       textAlign: 'center', padding: '4px 2px', borderRadius: 6, cursor: c.apts.length > 0 ? 'pointer' : 'default',
                       background: selectedCalDate?.endsWith(`-${String(c.day).padStart(2, '0')}`) ? 'rgba(59,130,246,0.25)' : c.apts.length > 0 ? 'rgba(59,130,246,0.1)' : 'transparent',
-                      border: c.day === now.getDate() ? '2px solid var(--brand)' : '1px solid transparent',
+                      border: calOffset === 0 && c.day === new Date().getDate() ? '2px solid var(--brand)' : '1px solid transparent',
                     }}>
                       <div style={{ color: c.apts.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: c.apts.length > 0 ? 700 : 400 }}>{c.day}</div>
                       {c.apts.length > 0 && <div style={{ fontSize: 8, color: '#3B82F6', fontWeight: 700 }}>{c.apts.length}건</div>}
                     </div>
                   ))}
                 </div>
+                </>
               );
             })()}
             {selectedCalDate && (() => {
