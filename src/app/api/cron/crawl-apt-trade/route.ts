@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 
-export const maxDuration = 120; // 2분 (시군구 200개+ 처리)
+export const maxDuration = 300; // 5분 (전국 200개 시군구 × 올해 전체 월)
 
 const LAWD_CODES: Record<string, string> = {
   '서울 종로구':'11110','서울 중구':'11140','서울 용산구':'11170','서울 성동구':'11200',
@@ -121,10 +121,13 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('crawl-apt-trade', async () => {
     const now = new Date();
-    const months = [
-      `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`,
-      `${now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()}${String(now.getMonth() === 0 ? 12 : now.getMonth()).padStart(2, '0')}`,
-    ];
+    // 올해 1월부터 현재 월까지 전부 수집
+    const months: string[] = [];
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    for (let m = 1; m <= currentMonth; m++) {
+      months.push(`${currentYear}${String(m).padStart(2, '0')}`);
+    }
 
     const entries = Object.entries(LAWD_CODES);
     let totalInserted = 0;

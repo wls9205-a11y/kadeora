@@ -974,7 +974,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             )}
 
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-              📊 데이터 출처: 국토교통부 실거래가 공개시스템 (rt.molit.go.kr) · 공공데이터포털 API (apis.data.go.kr) · 전국 약 200개 시군구 · 평일 매일 08시 자동 수집 · 최근 2개월 거래 기준 · 실제 거래가와 차이가 있을 수 있습니다
+              📊 데이터 출처: 국토교통부 실거래가 공개시스템 (rt.molit.go.kr) · 공공데이터포털 API (apis.data.go.kr) · 전국 약 200개 시군구 · 평일 매일 08시 자동 수집 · 2026년 1월~현재 거래 기준 · 실제 거래가와 차이가 있을 수 있습니다
             </p>
           </div>
         );

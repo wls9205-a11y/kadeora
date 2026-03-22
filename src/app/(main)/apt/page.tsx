@@ -48,7 +48,7 @@ export default async function AptPage() {
       sb.from('apt_alerts').select('house_manage_no'),
       sb.from('redevelopment_projects').select('*').eq('is_active', true).order('total_households', { ascending: false }),
       sb.from('apt_cache').select('data').eq('cache_type', 'unsold_summary').maybeSingle(),
-      sb.from('apt_transactions').select('*').order('deal_date', { ascending: false }).limit(200),
+      sb.from('apt_transactions').select('*').gte('deal_date', `${new Date().getFullYear()}-01-01`).order('deal_date', { ascending: false }).limit(2000),
       sb.from('unsold_monthly_stats').select('*').order('stat_month', { ascending: true }),
       sb.from('apt_trade_monthly_stats').select('*').order('stat_month', { ascending: true }),
     ]);
