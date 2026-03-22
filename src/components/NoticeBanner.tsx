@@ -87,7 +87,7 @@ export default function NoticeBanner() {
     impressionLogged.current.add(notice.id);
 
     // fire-and-forget
-    createSupabaseBrowser().rpc('increment_banner_impression', { p_notice_id: notice.id }).catch(() => {});
+    createSupabaseBrowser().rpc('increment_banner_impression', { p_notice_id: notice.id }).then(() => {}).catch(() => {});
   }, [currentIdx, notices]);
 
   if (notices.length === 0) return null;
@@ -104,7 +104,7 @@ export default function NoticeBanner() {
 
   const handleClick = () => {
     // 클릭 카운트 추적
-    createSupabaseBrowser().rpc('increment_banner_click', { p_notice_id: notice.id }).catch(() => {});
+    createSupabaseBrowser().rpc('increment_banner_click', { p_notice_id: notice.id }).then(() => {}).catch(() => {});
     setShowSheet(true);
   };
 
