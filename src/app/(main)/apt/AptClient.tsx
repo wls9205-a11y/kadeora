@@ -191,38 +191,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {/* ━━━ 청약 일정 탭 ━━━ */}
       {activeTab === 'sub' && (
         <div>
-          {/* 🔥 마감 임박 배너 */}
-          {(() => {
-            const today = new Date();
-            const urgent = apts.filter(a => {
-              if (!a.rcept_endde) return false;
-              const end = new Date(a.rcept_endde);
-              const diff = Math.ceil((end.getTime() - today.getTime()) / 86400000);
-              return diff >= 0 && diff <= 3 && getStatus(a) === 'open';
-            }).sort((a, b) => new Date(a.rcept_endde).getTime() - new Date(b.rcept_endde).getTime());
-            return urgent.length > 0 ? (
-              <div style={{ background: 'linear-gradient(135deg, rgba(248,113,113,0.1), rgba(251,146,60,0.1))', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#F87171', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ animation: 'pulse 2s infinite' }}>🔥</span> 마감 임박 ({urgent.length}건)
-                </div>
-                {urgent.map(a => {
-                  const diff = Math.ceil((new Date(a.rcept_endde).getTime() - today.getTime()) / 86400000);
-                  return (
-                    <Link key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(248,113,113,0.1)', textDecoration: 'none', color: 'inherit' }}>
-                      <div>
-                        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.house_nm}</span>
-                        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{a.region_nm}</span>
-                      </div>
-                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: diff === 0 ? '#F87171' : '#FB923C', flexShrink: 0 }}>
-                        {diff === 0 ? '오늘 마감!' : `D-${diff}`}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : null;
-          })()}
-
           {/* 지역별 현황판 */}
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -262,6 +230,39 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               ))}
             </div>
           </div>
+
+          {/* 🔥 마감 임박 배너 */}
+          {(() => {
+            const today = new Date();
+            const urgent = apts.filter(a => {
+              if (!a.rcept_endde) return false;
+              const end = new Date(a.rcept_endde);
+              const diff = Math.ceil((end.getTime() - today.getTime()) / 86400000);
+              return diff >= 0 && diff <= 3 && getStatus(a) === 'open';
+            }).sort((a, b) => new Date(a.rcept_endde).getTime() - new Date(b.rcept_endde).getTime());
+            return urgent.length > 0 ? (
+              <div style={{ background: 'linear-gradient(135deg, rgba(248,113,113,0.1), rgba(251,146,60,0.1))', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#F87171', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ animation: 'pulse 2s infinite' }}>🔥</span> 마감 임박 ({urgent.length}건)
+                </div>
+                {urgent.map(a => {
+                  const diff = Math.ceil((new Date(a.rcept_endde).getTime() - today.getTime()) / 86400000);
+                  return (
+                    <Link key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(248,113,113,0.1)', textDecoration: 'none', color: 'inherit' }}>
+                      <div>
+                        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.house_nm}</span>
+                        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{a.region_nm}</span>
+                      </div>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: diff === 0 ? '#F87171' : '#FB923C', flexShrink: 0 }}>
+                        {diff === 0 ? '오늘 마감!' : `D-${diff}`}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : null;
+          })()}
+
           <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
             {pill('전체', statusFilter, setStatusFilter)}
             {pill('open', statusFilter, setStatusFilter, '접수중')}
@@ -499,6 +500,46 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
         return (
           <div>
+            {/* 지역별 현황 */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {ongoingApts.length}건</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+                <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
+                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  border: ongoingRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+                  background: ongoingRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                </button>
+                {regionCounts.map(r => (
+                  <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
+                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                    border: ongoingRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+                    background: ongoingRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                  }}>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                    <div style={{ display: 'flex', gap: 2, fontSize: 8, color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+                      {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#34D399' }}>분양{r.subCount}</span>}
+                      {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#F87171' }}>미분양{r.unsoldCount}</span>}
+                    </div>
+                    {r.count > 0 && (
+                      <div style={{ width: '100%', height: 3, background: ongoingRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
+                        <div style={{ height: '100%', background: '#60a5fa', width: `${(r.subCount / r.count) * 100}%` }} />
+                        <div style={{ height: '100%', background: '#F87171', width: `${(r.unsoldCount / r.count) * 100}%` }} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* ① 입주 임박 배너 */}
             {urgentMove.length > 0 && (
               <div style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(96,165,250,0.1))', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
@@ -610,40 +651,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 style={{ width: '100%', padding: '9px 12px 9px 32px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box', fontFamily: 'inherit' }} />
               <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>🔍</span>
               {ongoingSearch && <button onClick={() => setOngoingSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>✕</button>}
-            </div>
-
-            {/* ② 지역 그리드 현황판 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 6, marginBottom: 10 }}>
-              <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
-                padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                border: ongoingRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                background: ongoingRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-              }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
-              </button>
-              {regionCounts.map(r => (
-                <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
-                  padding: '6px 4px', borderRadius: 10, cursor: 'pointer',
-                  border: ongoingRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: ongoingRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
-                  <div style={{ display: 'flex', gap: 2, fontSize: 8, color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                    {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#34D399' }}>분양{r.subCount}</span>}
-                    {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : '#F87171' }}>미분양{r.unsoldCount}</span>}
-                  </div>
-                  {r.count > 0 && (
-                    <div style={{ width: '100%', height: 3, background: ongoingRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 1 }}>
-                      <div style={{ height: '100%', background: '#60a5fa', width: `${(r.subCount / r.count) * 100}%` }} />
-                      <div style={{ height: '100%', background: '#F87171', width: `${(r.unsoldCount / r.count) * 100}%` }} />
-                    </div>
-                  )}
-                </button>
-              ))}
             </div>
 
             {/* 정렬 + 상태 필터 */}
@@ -867,6 +874,43 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
         return (
           <div>
+            {/* 지역별 현황 */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#f87171' }}>총 {total.toLocaleString()}세대</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+                <button onClick={() => setUnsoldRegion('전체')} style={{
+                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  border: unsoldRegion === '전체' ? '2px solid #f87171' : '1px solid var(--border)',
+                  background: unsoldRegion === '전체' ? '#f87171' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#f87171' }}>{total.toLocaleString()}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                  <span style={{ fontSize: 8, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
+                </button>
+                {unsoldRegionStats.map(r => (
+                  <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
+                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                    border: unsoldRegion === r.name ? '2px solid #f87171' : '1px solid var(--border)',
+                    background: unsoldRegion === r.name ? '#f87171' : 'var(--bg-surface)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                  }}>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#f87171' }}>{r.unitCount.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                    <span style={{ fontSize: 8, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+                    {total > 0 && (
+                      <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
+                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : '#f87171', width: `${(r.unitCount / total) * 100}%` }} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* 전국 종합 현황판 */}
             {us && (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
@@ -907,43 +951,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 ))}
               </div>
             )}
-
-            {/* 지역별 현황판 */}
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 미분양 현황</span>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#f87171' }}>총 {total.toLocaleString()}세대</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6 }}>
-                <button onClick={() => setUnsoldRegion('전체')} style={{
-                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                  border: unsoldRegion === '전체' ? '2px solid #f87171' : '1px solid var(--border)',
-                  background: unsoldRegion === '전체' ? '#f87171' : 'var(--bg-surface)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#f87171' }}>{total.toLocaleString()}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
-                  <span style={{ fontSize: 8, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
-                </button>
-                {unsoldRegionStats.map(r => (
-                  <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
-                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                    border: unsoldRegion === r.name ? '2px solid #f87171' : '1px solid var(--border)',
-                    background: unsoldRegion === r.name ? '#f87171' : 'var(--bg-surface)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                  }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#f87171' }}>{r.unitCount.toLocaleString()}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
-                    <span style={{ fontSize: 8, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
-                    {total > 0 && (
-                      <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
-                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : '#f87171', width: `${(r.unitCount / total) * 100}%` }} />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* 미분양 추이 차트 */}
             {unsoldMonthly.length > 0 && (
@@ -1121,6 +1128,46 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
         return (
           <div>
+            {/* 지역별 현황 */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>총 {redevelopment.length}건</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+                <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
+                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  border: redevRegion === '전체' ? '2px solid var(--brand)' : '1px solid var(--border)',
+                  background: redevRegion === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? '#fff' : 'var(--brand)' }}>{redevelopment.length}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                </button>
+                {redevRegionStats.map(r => (
+                  <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
+                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                    border: redevRegion === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
+                    background: redevRegion === r.name ? 'var(--brand)' : 'var(--bg-surface)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                  }}>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                    <div style={{ fontSize: 8, display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+                      {r.redev > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : '#60A5FA' }}>개발{r.redev}</span>}
+                      {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : '#34D399' }}>건축{r.rebuild}</span>}
+                    </div>
+                    {r.total > 0 && (
+                      <div style={{ width: '100%', height: 3, background: redevRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
+                        <div style={{ height: '100%', background: '#60A5FA', width: `${(r.redev / r.total) * 100}%` }} />
+                        <div style={{ height: '100%', background: '#34D399', width: `${(r.rebuild / r.total) * 100}%` }} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* 현황 요약 */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
@@ -1155,47 +1202,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     </div>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* 지역별 현황판 */}
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>총 {totalHouseholds.toLocaleString()}세대</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
-                <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
-                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                  border: redevRegion === '전체' ? '2px solid var(--brand)' : '1px solid var(--border)',
-                  background: redevRegion === '전체' ? 'var(--brand)' : 'var(--bg-surface)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? '#fff' : 'var(--brand)' }}>{redevelopment.length}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
-                  <span style={{ fontSize: 8, color: redevRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{totalHouseholds.toLocaleString()}세대</span>
-                </button>
-                {redevRegionStats.map(r => (
-                  <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
-                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                    border: redevRegion === r.name ? '2px solid var(--brand)' : '1px solid var(--border)',
-                    background: redevRegion === r.name ? 'var(--brand)' : 'var(--bg-surface)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                  }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--brand)' }}>{r.total}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
-                    <div style={{ fontSize: 8, display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                      {r.redev > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : '#60A5FA' }}>개발{r.redev}</span>}
-                      {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : '#34D399' }}>건축{r.rebuild}</span>}
-                    </div>
-                    {r.total > 0 && (
-                      <div style={{ width: '100%', height: 3, background: redevRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
-                        <div style={{ height: '100%', background: '#60A5FA', width: `${(r.redev / r.total) * 100}%` }} />
-                        <div style={{ height: '100%', background: '#34D399', width: `${(r.rebuild / r.total) * 100}%` }} />
-                      </div>
-                    )}
-                  </button>
-                ))}
               </div>
             </div>
 
@@ -1317,8 +1323,55 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           regionAvgs[r].cnt++;
         });
 
+        // 지역별 거래 건수 집계 (현황판용)
+        const tradeRegionStats = tradeRegs.filter(r => r !== '전체').map(r => {
+          const items = transactions.filter((t: any) => (t.region_nm || '기타') === r);
+          const avgAmt = items.length > 0 ? Math.round(items.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / items.length) : 0;
+          return { name: r, count: items.length, avgAmount: avgAmt };
+        }).sort((a, b) => b.count - a.count);
+
         return (
           <div>
+            {/* 지역별 현황 */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+                <button onClick={() => { setTradeRegion('전체'); setTradePage(1); }} style={{
+                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  border: tradeRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+                  background: tradeRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tradeRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{transactions.length}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: tradeRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                </button>
+                {tradeRegionStats.map(r => (
+                  <button key={r.name} onClick={() => { setTradeRegion(r.name === tradeRegion ? '전체' : r.name); setTradePage(1); }} style={{
+                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                    border: tradeRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+                    background: tradeRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                  }}>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tradeRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: tradeRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                    {r.avgAmount > 0 && (
+                      <span style={{ fontSize: 8, color: tradeRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+                        평균{r.avgAmount >= 10000 ? `${(r.avgAmount / 10000).toFixed(1)}억` : `${Math.round(r.avgAmount / 1000)}천`}
+                      </span>
+                    )}
+                    {r.count > 0 && (
+                      <div style={{ width: '100%', height: 3, background: tradeRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
+                        <div style={{ height: '100%', background: tradeRegion === r.name ? '#fff' : '#60A5FA', width: `${(r.count / transactions.length) * 100}%` }} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* 대시보드 */}
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 최근 거래 현황</div>
@@ -1415,11 +1468,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 </div>
               ) : null;
             })()}
-
-            {/* 지역 필터 */}
-            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
-              {tradeRegs.map(r => pill(r, tradeRegion, (v) => { setTradeRegion(v); setTradePage(1); }))}
-            </div>
 
             {/* 면적 필터 */}
             <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
