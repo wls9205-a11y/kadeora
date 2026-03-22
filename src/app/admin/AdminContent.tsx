@@ -69,17 +69,17 @@ export default function AdminContent() {
           { label: '이번주 발행', value: blogStats?.thisWeek || 0, icon: '📅' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, textAlign: 'center' }}>
-            <div style={{ fontSize: 22 }}>{s.icon}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0' }}>{s.value.toLocaleString()}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{s.label}</div>
+            <div style={{ fontSize: 'var(--fs-xl)' }}>{s.icon}</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0' }}>{s.value.toLocaleString()}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* SEO Card */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>SEO 스코어카드</div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>SEO 스코어카드</div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           <div>sitemap: <a href="/sitemap.xml" target="_blank" style={{ color: '#3b82f6' }}>/sitemap.xml</a></div>
           <div>robots: <a href="/robots.txt" target="_blank" style={{ color: '#3b82f6' }}>/robots.txt</a></div>
           <div>OG 이미지: /api/og 엔드포인트 활성</div>
@@ -89,11 +89,11 @@ export default function AdminContent() {
       {/* Reports */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>신고 처리</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>신고 처리</div>
           <div style={{ display: 'flex', gap: 6 }}>
             {['all', 'pending', 'resolved', 'dismissed'].map(f => (
               <button key={f} onClick={() => setReportFilter(f)} style={{
-                padding: '4px 12px', borderRadius: 16, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                padding: '4px 12px', borderRadius: 16, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700,
                 background: reportFilter === f ? '#ff5b36' : 'var(--bg-hover)',
                 color: reportFilter === f ? '#fff' : 'var(--text-secondary)',
               }}>{{ all: '전체', pending: '미처리', resolved: '처리됨', dismissed: '기각' }[f]}</button>
@@ -102,7 +102,7 @@ export default function AdminContent() {
         </div>
 
         {filteredReports.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-tertiary)', fontSize: 13 }}>신고 내역이 없습니다</div>
+          <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>신고 내역이 없습니다</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filteredReports.map(r => (
@@ -113,28 +113,28 @@ export default function AdminContent() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{
-                    fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700,
+                    fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: r.content_type === 'post' ? '#ff5b36' : r.content_type === 'comment' ? '#eab308' : '#8b5cf6',
                     color: '#fff',
                   }}>{{ post: '게시글', comment: '댓글', chat: '채팅' }[r.content_type] || r.content_type}</span>
                   <span style={{
-                    fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700,
+                    fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: r.status === 'pending' ? '#fde68a' : r.status === 'resolved' ? '#dcfce7' : '#e2e8f0',
                     color: r.status === 'pending' ? '#92400e' : r.status === 'resolved' ? '#16a34a' : '#64748b',
                   }}>{{ pending: '미처리', resolved: '처리됨', dismissed: '기각' }[r.status] || r.status}</span>
-                  {r.auto_hidden && <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: '#fee2e2', color: '#dc2626' }}>자동숨김</span>}
+                  {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: '#fee2e2', color: '#dc2626' }}>자동숨김</span>}
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{r.reason}</div>
-                {r.details && <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{r.details}</div>}
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{r.reason}</div>
+                {r.details && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2 }}>{r.details}</div>}
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
                   {r.reporter?.nickname ? `신고자: ${r.reporter.nickname}` : ''} · {new Date(r.created_at).toLocaleDateString('ko-KR')}
                 </div>
                 {r.status === 'pending' && (
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                    <button onClick={() => handleReport(r.id, 'resolve')} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', cursor: 'pointer', fontWeight: 700 }}>처리완료</button>
-                    <button onClick={() => handleReport(r.id, 'dismiss')} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #94a3b8', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 700 }}>기각</button>
+                    <button onClick={() => handleReport(r.id, 'resolve')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', cursor: 'pointer', fontWeight: 700 }}>처리완료</button>
+                    <button onClick={() => handleReport(r.id, 'dismiss')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #94a3b8', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 700 }}>기각</button>
                     {(r.post_id || r.comment_id) && (
-                      <button onClick={() => handleReport(r.id, 'hide_content')} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: 'none', background: '#ef4444', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>숨기기</button>
+                      <button onClick={() => handleReport(r.id, 'hide_content')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: 'none', background: '#ef4444', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>숨기기</button>
                     )}
                   </div>
                 )}

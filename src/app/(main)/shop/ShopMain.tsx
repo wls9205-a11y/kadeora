@@ -62,14 +62,14 @@ export default function ShopMain() {
     return (
       <div key={p.id} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div style={{ fontSize: 22 }}>{p.icon ?? '🎁'}</div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4, flex: 1 }}>{p.description}</div>
-        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--brand)' }}>{p.point_price.toLocaleString()}P</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.4, flex: 1 }}>{p.description}</div>
+        <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--brand)' }}>{p.point_price.toLocaleString()}P</div>
         <button
           onClick={() => handleExchange(p.id, p.point_price)}
           disabled={!canAfford || isExchanging}
           style={{
-            padding: '7px 0', borderRadius: 10, border: 'none', fontSize: 12, fontWeight: 700,
+            padding: '7px 0', borderRadius: 10, border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: canAfford ? 'var(--brand)' : 'var(--bg-hover)',
             color: canAfford ? 'white' : 'var(--text-tertiary)',
             cursor: canAfford && !isExchanging ? 'pointer' : 'not-allowed',
@@ -84,16 +84,16 @@ export default function ShopMain() {
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>상점</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>상점</h1>
 
       {/* 내 포인트 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '16px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>내 포인트</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--brand)' }}>{myPoints.toLocaleString()}P</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>내 포인트</div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--brand)' }}>{myPoints.toLocaleString()}P</div>
         </div>
         {!userId && (
-          <button onClick={() => router.push('/login')} style={{ padding: '8px 16px', borderRadius: 10, background: 'var(--brand)', color: 'white', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+          <button onClick={() => router.push('/login')} style={{ padding: '8px 16px', borderRadius: 10, background: 'var(--brand)', color: 'white', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>
             로그인
           </button>
         )}
@@ -105,7 +105,7 @@ export default function ShopMain() {
         if (catProducts.length === 0) return null;
         return (
           <div key={cat.key} style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>{cat.label}</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>{cat.label}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
               {catProducts.map(renderCard)}
             </div>
@@ -114,7 +114,7 @@ export default function ShopMain() {
       })}
 
       {/* 포인트 모으는 법 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
         <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>포인트 모으는 법</div>
         글쓰기 +10P · 댓글 +5P · 출석체크 +10P · 프로필 완성 +100P
       </div>

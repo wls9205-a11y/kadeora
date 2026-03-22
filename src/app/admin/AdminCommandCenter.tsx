@@ -122,8 +122,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         flexWrap: 'wrap',
       }}>
         <div style={{ flex: '0 0 auto' }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: '#ff5b36' }}>카더라</div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>커맨드센터</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#ff5b36' }}>카더라</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.4)' }}>커맨드센터</div>
         </div>
 
         {/* Service status dots */}
@@ -131,7 +131,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           {healthChecks.map(hc => (
             <div key={hc.service_name} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               {statusDot(hc.status)}
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{hc.service_name}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.5)' }}>{hc.service_name}</span>
             </div>
           ))}
         </div>
@@ -146,7 +146,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             border: 'none',
             background: refresh.running ? '#334155' : '#ff5b36',
             color: '#fff',
-            fontSize: 13,
+            fontSize: 'var(--fs-sm)',
             fontWeight: 700,
             cursor: refresh.running ? 'not-allowed' : 'pointer',
             display: 'flex',
@@ -173,7 +173,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          fontSize: 13,
+          fontSize: 'var(--fs-sm)',
         }}>
           <span style={{ fontWeight: 700, color: refresh.summary.failCount > 0 ? '#ef4444' : '#22c55e' }}>
             {refresh.summary.failCount > 0 ? '⚠️' : '✅'} 전체 갱신 완료
@@ -182,12 +182,12 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             성공 {refresh.summary.successCount}개 / 실패 {refresh.summary.failCount}개 · {(refresh.elapsed / 1000).toFixed(1)}초
           </span>
           {refresh.results.filter(r => r.status !== 'success').length > 0 && (
-            <span style={{ color: '#ef4444', fontSize: 12 }}>
+            <span style={{ color: '#ef4444', fontSize: 'var(--fs-sm)' }}>
               실패: {refresh.results.filter(r => r.status !== 'success').map(r => CRON_NAMES[r.name] || r.name).join(', ')}
             </span>
           )}
           <button onClick={() => setRefresh(prev => ({ ...prev, summary: null }))} style={{
-            marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 16,
+            marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)',
           }}>&times;</button>
         </div>
       )}
@@ -209,7 +209,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               border: 'none',
               background: 'none',
               cursor: 'pointer',
-              fontSize: 13,
+              fontSize: 'var(--fs-sm)',
               fontWeight: 700,
               color: activeTab === tab.id ? '#ff5b36' : 'var(--text-secondary)',
               borderBottom: activeTab === tab.id ? '2px solid #ff5b36' : '2px solid transparent',

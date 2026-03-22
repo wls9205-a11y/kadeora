@@ -255,14 +255,14 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             {avatarUrl ? (
               <Image src={`${avatarUrl}?width=80&height=80`} alt={`${displayName} 프로필 사진`} width={72} height={72} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }} />
             ) : (
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-2xl)' }}>
                 {GRADE_EMOJI[profile.grade ?? 1] ?? '🌱'}
               </div>
             )}
             {isOwner && (
               <>
                 <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} style={{ display: 'none' }} id="avatar-upload" aria-label="프로필 사진 변경" />
-                <label htmlFor="avatar-upload" title="프로필 사진 변경" style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, cursor: avatarUploading ? 'not-allowed' : 'pointer', border: '2px solid var(--bg-surface)', opacity: avatarUploading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+                <label htmlFor="avatar-upload" title="프로필 사진 변경" style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', cursor: avatarUploading ? 'not-allowed' : 'pointer', border: '2px solid var(--bg-surface)', opacity: avatarUploading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
                   {avatarUploading ? '⏳' : '📷'}
                 </label>
               </>
@@ -274,21 +274,21 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             {editing ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>닉네임</label>
-                  <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="닉네임" maxLength={20} className="kd-input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 15, padding: '10px 16px' }} />
+                  <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>닉네임</label>
+                  <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="닉네임" maxLength={20} className="kd-input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 'var(--fs-md)', padding: '10px 16px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>자기소개</label>
+                  <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>자기소개</label>
                   <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="자기소개를 입력해주세요" maxLength={200} rows={3}
-                    style={{ width: '100%', boxSizing: 'border-box', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', padding: '10px 16px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
+                    style={{ width: '100%', boxSizing: 'border-box', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', padding: '10px 16px', fontSize: 'var(--fs-sm)', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
                     onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
                     onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')} />
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4, padding: '0 4px' }}>{bio.length}/200</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4, padding: '0 4px' }}>{bio.length}/200</div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>📍 지역</label>
+                  <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>📍 지역</label>
                   <select value={regionText} onChange={e => setRegionText(e.target.value)}
-                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 13, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 'var(--fs-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer' }}>
                     <option value="">미설정</option>
                     {REGIONS.filter(r => r.value !== 'all').map(r => (
                       <option key={r.value} value={r.value}>{r.label}</option>
@@ -299,28 +299,28 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             ) : (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                  <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{displayName}</h1>
-                  <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor }}>
+                  <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{displayName}</h1>
+                  <span style={{ fontSize: 'var(--fs-sm)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor }}>
                     {gradeEmoji} {gradeTitle} Lv.{gradeNum}
                   </span>
-                  {profile.is_premium && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700 }}>👑 PREMIUM</span>}
+                  {profile.is_premium && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700 }}>👑 PREMIUM</span>}
                 </div>
-                <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 6px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 12, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
                   <span>{joinDate} 가입</span>
                   {profile.region_text && <span>📍 {profile.region_text}</span>}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'center' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{followers}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로워</span>
+                    <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{followers}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>팔로워</span>
                   </div>
                   <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{followingCount}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로잉</span>
+                    <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{followingCount}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>팔로잉</span>
                   </div>
                 </div>
               </>
@@ -332,16 +332,16 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             {isOwner ? (
               editing ? (
                 <>
-                  <button onClick={() => setEditing(false)} className="kd-btn kd-btn-ghost" style={{ fontSize: 13 }}>취소</button>
-                  <button onClick={handleSave} disabled={saving} className="kd-btn kd-btn-primary" style={{ fontSize: 13 }}>{saving ? '저장 중...' : '저장'}</button>
+                  <button onClick={() => setEditing(false)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)' }}>취소</button>
+                  <button onClick={handleSave} disabled={saving} className="kd-btn kd-btn-primary" style={{ fontSize: 'var(--fs-sm)' }}>{saving ? '저장 중...' : '저장'}</button>
                 </>
               ) : (
-                <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 13 }}>✏️ 프로필 수정</button>
+                <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)' }}>✏️ 프로필 수정</button>
               )
             ) : (
               <button onClick={handleFollow} disabled={followLoading} aria-pressed={following}
                 className={following ? 'kd-btn kd-btn-ghost' : 'kd-btn kd-btn-primary'}
-                style={{ fontSize: 13, minWidth: 90 }}>
+                style={{ fontSize: 'var(--fs-sm)', minWidth: 90 }}>
                 {followLoading ? '...' : following ? '✓ 팔로잉' : '+ 팔로우'}
               </button>
             )}
@@ -357,7 +357,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               } else {
                 navigator.clipboard.writeText(url).then(() => success('프로필 링크가 복사됐어요!'));
               }
-            }} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+            }} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', fontWeight: 600 }}>
               공유
             </button>
           </div>
@@ -366,8 +366,8 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
         {/* 등급 진행 바 */}
         <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--bg-base)', borderRadius: 10, border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: gradeColor }}>{gradeEmoji} {gradeTitle}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: gradeColor }}>{gradeEmoji} {gradeTitle}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
               {(currentPoints ?? 0).toLocaleString()} / {gradeNum < 10 ? (nextPoints ?? 0).toLocaleString() : '∞'} pts
             </span>
           </div>
@@ -375,11 +375,11 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             <div style={{ height: '100%', borderRadius: 3, background: gradeColor, width: `${progress}%`, transition: 'width 0.6s ease' }} />
           </div>
           {gradeNum < 10 && (
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'right' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'right' }}>
               다음 등급까지 {((nextPoints ?? 0) - (currentPoints ?? 0)).toLocaleString()}pts
             </div>
           )}
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 8 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 8 }}>
             현재 혜택: {GRADE_BENEFITS[gradeNum] || '기본 기능 이용'}
             {gradeNum < 10 && (
               <span style={{ marginLeft: 8, color: 'var(--text-secondary)' }}>
@@ -403,8 +403,8 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               <div key={stat.label} style={{ display: 'contents' }}>
                 {i > 0 && <div style={{ height: 24, width: 1, background: 'var(--border)' }} />}
                 <div style={{ minWidth: 60, textAlign: 'center', padding: '0 16px' }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
                 </div>
               </div>
             ));
@@ -487,7 +487,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
             flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
             background: activeTab === tab ? 'var(--brand)' : 'transparent',
             color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',
-            fontWeight: 600, fontSize: 13, transition: 'all 0.15s',
+            fontWeight: 600, fontSize: 'var(--fs-sm)', transition: 'all 0.15s',
           }}>
             {tab === 'posts' ? `📝 작성한 글 (${displayedPosts.length})` : tab === 'comments' ? `💬 댓글` : `🔖 북마크`}
           </button>
@@ -508,9 +508,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                     <div style={{ padding: '12px 0', borderBottom: i < displayedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                      <span style={{ flex: 1, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+                      <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
                         <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                       </div>
@@ -520,7 +520,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
               })}
               {hasMorePosts && (
                 <button onClick={loadMorePosts} disabled={loadingMorePosts}
-                  style={{ marginTop: 12, padding: '10px 0', width: '100%', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                  style={{ marginTop: 12, padding: '10px 0', width: '100%', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>
                   {loadingMorePosts ? '불러오는 중...' : '더보기'}
                 </button>
               )}
@@ -542,10 +542,10 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                   <div style={{ padding: '12px 0', borderBottom: i < myComments.length - 1 ? '1px solid var(--border)' : 'none', transition: 'opacity 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                    <div style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {comment.content}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                       게시글 #{comment.post_id} · {new Date(comment.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                     </div>
                   </div>
@@ -571,9 +571,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                     <div style={{ padding: '12px 0', borderBottom: i < bookmarkedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
-                      <span style={{ flex: 1, fontSize: 14, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+                      <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
                         <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                       </div>

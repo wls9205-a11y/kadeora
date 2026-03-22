@@ -57,10 +57,10 @@ function TopicCard({ topic }: { topic: Topic }) {
         borderRadius: 12, marginBottom: 8,
       }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-          {topic.is_hot && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
+        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
         {topic.topic_type === 'poll' && (
           <div style={{ marginBottom: 12 }}>
             {[
@@ -68,16 +68,16 @@ function TopicCard({ topic }: { topic: Topic }) {
               { label: topic.option_b, pct: pctB, winning: pctB > pctA },
             ].map((opt, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, minWidth: 60, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, minWidth: 60, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
                 <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 11, overflow: 'hidden' }}>
                   <div style={{ width: `${opt.pct}%`, height: '100%', background: opt.winning ? 'var(--brand)' : 'var(--border)', borderRadius: 11, transition: 'width 0.3s', minWidth: opt.pct > 0 ? 8 : 0 }} />
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 700, minWidth: 36, textAlign: 'right', color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>{opt.pct}%</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, minWidth: 36, textAlign: 'right', color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>{opt.pct}%</span>
               </div>
             ))}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <div style={{ display: 'flex', gap: 12, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           <span>💬 {topic.comment_count || 0}</span>
           <span>👁 {topic.view_count || 0}</span>
           <span>🗳 {total}명</span>
@@ -167,8 +167,8 @@ export default function DiscussClient() {
   return (
     <div style={containerStyle}>
       <div style={{ flexShrink: 0, marginBottom: isChat ? 8 : 16 }}>
-        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
-        <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들</p>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
+        <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들</p>
       </div>
 
       {/* 탭 */}
@@ -180,7 +180,7 @@ export default function DiscussClient() {
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
-            fontWeight: 700, fontSize: 13,
+            fontWeight: 700, fontSize: 'var(--fs-sm)',
             background: tab === t.key ? 'var(--border)' : 'transparent',
             color: tab === t.key ? 'var(--text-primary)' : 'var(--text-secondary)',
           }}>{t.label}</button>
@@ -197,7 +197,7 @@ export default function DiscussClient() {
           <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {POLL_CATS.map(c => (
               <button key={c.key} onClick={() => setPollCat(c.key)} style={{
-                padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
+                padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
                 background: pollCat === c.key ? 'var(--text-primary)' : 'var(--bg-hover)',
                 color: pollCat === c.key ? 'var(--bg-base)' : 'var(--text-secondary)',
               }}>{c.label}</button>
@@ -208,7 +208,7 @@ export default function DiscussClient() {
           <button onClick={() => user ? setShowCreate(!showCreate) : router.push('/login')} style={{
             width: '100%', padding: '12px', marginBottom: 12, borderRadius: 12,
             border: '1px dashed var(--border)', background: 'var(--bg-surface)',
-            color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer',
           }}>✍️ 새 토론 만들기</button>
 
           {showCreate && (
@@ -216,23 +216,23 @@ export default function DiscussClient() {
               <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                 {['stock', 'apt', 'economy', 'free'].map(c => (
                   <button key={c} onClick={() => setNewCat(c)} style={{
-                    padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer',
+                    padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer',
                     background: newCat === c ? 'var(--brand)' : 'var(--bg-hover)',
                     color: newCat === c ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>{(CAT_STYLE[c] || CAT_STYLE.free).label}</button>
                 ))}
               </div>
               <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="토론 주제 (5자 이상)" maxLength={100}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 14, marginBottom: 8, boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', marginBottom: 8, boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                 <input value={newOptA} onChange={e => setNewOptA(e.target.value)} placeholder="옵션 A" maxLength={20}
-                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }} />
-                <span style={{ alignSelf: 'center', color: 'var(--text-tertiary)', fontSize: 12 }}>vs</span>
+                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+                <span style={{ alignSelf: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>vs</span>
                 <input value={newOptB} onChange={e => setNewOptB(e.target.value)} placeholder="옵션 B" maxLength={20}
-                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }} />
+                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
               </div>
               <button onClick={handleCreate} disabled={creating} style={{
-                width: '100%', padding: '10px', borderRadius: 8, border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 14, fontWeight: 700, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
+                width: '100%', padding: '10px', borderRadius: 8, border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
               }}>{creating ? '생성 중...' : '토론 시작하기'}</button>
             </div>
           )}
@@ -242,13 +242,13 @@ export default function DiscussClient() {
           ) : topics.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)' }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>🗳️</div>
-              <div style={{ fontSize: 14 }}>아직 토론이 없습니다. 첫 번째 토론을 시작해보세요!</div>
+              <div style={{ fontSize: 'var(--fs-base)' }}>아직 토론이 없습니다. 첫 번째 토론을 시작해보세요!</div>
             </div>
           ) : (
             <>
               {hotTopics.length > 0 && (
                 <div style={{ marginBottom: 8 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🔥 HOT 토론</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🔥 HOT 토론</div>
                   {hotTopics.map(t => <TopicCard key={t.id} topic={t} />)}
                 </div>
               )}

@@ -144,6 +144,30 @@
     {
       "path": "/api/cron/stock-crawl",
       "schedule": "0 22 * * 1-5"
+    },
+    {
+      "path": "/api/cron/blog-afternoon",
+      "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/blog-apt-landmark",
+      "schedule": "0 7 * * 3"
+    },
+    {
+      "path": "/api/cron/blog-redevelopment",
+      "schedule": "0 8 * * 4"
+    },
+    {
+      "path": "/api/cron/blog-seed-guide",
+      "schedule": "0 10 * * 2"
+    },
+    {
+      "path": "/api/cron/seed-chat",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/seed-comments",
+      "schedule": "30 */4 * * *"
     }
   ]
 }

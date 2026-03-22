@@ -92,15 +92,15 @@ export default function AdminUsers() {
           { label: '정지됨', value: users.filter(u => u.is_deleted).length, color: '#ef4444' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.label}</div>
+            <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Grade Distribution Bar */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>등급 분포</div>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>등급 분포</div>
         <div style={{ display: 'flex', height: 24, borderRadius: 12, overflow: 'hidden', background: 'var(--bg-hover)' }}>
           {Object.entries(gradeMap).map(([grade, count]) => {
             const pct = users.length > 0 ? (count / users.length) * 100 : 0;
@@ -115,7 +115,7 @@ export default function AdminUsers() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 9,
+                  fontSize: 'var(--fs-xs)',
                   color: '#fff',
                   fontWeight: 700,
                   overflow: 'hidden',
@@ -129,7 +129,7 @@ export default function AdminUsers() {
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
           {Object.entries(gradeMap).map(([grade, count]) => (
-            <div key={grade} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-secondary)' }}>
+            <div key={grade} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: gradeColors[grade] || '#94a3b8' }} />
               {grade} ({count})
             </div>
@@ -141,7 +141,7 @@ export default function AdminUsers() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
         {(['all', 'real', 'seed'] as const).map(t => (
           <button key={t} onClick={() => setUserType(t)} style={{
-            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: userType === t ? '#ff5b36' : 'var(--bg-hover)',
             color: userType === t ? '#fff' : 'var(--text-secondary)',
           }}>
@@ -151,7 +151,7 @@ export default function AdminUsers() {
         <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
         {(['all', 'active', 'suspended'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
-            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: filter === f ? '#ff5b36' : 'var(--bg-hover)',
             color: filter === f ? '#fff' : 'var(--text-secondary)',
           }}>
@@ -160,7 +160,7 @@ export default function AdminUsers() {
         ))}
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="닉네임 검색"
           style={{
-            marginLeft: 'auto', padding: '6px 12px', fontSize: 13, background: 'var(--bg-hover)',
+            marginLeft: 'auto', padding: '6px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)',
             border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', width: '100%', maxWidth: 180,
           }}
         />
@@ -171,7 +171,7 @@ export default function AdminUsers() {
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로딩 중...</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 14px' }}>닉네임</th>
@@ -188,7 +188,7 @@ export default function AdminUsers() {
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--bg-hover)', opacity: u.is_deleted ? 0.5 : 1 }}>
                   <td style={{ padding: '10px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>
                     {u.nickname || '미설정'}
-                    {isSeed(u.id) && <span style={{ fontSize: 9, marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>시드</span>}
+                    {isSeed(u.id) && <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 4, padding: '1px 4px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>시드</span>}
                   </td>
                   <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{u.grade_title || '-'}</td>
                   <td style={{ padding: '10px 14px', color: 'var(--text-tertiary)' }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
@@ -196,7 +196,7 @@ export default function AdminUsers() {
                   <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{u.points ?? 0}</td>
                   <td style={{ padding: '10px 14px' }}>
                     <span style={{
-                      fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700,
+                      fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                       background: u.is_deleted ? '#fee2e2' : '#dcfce7',
                       color: u.is_deleted ? '#dc2626' : '#16a34a',
                     }}>{u.is_deleted ? '정지' : '정상'}</span>
@@ -204,11 +204,11 @@ export default function AdminUsers() {
                   <td style={{ padding: '10px 14px' }}>
                     <div style={{ display: 'flex', gap: 4 }}>
                       {u.is_deleted ? (
-                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', cursor: 'pointer', fontWeight: 600 }}>복구</button>
+                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', cursor: 'pointer', fontWeight: 600 }}>복구</button>
                       ) : (
-                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontWeight: 600 }}>정지</button>
+                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontWeight: 600 }}>정지</button>
                       )}
-                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: '1px solid #3b82f6', background: 'transparent', color: '#3b82f6', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
+                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #3b82f6', background: 'transparent', color: '#3b82f6', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
                     </div>
                   </td>
                 </tr>

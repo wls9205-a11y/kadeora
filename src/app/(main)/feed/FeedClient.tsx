@@ -211,7 +211,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, padding: '4px 0' }}>
-        <h1 style={{ fontSize: 20, fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5 }}>카더라</h1>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5 }}>카더라</h1>
         <div style={{ display: 'flex', gap: 8 }}>
           <Link href="/search" aria-label="검색" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 12, color: 'var(--text-secondary)', textDecoration: 'none' }}>
             <Search size={20} />
@@ -231,7 +231,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               onClick={() => router.push(`/feed${cat.key !== 'all' ? `?category=${cat.key}` : ''}`)}
               style={{
                 padding: '7px 16px', borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0,
-                fontWeight: isActive ? 700 : 500, fontSize: 13,
+                fontWeight: isActive ? 700 : 500, fontSize: 'var(--fs-sm)',
                 background: isActive ? 'var(--text-primary)' : 'var(--bg-surface)',
                 color: isActive ? 'var(--bg-base, #fff)' : 'var(--text-secondary)',
                 transition: 'all 0.15s', fontFamily: 'inherit',
@@ -252,7 +252,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 onClick={() => router.push(`/feed${r.value === 'all' ? '?category=local' : `?category=local&region=${r.value}`}`)}
                 style={{
                   padding: '5px 12px', borderRadius: 999, border: `1px solid ${isActive ? 'var(--brand)' : 'var(--border)'}`, cursor: 'pointer', flexShrink: 0,
-                  fontWeight: 600, fontSize: 11, fontFamily: 'inherit',
+                  fontWeight: 600, fontSize: 'var(--fs-xs)', fontFamily: 'inherit',
                   background: isActive ? 'var(--brand)' : 'transparent',
                   color: isActive ? '#fff' : 'var(--text-tertiary)',
                 }}>
@@ -270,8 +270,8 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 16, textDecoration: 'none', marginBottom: 14,
         }}>
-          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 16, fontWeight: 700 }}>+</div>
-          <span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>무슨 소문이 있나요?</span>
+          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700 }}>+</div>
+          <span style={{ fontSize: 'var(--fs-base)', color: 'var(--text-tertiary)' }}>무슨 소문이 있나요?</span>
         </Link>
       )}
 
@@ -283,12 +283,12 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           border: '1px solid rgba(139,92,246,0.15)', borderRadius: 12,
           textDecoration: 'none', marginBottom: 10,
         }}>
-          <span style={{ fontSize: 18 }}>📖</span>
+          <span style={{ fontSize: 'var(--fs-lg)' }}>📖</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>카더라 처음이신가요?</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>가이드북에서 활용법을 확인하세요</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>카더라 처음이신가요?</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>가이드북에서 활용법을 확인하세요</div>
           </div>
-          <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-tertiary)' }}>→</span>
+          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>→</span>
         </Link>
       )}
 
@@ -298,13 +298,13 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       {/* 🔥 실시간 인기글 */}
       {showHotBanner && hotPosts.length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 14, position: 'relative' }}>
-          <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 16 }}>✕</button>
-          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--brand)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
+          <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }}>✕</button>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
           {hotPosts.map((hp: any, i: number) => (
             <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ fontSize: 14, fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 18 }}>{i + 1}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>♥ {hp.likes_count}</span>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 18 }}>{i + 1}</span>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>♥ {hp.likes_count}</span>
             </Link>
           ))}
         </div>
@@ -327,13 +327,13 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                 {/* 1행: 아바타 + 닉네임 + 등급 + 시간 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff' }}>
                     {displayName[0].toUpperCase()}
                   </div>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
-                  <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
-                    <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1), fontWeight: 600 }}>{gradeTitle(post.profiles?.grade ?? 1)}</span>
-                  <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }}>{displayName}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(post.profiles?.grade ?? 1), fontWeight: 600 }}>{gradeTitle(post.profiles?.grade ?? 1)}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
                 </div>
 
                 {/* 본문: 제목 + 본문 2줄 */}
@@ -350,11 +350,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               {/* 인터랙션: 좋아요 + 댓글 + 공유 (3개만) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0 }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', color: isLiked ? '#ef4444' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0 }}>
                   <Heart size={18} fill={isLiked ? '#ef4444' : 'none'} stroke={isLiked ? '#ef4444' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : ''}
                 </button>
                 <Link href={`${postHref}#comments`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', fontSize: 13, color: 'var(--text-tertiary)', padding: 0 }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', padding: 0 }}>
                   <MessageCircle size={18} /> {(post.comments_count ?? 0) > 0 ? numFmt(post.comments_count ?? 0) : ''}
                 </Link>
                 <button onClick={(e) => handleShare(e, post)}
@@ -370,11 +370,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           if (i === 4 && !currentUserId) {
             acc.push(
               <div key="signup-cta" style={{ padding: '20px 16px', margin: '8px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>카더라 회원이 되면</div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>카더라 회원이 되면</div>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
                   관심 종목 알림 · 청약 마감 알림<br />글 전문 보기 · 댓글 참여 · 포인트 적립
                 </div>
-                <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+                <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
                   카카오로 3초 가입
                 </Link>
               </div>
@@ -386,11 +386,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
       {hasMore && (
         <div ref={sentinelRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
-          <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>불러오는 중...</span>
+          <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>불러오는 중...</span>
         </div>
       )}
       {!hasMore && posts.length > 0 && (
-        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
+        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
           모든 게시글을 읽었어요 ✓
         </div>
       )}
