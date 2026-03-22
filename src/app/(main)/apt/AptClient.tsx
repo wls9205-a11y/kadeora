@@ -62,6 +62,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [activeTab, setActiveTab] = useState<'sub' | 'unsold' | 'redev' | 'trade'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
+  const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'>('date');
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
@@ -69,6 +70,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [tradeRegion, setTradeRegion] = useState('전체');
   const [tradePage, setTradePage] = useState(1);
   const [tradeAreaFilter, setTradeAreaFilter] = useState('전체');
+  const [tradeSort, setTradeSort] = useState<'date'|'price_desc'|'price_asc'|'area'>('date');
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
@@ -122,11 +124,20 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   };
 
   const availableRegions = useMemo(() => ['전체', ...Array.from(new Set(apts.map(a => a.region_nm).filter(Boolean))).sort()], [apts]);
-  const filtered = useMemo(() => apts.filter(a => {
-    if (region !== '전체' && a.region_nm !== region) return false;
-    if (statusFilter !== '전체' && getStatus(a) !== statusFilter) return false;
-    return true;
-  }), [apts, region, statusFilter]);
+  const filtered = useMemo(() => {
+    const f = apts.filter(a => {
+      if (region !== '전체' && a.region_nm !== region) return false;
+      if (statusFilter !== '전체' && getStatus(a) !== statusFilter) return false;
+      return true;
+    });
+    if (aptSort === 'supply') f.sort((a, b) => (b.tot_supply_hshld_co || 0) - (a.tot_supply_hshld_co || 0));
+    if (aptSort === 'deadline') f.sort((a, b) => {
+      const aEnd = String(a.rcept_endde || '9999');
+      const bEnd = String(b.rcept_endde || '9999');
+      return aEnd.localeCompare(bEnd);
+    });
+    return f;
+  }, [apts, region, statusFilter, aptSort]);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
@@ -310,12 +321,26 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             })()}
           </div>
 
-          {/* 필터 결과 카운트 */}
+          {/* 필터 결과 카운트 + 정렬 */}
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건</span>
-            {filtered.filter(a => getStatus(a) === 'open').length > 0 && (
-              <span style={{ color: '#22c55e', fontWeight: 600 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}건</span>
-            )}
+            <span>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건
+              {filtered.filter(a => getStatus(a) === 'open').length > 0 && (
+                <span style={{ color: '#22c55e', fontWeight: 600, marginLeft: 8 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}건</span>
+              )}
+            </span>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {([
+                { key: 'date' as const, label: '최신순' },
+                { key: 'supply' as const, label: '세대수순' },
+                { key: 'deadline' as const, label: '마감임박' },
+              ]).map(s => (
+                <button key={s.key} onClick={() => setAptSort(s.key)} style={{
+                  fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                  background: aptSort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
+                  color: aptSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
+                }}>{s.label}</button>
+              ))}
+            </div>
           </div>
 
           {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>조건에 맞는 청약이 없습니다</div>}
@@ -828,6 +853,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           }
           return true;
         });
+        // 정렬
+        filteredTrades.sort((a: any, b: any) => {
+          if (tradeSort === 'price_desc') return (b.deal_amount || 0) - (a.deal_amount || 0);
+          if (tradeSort === 'price_asc') return (a.deal_amount || 0) - (b.deal_amount || 0);
+          if (tradeSort === 'area') return (b.exclusive_area || 0) - (a.exclusive_area || 0);
+          return 0; // date — 이미 서버에서 deal_date desc 정렬됨
+        });
         const pagedTrades = filteredTrades.slice(0, tradePage * 20);
 
         // 요약 통계
@@ -965,9 +997,25 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               ].map(a => pill(a.key, tradeAreaFilter, (v) => { setTradeAreaFilter(v); setTradePage(1); }, a.label))}
             </div>
 
-            {/* 결과 */}
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
-              총 <strong style={{ color: 'var(--text-primary)' }}>{filteredTrades.length}</strong>건
+            {/* 결과 + 정렬 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
+                총 <strong style={{ color: 'var(--text-primary)' }}>{filteredTrades.length}</strong>건
+              </span>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {([
+                  { key: 'date', label: '최신순' },
+                  { key: 'price_desc', label: '고가순' },
+                  { key: 'price_asc', label: '저가순' },
+                  { key: 'area', label: '면적순' },
+                ] as { key: typeof tradeSort; label: string }[]).map(s => (
+                  <button key={s.key} onClick={() => { setTradeSort(s.key); setTradePage(1); }} style={{
+                    fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    background: tradeSort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
+                    color: tradeSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
+                  }}>{s.label}</button>
+                ))}
+              </div>
             </div>
 
             {/* 카드 리스트 */}
