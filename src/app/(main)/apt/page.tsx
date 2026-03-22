@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
 export const revalidate = 3600;
 import { createSupabaseServer } from '@/lib/supabase-server';
-import { unstable_cache } from 'next/cache';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 
@@ -177,9 +176,7 @@ async function fetchAptData() {
   return { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts };
 }
 
-const getCachedAptData = unstable_cache(fetchAptData, ['apt-page-data', 'v2'], { revalidate: 3600 });
-
 export default async function AptPage() {
-  const { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts } = await getCachedAptData();
+  const { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts } = await fetchAptData();
   return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} ongoingApts={ongoingApts} /><Disclaimer /></>;
 }
