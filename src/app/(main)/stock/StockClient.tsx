@@ -22,6 +22,13 @@ function isIdx(s: Stock) { return ['KOSPI','KOSDAQ','NASDAQ','S&P 500','DOW','NI
 const M7 = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA'];
 const SECTORS = ['all','반도체','바이오','금융','자동차','방산','IT/소프트웨어','에너지','2차전지','소비재','건설','통신','유틸리티','화학','미디어'];
 
+// 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
+function stockColor(pct: number, isKR: boolean) {
+  if (pct === 0) return 'var(--text-tertiary)';
+  if (isKR) return pct > 0 ? '#ef4444' : '#3b82f6';
+  return pct > 0 ? '#22c55e' : '#ef4444';
+}
+
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [mode, setMode] = useState<'domestic'|'global'>('domestic');
@@ -135,7 +142,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
               </div>
               {isGlobal && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: pct > 0 ? '#22c55e' : pct < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockColor(pct, !isGlobal) }}>
                 {pct > 0 ? '▲' : pct < 0 ? '▼' : '—'} {Math.abs(pct).toFixed(2)}%
               </div>
             </>
@@ -202,7 +209,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 <div key={sec.name} style={{
                   fontSize: 10, padding: '3px 8px', borderRadius: 6,
                   background: (sec.avg_pct || 0) > 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-                  color: (sec.avg_pct || 0) > 0 ? '#22c55e' : '#ef4444',
+                  color: (sec.avg_pct || 0) > 0 ? '#ef4444' : '#3b82f6',
                   fontWeight: 600,
                 }}>
                   {sec.name} {(sec.avg_pct || 0) > 0 ? '+' : ''}{sec.avg_pct}%
@@ -241,7 +248,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{s.name}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
                 <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{s.currency === 'USD' ? `$${s.price?.toFixed(0)}` : fmt(s.price)}</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? '#22c55e' : pct < 0 ? '#ef4444' : 'var(--text-tertiary)' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: stockColor(pct, isDomestic) }}>
                   {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                 </span>
               </div>
@@ -254,14 +261,14 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {sentimentStocks.length > 0 && (
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>
-            <span style={{ color: '#22c55e', fontWeight: 600 }}>▲ {upCount}</span>
+            <span style={{ color: isDomestic ? '#ef4444' : '#22c55e', fontWeight: 600 }}>▲ {upCount}</span>
             <span>· — {flatCount}</span>
-            <span style={{ color: '#ef4444', fontWeight: 600 }}>· ▼ {downCount}</span>
+            <span style={{ color: isDomestic ? '#3b82f6' : '#ef4444', fontWeight: 600 }}>· ▼ {downCount}</span>
           </div>
           <div style={{ display: 'flex', height: 4, borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: '#22c55e' }} />
+            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? '#ef4444' : '#22c55e' }} />
             <div style={{ width: `${(flatCount/sentTotal)*100}%`, background: 'var(--bg-hover)' }} />
-            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: '#ef4444' }} />
+            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: isDomestic ? '#3b82f6' : '#ef4444' }} />
           </div>
         </div>
       )}
@@ -274,7 +281,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             {themes.map(t => (
               <div key={t.id} onClick={() => setDomesticTab('themes')} style={{ minWidth: 110, padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, flexShrink: 0, cursor: 'pointer' }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot && '🔥'}{t.theme_name}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, marginTop: 3, color: (t.change_pct??0)>0 ? '#22c55e' : (t.change_pct??0)<0 ? '#ef4444' : 'var(--text-tertiary)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, marginTop: 3, color: stockColor(t.change_pct??0, true) }}>
                   {(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%
                 </div>
               </div>
@@ -329,7 +336,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: 14, fontWeight: 700, color: (t.change_pct??0)>0?'#22c55e':'#ef4444' }}>{(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: stockColor(t.change_pct??0, true) }}>{(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%</span>
               </div>
               {t.description && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.description}</div>}
               {t.related_symbols?.length && (
@@ -365,7 +372,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{st.name}</div>
                     <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>{sym}</div>
                     <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>${st.price?.toFixed(2)}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: pct>0?'#22c55e':pct<0?'#ef4444':'var(--text-tertiary)', marginTop: 2 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: stockColor(pct, false), marginTop: 2 }}>
                       {pct>0?'▲':pct<0?'▼':'—'} {Math.abs(pct).toFixed(2)}%
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{fmtCap(st.market_cap, 'USD')}</div>
@@ -442,8 +449,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                     <tbody>
                       <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>시총</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sa.market_cap,c.sa.currency)}</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sb.market_cap,c.sb.currency)}</td></tr>
                       <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>등락</td>
-                        <td style={{ fontWeight: 700, color: (c.sa.change_pct??0)>0?'#22c55e':(c.sa.change_pct??0)<0?'#ef4444':'var(--text-tertiary)' }}>{(c.sa.change_pct??0)>0?'+':''}{(c.sa.change_pct??0).toFixed(2)}%</td>
-                        <td style={{ fontWeight: 700, color: (c.sb.change_pct??0)>0?'#22c55e':(c.sb.change_pct??0)<0?'#ef4444':'var(--text-tertiary)' }}>{(c.sb.change_pct??0)>0?'+':''}{(c.sb.change_pct??0).toFixed(2)}%</td>
+                        <td style={{ fontWeight: 700, color: stockColor(c.sa.change_pct??0, true) }}>{(c.sa.change_pct??0)>0?'+':''}{(c.sa.change_pct??0).toFixed(2)}%</td>
+                        <td style={{ fontWeight: 700, color: stockColor(c.sb.change_pct??0, true) }}>{(c.sb.change_pct??0)>0?'+':''}{(c.sb.change_pct??0).toFixed(2)}%</td>
                       </tr>
                     </tbody>
                   </table>
@@ -482,7 +489,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               </div>
               <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>등락률</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: (selectedStock.change_pct??0)>0?'#22c55e':(selectedStock.change_pct??0)<0?'#ef4444':'var(--text-tertiary)' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: stockColor(selectedStock.change_pct??0, isDomestic) }}>
                   {(selectedStock.change_pct??0)>0?'▲':'▼'} {Math.abs(selectedStock.change_pct??0).toFixed(2)}%
                 </div>
               </div>
