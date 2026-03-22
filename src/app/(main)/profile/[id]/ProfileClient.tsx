@@ -62,10 +62,14 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [followLoading, setFollowLoading] = useState(false);
   const searchParams = useSearchParams();
   const paramTab = searchParams.get('tab');
-  const initialTab = paramTab === 'bookmarks' ? 'bookmarks' : paramTab === 'comments' ? 'comments' : 'posts';
-  const [activeTab, setActiveTab] = useState<'posts'|'bookmarks'|'comments'>(initialTab);
+  const initialTab = paramTab === 'bookmarks' ? 'bookmarks' : paramTab === 'comments' ? 'comments' : paramTab === 'stocks' ? 'stocks' : paramTab === 'apts' ? 'apts' : 'posts';
+  const [activeTab, setActiveTab] = useState<'posts'|'bookmarks'|'comments'|'stocks'|'apts'>(initialTab);
   const [bookmarkedPosts, setBookmarkedPosts] = useState<PostRow[]>([]);
   const [bookmarksLoaded, setBookmarksLoaded] = useState(false);
+  const [watchStocks, setWatchStocks] = useState<any[]>([]);
+  const [watchStocksLoaded, setWatchStocksLoaded] = useState(false);
+  const [watchApts, setWatchApts] = useState<any[]>([]);
+  const [watchAptsLoaded, setWatchAptsLoaded] = useState(false);
   const [displayedPosts, setDisplayedPosts] = useState<PostRow[]>(posts);
   const [postsOffset, setPostsOffset] = useState(posts.length);
   const [hasMorePosts, setHasMorePosts] = useState(posts.length >= 20);
@@ -183,16 +187,44 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
     } catch {} finally { setLoadingMorePosts(false); }
   };
 
-  const handleTabChange = (tab: 'posts'|'bookmarks'|'comments') => {
+  const handleTabChange = (tab: 'posts'|'bookmarks'|'comments'|'stocks'|'apts') => {
     setActiveTab(tab);
     if (tab === 'bookmarks') loadBookmarks();
     if (tab === 'comments') loadMyComments();
+    if (tab === 'stocks') loadWatchStocks();
+    if (tab === 'apts') loadWatchApts();
+  };
+
+  const loadWatchStocks = async () => {
+    if (watchStocksLoaded) return;
+    const sb = createSupabaseBrowser();
+    const { data: wl } = await sb.from('stock_watchlist').select('symbol').eq('user_id', profile.id);
+    if (wl && wl.length > 0) {
+      const symbols = wl.map((w: any) => w.symbol);
+      const { data: stocks } = await sb.from('stock_quotes').select('symbol, name, market, price, change_pct, currency').in('symbol', symbols);
+      setWatchStocks(stocks ?? []);
+    }
+    setWatchStocksLoaded(true);
+  };
+
+  const loadWatchApts = async () => {
+    if (watchAptsLoaded) return;
+    const sb = createSupabaseBrowser();
+    const { data: bm } = await sb.from('apt_bookmarks').select('apt_id').eq('user_id', profile.id);
+    if (bm && bm.length > 0) {
+      const ids = bm.map((b: any) => b.apt_id);
+      const { data: apts } = await sb.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co').in('id', ids);
+      setWatchApts(apts ?? []);
+    }
+    setWatchAptsLoaded(true);
   };
 
   // Auto-load bookmarks/comments if initial tab matches
   useEffect(() => {
     if (initialTab === 'bookmarks') loadBookmarks();
     if (initialTab === 'comments') loadMyComments();
+    if (initialTab === 'stocks') loadWatchStocks();
+    if (initialTab === 'apts') loadWatchApts();
   }, []);
 
   const [postsLoaded, setPostsLoaded] = useState(false);
@@ -481,15 +513,15 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       </div>
 
       {/* 탭 — 게시글 / 북마크(본인만) */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 12, padding: 4, border: '1px solid var(--border)' }}>
-        {(['posts', 'comments', ...(isOwner ? ['bookmarks'] : [])] as ('posts'|'comments'|'bookmarks')[]).map(tab => (
+      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 12, padding: 4, border: '1px solid var(--border)', overflowX: 'auto' }}>
+        {(['posts', 'comments', ...(isOwner ? ['stocks', 'apts', 'bookmarks'] : [])] as ('posts'|'comments'|'bookmarks'|'stocks'|'apts')[]).map(tab => (
           <button key={tab} onClick={() => handleTabChange(tab)} style={{
             flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
             background: activeTab === tab ? 'var(--brand)' : 'transparent',
             color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',
-            fontWeight: 600, fontSize: 'var(--fs-sm)', transition: 'all 0.15s',
+            fontWeight: 600, fontSize: 'var(--fs-sm)', transition: 'all 0.15s', whiteSpace: 'nowrap', minWidth: 'fit-content',
           }}>
-            {tab === 'posts' ? `📝 작성한 글 (${displayedPosts.length})` : tab === 'comments' ? `💬 댓글` : `🔖 북마크`}
+            {tab === 'posts' ? `📝 글` : tab === 'comments' ? `💬 댓글` : tab === 'stocks' ? `⭐ 관심종목` : tab === 'apts' ? `🏠 관심단지` : `🔖 북마크`}
           </button>
         ))}
       </div>
@@ -555,6 +587,92 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
           )
         )}
 
+        {/* 관심종목 */}
+        {activeTab === 'stocks' && (
+          !watchStocksLoaded ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
+              <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', margin: '0 auto 8px' }} className="animate-spin" />
+            </div>
+          ) : watchStocks.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>⭐</div>
+              관심종목이 없어요<br/>
+              <Link href="/stock" style={{ color: 'var(--brand)', fontSize: 'var(--fs-sm)' }}>주식 페이지에서 ☆를 눌러 추가하세요</Link>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {watchStocks.map((s: any, i: number) => {
+                const isUp = (s.change_pct || 0) >= 0;
+                const color = s.market === 'KR' ? (isUp ? '#ef4444' : '#3b82f6') : (isUp ? '#22c55e' : '#ef4444');
+                return (
+                  <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ padding: '12px 0', borderBottom: i < watchStocks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>{s.name}</div>
+                        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.symbol} · {s.market}</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>
+                          {s.currency === 'KRW' ? `₩${Number(s.price).toLocaleString()}` : `$${Number(s.price).toLocaleString()}`}
+                        </div>
+                        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color }}>
+                          {isUp ? '+' : ''}{Number(s.change_pct).toFixed(2)}%
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )
+        )}
+
+        {/* 관심단지 */}
+        {activeTab === 'apts' && (
+          !watchAptsLoaded ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
+              <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', margin: '0 auto 8px' }} className="animate-spin" />
+            </div>
+          ) : watchApts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🏠</div>
+              관심단지가 없어요<br/>
+              <Link href="/apt" style={{ color: 'var(--brand)', fontSize: 'var(--fs-sm)' }}>부동산 페이지에서 북마크를 눌러 추가하세요</Link>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {watchApts.map((a: any, i: number) => {
+                const today = new Date().toISOString().slice(0, 10);
+                const isOpen = a.rcept_bgnde && a.rcept_endde && today >= a.rcept_bgnde && today <= a.rcept_endde;
+                const isClosed = a.rcept_endde && today > a.rcept_endde;
+                return (
+                  <Link key={a.id} href={`/apt/${a.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ padding: '12px 0', borderBottom: i < watchApts.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>{a.house_nm}</div>
+                        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                          {a.region_nm} · {a.tot_supply_hshld_co ? `${Number(a.tot_supply_hshld_co).toLocaleString()}세대` : ''}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: isOpen ? '#14532d' : isClosed ? 'var(--bg-hover)' : '#1e3a5f', color: isOpen ? '#86efac' : isClosed ? 'var(--text-tertiary)' : '#93c5fd' }}>
+                          {isOpen ? '접수중' : isClosed ? '마감' : '접수예정'}
+                        </span>
+                        {a.rcept_bgnde && (
+                          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
+                            {a.rcept_bgnde} ~ {a.rcept_endde}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )
+        )}
+
+        {/* 북마크 */}
         {activeTab === 'bookmarks' && (
           !bookmarksLoaded ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
