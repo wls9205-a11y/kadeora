@@ -259,3 +259,15 @@
 - 필터 인덱스 추가: unsold (active+region), redev (active+stage)
 - 크론 상태 전수 확인: 전체 정상, aggregate-trade-stats 간헐적 실패 → 현재 수정됨
 - consultant_premium 테이블: 이미 존재 확인
+
+---
+
+## 세션 21 최종 통계
+
+- **총 커밋**: 24건
+- **변경 파일**: 160+
+- **DB 수정**: 서울 재개발 104건 stage 수정, GIN 인덱스 7개 추가
+- **크론 수정**: crawl-seoul-redev guessStage 추가
+- **기능 추가**: 글쓰기 임시저장 (localStorage)
+- **디자인 확정**: 네이비 단일 테마, #2563EB 채움 강조 패턴
+- **데이터 검증**: 5개 테이블 전수 검사, KST 보정 완료
