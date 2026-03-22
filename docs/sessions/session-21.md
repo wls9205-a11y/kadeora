@@ -117,3 +117,38 @@
 - [ ] KIS_APP_KEY + KIS_APP_SECRET 환경변수
 - [ ] STOCK_DATA_API_KEY 발급
 - [ ] crawl-nationwide-redev API 키 등록
+
+---
+
+## 추가 작업: 전수 색상 검사 (2건 커밋)
+
+### 커밋 8: 전체 색상 전수 검사 (27파일)
+
+56개 tsx/ts 파일을 하나하나 열어서 색상 사용을 전수 검사.
+발견한 문제 27곳 수정:
+
+1. **ProfileClient**: 청약 상태 색상 구버전 그대로 → 네이비 팔레트
+2. **ChatRoom**: #7c3aed → #A78BFA, hex 8자리 → rgba
+3. **BannerPurchaseForm/NoticeBanner**: #4ade80 → #34D399, 전광판 미리보기 배경 네이비
+4. **opengraph-image/OG route**: 구 GitHub 텍스트 색상 → 네이비 팔레트
+5. **어드민 6파일**: 라이트전용 배경(#dcfce7/#fee2e2 등) → 다크호환 rgba
+6. **AdminCommandCenter**: hex-alpha(#05966920) → 정식 rgba
+7. **apt/[id]/page.tsx**: 청약 상태 색상 AptClient와 동기화 빠져있었음
+8. **PaymentClient**: 라이트전용 #FEF3C7 → 다크호환
+9. **constants.ts**: 브론즈/실버/다이아 등급 네이비 최적화
+10. **탭/필터 반투명 패턴**: FeedClient, StockClient, blog, search, shop, discuss, StockComments, FontSizeControl, UnsoldStatsWidget — 전부 `var(--brand)` 채움 → `rgba(96,165,250,0.15)` 반투명
+
+### 최종 검증: 10개 카테고리 전부 0건
+
+| # | 카테고리 | 결과 |
+|---|---------|------|
+| 1 | 오렌지 브랜드 | 0건 |
+| 2 | Material Design | 0건 |
+| 3 | 구 Tailwind hex | 0건 |
+| 4 | GitHub 다크 | 0건 |
+| 5 | 구 rgba | 0건 |
+| 6 | Reddit 구 다크 | 0건 |
+| 7 | 라이트전용 배경 | 0건 |
+| 8 | 구 green | 0건 |
+| 9 | 구 보라 | 0건 |
+| 10 | 구 기타 | 0건 |
