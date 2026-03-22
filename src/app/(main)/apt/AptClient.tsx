@@ -234,7 +234,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           {/* 🔥 마감 임박 배너 */}
           {(() => {
             const today = new Date();
-            const urgent = apts.filter(a => {
+            const urgent = filtered.filter(a => {
               if (!a.rcept_endde) return false;
               const end = new Date(a.rcept_endde);
               const diff = Math.ceil((end.getTime() - today.getTime()) / 86400000);
@@ -283,7 +283,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               const cells: { day: number; apts: any[] }[] = [];
               for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dayApts = apts.filter(a => dateStr >= String(a.rcept_bgnde || '').slice(0, 10) && dateStr <= String(a.rcept_endde || '').slice(0, 10));
+                const dayApts = filtered.filter(a => dateStr >= String(a.rcept_bgnde || '').slice(0, 10) && dateStr <= String(a.rcept_endde || '').slice(0, 10));
                 cells.push({ day: d, apts: dayApts });
               }
               return (
@@ -435,8 +435,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         if (ongoingStatus !== '전체') filtered = filtered.filter((o: any) => ongoingStatus === '미분양' ? o.source === 'unsold' : o.source === 'subscription');
         const totalSites = filtered.length;
         const totalUnsoldUnits = filtered.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0);
-        const allSubCount = ongoingApts.filter((o: any) => o.source === 'subscription').length;
-        const allUnsoldCount = ongoingApts.filter((o: any) => o.source === 'unsold').length;
+        const allSubCount = filtered.filter((o: any) => o.source === 'subscription').length;
+        const allUnsoldCount = filtered.filter((o: any) => o.source === 'unsold').length;
         const PER_PAGE = 20;
         const sorted = [...filtered].sort((a, b) => {
           if (ongoingSort === 'unsold') return (b.unsold_count || 0) - (a.unsold_count || 0);
@@ -458,7 +458,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
         // ① 입주 임박 현장
         const todayD = new Date();
-        const urgentMove = ongoingApts.filter((o: any) => {
+        const urgentMove = filtered.filter((o: any) => {
           if (!o.mvn_prearnge_ym) return false;
           const mvn = String(o.mvn_prearnge_ym).replace(/[^0-9]/g, '').slice(0, 6);
           if (mvn.length < 6) return false;
@@ -477,7 +477,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const pipeStages = ['청약마감', '당첨발표', '계약중', '공사중', '입주예정'];
         const pipeCounts: Record<string, number> = {};
         pipeStages.forEach(s => { pipeCounts[s] = 0; });
-        ongoingApts.forEach((o: any) => {
+        filtered.forEach((o: any) => {
           if (o.source === 'unsold') { pipeCounts['공사중']++; return; }
           const dates = [o.rcept_endde, o.przwner_presnatn_de, o.cntrct_cncls_endde, o.mvn_prearnge_ym].map(d => d ? String(d).slice(0, 10) : '');
           if (dates[3] && dates[3] <= todayPipe) pipeCounts['입주예정']++;
@@ -486,17 +486,17 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           else if (dates[0] && dates[0] <= todayPipe) pipeCounts['당첨발표']++;
           else pipeCounts['청약마감']++;
         });
-        const pipeTotal = ongoingApts.length || 1;
+        const pipeTotal = filtered.length || 1;
         const pipeColors = ['#6b7280', '#60A5FA', '#FBBF24', '#FB923C', '#34D399'];
 
         // ④ 분양가 TOP10
-        const priceTop = [...ongoingApts].filter(o => o.sale_price_max && o.sale_price_max > 0).sort((a, b) => (b.sale_price_max || 0) - (a.sale_price_max || 0)).slice(0, 10);
+        const priceTop = [...filtered].filter(o => o.sale_price_max && o.sale_price_max > 0).sort((a, b) => (b.sale_price_max || 0) - (a.sale_price_max || 0)).slice(0, 10);
         const maxPrice = priceTop[0]?.sale_price_max || 1;
 
         // 수도권/지방 집계
         const capitalRegions = ['서울', '경기', '인천'];
-        const capitalCount = ongoingApts.filter((o: any) => capitalRegions.some(c => (o.region_nm || '').includes(c))).length;
-        const localCount = ongoingApts.length - capitalCount;
+        const capitalCount = filtered.filter((o: any) => capitalRegions.some(c => (o.region_nm || '').includes(c))).length;
+        const localCount = filtered.length - capitalCount;
 
         return (
           <div>
@@ -562,10 +562,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
             {/* 종합 현황 + 수도권/지방 */}
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 전국 분양중 현황</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 {ongoingRegion !== '전체' ? `${ongoingRegion} ` : ''}분양중 현황</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
                 {[
-                  { label: '전체', value: ongoingApts.length, color: 'var(--brand)' },
+                  { label: '전체', value: filtered.length, color: 'var(--brand)' },
                   { label: '분양중', value: allSubCount, color: '#34D399' },
                   { label: '미분양', value: allUnsoldCount, color: '#F87171' },
                   { label: '수도권', value: capitalCount, color: 'var(--text-primary)' },
@@ -911,31 +911,38 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             </div>
 
-            {/* 전국 종합 현황판 */}
-            {us && (
+            {/* 종합 현황판 */}
+            {(() => {
+              const filteredTotal = fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+              const filteredAfterCompletion = fu.reduce((s: number, u: any) => s + (u.after_completion_unsold || 0), 0);
+              const capitalR = ['서울', '경기', '인천'];
+              const filteredCapital = fu.filter((u: any) => capitalR.some(c => (u.region_nm || '').includes(c))).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+              const filteredLocal = filteredTotal - filteredCapital;
+              return (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 전국 미분양 현황</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {unsoldRegion !== '전체' ? `${unsoldRegion} ` : ''}미분양 현황</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전국</div>
-                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{(us.total || total).toLocaleString()}호</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{unsoldRegion !== '전체' ? unsoldRegion : '전국'}</div>
+                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{filteredTotal.toLocaleString()}호</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>준공후(악성)</div>
-                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{(us.after_completion || 0).toLocaleString()}호</div>
+                    <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{filteredAfterCompletion.toLocaleString()}호</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>수도권</div>
-                    <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{(us.capital || 0).toLocaleString()}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>단지 수</div>
+                    <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length}곳</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지방</div>
-                    <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{(us.local || 0).toLocaleString()}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 미분양</div>
+                    <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>{us.month ? `${us.month.slice(0,4)}.${us.month.slice(4)}` : us.year ? `${us.year}년` : ''} 기준 · 국토교통부 통계누리</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>국토교통부 통계누리 기준</div>
               </div>
-            )}
+              );
+            })()}
 
             {/* 미분양 지역별 TOP5 */}
             {unsoldRegionStats.length > 0 && (
@@ -1127,14 +1134,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {activeTab === 'redev' && (() => {
         if (!redevelopment.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏗️ 재개발·재건축 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>각 지자체 정비사업 데이터 연동 시 표시됩니다</span></div>;
 
-        const redevCount = redevelopment.filter((r: any) => r.project_type === '재개발').length;
-        const rebuildCount = redevelopment.filter((r: any) => r.project_type === '재건축').length;
-        const stageCount: Record<string, number> = {};
-        STAGE_ORDER.forEach(s => { stageCount[s] = 0; });
-        redevelopment.forEach((r: any) => { if (stageCount[r.stage] !== undefined) stageCount[r.stage]++; else stageCount['기타'] = (stageCount['기타'] || 0) + 1; });
-
-        const totalHouseholds = redevelopment.reduce((s: number, r: any) => s + (r.total_households || 0), 0);
-
         // 지역별 현황판 데이터
         const redevRegionMap = new Map<string, { total: number; redev: number; rebuild: number; households: number }>();
         redevelopment.forEach((r: any) => {
@@ -1162,6 +1161,14 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           if (!aOk && bOk) return 1;
           return 0;
         });
+
+        const redevCount = filteredRedev.filter((r: any) => r.project_type === '재개발').length;
+        const rebuildCount = filteredRedev.filter((r: any) => r.project_type === '재건축').length;
+        const stageCount: Record<string, number> = {};
+        STAGE_ORDER.forEach(s => { stageCount[s] = 0; });
+        filteredRedev.forEach((r: any) => { if (stageCount[r.stage] !== undefined) stageCount[r.stage]++; else stageCount['기타'] = (stageCount['기타'] || 0) + 1; });
+
+        const totalHouseholds = filteredRedev.reduce((s: number, r: any) => s + (r.total_households || 0), 0);
 
         return (
           <div>
@@ -1226,8 +1233,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏗️ 단계별 파이프라인</div>
               <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
                 {STAGE_ORDER.map((stage, i) => {
-                  const count = redevelopment.filter((r: any) => r.stage === stage).length;
-                  const total = redevelopment.length || 1;
+                  const regionFiltered = redevRegion === '전체' ? redevelopment : redevelopment.filter((r: any) => r.region === redevRegion);
+                  const count = regionFiltered.filter((r: any) => r.stage === stage).length;
+                  const total = regionFiltered.length || 1;
                   const pct = Math.round((count / total) * 100);
                   const sc = STAGE_COLORS[stage] || { bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' };
                   return (
@@ -1411,7 +1419,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
             {/* 대시보드 */}
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 최근 거래 현황</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {tradeRegion !== '전체' ? `${tradeRegion} ` : ''}최근 거래 현황</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 10 }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
