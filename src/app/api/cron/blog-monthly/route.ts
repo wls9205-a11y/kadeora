@@ -70,8 +70,8 @@ ${apts.length >= 3 ? `이번 달 **${region}**에는 ${apts.length}개 단지가
 
 > 청약홈(applyhome.co.kr) 공공데이터 기반. 정확한 정보는 청약홈에서 확인하세요.`;
 
-      await admin.from('blog_posts').insert({ slug, title: regTitle, content: ensureMinLength(content, 'apt'), excerpt: `${month} ${region} 지역 청약 ${apts.length}건 · ${totalUnits.toLocaleString()}세대.`, category: 'apt', tags: [`${region} 청약`, `${region} 분양`, '아파트 청약', '청약일정'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(regTitle)}&type=blog`, image_alt: generateImageAlt('apt', regTitle), meta_description: generateMetaDesc(content), meta_keywords: generateMetaKeywords('apt', [`${region} 청약`, `${region} 분양`, '아파트 청약', '청약일정']) });
-      created++;
+      const _r = await safeBlogInsert(admin, { slug, title: regTitle, content: ensureMinLength(content, 'apt'), excerpt: `${month} ${region} 지역 청약 ${apts.length}건 · ${totalUnits.toLocaleString()}세대.`, category: 'apt', tags: [`${region} 청약`, `${region} 분양`, '아파트 청약', '청약일정'], cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(regTitle)}&type=blog`, image_alt: generateImageAlt('apt', regTitle), meta_description: generateMetaDesc(content), meta_keywords: generateMetaKeywords('apt', [`${region} 청약`, `${region} 분양`, '아파트 청약', '청약일정']) });
+      if (_r.success) created++;
     }
 
     // 미분양 월간 리포트
@@ -128,8 +128,8 @@ ${table}
 
 > 국토교통부 미분양주택현황 기반. 투자 권유가 아니며, 정확한 정보는 해당 시행사에 직접 확인하세요.`;
 
-      await admin.from('blog_posts').insert({ slug: slugUnsold, title: unsoldTitle, content: ensureMinLength(content, 'unsold'), excerpt: `${month} 전국 미분양 ${total.toLocaleString()}세대. ${regionCount}개 지역 분석.`, category: 'unsold', tags: ['미분양', '미분양아파트', '부동산', '전국미분양'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog`, image_alt: generateImageAlt('unsold', unsoldTitle), meta_description: generateMetaDesc(content), meta_keywords: generateMetaKeywords('unsold', ['미분양', '미분양아파트', '부동산', '전국미분양']) });
-      created++;
+      const _r = await safeBlogInsert(admin, { slug: slugUnsold, title: unsoldTitle, content: ensureMinLength(content, 'unsold'), excerpt: `${month} 전국 미분양 ${total.toLocaleString()}세대. ${regionCount}개 지역 분석.`, category: 'unsold', tags: ['미분양', '미분양아파트', '부동산', '전국미분양'], cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog`, image_alt: generateImageAlt('unsold', unsoldTitle), meta_description: generateMetaDesc(content), meta_keywords: generateMetaKeywords('unsold', ['미분양', '미분양아파트', '부동산', '전국미분양']) });
+      if (_r.success) created++;
     }
 
     // 가격대별 미분양
@@ -189,8 +189,8 @@ ${bTable}
 카더라에서 매월 업데이트되는 가격대별 미분양 정보를 확인하세요.
 
 > 국토교통부 미분양주택현황 기반. 투자 권유가 아닙니다.`;
-        await admin.from('blog_posts').insert({ slug: bSlug, title: bTitle, content: ensureMinLength(bContent, 'unsold'), excerpt: `${b.label} 미분양 ${budgetApts.length}건 · ${bTotalUnsold.toLocaleString()}세대. ${bRegions.slice(0, 3).join(', ')}.`, category: 'unsold', tags: [`${b.label} 미분양`, '미분양 아파트', '가격대별', '부동산'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(bTitle)}&type=blog`, image_alt: generateImageAlt('unsold', bTitle), meta_description: generateMetaDesc(bContent), meta_keywords: generateMetaKeywords('unsold', [`${b.label} 미분양`, '미분양 아파트', '가격대별', '부동산']) });
-        created++;
+        const _r = await safeBlogInsert(admin, { slug: bSlug, title: bTitle, content: ensureMinLength(bContent, 'unsold'), excerpt: `${b.label} 미분양 ${budgetApts.length}건 · ${bTotalUnsold.toLocaleString()}세대. ${bRegions.slice(0, 3).join(', ')}.`, category: 'unsold', tags: [`${b.label} 미분양`, '미분양 아파트', '가격대별', '부동산'], cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(bTitle)}&type=blog`, image_alt: generateImageAlt('unsold', bTitle), meta_description: generateMetaDesc(bContent), meta_keywords: generateMetaKeywords('unsold', [`${b.label} 미분양`, '미분양 아파트', '가격대별', '부동산']) });
+      if (_r.success) created++;
       }
     }
 
@@ -211,8 +211,8 @@ ${bTable}
         const calTable = calApts.map(a => `| ${a.rcept_bgnde?.slice(5) ?? '-'} | [${a.house_nm}](/apt/${a.house_manage_no}) | ${a.region_nm} | ${a.rcept_endde?.slice(5) ?? '-'} |`).join('\n');
         const calTitle = `${calMonth.replace('-', '년 ')}월 아파트 청약 캘린더`;
         const calContent = `## ${calTitle}\n\n| 접수시작 | 단지명 | 지역 | 접수마감 |\n|---|---|---|---|\n${calTable}\n\n---\n\n[전체 청약 일정 →](/apt)\n[청약 마감 알림 받기 →](/login)\n\n> 청약홈 공공데이터 기반.`;
-        await admin.from('blog_posts').insert({ slug: calSlug, title: calTitle, content: ensureMinLength(calContent, 'apt'), excerpt: `${calMonth} 접수 예정 청약 ${calApts.length}건 캘린더.`, category: 'apt', tags: ['청약캘린더', `${calMonth} 청약`, '청약일정'], source_type: 'auto', cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(calTitle)}&type=blog`, image_alt: generateImageAlt('apt', calTitle), meta_description: generateMetaDesc(calContent), meta_keywords: generateMetaKeywords('apt', ['청약캘린더', `${calMonth} 청약`, '청약일정']) });
-        created++;
+        const _r = await safeBlogInsert(admin, { slug: calSlug, title: calTitle, content: ensureMinLength(calContent, 'apt'), excerpt: `${calMonth} 접수 예정 청약 ${calApts.length}건 캘린더.`, category: 'apt', tags: ['청약캘린더', `${calMonth} 청약`, '청약일정'], cron_type: 'monthly', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(calTitle)}&type=blog`, image_alt: generateImageAlt('apt', calTitle), meta_description: generateMetaDesc(calContent), meta_keywords: generateMetaKeywords('apt', ['청약캘린더', `${calMonth} 청약`, '청약일정']) });
+      if (_r.success) created++;
       }
     }
 

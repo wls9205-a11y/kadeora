@@ -98,16 +98,16 @@ ${region} 지역은 최근 분양 물량이 꾸준히 공급되고 있어 청약
 
       const tags = [`${apt.house_nm} 분양`, `${region} 청약`, '아파트 청약', '분양일정'];
       const aptTitle = `${apt.house_nm} ${region} 분양 청약 일정 총정리`;
-      await admin.from('blog_posts').insert({
+      const _r = await safeBlogInsert(admin, {
         slug, title: aptTitle,
         content: ensureMinLength(content, 'apt'), excerpt: `${apt.house_nm} ${region} ${units.toLocaleString()}세대 분양. 접수 ${fmtDate(apt.rcept_bgnde)}~${fmtDate(apt.rcept_endde)}.`,
-        category: 'apt', tags, source_type: 'apt', source_ref: apt.house_manage_no,
+        category: 'apt', tags, source_ref: apt.house_manage_no,
         cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(aptTitle)}&type=blog`,
         image_alt: generateImageAlt('apt', aptTitle),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords('apt', tags),
       });
-      created++;
+      if (_r.success) created++;
     }
 
     // 2. unsold_apts에서 블로그 없는 현장
@@ -172,17 +172,16 @@ ${unsoldPct >= 50 ? `**${u.house_nm}**의 미분양률이 ${unsoldPct}%로 상�
 > 국토교통부 미분양주택현황 기반. 정확한 정보는 해당 시행사에 직접 확인하세요. 투자 권유가 아닙니다.`;
 
       const unsoldTitle = `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대 현황`;
-      await admin.from('blog_posts').insert({
+      const _r = await safeBlogInsert(admin, {
         slug, title: unsoldTitle,
         content: ensureMinLength(content, 'unsold'), excerpt: `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대. 분양가 ${pMin}~${pMax}.`,
-        category: 'unsold', tags: [`${u.house_nm} 미분양`, `${u.region_nm} 미분양`, '미분양 아파트'],
-        source_type: 'unsold', source_ref: String(u.id),
+        category: 'unsold', tags: [`${u.house_nm} 미분양`, `${u.region_nm} 미분양`, '미분양 아파트'], source_ref: String(u.id),
         cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog`,
         image_alt: generateImageAlt('unsold', unsoldTitle),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords('unsold', [`${u.house_nm} 미분양`, `${u.region_nm} 미분양`, '미분양 아파트']),
       });
-      created++;
+      if (_r.success) created++;
     }
 
     return {

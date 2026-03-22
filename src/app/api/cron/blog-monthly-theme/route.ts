@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
         const content = generateMonthlyContent(theme);
         const tags = [monthKey, theme.category];
 
-        await admin.from('blog_posts').insert({
+        const _r = await safeBlogInsert(admin, {
           slug: theme.slug, title: theme.title,
           content: ensureMinLength(content, theme.category),
           excerpt: `${theme.title} — 카더라 월별 특집`,
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords(theme.category, tags),
         });
-        created++;
+      if (_r.success) created++;
       } catch (e: any) {
         console.error(`[blog-monthly-theme] Error for ${theme.slug}:`, e.message);
       }

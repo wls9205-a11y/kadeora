@@ -152,7 +152,7 @@ export async function GET(req: NextRequest) {
         const content = generateLandmarkBlog(apt);
         const tags = apt.tags || [apt.region, apt.district, apt.name].filter(Boolean);
 
-        await admin.from('blog_posts').insert({
+        const _r = await safeBlogInsert(admin, {
           slug, title,
           content: ensureMinLength(content, 'apt'),
           excerpt: `${apt.name} ${apt.region} ${apt.district} 매매 전세 시세 학군 교통 투자전망 2026년 분석`,
@@ -163,8 +163,7 @@ export async function GET(req: NextRequest) {
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('apt', tags),
         });
-
-        await admin.from('landmark_apts').update({ blog_generated: true }).eq(apt.blog_slug ? 'blog_slug' : 'slug', slug);
+      if (_r.success) await admin.from('landmark_apts').update({ blog_generated: true }).eq(apt.blog_slug ? 'blog_slug' : 'slug', slug);
         created++;
       } catch (e: any) {
         console.error(`[blog-apt-landmark] Error for ${apt.blog_slug || apt.slug}:`, e.message);

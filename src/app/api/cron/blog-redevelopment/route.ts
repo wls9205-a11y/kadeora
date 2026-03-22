@@ -135,7 +135,7 @@ export async function GET(req: NextRequest) {
         const content = generateRedevelopmentBlog(zone);
         const tags = zone.tags || [zone.region, zName, zType].filter(Boolean);
 
-        await admin.from('blog_posts').insert({
+        const _r = await safeBlogInsert(admin, {
           slug, title,
           content: ensureMinLength(content, 'apt'),
           excerpt: `${zName} ${zType} ${zone.progress_stage || zone.stage || ''} 시공사 분담금 투자전망 2026`,
@@ -145,8 +145,7 @@ export async function GET(req: NextRequest) {
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('apt', tags),
         });
-
-        await admin.from('redevelopment_zones').update({ blog_generated: true }).eq(zone.blog_slug ? 'blog_slug' : 'slug', slug);
+      if (_r.success) await admin.from('redevelopment_zones').update({ blog_generated: true }).eq(zone.blog_slug ? 'blog_slug' : 'slug', slug);
         created++;
       } catch (e: any) {
         console.error(`[blog-redevelopment] Error for ${zone.blog_slug || zone.slug}:`, e.message);

@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     }
 
     const tags = ['월간리뷰', 'market-review', monthKey];
-    await supabase.from('blog_posts').insert({
+    const _r = await safeBlogInsert(supabase, {
       slug, title,
       content: ensureMinLength(content, 'stock'),
       excerpt: `${monthKey} 월간 시장 종합 리뷰`,
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       meta_keywords: generateMetaKeywords('stock', tags),
     });
 
-    return { processed: 1, created: 1, failed: 0, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
+    return { processed: 1, created: _r.success ? 1 : 0, failed: _r.success ? 0 : 1, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
   });
 
   if (!result.success) return NextResponse.json({ error: result.error }, { status: 500 });

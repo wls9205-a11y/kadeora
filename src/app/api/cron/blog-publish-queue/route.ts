@@ -5,15 +5,18 @@ import { withCronLogging } from '@/lib/cron-logger';
 export const dynamic = 'force-dynamic';
 
 /**
- * 블로그 발행 큐 크론
+ * 블로그 발행 큐 크론 (v2)
  * 
- * - 하루 최대 3개까지 대기 중인 글을 순차 발행
- * - 발행 = is_published=true + published_at=NOW()
- * - 오전 9시, 오후 1시, 오후 6시에 각 1개씩 발행 (vercel.json에서 3회 호출)
- * - 또는 1회 호출 시 남은 쿼터만큼 발행
+ * DB의 blog_publish_config 테이블에서 설정을 읽어 발행:
+ * - daily_publish_limit: 하루 최대 발행 수 (기본 3)
+ * - min_content_length: 최소 글자 수 (미달 시 스킵, 기본 1200)
+ * - auto_publish_enabled: 자동 발행 on/off
+ * 
+ * vercel.json에서 하루 3회 호출 (09:00, 13:00, 18:00)
+ * 각 호출 시 DB RPC blog_publish_from_queue()로 1개씩 안전 발행
+ * 
+ * ★ 발행 속도 조절: Supabase에서 blog_publish_config.daily_publish_limit만 변경
  */
-
-const DAILY_PUBLISH_LIMIT = 3;
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -28,74 +31,25 @@ export async function GET(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // 오늘 이미 발행된 건수
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const { count: todayCount } = await admin
-      .from('blog_posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_published', true)
-      .gte('published_at', todayStart.toISOString());
+    // DB RPC로 발행 (설정값도 DB에서 읽음 — 코드 배포 없이 속도 조절 가능)
+    const { data: publishResult, error: publishError } = await admin.rpc('blog_publish_from_queue');
 
-    const remaining = DAILY_PUBLISH_LIMIT - (todayCount ?? 0);
-    if (remaining <= 0) {
-      return {
-        processed: 0,
-        created: 0,
-        failed: 0,
-        metadata: { reason: 'daily_limit_reached', today_count: todayCount },
-      };
+    if (publishError) {
+      console.error('[blog-publish-queue] RPC error:', publishError.message);
+      throw new Error(publishError.message);
     }
 
-    // 이번 호출에서 1개만 발행 (시간대별 분산)
-    const publishCount = 1;
+    // 큐 상태도 조회 (로그용)
+    const { data: queueStatus } = await admin.rpc('blog_queue_status');
 
-    // 큐에서 가장 오래된 대기 글 가져오기
-    const { data: queue } = await admin
-      .from('blog_posts')
-      .select('id, title, slug, category')
-      .eq('is_published', false)
-      .is('published_at', null)
-      .order('created_at', { ascending: true })
-      .limit(publishCount);
-
-    if (!queue || queue.length === 0) {
-      return {
-        processed: 0,
-        created: 0,
-        failed: 0,
-        metadata: { reason: 'queue_empty' },
-      };
-    }
-
-    let published = 0;
-    for (const post of queue) {
-      const { error } = await admin
-        .from('blog_posts')
-        .update({
-          is_published: true,
-          published_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', post.id);
-
-      if (!error) {
-        published++;
-        console.log(`[blog-publish-queue] Published: "${post.title}" (${post.slug})`);
-      } else {
-        console.error(`[blog-publish-queue] Failed to publish ${post.slug}:`, error.message);
-      }
-    }
+    const published = publishResult?.published ?? 0;
+    console.log(`[blog-publish-queue] Result: ${JSON.stringify(publishResult)}, Queue: ${JSON.stringify(queueStatus)}`);
 
     return {
-      processed: queue.length,
+      processed: published,
       created: published,
-      failed: queue.length - published,
-      metadata: {
-        today_total: (todayCount ?? 0) + published,
-        daily_limit: DAILY_PUBLISH_LIMIT,
-        queue_published: queue.map(p => p.slug),
-      },
+      failed: 0,
+      metadata: { publish_result: publishResult, queue_status: queueStatus },
     };
   });
 
