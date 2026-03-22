@@ -32,7 +32,7 @@ function MiniChart({ data }: { data: { date: string; close_price: number }[] }) 
   const range = max - min || 1; const W = 300; const H = 80; const P = 4;
   const points = prices.map((p, i) => `${P + (i / (prices.length - 1)) * (W - P * 2)},${H - P - ((p - min) / range) * (H - P * 2)}`).join(' ');
   const isUp = prices[prices.length - 1] >= prices[0];
-  const color = isUp ? '#22c55e' : '#ef4444';
+  const color = isUp ? '#ef4444' : '#3b82f6';
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
@@ -206,7 +206,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                   <span style={{
                     fontSize: 10, padding: '1px 6px', borderRadius: 8, fontWeight: 700, flexShrink: 0,
                     background: n.sentiment_label === 'positive' ? 'rgba(34,197,94,0.15)' : n.sentiment_label === 'negative' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.1)',
-                    color: n.sentiment_label === 'positive' ? '#22c55e' : n.sentiment_label === 'negative' ? '#ef4444' : '#94a3b8',
+                    color: n.sentiment_label === 'positive' ? '#ef4444' : n.sentiment_label === 'negative' ? '#3b82f6' : '#94a3b8',
                   }}>
                     {n.sentiment_label === 'positive' ? '🟢' : n.sentiment_label === 'negative' ? '🔴' : '⚪'}
                     {n.sentiment_score ? ` ${Math.round(n.sentiment_score * 100)}%` : ''}

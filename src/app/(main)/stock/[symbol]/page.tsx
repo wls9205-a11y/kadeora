@@ -44,12 +44,13 @@ export default async function StockDetailPage({ params }: Props) {
   const isStale = !s.updated_at || s.updated_at.startsWith('2000-01-01');
 
   // Parallel fetch all data
-  const [histR, aiR, newsR, flowR, discR] = await Promise.all([
+  const [histR, aiR, newsR, flowR, discR, similarR] = await Promise.all([
     sb.from('stock_price_history').select('date, close_price').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
     sb.from('stock_ai_comments').select('*').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('stock_news').select('*').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
     sb.from('stock_investor_flow').select('*').eq('symbol', symbol).order('date', { ascending: false }).limit(5),
     sb.from('stock_disclosures').select('*').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
+    s.sector ? sb.from('stock_quotes').select('symbol, name, price, change_pct, market_cap, currency').eq('sector', s.sector).neq('symbol', symbol).gt('price', 0).order('market_cap', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
   ]);
 
   const items = [
@@ -111,6 +112,33 @@ export default async function StockDetailPage({ params }: Props) {
         description={s.description || `${s.name}은(는) ${s.market} 상장 종목입니다. 자세한 기업 정보는 공식 홈페이지나 증권사 앱에서 확인해보세요.`}
         currency={s.currency}
       />
+
+      {/* 비슷한 종목 */}
+      {(similarR.data ?? []).length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 같은 섹터 종목 ({s.sector})</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {(similarR.data ?? []).map((sim: any) => {
+              const simPct = Number(sim.change_pct) || 0;
+              const isKR = sim.currency !== 'USD';
+              return (
+                <Link key={sim.symbol} href={`/stock/${encodeURIComponent(sim.symbol)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{sim.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 6 }}>{sim.symbol}</span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, marginLeft: 8, color: isKR ? (simPct > 0 ? '#ef4444' : simPct < 0 ? '#3b82f6' : 'var(--text-tertiary)') : (simPct > 0 ? '#22c55e' : simPct < 0 ? '#ef4444' : 'var(--text-tertiary)') }}>
+                      {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 면책고지 */}
       <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>

@@ -170,6 +170,38 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {/* ━━━ 청약 일정 탭 ━━━ */}
       {activeTab === 'sub' && (
         <div>
+          {/* 🔥 마감 임박 배너 */}
+          {(() => {
+            const today = new Date();
+            const urgent = apts.filter(a => {
+              if (!a.rcept_endde) return false;
+              const end = new Date(a.rcept_endde);
+              const diff = Math.ceil((end.getTime() - today.getTime()) / 86400000);
+              return diff >= 0 && diff <= 3 && getStatus(a) === 'open';
+            }).sort((a, b) => new Date(a.rcept_endde).getTime() - new Date(b.rcept_endde).getTime());
+            return urgent.length > 0 ? (
+              <div style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(249,115,22,0.1))', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#ef4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ animation: 'pulse 2s infinite' }}>🔥</span> 마감 임박 ({urgent.length}건)
+                </div>
+                {urgent.map(a => {
+                  const diff = Math.ceil((new Date(a.rcept_endde).getTime() - today.getTime()) / 86400000);
+                  return (
+                    <Link key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(239,68,68,0.1)', textDecoration: 'none', color: 'inherit' }}>
+                      <div>
+                        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.house_nm}</span>
+                        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{a.region_nm}</span>
+                      </div>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: diff === 0 ? '#dc2626' : '#f97316', flexShrink: 0 }}>
+                        {diff === 0 ? '오늘 마감!' : `D-${diff}`}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : null;
+          })()}
+
           {/* 지역별 현황판 */}
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -903,7 +935,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   </div>
                   <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{t.apt_name}</div>
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
-                    전용 {t.exclusive_area}㎡ | <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(amt)}</strong> | {t.floor}층 | {t.deal_date}
+                    전용 {t.exclusive_area}㎡ | <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(amt)}</strong>
+                    {t.exclusive_area > 0 && amt > 0 && <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}> · 평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</span>}
+                    {' '}| {t.floor}층 | {t.deal_date}
                   </div>
                 </div>
               );
