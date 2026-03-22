@@ -39,6 +39,11 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'blog-seed-guide':       { display: '가이드 블로그',    group: '블로그' },
   'blog-monthly-theme':    { display: '월별 테마 블로그',  group: '블로그' },
   'auto-grade':            { display: '등급 자동 갱신',    group: '시스템' },
+  'apt-ai-summary':        { display: 'AI 한줄 분석',     group: '부동산' },
+  'expire-listings':       { display: '리스팅 만료 처리',  group: '시스템' },
+  'stock-refresh':         { display: '주식 실시간',      group: '주식' },
+  'push-apt-deadline':     { display: '청약 마감 알림',    group: '부동산' },
+  'cleanup':               { display: '데이터 정리',      group: '시스템' },
 };
 
 const QUICK_ACTIONS = [
@@ -50,6 +55,8 @@ const QUICK_ACTIONS = [
   { id: 'daily-stats',   label: '일일 통계',    path: '/api/cron/daily-stats',   icon: '📊' },
   { id: 'blog-daily',    label: '블로그 발행',  path: '/api/cron/blog-daily',    icon: '📰' },
   { id: 'health-check',  label: '헬스체크',     path: '/api/cron/health-check',  icon: '🩺' },
+  { id: 'ai-summary',    label: 'AI 분석 생성', path: '/api/cron/apt-ai-summary', icon: '🤖' },
+  { id: 'auto-grade',    label: '등급 갱신',    path: '/api/cron/auto-grade',    icon: '⭐' },
 ];
 
 const GROUPS_ORDER = ['시스템', '주식', '부동산', '콘텐츠', '블로그'];
@@ -108,11 +115,11 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         sb.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', today),
         sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).eq('is_active', true),
-        sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }),
+        sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
         sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', today),
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }),
         sb.from('apt_transactions').select('id', { count: 'exact', head: true }),
-        sb.from('unsold_apts').select('id', { count: 'exact', head: true }),
+        sb.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true),
         sb.from('admin_alerts').select('*').order('created_at', { ascending: false }).limit(15),
         sb.from('cron_logs').select('*').order('started_at', { ascending: false }).limit(300),
         sb.from('api_quotas').select('*'),
@@ -139,8 +146,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         { label: '주식', value: stocksR.count || 0, icon: '📈' },
         { label: '청약', value: aptSubR.count || 0, icon: '🏠' },
         { label: '실거래', value: aptTradeR.count || 0, icon: '🏗' },
-        { label: '재개발', value: redevR.count || 0, icon: '🔨' },
-        { label: '미분양', value: unsoldR.count || 0, icon: '📉' },
+        { label: '재개발(활성)', value: redevR.count || 0, icon: '🔨' },
+        { label: '미분양(활성)', value: unsoldR.count || 0, icon: '📉' },
       ]);
 
       const allLogs = logsRes.data || [];
@@ -433,6 +440,31 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* 세션 22 변경사항 요약 */}
+        <div className="cc-card" style={{ background: 'linear-gradient(135deg, #0F1D35, #1A2744)', borderRadius: 12, padding: '14px 16px', border: '1px solid rgba(96,165,250,0.2)', marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#60A5FA', marginBottom: 10, letterSpacing: 0.5 }}>🔧 세션 22 주요 변경사항</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 11 }}>
+            {[
+              { icon: '🤖', label: 'AI 한줄 분석', desc: '청약/미분양/재개발' },
+              { icon: '🔍', label: 'Full-Text Search', desc: 'FTS + ILIKE 폴백' },
+              { icon: '🏅', label: '프리미엄 골드', desc: '분양중 카드 연동' },
+              { icon: '📊', label: '데이터 전수조사', desc: '부정확 54건 정리' },
+              { icon: '🎨', label: '카드 디자인', desc: '3탭 리뉴얼' },
+              { icon: '📦', label: 'DB 확장', desc: '30+ 컬럼 추가' },
+              { icon: '📈', label: '시군구 확대', desc: '67→231개' },
+              { icon: '⭐', label: '등급 자동 갱신', desc: '배치+승급알림' },
+            ].map(item => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, background: '#1E305040' }}>
+                <span style={{ fontSize: 14 }}>{item.icon}</span>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#E2E8F0' }}>{item.label}</div>
+                  <div style={{ fontSize: 10, color: '#7D8DA3' }}>{item.desc}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
