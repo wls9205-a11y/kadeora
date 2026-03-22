@@ -11,12 +11,25 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#FF4B36',
-          light: '#FF6B58',
-          dark: '#E8341F',
+          DEFAULT: '#1E40AF',
+          light: '#3B82F6',
+          dark: '#1E3A8A',
         },
-        bull: '#E8341F',
-        bear: '#2563EB',
+        navy: {
+          50: '#F0F4FA',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1E40AF',
+          800: '#1E3A5F',
+          900: '#0F1D35',
+          950: '#0B1426',
+        },
+        bull: '#EF4444',
+        bear: '#3B82F6',
         surface: {
           1: 'var(--surface-1)',
           2: 'var(--surface-2)',

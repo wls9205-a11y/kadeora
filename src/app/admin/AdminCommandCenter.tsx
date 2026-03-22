@@ -285,9 +285,9 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
   /* ─── Loading ─── */
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0a0f1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: '#0B1426', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 36, height: 36, border: '3px solid rgba(255,91,54,0.2)', borderTopColor: '#ff5b36', borderRadius: '50%', animation: 'spin .7s linear infinite', margin: '0 auto 16px' }} />
+          <div style={{ width: 36, height: 36, border: '3px solid rgba(37,99,235,0.2)', borderTopColor: '#2563EB', borderRadius: '50%', animation: 'spin .7s linear infinite', margin: '0 auto 16px' }} />
           <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 600 }}>커맨드센터 로딩 중...</div>
         </div>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -303,7 +303,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
 
   /* ═══════════════════════════ RENDER ═══════════════════════════ */
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0f1a', color: '#e2e8f0' }}>
+    <div style={{ minHeight: '100vh', background: '#0B1426', color: '#e2e8f0' }}>
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
@@ -314,20 +314,20 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         .cc-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
         .cc-btn:active{transform:translateY(0)}
         .cc-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;filter:none}
-        .cc-input{padding:5px 10px;border-radius:6px;border:1px solid #1e293b;background:#0f172a;color:#e2e8f0;font-size:13px;width:55px;outline:none;transition:border-color .2s}
-        .cc-input:focus{border-color:#ff5b36}
+        .cc-input{padding:5px 10px;border-radius:6px;border:1px solid #1E3050;background:#0F1D35;color:#e2e8f0;font-size:13px;width:55px;outline:none;transition:border-color .2s}
+        .cc-input:focus{border-color:#2563EB}
         .cc-section{animation:fadein .3s ease}
-        .cc-progress{height:4px;border-radius:2px;background:#1e293b;overflow:hidden}
+        .cc-progress{height:4px;border-radius:2px;background:#1E3050;overflow:hidden}
         .cc-progress-bar{height:100%;border-radius:2px;transition:width .5s ease}
         .cc-scrollbar::-webkit-scrollbar{width:4px}
-        .cc-scrollbar::-webkit-scrollbar-thumb{background:#334155;border-radius:2px}
+        .cc-scrollbar::-webkit-scrollbar-thumb{background:#2A4060;border-radius:2px}
       `}</style>
 
       {/* ═══ HEADER ═══ */}
-      <div style={{ background: 'linear-gradient(180deg,#0f172a 0%,#0a0f1a 100%)', borderBottom: '1px solid #1e293b', padding: '14px 20px' }}>
+      <div style={{ background: 'linear-gradient(180deg,#0F1D35 0%,#0B1426 100%)', borderBottom: '1px solid #1E3050', padding: '14px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', maxWidth: 1300, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#ff5b36', letterSpacing: -0.5 }}>카더라</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#2563EB', letterSpacing: -0.5 }}>카더라</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: '#475569', letterSpacing: 1 }}>COMMAND CENTER</span>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
@@ -345,13 +345,13 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: '#f59e0b20', color: '#fbbf24', fontWeight: 700 }}>알림 {unreadAlerts}</span>}
           </div>
           {lastRefresh && <span style={{ fontSize: 10, color: '#475569' }}>갱신: {lastRefresh.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span>}
-          <button className="cc-btn" onClick={handleRefreshAll} disabled={refresh.running} style={{ background: refresh.running ? '#1e293b' : '#ff5b36', color: '#fff', padding: '8px 16px' }}>
+          <button className="cc-btn" onClick={handleRefreshAll} disabled={refresh.running} style={{ background: refresh.running ? '#1E3050' : '#2563EB', color: '#fff', padding: '8px 16px' }}>
             {refresh.running ? (<><span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />{((refresh.elapsed/1000)|0)}초</>) : '⚡ 전체 갱신'}
           </button>
-          <button className="cc-btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#1e293b', color: '#94a3b8', fontSize: 11, padding: '6px 12px' }}>🔄</button>
+          <button className="cc-btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#1E3050', color: '#94a3b8', fontSize: 11, padding: '6px 12px' }}>🔄</button>
         </div>
         {refresh.results.length > 0 && !refresh.running && (
-          <div style={{ maxWidth: 1300, margin: '10px auto 0', padding: '8px 14px', borderRadius: 8, background: '#0f172a', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
+          <div style={{ maxWidth: 1300, margin: '10px auto 0', padding: '8px 14px', borderRadius: 8, background: '#0F1D35', border: '1px solid #1E3050', display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
             {(() => { const fail = refresh.results.filter(r => r.status !== 'success'); return (<>
               <span style={{ color: fail.length > 0 ? '#f87171' : '#22c55e', fontWeight: 700 }}>{fail.length > 0 ? '⚠️' : '✅'} {refresh.results.filter(r => r.status === 'success').length}/{refresh.results.length} 성공</span>
               <span style={{ color: '#475569' }}>{(refresh.elapsed/1000).toFixed(1)}초</span>
@@ -368,7 +368,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         {/* KPI Cards */}
         <div className="cc-section" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: 10, marginBottom: 16 }}>
           {kpis.map((k, i) => (
-            <div key={k.label} className="cc-card" style={{ background: '#0f172a', borderRadius: 12, padding: '14px 16px', border: '1px solid #1e293b', animation: `fadein .3s ease ${i*50}ms both` }}>
+            <div key={k.label} className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050', animation: `fadein .3s ease ${i*50}ms both` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 20 }}>{k.icon}</span>
                 <div>
@@ -382,11 +382,11 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
 
         {/* Data Counts + 7-Day Trend */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-          <div className="cc-card" style={{ background: '#0f172a', borderRadius: 12, padding: 16, border: '1px solid #1e293b' }}>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: 16, border: '1px solid #1E3050' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>데이터 현황</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {dataCounts.map(d => (
-                <div key={d.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1e293b40' }}>
+                <div key={d.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1E305040' }}>
                   <div style={{ fontSize: 14 }}>{d.icon}</div>
                   <div style={{ fontSize: 16, fontWeight: 800, color: '#f1f5f9' }}>{d.value.toLocaleString()}</div>
                   <div style={{ fontSize: 9, color: '#64748b', fontWeight: 600 }}>{d.label}</div>
@@ -394,7 +394,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               ))}
             </div>
           </div>
-          <div className="cc-card" style={{ background: '#0f172a', borderRadius: 12, padding: 16, border: '1px solid #1e293b' }}>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: 16, border: '1px solid #1E3050' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>7일 추이</div>
             {dailyStats.length > 1 ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -417,7 +417,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         </div>
 
         {/* Quick Actions */}
-        <div className="cc-card cc-section" style={{ background: '#0f172a', borderRadius: 12, padding: '14px 16px', border: '1px solid #1e293b', marginBottom: 16 }}>
+        <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: 0.5 }}>원클릭 실행</span>
             <span style={{ fontSize: 9, color: '#475569' }}>개별 크론 즉시 실행</span>
@@ -427,7 +427,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               const result = actionResults[a.id];
               return (
                 <button key={a.id} className="cc-btn" onClick={() => runQuickAction(a)} disabled={!!actionRunning}
-                  style={{ background: result ? (result.ok ? '#16a34a20' : '#ef444420') : '#1e293b', color: result ? (result.ok ? '#4ade80' : '#f87171') : '#94a3b8', border: `1px solid ${result ? (result.ok ? '#16a34a40' : '#ef444440') : '#334155'}` }}>
+                  style={{ background: result ? (result.ok ? '#16a34a20' : '#ef444420') : '#1E3050', color: result ? (result.ok ? '#4ade80' : '#f87171') : '#94a3b8', border: `1px solid ${result ? (result.ok ? '#16a34a40' : '#ef444440') : '#2A4060'}` }}>
                   {actionRunning === a.id ? <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <span style={{ fontSize: 13 }}>{a.icon}</span>}
                   {result?.msg || a.label}
                 </button>
@@ -437,7 +437,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         </div>
 
         {/* Cron Status Grid */}
-        <div className="cc-card cc-section" style={{ background: '#0f172a', borderRadius: 12, padding: '14px 16px', border: '1px solid #1e293b', marginBottom: 16 }}>
+        <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050', marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 12, letterSpacing: 0.5 }}>크론 상태 ({cronEntries.length}개)</div>
           {GROUPS_ORDER.map(group => {
             const gc = cronEntries.filter(c => c.group === group);
@@ -471,7 +471,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         {/* Expandable Panels */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
           {/* Blog Automation */}
-          <div className="cc-card" style={{ background: '#0f172a', borderRadius: 12, border: '1px solid #1e293b', overflow: 'hidden' }}>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, border: '1px solid #1E3050', overflow: 'hidden' }}>
             <button onClick={() => toggle('blog')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>📰</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', flex: 1, textAlign: 'left' }}>블로그 자동화</span>
@@ -511,7 +511,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                           { v: queueStatus.queue_ready??0, l: '대기(가능)', c: '#22c55e' },
                           { v: queueStatus.queue_too_short??0, l: '대기(미달)', c: (queueStatus.queue_too_short??0)>0?'#ef4444':'#64748b' },
                         ].map(q => (
-                          <div key={q.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1e293b40' }}>
+                          <div key={q.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1E305040' }}>
                             <div style={{ fontSize: 16, fontWeight: 800, color: q.c }}>{q.v}</div>
                             <div style={{ fontSize: 8, color: '#64748b' }}>{q.l}</div>
                           </div>
@@ -522,7 +522,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                   )}
                 </div>
                 {rewriteStats && (
-                  <div style={{ borderTop: '1px solid #1e293b', paddingTop: 10 }}>
+                  <div style={{ borderTop: '1px solid #1E3050', paddingTop: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#8b5cf6' }}>✍️ AI 리라이팅</span>
                       <span style={{ fontSize: 10, color: '#64748b' }}>{rewriteStats.done}/{rewriteStats.total} ({pct(rewriteStats.done,rewriteStats.total)}%)</span>
@@ -532,7 +532,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                       <button className="cc-btn" onClick={() => runRewrite(5)} disabled={rewriteRunning} style={{ background: '#8b5cf6', color: '#fff' }}>{rewriteRunning ? '처리 중...' : '5건'}</button>
                       <button className="cc-btn" onClick={() => runRewrite(10)} disabled={rewriteRunning} style={{ background: '#6d28d9', color: '#fff' }}>10건</button>
                     </div>
-                    {rewriteLog.length > 0 && <div className="cc-scrollbar" style={{ marginTop: 6, maxHeight: 80, overflow: 'auto', fontSize: 9, color: '#475569', background: '#1e293b40', borderRadius: 6, padding: 6 }}>{rewriteLog.slice(-5).map((l,i)=><div key={i}>{l}</div>)}</div>}
+                    {rewriteLog.length > 0 && <div className="cc-scrollbar" style={{ marginTop: 6, maxHeight: 80, overflow: 'auto', fontSize: 9, color: '#475569', background: '#1E305040', borderRadius: 6, padding: 6 }}>{rewriteLog.slice(-5).map((l,i)=><div key={i}>{l}</div>)}</div>}
                   </div>
                 )}
               </div>
@@ -540,7 +540,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           </div>
 
           {/* Users Summary */}
-          <div className="cc-card" style={{ background: '#0f172a', borderRadius: 12, border: '1px solid #1e293b', overflow: 'hidden' }}>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, border: '1px solid #1E3050', overflow: 'hidden' }}>
             <button onClick={() => toggle('users')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>👥</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', flex: 1, textAlign: 'left' }}>유저 관리</span>
@@ -551,7 +551,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
                   {[{l:'전체',v:users.length,c:'#f1f5f9'},{l:'실제',v:realUsers.length,c:'#10b981'},{l:'시드',v:users.length-realUsers.length,c:'#64748b'},{l:'정지',v:users.filter(u=>u.is_deleted).length,c:'#ef4444'}].map(s=>(
-                    <div key={s.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1e293b40' }}>
+                    <div key={s.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1E305040' }}>
                       <div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div>
                       <div style={{ fontSize: 8, color: '#64748b' }}>{s.l}</div>
                     </div>
@@ -560,7 +560,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <div style={{ fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>최근 실제 가입</div>
                 <div className="cc-scrollbar" style={{ maxHeight: 120, overflow: 'auto' }}>
                   {realUsers.slice(0,10).map(u=>(
-                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', borderBottom: '1px solid #1e293b30', fontSize: 11 }}>
+                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', borderBottom: '1px solid #1E305030', fontSize: 11 }}>
                       <span style={{ color: '#e2e8f0', fontWeight: 600, flex: 1 }}>{u.nickname||'미설정'}</span>
                       <span style={{ color: '#64748b' }}>{u.grade_title||'-'}</span>
                       <span style={{ color: '#475569' }}>{u.points??0}P</span>
@@ -574,7 +574,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           </div>
 
           {/* Alerts */}
-          <div className="cc-card" style={{ background: '#0f172a', borderRadius: 12, border: '1px solid #1e293b', overflow: 'hidden' }}>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, border: '1px solid #1E3050', overflow: 'hidden' }}>
             <button onClick={() => toggle('alerts')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>🔔</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', flex: 1, textAlign: 'left' }}>알림 / 신고</span>
@@ -585,7 +585,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div className="cc-scrollbar" style={{ maxHeight: 200, overflow: 'auto' }}>
                   {alerts.length === 0 ? <div style={{ color: '#475569', fontSize: 11, textAlign: 'center', padding: 12 }}>알림 없음</div> : alerts.map(a => (
-                    <div key={a.id} onClick={() => !a.is_read && dismissAlert(a.id)} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 0', borderBottom: '1px solid #1e293b30', opacity: a.is_read ? 0.4 : 1, cursor: a.is_read ? 'default' : 'pointer', fontSize: 11 }}>
+                    <div key={a.id} onClick={() => !a.is_read && dismissAlert(a.id)} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 0', borderBottom: '1px solid #1E305030', opacity: a.is_read ? 0.4 : 1, cursor: a.is_read ? 'default' : 'pointer', fontSize: 11 }}>
                       <span>{a.severity === 'error' ? '🔴' : a.severity === 'warning' ? '🟡' : '🟢'}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: a.is_read ? 400 : 700, color: '#e2e8f0' }}>{a.title}</div>
@@ -596,7 +596,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                   ))}
                 </div>
                 {pendingReports > 0 && (
-                  <div style={{ borderTop: '1px solid #1e293b', paddingTop: 8, marginTop: 8 }}>
+                  <div style={{ borderTop: '1px solid #1E3050', paddingTop: 8, marginTop: 8 }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: '#f87171', marginBottom: 4 }}>미처리 신고 {pendingReports}건</div>
                     <a href="/admin/reports" style={{ fontSize: 10, color: '#3b82f6' }}>신고 관리 →</a>
                   </div>
@@ -606,7 +606,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           </div>
 
           {/* Tools */}
-          <div className="cc-card" style={{ background: '#0f172a', borderRadius: 12, border: '1px solid #1e293b', overflow: 'hidden' }}>
+          <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, border: '1px solid #1E3050', overflow: 'hidden' }}>
             <button onClick={() => toggle('tools')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>🛠</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', flex: 1, textAlign: 'left' }}>공지 / SEO / 도구</span>
@@ -616,8 +616,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>전광판 공지</div>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-                  <input value={noticeText} onChange={e => setNoticeText(e.target.value)} placeholder="전광판 공지 입력..." style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid #1e293b', background: '#0f172a', color: '#e2e8f0', fontSize: 11, outline: 'none' }} />
-                  <button className="cc-btn" onClick={postNotice} disabled={noticeSaving||!noticeText.trim()} style={{ background: '#ff5b36', color: '#fff' }}>등록</button>
+                  <input value={noticeText} onChange={e => setNoticeText(e.target.value)} placeholder="전광판 공지 입력..." style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid #1E3050', background: '#0F1D35', color: '#e2e8f0', fontSize: 11, outline: 'none' }} />
+                  <button className="cc-btn" onClick={postNotice} disabled={noticeSaving||!noticeText.trim()} style={{ background: '#2563EB', color: '#fff' }}>등록</button>
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>SEO</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10, marginBottom: 10 }}>
@@ -628,7 +628,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>관리 페이지</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10 }}>
                   {[{h:'/admin/content',l:'콘텐츠'},{h:'/admin/users',l:'유저'},{h:'/admin/reports',l:'신고'},{h:'/admin/blog',l:'블로그'},{h:'/admin/infra',l:'인프라'},{h:'/admin/realestate',l:'부동산'},{h:'/admin/payments',l:'결제'},{h:'/admin/notifications',l:'알림'},{h:'/admin/system',l:'시스템'}].map(l=>(
-                    <a key={l.h} href={l.h} style={{ color: '#94a3b8', padding: '3px 8px', borderRadius: 6, background: '#1e293b40', textDecoration: 'none' }}>{l.l}</a>
+                    <a key={l.h} href={l.h} style={{ color: '#94a3b8', padding: '3px 8px', borderRadius: 6, background: '#1E305040', textDecoration: 'none' }}>{l.l}</a>
                   ))}
                 </div>
               </div>
@@ -638,7 +638,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
 
         {/* API Quotas */}
         {quotas.length > 0 && (
-          <div className="cc-card cc-section" style={{ background: '#0f172a', borderRadius: 12, padding: '14px 16px', border: '1px solid #1e293b', marginBottom: 16 }}>
+          <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050', marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>API 할당량</div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {quotas.map(q => {
@@ -658,16 +658,16 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         )}
 
         {/* Cron Logs */}
-        <div className="cc-card cc-section" style={{ background: '#0f172a', borderRadius: 12, padding: '14px 16px', border: '1px solid #1e293b' }}>
+        <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>최근 크론 로그</div>
           <div className="cc-scrollbar" style={{ overflow: 'auto', maxHeight: 300 }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-              <thead><tr style={{ borderBottom: '1px solid #1e293b', textAlign: 'left' }}>
+              <thead><tr style={{ borderBottom: '1px solid #1E3050', textAlign: 'left' }}>
                 {['시간','크론','상태','소요','처리','에러'].map(h=><th key={h} style={{ padding:'6px 8px',color:'#475569',fontWeight:600 }}>{h}</th>)}
               </tr></thead>
               <tbody>
                 {cronLogs.map((log,i) => (
-                  <tr key={log.id||i} style={{ borderBottom: '1px solid #1e293b20' }}>
+                  <tr key={log.id||i} style={{ borderBottom: '1px solid #1E305020' }}>
                     <td style={{ padding:'5px 8px',color:'#64748b',whiteSpace:'nowrap' }}>{log.started_at ? new Date(log.started_at).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</td>
                     <td style={{ padding:'5px 8px',color:'#e2e8f0',fontWeight:600 }}>{CRON_MAP[log.cron_name]?.display||log.cron_name}</td>
                     <td style={{ padding:'5px 8px' }}><span style={{ fontSize:9,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'#16a34a20':log.status==='running'?'#3b82f620':'#ef444420',color:log.status==='success'?'#4ade80':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>

@@ -142,7 +142,7 @@ export default function AdminUsers() {
         {(['all', 'real', 'seed'] as const).map(t => (
           <button key={t} onClick={() => setUserType(t)} style={{
             padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
-            background: userType === t ? '#ff5b36' : 'var(--bg-hover)',
+            background: userType === t ? '#2563EB' : 'var(--bg-hover)',
             color: userType === t ? '#fff' : 'var(--text-secondary)',
           }}>
             {t === 'all' ? '전체' : t === 'real' ? `실제 (${realUsersList.length})` : `시드 (${seedUsers.length})`}
@@ -152,7 +152,7 @@ export default function AdminUsers() {
         {(['all', 'active', 'suspended'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 700,
-            background: filter === f ? '#ff5b36' : 'var(--bg-hover)',
+            background: filter === f ? '#2563EB' : 'var(--bg-hover)',
             color: filter === f ? '#fff' : 'var(--text-secondary)',
           }}>
             {{ all: '전체', active: '정상', suspended: '정지됨' }[f]}

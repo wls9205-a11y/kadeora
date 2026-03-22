@@ -28,10 +28,10 @@
   --kd-nav-bg:      #FFFFFF;
   --kd-nav-border:  #EDEFF1;
   --kd-nav-text:    #1C1C1C;
-  --kd-nav-active:  #FF4500;
+  --kd-nav-active:  #2563EB;
 
   /* 브랜드 */
-  --kd-primary:     #FF4500;
+  --kd-primary:     #2563EB;
   --kd-primary-dim: rgba(255,69,0,0.08);
   --kd-primary-hover: #E03D00;
 
@@ -73,9 +73,9 @@
   --kd-nav-bg:      #1A1A1B;
   --kd-nav-border:  #343536;
   --kd-nav-text:    #D7DADC;
-  --kd-nav-active:  #FF4500;
+  --kd-nav-active:  #2563EB;
 
-  --kd-primary:     #FF4500;
+  --kd-primary:     #2563EB;
   --kd-primary-dim: rgba(255,69,0,0.15);
   --kd-primary-hover: #FF5722;
 
@@ -104,7 +104,7 @@
     --kd-nav-bg: #1A1A1B;
     --kd-nav-border: #343536;
     --kd-nav-text: #D7DADC;
-    --kd-nav-active: #FF4500;
+    --kd-nav-active: #2563EB;
     --kd-primary-dim: rgba(255,69,0,0.15);
     --kd-danger: #FF585B;
     --kd-danger-dim: rgba(255,88,91,0.15);

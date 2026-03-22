@@ -29,17 +29,17 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   return new ImageResponse(
     (
       <div style={{
-        width: 1200, height: 630, background: '#0d1117',
+        width: 1200, height: 630, background: '#0B1426',
         display: 'flex', flexDirection: 'column', padding: '60px 80px',
         fontFamily: 'sans-serif',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
           <div style={{ display: 'flex', gap: 5 }}>
             {[0, 1, 2].map(i => (
-              <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: '#FF4500' }} />
+              <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: '#2563EB' }} />
             ))}
           </div>
-          <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#FF4500' }}>카더라</span>
+          <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#2563EB' }}>카더라</span>
         </div>
 
         <div style={{

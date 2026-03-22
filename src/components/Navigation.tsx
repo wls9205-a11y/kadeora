@@ -34,7 +34,13 @@ const MORE_ITEMS = [
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 72 72" style={{ flexShrink:0, display:'block' }}>
-    <rect width="72" height="72" rx="18" fill="#FF4500"/>
+    <defs>
+      <linearGradient id="navyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#1E40AF"/>
+        <stop offset="100%" stopColor="#3B82F6"/>
+      </linearGradient>
+    </defs>
+    <rect width="72" height="72" rx="18" fill="url(#navyGrad)"/>
     <circle cx="18" cy="36" r="7" fill="white"/>
     <circle cx="36" cy="36" r="7" fill="white"/>
     <circle cx="54" cy="36" r="7" fill="white"/>

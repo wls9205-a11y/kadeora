@@ -136,7 +136,7 @@ export const GRADE_MAP: Record<number, { title: string; emoji: string; color: st
   6:  { title: '빅마우스',   emoji: '🔥', color: '#E91E63' },
   7:  { title: '찐고수',     emoji: '💎', color: '#00BCD4' },
   8:  { title: '전설',       emoji: '🌟', color: '#FFD700' },
-  9:  { title: '신의경지',   emoji: '👑', color: '#FF6B35' },
+  9:  { title: '신의경지',   emoji: '👑', color: '#2563EB' },
   10: { title: '카더라신',   emoji: '🚀', color: '#7B2FBE' },
 };
 

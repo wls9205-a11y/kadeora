@@ -60,7 +60,7 @@ export default function InstallBanner() {
     <>
       <div style={{
         position: 'fixed', bottom: 88, left: 12, right: 12, zIndex: 8000,
-        background: 'linear-gradient(135deg, #FF4500, #FF6B35)',
+        background: 'linear-gradient(135deg, #2563EB, #60A5FA)',
         borderRadius: 16, padding: '14px 16px',
         boxShadow: '0 8px 32px rgba(255,69,0,0.45)',
         display: 'flex', alignItems: 'center', gap: 12,
@@ -72,7 +72,7 @@ export default function InstallBanner() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
           <button onClick={() => { hap('light'); handleInstall(); }} style={{
-            padding: '8px 14px', background: 'var(--bg-primary)', color: '#FF4500',
+            padding: '8px 14px', background: 'var(--bg-primary)', color: '#2563EB',
             border: 'none', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 800, cursor: 'pointer',
           }}>{isIOS ? '방법 보기' : '📲 설치하기'}</button>
           <button onClick={handleDismiss} style={{
