@@ -68,7 +68,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [activeTab, setActiveTab] = useState<'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
-  const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'>('date');
+  const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'>('date');
+  const [subSearch, setSubSearch] = useState('');
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
   const [ongoingRegion, setOngoingRegion] = useState('전체');
   const [ongoingPage, setOngoingPage] = useState(1);
@@ -157,6 +158,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     const f = apts.filter(a => {
       if (region !== '전체' && a.region_nm !== region) return false;
       if (statusFilter !== '전체' && getStatus(a) !== statusFilter) return false;
+      if (subSearch) {
+        const q = subSearch.toLowerCase();
+        if (!(a.house_nm || '').toLowerCase().includes(q) && !(a.region_nm || '').toLowerCase().includes(q) && !(a.hssply_adres || '').toLowerCase().includes(q)) return false;
+      }
       return true;
     });
     if (aptSort === 'supply') f.sort((a, b) => (b.tot_supply_hshld_co || 0) - (a.tot_supply_hshld_co || 0));
@@ -165,8 +170,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       const bEnd = String(b.rcept_endde || '9999');
       return aEnd.localeCompare(bEnd);
     });
+    if (aptSort === 'competition') f.sort((a, b) => (Number(b.competition_rate_1st) || 0) - (Number(a.competition_rate_1st) || 0));
     return f;
-  }, [apts, region, statusFilter, aptSort]);
+  }, [apts, region, statusFilter, aptSort, subSearch]);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
@@ -256,6 +262,22 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   )}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* 검색 + 정렬 + 통계 요약 */}
+          <div style={{ marginBottom: 12 }}>
+            <input value={subSearch} onChange={e => setSubSearch(e.target.value)} placeholder="단지명, 지역 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginRight: 4 }}>정렬</span>
+              {([['date', '최신순'], ['deadline', '마감임박'], ['supply', '세대수'], ['competition', '경쟁률']] as const).map(([k, l]) => (
+                <button key={k} onClick={() => setAptSort(k)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 'var(--fs-xs)', fontWeight: aptSort === k ? 700 : 500, background: aptSort === k ? 'var(--brand)' : 'var(--bg-hover)', color: aptSort === k ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{l}</button>
+              ))}
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, fontSize: 'var(--fs-xs)' }}>
+                <span style={{ color: '#34D399', fontWeight: 700 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}</span>
+                <span style={{ color: '#FCD34D', fontWeight: 700 }}>예정 {filtered.filter(a => getStatus(a) === 'upcoming').length}</span>
+                <span style={{ color: 'var(--text-tertiary)' }}>마감 {filtered.filter(a => getStatus(a) === 'closed').length}</span>
+              </div>
             </div>
           </div>
 
@@ -971,6 +993,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           : usRaw?.total != null ? usRaw
           : usRaw?.data?.total != null ? usRaw.data : null;
 
+        // 위험도 계산
+        const highRisk = unsold.filter((u: any) => (u.tot_unsold_hshld_co || 0) >= 500);
+        const medRisk = unsold.filter((u: any) => { const c = u.tot_unsold_hshld_co || 0; return c >= 100 && c < 500; });
+
         // 지역별 현황판 데이터 집계
         const unsoldRegionStats = regs.filter(r => r !== '전체').map(r => {
           const items = unsold.filter((u: any) => (u.region_nm || '기타') === r);
@@ -980,6 +1006,39 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
         return (
           <div>
+            {/* 위험도 요약 카드 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+              <div style={{ padding: '12px 8px', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{highRisk.length}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: '#F87171', fontWeight: 600 }}>고위험 (500+)</div>
+              </div>
+              <div style={{ padding: '12px 8px', borderRadius: 10, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#FBBF24' }}>{medRisk.length}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: '#FBBF24', fontWeight: 600 }}>주의 (100~499)</div>
+              </div>
+              <div style={{ padding: '12px 8px', borderRadius: 10, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#34D399' }}>{total.toLocaleString()}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: '#34D399', fontWeight: 600 }}>전체 미분양</div>
+              </div>
+            </div>
+
+            {/* 전월 대비 */}
+            {unsoldMonthly.length >= 2 && (() => {
+              const latest = unsoldMonthly[unsoldMonthly.length - 1];
+              const prev = unsoldMonthly[unsoldMonthly.length - 2];
+              if (!latest || !prev) return null;
+              const diff = (latest.total_unsold || 0) - (prev.total_unsold || 0);
+              const pct = prev.total_unsold > 0 ? ((diff / prev.total_unsold) * 100).toFixed(1) : '0';
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, background: diff > 0 ? 'rgba(248,113,113,0.06)' : 'rgba(52,211,153,0.06)', border: `1px solid ${diff > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)'}`, marginBottom: 12 }}>
+                  <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: diff > 0 ? '#F87171' : '#34D399' }}>{diff > 0 ? '▲' : diff < 0 ? '▼' : '─'}</span>
+                  <div>
+                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>전월 대비 {diff > 0 ? '+' : ''}{diff.toLocaleString()}세대 ({pct}%)</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{prev.stat_month || ''} → {latest.stat_month || ''}</div>
+                  </div>
+                </div>
+              );
+            })()}
             {/* 지역별 현황 */}
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
