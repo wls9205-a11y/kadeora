@@ -35,7 +35,7 @@
 
 ---
 
-## 크론 현황 (47개 등록, vercel.json — 세션 22에서 2개 정리)
+## 크론 현황 (45개 등록, vercel.json — 세션 22에서 구형 2개 제거)
 
 ### 부동산
 | 크론 | 주기 | 상태 |
@@ -268,3 +268,7 @@
 - profiles.points 직접 UPDATE 절대 금지 → award_points/deduct_points RPC
 - 알림은 DB 트리거가 처리 — 수동 INSERT 금지 (팔로우만 예외)
 - 페이지뷰: 관리자(is_admin) 조회수 제외됨 (세션22 적용)
+- 재개발 세대수: 전량 NULL 리셋 상태. 새로 입력 시 반드시 공식 출처 확인 후 입력
+- AdminCommandCenter: 신규 DB 쿼리 결과는 반드시 state에 저장 후 JSX에서 참조 (loadAll 로컬 변수 직접 참조 금지)
+- CRON_MAP: 크론 추가/삭제 시 라우트파일+vercel.json+CRON_MAP 3곳 동시 반영
+- aggregate-trade-stats RPC: `aggregate_trade_monthly_stats()` — 컬럼명 `region` (region_nm 아님)
