@@ -206,7 +206,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, fontWeight: 700, flexShrink: 0,
                     background: n.sentiment_label === 'positive' ? 'rgba(52,211,153,0.15)' : n.sentiment_label === 'negative' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.1)',
-                    color: n.sentiment_label === 'positive' ? '#F87171' : n.sentiment_label === 'negative' ? '#60A5FA' : '#94a3b8',
+                    color: n.sentiment_label === 'positive' ? '#F87171' : n.sentiment_label === 'negative' ? '#60A5FA' : '#9DB0C7',
                   }}>
                     {n.sentiment_label === 'positive' ? '🟢' : n.sentiment_label === 'negative' ? '🔴' : '⚪'}
                     {n.sentiment_score ? ` ${Math.round(n.sentiment_score * 100)}%` : ''}

@@ -29,7 +29,7 @@ export default function MiniBarChart({
           const pct = (d.value / max) * 100;
           return (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: gap }}>
-              <div style={{ width: 60, fontSize: 'var(--fs-xs)', color: '#64748b', textAlign: 'right', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ width: 60, fontSize: 'var(--fs-xs)', color: '#7D8DA3', textAlign: 'right', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {d.label}
               </div>
               <div style={{ flex: 1, height: barH, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
@@ -41,7 +41,7 @@ export default function MiniBarChart({
                 {showValues && (
                   <span style={{
                     position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: 'var(--fs-xs)', fontWeight: 700, color: pct > 50 ? '#fff' : '#64748b',
+                    fontSize: 'var(--fs-xs)', fontWeight: 700, color: pct > 50 ? '#fff' : '#7D8DA3',
                   }}>
                     {d.value.toLocaleString()}
                   </span>
@@ -62,12 +62,12 @@ export default function MiniBarChart({
         const pct = (d.value / max) * 100;
         return (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-            {showValues && <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b', marginBottom: 2 }}>{d.value.toLocaleString()}</div>}
+            {showValues && <div style={{ fontSize: 'var(--fs-xs)', color: '#7D8DA3', marginBottom: 2 }}>{d.value.toLocaleString()}</div>}
             <div style={{
               width: barW, height: `${pct}%`, minHeight: 2, borderRadius: '4px 4px 0 0',
               background: d.color || defaultColor,
             }} />
-            <div style={{ fontSize: 'var(--fs-xs)', color: '#94a3b8', marginTop: 4, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: barW + 8 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#9DB0C7', marginTop: 4, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: barW + 8 }}>
               {d.label}
             </div>
           </div>

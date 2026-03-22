@@ -18,7 +18,7 @@ const CATS = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  stock: '#60A5FA', apt: '#34D399', unsold: '#FB923C', finance: '#A78BFA', general: '#64748b',
+  stock: '#60A5FA', apt: '#34D399', unsold: '#FB923C', finance: '#A78BFA', general: '#7D8DA3',
 };
 
 interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string }> }
@@ -154,7 +154,7 @@ export default async function BlogPage({ searchParams }: Props) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {(posts ?? []).map((p: any) => {
-            const catColor = CAT_COLORS[p.category] || '#64748b';
+            const catColor = CAT_COLORS[p.category] || '#7D8DA3';
             return (
               <Link key={p.id} href={`/blog/${p.slug}`} style={{
                 display: 'flex', gap: 14, padding: '14px 16px', borderRadius: 12,

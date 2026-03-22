@@ -210,7 +210,7 @@ export default function AdminDashboard() {
               <span style={{
                 marginLeft: 'auto', fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 10, fontWeight: 700,
                 background: briefing.sentiment === 'bullish' ? 'rgba(52,211,153,0.12)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.12)' : 'rgba(148,163,184,0.1)',
-                color: briefing.sentiment === 'bullish' ? '#059669' : briefing.sentiment === 'bearish' ? '#F87171' : '#64748b',
+                color: briefing.sentiment === 'bullish' ? '#059669' : briefing.sentiment === 'bearish' ? '#F87171' : '#7D8DA3',
               }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
             </div>
           </div>

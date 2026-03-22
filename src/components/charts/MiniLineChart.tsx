@@ -74,7 +74,7 @@ export default function MiniLineChart({
         ))}
         {/* Values */}
         {showValues && points.map((p, i) => (
-          <text key={i} x={p.x} y={p.y - 8} textAnchor="middle" fontSize="9" fill="#64748b">
+          <text key={i} x={p.x} y={p.y - 8} textAnchor="middle" fontSize="9" fill="#7D8DA3">
             {data[i].value.toLocaleString()}
           </text>
         ))}
@@ -82,7 +82,7 @@ export default function MiniLineChart({
         {showLabels && data.map((d, i) => {
           if (data.length > 8 && i % 2 !== 0 && i !== data.length - 1) return null;
           return (
-            <text key={i} x={points[i].x} y={H - 2} textAnchor="middle" fontSize="9" fill="#94a3b8">
+            <text key={i} x={points[i].x} y={H - 2} textAnchor="middle" fontSize="9" fill="#9DB0C7">
               {d.label}
             </text>
           );

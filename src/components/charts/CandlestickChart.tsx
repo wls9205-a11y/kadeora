@@ -84,10 +84,10 @@ export default function CandlestickChart({ data, width = 340, height = 200, show
         })}
 
         {/* Price labels */}
-        <text x={width - P} y={P + 4} textAnchor="end" fontSize="9" fill="var(--text-tertiary, #64748B)">
+        <text x={width - P} y={P + 4} textAnchor="end" fontSize="9" fill="var(--text-tertiary, #7D8DA3)">
           {maxP.toLocaleString()}
         </text>
-        <text x={width - P} y={chartH - P + 4} textAnchor="end" fontSize="9" fill="var(--text-tertiary, #64748B)">
+        <text x={width - P} y={chartH - P + 4} textAnchor="end" fontSize="9" fill="var(--text-tertiary, #7D8DA3)">
           {minP.toLocaleString()}
         </text>
 
@@ -96,7 +96,7 @@ export default function CandlestickChart({ data, width = 340, height = 200, show
           const idx = data.indexOf(d);
           const x = P + idx * gapW + gapW / 2;
           return (
-            <text key={d.date} x={x} y={height - 2} textAnchor="middle" fontSize="8" fill="var(--text-tertiary, #64748B)">
+            <text key={d.date} x={x} y={height - 2} textAnchor="middle" fontSize="8" fill="var(--text-tertiary, #7D8DA3)">
               {d.date.slice(5)}
             </text>
           );

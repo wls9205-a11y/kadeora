@@ -123,8 +123,8 @@ html.font-large input, html.font-large textarea { font-size: 20px !important; }
   --border-strong: #2A4060;
   --border-focus:  #3B82F6;
   --text-primary:   #E2E8F0;
-  --text-secondary: #94A3B8;
-  --text-tertiary:  #64748B;
+  --text-secondary: #9DB0C7;
+  --text-tertiary:  #7D8DA3;
   --text-disabled:  #334155;
   --text-inverse:   #0B1426;
   --text-link:      #60A5FA;
@@ -143,7 +143,7 @@ html.font-large input, html.font-large textarea { font-size: 20px !important; }
   --font-base:      15px;
   --stock-up:       #F87171;
   --stock-down:     #60A5FA;
-  --stock-flat:     #94A3B8;
+  --stock-flat:     #9DB0C7;
   --nav-bg:         #0F1D35;
   --nav-border:     #1E3050;
   --nav-text:       #E2E8F0;

@@ -70,10 +70,10 @@ export async function GET(req: NextRequest) {
               카더라
             </span>
           </div>
-          <div style={{ fontSize: 24, color: '#94a3b8', fontWeight: 500, marginBottom: 16 }}>
+          <div style={{ fontSize: 24, color: '#9DB0C7', fontWeight: 500, marginBottom: 16 }}>
             아는 사람만 아는 그 정보
           </div>
-          <div style={{ fontSize: 16, color: '#64748B', fontWeight: 400 }}>
+          <div style={{ fontSize: 16, color: '#7D8DA3', fontWeight: 400 }}>
             주식 · 부동산 · 청약 · 우리동네
           </div>
         </div>
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
                 }}>
                   {author[0].toUpperCase()}
                 </div>
-                <span style={{ fontSize: 16, color: '#94a3b8', fontWeight: 500 }}>{author}</span>
+                <span style={{ fontSize: 16, color: '#9DB0C7', fontWeight: 500 }}>{author}</span>
               </>
             )}
           </div>
@@ -159,14 +159,14 @@ export async function GET(req: NextRequest) {
             {(Number(likes) > 0 || Number(comments) > 0) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 {Number(likes) > 0 && (
-                  <span style={{ fontSize: 15, color: '#64748b' }}>♥ {likes}</span>
+                  <span style={{ fontSize: 15, color: '#7D8DA3' }}>♥ {likes}</span>
                 )}
                 {Number(comments) > 0 && (
-                  <span style={{ fontSize: 15, color: '#64748b' }}>💬 {comments}</span>
+                  <span style={{ fontSize: 15, color: '#7D8DA3' }}>💬 {comments}</span>
                 )}
               </div>
             )}
-            <span style={{ fontSize: 14, color: '#64748B' }}>kadeora.app</span>
+            <span style={{ fontSize: 14, color: '#7D8DA3' }}>kadeora.app</span>
           </div>
         </div>
       </div>

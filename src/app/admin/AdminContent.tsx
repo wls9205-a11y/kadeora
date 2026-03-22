@@ -120,7 +120,7 @@ export default function AdminContent() {
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: r.status === 'pending' ? 'rgba(251,191,36,0.3)' : r.status === 'resolved' ? 'rgba(52,211,153,0.12)' : 'rgba(148,163,184,0.15)',
-                    color: r.status === 'pending' ? '#FBBF24' : r.status === 'resolved' ? '#34D399' : '#64748b',
+                    color: r.status === 'pending' ? '#FBBF24' : r.status === 'resolved' ? '#34D399' : '#7D8DA3',
                   }}>{{ pending: '미처리', resolved: '처리됨', dismissed: '기각' }[r.status] || r.status}</span>
                   {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: 'rgba(248,113,113,0.1)', color: '#F87171' }}>자동숨김</span>}
                 </div>
@@ -132,7 +132,7 @@ export default function AdminContent() {
                 {r.status === 'pending' && (
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                     <button onClick={() => handleReport(r.id, 'resolve')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #34D399', background: 'transparent', color: '#34D399', cursor: 'pointer', fontWeight: 700 }}>처리완료</button>
-                    <button onClick={() => handleReport(r.id, 'dismiss')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #94a3b8', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 700 }}>기각</button>
+                    <button onClick={() => handleReport(r.id, 'dismiss')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #9DB0C7', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 700 }}>기각</button>
                     {(r.post_id || r.comment_id) && (
                       <button onClick={() => handleReport(r.id, 'hide_content')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: 'none', background: '#F87171', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>숨기기</button>
                     )}

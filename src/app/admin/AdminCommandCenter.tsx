@@ -54,7 +54,7 @@ const QUICK_ACTIONS = [
 
 const GROUPS_ORDER = ['시스템', '주식', '부동산', '콘텐츠', '블로그'];
 const GROUP_COLORS: Record<string, string> = {
-  '시스템': '#64748b', '주식': '#FBBF24', '부동산': '#60A5FA', '콘텐츠': '#34D399', '블로그': '#A78BFA',
+  '시스템': '#7D8DA3', '주식': '#FBBF24', '부동산': '#60A5FA', '콘텐츠': '#34D399', '블로그': '#A78BFA',
 };
 
 /* ─────────────────────── Component ─────────────────────── */
@@ -328,35 +328,35 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', maxWidth: 1300, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
             <span style={{ fontSize: 20, fontWeight: 900, color: '#2563EB', letterSpacing: -0.5 }}>카더라</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#64748B', letterSpacing: 1 }}>COMMAND CENTER</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#7D8DA3', letterSpacing: 1 }}>COMMAND CENTER</span>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
             {healthChecks.map(hc => (
               <div key={hc.service_name} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: hc.status === 'ok' ? '#34D399' : hc.status === 'warning' ? '#FBBF24' : '#F87171', animation: hc.status !== 'ok' ? 'pulse-dot 1.5s infinite' : 'none' }} />
-                <span style={{ fontSize: 10, color: '#64748b' }}>{hc.service_name}</span>
+                <span style={{ fontSize: 10, color: '#7D8DA3' }}>{hc.service_name}</span>
               </div>
             ))}
             <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 4 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: failCrons > 0 ? '#F87171' : '#34D399' }} />
-              <span style={{ fontSize: 10, color: '#64748b' }}>크론 {successCrons}/{cronEntries.length}</span>
+              <span style={{ fontSize: 10, color: '#7D8DA3' }}>크론 {successCrons}/{cronEntries.length}</span>
             </div>
             {pendingReports > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#F87171', fontWeight: 700 }}>신고 {pendingReports}</span>}
             {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(251,191,36,0.12)', color: '#FBBF24', fontWeight: 700 }}>알림 {unreadAlerts}</span>}
           </div>
-          {lastRefresh && <span style={{ fontSize: 10, color: '#64748B' }}>갱신: {lastRefresh.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span>}
+          {lastRefresh && <span style={{ fontSize: 10, color: '#7D8DA3' }}>갱신: {lastRefresh.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span>}
           <button className="cc-btn" onClick={handleRefreshAll} disabled={refresh.running} style={{ background: refresh.running ? '#1E3050' : '#2563EB', color: '#fff', padding: '8px 16px' }}>
             {refresh.running ? (<><span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />{((refresh.elapsed/1000)|0)}초</>) : '⚡ 전체 갱신'}
           </button>
-          <button className="cc-btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#1E3050', color: '#94a3b8', fontSize: 11, padding: '6px 12px' }}>🔄</button>
+          <button className="cc-btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#1E3050', color: '#9DB0C7', fontSize: 11, padding: '6px 12px' }}>🔄</button>
         </div>
         {refresh.results.length > 0 && !refresh.running && (
           <div style={{ maxWidth: 1300, margin: '10px auto 0', padding: '8px 14px', borderRadius: 8, background: '#0F1D35', border: '1px solid #1E3050', display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
             {(() => { const fail = refresh.results.filter(r => r.status !== 'success'); return (<>
               <span style={{ color: fail.length > 0 ? '#F87171' : '#34D399', fontWeight: 700 }}>{fail.length > 0 ? '⚠️' : '✅'} {refresh.results.filter(r => r.status === 'success').length}/{refresh.results.length} 성공</span>
-              <span style={{ color: '#64748B' }}>{(refresh.elapsed/1000).toFixed(1)}초</span>
+              <span style={{ color: '#7D8DA3' }}>{(refresh.elapsed/1000).toFixed(1)}초</span>
               {fail.length > 0 && <span style={{ color: '#F87171' }}>실패: {fail.map(f => CRON_MAP[f.name]?.display || f.name).join(', ')}</span>}
-              <button onClick={() => setRefresh(prev => ({...prev, results: []}))} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 14 }}>×</button>
+              <button onClick={() => setRefresh(prev => ({...prev, results: []}))} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#7D8DA3', cursor: 'pointer', fontSize: 14 }}>×</button>
             </>); })()}
           </div>
         )}
@@ -372,7 +372,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 20 }}>{k.icon}</span>
                 <div>
-                  <div style={{ fontSize: 10, color: '#64748b', fontWeight: 600, letterSpacing: 0.5 }}>{k.label}</div>
+                  <div style={{ fontSize: 10, color: '#7D8DA3', fontWeight: 600, letterSpacing: 0.5 }}>{k.label}</div>
                   <div style={{ fontSize: 24, fontWeight: 900, color: '#E2E8F0', lineHeight: 1.1 }}>{k.value.toLocaleString()}</div>
                 </div>
               </div>
@@ -383,19 +383,19 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         {/* Data Counts + 7-Day Trend */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
           <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: 16, border: '1px solid #1E3050' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>데이터 현황</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#7D8DA3', marginBottom: 10, letterSpacing: 0.5 }}>데이터 현황</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {dataCounts.map(d => (
                 <div key={d.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1E305040' }}>
                   <div style={{ fontSize: 14 }}>{d.icon}</div>
                   <div style={{ fontSize: 16, fontWeight: 800, color: '#E2E8F0' }}>{d.value.toLocaleString()}</div>
-                  <div style={{ fontSize: 9, color: '#64748b', fontWeight: 600 }}>{d.label}</div>
+                  <div style={{ fontSize: 10, color: '#7D8DA3', fontWeight: 600 }}>{d.label}</div>
                 </div>
               ))}
             </div>
           </div>
           <div className="cc-card" style={{ background: '#0F1D35', borderRadius: 12, padding: 16, border: '1px solid #1E3050' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>7일 추이</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#7D8DA3', marginBottom: 10, letterSpacing: 0.5 }}>7일 추이</div>
             {dailyStats.length > 1 ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {[
@@ -405,29 +405,29 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                   { data: dailyStats.map(s => s.total_page_views||0), label: 'PV', color: '#FBBF24' },
                 ].map(c => (
                   <div key={c.label}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#64748b', marginBottom: 2 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#7D8DA3', marginBottom: 2 }}>
                       <span>{c.label}</span><span style={{ color: c.color, fontWeight: 700 }}>{c.data[c.data.length-1]}</span>
                     </div>
                     <MiniChart data={c.data} color={c.color} h={28} />
                   </div>
                 ))}
               </div>
-            ) : <div style={{ color: '#64748B', fontSize: 12, textAlign: 'center', padding: 20 }}>데이터 부족</div>}
+            ) : <div style={{ color: '#7D8DA3', fontSize: 12, textAlign: 'center', padding: 20 }}>데이터 부족</div>}
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: 0.5 }}>원클릭 실행</span>
-            <span style={{ fontSize: 9, color: '#64748B' }}>개별 크론 즉시 실행</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#7D8DA3', letterSpacing: 0.5 }}>원클릭 실행</span>
+            <span style={{ fontSize: 10, color: '#7D8DA3' }}>개별 크론 즉시 실행</span>
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {QUICK_ACTIONS.map(a => {
               const result = actionResults[a.id];
               return (
                 <button key={a.id} className="cc-btn" onClick={() => runQuickAction(a)} disabled={!!actionRunning}
-                  style={{ background: result ? (result.ok ? 'rgba(5,150,105,0.12)' : 'rgba(248,113,113,0.12)') : '#1E3050', color: result ? (result.ok ? '#34D399' : '#f87171') : '#94a3b8', border: `1px solid ${result ? (result.ok ? 'rgba(5,150,105,0.25)' : 'rgba(248,113,113,0.25)') : '#2A4060'}` }}>
+                  style={{ background: result ? (result.ok ? 'rgba(5,150,105,0.12)' : 'rgba(248,113,113,0.12)') : '#1E3050', color: result ? (result.ok ? '#34D399' : '#f87171') : '#9DB0C7', border: `1px solid ${result ? (result.ok ? 'rgba(5,150,105,0.25)' : 'rgba(248,113,113,0.25)') : '#2A4060'}` }}>
                   {actionRunning === a.id ? <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <span style={{ fontSize: 13 }}>{a.icon}</span>}
                   {result?.msg || a.label}
                 </button>
@@ -438,15 +438,15 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
 
         {/* Cron Status Grid */}
         <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 12, letterSpacing: 0.5 }}>크론 상태 ({cronEntries.length}개)</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#7D8DA3', marginBottom: 12, letterSpacing: 0.5 }}>크론 상태 ({cronEntries.length}개)</div>
           {GROUPS_ORDER.map(group => {
             const gc = cronEntries.filter(c => c.group === group);
             if (!gc.length) return null;
             return (
               <div key={group} style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_COLORS[group]||'#64748b' }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: GROUP_COLORS[group]||'#64748b' }}>{group}</span>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_COLORS[group]||'#7D8DA3' }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: GROUP_COLORS[group]||'#7D8DA3' }}>{group}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {gc.map(c => {
@@ -457,8 +457,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                       <div key={c.name} style={{ padding: '6px 10px', borderRadius: 8, background: isOk ? '#05966910' : isFail ? '#F8717110' : '#60A5FA10', border: `1px solid ${isOk ? '#05966925' : isFail ? '#F8717125' : '#60A5FA25'}`, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOk ? '#34D399' : isFail ? '#F87171' : '#60A5FA', animation: isRun ? 'pulse-dot 1s infinite' : 'none' }} />
                         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{c.display}</span>
-                        <span style={{ color: '#64748B', fontSize: 9 }}>{c.latest?.started_at ? timeAgo(c.latest.started_at) : '-'}</span>
-                        <span style={{ color: '#64748B', fontSize: 9 }}>{c.successRate}%</span>
+                        <span style={{ color: '#7D8DA3', fontSize: 10 }}>{c.latest?.started_at ? timeAgo(c.latest.started_at) : '-'}</span>
+                        <span style={{ color: '#7D8DA3', fontSize: 10 }}>{c.successRate}%</span>
                       </div>
                     );
                   })}
@@ -476,13 +476,13 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <span style={{ fontSize: 14 }}>📰</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>블로그 자동화</span>
               {queueStatus && <span style={{ fontSize: 10, color: '#34D399', fontWeight: 700 }}>큐 {queueStatus.queue_ready ?? 0}</span>}
-              <span style={{ fontSize: 14, color: '#64748B', transform: expandedPanel === 'blog' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
+              <span style={{ fontSize: 14, color: '#7D8DA3', transform: expandedPanel === 'blog' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
             </button>
             {expandedPanel === 'blog' && blogConfig && (
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#94a3b8', marginBottom: 6 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#9DB0C7', marginBottom: 6 }}>
                       <input type="checkbox" checked={blogConfig.auto_publish_enabled} onChange={e => setBlogConfig({...blogConfig,auto_publish_enabled:e.target.checked})} /> 자동 발행
                     </label>
                     {[
@@ -492,7 +492,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                       { k: 'title_similarity_threshold', l: '유사도', min: 0.1, max: 0.9 },
                     ].map(f => (
                       <div key={f.k} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
-                        <span style={{ fontSize: 10, color: '#64748b', minWidth: 55 }}>{f.l}</span>
+                        <span style={{ fontSize: 10, color: '#7D8DA3', minWidth: 55 }}>{f.l}</span>
                         <input className="cc-input" type="number" min={f.min} max={f.max} step={f.k === 'title_similarity_threshold' ? 0.05 : f.k === 'min_content_length' ? 100 : 1}
                           value={(blogConfig as any)[f.k]} onChange={e => setBlogConfig({...blogConfig,[f.k]: f.k === 'title_similarity_threshold' ? parseFloat(e.target.value) : parseInt(e.target.value)})} />
                       </div>
@@ -509,15 +509,15 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                           { v: queueStatus.published_today??0, l: '오늘 발행', c: '#E2E8F0' },
                           { v: queueStatus.remaining_today??0, l: '남은 쿼터', c: '#E2E8F0' },
                           { v: queueStatus.queue_ready??0, l: '대기(가능)', c: '#34D399' },
-                          { v: queueStatus.queue_too_short??0, l: '대기(미달)', c: (queueStatus.queue_too_short??0)>0?'#F87171':'#64748b' },
+                          { v: queueStatus.queue_too_short??0, l: '대기(미달)', c: (queueStatus.queue_too_short??0)>0?'#F87171':'#7D8DA3' },
                         ].map(q => (
                           <div key={q.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1E305040' }}>
                             <div style={{ fontSize: 16, fontWeight: 800, color: q.c }}>{q.v}</div>
-                            <div style={{ fontSize: 8, color: '#64748b' }}>{q.l}</div>
+                            <div style={{ fontSize: 8, color: '#7D8DA3' }}>{q.l}</div>
                           </div>
                         ))}
                       </div>
-                      {(queueStatus.queue_ready??0)>0 && <div style={{ fontSize: 9, color: '#64748B', marginTop: 6, textAlign: 'center' }}>소진: ~{Math.ceil(queueStatus.queue_ready/(blogConfig.daily_publish_limit||3))}일</div>}
+                      {(queueStatus.queue_ready??0)>0 && <div style={{ fontSize: 10, color: '#7D8DA3', marginTop: 6, textAlign: 'center' }}>소진: ~{Math.ceil(queueStatus.queue_ready/(blogConfig.daily_publish_limit||3))}일</div>}
                     </div>
                   )}
                 </div>
@@ -525,14 +525,14 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                   <div style={{ borderTop: '1px solid #1E3050', paddingTop: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA' }}>✍️ AI 리라이팅</span>
-                      <span style={{ fontSize: 10, color: '#64748b' }}>{rewriteStats.done}/{rewriteStats.total} ({pct(rewriteStats.done,rewriteStats.total)}%)</span>
+                      <span style={{ fontSize: 10, color: '#7D8DA3' }}>{rewriteStats.done}/{rewriteStats.total} ({pct(rewriteStats.done,rewriteStats.total)}%)</span>
                     </div>
                     <div className="cc-progress" style={{ marginBottom: 8 }}><div className="cc-progress-bar" style={{ width: `${pct(rewriteStats.done,rewriteStats.total)}%`, background: '#A78BFA' }} /></div>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button className="cc-btn" onClick={() => runRewrite(5)} disabled={rewriteRunning} style={{ background: '#A78BFA', color: '#fff' }}>{rewriteRunning ? '처리 중...' : '5건'}</button>
                       <button className="cc-btn" onClick={() => runRewrite(10)} disabled={rewriteRunning} style={{ background: '#A78BFA', color: '#fff' }}>10건</button>
                     </div>
-                    {rewriteLog.length > 0 && <div className="cc-scrollbar" style={{ marginTop: 6, maxHeight: 80, overflow: 'auto', fontSize: 9, color: '#64748B', background: '#1E305040', borderRadius: 6, padding: 6 }}>{rewriteLog.slice(-5).map((l,i)=><div key={i}>{l}</div>)}</div>}
+                    {rewriteLog.length > 0 && <div className="cc-scrollbar" style={{ marginTop: 6, maxHeight: 80, overflow: 'auto', fontSize: 10, color: '#7D8DA3', background: '#1E305040', borderRadius: 6, padding: 6 }}>{rewriteLog.slice(-5).map((l,i)=><div key={i}>{l}</div>)}</div>}
                   </div>
                 )}
               </div>
@@ -545,26 +545,26 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <span style={{ fontSize: 14 }}>👥</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>유저 관리</span>
               <span style={{ fontSize: 10, color: '#34D399', fontWeight: 700 }}>실제 {realUsers.length}</span>
-              <span style={{ fontSize: 14, color: '#64748B', transform: expandedPanel === 'users' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
+              <span style={{ fontSize: 14, color: '#7D8DA3', transform: expandedPanel === 'users' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
             </button>
             {expandedPanel === 'users' && (
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
-                  {[{l:'전체',v:users.length,c:'#E2E8F0'},{l:'실제',v:realUsers.length,c:'#34D399'},{l:'시드',v:users.length-realUsers.length,c:'#64748b'},{l:'정지',v:users.filter(u=>u.is_deleted).length,c:'#F87171'}].map(s=>(
+                  {[{l:'전체',v:users.length,c:'#E2E8F0'},{l:'실제',v:realUsers.length,c:'#34D399'},{l:'시드',v:users.length-realUsers.length,c:'#7D8DA3'},{l:'정지',v:users.filter(u=>u.is_deleted).length,c:'#F87171'}].map(s=>(
                     <div key={s.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#1E305040' }}>
                       <div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div>
-                      <div style={{ fontSize: 8, color: '#64748b' }}>{s.l}</div>
+                      <div style={{ fontSize: 8, color: '#7D8DA3' }}>{s.l}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>최근 실제 가입</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#7D8DA3', marginBottom: 4 }}>최근 실제 가입</div>
                 <div className="cc-scrollbar" style={{ maxHeight: 120, overflow: 'auto' }}>
                   {realUsers.slice(0,10).map(u=>(
                     <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', borderBottom: '1px solid #1E305030', fontSize: 11 }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600, flex: 1 }}>{u.nickname||'미설정'}</span>
-                      <span style={{ color: '#64748b' }}>{u.grade_title||'-'}</span>
-                      <span style={{ color: '#64748B' }}>{u.points??0}P</span>
-                      <span style={{ color: '#64748B', fontSize: 9 }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</span>
+                      <span style={{ color: '#7D8DA3' }}>{u.grade_title||'-'}</span>
+                      <span style={{ color: '#7D8DA3' }}>{u.points??0}P</span>
+                      <span style={{ color: '#7D8DA3', fontSize: 10 }}>{new Date(u.created_at).toLocaleDateString('ko-KR')}</span>
                     </div>
                   ))}
                 </div>
@@ -579,19 +579,19 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <span style={{ fontSize: 14 }}>🔔</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>알림 / 신고</span>
               {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(251,191,36,0.12)', color: '#FBBF24', fontWeight: 700 }}>{unreadAlerts}</span>}
-              <span style={{ fontSize: 14, color: '#64748B', transform: expandedPanel === 'alerts' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
+              <span style={{ fontSize: 14, color: '#7D8DA3', transform: expandedPanel === 'alerts' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
             </button>
             {expandedPanel === 'alerts' && (
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div className="cc-scrollbar" style={{ maxHeight: 200, overflow: 'auto' }}>
-                  {alerts.length === 0 ? <div style={{ color: '#64748B', fontSize: 11, textAlign: 'center', padding: 12 }}>알림 없음</div> : alerts.map(a => (
+                  {alerts.length === 0 ? <div style={{ color: '#7D8DA3', fontSize: 11, textAlign: 'center', padding: 12 }}>알림 없음</div> : alerts.map(a => (
                     <div key={a.id} onClick={() => !a.is_read && dismissAlert(a.id)} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 0', borderBottom: '1px solid #1E305030', opacity: a.is_read ? 0.4 : 1, cursor: a.is_read ? 'default' : 'pointer', fontSize: 11 }}>
                       <span>{a.severity === 'error' ? '🔴' : a.severity === 'warning' ? '🟡' : '🟢'}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: a.is_read ? 400 : 700, color: 'var(--text-primary)' }}>{a.title}</div>
-                        {a.message && <div style={{ fontSize: 9, color: '#64748b', marginTop: 1 }}>{a.message.slice(0,80)}</div>}
+                        {a.message && <div style={{ fontSize: 10, color: '#7D8DA3', marginTop: 1 }}>{a.message.slice(0,80)}</div>}
                       </div>
-                      <span style={{ fontSize: 9, color: '#64748B', whiteSpace: 'nowrap' }}>{a.created_at ? timeAgo(a.created_at) : ''}</span>
+                      <span style={{ fontSize: 10, color: '#7D8DA3', whiteSpace: 'nowrap' }}>{a.created_at ? timeAgo(a.created_at) : ''}</span>
                     </div>
                   ))}
                 </div>
@@ -610,25 +610,25 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             <button onClick={() => toggle('tools')} style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 14 }}>🛠</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>공지 / SEO / 도구</span>
-              <span style={{ fontSize: 14, color: '#64748B', transform: expandedPanel === 'tools' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
+              <span style={{ fontSize: 14, color: '#7D8DA3', transform: expandedPanel === 'tools' ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
             </button>
             {expandedPanel === 'tools' && (
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>전광판 공지</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>전광판 공지</div>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
                   <input value={noticeText} onChange={e => setNoticeText(e.target.value)} placeholder="전광판 공지 입력..." style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid #1E3050', background: '#0F1D35', color: 'var(--text-primary)', fontSize: 11, outline: 'none' }} />
                   <button className="cc-btn" onClick={postNotice} disabled={noticeSaving||!noticeText.trim()} style={{ background: '#2563EB', color: '#fff' }}>등록</button>
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>SEO</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>SEO</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10, marginBottom: 10 }}>
                   {[{h:'/sitemap.xml',l:'sitemap.xml'},{h:'/robots.txt',l:'robots.txt'},{h:'/api/og?title=테스트',l:'OG 미리보기'}].map(lk=>(
                     <a key={lk.h} href={lk.h} target="_blank" style={{ color: '#60A5FA', padding: '3px 8px', borderRadius: 6, background: '#60A5FA10' }}>{lk.l}</a>
                   ))}
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>관리 페이지</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>관리 페이지</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10 }}>
                   {[{h:'/admin/content',l:'콘텐츠'},{h:'/admin/users',l:'유저'},{h:'/admin/reports',l:'신고'},{h:'/admin/blog',l:'블로그'},{h:'/admin/infra',l:'인프라'},{h:'/admin/realestate',l:'부동산'},{h:'/admin/payments',l:'결제'},{h:'/admin/notifications',l:'알림'},{h:'/admin/system',l:'시스템'}].map(l=>(
-                    <a key={l.h} href={l.h} style={{ color: '#94a3b8', padding: '3px 8px', borderRadius: 6, background: '#1E305040', textDecoration: 'none' }}>{l.l}</a>
+                    <a key={l.h} href={l.h} style={{ color: '#9DB0C7', padding: '3px 8px', borderRadius: 6, background: '#1E305040', textDecoration: 'none' }}>{l.l}</a>
                   ))}
                 </div>
               </div>
@@ -639,7 +639,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         {/* API Quotas */}
         {quotas.length > 0 && (
           <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050', marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>API 할당량</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#7D8DA3', marginBottom: 10, letterSpacing: 0.5 }}>API 할당량</div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {quotas.map(q => {
                 const dp = q.daily_limit ? pct(q.daily_used,q.daily_limit) : 0;
@@ -648,8 +648,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 return (
                   <div key={q.api_name} style={{ flex: '1 1 200px', minWidth: 180 }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{q.api_name}</div>
-                    {q.daily_limit && <div style={{ marginBottom: 4 }}><div style={{ display:'flex',justifyContent:'space-between',fontSize:9,color:'#64748b',marginBottom:2 }}><span>일일</span><span>{q.daily_used}/{q.daily_limit}</span></div><div className="cc-progress"><div className="cc-progress-bar" style={{ width:`${Math.min(dp,100)}%`,background:bc(dp) }} /></div></div>}
-                    {q.monthly_limit && <div><div style={{ display:'flex',justifyContent:'space-between',fontSize:9,color:'#64748b',marginBottom:2 }}><span>월간</span><span>{q.monthly_used}/{q.monthly_limit}</span></div><div className="cc-progress"><div className="cc-progress-bar" style={{ width:`${Math.min(mp,100)}%`,background:bc(mp) }} /></div></div>}
+                    {q.daily_limit && <div style={{ marginBottom: 4 }}><div style={{ display:'flex',justifyContent:'space-between',fontSize:10,color:'#7D8DA3',marginBottom:2 }}><span>일일</span><span>{q.daily_used}/{q.daily_limit}</span></div><div className="cc-progress"><div className="cc-progress-bar" style={{ width:`${Math.min(dp,100)}%`,background:bc(dp) }} /></div></div>}
+                    {q.monthly_limit && <div><div style={{ display:'flex',justifyContent:'space-between',fontSize:10,color:'#7D8DA3',marginBottom:2 }}><span>월간</span><span>{q.monthly_used}/{q.monthly_limit}</span></div><div className="cc-progress"><div className="cc-progress-bar" style={{ width:`${Math.min(mp,100)}%`,background:bc(mp) }} /></div></div>}
                   </div>
                 );
               })}
@@ -659,20 +659,20 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
 
         {/* Cron Logs */}
         <div className="cc-card cc-section" style={{ background: '#0F1D35', borderRadius: 12, padding: '14px 16px', border: '1px solid #1E3050' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, letterSpacing: 0.5 }}>최근 크론 로그</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#7D8DA3', marginBottom: 10, letterSpacing: 0.5 }}>최근 크론 로그</div>
           <div className="cc-scrollbar" style={{ overflow: 'auto', maxHeight: 300 }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
               <thead><tr style={{ borderBottom: '1px solid #1E3050', textAlign: 'left' }}>
-                {['시간','크론','상태','소요','처리','에러'].map(h=><th key={h} style={{ padding:'6px 8px',color:'#64748B',fontWeight:600 }}>{h}</th>)}
+                {['시간','크론','상태','소요','처리','에러'].map(h=><th key={h} style={{ padding:'6px 8px',color:'#7D8DA3',fontWeight:600 }}>{h}</th>)}
               </tr></thead>
               <tbody>
                 {cronLogs.map((log,i) => (
                   <tr key={log.id||i} style={{ borderBottom: '1px solid #1E305020' }}>
-                    <td style={{ padding:'5px 8px',color:'#64748b',whiteSpace:'nowrap' }}>{log.started_at ? new Date(log.started_at).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</td>
+                    <td style={{ padding:'5px 8px',color:'#7D8DA3',whiteSpace:'nowrap' }}>{log.started_at ? new Date(log.started_at).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</td>
                     <td style={{ padding:'5px 8px',color:'var(--text-primary)',fontWeight:600 }}>{CRON_MAP[log.cron_name]?.display||log.cron_name}</td>
-                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:9,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'rgba(5,150,105,0.12)':log.status==='running'?'rgba(96,165,250,0.12)':'rgba(248,113,113,0.12)',color:log.status==='success'?'#34D399':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>
-                    <td style={{ padding:'5px 8px',color:'#64748b' }}>{log.duration_ms?`${(log.duration_ms/1000).toFixed(1)}s`:'-'}</td>
-                    <td style={{ padding:'5px 8px',color:'#64748b' }}>{log.records_processed||0}</td>
+                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:10,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'rgba(5,150,105,0.12)':log.status==='running'?'rgba(96,165,250,0.12)':'rgba(248,113,113,0.12)',color:log.status==='success'?'#34D399':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>
+                    <td style={{ padding:'5px 8px',color:'#7D8DA3' }}>{log.duration_ms?`${(log.duration_ms/1000).toFixed(1)}s`:'-'}</td>
+                    <td style={{ padding:'5px 8px',color:'#7D8DA3' }}>{log.records_processed||0}</td>
                     <td style={{ padding:'5px 8px',color:'#F87171',maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{log.error_message||''}</td>
                   </tr>
                 ))}

@@ -162,7 +162,7 @@ export const CATEGORY_MAP: Record<string, { label: string; color: string; bg: st
   stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.12)' },
   local: { label: '우리동네', color: '#FBBF24', bg: 'rgba(251,191,36,0.12)' },
   free: { label: '자유', color: '#A78BFA', bg: 'rgba(167,139,250,0.12)' },
-  all: { label: '전체', color: '#94A3B8', bg: 'transparent' },
+  all: { label: '전체', color: '#9DB0C7', bg: 'transparent' },
 };
 
 export const REGIONS = [
@@ -187,10 +187,10 @@ export const REGIONS = [
 ];
 
 export const GRADE_INFO: Record<string, { icon: string; color: string }> = {
-  '씨앗': { icon: '🌱', color: '#94A3B8' },
+  '씨앗': { icon: '🌱', color: '#9DB0C7' },
   '새싹': { icon: '🌿', color: '#34D399' },
   '브론즈': { icon: '🥉', color: '#FBBF24' },
-  '실버': { icon: '🥈', color: '#94A3B8' },
+  '실버': { icon: '🥈', color: '#9DB0C7' },
   '골드': { icon: '🥇', color: '#FCD34D' },
   '플래티넘': { icon: '💎', color: '#A78BFA' },
   '다이아': { icon: '🔷', color: '#22D3EE' },
