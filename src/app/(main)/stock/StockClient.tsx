@@ -471,10 +471,10 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 면책 */}
       <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 6, padding: '8px 14px', marginTop: 16, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-        본 서비스의 주식 정보는 투자 참고용이며 투자 권유가 아닙니다. 투자 손실에 대한 책임은 투자자 본인에게 있습니다.
+        ⚠️ 본 서비스의 주식 정보는 투자 참고용이며 투자 권유가 아닙니다. 투자 손실에 대한 책임은 투자자 본인에게 있습니다.
       </div>
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>
-        시세 데이터: Naver Finance / Yahoo Finance API · 20분 지연 · 환율: 1 USD = ₩{exchangeRate.toFixed(0)}
+        📊 데이터 출처: 공공데이터포털 금융위원회 주식시세 API (data.go.kr) · 장 마감 후 종가 기준 · 환율: open.er-api.com · 실시간 시세가 아닌 지연 데이터입니다
       </p>
 
       {/* 종목 모달 */}

@@ -374,7 +374,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           })}
 
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-            청약홈(applyhome.co.kr) 공공 데이터 기준 · 정확한 일정은 청약홈에서 확인하세요
+            청약홈(applyhome.co.kr) 공공데이터 · 공공데이터포털(data.go.kr) API 기준 · 매일 06시 자동 갱신 · 정확한 일정과 분양가는 반드시 청약홈에서 재확인하세요
           </p>
         </div>
       )}
@@ -529,7 +529,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             })()}
 
             {/* 안내 + 필터 */}
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>최근 1년 기준 · 국토교통부 미분양주택현황 및 청약홈 공공데이터</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
             <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 12, paddingBottom: 2 }}>
               {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
             </div>
@@ -591,7 +591,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             })}
 
             {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>해당 지역 데이터가 없습니다</div>}
-            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>최근 1년 미분양 현황 · 국토교통부 미분양주택현황 및 청약홈 공공데이터 기반 · 매월 갱신</p>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>📊 데이터 출처: 국토교통부 미분양주택현황 통계 (stat.molit.go.kr) · 매월 말 발표 기준, 2~3개월 지연 반영 · 개별 단지 정보는 청약홈(applyhome.co.kr) 병행 수집</p>
           </div>
         );
       })()}
@@ -724,7 +724,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             </div>
 
             {/* 안내 */}
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>각 지자체 정비사업 공개 데이터 기준</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준 · 매주 월요일 자동 갱신</div>
 
             {/* 결과 카운트 */}
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
@@ -783,7 +783,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
             {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>조건에 맞는 프로젝트가 없습니다</div>}
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-              각 지자체 정비사업 공개 데이터 기준 · 실제 진행 상황은 해당 조합/지자체에서 확인하세요
+              📊 데이터 출처: 서울시 열린데이터광장(openapi.seoul.go.kr) · 경기도 공공데이터(openapi.gg.go.kr) · 부산시 공공데이터(apis.data.go.kr) · 매주 월요일 갱신 · 실제 진행 상황은 해당 조합 또는 지자체에 직접 확인하세요
             </p>
           </div>
         );
@@ -974,7 +974,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             )}
 
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-              국토교통부 실거래가 공개시스템 기준 · 실제 거래가와 차이가 있을 수 있습니다
+              📊 데이터 출처: 국토교통부 실거래가 공개시스템 (rt.molit.go.kr) · 공공데이터포털 API (apis.data.go.kr) · 전국 약 200개 시군구 · 평일 매일 08시 자동 수집 · 최근 2개월 거래 기준 · 실제 거래가와 차이가 있을 수 있습니다
             </p>
           </div>
         );
