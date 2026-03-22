@@ -7,7 +7,7 @@
       "maxDuration": 300
     },
     "src/app/api/cron/crawl-*/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 120
     },
     "src/app/(main)/**/*.tsx": {
       "maxDuration": 30
@@ -140,6 +140,10 @@
     {
       "path": "/api/cron/blog-monthly-market",
       "schedule": "0 1 2 * *"
+    },
+    {
+      "path": "/api/cron/stock-crawl",
+      "schedule": "0 22 * * 1-5"
     }
   ]
 }
