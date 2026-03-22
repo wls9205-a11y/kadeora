@@ -113,7 +113,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       {/* Header */}
-      <div style={{
+      <div className="admin-header" style={{
         background: '#0f172a',
         padding: '16px 24px',
         display: 'flex',
@@ -127,7 +127,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         </div>
 
         {/* Service status dots */}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 1 }}>
+        <div className="service-dots" style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 1 }}>
           {healthChecks.map(hc => (
             <div key={hc.service_name} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               {statusDot(hc.status)}
@@ -224,7 +224,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
       </div>
 
       {/* Tab content */}
-      <div style={{ padding: 24, maxWidth: 1200 }}>
+      <div className="admin-content" style={{ padding: 24, maxWidth: 1200 }}>
         {activeTab === 'dashboard' && <AdminDashboard />}
         {activeTab === 'automation' && <AdminAutomation />}
         {activeTab === 'content' && <AdminContent />}

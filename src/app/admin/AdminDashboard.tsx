@@ -29,23 +29,24 @@ export default function AdminDashboard() {
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', today),
       sb.from('comments').select('id', { count: 'exact', head: true }).gte('created_at', today),
-      sb.from('blog_posts').select('id', { count: 'exact', head: true }),
-      sb.from('stock_quotes').select('id', { count: 'exact', head: true }),
+      sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
+      sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).eq('is_active', true),
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }),
+      sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', today),
       // Other data
       sb.from('admin_alerts').select('*').order('created_at', { ascending: false }).limit(20),
       sb.from('health_checks').select('*'),
       sb.from('daily_stats').select('*').order('stat_date', { ascending: false }).limit(7),
       sb.from('unsold_monthly_stats').select('stat_month, total_unsold').order('stat_month', { ascending: true }),
       sb.from('stock_daily_briefing').select('*').eq('market', 'KR').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
-    ]).then(([usersR, todayUsersR, postsR, todayPostsR, todayCommentsR, blogsR, stocksR, redevR, alertsRes, healthRes, statsRes, unsoldRes, briefingRes]) => {
+    ]).then(([usersR, todayUsersR, postsR, todayPostsR, todayCommentsR, blogsR, stocksR, redevR, dauR, alertsRes, healthRes, statsRes, unsoldRes, briefingRes]) => {
       setData({
         total_users: usersR.count || 0,
         today_signups: todayUsersR.count || 0,
         total_posts: postsR.count || 0,
         today_posts: todayPostsR.count || 0,
         today_comments: todayCommentsR.count || 0,
-        dau: todayUsersR.count || 0,
+        dau: dauR.count || 0,
         total_blogs: blogsR.count || 0,
         total_stocks: stocksR.count || 0,
         total_apt_data: redevR.count || 0,
