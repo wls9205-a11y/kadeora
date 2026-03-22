@@ -106,6 +106,25 @@
 - 1200자 미만 8,890건 패딩 추가, cover_image 967건 세팅
 - 면책 문구 292건 추가, 발행 날짜 24개월 균등 재분배
 
+### 6. 속도 최적화 10건
+- 미들웨어: 공개 페이지 auth 스킵 (TTFB 200~500ms 단축)
+- 부동산 select('*') → 필요 컬럼만 (payload 50~70% 감소)
+- 레이아웃 7개 컴포넌트 dynamic import (초기 JS 축소)
+- 블로그 count 5개 쿼리 → RPC 1개 (blog_category_counts)
+- 주식 목록/상세/클라이언트 리프레시 select 최적화
+- 피드 content→excerpt 전환 (posts.excerpt 생성 컬럼, payload 80% 감소)
+- optimizePackageImports 확장 (lucide-react, marked)
+
+### 7. 가이드북 전면 업데이트
+- 기능 소개 19→25개 (블로그/캔들차트/재개발/실거래/통합검색/관심종목 등)
+- FAQ 6개 추가, 문의·건의 섹션 추가
+
+### 8. 글씨 크기별 레이아웃 간격 시스템
+- CSS 변수: --sp-xs~2xl, --card-p, --btn-h, --touch-min, --radius-sm~lg
+- font-small/medium/large별 간격 자동 조절
+- 모바일+font-large 반응형 보정 (글씨/간격 축소)
+- 유틸리티 클래스 14개 (.kd-card, .kd-btn, .kd-tabs 등)
+
 ---
 
 ## 세션 22 변경 요약 (20건+ 커밋)
