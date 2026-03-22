@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.kakaocdn.net" },
       { protocol: "https", hostname: "img1.kakaocdn.net" },
       { protocol: "https", hostname: "t1.kakaocdn.net" },
+      { protocol: "https", hostname: "kadeora.app" },
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,

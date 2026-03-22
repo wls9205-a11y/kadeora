@@ -36,12 +36,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       supabase.from('apt_subscriptions').select('house_manage_no, created_at').order('rcept_bgnde', { ascending: false }).limit(5000),
     ]);
 
-    blogPages = (blogsR.data || []).map(b => ({
-      url: `${BASE}/blog/${b.slug}`,
-      lastModified: new Date(b.updated_at || b.published_at || Date.now()),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }));
+    blogPages = (blogsR.data || []).map(b => {
+      const pubDate = new Date(b.published_at || b.updated_at || Date.now());
+      const daysSincePub = Math.floor((Date.now() - pubDate.getTime()) / 86400000);
+      return {
+        url: `${BASE}/blog/${b.slug}`,
+        lastModified: new Date(b.updated_at || b.published_at || Date.now()),
+        changeFrequency: (daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly') as const,
+        priority: daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5,
+      };
+    });
 
     stockPages = (stocksR.data || []).map(s => ({
       url: `${BASE}/stock/${s.symbol}`,

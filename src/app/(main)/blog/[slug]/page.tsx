@@ -12,7 +12,15 @@ import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 export const revalidate = 300;
 const SITE = 'https://kadeora.app';
 
-marked.setOptions({ breaks: true, gfm: true });
+// marked heading에 id 자동 부여 (TOC 앵커용)
+const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+
+const renderer = new marked.Renderer();
+renderer.heading = function ({ text, depth }: { text: string; depth: number }) {
+  const id = slugify(text);
+  return `<h${depth} id="${id}">${text}</h${depth}>\n`;
+};
+marked.setOptions({ breaks: true, gfm: true, renderer });
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -72,7 +80,12 @@ export async function generateMetadata({ params }: Props) {
     openGraph: {
       title: post.title, description: post.excerpt || post.title, type: 'article',
       siteName: '카더라', locale: 'ko_KR',
-      publishedTime: post.published_at || post.created_at, url: `${SITE}/blog/${slug}`,
+      publishedTime: post.published_at || post.created_at,
+      modifiedTime: post.published_at || post.created_at,
+      authors: [post.author_name || '카더라 데이터팀'],
+      tags: post.tags ?? [],
+      section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
+      url: `${SITE}/blog/${slug}`,
       images: [{ url: ogImage, width: 1200, height: 630, alt: post.image_alt || `카더라 — ${post.title}` }],
     },
     twitter: {
@@ -80,7 +93,6 @@ export async function generateMetadata({ params }: Props) {
       images: [ogImage],
     },
     other: (() => {
-      // GEO 태그: 제목/태그에서 지역명 추출
       const allText = `${post.title} ${(post.tags ?? []).join(' ')}`;
       const geo = Object.entries(GEO_CODES).find(([k]) => allText.includes(k));
       return geo ? { 'geo.region': geo[1], 'geo.placename': geo[0] } : {};
@@ -112,10 +124,18 @@ export default async function BlogDetailPage({ params }: Props) {
     comments = data ?? [];
   } catch {}
 
+  const wordCount = post.content.replace(/[#*|\-\n\r\[\]`>]/g, '').replace(/\s+/g, ' ').trim().length;
+  const readingTimeMin = Math.max(1, Math.ceil(wordCount / 500));
+
+  const catSection: Record<string, string> = { stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크', general: '생활' };
+
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Article',
     headline: post.title, description: post.meta_description || post.excerpt || '',
-    datePublished: post.published_at || post.created_at, dateModified: post.updated_at,
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.updated_at || post.published_at || post.created_at,
+    wordCount,
+    timeRequired: `PT${readingTimeMin}M`,
     author: {
       '@type': 'Person',
       name: post.author_name || '카더라 데이터팀',
@@ -133,7 +153,31 @@ export default async function BlogDetailPage({ params }: Props) {
     keywords: (post.tags ?? []).join(', '),
     inLanguage: 'ko-KR',
     isAccessibleForFree: true,
-    articleSection: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
+    articleSection: catSection[post.category] || '정보',
+    ...(comments.length > 0 ? {
+      commentCount: comments.length,
+      comment: comments.slice(0, 3).map((c: any) => ({
+        '@type': 'Comment',
+        text: c.content,
+        dateCreated: c.created_at,
+        author: { '@type': 'Person', name: (c.profiles as any)?.nickname ?? '사용자' },
+      })),
+    } : {}),
+    interactionStatistic: {
+      '@type': 'InteractionCounter',
+      interactionType: 'https://schema.org/ReadAction',
+      userInteractionCount: post.view_count ?? 0,
+    },
+  };
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '홈', item: SITE },
+      { '@type': 'ListItem', position: 2, name: '블로그', item: `${SITE}/blog` },
+      ...(post.category ? [{ '@type': 'ListItem', position: 3, name: catSection[post.category] || post.category, item: `${SITE}/blog?category=${post.category}` }] : []),
+      { '@type': 'ListItem', position: post.category ? 4 : 3, name: post.title },
+    ],
   };
 
   // 마크다운 → HTML
@@ -159,6 +203,7 @@ export default async function BlogDetailPage({ params }: Props) {
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
       <div style={{ marginBottom: 16 }}>
@@ -170,6 +215,8 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
           <span>{new Date(post.published_at || post.created_at).toLocaleDateString('ko-KR')}</span>
           <span>조회 {post.view_count ?? 0}</span>
+          <span>·</span>
+          <span>약 {readingTimeMin}분</span>
         </div>
 
         {(post.tags ?? []).length > 0 && (

@@ -1,12 +1,42 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export const revalidate = 300;
-export const metadata: Metadata = {
-  title: '블로그 — 주식·청약·부동산 정보',
-  description: '코스피 코스닥 시세, 아파트 청약 일정, 미분양 현황, 재테크 정보를 매일 업데이트합니다.',
+
+const SITE = 'https://kadeora.app';
+
+const CAT_META: Record<string, { title: string; desc: string }> = {
+  all: { title: '블로그 — 주식·청약·부동산 정보', desc: '코스피 코스닥 시세, 아파트 청약 일정, 미분양 현황, 재테크 정보를 매일 업데이트합니다.' },
+  stock: { title: '주식 블로그 — 코스피·코스닥 시황 분석', desc: '매일 업데이트되는 코스피 코스닥 시황, 급등락 종목 분석, 섹터별 동향 정보.' },
+  apt: { title: '청약 블로그 — 아파트 청약 일정·분석', desc: '전국 아파트 청약 일정, 분양가 분석, 당첨 전략 등 청약 정보를 매일 제공합니다.' },
+  unsold: { title: '미분양 블로그 — 전국 미분양 현황·분석', desc: '전국 미분양 아파트 현황, 투자 분석, 할인 분양 정보를 월간 업데이트합니다.' },
+  finance: { title: '재테크 블로그 — 투자·절약·자산관리', desc: '재테크 기본 원칙부터 실전 투자 전략까지, 자산 관리 정보를 제공합니다.' },
+  general: { title: '생활 정보 블로그 — 우리동네 소식', desc: '알아두면 유용한 생활 정보, 동네 소식, 정책 변경 사항을 안내합니다.' },
 };
+
+interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string }> }
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const { category = 'all', page = '1', q } = await searchParams;
+  const meta = CAT_META[category] || CAT_META.all;
+  const pageNum = parseInt(page) || 1;
+  const suffix = pageNum > 1 ? ` (${pageNum}페이지)` : '';
+  const qSuffix = q ? ` — "${q}" 검색` : '';
+
+  const canonical = category === 'all' && pageNum === 1 && !q
+    ? `${SITE}/blog`
+    : `${SITE}/blog?${category !== 'all' ? `category=${category}&` : ''}${pageNum > 1 ? `page=${pageNum}` : ''}`.replace(/&$/, '');
+
+  return {
+    title: `${meta.title}${suffix}${qSuffix}`,
+    description: meta.desc,
+    alternates: { canonical },
+    openGraph: { title: meta.title, description: meta.desc, url: canonical },
+    ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 const CATS = [
   { key: 'all', label: '전체', icon: '📋' },
@@ -66,8 +96,32 @@ export default async function BlogPage({ searchParams }: Props) {
 
   const hasMore = (posts ?? []).length === perPage;
 
+  const catLabel = CATS.find(c => c.key === category)?.label || '전체';
+  const breadcrumbLd = {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '홈', item: 'https://kadeora.app' },
+      { '@type': 'ListItem', position: 2, name: '블로그', item: 'https://kadeora.app/blog' },
+      ...(category !== 'all' ? [{ '@type': 'ListItem', position: 3, name: catLabel }] : []),
+    ],
+  };
+
+  const itemListLd = (posts ?? []).length > 0 ? {
+    '@context': 'https://schema.org', '@type': 'ItemList',
+    name: `카더라 블로그 — ${catLabel}`,
+    numberOfItems: (posts ?? []).length,
+    itemListElement: (posts ?? []).slice(0, 10).map((p: any, i: number) => ({
+      '@type': 'ListItem',
+      position: i + 1 + (pageNum - 1) * perPage,
+      url: `https://kadeora.app/blog/${p.slug}`,
+      name: p.title,
+    })),
+  } : null;
+
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📝 블로그</h1>
         <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{totalCount.toLocaleString()}개의 글</span>
@@ -165,10 +219,11 @@ export default async function BlogPage({ searchParams }: Props) {
                 {p.cover_image && (
                   <div style={{
                     width: 80, height: 80, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
-                    background: 'var(--bg-hover)',
+                    background: 'var(--bg-hover)', position: 'relative',
                   }}>
-                    <img src={p.cover_image} alt={p.image_alt || p.title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    <Image src={p.cover_image} alt={p.image_alt || p.title}
+                      width={80} height={80}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                       loading="lazy" />
                   </div>
                 )}
