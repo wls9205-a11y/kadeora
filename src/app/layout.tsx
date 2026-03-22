@@ -69,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="alternate" type="application/rss+xml" title="카더라 RSS" href="/feed.xml" />
+        <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png?v=2" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=2" />
         <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png?v=2" />
