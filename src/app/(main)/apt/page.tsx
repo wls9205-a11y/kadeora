@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '아파트 청약 일정 · 미분양 · 재개발',
-  description: '2026년 전국 아파트 청약 일정, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.',
+  title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발',
+  description: '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.',
   openGraph: {
-    title: '청약·미분양·재개발',
-    description: '전국 아파트 청약 일정, 미분양 현황, 재개발·재건축 진행 현황',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 청약·미분양·재개발' }],
+    title: '청약·분양중·미분양·재개발',
+    description: '전국 아파트 청약 일정, 분양중 현장, 미분양 현황, 재개발·재건축 진행 현황',
+    images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 청약·분양중·미분양·재개발' }],
   },
 };
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
@@ -64,6 +64,7 @@ export default async function AptPage() {
 
   // 지역별 + 상태별 통계 계산
   const today = new Date().toISOString().slice(0, 10);
+  const thisMonth = today.slice(0, 7).replace('-', ''); // 202603
   const regionDetail: Record<string, { total: number; open: number; upcoming: number; closed: number }> = {};
   apts.forEach((a: any) => {
     const r = a.region_nm || '기타';
@@ -75,5 +76,59 @@ export default async function AptPage() {
   });
   const regionStats = Object.entries(regionDetail).sort((a, b) => b[1].total - a[1].total).map(([name, s]) => ({ name, ...s }));
 
-  return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} /><Disclaimer /></>;
+  // ━━━ 분양중 데이터 조합 ━━━
+  // 소스1: 청약 마감 + 입주 전 (분양 진행 중)
+  const ongoingFromSub = apts
+    .filter((a: any) => {
+      const endDate = String(a.rcept_endde ?? '');
+      if (!endDate || endDate >= today) return false; // 아직 청약 중이거나 날짜 없음 → 제외
+      const mvn = String(a.mvn_prearnge_ym ?? '').replace(/[^0-9]/g, '').slice(0, 6);
+      if (mvn && mvn < thisMonth) return false; // 입주 완료 → 제외
+      return true; // 청약 마감 + 입주 전 또는 입주일 미정
+    })
+    .map((a: any) => ({
+      id: `sub_${a.id}`,
+      source: 'subscription' as const,
+      house_nm: a.house_nm || '',
+      region_nm: a.region_nm || '기타',
+      address: a.hssply_adres || a.supply_addr || '',
+      total_supply: a.tot_supply_hshld_co || 0,
+      unsold_count: null as number | null,
+      mvn_prearnge_ym: a.mvn_prearnge_ym || null,
+      sale_price_min: null as number | null,
+      sale_price_max: null as number | null,
+      constructor_nm: a.mdatrgbn_nm || null,
+      pblanc_url: a.pblanc_url || null,
+      contact_tel: null as string | null,
+      link_id: a.id,
+      link_type: 'apt' as const,
+      created_at: a.fetched_at || a.created_at || null,
+    }));
+
+  // 소스2: 미분양 (준공 후 포함)
+  const ongoingFromUnsold = unsold.map((u: any) => ({
+    id: `unsold_${u.id}`,
+    source: 'unsold' as const,
+    house_nm: u.house_nm || '',
+    region_nm: u.region_nm || '기타',
+    address: u.supply_addr || u.hssply_adres || '',
+    total_supply: u.tot_supply_hshld_co || 0,
+    unsold_count: u.tot_unsold_hshld_co || 0,
+    mvn_prearnge_ym: u.completion_ym || null,
+    sale_price_min: u.sale_price_min || null,
+    sale_price_max: u.sale_price_max || null,
+    constructor_nm: null as string | null,
+    pblanc_url: u.pblanc_url || null,
+    contact_tel: u.contact_tel || null,
+    link_id: u.id,
+    link_type: 'unsold' as const,
+    created_at: u.created_at || null,
+  }));
+
+  // 중복 제거: 같은 단지명+지역이면 unsold 우선 (미분양 세대수 정보가 더 정확)
+  const unsoldNames = new Set(ongoingFromUnsold.map(u => `${u.house_nm}::${u.region_nm}`));
+  const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
+  const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
+
+  return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} ongoingApts={ongoingApts} /><Disclaimer /></>;
 }

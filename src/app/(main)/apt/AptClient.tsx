@@ -6,7 +6,7 @@ import AptCommentSheet from '@/components/AptCommentSheet';
 import MiniLineChart from '@/components/charts/MiniLineChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';
 
-const NEW_HOURS: Record<string, number> = { subscription: 24, unsold: 168, redevelopment: 168, transaction: 72 };
+const NEW_HOURS: Record<string, number> = { subscription: 24, ongoing: 168, unsold: 168, redevelopment: 168, transaction: 72 };
 function isNew(item: any, type: string): boolean {
   const h = NEW_HOURS[type] || 72;
   const ts = item.created_at || item.fetched_at;
@@ -58,12 +58,14 @@ const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }
 };
 const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [], unsoldMonthly = [], tradeMonthly = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[] }) {
-  const [activeTab, setActiveTab] = useState<'sub' | 'unsold' | 'redev' | 'trade'>('sub');
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [] }: { apts: Apt[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[] }) {
+  const [activeTab, setActiveTab] = useState<'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade'>('sub');
   const [region, setRegion] = useState('전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'>('date');
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
+  const [ongoingRegion, setOngoingRegion] = useState('전체');
+  const [ongoingPage, setOngoingPage] = useState(1);
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
   const [redevPage, setRedevPage] = useState(1);
@@ -162,6 +164,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)' }}>
         {[
           { k: 'sub' as const, l: '📅 청약', type: 'subscription', data: apts },
+          { k: 'ongoing' as const, l: '🏢 분양중', type: 'ongoing', data: ongoingApts },
           { k: 'unsold' as const, l: '🏚️ 미분양', type: 'unsold', data: unsold },
           { k: 'redev' as const, l: '🏗️ 재개발', type: 'redevelopment', data: redevelopment },
           { k: 'trade' as const, l: '💰 실거래', type: 'transaction', data: transactions },
@@ -412,6 +415,146 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           </p>
         </div>
       )}
+
+      {/* ━━━ 분양중 탭 ━━━ */}
+      {activeTab === 'ongoing' && (() => {
+        if (!ongoingApts.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏢 분양중 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>청약 마감 후 입주 전 현장 및 미분양 현장이 표시됩니다</span></div>;
+
+        const regs = ['전체', ...Array.from(new Set(ongoingApts.map((o: any) => o.region_nm || '기타'))).sort()];
+        const filtered = ongoingRegion === '전체' ? ongoingApts : ongoingApts.filter((o: any) => (o.region_nm || '기타') === ongoingRegion);
+        const totalSites = filtered.length;
+        const totalUnsoldUnits = filtered.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0);
+        const fromSub = filtered.filter((o: any) => o.source === 'subscription').length;
+        const fromUnsold = filtered.filter((o: any) => o.source === 'unsold').length;
+        const PER_PAGE = 20;
+        const totalPages = Math.ceil(totalSites / PER_PAGE);
+        const paged = filtered.slice((ongoingPage - 1) * PER_PAGE, ongoingPage * PER_PAGE);
+
+        // 지역별 현장 수 집계
+        const regionCounts = regs.filter(r => r !== '전체').map(r => {
+          const items = ongoingApts.filter((o: any) => (o.region_nm || '기타') === r);
+          return { name: r, count: items.length, unsoldUnits: items.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0) };
+        }).sort((a, b) => b.count - a.count);
+
+        return (
+          <div>
+            {/* 종합 현황 */}
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 전국 분양중 현황</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>분양중 현장</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{ongoingApts.length.toLocaleString()}곳</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양 세대</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#ef4444' }}>{ongoingApts.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0).toLocaleString()}호</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준</div>
+            </div>
+
+            {/* 지역별 TOP5 */}
+            {regionCounts.length > 0 && (
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 분양중 많은 지역 TOP5</div>
+                {regionCounts.slice(0, 5).map((r, i) => (
+                  <button key={r.name} onClick={() => { setOngoingRegion(r.name); setOngoingPage(1); }} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none', width: '100%', background: 'none', border: i < 4 ? undefined : 'none', borderTop: 'none', borderLeft: 'none', borderRight: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
+                    <span style={{ flex: 1, fontSize: 'var(--fs-sm)', fontWeight: 600, color: ongoingRegion === r.name ? 'var(--brand)' : 'var(--text-primary)' }}>{r.name}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{r.count}곳</span>
+                    {r.unsoldUnits > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: '#ef4444' }}>{r.unsoldUnits.toLocaleString()}호</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* 지역 필터 */}
+            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 12, paddingBottom: 4 }}>
+              {regs.map(r => pill(r, ongoingRegion, (v) => { setOngoingRegion(v); setOngoingPage(1); }))}
+            </div>
+
+            {/* 결과 수 */}
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 10 }}>
+              {ongoingRegion !== '전체' ? `${ongoingRegion} ` : '전체 '}{totalSites}곳{totalUnsoldUnits > 0 ? ` · 미분양 ${totalUnsoldUnits.toLocaleString()}호` : ''}
+            </div>
+
+            {/* 현장 리스트 */}
+            {paged.map((o: any) => {
+              const isUnsold = o.source === 'unsold';
+              const pMin = o.sale_price_min ? Math.round(o.sale_price_min / 10000 * 10) / 10 : null;
+              const pMax = o.sale_price_max ? Math.round(o.sale_price_max / 10000 * 10) / 10 : null;
+              const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
+              const mvnStr = o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(0, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : null;
+              const linkHref = isUnsold ? `/apt/unsold/${o.link_id}` : `/apt/${o.link_id}`;
+              const wlKey = isUnsold ? `unsold:${o.link_id}` : `sub:${o.link_id}`;
+              const isWatched = watchlist.has(wlKey);
+
+              return (
+                <div key={o.id} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                    <a href={linkHref} style={{ flex: 1, textDecoration: 'none', color: 'inherit' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        {isNew(o, 'ongoing') && <NewBadge />}
+                        <span style={{
+                          fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 7px', borderRadius: 4,
+                          background: isUnsold ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)',
+                          color: isUnsold ? '#f87171' : '#60a5fa',
+                          border: `1px solid ${isUnsold ? 'rgba(239,68,68,0.25)' : 'rgba(59,130,246,0.25)'}`,
+                        }}>
+                          {isUnsold ? '미분양' : '분양중'}
+                        </span>
+                        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
+                      </div>
+                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
+                      {o.address && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>{o.address}</div>}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 'var(--fs-xs)' }}>
+                        {o.total_supply > 0 && <span style={{ color: 'var(--text-secondary)' }}>총 {o.total_supply.toLocaleString()}세대</span>}
+                        {o.unsold_count != null && o.unsold_count > 0 && <span style={{ color: '#ef4444', fontWeight: 700 }}>미분양 {o.unsold_count.toLocaleString()}호</span>}
+                        {priceStr && <span style={{ color: 'var(--text-secondary)' }}>{priceStr}</span>}
+                        {mvnStr && <span style={{ color: 'var(--text-secondary)' }}>입주 {mvnStr}</span>}
+                        {o.constructor_nm && <span style={{ color: 'var(--text-tertiary)' }}>{o.constructor_nm}</span>}
+                      </div>
+                    </a>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(isUnsold ? 'unsold' : 'sub', String(o.link_id)); }} style={{
+                      fontSize: 'var(--fs-xl)', background: isWatched ? 'rgba(234,179,8,0.15)' : 'transparent',
+                      border: isWatched ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--border)',
+                      borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1,
+                    }}>
+                      {isWatched ? '⭐' : '☆'}
+                    </button>
+                  </div>
+                  {/* 하단 액션 */}
+                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                    {o.pblanc_url && <a href={o.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(255,91,54,0.2)', background: 'rgba(255,91,54,0.06)' }}>공고 →</a>}
+                    {o.contact_tel && <a href={`tel:${o.contact_tel}`} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-hover)' }}>📞 문의</a>}
+                    <button onClick={() => setCommentTarget({ houseKey: isUnsold ? `unsold_${o.link_id}` : `sub_${o.link_id}`, houseNm: o.house_nm || '현장', houseType: isUnsold ? 'unsold' : 'sub' })}
+                      style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-hover)', cursor: 'pointer' }}>💬 한줄평</button>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* 페이지네이션 */}
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginTop: 12 }}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                  <button key={p} onClick={() => { setOngoingPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
+                    padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+                    border: `1px solid ${ongoingPage === p ? 'var(--brand)' : 'var(--border)'}`,
+                    background: ongoingPage === p ? 'var(--brand)' : 'transparent',
+                    color: ongoingPage === p ? '#fff' : 'var(--text-tertiary)',
+                  }}>{p}</button>
+                ))}
+              </div>
+            )}
+
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
+              청약홈·국토교통부 미분양 통계 기준 · 청약 마감 후 입주 전 현장 + 미분양 현장 통합 · 정확한 분양 정보는 각 현장에 직접 확인하세요
+            </p>
+          </div>
+        );
+      })()}
 
       {/* ━━━ 미분양 탭 ━━━ */}
       {activeTab === 'unsold' && (() => {
