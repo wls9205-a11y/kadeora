@@ -25,10 +25,6 @@
       "schedule": "*/30 * * * *"
     },
     {
-      "path": "/api/cron/invite-reward",
-      "schedule": "0 15 * * *"
-    },
-    {
       "path": "/api/cron/cleanup",
       "schedule": "0 3 * * *"
     },
@@ -70,11 +66,7 @@
     },
     {
       "path": "/api/cron/blog-publish-queue",
-      "schedule": "0 13 * * *"
-    },
-    {
-      "path": "/api/cron/blog-publish-queue",
-      "schedule": "0 18 * * *"
+      "schedule": "0 14 * * *"
     },
     {
       "path": "/api/cron/blog-monthly-theme",

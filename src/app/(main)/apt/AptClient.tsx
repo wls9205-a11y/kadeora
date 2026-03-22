@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
+import { haptic } from '@/lib/haptic';
 import MiniLineChart from '@/components/charts/MiniLineChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';
 
@@ -175,7 +176,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         ].map(({ k, l, type, data }) => {
           const hasNew = (data as any[]).some((item: any) => isNew(item, type));
           return (
-            <button key={k} onClick={() => setActiveTab(k)} style={{
+            <button key={k} onClick={() => { setActiveTab(k); haptic('light'); }} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
               background: activeTab === k ? '#2563EB' : 'transparent',
               color: activeTab === k ? '#fff' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
@@ -364,7 +365,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
             const accentColor = st === 'open' ? '#34D399' : st === 'upcoming' ? '#60A5FA' : 'var(--border)';
             // 간략 주소: 전체 주소에서 구+동 추출
-            const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ') : '';
+            const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
               <Link key={apt.id} href={`/apt/${apt.house_manage_no || apt.id}`} style={{
                 display: 'block', padding: '12px 16px', borderRadius: 12, marginBottom: 6,
@@ -701,7 +702,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       </div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
                       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
-                        {o.address ? o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 2).join(' ') : ''}
+                        {o.address ? o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : ''}
                         {o.total_supply > 0 ? ` · ${o.total_supply.toLocaleString()}세대` : ''}
                         {priceStr ? ` · ${priceStr}` : ''}
                       </div>
@@ -1515,7 +1516,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             })()}
 
             {/* 면적 필터 */}
-            <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
+            <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
               {[
                 { key: '전체', label: '전체 면적' },
                 { key: '~59', label: '~59㎡ (소형)' },
@@ -1568,10 +1569,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     </button>
                   </div>
                   <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{t.apt_name}</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', wordBreak: 'break-all' }}>
                     전용 {t.exclusive_area}㎡ | <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(amt)}</strong>
                     {t.exclusive_area > 0 && amt > 0 && <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}> · 평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</span>}
-                    {' '}| {t.floor}층{t.built_year ? ` | ${t.built_year}년식` : ''} | {t.deal_date}
+                  </div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                    {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''} · {t.deal_date}
                   </div>
                 </div>
               );
@@ -1697,6 +1700,16 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <button onClick={() => { setSelectedRedev(null); setCommentTarget({ houseKey: `redev_${r.id}`, houseNm: r.district_name || '정비사업', houseType: 'redev' as any }); }} style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', marginBottom: 12, fontWeight: 600 }}>
                 💬 한줄평 작성하기
               </button>
+
+              {/* 지도 버튼 */}
+              {(r.address || r.district_name) && (
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                  <a href={`https://map.kakao.com/?q=${encodeURIComponent(r.address || r.district_name || '')}`} target="_blank" rel="noopener noreferrer"
+                    style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+                  <a href={`https://map.naver.com/search/${encodeURIComponent(r.address || r.district_name || '')}`} target="_blank" rel="noopener noreferrer"
+                    style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+                </div>
+              )}
 
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center' }}>
                 본 정보는 참고용이며, 투자 판단의 근거로 사용하면 안 됩니다.

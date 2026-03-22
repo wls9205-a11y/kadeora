@@ -25,7 +25,19 @@ export async function GET(req: NextRequest) {
     // Blog search
     const blogsPromise = supabase.from('blog_posts').select('id, slug, title, excerpt, category, created_at, view_count').eq('is_published', true).ilike('title', `%${query}%`).order('view_count', { ascending: false }).limit(5);
 
-    const [postsResult, stocksResult, aptsResult, blogsResult] = await Promise.all([postsPromise, stocksPromise, aptsPromise, blogsPromise]);
+    // Redevelopment search
+    const redevPromise = supabase.from('redevelopment_projects').select('id, district_name, region, stage, project_type, address, total_households').or(`district_name.ilike.%${query}%,region.ilike.%${query}%,address.ilike.%${query}%`).limit(5);
+
+    // Unsold search
+    const unsoldPromise = supabase.from('unsold_apts').select('id, house_nm, region_nm, sigungu_nm, tot_unsold_hshld_co').or(`house_nm.ilike.%${query}%,region_nm.ilike.%${query}%`).limit(5);
+
+    // Transaction search
+    const tradePromise = supabase.from('apt_transactions').select('id, apt_name, region_nm, deal_amount, exclusive_area, deal_date').or(`apt_name.ilike.%${query}%,region_nm.ilike.%${query}%`).order('deal_date', { ascending: false }).limit(5);
+
+    // Discussion topics search
+    const discussPromise = supabase.from('discussion_topics').select('id, title, category, vote_yes, vote_no, created_at').ilike('title', `%${query}%`).limit(5);
+
+    const [postsResult, stocksResult, aptsResult, blogsResult, redevResult, unsoldResult, tradeResult, discussResult] = await Promise.all([postsPromise, stocksPromise, aptsPromise, blogsPromise, redevPromise, unsoldPromise, tradePromise, discussPromise]);
 
     if (postsResult.error) { console.error('[Search GET] posts', postsResult.error); return NextResponse.json({ error: '검색에 실패했습니다.' }, { status: 500 }); }
 
@@ -38,6 +50,10 @@ export async function GET(req: NextRequest) {
       stocks: stocksResult.data || [],
       apts: aptsResult.data || [],
       blogs: blogsResult.data || [],
+      redevelopments: redevResult.data || [],
+      unsolds: unsoldResult.data || [],
+      transactions: tradeResult.data || [],
+      discussions: discussResult.data || [],
     }, { headers: { 'Cache-Control': 'public, max-age=30' } });
   } catch (err) { console.error('[Search GET]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }

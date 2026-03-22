@@ -12,6 +12,15 @@ export default function InstallBanner() {
     if (window.matchMedia('(display-mode: standalone)').matches) return;
     const dismissed = localStorage.getItem('kd_install_dismissed');
     if (dismissed && Date.now() - Number(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
+    // 쿠키 동의 배너가 아직 처리 안 됐으면 대기
+    const cookieConsent = localStorage.getItem('kd_cookie_consent');
+    if (cookieConsent !== 'accepted' && cookieConsent !== 'declined') {
+      const interval = setInterval(() => {
+        const c = localStorage.getItem('kd_cookie_consent');
+        if (c === 'accepted' || c === 'declined') { clearInterval(interval); setShow(true); }
+      }, 2000);
+      return () => clearInterval(interval);
+    }
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(ios);
     const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e); setShow(true); };

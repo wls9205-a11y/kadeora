@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const SEED_USERS = Array.from({ length: 89 }, (_, i) => {
-  const n = String(i + 1).padStart(4, '0');
-  return `aaaaaaaa-${n}-${n}-${n}-${String(i + 1).padStart(12, '0')}`;
+  // 자연스러운 UUID v4 형태 생성 (고정 시드 기반)
+  const h = (v: number) => ((v * 2654435761 + 0x9e3779b9) >>> 0).toString(16).padStart(8, '0');
+  const a = h(i * 7 + 31); const b = h(i * 13 + 47).slice(0, 4); const c = h(i * 19 + 61).slice(0, 4);
+  const d = h(i * 23 + 73).slice(0, 4); const e = h(i * 29 + 83).padStart(12, '0').slice(0, 12);
+  return `${a}-${b}-4${c.slice(1)}-${['8','9','a','b'][i % 4]}${d.slice(1)}-${e}`;
 });
 
 const COMMENT_BY_CAT: Record<string, string[]> = {

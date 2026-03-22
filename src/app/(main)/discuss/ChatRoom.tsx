@@ -98,14 +98,34 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
     const t = input.trim(); if (!t || sending) return;
     setSending(true);
     const sb = createSupabaseBrowser();
+
+    // Optimistic update: 즉시 UI에 표시
+    const optimisticMsg: any = {
+      id: `temp_${Date.now()}`,
+      user_id: user.id,
+      content: t,
+      room,
+      created_at: new Date().toISOString(),
+      parent_id: replyTarget?.id || null,
+      likes: [{ count: 0 }],
+      profiles: { id: user.id, nickname: (user as any).user_metadata?.nickname || '나', avatar_url: (user as any).user_metadata?.avatar_url || null, grade: null },
+    };
+    setMsgs(prev => [...prev, optimisticMsg]);
+    setInput(''); setShowMention(false);
+
+    // 스크롤 즉시 하단으로
+    setTimeout(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }); }, 50);
+
     if (replyTarget) {
       await sb.from('chat_messages').insert({ user_id: user.id, content: t, parent_id: replyTarget.id, room });
       setReplyTarget(null);
-      await loadMessages();
     } else {
       await sb.from('chat_messages').insert({ user_id: user.id, content: t, room });
     }
-    setInput(''); setSending(false); setShowMention(false);
+    setSending(false);
+
+    // 실제 데이터로 교체
+    await loadMessages();
 
     // 포인트 적립 (1분 디바운싱)
     try {
@@ -129,7 +149,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (showMention && mentionList.length > 0) { if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => Math.min(i + 1, mentionList.length - 1)); return; } if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => Math.max(i - 1, 0)); return; } if (e.key === 'Enter') { e.preventDefault(); selectMention(mentionList[mentionIndex].nickname); return; } if (e.key === 'Escape') { setShowMention(false); return; } } if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden', maxHeight: 'calc(100dvh - 200px)' }}>
       {/* 라운지 공지 */}
       <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
         <span>💬 오늘의 라운지 ({new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}) — 채팅 1회 = 1P</span>
