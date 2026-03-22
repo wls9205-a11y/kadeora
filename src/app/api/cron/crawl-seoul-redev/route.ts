@@ -13,6 +13,32 @@ const TYPE_MAP: Record<string, string> = {
   '주택재건축사업지구': '재건축',
 };
 
+function guessStage(row: Record<string, any>): string {
+  // 여러 필드에서 단계 추정
+  const text = [
+    row.STEP_SE_NM, row.STTUS_NM, row.BSNS_STEP_NM, row.PRGRS_STTUS,
+    row.STEP_SE, row.BSNS_STTUS, row.RPTT_STTUS,
+  ].filter(Boolean).join(' ');
+
+  if (!text) {
+    // text가 없으면 날짜 필드로 추정
+    if (row.COMPT_DE || row.USE_APRV_DE) return '준공';
+    if (row.CNSTRN_BGN_DE || row.CONSRT_BGNDE) return '착공';
+    if (row.DSPSL_PLANPSS_DE || row.MGT_DSPSL_DE) return '관리처분';
+    if (row.BSNS_ATHZ_DE || row.BSNS_PMS_DE) return '사업시행인가';
+    if (row.UNION_FNDTN_DE || row.ASSTN_APRVL_DE) return '조합설립';
+    return '정비구역지정';
+  }
+
+  if (/준공|완료|입주|사용승인/.test(text)) return '준공';
+  if (/착공|공사|시공/.test(text)) return '착공';
+  if (/관리처분/.test(text)) return '관리처분';
+  if (/사업시행|시행인가/.test(text)) return '사업시행인가';
+  if (/조합설립|조합인가/.test(text)) return '조합설립';
+  if (/구역지정|정비구역|안전진단/.test(text)) return '정비구역지정';
+  return '정비구역지정';
+}
+
 function extractGu(pstn: string | null): string | null {
   if (!pstn) return null;
   const match = pstn.match(/([\uAC00-\uD7AF]+구)/);
@@ -84,7 +110,7 @@ export async function GET(req: NextRequest) {
       region: '서울',
       sigungu: extractGu(r.PSTN_NM),
       project_type: getProjectType(r.SCLSF || '') || '재개발',
-      stage: '기타',
+      stage: guessStage(r),
       total_households: (() => { const v = r.TOT_HSHLD_CO || r.HSHLD_CO || r.PLAN_HSHLD_CO || r.HO_CNT || null; const n = v ? parseInt(v) : null; return n && n > 0 && n < 100000 ? n : null; })(),
       area_sqm: parseFloat(r.AREA_CHG_AFTR || r.AREA_EXS || '0') || null,
       address: r.PSTN_NM || null,

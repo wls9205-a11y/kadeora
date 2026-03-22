@@ -48,7 +48,7 @@ export default async function AptDetailPage({ params }: Props) {
   } catch {}
   if (!apt) notFound();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10); // KST
   const status = !apt.rcept_bgnde ? 'upcoming' : today >= apt.rcept_bgnde && today <= apt.rcept_endde ? 'open' : today < apt.rcept_bgnde ? 'upcoming' : 'closed';
   const dday = apt.rcept_bgnde ? Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000) : null;
   const SB: Record<string, { label: string; bg: string; color: string; border: string }> = {

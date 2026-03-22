@@ -27,9 +27,14 @@ interface Apt {
   competition_rate_1st: number | null; competition_rate_2nd?: number | null;
   view_count?: number;
 }
+// 한국시간(KST) 기준 today
+function kstToday(): string { return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10); }
+function kstNow(): Date { return new Date(Date.now() + 9 * 60 * 60 * 1000); }
 
 function getStatus(apt: Apt): 'open' | 'upcoming' | 'closed' {
-  const today = new Date().toISOString().slice(0, 10);
+  // 한국시간 기준 (UTC+9)
+  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const today = kst.toISOString().slice(0, 10);
   if (!apt.rcept_bgnde) return 'upcoming';
   if (today >= String(apt.rcept_bgnde) && today <= String(apt.rcept_endde)) return 'open';
   if (today < String(apt.rcept_bgnde)) return 'upcoming';
@@ -240,7 +245,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
           {/* 🔥 마감 임박 배너 */}
           {(() => {
-            const today = new Date();
+            const today = kstNow();
             const urgent = filtered.filter(a => {
               if (!a.rcept_endde) return false;
               const end = new Date(a.rcept_endde);
@@ -320,7 +325,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           {/* 청약 캘린더 */}
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
             {(() => {
-              const now = new Date();
+              const now = kstNow();
               const targetDate = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
               const year = targetDate.getFullYear();
               const month = targetDate.getMonth();
@@ -349,7 +354,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <div key={c.day} onClick={() => c.apts.length > 0 && setSelectedCalDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(c.day).padStart(2, '0')}`)} style={{
                       textAlign: 'center', padding: '4px 2px', borderRadius: 6, cursor: c.apts.length > 0 ? 'pointer' : 'default',
                       background: selectedCalDate?.endsWith(`-${String(c.day).padStart(2, '0')}`) ? 'rgba(96,165,250,0.25)' : c.apts.length > 0 ? 'rgba(96,165,250,0.1)' : 'transparent',
-                      border: calOffset === 0 && c.day === new Date().getDate() ? '2px solid var(--brand)' : '1px solid transparent',
+                      border: calOffset === 0 && c.day === kstNow().getDate() ? '2px solid var(--brand)' : '1px solid transparent',
                     }}>
                       <div style={{ color: c.apts.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: c.apts.length > 0 ? 700 : 400 }}>{c.day}</div>
                       {c.apts.length > 0 && <div style={{ fontSize: 10, color: '#60A5FA', fontWeight: 700 }}>{c.apts.length}건</div>}
@@ -504,7 +509,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const maxRegionCount = Math.max(...regionCounts.map(r => r.count), 1);
 
         // ① 입주 임박 현장
-        const todayD = new Date();
+        const todayD = kstNow();
         const urgentMove = filtered.filter((o: any) => {
           if (!o.mvn_prearnge_ym) return false;
           const mvn = String(o.mvn_prearnge_ym).replace(/[^0-9]/g, '').slice(0, 6);
@@ -520,7 +525,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         }).sort((a: any, b: any) => a.daysToMove - b.daysToMove);
 
         // ③ 단계별 파이프라인
-        const todayPipe = new Date().toISOString().slice(0, 10);
+        const todayPipe = kstToday();
         const pipeStages = ['청약마감', '당첨발표', '계약중', '공사중', '입주예정'];
         const pipeCounts: Record<string, number> = {};
         pipeStages.forEach(s => { pipeCounts[s] = 0; });
@@ -773,7 +778,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                           { key: 'c', label: '계약', date: o.cntrct_cncls_bgnde },
                           { key: 'm', label: '입주', date: o.mvn_prearnge_ym },
                         ];
-                        const td = new Date().toISOString().slice(0, 10);
+                        const td = kstToday();
                         let ci = 0;
                         stages.forEach((s, i) => { if (s.date && String(s.date).slice(0, 10) <= td) ci = i + 1; });
                         ci = Math.min(ci, stages.length - 1);
@@ -1213,7 +1218,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const rebuildCount = filteredRedev.filter((r: any) => r.project_type === '재건축').length;
         const stageCount: Record<string, number> = {};
         STAGE_ORDER.forEach(s => { stageCount[s] = 0; });
-        filteredRedev.forEach((r: any) => { if (stageCount[r.stage] !== undefined) stageCount[r.stage]++; else stageCount['기타'] = (stageCount['기타'] || 0) + 1; });
+        filteredRedev.forEach((r: any) => {
+          const s = r.stage || '정비구역지정';
+          if (stageCount[s] !== undefined) stageCount[s]++;
+          else stageCount['정비구역지정']++; // 알 수 없는 stage는 정비구역지정으로
+        });
 
         const totalHouseholds = filteredRedev.reduce((s: number, r: any) => s + (r.total_households || 0), 0);
 
