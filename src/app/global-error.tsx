@@ -9,12 +9,12 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="ko">
-      <body style={{ margin:0, fontFamily:'sans-serif', background:'var(--bg-base, #1A1A1B)', color:'var(--text-primary, #D7DADC)', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', textAlign:'center' }}>
+      <body style={{ margin:0, fontFamily:'sans-serif', background:'var(--bg-base, #0B1426)', color:'var(--text-primary, #E2E8F0)', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', textAlign:'center' }}>
         <div style={{ padding:'40px 20px' }}>
           <div style={{ fontSize:64, marginBottom:20 }}>💥</div>
           <h1 style={{ fontSize:24, fontWeight:800, marginBottom:12 }}>서비스에 문제가 발생했습니다</h1>
-          <p style={{ color:'var(--text-secondary, #818384)', marginBottom:8 }}>잠시 후 다시 시도해주세요</p>
-          {error.digest && <p style={{ fontSize:12, color:'var(--text-tertiary, #6B6D6F)', marginBottom:24 }}>오류 코드: {error.digest}</p>}
+          <p style={{ color:'var(--text-secondary, #94A3B8)', marginBottom:8 }}>잠시 후 다시 시도해주세요</p>
+          {error.digest && <p style={{ fontSize:12, color:'var(--text-tertiary, #64748B)', marginBottom:24 }}>오류 코드: {error.digest}</p>}
           <button onClick={reset} style={{ background:'var(--brand)', color:'var(--text-inverse, #fff)', border:'none', borderRadius:20, padding:'12px 32px', cursor:'pointer', fontWeight:700, fontSize:16, marginRight:12 }}>
             다시 시도
           </button>
