@@ -6,7 +6,7 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: 'class',
+  // darkMode 제거됨 — 다크모드 단일 테마
   theme: {
     extend: {
       colors: {

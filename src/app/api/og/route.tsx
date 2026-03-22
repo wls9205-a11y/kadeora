@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
           <div style={{ fontSize: 24, color: '#94a3b8', fontWeight: 500, marginBottom: 16 }}>
             아는 사람만 아는 그 정보
           </div>
-          <div style={{ fontSize: 16, color: '#475569', fontWeight: 400 }}>
+          <div style={{ fontSize: 16, color: '#64748B', fontWeight: 400 }}>
             주식 · 부동산 · 청약 · 우리동네
           </div>
         </div>
@@ -166,7 +166,7 @@ export async function GET(req: NextRequest) {
                 )}
               </div>
             )}
-            <span style={{ fontSize: 14, color: '#475569' }}>kadeora.app</span>
+            <span style={{ fontSize: 14, color: '#64748B' }}>kadeora.app</span>
           </div>
         </div>
       </div>

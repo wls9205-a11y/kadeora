@@ -32,7 +32,7 @@ export default function MiniBarChart({
               <div style={{ width: 60, fontSize: 'var(--fs-xs)', color: '#64748b', textAlign: 'right', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {d.label}
               </div>
-              <div style={{ flex: 1, height: barH, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
+              <div style={{ flex: 1, height: barH, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
                 <div style={{
                   height: '100%', width: `${pct}%`, borderRadius: 4,
                   background: d.color || defaultColor,

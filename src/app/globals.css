@@ -153,28 +153,7 @@ html.font-large input, html.font-large textarea { font-size: 20px !important; }
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.8);
 }
 
-.light {
-  --bg-base: #F0F4FA;
-  --bg-surface: #FFFFFF;
-  --bg-elevated: #FFFFFF;
-  --bg-sunken: #E8EDF5;
-  --bg-hover: #EDF1F7;
-  --bg-active: #DBEAFE;
-  --text-primary: #0F1D35;
-  --text-secondary: #475569;
-  --text-tertiary: #94A3B8;
-  --text-disabled: #CBD5E1;
-  --text-inverse: #FFFFFF;
-  --text-link: #1E40AF;
-  --brand:          #1E40AF;
-  --brand-hover:    #2563EB;
-  --brand-light:    #DBEAFE;
-  --brand-dark:     #1E3A8A;
-  --border: #E2E8F0;
-  --border-strong: #CBD5E1;
-  --shadow-sm: 0 1px 2px rgba(15,29,53,0.06);
-  --shadow-md: 0 4px 6px rgba(15,29,53,0.08);
-}
+/* 다크모드 단일 테마 — 라이트모드 제거됨 */
 
 /* ========================================
    기본 리셋

@@ -9,38 +9,6 @@
 ════════════════════════════════════════ */
 
 :root {
-  color-scheme: light;
-  --kd-bg:          #F0F4FA;
-  --kd-surface:     #FFFFFF;
-  --kd-surface-2:   #EDF1F7;
-  --kd-surface-3:   #E8EDF5;
-  --kd-border:      #E2E8F0;
-  --kd-border-hover:#CBD5E1;
-  --kd-text:        #0F1D35;
-  --kd-text-muted:  #475569;
-  --kd-text-dim:    #94A3B8;
-  --kd-text-link:   #1E40AF;
-  --kd-nav-bg:      #FFFFFF;
-  --kd-nav-border:  #E2E8F0;
-  --kd-nav-text:    #0F1D35;
-  --kd-nav-active:  #1E40AF;
-  --kd-primary:     #1E40AF;
-  --kd-primary-dim: rgba(30,64,175,0.08);
-  --kd-primary-hover: #2563EB;
-  --kd-danger:      #F87171;
-  --kd-danger-dim:  rgba(248,113,113,0.08);
-  --kd-success:     #059669;
-  --kd-success-dim: rgba(5,150,105,0.08);
-  --kd-warning:     #FBBF24;
-  --kd-warning-dim: rgba(251,191,36,0.08);
-  --btn-h-sm:  32px;
-  --btn-h-md:  40px;
-  --btn-h-lg:  48px;
-  --btn-r:     20px;
-  --btn-r-sm:  4px;
-}
-
-[data-theme="dark"] {
   color-scheme: dark;
   --kd-bg:          #0B1426;
   --kd-surface:     #0F1D35;
@@ -65,21 +33,16 @@
   --kd-success-dim: rgba(52,211,153,0.12);
   --kd-warning:     #FBBF24;
   --kd-warning-dim: rgba(251,191,36,0.12);
+  --btn-h-sm:  32px;
+  --btn-h-md:  40px;
+  --btn-h-lg:  48px;
+  --btn-r:     20px;
+  --btn-r-sm:  4px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --kd-bg:#0B1426;--kd-surface:#0F1D35;--kd-surface-2:#162544;--kd-surface-3:#1E3050;
-    --kd-border:#1E3050;--kd-border-hover:#2A4060;
-    --kd-text:#E2E8F0;--kd-text-muted:#94A3B8;--kd-text-dim:#64748B;--kd-text-link:#60A5FA;
-    --kd-nav-bg:#0F1D35;--kd-nav-border:#1E3050;--kd-nav-text:#E2E8F0;--kd-nav-active:#3B82F6;
-    --kd-primary-dim:rgba(37,99,235,0.15);
-    --kd-danger:#F87171;--kd-danger-dim:rgba(248,113,113,0.12);
-    --kd-success:#34D399;--kd-success-dim:rgba(52,211,153,0.12);
-    --kd-warning:#FBBF24;--kd-warning-dim:rgba(251,191,36,0.12);
-  }
-}
+/* 다크모드 단일 테마 — data-theme 분기 제거됨 */
+
+/* prefers-color-scheme 분기 제거됨 */
 
 *, *::before, *::after { box-sizing: border-box; }
 html { background:var(--kd-bg); color:var(--kd-text); font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }

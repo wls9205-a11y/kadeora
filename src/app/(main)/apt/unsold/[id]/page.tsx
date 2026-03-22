@@ -67,7 +67,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(248,113,113,0.15)', color: '#f87171', border: '1px solid rgba(248,113,113,0.3)' }}>미분양</span>
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(248,113,113,0.15)', color: '#F87171', border: '1px solid rgba(248,113,113,0.3)' }}>미분양</span>
         </div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{u.house_nm || '미분양 단지'}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}{u.supply_addr ? ` · ${u.supply_addr}` : ''}</div>
@@ -122,7 +122,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양</div>
-            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#f87171' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)' }}>세대</span></div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F87171' }}>{(u.tot_unsold_hshld_co || 0).toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)' }}>세대</span></div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>총공급</div>

@@ -381,7 +381,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: dday <= 2 ? '#F87171' : dday <= 6 ? '#FBBF24' : 'var(--text-secondary)' }}>D-{dday}</span>
                   )}
                   {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.2)' }}>분양가상한</span>}
-                  {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#f87171', border: '1px solid rgba(248,113,113,0.2)' }}>투기과열</span>}
+                  {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#F87171', border: '1px solid rgba(248,113,113,0.2)' }}>투기과열</span>}
                   {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(251,146,60,0.12)', color: '#fdba74', border: '1px solid rgba(251,146,60,0.2)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
                   <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`subscription:${apt.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
@@ -952,6 +952,43 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             )}
 
+            {/* 지역별 현황판 */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 미분양 현황</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#F87171' }}>총 {total.toLocaleString()}세대</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6 }}>
+                <button onClick={() => setUnsoldRegion('전체')} style={{
+                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                  border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
+                  background: unsoldRegion === '전체' ? '#F87171' : 'var(--bg-surface)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#F87171' }}>{total.toLocaleString()}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                  <span style={{ fontSize: 8, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
+                </button>
+                {unsoldRegionStats.map(r => (
+                  <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
+                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                    border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
+                    background: unsoldRegion === r.name ? '#F87171' : 'var(--bg-surface)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                  }}>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#F87171' }}>{r.unitCount.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                    <span style={{ fontSize: 8, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+                    {total > 0 && (
+                      <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
+                        <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : '#F87171', width: `${(r.unitCount / total) * 100}%` }} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* 미분양 추이 차트 */}
             {unsoldMonthly.length > 0 && (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
@@ -1047,7 +1084,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                     <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
-                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'rgba(248,113,113,0.12)', color: '#f87171', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'rgba(248,113,113,0.12)', color: '#F87171', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>미분양 {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대</span>
                     {priceStr && <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
                     <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'rgba(251,191,36,0.15)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
                       {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
@@ -1065,7 +1102,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {rate !== null && (
                     <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 10 }}>
                       <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? '#F87171' : rate > 40 ? '#FB923C' : '#FBBF24' }} />
-                      <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#f87171' }}>{rate}%</span>
+                      <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#F87171' }}>{rate}%</span>
                     </div>
                   )}
 
