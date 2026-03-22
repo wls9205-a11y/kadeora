@@ -58,7 +58,28 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>×</button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', marginBottom: 12 }}>
-          {comments.length === 0 && <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>첫 한줄평을 남겨보세요! 👋</div>}
+          {comments.length === 0 && (
+            <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 'var(--fs-base)', marginBottom: 12 }}>첫 한줄평을 남겨보세요! 👋</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {(houseType === 'sub' ? [
+                  '💬 모델하우스 다녀오셨나요?',
+                  '🏗️ 시공사 평판은 어떤가요?',
+                  '🚇 교통/학군 어떤 것 같으세요?',
+                  '💰 분양가 적당한가요?',
+                ] : houseType === 'unsold' ? [
+                  '🤔 미분양인 이유가 뭘까요?',
+                  '📉 추가 할인 소식 있나요?',
+                  '🏠 실거주 vs 투자 어떤 목적?',
+                ] : [
+                  '📋 사업 진행 상황은 어떤가요?',
+                  '🏗️ 주민 의견은 어떤가요?',
+                ]).map((q, i) => (
+                  <button key={i} onClick={() => setText(q.replace(/^.{2}/, ''))} style={{ padding: '6px 12px', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', textAlign: 'left' }}>{q}</button>
+                ))}
+              </div>
+            </div>
+          )}
           {comments.map((c: any) => (
             <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
@@ -72,7 +93,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
         {user ? (
           <div>
             <div style={{ position: 'relative' }}>
-              <textarea value={text} onChange={e => setText(e.target.value.slice(0, 200))} rows={2} maxLength={200} placeholder="이 현장 어때요? (200자)"
+              <textarea value={text} onChange={e => setText(e.target.value.slice(0, 200))} rows={2} maxLength={200} placeholder={houseType === 'sub' ? '이 단지 분양가 어때요? 주변 환경은?' : houseType === 'unsold' ? '미분양 이유가 뭘까요? 할인 소식?' : '사업 진행 상황이나 주변 분위기는?'}
                 style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               <span style={{ position: 'absolute', right: 10, bottom: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{text.length}/200</span>
             </div>
