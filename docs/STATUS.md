@@ -172,7 +172,7 @@
 ### 선택적 개선
 - [ ] 주식 캔들차트
 - [ ] 부동산 지도뷰
-- [ ] 게시글 임시저장 (localStorage draft)
+- [x] 게시글 임시저장 (localStorage draft) ✅ 세션 21
 - [ ] Full-Text Search (현재 ILIKE)
 
 ---
