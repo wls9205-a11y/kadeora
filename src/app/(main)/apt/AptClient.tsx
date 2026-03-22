@@ -1763,9 +1763,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   📍 {r.address}
                 </div>
               )}
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: r.ai_summary ? 8 : 16 }}>
                 {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ` · 세대수 ${r.stage === '정비구역지정' || r.stage === '조합설립' ? '미확정' : '확인 필요'}`}
               </div>
+              {r.ai_summary && (
+                <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(96,165,250,0.08), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#60A5FA', marginBottom: 3 }}>🤖 AI 분석</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{r.ai_summary}</div>
+                </div>
+              )}
 
               {/* 사업 진행률 파이프라인 */}
               {(() => {

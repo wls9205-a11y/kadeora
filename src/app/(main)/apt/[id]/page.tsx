@@ -107,6 +107,12 @@ export default async function AptDetailPage({ params }: Props) {
         </div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{apt.house_nm}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{apt.region_nm} · {apt.hssply_adres}{apt.tot_supply_hshld_co ? ` · ${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : ''}</div>
+        {apt.ai_summary && (
+          <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(139,92,246,0.06))', border: '1px solid rgba(37,99,235,0.15)' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--brand)', marginBottom: 3 }}>🤖 AI 한줄 분석</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{apt.ai_summary}</div>
+          </div>
+        )}
       </div>
 
       {/* 공유 + 청약홈 */}

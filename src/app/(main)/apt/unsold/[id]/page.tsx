@@ -71,6 +71,12 @@ export default async function UnsoldDetailPage({ params }: Props) {
         </div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{u.house_nm || '미분양 단지'}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}{u.supply_addr ? ` · ${u.supply_addr}` : ''}</div>
+        {u.ai_summary && (
+          <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(248,113,113,0.08), rgba(251,146,60,0.06))', border: '1px solid rgba(248,113,113,0.15)' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#F87171', marginBottom: 3 }}>🤖 AI 분석</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{u.ai_summary}</div>
+          </div>
+        )}
       </div>
 
       {/* 현황 요약 */}
