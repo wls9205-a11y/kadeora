@@ -137,7 +137,10 @@ export default async function AptPage() {
     }));
 
   // 소스2: 미분양 (준공 후 포함)
-  const ongoingFromUnsold = unsold.map((u: any) => ({
+  // 소스2: 미분양 (개별 단지만 — "OO시 미분양" 같은 시군구 통계는 제외)
+  const ongoingFromUnsold = unsold
+    .filter((u: any) => !String(u.house_nm || '').endsWith('미분양'))
+    .map((u: any) => ({
     id: `unsold_${u.id}`,
     source: 'unsold' as const,
     house_nm: u.house_nm || '',

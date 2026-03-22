@@ -1400,7 +1400,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   </div>
                   {/* 3행: 시군구 + 세대수 + 시공사 */}
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 2 }}>
-                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ' · 세대수 미상'}{r.constructor ? ` · ${r.constructor}` : ''}
+                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ' · 세대수 미정'}{r.constructor ? ` · ${r.constructor}` : ''}
                   </div>
                   {/* 4행: 비고/예상준공 */}
                   {(r.notes || r.expected_completion) && (
