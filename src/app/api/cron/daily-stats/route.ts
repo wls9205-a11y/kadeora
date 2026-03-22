@@ -25,10 +25,10 @@ export async function GET(request: Request) {
 
       await supabase.from('daily_stats').upsert({
         stat_date: today,
-        signups: usersR.count || 0,
-        posts: postsR.count || 0,
-        comments: commentsR.count || 0,
-        page_views: pvR.count || 0,
+        new_users: usersR.count || 0,
+        new_posts: postsR.count || 0,
+        new_comments: commentsR.count || 0,
+        total_page_views: pvR.count || 0,
       }, { onConflict: 'stat_date' });
     }
 

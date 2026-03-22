@@ -162,10 +162,10 @@ export default function AdminDashboard() {
         <div style={{ ...cardStyle, marginBottom: 20 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>7일 추이</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-            {renderMiniChart(dailyStats.map(s => s.signups || 0), '신규가입', '#3b82f6')}
-            {renderMiniChart(dailyStats.map(s => s.posts || 0), '게시글', '#10b981')}
-            {renderMiniChart(dailyStats.map(s => s.comments || 0), '댓글', '#8b5cf6')}
-            {renderMiniChart(dailyStats.map(s => s.page_views || 0), '페이지뷰', '#f59e0b')}
+            {renderMiniChart(dailyStats.map(s => s.new_users || 0), '신규가입', '#3b82f6')}
+            {renderMiniChart(dailyStats.map(s => s.new_posts || 0), '게시글', '#10b981')}
+            {renderMiniChart(dailyStats.map(s => s.new_comments || 0), '댓글', '#8b5cf6')}
+            {renderMiniChart(dailyStats.map(s => s.total_page_views || 0), '페이지뷰', '#f59e0b')}
           </div>
         </div>
       )}
