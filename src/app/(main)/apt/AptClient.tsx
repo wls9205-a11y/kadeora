@@ -66,6 +66,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
   const [ongoingRegion, setOngoingRegion] = useState('전체');
   const [ongoingPage, setOngoingPage] = useState(1);
+  const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
   const [redevPage, setRedevPage] = useState(1);
@@ -427,8 +428,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const fromSub = filtered.filter((o: any) => o.source === 'subscription').length;
         const fromUnsold = filtered.filter((o: any) => o.source === 'unsold').length;
         const PER_PAGE = 20;
-        const totalPages = Math.ceil(totalSites / PER_PAGE);
-        const paged = filtered.slice((ongoingPage - 1) * PER_PAGE, ongoingPage * PER_PAGE);
+        // 정렬 적용
+        const sorted = [...filtered].sort((a, b) => {
+          if (ongoingSort === 'unsold') return (b.unsold_count || 0) - (a.unsold_count || 0);
+          if (ongoingSort === 'price') return (b.sale_price_max || 0) - (a.sale_price_max || 0);
+          if (ongoingSort === 'competition') return (b.competition_rate || 0) - (a.competition_rate || 0);
+          return (b.total_supply || 0) - (a.total_supply || 0); // default: supply
+        });
+        const totalPages = Math.ceil(sorted.length / PER_PAGE);
+        const paged = sorted.slice((ongoingPage - 1) * PER_PAGE, ongoingPage * PER_PAGE);
 
         // 지역별 현장 수 집계
         const regionCounts = regs.filter(r => r !== '전체').map(r => {
@@ -470,8 +478,20 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             )}
 
             {/* 지역 필터 */}
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 12, paddingBottom: 4 }}>
+            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 8, paddingBottom: 4 }}>
               {regs.map(r => pill(r, ongoingRegion, (v) => { setOngoingRegion(v); setOngoingPage(1); }))}
+            </div>
+
+            {/* 정렬 */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto' }}>
+              {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
+                <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
+                  padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+                  border: `1px solid ${ongoingSort === k ? 'var(--brand)' : 'var(--border)'}`,
+                  background: ongoingSort === k ? 'var(--brand)' : 'transparent',
+                  color: ongoingSort === k ? '#fff' : 'var(--text-tertiary)',
+                }}>{l}</button>
+              ))}
             </div>
 
             {/* 결과 수 */}
@@ -514,7 +534,47 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                         {priceStr && <span style={{ color: 'var(--text-secondary)' }}>{priceStr}</span>}
                         {mvnStr && <span style={{ color: 'var(--text-secondary)' }}>입주 {mvnStr}</span>}
                         {o.constructor_nm && <span style={{ color: 'var(--text-tertiary)' }}>{o.constructor_nm}</span>}
+                        {o.competition_rate && <span style={{ color: '#f59e0b', fontWeight: 700 }}>경쟁률 {o.competition_rate}:1</span>}
                       </div>
+                      {/* 분양 진행 단계 프로그레스바 */}
+                      {!isUnsold && (() => {
+                        const stages = [
+                          { key: 'rcept', label: '접수', date: o.rcept_bgnde },
+                          { key: 'end', label: '마감', date: o.rcept_endde },
+                          { key: 'winner', label: '당첨', date: o.przwner_presnatn_de },
+                          { key: 'contract', label: '계약', date: o.cntrct_cncls_bgnde },
+                          { key: 'move', label: '입주', date: o.mvn_prearnge_ym },
+                        ];
+                        const todayStr = new Date().toISOString().slice(0, 10);
+                        let currentIdx = 0;
+                        stages.forEach((s, i) => { if (s.date && String(s.date).slice(0, 10) <= todayStr) currentIdx = i + 1; });
+                        if (currentIdx > stages.length - 1) currentIdx = stages.length - 1;
+                        const pct = Math.min(100, Math.round((currentIdx / (stages.length - 1)) * 100));
+                        return (
+                          <div style={{ marginTop: 8 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                              {stages.map((s, i) => (
+                                <span key={s.key} style={{ fontSize: '9px', color: i <= currentIdx ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: i === currentIdx ? 800 : 400 }}>{s.label}</span>
+                              ))}
+                            </div>
+                            <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
+                              <div style={{ height: '100%', borderRadius: 2, width: `${pct}%`, background: 'var(--brand)', transition: 'width 0.3s' }} />
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      {/* 인근 시세 비교 */}
+                      {o.nearby_avg_price && o.sale_price_min && (() => {
+                        const avg = o.nearby_avg_price; // 만원 단위
+                        const saleMin = o.sale_price_min; // 만원 단위
+                        const diff = Math.round(((avg - saleMin) / avg) * 100);
+                        if (diff <= 0) return null;
+                        return (
+                          <div style={{ marginTop: 6, fontSize: 'var(--fs-xs)', color: '#10b981', fontWeight: 600 }}>
+                            📊 인근 시세 대비 약 {diff}% 저렴 <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>(지역 평균 {(avg / 10000).toFixed(1)}억)</span>
+                          </div>
+                        );
+                      })()}
                     </a>
                     <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(isUnsold ? 'unsold' : 'sub', String(o.link_id)); }} style={{
                       fontSize: 'var(--fs-xl)', background: isWatched ? 'rgba(234,179,8,0.15)' : 'transparent',

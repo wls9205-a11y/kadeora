@@ -77,14 +77,37 @@ export default async function AptPage() {
   const regionStats = Object.entries(regionDetail).sort((a, b) => b[1].total - a[1].total).map(([name, s]) => ({ name, ...s }));
 
   // ━━━ 분양중 데이터 조합 ━━━
+  // 경쟁률 데이터 (house_manage_no → 경쟁률)
+  const competitionMap: Record<string, number> = {};
+  apts.forEach((a: any) => {
+    if (a.competition_rate_1st) competitionMap[a.house_manage_no] = a.competition_rate_1st;
+  });
+
+  // 지역별 평균 실거래가 (만원) 계산
+  const regionAvgPrice: Record<string, number> = {};
+  const regionTradeCount: Record<string, number> = {};
+  transactions.forEach((t: any) => {
+    const r = t.region_nm || t.sigungu_nm || '';
+    if (!r || !t.deal_amount) return;
+    const amt = typeof t.deal_amount === 'string' ? parseInt(t.deal_amount.replace(/,/g, '')) : t.deal_amount;
+    if (!amt || amt <= 0) return;
+    const regionKey = r.split(' ')[0]; // 시도명만 추출
+    if (!regionAvgPrice[regionKey]) { regionAvgPrice[regionKey] = 0; regionTradeCount[regionKey] = 0; }
+    regionAvgPrice[regionKey] += amt;
+    regionTradeCount[regionKey]++;
+  });
+  Object.keys(regionAvgPrice).forEach(k => {
+    if (regionTradeCount[k] > 0) regionAvgPrice[k] = Math.round(regionAvgPrice[k] / regionTradeCount[k]);
+  });
+
   // 소스1: 청약 마감 + 입주 전 (분양 진행 중)
   const ongoingFromSub = apts
     .filter((a: any) => {
       const endDate = String(a.rcept_endde ?? '');
-      if (!endDate || endDate >= today) return false; // 아직 청약 중이거나 날짜 없음 → 제외
+      if (!endDate || endDate >= today) return false;
       const mvn = String(a.mvn_prearnge_ym ?? '').replace(/[^0-9]/g, '').slice(0, 6);
-      if (mvn && mvn < thisMonth) return false; // 입주 완료 → 제외
-      return true; // 청약 마감 + 입주 전 또는 입주일 미정
+      if (mvn && mvn < thisMonth) return false;
+      return true;
     })
     .map((a: any) => ({
       id: `sub_${a.id}`,
@@ -103,6 +126,14 @@ export default async function AptPage() {
       link_id: a.id,
       link_type: 'apt' as const,
       created_at: a.fetched_at || a.created_at || null,
+      // 강화 필드
+      competition_rate: competitionMap[a.house_manage_no] || null,
+      rcept_bgnde: a.rcept_bgnde || null,
+      rcept_endde: a.rcept_endde || null,
+      przwner_presnatn_de: a.przwner_presnatn_de || null,
+      cntrct_cncls_bgnde: a.cntrct_cncls_bgnde || null,
+      cntrct_cncls_endde: a.cntrct_cncls_endde || null,
+      nearby_avg_price: regionAvgPrice[(a.region_nm || '').split(' ')[0]] || null,
     }));
 
   // 소스2: 미분양 (준공 후 포함)
@@ -123,6 +154,14 @@ export default async function AptPage() {
     link_id: u.id,
     link_type: 'unsold' as const,
     created_at: u.created_at || null,
+    // 강화 필드
+    competition_rate: null as number | null,
+    rcept_bgnde: null as string | null,
+    rcept_endde: null as string | null,
+    przwner_presnatn_de: null as string | null,
+    cntrct_cncls_bgnde: null as string | null,
+    cntrct_cncls_endde: null as string | null,
+    nearby_avg_price: regionAvgPrice[(u.region_nm || '').split(' ')[0]] || null,
   }));
 
   // 중복 제거: 같은 단지명+지역이면 unsold 우선 (미분양 세대수 정보가 더 정확)
