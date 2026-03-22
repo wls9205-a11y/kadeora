@@ -18,7 +18,7 @@ async function fetchStocks() {
   const sb = await createSupabaseServer();
   const { data } = await sb
     .from('stock_quotes')
-    .select('*')
+    .select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, description')
     .order('market_cap', { ascending: false });
   return data ?? [];
 }
@@ -27,7 +27,7 @@ async function fetchBriefing() {
   const sb = await createSupabaseServer();
   const { data } = await sb
     .from('stock_daily_briefing')
-    .select('*')
+    .select('id, market, briefing_date, summary, top_gainers, top_losers, market_sentiment')
     .eq('market', 'KR')
     .order('briefing_date', { ascending: false })
     .limit(1)
@@ -40,7 +40,7 @@ async function fetchExchangeHistory() {
   const since = new Date(Date.now() - 7 * 86400000).toISOString();
   const { data } = await sb
     .from('exchange_rate_history')
-    .select('*')
+    .select('id, currency_pair, rate, change_pct, recorded_at')
     .eq('currency_pair', 'USD/KRW')
     .gte('recorded_at', since)
     .order('recorded_at', { ascending: true });
@@ -51,7 +51,7 @@ async function fetchThemeHistory() {
   const sb = await createSupabaseServer();
   const { data } = await sb
     .from('stock_theme_history')
-    .select('*')
+    .select('id, theme_id, theme_name, change_pct, recorded_date')
     .order('recorded_date', { ascending: false })
     .limit(20);
   return data ?? [];
