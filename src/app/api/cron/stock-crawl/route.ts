@@ -4,94 +4,85 @@ import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 60;
 
-// 네이버 금융 시세 페이지에서 종목 데이터 파싱
-async function fetchNaverStocks(market: 'KOSPI' | 'KOSDAQ', pages: number = 3): Promise<any[]> {
+/**
+ * 주식 시세 수집 크론
+ * 
+ * 1단계 (현재): KRX 공공데이터 + data.go.kr 금융위원회 API
+ *   - 장 마감 후 종가 기준 (15~20분 지연)
+ *   - 무료, 합법, API 키: STOCK_DATA_API_KEY (data.go.kr 발급)
+ * 
+ * 2단계 (KIS 키 발급 후): 한국투자증권 오픈API
+ *   - 실시간 시세 (1분 이내)
+ *   - 무료, 합법, API 키: KIS_APP_KEY + KIS_APP_SECRET
+ */
+
+// data.go.kr 금융위원회 주식시세 API
+async function fetchKRXStocks(apiKey: string): Promise<any[]> {
   const stocks: any[] = [];
-  const marketCode = market === 'KOSPI' ? 0 : 1;
-
-  for (let page = 1; page <= pages; page++) {
+  
+  // 주식시세 정보 — KOSPI
+  for (const marketCode of ['KOSPI', 'KOSDAQ']) {
     try {
-      // 네이버 금융 시가총액 순 정렬
-      const url = `https://finance.naver.com/sise/sise_market_sum.naver?sosok=${marketCode}&page=${page}`;
-      const res = await fetch(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Kadeora/1.0)' },
-      });
-      const html = await res.text();
-
-      // 간단한 HTML 파싱 — <a href="/item/main.naver?code=XXXXXX"> 패턴
-      const rowRegex = /href="\/item\/main\.naver\?code=(\d{6})"[^>]*>\s*([^<]+)<\/a>[\s\S]*?<td class="number">([\d,]+)<\/td>\s*<td class="number">\s*<span[^>]*>([\d,]+)<\/span>/g;
-      let match;
-      while ((match = rowRegex.exec(html)) !== null) {
-        const symbol = match[1];
-        const name = match[2].trim();
-        const price = parseInt(match[3].replace(/,/g, ''));
-        const changePriceStr = match[4].replace(/,/g, '');
-
-        if (price > 0 && name) {
-          stocks.push({ symbol, name, market, price });
-        }
-      }
-
-      // 더 간단한 패턴: tltle 클래스에서 종목명+코드 추출
-      if (stocks.length === 0) {
-        const simpleRegex = /code=(\d{6})"[^>]*class="tltle"[^>]*>([^<]+)/g;
-        while ((match = simpleRegex.exec(html)) !== null) {
-          stocks.push({ symbol: match[1], name: match[2].trim(), market, price: 0 });
-        }
+      const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=200&resultType=json&mrktCls=${marketCode}`;
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const items = data?.response?.body?.items?.item || [];
+      
+      for (const item of items) {
+        const price = parseInt(item.clpr) || 0; // 종가
+        if (price <= 0) continue;
+        
+        stocks.push({
+          symbol: item.srtnCd || item.isinCd, // 단축코드
+          name: item.itmsNm, // 종목명
+          market: marketCode,
+          price,
+          change_amt: parseInt(item.vs) || 0, // 전일대비
+          change_pct: parseFloat(item.fltRt) || 0, // 등락률
+          volume: parseInt(item.trqu) || 0, // 거래량
+          market_cap: parseInt(item.mrktTotAmt) || 0, // 시가총액
+          currency: 'KRW',
+        });
       }
     } catch {}
   }
-
+  
   return stocks;
 }
 
-// Yahoo Finance에서 미국 종목 시세 가져오기
-async function fetchUSStocks(): Promise<any[]> {
-  const symbols = [
-    // S&P 500 상위 + 인기 종목
-    'AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'BRK-B', 'JPM', 'V',
-    'UNH', 'XOM', 'MA', 'JNJ', 'PG', 'HD', 'AVGO', 'COST', 'ABBV', 'MRK',
-    'CRM', 'AMD', 'NFLX', 'PEP', 'KO', 'LLY', 'TMO', 'ADBE', 'WMT', 'BAC',
-    'CSCO', 'ACN', 'MCD', 'ABT', 'DHR', 'TXN', 'NEE', 'PM', 'INTC', 'QCOM',
-    'AMAT', 'BKNG', 'ISRG', 'AMGN', 'GE', 'CAT', 'LRCX', 'BA', 'PFE', 'DIS',
-    // 추가 인기
-    'PLTR', 'COIN', 'RIVN', 'LCID', 'SOFI', 'NIO', 'MARA', 'SMCI', 'ARM', 'SNOW',
-    'SQ', 'SHOP', 'ROKU', 'DDOG', 'ZS', 'CRWD', 'PANW', 'MDB', 'NET', 'ABNB',
-  ];
-
+// KIS 한국투자증권 API (2단계 — 키 발급 후 활성화)
+async function fetchKISStocks(appKey: string, appSecret: string): Promise<any[]> {
   const stocks: any[] = [];
-  // Yahoo Finance API (비공식이지만 무료)
+  
   try {
-    const symbolStr = symbols.join(',');
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolStr}`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Kadeora/1.0)' },
+    // 1. 토큰 발급
+    const tokenRes = await fetch('https://openapi.koreainvestment.com:9443/oauth2/tokenP', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'client_credentials',
+        appkey: appKey,
+        appsecret: appSecret,
+      }),
     });
-    if (res.ok) {
-      const data = await res.json();
-      const quotes = data?.quoteResponse?.result || [];
-      for (const q of quotes) {
-        if (q.regularMarketPrice > 0) {
-          stocks.push({
-            symbol: q.symbol,
-            name: q.shortName || q.longName || q.symbol,
-            market: q.exchange === 'NMS' ? 'NASDAQ' : 'NYSE',
-            price: q.regularMarketPrice,
-            change_amt: q.regularMarketChange || 0,
-            change_pct: q.regularMarketChangePercent || 0,
-            volume: q.regularMarketVolume || 0,
-            market_cap: q.marketCap || 0,
-            currency: 'USD',
-          });
-        }
-      }
-    }
-  } catch {}
-  return stocks;
+    if (!tokenRes.ok) return [];
+    const tokenData = await tokenRes.json();
+    const accessToken = tokenData.access_token;
+    if (!accessToken) return [];
+    
+    // 2. 시세 조회 (주요 종목)
+    // KIS API는 종목별 개별 조회 — 기존 DB의 활성 종목만 업데이트
+    // (대량 조회는 별도 설정 필요)
+    
+    return stocks;
+  } catch {
+    return [];
+  }
 }
 
 function guessSector(name: string): string | null {
-  if (/반도체|하이닉스|삼성전자|마이크론|엔비디아/.test(name)) return '반도체';
+  if (/반도체|하이닉스|삼성전자/.test(name)) return '반도체';
   if (/바이오|셀트리온|삼성바이오|유한양행|녹십자|한미약품/.test(name)) return '바이오';
   if (/금융|은행|지주|보험|증권|KB|신한|하나|우리|NH/.test(name)) return '금융';
   if (/자동차|현대차|기아|만도|한온/.test(name)) return '자동차';
@@ -114,69 +105,62 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('stock-crawl', async () => {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    
+    let totalCreated = 0;
+    let source = 'none';
 
-    // 1. 미국 주식 (Yahoo Finance)
-    const usStocks = await fetchUSStocks();
-    let usCreated = 0;
-    for (const s of usStocks) {
-      const { error } = await supabase.from('stock_quotes').upsert({
-        symbol: s.symbol,
-        name: s.name,
-        market: s.market,
-        price: s.price,
-        change_amt: s.change_amt,
-        change_pct: s.change_pct,
-        volume: s.volume,
-        market_cap: s.market_cap,
-        currency: s.currency,
-        is_active: true,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'symbol' });
-      if (!error) usCreated++;
-    }
-
-    // 2. 한국 주식 — 기존 종목 시세 업데이트 (네이버)
-    // 네이버 증권 개별 종목 API로 기존 종목 시세 갱신
-    const { data: existingKR } = await supabase.from('stock_quotes')
-      .select('symbol')
-      .in('market', ['KOSPI', 'KOSDAQ'])
-      .eq('is_active', true);
-
-    let krUpdated = 0;
-    if (existingKR) {
-      for (let i = 0; i < existingKR.length; i += 20) {
-        const batch = existingKR.slice(i, i + 20);
-        await Promise.allSettled(batch.map(async (s) => {
-          try {
-            const url = `https://finance.naver.com/item/main.naver?code=${s.symbol}`;
-            const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-            const html = await res.text();
-            // 현재가 파싱
-            const priceMatch = html.match(/no_today[\s\S]*?<span class="blind">([\d,]+)<\/span>/);
-            if (priceMatch) {
-              const price = parseInt(priceMatch[1].replace(/,/g, ''));
-              if (price > 0) {
-                await supabase.from('stock_quotes').update({
-                  price,
-                  updated_at: new Date().toISOString(),
-                }).eq('symbol', s.symbol);
-                krUpdated++;
-              }
-            }
-          } catch {}
-        }));
+    // === 1단계: KIS API (실시간, 키가 있을 때) ===
+    const kisKey = process.env.KIS_APP_KEY;
+    const kisSecret = process.env.KIS_APP_SECRET;
+    if (kisKey && kisSecret) {
+      const kisStocks = await fetchKISStocks(kisKey, kisSecret);
+      if (kisStocks.length > 0) {
+        source = 'kis';
+        for (const s of kisStocks) {
+          const sector = guessSector(s.name);
+          const { error } = await supabase.from('stock_quotes').upsert({
+            ...s,
+            ...(sector ? { sector } : {}),
+            is_active: true,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'symbol' });
+          if (!error) totalCreated++;
+        }
       }
     }
 
+    // === 2단계: 공공데이터 API (종가, 키가 있을 때) ===
+    const stockApiKey = process.env.STOCK_DATA_API_KEY || process.env.BUSAN_DATA_API_KEY;
+    if (stockApiKey && totalCreated === 0) {
+      const krxStocks = await fetchKRXStocks(stockApiKey);
+      if (krxStocks.length > 0) {
+        source = 'data_go_kr';
+        for (const s of krxStocks) {
+          const sector = guessSector(s.name);
+          const { error } = await supabase.from('stock_quotes').upsert({
+            ...s,
+            ...(sector ? { sector } : {}),
+            is_active: true,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'symbol' });
+          if (!error) totalCreated++;
+        }
+      }
+    }
+
+    // === is_active 정리: price=0이면 비활성 ===
+    await supabase.from('stock_quotes')
+      .update({ is_active: false })
+      .eq('price', 0);
+
     return {
-      processed: usStocks.length + (existingKR?.length || 0),
-      created: usCreated + krUpdated,
+      processed: totalCreated,
+      created: totalCreated,
       failed: 0,
       metadata: {
-        us_stocks: usStocks.length,
-        us_created: usCreated,
-        kr_updated: krUpdated,
-        kr_total: existingKR?.length || 0,
+        source,
+        kis_available: !!(kisKey && kisSecret),
+        public_api_available: !!stockApiKey,
       },
     };
   });
