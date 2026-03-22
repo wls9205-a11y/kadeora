@@ -348,7 +348,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 미분양 탭 ━━━ */}
       {activeTab === 'unsold' && (() => {
-        if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>미분양 데이터가 없습니다</div>;
+        if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏚️ 미분양 데이터를 수집 중입니다<br/><span style={{ fontSize: 12 }}>매월 국토교통부 통계 업데이트 시 반영됩니다</span></div>;
         const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
         const fu = unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion);
@@ -565,7 +565,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 재개발·재건축 탭 ━━━ */}
       {activeTab === 'redev' && (() => {
-        if (!redevelopment.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>재개발·재건축 데이터가 없습니다</div>;
+        if (!redevelopment.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏗️ 재개발·재건축 데이터를 수집 중입니다<br/><span style={{ fontSize: 12 }}>각 지자체 정비사업 데이터 연동 시 표시됩니다</span></div>;
 
         const redevCount = redevelopment.filter((r: any) => r.project_type === '재개발').length;
         const rebuildCount = redevelopment.filter((r: any) => r.project_type === '재건축').length;
@@ -758,7 +758,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 실거래가 탭 ━━━ */}
       {activeTab === 'trade' && (() => {
-        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>실거래가 데이터가 없습니다. 크론 수집 후 표시됩니다.</div>;
+        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>💰 실거래가 데이터를 수집 중입니다<br/><span style={{ fontSize: 12 }}>국토교통부 실거래가 API에서 주기적으로 수집합니다</span></div>;
 
         const tradeRegs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
         const filteredTrades = tradeRegion === '전체' ? transactions : transactions.filter((t: any) => t.region_nm === tradeRegion);
@@ -958,7 +958,45 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}
               </div>
 
-              {/* 상세 정보 */}
+              {/* 사업 진행률 파이프라인 */}
+              {(() => {
+                const currentIdx = STAGE_ORDER.indexOf(r.stage);
+                const progress = currentIdx >= 0 ? Math.round(((currentIdx + 1) / STAGE_ORDER.length) * 100) : 0;
+                return (
+                  <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>📊 사업 진행률</span>
+                      <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>{progress}%</span>
+                    </div>
+                    <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
+                      <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg, #3b82f6, #22c55e, var(--brand))', borderRadius: 4, transition: 'width 0.5s' }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      {STAGE_ORDER.map((stage, i) => {
+                        const isCurrent = stage === r.stage;
+                        const isPast = currentIdx >= 0 && i < currentIdx;
+                        const stageColor = STAGE_COLORS[stage] || STAGE_COLORS['정비구역지정'];
+                        return (
+                          <div key={stage} style={{ textAlign: 'center', flex: 1 }}>
+                            <div style={{
+                              width: 20, height: 20, borderRadius: '50%', margin: '0 auto 4px',
+                              background: isCurrent ? stageColor.border : isPast ? 'var(--text-tertiary)' : 'var(--border)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              border: isCurrent ? '2px solid var(--brand)' : 'none',
+                              boxShadow: isCurrent ? '0 0 8px rgba(255,91,54,0.4)' : 'none',
+                            }}>
+                              {(isPast || isCurrent) && <span style={{ color: '#fff', fontSize: 10, fontWeight: 800 }}>✓</span>}
+                            </div>
+                            <div style={{ fontSize: 8, color: isCurrent ? 'var(--brand)' : isPast ? 'var(--text-secondary)' : 'var(--text-tertiary)', fontWeight: isCurrent ? 800 : 400, lineHeight: 1.2 }}>
+                              {stage.replace('사업시행인가', '시행인가').replace('정비구역지정', '구역지정').replace('관리처분', '관리처분')}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
               <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
                 {[
                   r.address && ['📍 주소', r.address],
@@ -1016,6 +1054,37 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button onClick={() => setSelectedTrade(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18 }}>✕</button>
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
+
+              {/* 가격 추이 미니차트 */}
+              {related.length >= 2 && (() => {
+                const sorted = [...related].sort((a: any, b: any) => (a.deal_date || '').localeCompare(b.deal_date || ''));
+                const prices = sorted.map((r: any) => r.deal_amount || 0).filter((v: number) => v > 0);
+                if (prices.length < 2) return null;
+                const min = Math.min(...prices); const max = Math.max(...prices);
+                const range = max - min || 1; const W = 280; const H = 60; const P = 4;
+                const points = prices.map((p: number, i: number) => `${P + (i / (prices.length - 1)) * (W - P * 2)},${H - P - ((p - min) / range) * (H - P * 2)}`).join(' ');
+                const isUp = prices[prices.length - 1] >= prices[0];
+                const changePct = ((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(1);
+                return (
+                  <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 12, marginBottom: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>📈 거래가 추이</span>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? '#ef4444' : '#3b82f6' }}>{isUp ? '▲' : '▼'} {changePct}%</span>
+                    </div>
+                    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 60 }}>
+                      <polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#3b82f6'} strokeWidth="2" strokeLinecap="round" />
+                      {prices.map((p: number, i: number) => (
+                        <circle key={i} cx={P + (i / (prices.length - 1)) * (W - P * 2)} cy={H - P - ((p - min) / range) * (H - P * 2)} r="3" fill={isUp ? '#ef4444' : '#3b82f6'} />
+                      ))}
+                    </svg>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                      <span>{fmtAmt(prices[0])}</span>
+                      <span>{fmtAmt(prices[prices.length - 1])}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>거래 이력 ({related.length}건)</div>
               {related.map((r: any, i: number) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>

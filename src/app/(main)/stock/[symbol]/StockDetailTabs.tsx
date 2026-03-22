@@ -147,7 +147,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
               )}
             </>
           ) : (
-            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', fontSize: 13 }}>차트 데이터 준비 중</div>
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', fontSize: 13 }}>📊 거래 데이터가 쌓이면 차트가 표시됩니다<br/><span style={{ fontSize: 11 }}>보통 상장 후 2~3일 내에 업데이트</span></div>
           )}
         </div>
       )}
@@ -157,7 +157,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 투자자별 수급</div>
           {investorFlow.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 13 }}>수급 데이터 준비 중</div>
+            <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 13 }}>📊 외국인·기관 매매 데이터가 수집되면 표시됩니다</div>
           ) : investorFlow.map((d: any) => {
             const foreignNet = (d.foreign_buy || 0) - (d.foreign_sell || 0);
             const instNet = (d.inst_buy || 0) - (d.inst_sell || 0);
@@ -196,7 +196,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
           {news.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 13 }}>뉴스 데이터 준비 중</div>
+            <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 13 }}>📰 최근 관련 뉴스가 없습니다<br/><span style={{ fontSize: 11 }}>새로운 뉴스가 발행되면 자동으로 수집됩니다</span></div>
           ) : news.map((n: any) => (
             <a key={n.id} href={n.url} target="_blank" rel="noopener noreferrer"
               style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
@@ -230,7 +230,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📋 최근 공시</div>
           {disclosures.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 13 }}>공시 데이터 준비 중</div>
+            <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 13 }}>📋 최근 공시 내역이 없습니다<br/><span style={{ fontSize: 11 }}>DART 공시 등록 시 자동으로 수집됩니다</span></div>
           ) : disclosures.map((d: any) => {
             const typeMap: Record<string, string> = { earnings: '📈실적', dividend: '💰배당', buyback: '🔄자사주', contract: '📝수주', ir: '🎤IR' };
             return (
