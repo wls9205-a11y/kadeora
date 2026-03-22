@@ -1408,7 +1408,16 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   </div>
                   {/* 시군구 + 세대수 + 시공사 */}
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>
-                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ' · 세대수 미정'}{r.constructor ? ` · ${r.constructor}` : ''}
+                    {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : (() => {
+                      const stageMsg: Record<string, string> = {
+                        '정비구역지정': ' · 세대수 미확정 (구역지정 단계)',
+                        '조합설립': ' · 세대수 확정 전 (조합설립 단계)',
+                        '사업시행인가': ' · 세대수 인가 후 확정 예정',
+                        '관리처분': ' · 관리처분계획 참조',
+                        '착공': ' · 사업시행계획 참조',
+                      };
+                      return stageMsg[r.stage] || ' · 세대수 미확정';
+                    })()}{r.constructor ? ` · ${r.constructor}` : ''}
                   </div>
                   {/* 비고/예상준공 */}
                   {(r.notes || r.expected_completion) && (
@@ -1754,7 +1763,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 </div>
               )}
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>
-                {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}
+                {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ` · 세대수 ${r.stage === '정비구역지정' || r.stage === '조합설립' ? '미확정' : '확인 필요'}`}
               </div>
 
               {/* 사업 진행률 파이프라인 */}
