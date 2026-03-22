@@ -102,7 +102,7 @@ export default async function AptDetailPage({ params }: Props) {
           <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}>{badge.label}</span>
           {status === 'upcoming' && dday !== null && dday >= 0 && <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>D-{dday}</span>}
           {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 10 }}>{Number(apt.competition_rate_1st).toFixed(1)}:1</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#818CF8', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 10 }}>{Number(apt.competition_rate_1st).toFixed(1)}:1</span>
           )}
         </div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{apt.house_nm}</h1>
@@ -134,7 +134,7 @@ export default async function AptDetailPage({ params }: Props) {
       {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
         <div style={{ ...card, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏆 청약 경쟁률</div>
-          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#818cf8', marginBottom: 12 }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#818CF8', marginBottom: 12 }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
           {apt.total_apply_count && apt.supply_count && (
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>
               총 지원 {Number(apt.total_apply_count).toLocaleString()}명 / 공급 {Number(apt.supply_count).toLocaleString()}세대
@@ -160,7 +160,7 @@ export default async function AptDetailPage({ params }: Props) {
                         <td style={{ padding: '6px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{t.type || t.area || '-'}</td>
                         <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.supply || 0).toLocaleString()}</td>
                         <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{(t.apply || 0).toLocaleString()}</td>
-                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: (t.rate || 0) >= 10 ? '#F87171' : (t.rate || 0) >= 5 ? '#FB923C' : '#818cf8' }}>
+                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: (t.rate || 0) >= 10 ? '#F87171' : (t.rate || 0) >= 5 ? '#FB923C' : '#818CF8' }}>
                           {t.rate ? `${t.rate}:1` : '-'}
                         </td>
                       </tr>

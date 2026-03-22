@@ -49,7 +49,7 @@ const SB = {
 } as const;
 
 const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  '정비구역지정': { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af', border: '#6b7280' },
+  '정비구역지정': { bg: 'rgba(107,114,128,0.15)', color: '#9DB0C7', border: '#7D8DA3' },
   '조합설립': { bg: 'rgba(96,165,250,0.2)', color: '#93C5FD', border: '#60A5FA' },
   '사업시행인가': { bg: 'rgba(251,191,36,0.2)', color: '#FDE047', border: '#FBBF24' },
   '관리처분': { bg: 'rgba(251,146,60,0.2)', color: '#FDBA74', border: '#FB923C' },
@@ -380,7 +380,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   {dday !== null && dday >= 0 && st !== 'closed' && (
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: dday <= 2 ? '#F87171' : dday <= 6 ? '#FBBF24' : 'var(--text-secondary)' }}>D-{dday}</span>
                   )}
-                  {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.2)' }}>분양가상한</span>}
+                  {(apt as any).PARCPRC_ULS_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', color: '#A78BFA', border: '1px solid rgba(167,139,250,0.2)' }}>분양가상한</span>}
                   {(apt as any).SPECLT_RDN_EARTH_AT === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(248,113,113,0.12)', color: '#F87171', border: '1px solid rgba(248,113,113,0.2)' }}>투기과열</span>}
                   {(apt as any).MDAT_TRGET_AREA_SECD === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'rgba(251,146,60,0.12)', color: '#fdba74', border: '1px solid rgba(251,146,60,0.2)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{apt.region_nm}</span>
@@ -487,7 +487,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           else pipeCounts['청약마감']++;
         });
         const pipeTotal = filtered.length || 1;
-        const pipeColors = ['#6b7280', '#60A5FA', '#FBBF24', '#FB923C', '#34D399'];
+        const pipeColors = ['#7D8DA3', '#60A5FA', '#FBBF24', '#FB923C', '#34D399'];
 
         // ④ 분양가 TOP10
         const priceTop = [...filtered].filter(o => o.sale_price_max && o.sale_price_max > 0).sort((a, b) => (b.sale_price_max || 0) - (a.sale_price_max || 0)).slice(0, 10);
@@ -1467,7 +1467,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <>
                       <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
                         {regions.slice(0, 8).map(r => (
-                          <button key={r} onClick={() => setTradeChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (tradeChartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (tradeChartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (tradeChartRegion || regions[0]) === r ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
+                          <button key={r} onClick={() => setTradeChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (tradeChartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (tradeChartRegion || regions[0]) === r ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)', color: (tradeChartRegion || regions[0]) === r ? '#93C5FD' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
                         ))}
                       </div>
                       <MiniLineChart
@@ -1539,7 +1539,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <button key={s.key} onClick={() => { setTradeSort(s.key); setTradePage(1); }} style={{
                     fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
                     background: tradeSort === s.key ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)',
-                    color: tradeSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
+                    color: tradeSort === s.key ? '#93C5FD' : 'var(--text-tertiary)', fontWeight: 600,
                   }}>{s.label}</button>
                 ))}
               </div>
