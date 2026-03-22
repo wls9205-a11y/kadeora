@@ -251,7 +251,7 @@ export default function SearchClient() {
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-lg)', pointerEvents: 'none' }}>🔍</span>
         {inputVal && (
           <button
-            onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); }}
+            onClick={() => { setInputVal(''); setResults([]); setTotal(0); setAcOpen(false); setAcStocks([]); setAcApts([]); setAcPosts([]); setAcBlogs([]); }}
             aria-label="검색어 지우기"
             style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}
           >✕</button>
@@ -276,13 +276,13 @@ export default function SearchClient() {
               overflowY: 'auto' as const,
             }}
           >
-            {acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && (
+            {acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && acBlogs.length === 0 && (
               <div style={{ padding: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <div style={{ width: 20, height: 20, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
               </div>
             )}
 
-            {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && results.length === 0 && (
+            {!acLoading && acStocks.length === 0 && acApts.length === 0 && acPosts.length === 0 && acBlogs.length === 0 && results.length === 0 && (
               <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>🔍 검색 결과가 없어요</div>
             )}
 
