@@ -194,6 +194,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
             }}>
               {l}
+              {data.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 2, opacity: 0.7 }}>{data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length}</span>}
               {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#F87171' }} />}
             </button>
           );
@@ -904,6 +905,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       <button onClick={() => { setSelectedOngoing(null); toggleWatchlist(isU ? 'unsold' : 'sub', String(o.link_id)); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>⭐ 관심단지</button>
                       <button onClick={() => { setSelectedOngoing(null); setCommentTarget({ houseKey: isU ? `unsold_${o.link_id}` : `sub_${o.link_id}`, houseNm: o.house_nm || '현장', houseType: isU ? 'unsold' : 'sub' }); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>💬 한줄평</button>
                     </div>
+                    {/* 지도 버튼 */}
+                    {(o.address || o.house_nm) && (
+                      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                        <a href={`https://map.kakao.com/?q=${encodeURIComponent(o.address || o.house_nm)}`} target="_blank" rel="noopener noreferrer"
+                          style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+                        <a href={`https://map.naver.com/p/search/${encodeURIComponent(o.address || o.house_nm)}`} target="_blank" rel="noopener noreferrer"
+                          style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+                      </div>
+                    )}
                   </div>
                 </>
               );
@@ -1100,8 +1110,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>{'\u{1F5FA}\uFE0F'} 지역별 미분양 현황</div>
                   {regionData.map((d: any) => (
-                    <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <div style={{ width: 40, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textAlign: 'right', flexShrink: 0 }}>{d.label}</div>
+                    <div key={d.label} onClick={() => setUnsoldRegion(d.label === unsoldRegion ? '전체' : d.label)} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, cursor: 'pointer', opacity: unsoldRegion !== '전체' && unsoldRegion !== d.label ? 0.5 : 1, transition: 'opacity 0.15s' }}>
+                      <div style={{ width: 40, fontSize: 'var(--fs-xs)', color: unsoldRegion === d.label ? '#60A5FA' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: unsoldRegion === d.label ? 700 : 400 }}>{d.label}</div>
                       <div style={{ flex: 1, height: 28, background: 'var(--bg-hover)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
                         <div style={{ height: '100%', width: `${Math.max((d.value / max) * 100, 2)}%`, borderRadius: 6, background: getColor(d.value), transition: 'width 0.5s', display: 'flex', alignItems: 'center', paddingLeft: 8 }}>
                           {d.value > max * 0.15 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff' }}>{d.value.toLocaleString()}</span>}
