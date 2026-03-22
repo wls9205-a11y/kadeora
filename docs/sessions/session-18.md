@@ -1,90 +1,100 @@
-# 카더라 세션 18 작업 요약
+# 세션 18 — 블로그 스팸 방지 + 대량 시드 생성 + SEO 전면 최적화
 
-**날짜:** 2026-03-22
-**최신 커밋:** `a1fd509` → Vercel 자동 배포
-**배포 횟수:** 7회 (커밋 7건)
-
----
-
-## 배포 이력
-
-| # | 커밋 | 주요 내용 |
-|---|------|----------|
-| 1 | `79f67dc` | docs: 작업보고서 시스템 + 프로젝트 지침서 추가 |
-| 2 | `d5c76a8` | 글씨 크기 상향 + 어드민 미분양 차트 버그 + 주식 ⭐ 관심종목 |
-| 3 | `6e6c29d` | 주식 한국식 색상 적용 (국내 상승=빨강/하락=파랑) |
-| 4 | `88efa4e` | 재개발 진행률 시각화 + 실거래 미니차트 + 빈 데이터 안내 |
-| 5 | `72d9ff8` | 세션 18 보고서 (중간) |
-| 6 | `45db9ed` | 블로그 대폭 강화 + 청약 마감임박 + 실거래 평당가 + 비슷한 종목 |
-| 7 | `a1fd509` | 피드 인기글 배너 표시 + daily-stats 크론 fallback |
+**날짜**: 2026-03-22
+**최종 커밋**: `803f0fa`
 
 ---
 
-## 주요 변경사항
+## 결과 요약
 
-### 1. 작업보고서 시스템 구축
-- `docs/GUIDE.md` — 프로젝트 전체 지침서
-- `docs/README.md` — docs 폴더 사용법
-- `docs/STATUS.md` — 프로젝트 현황
-- `docs/sessions/` — 세션별 작업 기록
-
-### 2. 글씨 크기 대폭 상향
-- 보통(medium) base: 14px → 16px
-- 크게(large) base: 16px → 18px
-- 인라인 오버라이드 + input/textarea 동기화
-
-### 3. 어드민 대시보드 버그 수정
-- 미분양 추이 차트 `unsold_count` → `total_unsold` 컬럼명 오류 수정
-
-### 4. 주식 페이지 강화
-- 종목 리스트 ☆/★ 관심종목 토글 버튼 (TODO 해결)
-- `stockColor()` 헬퍼: 국내 상승=빨강 하락=파랑, 해외 상승=초록 하락=빨강
-- StockClient + StockDetailTabs 전면 적용
-- 종목 상세에 같은 섹터 비슷한 종목 5개 추천
-
-### 5. 부동산 페이지 강화
-- 재개발 모달: 6단계 파이프라인 프로그레스바 + 퍼센트
-- 실거래 모달: 동일 단지 거래가 추이 SVG 미니차트
-- 청약 탭: 마감 임박 배너 (D-3 이내 접수중 강조)
-- 실거래 카드: 평당가 자동 계산 표시
-
-### 6. 블로그 대폭 강화
-- 커버이미지 썸네일 카드형 레이아웃
-- 제목 검색 기능 (ilike)
-- 인기순/최신순 정렬 토글
-- 카테고리별 건수 + general 카테고리 추가
-- 인기글 TOP5 하이라이트 (첫 페이지)
-- 20건씩 페이지네이션
-- published_at 예약 발행 필터 통합
-
-### 7. 피드 인기글 + 크론 강화
-- 피드: hotPosts를 실제 UI에 표시 (이번 주 인기글 TOP3)
-- daily-stats 크론: RPC 실패 시 직접 쿼리 fallback + cron_logs 기록
-- 에러 시 200 반환 (재시도 루프 방지)
-
-### 8. 빈 데이터 안내 문구 구체화
-- 주식: 차트/수급/뉴스/공시 각각 구체적 안내
-- 부동산: 미분양/재개발/실거래 데이터 수집 안내
+| 항목 | Before | After |
+|------|--------|-------|
+| 블로그 총 건수 | 2,055건 | **13,778건** (6.7배) |
+| 발행 기간 | 12개월 (미래날짜 포함) | **24개월** (2024-03~2026-03) |
+| 1000자 미만 | 다수 | **0건** |
+| SEO 메타 누락 | 대부분 | **0건** (전 항목) |
+| 제목 중복 | 1,147건 | **0건** |
+| 쓰레기 데이터 | 193건 | **0건** (비공개) |
+| 콘텐츠 다양성 | 템플릿 반복 | **99.9%** 고유 |
+| sitemap | 5,000건 제한 | **전체 등재** (50,000 limit) |
+| 저자 정보 | Organization | **Person + 직책** |
+| 리라이팅 | 없음 | **자동 크론 9건/일** |
 
 ---
 
-## 미해결 / 다음 세션 작업
+## 구축한 시스템
 
-### 이번 세션에서 해결된 TODO
-- [x] 주식 목록 ⭐ 관심종목 토글 버튼 추가
-- [x] 어드민 미분양 추이 차트 0 표시 버그
-- [x] 주식 상세 한국식 색상 적용
+### 블로그 생성 → 발행 흐름
+```
+크론 11개 → safeBlogInsert() → is_published=false (큐)
+      ↓
+blog-publish-queue (09/13/18시) → blog_publish_from_queue() RPC
+      ↓
+is_published=true + published_at=NOW()
+```
 
-### 여전히 미해결
-- [ ] 부산 재개발 API 필드명 매핑 수정
-- [ ] stock_quotes 99개 price=0 — KIS API 연동
-- [ ] 지역별 거래가 추이 차트 구 탭 연동 확인
-- [ ] Google/네이버 서치콘솔 sitemap 제출
+### AI 리라이팅 흐름
+```
+blog-rewrite 크론 (10:30/14:30/20:30) → Claude API Sonnet
+      ↓
+rewritten_at IS NULL 3건씩 → 5가지 랜덤 문체 리라이팅
+```
+
+### 어드민 (/admin → ⚡ 자동화)
+- 발행 제어: 속도/상한/최소길이/유사도 실시간 변경
+- 발행 큐 현황: 오늘발행/쿼터/대기/소진예상
+- AI 리라이팅: 진행률 + 수동 5/10건 실행
+
+---
+
+## 신규/수정 파일
+
+### 신규
+```
+src/lib/blog-safe-insert.ts
+src/app/api/cron/blog-publish-queue/route.ts
+src/app/api/cron/blog-rewrite/route.ts
+src/app/api/admin/blog-rewrite/route.ts
+```
+
+### 수정
+```
+src/app/(main)/blog/page.tsx          — published_at 정렬, 미래글 필터
+src/app/(main)/blog/[slug]/page.tsx   — JSON-LD Person 저자, OG 강화
+src/app/sitemap.ts                    — limit 50000
+src/app/admin/AdminAutomation.tsx     — 발행설정 + 리라이팅 패널
+vercel.json                           — blog-rewrite 크론 3회
+```
+
+---
+
+## DB 설정 (blog_publish_config)
+
+| 설정 | 값 |
+|------|---|
+| daily_publish_limit | 3 |
+| daily_create_limit | 10 |
+| min_content_length | 1200 |
+| title_similarity_threshold | 0.4 |
+| auto_publish_enabled | true |
+
+---
+
+## 다음 세션 할 일
+
+### 즉시
+- [ ] Google Search Console sitemap 재제출
+- [ ] 네이버 서치어드바이저 sitemap 제출
 - [ ] 토스 라이브키 교체
-- [ ] 블로그 빌더 RPC 6개 전환
-- [ ] 프로필에 관심종목/관심단지 탭 추가
-- [ ] 상점 페이지 UI 개선
+- [ ] GitHub 토큰 삭제: https://github.com/settings/tokens
 
----
+### 중기
+- [ ] daily_publish_limit 3→10 올리기
+- [ ] 리라이팅 크론 Vercel 로그 확인
+- [ ] About 페이지 (저자 프로필)
+- [ ] 비공개 708건 리뷰
 
-*작성: Claude Opus 4.6 | 2026-03-22*
+### 장기
+- [ ] 리라이팅 13,778건 모니터링
+- [ ] 새 데이터 → 시드 RPC 재실행
+- [ ] GSC 색인 현황/CWV 점검
