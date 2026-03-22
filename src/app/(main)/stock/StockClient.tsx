@@ -400,6 +400,25 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: stockColor(t.change_pct??0, true) }}>{(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%</span>
               </div>
               {t.description && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>{t.description}</div>}
+              {/* 테마 추이 스파크라인 */}
+              {th?.history && Array.isArray(th.history) && th.history.length >= 2 && (() => {
+                const vals = th.history.map((h: any) => Number(h.change_pct || h.avg_change_rate || 0));
+                const min = Math.min(...vals); const max = Math.max(...vals);
+                const range = max - min || 1; const W = 200; const H = 30; const P = 2;
+                const points = vals.map((v: number, i: number) => `${P + (i / (vals.length - 1)) * (W - P * 2)},${H - P - ((v - min) / range) * (H - P * 2)}`).join(' ');
+                const isUp = vals[vals.length - 1] >= vals[0];
+                return (
+                  <div style={{ marginBottom: 8 }}>
+                    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 30 }}>
+                      <polyline points={points} fill="none" stroke={isUp ? '#F87171' : '#60A5FA'} strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                      <span>{th.history[0]?.date?.slice(5) || ''}</span>
+                      <span>{th.history[th.history.length - 1]?.date?.slice(5) || ''}</span>
+                    </div>
+                  </div>
+                );
+              })()}
               {t.related_symbols?.length && (
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {t.related_symbols.map(sym => {
@@ -555,11 +574,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                   <table style={{ width: '100%', fontSize: 'var(--fs-sm)', borderCollapse: 'collapse' }}>
                     <thead><tr style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}><td></td><td>{c.sa.name}</td><td>{c.sb.name}</td></tr></thead>
                     <tbody>
+                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>현재가</td><td style={{ fontWeight: 600 }}>₩{fmt(c.sa.price)}</td><td style={{ fontWeight: 600 }}>₩{fmt(c.sb.price)}</td></tr>
                       <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>시총</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sa.market_cap,c.sa.currency)}</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sb.market_cap,c.sb.currency)}</td></tr>
                       <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>등락</td>
                         <td style={{ fontWeight: 700, color: stockColor(c.sa.change_pct??0, true) }}>{(c.sa.change_pct??0)>0?'+':''}{(c.sa.change_pct??0).toFixed(2)}%</td>
                         <td style={{ fontWeight: 700, color: stockColor(c.sb.change_pct??0, true) }}>{(c.sb.change_pct??0)>0?'+':''}{(c.sb.change_pct??0).toFixed(2)}%</td>
                       </tr>
+                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>거래량</td><td style={{ fontWeight: 600, fontSize: 'var(--fs-xs)' }}>{c.sa.volume ? fmt(c.sa.volume) : '-'}</td><td style={{ fontWeight: 600, fontSize: 'var(--fs-xs)' }}>{c.sb.volume ? fmt(c.sb.volume) : '-'}</td></tr>
                     </tbody>
                   </table>
                 </div>

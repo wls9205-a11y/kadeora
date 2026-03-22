@@ -130,13 +130,17 @@ export default async function StockDetailPage({ params }: Props) {
               const isKR = sim.currency !== 'USD';
               return (
                 <Link key={sim.symbol} href={`/stock/${encodeURIComponent(sim.symbol)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-                  <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{sim.name}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{sim.symbol}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{sim.symbol}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{fmtCap(Number(sim.market_cap), sim.currency)}</span>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, marginLeft: 8, color: isKR ? (simPct > 0 ? '#F87171' : simPct < 0 ? '#60A5FA' : 'var(--text-tertiary)') : (simPct > 0 ? '#34D399' : simPct < 0 ? '#F87171' : 'var(--text-tertiary)') }}>
+                    <div style={{ width: 24, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, height: '100%', background: isKR ? (simPct > 0 ? '#F87171' : '#60A5FA') : (simPct > 0 ? '#34D399' : '#F87171'), borderRadius: 2 }} />
+                    </div>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isKR ? (simPct > 0 ? '#F87171' : simPct < 0 ? '#60A5FA' : 'var(--text-tertiary)') : (simPct > 0 ? '#34D399' : simPct < 0 ? '#F87171' : 'var(--text-tertiary)') }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
                   </div>

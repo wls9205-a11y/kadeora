@@ -162,6 +162,22 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {tab === 'flow' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 투자자별 수급</div>
+          {investorFlow.length > 0 && (() => {
+            const totalForeign = investorFlow.reduce((s: number, d: any) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
+            const totalInst = investorFlow.reduce((s: number, d: any) => s + ((d.inst_buy || 0) - (d.inst_sell || 0)), 0);
+            return (
+              <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>외국인 누적</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: totalForeign >= 0 ? '#60A5FA' : '#F87171', marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
+                </div>
+                <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기관 누적</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: totalInst >= 0 ? '#FBBF24' : '#F87171', marginTop: 2 }}>{totalInst >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalInst / 10000))}만</div>
+                </div>
+              </div>
+            );
+          })()}
           {investorFlow.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📊 외국인·기관 매매 데이터가 수집되면 표시됩니다</div>
           ) : investorFlow.map((d: any) => {
@@ -252,7 +268,10 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 공시 */}
       {tab === 'disclosure' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📋 최근 공시</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📋 최근 공시</div>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{disclosures.length}건</span>
+          </div>
           {disclosures.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📋 최근 공시 내역이 없습니다<br/><span style={{ fontSize: 'var(--fs-xs)' }}>DART 공시 등록 시 자동으로 수집됩니다</span></div>
           ) : disclosures.map((d: any) => {
