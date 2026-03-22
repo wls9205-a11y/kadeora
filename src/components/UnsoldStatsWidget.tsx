@@ -44,7 +44,7 @@ export default function UnsoldStatsWidget() {
               whiteSpace: 'nowrap',
               flexShrink: 0,
               border: `1px solid ${region === r ? 'var(--brand)' : 'var(--border)'}`,
-              background: region === r ? 'rgba(96,165,250,0.15)' : 'transparent',
+              background: region === r ? '#2563EB' : 'transparent',
               color: region === r ? '#fff' : 'var(--text-tertiary)',
             }}
           >

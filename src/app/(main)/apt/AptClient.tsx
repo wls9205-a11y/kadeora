@@ -148,9 +148,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
       padding: '4px 12px', borderRadius: 16, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' as const, flexShrink: 0,
-      border: `1px solid ${sel === v ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
-      background: sel === v ? 'rgba(96,165,250,0.15)' : 'transparent',
-      color: sel === v ? '#93C5FD' : 'var(--text-tertiary)',
+      border: `1px solid ${sel === v ? '#3B82F6' : 'var(--border)'}`,
+      background: sel === v ? '#2563EB' : 'transparent',
+      color: sel === v ? '#fff' : 'var(--text-tertiary)',
     }}>{label || v}</button>
   );
 
@@ -177,9 +177,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           return (
             <button key={k} onClick={() => setActiveTab(k)} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
-              background: activeTab === k ? 'var(--bg-elevated, #162544)' : 'transparent',
+              background: activeTab === k ? '#2563EB' : 'transparent',
               color: activeTab === k ? '#fff' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
-              boxShadow: activeTab === k ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
+              boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
             }}>
               {l}
               {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#F87171' }} />}
@@ -201,7 +201,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               <button onClick={() => setRegion('전체')} style={{
                 padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                 border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                background: region === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                background: region === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--text-primary)' }}>{apts.length}</span>
@@ -211,7 +211,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
                   padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                   border: region === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: region === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  background: region === r.name ? '#1E3A5F' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
@@ -345,7 +345,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               ]).map(s => (
                 <button key={s.key} onClick={() => setAptSort(s.key)} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                  background: aptSort === s.key ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)',
+                  background: aptSort === s.key ? '#2563EB' : 'var(--bg-hover)',
                   color: aptSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
                 }}>{s.label}</button>
               ))}
@@ -510,7 +510,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: ongoingRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: ongoingRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  background: ongoingRegion === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
@@ -520,7 +520,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                     border: ongoingRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                    background: ongoingRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                    background: ongoingRegion === r.name ? '#1E3A5F' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
                     <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
@@ -659,7 +659,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
                   padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
                   border: `1px solid ${ongoingSort === k ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
-                  background: ongoingSort === k ? 'rgba(96,165,250,0.15)' : 'transparent',
+                  background: ongoingSort === k ? '#2563EB' : 'transparent',
                   color: ongoingSort === k ? '#fff' : 'var(--text-tertiary)',
                 }}>{l}</button>
               ))}
@@ -765,7 +765,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <button key={p} onClick={() => { setOngoingPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
                     padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                     border: `1px solid ${ongoingPage === p ? 'rgba(96,165,250,0.5)' : 'var(--border)'}`,
-                    background: ongoingPage === p ? 'rgba(96,165,250,0.15)' : 'transparent',
+                    background: ongoingPage === p ? '#2563EB' : 'transparent',
                     color: ongoingPage === p ? '#fff' : 'var(--text-tertiary)',
                   }}>{p}</button>
                 ))}
@@ -884,10 +884,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button onClick={() => setUnsoldRegion('전체')} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
-                  background: unsoldRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#F87171' : '#F87171' }}>{total.toLocaleString()}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#F87171' }}>{total.toLocaleString()}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
                   <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
                 </button>
@@ -895,10 +895,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                     border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
-                    background: unsoldRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                    background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#F87171' : '#F87171' }}>{r.unitCount.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#F87171' }}>{r.unitCount.toLocaleString()}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                     <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
                     {total > 0 && (
@@ -969,10 +969,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button onClick={() => setUnsoldRegion('전체')} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
-                  background: unsoldRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#F87171' : '#F87171' }}>{total.toLocaleString()}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : '#F87171' }}>{total.toLocaleString()}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
                   <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
                 </button>
@@ -980,10 +980,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                     border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
-                    background: unsoldRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                    background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#F87171' : '#F87171' }}>{r.unitCount.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : '#F87171' }}>{r.unitCount.toLocaleString()}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                     <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
                     {total > 0 && (
@@ -1182,7 +1182,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: redevRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: redevRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  background: redevRegion === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{redevelopment.length}</span>
@@ -1192,7 +1192,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                     border: redevRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                    background: redevRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                    background: redevRegion === r.name ? '#1E3A5F' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
                     <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
@@ -1387,7 +1387,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <button onClick={() => { setTradeRegion('전체'); setTradePage(1); }} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: tradeRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: tradeRegion === '전체' ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                  background: tradeRegion === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tradeRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{transactions.length}</span>
@@ -1397,7 +1397,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                   <button key={r.name} onClick={() => { setTradeRegion(r.name === tradeRegion ? '전체' : r.name); setTradePage(1); }} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                     border: tradeRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                    background: tradeRegion === r.name ? 'var(--bg-elevated, #162544)' : 'var(--bg-surface)',
+                    background: tradeRegion === r.name ? '#1E3A5F' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
                     <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tradeRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
@@ -1467,7 +1467,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                     <>
                       <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
                         {regions.slice(0, 8).map(r => (
-                          <button key={r} onClick={() => setTradeChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (tradeChartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (tradeChartRegion || regions[0]) === r ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)', color: (tradeChartRegion || regions[0]) === r ? '#93C5FD' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
+                          <button key={r} onClick={() => setTradeChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (tradeChartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (tradeChartRegion || regions[0]) === r ? '#2563EB' : 'var(--bg-hover)', color: (tradeChartRegion || regions[0]) === r ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
                         ))}
                       </div>
                       <MiniLineChart
@@ -1538,8 +1538,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 ] as { key: typeof tradeSort; label: string }[]).map(s => (
                   <button key={s.key} onClick={() => { setTradeSort(s.key); setTradePage(1); }} style={{
                     fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                    background: tradeSort === s.key ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)',
-                    color: tradeSort === s.key ? '#93C5FD' : 'var(--text-tertiary)', fontWeight: 600,
+                    background: tradeSort === s.key ? '#2563EB' : 'var(--bg-hover)',
+                    color: tradeSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
                   }}>{s.label}</button>
                 ))}
               </div>

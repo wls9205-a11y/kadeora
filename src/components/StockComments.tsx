@@ -385,7 +385,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
             style={{
               padding: '5px 14px', borderRadius: 20, fontSize: 'var(--fs-sm)', fontWeight: 600,
               cursor: 'pointer', border: 'none',
-              background: sort === key ? 'rgba(96,165,250,0.15)' : 'var(--bg-hover)',
+              background: sort === key ? '#2563EB' : 'var(--bg-hover)',
               color: sort === key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
             }}
           >{label}</button>
