@@ -55,7 +55,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const refresh = useCallback(async () => {
     try {
       const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
-      const { data } = await sb.from('stock_quotes').select('*').order('market_cap', { ascending: false });
+      const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active').order('market_cap', { ascending: false });
       if (data?.length) setStocks(data as any);
     } catch {}
   }, []);

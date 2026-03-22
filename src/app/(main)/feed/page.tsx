@@ -24,7 +24,7 @@ const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
 async function getPosts(category: string, region: string = 'all') {
   const sb = await createSupabaseServer();
   let q = sb.from('posts')
-    .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+    .select('id,title,excerpt,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
     .eq('is_deleted', false)
     .lte('created_at', new Date().toISOString())
     .order('created_at', { ascending: false })

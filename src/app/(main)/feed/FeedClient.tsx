@@ -343,7 +343,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                   </div>
                 )}
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                  {post.content}
+                  {(post as any).excerpt || post.content}
                 </div>
                 {/* 이미지 썸네일 */}
                 {(post as any).images && (post as any).images.length > 0 && (
