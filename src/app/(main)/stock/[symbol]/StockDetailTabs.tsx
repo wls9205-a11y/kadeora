@@ -201,6 +201,24 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {tab === 'news' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
+          {news.length > 0 && (() => {
+            const pos = news.filter((n: any) => n.sentiment_label === 'positive' || n.sentiment === 'positive').length;
+            const neg = news.filter((n: any) => n.sentiment_label === 'negative' || n.sentiment === 'negative').length;
+            const neu = news.length - pos - neg;
+            const total = news.length || 1;
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                <span style={{ color: '#F87171', fontWeight: 600 }}>긍정 {pos}</span>
+                <span>중립 {neu}</span>
+                <span style={{ color: '#60A5FA', fontWeight: 600 }}>부정 {neg}</span>
+                <div style={{ flex: 1, height: 4, borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
+                  <div style={{ width: `${(pos/total)*100}%`, background: '#F87171' }} />
+                  <div style={{ width: `${(neu/total)*100}%`, background: 'var(--bg-hover)' }} />
+                  <div style={{ width: `${(neg/total)*100}%`, background: '#60A5FA' }} />
+                </div>
+              </div>
+            );
+          })()}
           {news.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📰 최근 관련 뉴스가 없습니다<br/><span style={{ fontSize: 'var(--fs-xs)' }}>새로운 뉴스가 발행되면 자동으로 수집됩니다</span></div>
           ) : news.map((n: any) => (

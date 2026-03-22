@@ -143,8 +143,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
               </div>
               {isGlobal && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockColor(pct, !isGlobal) }}>
-                {pct > 0 ? '▲' : pct < 0 ? '▼' : '—'} {Math.abs(pct).toFixed(2)}%
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+                <div style={{ width: 32, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.min(Math.abs(pct) * 10, 100)}%`, height: '100%', background: stockColor(pct, !isGlobal), borderRadius: 2 }} />
+                </div>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockColor(pct, !isGlobal) }}>
+                  {pct > 0 ? '▲' : pct < 0 ? '▼' : '—'} {Math.abs(pct).toFixed(2)}%
+                </span>
               </div>
             </>
           )}
@@ -259,6 +264,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                   {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                 </span>
               </div>
+              {s.change_amt !== undefined && s.change_amt !== 0 && (
+                <div style={{ fontSize: 'var(--fs-xs)', color: stockColor(pct, isDomestic), marginTop: 1 }}>
+                  {s.change_amt > 0 ? '+' : ''}{s.currency === 'USD' ? `$${s.change_amt.toFixed(0)}` : fmt(s.change_amt)}
+                </div>
+              )}
             </div>
           );
         })}
@@ -405,9 +415,15 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* M7 카드 (해외) */}
       {!isDomestic && globalTab === 'm7' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>🏆 Magnificent 7</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>🏆 Magnificent 7</div>
+            {(() => {
+              const totalCap = M7.reduce((sum, sym) => { const st = stocks.find(s => s.symbol === sym); return sum + (st?.market_cap || 0); }, 0);
+              return totalCap > 0 ? <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>합산 시총 {fmtCap(totalCap, 'USD')}</span> : null;
+            })()}
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
-            {M7.map(sym => {
+            {M7.map((sym, idx) => {
               const st = stocks.find(s => s.symbol === sym);
               if (!st) return null;
               const pct = st.change_pct ?? 0;

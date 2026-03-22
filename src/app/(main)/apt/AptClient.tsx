@@ -277,6 +277,46 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             {pill('closed', statusFilter, setStatusFilter, '마감')}
           </div>
 
+          {/* 이번 주 청약 하이라이트 */}
+          {(() => {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const weekStart = new Date(now); weekStart.setDate(now.getDate() - dayOfWeek);
+            const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+            const ws = weekStart.toISOString().slice(0, 10);
+            const we = weekEnd.toISOString().slice(0, 10);
+            const thisWeek = filtered.filter(a => {
+              const begin = String(a.rcept_bgnde || '').slice(0, 10);
+              const end = String(a.rcept_endde || '').slice(0, 10);
+              return begin <= we && end >= ws;
+            });
+            const opening = thisWeek.filter(a => getStatus(a) === 'open');
+            const upcoming = thisWeek.filter(a => getStatus(a) === 'upcoming');
+            if (thisWeek.length === 0) return null;
+            return (
+              <div style={{ background: 'linear-gradient(135deg, rgba(96,165,250,0.08), rgba(52,211,153,0.08))', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: '#60A5FA', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  📅 이번 주 청약 ({thisWeek.length}건)
+                  {opening.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'rgba(52,211,153,0.15)', color: '#34D399', fontWeight: 700 }}>접수중 {opening.length}</span>}
+                  {upcoming.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'rgba(251,191,36,0.15)', color: '#FCD34D', fontWeight: 700 }}>예정 {upcoming.length}</span>}
+                </div>
+                {thisWeek.slice(0, 5).map(a => {
+                  const st = getStatus(a);
+                  const sb = SB[st];
+                  return (
+                    <a key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(96,165,250,0.1)', textDecoration: 'none', color: 'inherit' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: sb.bg, color: sb.color, border: `1px solid ${sb.border}`, fontWeight: 700 }}>{sb.label}</span>
+                        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{a.house_nm}</span>
+                      </div>
+                      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{a.region_nm} · {a.tot_supply_hshld_co?.toLocaleString() || '-'}세대</span>
+                    </a>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
           {/* 청약 캘린더 */}
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
             {(() => {
@@ -1308,6 +1348,20 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                       {r.notes}{r.expected_completion ? (r.notes ? `, ${r.expected_completion}` : r.expected_completion) : ''}
                     </div>
                   )}
+                  {/* 진행률 바 */}
+                  {(() => {
+                    const idx = STAGE_ORDER.indexOf(r.stage);
+                    if (idx < 0) return null;
+                    const progress = Math.round(((idx + 1) / STAGE_ORDER.length) * 100);
+                    return (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                        <div style={{ flex: 1, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${sc.border}, var(--brand))`, borderRadius: 2 }} />
+                        </div>
+                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: sc.color, flexShrink: 0 }}>{progress}%</span>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -1740,7 +1794,29 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
                 <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.apt_name}</h2>
                 <button onClick={() => setSelectedTrade(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
               </div>
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
+
+              {/* 선택 거래 상세 */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래가</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{fmtAmt(t.deal_amount || 0)}</div>
+                </div>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전용면적</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{t.exclusive_area}㎡</div>
+                </div>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평당가</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#60A5FA', marginTop: 2 }}>{t.exclusive_area > 0 && t.deal_amount > 0 ? fmtAmt(Math.round(t.deal_amount / (t.exclusive_area / 3.3058))) : '-'}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
+                <span>📅 {t.deal_date}</span>
+                <span>🏢 {t.floor}층</span>
+                {t.built_year && <span>🏗️ {t.built_year}년식</span>}
+                {t.trade_type && <span>📋 {t.trade_type}</span>}
+              </div>
 
               {/* 가격 추이 미니차트 */}
               {related.length >= 2 && (() => {
