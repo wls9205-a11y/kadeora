@@ -1325,7 +1325,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 실거래가 탭 ━━━ */}
       {activeTab === 'trade' && (() => {
-        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>💰 실거래가 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>국토교통부 실거래가 API에서 주기적으로 수집합니다</span></div>;
+        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>💰 실거래가 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)', marginTop: 8, display: 'block' }}>국토교통부 실거래가 API에서 평일 08시에 자동 수집합니다</span><br/><span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>crawl-apt-trade 크론이 정상 동작 중인지 어드민에서 확인해주세요</span></div>;
 
         const tradeRegs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
         const filteredTrades = transactions.filter((t: any) => {
