@@ -97,6 +97,10 @@
       "schedule": "0 4 * * 2"
     },
     {
+      "path": "/api/cron/redev-geocode",
+      "schedule": "30 4 * * 4"
+    },
+    {
       "path": "/api/cron/crawl-unsold-molit",
       "schedule": "0 7 1 * *"
     },
