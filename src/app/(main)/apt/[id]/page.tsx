@@ -72,13 +72,23 @@ export default async function AptDetailPage({ params }: Props) {
   const { data: { user: aptUser } } = await createSupabaseServer().then(s => s.auth.getUser());
 
   let relatedPosts: any[] = [];
+  let relatedBlogs: any[] = [];
   try {
     const sbRel = await createSupabaseServer();
-    const { data: rp } = await sbRel.from('posts').select('id,title,created_at')
-      .eq('is_deleted', false).ilike('title', `%${apt.house_nm.slice(0,4)}%`)
-      .order('created_at', { ascending: false }).limit(3);
-    relatedPosts = rp || [];
-  } catch { relatedPosts = []; }
+    const searchTerm = apt.house_nm.length > 4 ? apt.house_nm.slice(0, 4) : apt.house_nm;
+    const regionShort = (apt.region_nm || '').slice(0, 2);
+    const [rp, rb] = await Promise.all([
+      sbRel.from('posts').select('id,title,created_at')
+        .eq('is_deleted', false).ilike('title', `%${searchTerm}%`)
+        .order('created_at', { ascending: false }).limit(3),
+      sbRel.from('blog_posts').select('slug,title,category,view_count,published_at')
+        .eq('is_published', true)
+        .or(`title.ilike.%${searchTerm}%,title.ilike.%${regionShort} 청약%,title.ilike.%${regionShort} 부동산%`)
+        .order('published_at', { ascending: false }).limit(5),
+    ]);
+    relatedPosts = rp.data || [];
+    relatedBlogs = rb.data || [];
+  } catch { relatedPosts = []; relatedBlogs = []; }
 
   const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
 
@@ -254,6 +264,22 @@ export default async function AptDetailPage({ params }: Props) {
             <Link key={rp.id} href={`/feed/${rp.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{rp.title}</div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{new Date(rp.created_at).toLocaleDateString('ko-KR')}</div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* 관련 블로그 분석 */}
+      {relatedBlogs.length > 0 && (
+        <div style={card}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📰 관련 분석 블로그</div>
+          {relatedBlogs.map((b: any) => (
+            <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{b.published_at?.slice(0, 10)} · 조회 {b.view_count || 0}</div>
+              </div>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>→</span>
             </Link>
           ))}
         </div>

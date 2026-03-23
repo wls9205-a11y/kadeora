@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import ShareButtons from '@/components/ShareButtons';
 import StockWatchlistButton from './WatchlistButton';
 import StockDetailTabs from './StockDetailTabs';
+import StockAlertButton from '@/components/StockAlertButton';
 
 function fmtPrice(p: number, c: string) { return c === 'KRW' ? `₩${p.toLocaleString()}` : `$${p.toFixed(2)}`; }
 function fmtCap(v: number | null, c: string) {
@@ -90,7 +91,10 @@ export default async function StockDetailPage({ params }: Props) {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
-        <StockWatchlistButton symbol={symbol} />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <StockAlertButton symbol={symbol} stockName={s.name} currentPrice={Number(s.price)} currency={s.currency} />
+          <StockWatchlistButton symbol={symbol} />
+        </div>
       </div>
 
       {/* 가격 헤더 */}

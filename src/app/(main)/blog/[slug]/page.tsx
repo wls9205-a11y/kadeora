@@ -7,6 +7,7 @@ import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import ShareButtons from '@/components/ShareButtons';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
+import BlogToc from '@/components/BlogToc';
 import { getAvatarColor } from '@/lib/avatar';
 import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 
@@ -245,17 +246,8 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 목차 */}
-        {toc.length >= 3 && (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>목차</div>
-            {toc.map((item, i) => (
-              <a key={i} href={`#${item.id}`} style={{ display: 'block', padding: '3px 0', paddingLeft: item.level === 3 ? 16 : 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', textDecoration: 'none', lineHeight: 1.5 }}>
-                {item.text}
-              </a>
-            ))}
-          </div>
-        )}
+        {/* 목차 (스크롤 추적) */}
+        {toc.length >= 3 && <BlogToc toc={toc} />}
 
         {/* 본문 — 마크다운 렌더링 */}
         {isLoggedIn ? (
