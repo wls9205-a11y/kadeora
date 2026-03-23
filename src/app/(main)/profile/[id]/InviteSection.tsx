@@ -1,4 +1,5 @@
 'use client';
+import { SITE_URL } from '@/lib/constants';
 
 interface Props {
   inviteCode: string;

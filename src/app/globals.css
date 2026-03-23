@@ -669,7 +669,12 @@ input, textarea, select {
 
 /* 글로벌 카드 hover 효과 */
 .kd-card-hover { transition: border-color var(--transition-fast), background var(--transition-fast); }
-.kd-card-hover:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+@media (hover: hover) {
+  .kd-card-hover:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+}
+@media (hover: none) {
+  .kd-card-hover:active { background: var(--bg-hover); }
+}
 
 /* focus-visible 전역 */
 *:focus-visible {
@@ -680,7 +685,12 @@ input, textarea, select {
 
 /* 피드 카드 hover */
 .kd-feed-card { transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease; }
-.kd-feed-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--brand) !important; }
+@media (hover: hover) {
+  .kd-feed-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--brand) !important; }
+}
+@media (hover: none) {
+  .kd-feed-card:active { transform: scale(0.98); opacity: 0.9; }
+}
 
 /* 카드 등장 stagger 애니메이션 */
 @keyframes fadeInUp {
@@ -988,3 +998,154 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   transition: opacity var(--transition-fast);
 }
 .kd-action-link:hover { opacity: 0.8; }
+
+/* ========================================
+   모바일 UX 강화 — 세션 29
+   ======================================== */
+
+/* 모바일: 카드 패딩/간격 최적화 */
+@media (max-width: 640px) {
+  .kd-feed-card {
+    border-radius: 10px !important;
+  }
+  /* 프로필 카드 모바일 */
+  .kd-profile-card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* 모바일: 피드 상세 본문 가독성 */
+@media (max-width: 640px) {
+  .feed-detail-content {
+    font-size: var(--fs-base) !important;
+    line-height: 1.85 !important;
+    word-break: keep-all !important;
+  }
+}
+
+/* 모바일: 블로그 본문 */
+@media (max-width: 640px) {
+  .blog-content {
+    font-size: var(--fs-base) !important;
+    line-height: 1.9 !important;
+    word-break: keep-all !important;
+  }
+  .blog-content h2 {
+    font-size: var(--fs-lg) !important;
+    margin: 20px 0 8px !important;
+  }
+  .blog-content h3 {
+    font-size: var(--fs-md) !important;
+    margin: 16px 0 6px !important;
+  }
+  .blog-content img {
+    border-radius: 8px !important;
+  }
+}
+
+/* 모바일: 버튼 터치 타겟 최소 44px */
+@media (max-width: 640px) {
+  button, [role="button"], a[href] {
+    min-height: 36px;
+  }
+}
+
+/* 모바일: 탭 바 스크롤 개선 */
+@media (max-width: 640px) {
+  .kd-tab-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .kd-tab-scroll > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* 모바일: 입력 폼 터치 최적화 */
+@media (max-width: 640px) {
+  .kd-input {
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    font-size: 16px !important; /* iOS 자동 줌 방지 */
+  }
+  textarea.kd-input {
+    min-height: 100px !important;
+  }
+}
+
+/* 모바일: 주식 그리드 2열→1열 */
+@media (max-width: 380px) {
+  .kd-stock-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* 모바일: 피드 인터랙션 바 풀폭 */
+@media (max-width: 480px) {
+  .kd-interaction-bar {
+    gap: 2px !important;
+  }
+  .kd-interaction-bar > * {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 8px 4px !important;
+  }
+}
+
+/* 모바일: 헤더 높이 최적화 */
+@media (max-width: 640px) {
+  .kd-page-header h1 {
+    font-size: var(--fs-xl) !important;
+  }
+  .kd-page-header p {
+    font-size: var(--fs-xs) !important;
+  }
+}
+
+/* 모바일: 하단 바 위 콘텐츠 마진 */
+@media (max-width: 899px) {
+  .main-content-area {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* 모바일: 토스트 위치 하단바 위 */
+@media (max-width: 899px) {
+  .kd-toast {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* 모바일: 롱 텍스트 말줄임 */
+.kd-truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kd-truncate-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.kd-truncate-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* 모바일: 이미지 라운드 */
+@media (max-width: 640px) {
+  .kd-card img {
+    border-radius: 8px !important;
+  }
+}
+
+/* 터치 디바이스: -webkit-tap-highlight 제거 */
+@media (hover: none) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

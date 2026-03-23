@@ -7,7 +7,7 @@ import { useRef } from 'react';
 import PullToRefresh from '@/components/PullToRefresh';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
-import { CATEGORY_MAP, REGIONS, GRADE_EMOJI } from '@/lib/constants';
+import { CATEGORY_MAP, REGIONS, GRADE_EMOJI, SITE_URL } from '@/lib/constants';
 import { validateNickname } from '@/lib/nickname-filter';
 import InviteSection from './InviteSection';
 
@@ -278,9 +278,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
 
   return (
     <PullToRefresh>
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* 프로필 카드 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '28px 28px 24px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(16px, 4vw, 28px) clamp(16px, 4vw, 28px) clamp(14px, 3vw, 24px)', marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
           {/* 아바타 */}

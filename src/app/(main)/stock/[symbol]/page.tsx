@@ -67,7 +67,7 @@ export default async function StockDetailPage({ params }: Props) {
   ];
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* JSON-LD 구조화 데이터 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',

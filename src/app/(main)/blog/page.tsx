@@ -112,8 +112,8 @@ export default async function BlogPage({ searchParams }: Props) {
   const breadcrumbLd = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' },
+      { '@type': 'ListItem', position: 1, name: '홈', item: SITE },
+      { '@type': 'ListItem', position: 2, name: '블로그', item: SITE + '/blog' },
       ...(category !== 'all' ? [{ '@type': 'ListItem', position: 3, name: catLabel }] : []),
     ],
   };
@@ -125,7 +125,7 @@ export default async function BlogPage({ searchParams }: Props) {
     itemListElement: (posts ?? []).slice(0, 10).map((p: any, i: number) => ({
       '@type': 'ListItem',
       position: i + 1 + (pageNum - 1) * perPage,
-      url: `${SITE_URL}/blog/${p.slug}`,
+      url: `${SITE}/blog/${p.slug}`,
       name: p.title,
     })),
   } : null;

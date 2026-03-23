@@ -232,7 +232,7 @@ export default function SearchClient() {
 
   return (
     <PullToRefresh>
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <h1 style={{ margin: '0 0 20px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
 
       {/* Search input */}
