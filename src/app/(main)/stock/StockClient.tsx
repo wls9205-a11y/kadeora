@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
@@ -84,9 +84,9 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   }, [watchlistSymbols]);
 
   const isDomestic = mode === 'domestic';
-  const domesticStocks = stocks.filter(s => (s.market === 'KOSPI' || s.market === 'KOSDAQ') && !isIdx(s));
-  const globalStocks = stocks.filter(s => (s.market === 'NYSE' || s.market === 'NASDAQ') && !isIdx(s));
-  const indexStocks = stocks.filter(s => isIdx(s));
+  const domesticStocks = useMemo(() => stocks.filter(s => (s.market === 'KOSPI' || s.market === 'KOSDAQ') && !isIdx(s)), [stocks]);
+  const globalStocks = useMemo(() => stocks.filter(s => (s.market === 'NYSE' || s.market === 'NASDAQ') && !isIdx(s)), [stocks]);
+  const indexStocks = useMemo(() => stocks.filter(s => isIdx(s)), [stocks]);
 
   // Market sentiment
   const sentimentStocks = isDomestic ? domesticStocks : globalStocks;

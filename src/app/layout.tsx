@@ -108,6 +108,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', availableLanguage: '한국어' },
           },
         }) }} />
+        {/* WebSite schema — Google Sitelinks 검색 박스 */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: '카더라',
+          url: 'https://kadeora.app',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: { '@type': 'EntryPoint', urlTemplate: 'https://kadeora.app/search?q={search_term_string}' },
+            'query-input': 'required name=search_term_string',
+          },
+        }) }} />
       </head>
       <body className={inter.className}>
         <ThemeProvider>
