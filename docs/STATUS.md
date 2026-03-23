@@ -41,7 +41,7 @@
 
 ---
 
-## 크론 현황 (48개 등록, vercel.json — 세션 28에서 +2개)
+## 크론 현황 (50개 등록, vercel.json — 세션 28에서 +4개)
 
 ### 부동산
 | 크론 | 주기 | 상태 |
@@ -55,6 +55,7 @@
 | crawl-busan-redev | 주 1회 | ✅ 매핑 필드 9개 확대+범위검증(세션22) |
 | crawl-gyeonggi-redev | 주 1회 | ✅ |
 | crawl-nationwide-redev | 매주 월요일 | ⚠️ API 키 필요 |
+| redev-verify-households | 매주 화요일 | ✅ 세대수 NULL 자동 검증(세션28) |
 | aggregate-trade-stats | 매일 | ✅ |
 
 ### 주식
@@ -89,7 +90,7 @@
 
 ---
 
-## 세션 28 — 미해결 항목 5건 해소 (5커밋)
+## 세션 28 — 미해결 항목 8건 해소 (10커밋)
 
 ### 1. 리뷰 좋아요/신고 기능
 - POST /api/apt/reviews/[id]/like — 좋아요 토글 (apt_review_likes 테이블)
@@ -117,6 +118,22 @@
 ### 5. Skeleton UI 전 페이지 확대 적용
 - loading.tsx 11개 파일 → SkeletonList/SkeletonCard/SkeletonChart 통일
 - FeedClient loadingMore sentinel → SkeletonCard shimmer
+
+### 6. 재개발 세대수 검증 크론 (redev-verify-households)
+- 매주 화 04:00, NULL 세대수 30건씩 공식 API에서 수집
+- 서울 URIS API → data.go.kr 2중 폴백
+- QUICK_ACTIONS에 수동 실행 버튼 추가
+
+### 7. 지도뷰 MarkerClusterer 적용
+- 카카오맵 clusterer 라이브러리 적용 (줌 레벨 5 이상)
+- 데이터 로드 limit 100→300 (3개 레이어)
+- 50개 geocode 제한 해제
+
+### 8. 어드민 대시보드 전면 업데이트
+- dataCounts 8→12개 (시리즈/가격알림/포트폴리오/리뷰 추가)
+- 품질 현황: 세대수 미확인 건수 표시
+- CRON_MAP 완전 동기화 (check-price-alerts 누락 보충)
+- QUICK_ACTIONS +3개 (세대수검증/시리즈묶기/포트폴리오스냅샷)
 
 ---
 
@@ -575,11 +592,11 @@
 - [x] AptClient 2060→205줄 완전 분할 (5개 탭 + apt-utils, 90% 감소) ✅ 세션 24
 - [x] AptClient 탭별 lazy fetch 적용 (SSR 60%+ 감소) ✅ 세션 28
 - [ ] crawl-nationwide-redev API 키 등록 후 실행
-- [ ] 재개발 세대수 크론 검증 수집
+- [x] 재개발 세대수 크론 검증 수집 (redev-verify-households 매주 화) ✅ 세션 28
 - [ ] 청약 상세의 신규 필드 데이터 채우기
 - [x] 블로그 시리즈 시드 크론 (blog-series-assign 매일 03:30) ✅ 세션 28
 - [x] 포트폴리오 수익률 히스토리 (portfolio-snapshot + 30일 차트) ✅ 세션 28
-- [ ] 지도뷰 클러스터링 (마커 50개+ 시 성능 최적화)
+- [x] 지도뷰 클러스터링 (MarkerClusterer + limit 300) ✅ 세션 28
 - [x] 리뷰 좋아요/신고 기능 ✅ 세션 28
 - [x] Skeleton UI 피드/주식/블로그 전 탭 확대 적용 (11개 loading.tsx) ✅ 세션 28
 - [x] safe-catch 주요 파일 적용 (FeedClient/StockClient/AptClient) ✅ 세션 24
