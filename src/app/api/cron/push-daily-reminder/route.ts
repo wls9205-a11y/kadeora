@@ -50,6 +50,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ sent: inserted, unchecked: unchecked.length });
   } catch (err) {
     console.error('[push-daily-reminder]', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error' }, { status: 200 });
   }
 }

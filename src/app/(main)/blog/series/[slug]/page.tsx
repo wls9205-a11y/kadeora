@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { notFound } from 'next/navigation';
 
 interface Props { params: Promise<{ slug: string }> }
 
-const sb = () => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const sb = () => getSupabaseAdmin();
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

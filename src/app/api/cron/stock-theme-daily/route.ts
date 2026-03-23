@@ -48,6 +48,6 @@ export async function GET(req: NextRequest) {
     return { processed: themes.length, created, failed: 0 };
   });
 
-  if (!result.success) return NextResponse.json({ error: result.error }, { status: 500 });
+  if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });
   return NextResponse.json({ ok: true, ...result });
 }

@@ -16,7 +16,6 @@ import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 
 async function fetchAptData() {
-  const sb = await createSupabaseServer();
   let apts: any[] = [];
   let unsold: any[] = [];
   let alertCounts: Record<string, number> = {};

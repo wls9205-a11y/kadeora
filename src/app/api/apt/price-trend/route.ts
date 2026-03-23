@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = () => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(req: NextRequest) {
   try {
+    const sb = getSupabaseAdmin();
     const { searchParams } = new URL(req.url);
     const aptName = searchParams.get('name');
     const region = searchParams.get('region');
 
     if (!aptName) return NextResponse.json({ error: 'name 파라미터 필요' }, { status: 400 });
-
-    const sb = supabase();
 
     // RPC 먼저 시도
     const { data: rpcData, error: rpcErr } = await sb.rpc('get_apt_price_trend', {

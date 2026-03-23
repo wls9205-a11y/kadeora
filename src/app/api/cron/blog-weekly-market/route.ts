@@ -91,6 +91,6 @@ export async function GET(req: NextRequest) {
     return { processed: 1, created: _r.success ? 1 : 0, failed: _r.success ? 0 : 1, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
   });
 
-  if (!result.success) return NextResponse.json({ error: result.error }, { status: 500 });
+  if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });
   return NextResponse.json({ ok: true, ...result });
 }

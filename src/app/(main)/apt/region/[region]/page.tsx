@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { notFound } from 'next/navigation';
 
 const REGIONS = [
@@ -13,7 +13,7 @@ const REGIONS = [
 
 interface Props { params: Promise<{ region: string }> }
 
-const sb = () => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const sb = () => getSupabaseAdmin();
 
 export async function generateStaticParams() {
   return REGIONS.map(r => ({ region: encodeURIComponent(r) }));

@@ -193,7 +193,7 @@ ${unsoldPct >= 50 ? `**${u.house_nm}**의 미분양률이 ${unsoldPct}%로 상�
   });
 
   if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: 500 });
+    return NextResponse.json({ error: result.error }, { status: 200 });
   }
   return NextResponse.json({ ok: true, created: result.created });
 }

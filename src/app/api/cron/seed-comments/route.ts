@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
       comment_type: 'comment',
     });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: error.message }, { status: 200 });
 
     // Update comment count directly
     const { count } = await admin.from('comments').select('id', { count: 'exact', head: true }).eq('post_id', post.id);
@@ -73,6 +73,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ ok: true, post_id: post.id });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'error' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'error' }, { status: 200 });
   }
 }

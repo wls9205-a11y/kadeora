@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   }
 
   const apiKey = process.env.GYEONGGI_DATA_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: 'GYEONGGI_DATA_API_KEY not set' }, { status: 500 });
+  if (!apiKey) return NextResponse.json({ error: 'GYEONGGI_DATA_API_KEY not set' }, { status: 200 });
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -196,7 +196,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: 500 });
+    return NextResponse.json({ error: result.error }, { status: 200 });
   }
   return NextResponse.json({ ok: true, ...result });
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { BookOpen } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -13,10 +13,7 @@ export const revalidate = 3600;
 export default async function BlogSeriesPage() {
   let seriesList: any[] = [];
   try {
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const sb = getSupabaseAdmin();
     const { data } = await sb.from('blog_series')
       .select('*').eq('is_active', true)
       .order('post_count', { ascending: false });

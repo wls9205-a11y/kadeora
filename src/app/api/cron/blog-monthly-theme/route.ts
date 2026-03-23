@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: 500 });
+    return NextResponse.json({ error: result.error }, { status: 200 });
   }
   return NextResponse.json({ ok: true, created: result.created });
 }

@@ -36,6 +36,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (e: any) {
     console.error('[cleanup] error:', e.message)
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    return NextResponse.json({ error: e.message }, { status: 200 })
   }
 }

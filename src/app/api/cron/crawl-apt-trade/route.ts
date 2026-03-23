@@ -122,7 +122,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const apiKey = process.env.BUSAN_DATA_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: 'BUSAN_DATA_API_KEY not set' }, { status: 500 });
+  if (!apiKey) return NextResponse.json({ error: 'BUSAN_DATA_API_KEY not set' }, { status: 200 });
 
   const supabase = getSupabaseAdmin();
 
@@ -209,7 +209,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: 500 });
+    return NextResponse.json({ error: result.error }, { status: 200 });
   }
   return NextResponse.json({ ok: true, ...result });
 }

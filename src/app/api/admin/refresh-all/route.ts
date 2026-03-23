@@ -1,15 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/admin-auth';
 
 export const maxDuration = 60;
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 const CRON_SEQUENCE = [
   { name: 'health-check', path: '/api/cron/health-check' },
@@ -28,8 +21,6 @@ const CRON_SEQUENCE = [
   { name: 'exchange-rate', path: '/api/cron/exchange-rate' },
   { name: 'stock-theme-daily', path: '/api/cron/stock-theme-daily' },
   { name: 'stock-daily-briefing', path: '/api/cron/stock-daily-briefing' },
-  { name: 'blog-weekly-market', path: '/api/cron/blog-weekly-market' },
-  { name: 'blog-monthly-market', path: '/api/cron/blog-monthly-market' },
   { name: 'auto-grade', path: '/api/cron/auto-grade' },
   { name: 'invest-calendar', path: '/api/cron/invest-calendar-refresh' },
   { name: 'stock-news', path: '/api/cron/stock-news-crawl' },
@@ -41,44 +32,49 @@ export async function POST() {
   if ('error' in auth) return auth.error;
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const secret = process.env.CRON_SECRET || '';
   const results: any[] = [];
+  const BATCH_SIZE = 5;
 
-  for (const cron of CRON_SEQUENCE) {
-    try {
-      const res = await fetch(`${baseUrl}${cron.path}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${process.env.CRON_SECRET}`,
-        },
-      });
-      const data = await res.json().catch(() => ({}));
-      results.push({
-        name: cron.name,
-        status: res.ok ? 'success' : 'failed',
-        statusCode: res.status,
-        data,
-      });
-    } catch (error: any) {
-      results.push({
-        name: cron.name,
-        status: 'error',
-        error: error.message,
-      });
-    }
+  // 5개씩 병렬 배치 실행 (순차 22개 → 병렬 5배치, 504 방지)
+  for (let i = 0; i < CRON_SEQUENCE.length; i += BATCH_SIZE) {
+    const batch = CRON_SEQUENCE.slice(i, i + BATCH_SIZE);
+    const settled = await Promise.allSettled(
+      batch.map(async (cron) => {
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 25000);
+          const res = await fetch(`${baseUrl}${cron.path}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${secret}` },
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+          return { name: cron.name, status: res.ok ? 'success' : 'failed', statusCode: res.status };
+        } catch (error: any) {
+          return { name: cron.name, status: 'error', error: error.message?.slice(0, 100) };
+        }
+      })
+    );
+    settled.forEach(r => {
+      results.push(r.status === 'fulfilled' ? r.value : { name: '?', status: 'error' });
+    });
   }
 
   const successCount = results.filter(r => r.status === 'success').length;
   const failCount = results.filter(r => r.status !== 'success').length;
 
-  await getSupabase().from('admin_alerts').insert({
-    type: 'system',
-    severity: failCount > 0 ? 'warning' : 'info',
-    title: `전체 갱신 완료: ${successCount}/${results.length} 성공`,
-    message: failCount > 0
-      ? `실패: ${results.filter(r => r.status !== 'success').map(r => r.name).join(', ')}`
-      : '모든 크론이 정상 실행되었습니다.',
-    metadata: { results },
-  });
+  try {
+    await getSupabaseAdmin().from('admin_alerts').insert({
+      type: 'system',
+      severity: failCount > 0 ? 'warning' : 'info',
+      title: `전체 갱신 완료: ${successCount}/${results.length} 성공`,
+      message: failCount > 0
+        ? `실패: ${results.filter(r => r.status !== 'success').map(r => r.name).join(', ')}`
+        : '모든 크론이 정상 실행되었습니다.',
+      metadata: { results },
+    });
+  } catch {}
 
   return NextResponse.json({ success: true, results, summary: { successCount, failCount } });
 }

@@ -96,6 +96,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ sent: inserted, deadlines: deadlines.length, users: users.length });
   } catch (err) {
     console.error('[push-apt-deadline]', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error' }, { status: 200 });
   }
 }

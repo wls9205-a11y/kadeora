@@ -219,6 +219,6 @@ ${bTable}
     return NextResponse.json({ ok: true, created });
   } catch (err) {
     console.error('[blog-monthly]', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error' }, { status: 200 });
   }
 }

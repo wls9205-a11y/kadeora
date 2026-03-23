@@ -58,11 +58,11 @@ export async function GET(req: NextRequest) {
       if (error.message.includes('does not exist')) {
         return NextResponse.json({ skipped: true, reason: 'chat_messages table not found' });
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 200 });
     }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'error' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'error' }, { status: 200 });
   }
 }

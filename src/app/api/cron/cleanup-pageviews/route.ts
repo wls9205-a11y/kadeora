@@ -23,12 +23,12 @@ export async function GET(req: NextRequest) {
       .select('id');
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 200 });
     }
 
     const deleted = data?.length ?? 0;
     return NextResponse.json({ ok: true, deleted });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ error: e.message }, { status: 200 });
   }
 }

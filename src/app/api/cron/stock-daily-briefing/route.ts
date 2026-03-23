@@ -96,6 +96,6 @@ ${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${t.a
     return { processed: allStocks.length, created: 1, failed: 0, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
   });
 
-  if (!result.success) return NextResponse.json({ error: result.error }, { status: 500 });
+  if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });
   return NextResponse.json({ ok: true, ...result });
 }

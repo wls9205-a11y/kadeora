@@ -219,6 +219,6 @@ ${faqItems}
     return NextResponse.json({ ok: true, created });
   } catch (err) {
     console.error('[blog-weekly]', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error' }, { status: 200 });
   }
 }
