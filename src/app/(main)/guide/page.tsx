@@ -6,7 +6,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: '가이드북 — 카더라 100% 활용법',
   description: '카더라 앱 사용 가이드. 주식 시세, 부동산 청약, 블로그, 커뮤니티, 등급 시스템, 포인트 획득 방법을 알아보세요.',
-  alternates: { canonical: 'https://kadeora.app/guide' },
+  alternates: { canonical: SITE_URL + '/guide' },
   openGraph: {
     title: '가이드북 — 카더라 100% 활용법',
     description: '카더라 앱 사용 가이드',

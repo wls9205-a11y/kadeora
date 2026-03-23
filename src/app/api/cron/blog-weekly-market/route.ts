@@ -1,6 +1,7 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { withCronLogging } from '@/lib/cron-logger';
 import { generateEnglishSlug } from '@/lib/slug-utils';
 import { ensureMinLength } from '@/lib/blog-padding';
@@ -82,7 +83,7 @@ export async function GET(req: NextRequest) {
       content: ensureMinLength(content, 'stock'),
       excerpt: `${weekStr} 주간 시장 리뷰 — 주식/부동산 종합 분석`,
       category: 'stock', tags, cron_type: 'weekly-market',
-      cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}&type=blog`,
+      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&type=blog`,
       image_alt: generateImageAlt('stock', title),
       meta_description: generateMetaDesc(content),
       meta_keywords: generateMetaKeywords('stock', tags),

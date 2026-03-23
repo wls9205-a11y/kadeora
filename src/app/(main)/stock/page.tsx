@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '실시간 주식 시세',
   description: '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.',
-  alternates: { canonical: 'https://kadeora.app/stock' },
+  alternates: { canonical: SITE_URL + '/stock' },
   openGraph: {
     title: '실시간 주식 시세',
     description: '국내외 주요 종목 실시간 시세와 등락률',

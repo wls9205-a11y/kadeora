@@ -1,6 +1,7 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -102,7 +103,7 @@ ${region} 지역은 최근 분양 물량이 꾸준히 공급되고 있어 청약
         slug, title: aptTitle,
         content: ensureMinLength(content, 'apt'), excerpt: `${apt.house_nm} ${region} ${units.toLocaleString()}세대 분양. 접수 ${fmtDate(apt.rcept_bgnde)}~${fmtDate(apt.rcept_endde)}.`,
         category: 'apt', tags, source_ref: apt.house_manage_no,
-        cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(aptTitle)}&type=blog`,
+        cron_type: 'apt-new', cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(aptTitle)}&type=blog`,
         image_alt: generateImageAlt('apt', aptTitle),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords('apt', tags),
@@ -176,7 +177,7 @@ ${unsoldPct >= 50 ? `**${u.house_nm}**의 미분양률이 ${unsoldPct}%로 상�
         slug, title: unsoldTitle,
         content: ensureMinLength(content, 'unsold'), excerpt: `${u.house_nm} ${u.region_nm} 미분양 ${(u.tot_unsold_hshld_co ?? 0).toLocaleString()}세대. 분양가 ${pMin}~${pMax}.`,
         category: 'unsold', tags: [`${u.house_nm} 미분양`, `${u.region_nm} 미분양`, '미분양 아파트'], source_ref: String(u.id),
-        cron_type: 'apt-new', cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog`,
+        cron_type: 'apt-new', cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(unsoldTitle)}&type=blog`,
         image_alt: generateImageAlt('unsold', unsoldTitle),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords('unsold', [`${u.house_nm} 미분양`, `${u.region_nm} 미분양`, '미분양 아파트']),

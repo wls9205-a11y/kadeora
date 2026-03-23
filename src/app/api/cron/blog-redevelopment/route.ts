@@ -1,6 +1,7 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -140,7 +141,7 @@ export async function GET(req: NextRequest) {
           content: ensureMinLength(content, 'apt'),
           excerpt: `${zName} ${zType} ${zone.progress_stage || zone.stage || ''} 시공사 분담금 투자전망 2026`,
           category: 'apt', tags, cron_type: 'redevelopment',
-          cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&type=blog`,
           image_alt: generateImageAlt('apt', title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('apt', tags),

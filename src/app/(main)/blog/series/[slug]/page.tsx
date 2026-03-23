@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${s.title} — 시리즈`,
     description: s.description || `${s.title} 시리즈 전체 글 모아보기`,
-    alternates: { canonical: `https://kadeora.app/blog/series/${slug}` },
+    alternates: { canonical: `${SITE_URL}/blog/series/${slug}` },
   };
 }
 
@@ -112,7 +113,7 @@ export default async function SeriesDetailPage({ params }: Props) {
         itemListElement: (posts || []).map((p, i) => ({
           '@type': 'ListItem',
           position: i + 1,
-          url: `https://kadeora.app/blog/${p.slug}`,
+          url: `${SITE_URL}/blog/${p.slug}`,
           name: p.title,
         })),
       })}} />

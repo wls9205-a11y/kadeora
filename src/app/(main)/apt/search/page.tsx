@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { fmtAmount } from '@/lib/format';
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     title: '아파트 실거래가 검색',
     description: '전국 아파트 실거래가 조회 — 단지명·지역·면적별 검색',
   },
-  alternates: { canonical: 'https://kadeora.app/apt/search' },
+  alternates: { canonical: SITE_URL + '/apt/search' },
 };
 
 export const revalidate = 300;

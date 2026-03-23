@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 60;
@@ -90,7 +91,7 @@ JSON 배열만 응답:
           ai_summary: note.ai_summary || '',
           sentiment: note.sentiment || 'neutral',
           source: note.source || 'AI 시장분석',
-          url: `https://kadeora.app/stock/${note.symbol}`,
+          url: `${SITE_URL}/stock/${note.symbol}`,
           published_at: new Date().toISOString(),
         });
 

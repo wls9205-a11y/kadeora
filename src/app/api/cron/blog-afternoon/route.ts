@@ -1,6 +1,7 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
         excerpt: `${today} ${t.title}. 카더라에서 확인하세요.`,
         category: t.cat, tags: t.tags,
         cron_type: 'afternoon', data_date: dateSlug,
-        cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(fullTitle)}&type=blog`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(fullTitle)}&type=blog`,
         image_alt: generateImageAlt(t.cat, fullTitle),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords(t.cat, t.tags),

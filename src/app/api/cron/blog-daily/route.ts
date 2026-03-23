@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
         slug, title: blogTitle, content: finalContent,
         category: t.cat, tags: t.tagsFn(),
         cron_type: 'daily', data_date: dateSlug,
-        cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(blogTitle)}&type=blog`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(blogTitle)}&type=blog`,
         image_alt: generateImageAlt(t.cat, blogTitle),
         meta_description: generateMetaDesc(finalContent),
         meta_keywords: generateMetaKeywords(t.cat, t.tagsFn()),
@@ -120,7 +121,7 @@ ${(s.change_pct ?? 0) > 0 ? `이번 상승은 실적 개선 기대감, 업종 �
         excerpt: `${s.name} ${dir} ${Math.abs(s.change_pct ?? 0).toFixed(1)}%. ${today} 시세 분석.`,
         category: 'stock', tags: [s.name, dir, s.market, '주식'],
         cron_type: 'daily-stock', data_date: dateSlug, source_ref: s.symbol,
-        cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(stockTitle)}&type=blog`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(stockTitle)}&type=blog`,
         image_alt: generateImageAlt('stock', stockTitle),
         meta_description: generateMetaDesc(finalStockContent),
         meta_keywords: generateMetaKeywords('stock', [s.name, dir, s.market, '주식']),

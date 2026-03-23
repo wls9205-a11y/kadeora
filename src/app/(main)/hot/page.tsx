@@ -8,7 +8,7 @@ import HotClient from './HotClient';
 export const metadata: Metadata = {
   title: '오늘의 HOT',
   description: '오늘 가장 인기있는 카더라 게시글',
-  alternates: { canonical: 'https://kadeora.app/hot' },
+  alternates: { canonical: SITE_URL + '/hot' },
   openGraph: {
     title: '오늘의 HOT',
     description: '오늘 가장 인기있는 카더라 게시글',

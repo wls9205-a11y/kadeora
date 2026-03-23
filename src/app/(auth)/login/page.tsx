@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
   openGraph: {
     title: '카더라 시작하기',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-features.png', alt: '카더라 시작하기' }],
+    images: [{ url: SITE_URL + '/images/brand/kadeora-features.png', alt: '카더라 시작하기' }],
   },
 };
 

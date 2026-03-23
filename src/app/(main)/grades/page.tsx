@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer as createClient } from '@/lib/supabase-server';
 
 export const revalidate = 3600; // 1시간 캐시 — 등급 정보는 자주 안 바뀜
@@ -6,7 +7,7 @@ export const revalidate = 3600; // 1시간 캐시 — 등급 정보는 자주 �
 export const metadata: Metadata = {
   title: '회원 등급 안내',
   description: '카더라 회원 등급 시스템 안내 — 새싹부터 카더라신까지',
-  alternates: { canonical: 'https://kadeora.app/grades' },
+  alternates: { canonical: SITE_URL + '/grades' },
 };
 
 const GRADE_COLORS: Record<number, string> = {

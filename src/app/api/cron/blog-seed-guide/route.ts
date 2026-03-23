@@ -1,6 +1,7 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -139,7 +140,7 @@ export async function GET(req: NextRequest) {
           content: ensureMinLength(content, cat),
           excerpt: seed.meta_description || `${seed.title} 완전 정리 2026`,
           category: cat, tags, cron_type: 'seed-guide',
-          cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(seed.title)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(seed.title)}&type=blog`,
           image_alt: generateImageAlt(cat, seed.title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords(cat, tags),

@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Props) {
       title: post.title,
       description,
       alternates: {
-        canonical: `https://kadeora.app/feed/${post.slug || numId}`,
+        canonical: `${SITE_URL}/feed/${post.slug || numId}`,
       },
       openGraph: {
         title: post.title,

@@ -11,7 +11,7 @@ declare global {
 }
 
 export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props) {
-  const inviteUrl = `https://kadeora.app/login?invite=${inviteCode}`;
+  const inviteUrl = `${SITE_URL}/login?invite=${inviteCode}`;
 
   const handleKakaoShare = () => {
     if (typeof window !== 'undefined' && window.Kakao?.isInitialized?.()) {
@@ -20,7 +20,7 @@ export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props
         content: {
           title: '카더라에서 동네/주식/부동산 소식 같이 봐요! 🏘',
           description: `초대코드: ${inviteCode}`,
-          imageUrl: 'https://kadeora.app/og-image.png',
+          imageUrl: SITE_URL + '/og-image.png',
           link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl },
         },
         buttons: [{ title: '카더라 가입하기', link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl } }],

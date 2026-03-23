@@ -1,4 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${decoded} 실거래가·시세 분석`,
     description: `${decoded} 아파트 실거래가 이력, 평당가 추이, 면적별 비교, 주민 리뷰`,
-    alternates: { canonical: `https://kadeora.app/apt/complex/${name}` },
+    alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
   };
 }
 

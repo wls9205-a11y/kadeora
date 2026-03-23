@@ -1,6 +1,7 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -158,7 +159,7 @@ export async function GET(req: NextRequest) {
           excerpt: `${apt.name} ${apt.region} ${apt.district} 매매 전세 시세 학군 교통 투자전망 2026년 분석`,
           category: 'apt', tags,
           cron_type: 'apt-landmark',
-          cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(title)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&type=blog`,
           image_alt: generateImageAlt('apt', title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('apt', tags),

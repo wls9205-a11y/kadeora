@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 
 const TOPICS = [
@@ -171,7 +172,7 @@ export async function GET(req: NextRequest) {
       excerpt: `${t.title}. ${t.tags.join(', ')} 관련 정보.`,
       category: 'finance', tags: ['재테크', ...t.tags],
       source_type: 'seed', cron_type: 'seed-finance', is_published: true,
-      cover_image: `https://kadeora.app/api/og?title=${encodeURIComponent(t.title)}&type=blog`,
+      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(t.title)}&type=blog`,
     });
     created++;
   }
