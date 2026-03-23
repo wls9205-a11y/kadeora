@@ -92,7 +92,7 @@
 
 ---
 
-## 세션 29 — 풀스택 감사 실행 + 커뮤니티 리디자인 + 런타임 에러 제로 (9커밋)
+## 세션 29 — 풀스택 감사 실행 + 커뮤니티 리디자인 + 런타임 에러 제로 (18커밋)
 
 ### 1. 빌드 에러 긴급 수정
 - RightPanel.tsx `const sb` 중복 선언 → 삭제
@@ -137,13 +137,40 @@
 
 ### 9. 비로그인 관심종목 + sitemap 확대
 - StockClient: 관심종목 localStorage 폴백 (비로그인 가치 체험)
-- sitemap: 피드 게시글 최신 5,000건 포함
+- sitemap: 피드 게시글 최신 5,000건 slug URL 포함
+
+### 10. 게시글 slug 자동 생성 + 접근성
+- posts API POST: generateEnglishSlug() 자동 생성
+- 기존 105건 slug NULL → DB 백필 완료
+- Navigation: 글씨 크기 aria-label + aria-pressed, 로그아웃 aria-label
+
+### 11. 피드 slug 라우팅 + 301 리다이렉트
+- findPostBySlugOrId: slug 문자열이면 DB slug 컬럼 조회
+- 숫자 ID 접근 시 slug로 301 permanentRedirect (SEO 집중)
+
+### 12. 피드 조회수 + HOT 댓글/조회수
+- 피드 카드 메타라인 '· 조회 123' 표시
+- HOT 페이지 TOP 카드에 💬+👁 표시
+
+### 13. 에러 페이지 통일 + RightPanel CTA
+- feed/[id], apt/unsold/[id], stock/[symbol] → Sentry + 홈링크
+- RightPanel: 비로그인 카카오 가입 CTA
+
+### 14. 글쓰기 slug 리다이렉트 + aria-pressed 5곳
+
+### 15. Zod 검증 + Rate limit 12개 API + 공유 리워드
+- validations.ts: 5개 스키마 생성
+- 핵심 유저 API 12개에 rate limit 추가
+- 공유 시 1일 1회 5포인트 자동 적립
+- 상점/상담사 CTA 숨기기
+
+### 16. StockDetailSheet 추출 + ProfileClient aria-pressed
 
 ### 남은 작업 (다음 세션)
 - [ ] Supabase 타입 재생성 (`supabase gen types`) → ignoreBuildErrors 제거
-- [ ] 상점/상담사 페이지 숨기기 (유저 100명 전)
-- [ ] Zod 검증 확대 (POST/PATCH API 전체)
-- [ ] 블로그 콘텐츠 길이 개선 (1,575자 → 3,000자+)
+- [ ] 블로그 콘텐츠 길이 개선 (1,576자 → 3,000자+)
+- [ ] CSRF 토큰 적용
+- [ ] 테스트 파일 작성
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 
 ---
