@@ -117,6 +117,10 @@
       "schedule": "55 14 * * *"
     },
     {
+      "path": "/api/cron/portfolio-snapshot",
+      "schedule": "40 6 * * 1-5"
+    },
+    {
       "path": "/api/cron/daily-reset",
       "schedule": "5 15 * * *"
     },

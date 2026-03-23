@@ -15,6 +15,7 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   // ─── 시스템 ───
   'health-check':          { display: '헬스체크',         group: '시스템' },
   'daily-stats':           { display: '일일 통계',        group: '시스템' },
+  'portfolio-snapshot':    { display: '포트폴리오 스냅샷', group: '시스템' },
   'daily-reset':           { display: 'API 리셋/로그정리', group: '시스템' },
   'auto-grade':            { display: '등급 자동 갱신',    group: '시스템' },
   'expire-listings':       { display: '리스팅 만료 처리',  group: '시스템' },

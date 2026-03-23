@@ -23,14 +23,22 @@ export default function PortfolioTab() {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ symbol: '', buy_price: '', quantity: '', memo: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [history, setHistory] = useState<{ snapshot_date: string; total_pnl: number; pnl_pct: number }[]>([]);
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch('/api/portfolio');
+      const [res, histRes] = await Promise.all([
+        fetch('/api/portfolio'),
+        fetch('/api/portfolio/history?days=30').catch(() => null),
+      ]);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setHoldings(data.holdings || []);
       setSummary(data.summary || { totalInvested: 0, totalCurrent: 0, totalPnl: 0, pnlPct: 0 });
+      if (histRes?.ok) {
+        const hist = await histRes.json();
+        setHistory(hist.history || []);
+      }
     } catch { }
     setLoading(false);
   }, []);
@@ -92,6 +100,59 @@ export default function PortfolioTab() {
           </div>
         </div>
       </div>
+
+      {/* 수익률 추이 차트 */}
+      {history.length >= 2 && (() => {
+        const values = history.map(h => h.pnl_pct);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+        const W = 320;
+        const H = 60;
+        const pad = 4;
+        const points = values.map((v, i) => {
+          const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+          const y = H - pad - ((v - min) / range) * (H - pad * 2);
+          return `${x},${y}`;
+        }).join(' ');
+        const lastPct = values[values.length - 1];
+        const isUp = lastPct >= 0;
+        const color = isUp ? 'var(--accent-red)' : 'var(--accent-blue)';
+        return (
+          <div style={{
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            borderRadius: 12, padding: '12px 14px', marginBottom: 12,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>📈 30일 수익률 추이</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color }}>{isUp ? '+' : ''}{lastPct.toFixed(2)}%</span>
+            </div>
+            <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
+              <defs>
+                <linearGradient id="pfGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={isUp ? '#ef4444' : '#3b82f6'} stopOpacity="0.15" />
+                  <stop offset="100%" stopColor={isUp ? '#ef4444' : '#3b82f6'} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {/* 0% 기준선 */}
+              {min < 0 && max > 0 && (
+                <line x1={pad} x2={W - pad}
+                  y1={H - pad - ((0 - min) / range) * (H - pad * 2)}
+                  y2={H - pad - ((0 - min) / range) * (H - pad * 2)}
+                  stroke="var(--text-tertiary)" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.5" />
+              )}
+              {/* 면적 */}
+              <polygon points={`${pad},${H - pad} ${points} ${W - pad},${H - pad}`} fill="url(#pfGrad)" />
+              {/* 선 */}
+              <polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#3b82f6'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
+              <span>{history[0]?.snapshot_date?.slice(5)}</span>
+              <span>{history[history.length - 1]?.snapshot_date?.slice(5)}</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 추가 버튼 */}
       <button onClick={() => setShowAdd(!showAdd)} style={{
