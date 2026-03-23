@@ -156,7 +156,7 @@ export default function WriteClient() {
   const canSubmit = !loading && content.trim().length > 0;
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
       {/* 상단 바 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600 }}>← 돌아가기</Link>

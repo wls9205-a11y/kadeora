@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function BlogDetailError({ reset }: { error: Error; reset: () => void }) {
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
       <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 12 }}>📝</div>
       <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>글을 불러오지 못했어요</h2>
       <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-tertiary)', marginBottom: 20 }}>잠시 후 다시 시도해주세요</p>
