@@ -1112,39 +1112,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               </div>
             )}
 
-            {/* 지역별 미분양 히트맵 */}
-            {unsoldMonthly.length > 0 && (() => {
-              const latestMonth = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].pop();
-              const regionData = unsoldMonthly
-                .filter((s: any) => s.stat_month === latestMonth)
-                .map((s: any) => ({ label: s.region || '', value: s.total_unsold || 0 }))
-                .sort((a: any, b: any) => b.value - a.value);
-              const max = Math.max(...regionData.map((d: any) => d.value), 1);
-              const getColor = (v: number) => v >= 5000 ? 'var(--accent-red)' : v >= 3000 ? 'var(--accent-orange)' : v >= 1000 ? 'var(--accent-yellow)' : 'var(--accent-green)';
-              return regionData.length > 0 ? (
-                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>{'\u{1F5FA}\uFE0F'} 지역별 미분양 현황</div>
-                  {regionData.map((d: any) => (
-                    <div key={d.label} onClick={() => setUnsoldRegion(d.label === unsoldRegion ? '전체' : d.label)} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, cursor: 'pointer', opacity: unsoldRegion !== '전체' && unsoldRegion !== d.label ? 0.5 : 1, transition: 'opacity 0.15s' }}>
-                      <div style={{ width: 40, fontSize: 'var(--fs-xs)', color: unsoldRegion === d.label ? 'var(--accent-blue)' : 'var(--text-secondary)', textAlign: 'right', flexShrink: 0, fontWeight: unsoldRegion === d.label ? 700 : 400 }}>{d.label}</div>
-                      <div style={{ flex: 1, height: 28, background: 'var(--bg-hover)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
-                        <div style={{ height: '100%', width: `${Math.max((d.value / max) * 100, 2)}%`, borderRadius: 6, background: getColor(d.value), transition: 'width 0.5s', display: 'flex', alignItems: 'center', paddingLeft: 8 }}>
-                          {d.value > max * 0.15 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff' }}>{d.value.toLocaleString()}</span>}
-                        </div>
-                        {d.value <= max * 0.15 && <span style={{ position: 'absolute', left: `calc(${(d.value / max) * 100}% + 6px)`, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{d.value.toLocaleString()}</span>}
-                      </div>
-                    </div>
-                  ))}
-                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-green)', marginRight: 3 }} />~1000</span>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-yellow)', marginRight: 3 }} />1000~3000</span>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-orange)', marginRight: 3 }} />3000~5000</span>
-                    <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: 'var(--accent-red)', marginRight: 3 }} />5000+</span>
-                  </div>
-                </div>
-              ) : null;
-            })()}
-
             {/* 안내 + 검색 + 필터 */}
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
             <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
