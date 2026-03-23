@@ -55,12 +55,21 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     fetch('https://open.er-api.com/v6/latest/USD').then(r => r.json()).then(d => { if (d?.rates?.KRW) setExchangeRate(d.rates.KRW); }).catch(() => {});
   }, []);
 
+  // 모달 Escape 키 핸들러
+  useEffect(() => {
+    if (!selectedStock) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedStock(null); };
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = ''; };
+  }, [selectedStock]);
+
   const refresh = useCallback(async () => {
     try {
       const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
       const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active').order('market_cap', { ascending: false });
       if (data?.length) setStocks(data as any);
-    } catch {}
+    } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[Stock.refresh]', e); }
   }, []);
 
   useEffect(() => {

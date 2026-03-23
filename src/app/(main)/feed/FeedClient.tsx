@@ -184,7 +184,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       } else {
         setHasMore(false);
       }
-    } catch {} finally {
+    } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[FeedClient.loadMore]', e); } finally {
       setLoadingMore(false);
     }
   }, [posts.length, loadingMore, hasMore, activeCategory, activeRegion]);

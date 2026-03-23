@@ -115,6 +115,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     });
   }, []);
 
+  // 모달 Escape 키 핸들러 + 배경 스크롤 방지
+  useEffect(() => {
+    if (!selectedOngoing) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedOngoing(null); };
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = ''; };
+  }, [selectedOngoing]);
+
   const toggleAlert = async (apt: Apt) => {
     if (!aptUser) return;
     const sb = createSupabaseBrowser();
@@ -146,7 +155,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       haptic('medium');
       const { data: wl } = await sb.from('apt_watchlist').select('item_type, item_id').eq('user_id', aptUser.id);
       setWatchlist(new Set((wl || []).map((w: any) => `${w.item_type}:${w.item_id}`)));
-    } catch {}
+    } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[Apt.toggleWatchlist]', e); }
   };
 
   const availableRegions = useMemo(() => ['전체', ...Array.from(new Set(apts.map(a => a.region_nm).filter(Boolean))).sort()], [apts]);

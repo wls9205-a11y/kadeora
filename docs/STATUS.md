@@ -368,7 +368,7 @@
 - [ ] 토스 라이브키 교체
 - [ ] KIS_APP_KEY + KIS_APP_SECRET 환경변수
 - [ ] STOCK_DATA_API_KEY 발급
-- [ ] blog_series 초기 시리즈 데이터 시드
+- [x] blog_series 시리즈 10개 + 1,393편 매핑 ✅ 세션 24
 
 ### 코드
 - [ ] AptClient 2045줄 탭별 분할 (SubscriptionTab/OngoingTab/UnsoldTab/RedevTab/TransactionTab)
@@ -381,8 +381,8 @@
 - [ ] 지도뷰 클러스터링 (마커 50개+ 시 성능 최적화)
 - [ ] 리뷰 좋아요/신고 기능
 - [ ] Skeleton UI 피드/주식/블로그 전 탭 확대 적용
-- [ ] safe-catch.ts 전면 적용 (빈 catch 65개 → silentCatch 전환)
-- [ ] useModalA11y 모달 전면 적용 (AptClient 3개 모달, StockClient 모달)
+- [x] safe-catch 주요 파일 적용 (FeedClient/StockClient/AptClient) ✅ 세션 24
+- [x] 모달 Escape+배경스크롤방지 (AptClient/StockClient) ✅ 세션 24
 
 ### 완료
 - [x] 분양중 골드 하이라이트 ✅
