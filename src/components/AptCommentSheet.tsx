@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import BottomSheet from '@/components/BottomSheet';
 
 function timeAgo(d: string) {
   const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
@@ -49,14 +50,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
 
   if (!open) return null;
   return (
-    <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }} />
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', maxHeight: '70vh', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s ease' }}>
-        <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 12px' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>✏️ {houseNm} 한줄평</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>×</button>
-        </div>
+    <BottomSheet open={open} onClose={onClose} title={`✏️ ${houseNm} 한줄평`}>
         <div style={{ flex: 1, overflowY: 'auto', marginBottom: 12 }}>
           {comments.length === 0 && (
             <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
@@ -106,7 +100,6 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
             <a href="/login" style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요
           </div>
         )}
-      </div>
-    </>
+    </BottomSheet>
   );
 }

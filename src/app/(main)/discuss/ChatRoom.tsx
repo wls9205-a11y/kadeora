@@ -6,6 +6,7 @@ import { ReportModal } from '@/components/modals/ReportModal';
 import EmptyState from '@/components/shared/EmptyState';
 import type { User } from '@supabase/supabase-js';
 import { getAvatarColor } from '@/lib/avatar';
+import BottomSheet from '@/components/BottomSheet';
 
 interface MsgProfile { id: string; nickname: string | null; grade: number | null; points: number | null; }
 interface ChatMsg {
@@ -269,14 +270,10 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
 
       {/* Mini Profile Sheet */}
       {sheetUser && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-          <div onClick={() => setSheetUser(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
-          <div style={{ position: 'relative', background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: 24, zIndex: 1, maxWidth: 480, width: '100%', margin: '0 auto' }}>
-            <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)', margin: '0 auto 20px' }} />
+        <BottomSheet open={!!sheetUser} onClose={() => setSheetUser(null)} title={sheetUser.nickname ?? '사용자'} maxWidth={480}>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', background: avc(sheetUser.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', fontWeight: 700 }}>{(sheetUser.nickname ?? '?')[0]}</div>
               <div>
-                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>{sheetUser.nickname ?? '사용자'}</div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: (GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).color, fontWeight: 600 }}>
                   {(GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).emoji} {(GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).title}
                   <span style={{ color: 'var(--text-tertiary)', fontWeight: 400, marginLeft: 8 }}>{(sheetUser.points ?? 0).toLocaleString()}pts</span>
@@ -289,8 +286,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                 <button onClick={toggleFollow} style={{ flex: 1, padding: '10px 0', borderRadius: 10, border: 'none', background: isFollowing ? 'var(--bg-hover)' : 'var(--brand)', color: isFollowing ? 'var(--text-secondary)' : 'white', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer' }}>{isFollowing ? '팔로잉 ✓' : '팔로우'}</button>
               )}
             </div>
-          </div>
-        </div>
+        </BottomSheet>
       )}
       {reportTarget && <ReportModal targetType="chat" targetId={reportTarget} onClose={() => setReportTarget(null)} />}
     </div>
