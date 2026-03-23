@@ -40,7 +40,7 @@ export default async function HotPage() {
 
     const topResult = await withTimeout(
       sb.from('posts')
-        .select('id,title,slug,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
+        .select('id,title,slug,category,likes_count,comments_count,view_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
         .eq('is_deleted', false).gte('created_at', weekAgo)
         .order('likes_count', { ascending: false }).limit(5)
     );
@@ -50,7 +50,7 @@ export default async function HotPage() {
       const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const fallback = await withTimeout(
         sb.from('posts')
-          .select('id,title,slug,category,likes_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
+          .select('id,title,slug,category,likes_count,comments_count,view_count,region_id,author_id,profiles!posts_author_id_fkey(nickname)')
           .eq('is_deleted', false).gte('created_at', monthAgo)
           .order('likes_count', { ascending: false }).limit(5)
       );
@@ -61,7 +61,7 @@ export default async function HotPage() {
       REGION_SECTIONS.map(region =>
         withTimeout(
           sb.from('posts')
-            .select('id,title,slug,category,likes_count,profiles!posts_author_id_fkey(nickname)')
+            .select('id,title,slug,category,likes_count,comments_count,view_count,profiles!posts_author_id_fkey(nickname)')
             .eq('is_deleted', false).eq('region_id', region).gte('created_at', weekAgo)
             .order('likes_count', { ascending: false }).limit(3)
         )
@@ -116,6 +116,7 @@ export default async function HotPage() {
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ fontSize: isTop3 ? 14 : 12, color: 'var(--brand)', fontWeight: 700 }}>❤ {post.likes_count ?? 0}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>💬 {post.comments_count ?? 0} · 👁 {post.view_count ?? 0}</div>
                 </div>
               </Link>
               );

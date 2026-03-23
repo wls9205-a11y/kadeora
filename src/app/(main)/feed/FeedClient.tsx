@@ -299,6 +299,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 1 }}>
                     <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
                     <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                    {(post.view_count ?? 0) > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>· 조회 {numFmt(post.view_count ?? 0)}</span>}
                   </div>
                 </div>
               </div>
