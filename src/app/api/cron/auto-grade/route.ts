@@ -104,9 +104,6 @@ export async function GET(req: NextRequest) {
         commentCountMap[c.author_id] = (commentCountMap[c.author_id] || 0) + 1;
       }
     }
-    for (const c of (commentCounts || [])) {
-      commentCountMap[c.author_id] = (commentCountMap[c.author_id] || 0) + 1;
-    }
 
     let upgraded = 0;
     let unchanged = 0;
