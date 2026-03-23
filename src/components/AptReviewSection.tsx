@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Star, ThumbsUp, PenSquare } from 'lucide-react';
+import { Star, ThumbsUp, PenSquare, Flag } from 'lucide-react';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
+import { haptic } from '@/lib/haptic';
 
 interface Review {
   id: string; apt_name: string; rating: number; pros: string | null;
@@ -34,6 +35,11 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
   const [form, setForm] = useState({ rating: 0, pros: '', cons: '', content: '', living_years: '', is_resident: false });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
+  const [reportedSet, setReportedSet] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
   const load = useCallback(async () => {
     try {
@@ -65,6 +71,38 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
       load();
     } catch { setError('네트워크 오류'); }
     setSubmitting(false);
+  };
+
+  const handleLike = async (reviewId: string) => {
+    try {
+      const res = await fetch(`/api/apt/reviews/${reviewId}/like`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || '오류가 발생했습니다'); return; }
+      haptic('light');
+      setLikedSet(prev => {
+        const next = new Set(prev);
+        if (data.liked) next.add(reviewId); else next.delete(reviewId);
+        return next;
+      });
+      setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, likes_count: data.likes_count } : r));
+    } catch { showToast('네트워크 오류'); }
+  };
+
+  const handleReport = async (reviewId: string) => {
+    if (reportedSet.has(reviewId)) { showToast('이미 신고한 리뷰입니다'); return; }
+    if (!confirm('이 리뷰를 신고하시겠습니까?')) return;
+    try {
+      const res = await fetch(`/api/apt/reviews/${reviewId}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: '부적절한 리뷰' }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || '오류가 발생했습니다'); return; }
+      setReportedSet(prev => new Set(prev).add(reviewId));
+      showToast('신고가 접수되었습니다');
+      haptic('medium');
+    } catch { showToast('네트워크 오류'); }
   };
 
   return (
@@ -167,8 +205,40 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 {r.cons && <span style={{ fontSize: 10, color: 'var(--accent-red)' }}>👎 {r.cons}</span>}
               </div>
             )}
+            {/* 좋아요 / 신고 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
+              <button onClick={() => handleLike(r.id)} style={{
+                display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
+                background: likedSet.has(r.id) ? 'var(--brand-bg)' : 'transparent',
+                border: `1px solid ${likedSet.has(r.id) ? 'var(--brand)' : 'var(--border)'}`,
+                borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                color: likedSet.has(r.id) ? 'var(--brand)' : 'var(--text-tertiary)',
+                transition: 'all 0.15s ease',
+              }}>
+                <ThumbsUp size={12} fill={likedSet.has(r.id) ? 'var(--brand)' : 'none'} />
+                {r.likes_count > 0 ? r.likes_count : '좋아요'}
+              </button>
+              <button onClick={() => handleReport(r.id)} style={{
+                display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                fontSize: 11, color: reportedSet.has(r.id) ? 'var(--accent-red)' : 'var(--text-tertiary)',
+                opacity: reportedSet.has(r.id) ? 0.5 : 1,
+              }} disabled={reportedSet.has(r.id)}>
+                <Flag size={11} /> {reportedSet.has(r.id) ? '신고됨' : '신고'}
+              </button>
+            </div>
           </div>
         ))
+      )}
+      {/* 토스트 */}
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--bg-elevated, #1e293b)', color: 'var(--text-inverse)', padding: '10px 18px',
+          borderRadius: 10, fontSize: 'var(--fs-xs)', fontWeight: 600, zIndex: 9999,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
+          animation: 'fadeIn 0.2s ease-out',
+        }}>{toast}</div>
       )}
     </div>
   );
