@@ -1,0 +1,273 @@
+'use client';
+import { useState } from 'react';
+import { isNew, NewBadge, fmtAmount, type SharedTabProps } from './apt-utils';
+import MiniLineChart from '@/components/charts/MiniLineChart';
+import dynamic from 'next/dynamic';
+
+const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'), { ssr: false });
+const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), { ssr: false });
+
+interface Props extends SharedTabProps {
+  transactions: any[];
+  tradeMonthly: any[];
+}
+
+export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist }: Props) {
+  const [region, setRegion] = useState('전체');
+  const [page, setPage] = useState(1);
+  const [areaFilter, setAreaFilter] = useState('전체');
+  const [sort, setSort] = useState<'date'|'price_desc'|'price_asc'|'area'>('date');
+  const [search, setSearch] = useState('');
+  const [chartRegion, setChartRegion] = useState('');
+  const [selected, setSelected] = useState<any>(null);
+
+  if (!transactions.length) {
+    return (
+      <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>
+        💰 실거래가 데이터를 수집 중입니다
+        <span style={{ fontSize: 'var(--fs-sm)', marginTop: 8, display: 'block' }}>국토교통부 실거래가 API에서 평일 08시에 자동 수집합니다</span>
+      </div>
+    );
+  }
+
+  const regs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
+  const filtered = transactions.filter((t: any) => {
+    if (region !== '전체' && t.region_nm !== region) return false;
+    if (areaFilter !== '전체') {
+      const a = t.exclusive_area || 0;
+      if (areaFilter === '~59' && a > 60) return false;
+      if (areaFilter === '59~84' && (a <= 59 || a > 85)) return false;
+      if (areaFilter === '84~' && a <= 84) return false;
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      if (!(t.apt_name || '').toLowerCase().includes(q) && !(t.dong || '').toLowerCase().includes(q) && !(t.sigungu || '').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a: any, b: any) => {
+    if (sort === 'price_desc') return (b.deal_amount || 0) - (a.deal_amount || 0);
+    if (sort === 'price_asc') return (a.deal_amount || 0) - (b.deal_amount || 0);
+    if (sort === 'area') return (b.exclusive_area || 0) - (a.exclusive_area || 0);
+    return 0;
+  });
+
+  const paged = filtered.slice(0, page * 20);
+  const totalCount = filtered.length;
+  const avgAmount = totalCount > 0 ? Math.round(filtered.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
+  const maxTrade = filtered.reduce((max: any, t: any) => (!max || (t.deal_amount || 0) > (max.deal_amount || 0)) ? t : max, null as any);
+
+  const regStats = regs.filter(r => r !== '전체').map(r => {
+    const items = transactions.filter((t: any) => (t.region_nm || '기타') === r);
+    const avg = items.length > 0 ? Math.round(items.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / items.length) : 0;
+    return { name: r, count: items.length, avg };
+  }).sort((a, b) => b.count - a.count);
+
+  const pill = (k: string, sel: string, set: (v: string) => void, label?: string) => (
+    <button key={k} onClick={() => { set(k); setPage(1); }} style={{
+      padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+      background: sel === k ? '#2563EB' : 'var(--bg-hover)',
+      color: sel === k ? '#fff' : 'var(--text-secondary)',
+      border: 'none', cursor: 'pointer', flexShrink: 0,
+    }}>{label || k}</button>
+  );
+
+  return (
+    <div>
+      {/* 지역별 현황 */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+          <button onClick={() => { setRegion('전체'); setPage(1); }} style={{
+            padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+            border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+            background: region === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+          }}>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--text-primary)' }}>{transactions.length}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+          </button>
+          {regStats.map(r => (
+            <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} style={{
+              padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+              border: region === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+              background: region === r.name ? '#1E3A5F' : 'var(--bg-surface)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+            }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 대시보드 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {region !== '전체' ? `${region} ` : ''}최근 거래 현황</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래 건수</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균가</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{maxTrade ? fmtAmount(maxTrade.deal_amount) : '-'}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 추이 차트 */}
+      {tradeMonthly.length > 0 && (() => {
+        const regions = [...new Set(tradeMonthly.map((s: any) => s.region))];
+        const active = chartRegion || regions[0] || '';
+        const data = tradeMonthly.filter((s: any) => s.region === active);
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
+              {regions.slice(0, 8).map(r => (
+                <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? '#2563EB' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
+              ))}
+            </div>
+            <MiniLineChart data={data.map((s: any) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))} color="#34D399" showValues={true} height={140} />
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>단위: 억원</div>
+          </div>
+        );
+      })()}
+
+      {/* 검색 + 필터 */}
+      <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="단지명, 동(법정동) 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+
+      <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
+        {[{ key: '전체', label: '전체 면적' }, { key: '~59', label: '~59㎡' }, { key: '59~84', label: '59~84㎡' }, { key: '84~', label: '84㎡~' }].map(a => pill(a.key, areaFilter, setAreaFilter, a.label))}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건</span>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[{ key: 'date', label: '최신순' }, { key: 'price_desc', label: '고가순' }, { key: 'price_asc', label: '저가순' }, { key: 'area', label: '면적순' }].map(s => (
+            <button key={s.key} onClick={() => { setSort(s.key as any); setPage(1); }} style={{
+              fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+              background: sort === s.key ? '#2563EB' : 'var(--bg-hover)', color: sort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
+            }}>{s.label}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* 카드 리스트 */}
+      {paged.map((t: any, i: number) => {
+        const amt = t.deal_amount || 0;
+        const borderColor = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)';
+        const sameApt = filtered.filter((x: any) => x.apt_name === t.apt_name && (x.deal_amount || 0) > 0);
+        const maxP = sameApt.length > 1 ? Math.max(...sameApt.map((x: any) => x.deal_amount || 0)) : 0;
+        const vsMax = maxP > 0 && amt > 0 && maxP !== amt ? Math.round(((amt - maxP) / maxP) * 100) : null;
+        const isMax = maxP > 0 && amt >= maxP && sameApt.length >= 2;
+        return (
+          <div key={`${t.id || i}`} onClick={() => setSelected(t)} style={{
+            padding: '14px 16px', borderRadius: 14, marginBottom: 8,
+            background: isMax ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)',
+            border: isMax ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
+            cursor: 'pointer',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+              {isNew(t, 'transaction') && <NewBadge />}
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'var(--accent-blue-bg)', color: '#93c5fd' }}>{t.trade_type || '매매'}</span>
+              {isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(251,191,36,0.15)', color: '#FBBF24' }}>🏆 신고가</span>}
+              {vsMax !== null && !isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
+              <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
+              <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
+                {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 4 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 2 }}>{t.apt_name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전용 {t.exclusive_area}㎡ · {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''}</div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: borderColor, lineHeight: 1.2 }}>{fmtAmount(amt)}</div>
+                {t.exclusive_area > 0 && amt > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 1 }}>평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</div>}
+              </div>
+            </div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--border)' }}>📅 {t.deal_date}</div>
+          </div>
+        );
+      })}
+
+      {page * 20 < filtered.length && (
+        <button onClick={() => setPage(p => p + 1)} style={{
+          width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)',
+          background: 'var(--bg-surface)', color: 'var(--text-secondary)',
+          fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 8,
+        }}>더 보기 ({Math.min(page * 20, filtered.length)} / {filtered.length}건)</button>
+      )}
+
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
+        📊 국토교통부 실거래가 공개시스템 기준 · ⚠️ 투자 참고용이며 투자 권유가 아닙니다.
+      </p>
+
+      {/* 실거래 상세 모달 */}
+      {selected && (() => {
+        const t = selected;
+        const related = transactions.filter((x: any) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+            onClick={() => setSelected(null)}>
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
+            <div style={{ position: 'relative', width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: 20 }}
+              onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.apt_name}</h2>
+                <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
+              </div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래가</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{fmtAmount(t.deal_amount || 0)}</div>
+                </div>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전용면적</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{t.exclusive_area}㎡</div>
+                </div>
+                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평당가</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-blue)', marginTop: 2 }}>{t.exclusive_area > 0 && t.deal_amount > 0 ? fmtAmount(Math.round(t.deal_amount / (t.exclusive_area / 3.3058))) : '-'}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+                <a href={`https://map.kakao.com/?q=${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+                <a href={`https://map.naver.com/p/search/${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+              </div>
+
+              {/* 거래 이력 */}
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>거래 이력 ({related.length}건)</div>
+              {related.map((r: any, i: number) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{r.exclusive_area}㎡ · {r.floor}층</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(r.deal_amount)}</span>
+                </div>
+              ))}
+
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 12, marginBottom: 16 }}>국토교통부 실거래가 공개시스템 기준</div>
+
+              <AptPriceTrendChart aptName={t.apt_name} region={t.region_nm} />
+              <AptReviewSection aptName={t.apt_name} region={t.region_nm} />
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}

@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'), { ssr: false });
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), { ssr: false });
+import TransactionTab from './tabs/TransactionTab';
 
 const NEW_HOURS: Record<string, number> = { subscription: 24, ongoing: 168, unsold: 168, redevelopment: 168, transaction: 72 };
 function isNew(item: any, type: string): boolean {
@@ -85,22 +86,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState('전체');
   const [redevPage, setRedevPage] = useState(1);
-  const [tradeRegion, setTradeRegion] = useState('전체');
-  const [tradePage, setTradePage] = useState(1);
-  const [tradeAreaFilter, setTradeAreaFilter] = useState('전체');
-  const [tradeSort, setTradeSort] = useState<'date'|'price_desc'|'price_asc'|'area'>('date');
-  const [tradeSearch, setTradeSearch] = useState('');
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
   const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
-  const [selectedTrade, setSelectedTrade] = useState<any | null>(null);
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
   const [calOffset, setCalOffset] = useState(0); // 0=이번달, -1=지난달, 1=다음달
   const [redevStage, setRedevStage] = useState('전체');
   const [redevSearch, setRedevSearch] = useState('');
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
-  const [tradeChartRegion, setTradeChartRegion] = useState('');
   const [premiumListings, setPremiumListings] = useState<any[]>([]);
 
   useEffect(() => {
@@ -1413,319 +1407,17 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       })()}
 
       {/* ━━━ 실거래가 탭 ━━━ */}
-      {activeTab === 'trade' && (() => {
-        if (!transactions.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>💰 실거래가 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)', marginTop: 8, display: 'block' }}>국토교통부 실거래가 API에서 평일 08시에 자동 수집합니다</span><br/><span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>crawl-apt-trade 크론이 정상 동작 중인지 어드민에서 확인해주세요</span></div>;
-
-        const tradeRegs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
-        const filteredTrades = transactions.filter((t: any) => {
-          if (tradeRegion !== '전체' && t.region_nm !== tradeRegion) return false;
-          if (tradeAreaFilter !== '전체') {
-            const area = t.exclusive_area || 0;
-            if (tradeAreaFilter === '~59' && area > 60) return false;
-            if (tradeAreaFilter === '59~84' && (area <= 59 || area > 85)) return false;
-            if (tradeAreaFilter === '84~' && area <= 84) return false;
-          }
-          if (tradeSearch) {
-            const q = tradeSearch.toLowerCase();
-            if (!(t.apt_name || '').toLowerCase().includes(q) && !(t.dong || '').toLowerCase().includes(q) && !(t.sigungu || '').toLowerCase().includes(q)) return false;
-          }
-          return true;
-        });
-        // 정렬
-        filteredTrades.sort((a: any, b: any) => {
-          if (tradeSort === 'price_desc') return (b.deal_amount || 0) - (a.deal_amount || 0);
-          if (tradeSort === 'price_asc') return (a.deal_amount || 0) - (b.deal_amount || 0);
-          if (tradeSort === 'area') return (b.exclusive_area || 0) - (a.exclusive_area || 0);
-          return 0; // date — 이미 서버에서 deal_date desc 정렬됨
-        });
-        const pagedTrades = filteredTrades.slice(0, tradePage * 20);
-
-        // 요약 통계
-        const totalCount = filteredTrades.length;
-        const avgAmount = totalCount > 0 ? Math.round(filteredTrades.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
-        const maxTrade = filteredTrades.reduce((max: any, t: any) => (!max || (t.deal_amount || 0) > (max.deal_amount || 0)) ? t : max, null as any);
-        const minTrade = filteredTrades.filter((t: any) => (t.deal_amount || 0) > 0).reduce((min: any, t: any) => (!min || (t.deal_amount || 0) < (min.deal_amount || 0)) ? t : min, null as any);
-
-        function fmtAmount(amt: number): string {
-          if (!amt) return '-';
-          if (amt >= 10000) return `${(amt / 10000).toFixed(1)}억`;
-          return `${amt.toLocaleString()}만`;
-        }
-
-        // 지역별 평균
-        const regionAvgs: Record<string, { sum: number; cnt: number }> = {};
-        filteredTrades.forEach((t: any) => {
-          const r = t.region_nm || '기타';
-          if (!regionAvgs[r]) regionAvgs[r] = { sum: 0, cnt: 0 };
-          regionAvgs[r].sum += t.deal_amount || 0;
-          regionAvgs[r].cnt++;
-        });
-
-        // 지역별 거래 건수 집계 (현황판용)
-        const tradeRegionStats = tradeRegs.filter(r => r !== '전체').map(r => {
-          const items = transactions.filter((t: any) => (t.region_nm || '기타') === r);
-          const avgAmt = items.length > 0 ? Math.round(items.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / items.length) : 0;
-          return { name: r, count: items.length, avgAmount: avgAmt };
-        }).sort((a, b) => b.count - a.count);
-
-        return (
-          <div>
-            {/* 지역별 현황 */}
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
-                <button onClick={() => { setTradeRegion('전체'); setTradePage(1); }} style={{
-                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                  border: tradeRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: tradeRegion === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tradeRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{transactions.length}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: tradeRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
-                </button>
-                {tradeRegionStats.map(r => (
-                  <button key={r.name} onClick={() => { setTradeRegion(r.name === tradeRegion ? '전체' : r.name); setTradePage(1); }} style={{
-                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                    border: tradeRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                    background: tradeRegion === r.name ? '#1E3A5F' : 'var(--bg-surface)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                  }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tradeRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: tradeRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
-                    {r.avgAmount > 0 && (
-                      <span style={{ fontSize: 10, color: tradeRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                        평균{r.avgAmount >= 10000 ? `${(r.avgAmount / 10000).toFixed(1)}억` : `${Math.round(r.avgAmount / 1000)}천`}
-                      </span>
-                    )}
-                    {r.count > 0 && (
-                      <div style={{ width: '100%', height: 3, background: tradeRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
-                        <div style={{ height: '100%', background: tradeRegion === r.name ? '#fff' : 'var(--accent-blue)', width: `${(r.count / transactions.length) * 100}%` }} />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 대시보드 */}
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {tradeRegion !== '전체' ? `${tradeRegion} ` : ''}최근 거래 현황</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 10 }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{totalCount.toLocaleString()}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래 건수</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{fmtAmount(avgAmount)}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균가</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{maxTrade ? fmtAmount(maxTrade.deal_amount) : '-'}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-blue)' }}>{minTrade ? fmtAmount(minTrade.deal_amount) : '-'}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{Object.keys(regionAvgs).length}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>지역 수</div>
-                </div>
-              </div>
-              {maxTrade && (
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
-                  🏆 최고가: {maxTrade.apt_name} ({maxTrade.region_nm}) {maxTrade.exclusive_area}㎡ {maxTrade.floor}층
-                </div>
-              )}
-              {Object.keys(regionAvgs).length > 1 && (
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {Object.entries(regionAvgs).sort((a, b) => b[1].sum / b[1].cnt - a[1].sum / a[1].cnt).slice(0, 3).map(([r, v]) => (
-                    <span key={r} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r} 평균 <strong style={{ color: 'var(--text-secondary)' }}>{fmtAmount(Math.round(v.sum / v.cnt))}</strong></span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {tradeMonthly.length > 0 && (
-              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
-                {(() => {
-                  const regions = [...new Set(tradeMonthly.map((s: any) => s.region))];
-                  const activeRegion = tradeChartRegion || regions[0] || '';
-                  const data = tradeMonthly.filter((s: any) => s.region === activeRegion);
-                  return (
-                    <>
-                      <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
-                        {regions.slice(0, 8).map(r => (
-                          <button key={r} onClick={() => setTradeChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (tradeChartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (tradeChartRegion || regions[0]) === r ? '#2563EB' : 'var(--bg-hover)', color: (tradeChartRegion || regions[0]) === r ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
-                        ))}
-                      </div>
-                      <MiniLineChart
-                        data={data.map((s: any) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))}
-                        color="#34D399"
-                        showValues={true}
-                        height={140}
-                      />
-                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>단위: 억원</div>
-                    </>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* 평당가 비교 TOP 10 */}
-            {tradeMonthly.length > 0 && (() => {
-              const latestMonth = [...new Set(tradeMonthly.map((s: any) => s.stat_month))].pop();
-              const data = tradeMonthly
-                .filter((s: any) => s.stat_month === latestMonth && s.avg_price_per_pyeong)
-                .sort((a: any, b: any) => (b.avg_price_per_pyeong || 0) - (a.avg_price_per_pyeong || 0))
-                .slice(0, 10)
-                .map((s: any) => ({
-                  label: s.region,
-                  value: Math.round(s.avg_price_per_pyeong || 0),
-                  color: `hsl(${240 - (s.avg_price_per_pyeong / Math.max(...tradeMonthly.filter((t: any) => t.stat_month === latestMonth).map((t: any) => t.avg_price_per_pyeong || 1))) * 240}, 70%, 55%)`,
-                }));
-              return data.length > 0 ? (
-                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>💰 평당가 TOP 10 (만원/평)</div>
-                  {data.map((d: any, i: number) => {
-                    const pct = (d.value / (data[0]?.value || 1)) * 100;
-                    return (
-                      <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                        <div style={{ width: 50, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textAlign: 'right', flexShrink: 0 }}>{d.label}</div>
-                        <div style={{ flex: 1, height: 24, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: d.color || 'var(--accent-purple)' }} />
-                        </div>
-                        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 55, textAlign: 'right', flexShrink: 0 }}>{d.value.toLocaleString()}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null;
-            })()}
-
-            {/* 검색 */}
-            <input value={tradeSearch} onChange={e => { setTradeSearch(e.target.value); setTradePage(1); }} placeholder="단지명, 동(법정동) 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
-
-            {/* 요약 통계 카드 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
-              <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.15)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#60A5FA' }}>{fmtAmount(avgAmount)}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 거래가</div>
-              </div>
-              {maxTrade && (
-                <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.15)', textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#F87171' }}>{fmtAmount(maxTrade.deal_amount)}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>최고가 {maxTrade.apt_name?.slice(0, 8)}</div>
-                </div>
-              )}
-              <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.15)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#34D399' }}>{totalCount.toLocaleString()}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래 건수</div>
-              </div>
-            </div>
-
-            {/* 면적 필터 */}
-            <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
-              {[
-                { key: '전체', label: '전체 면적' },
-                { key: '~59', label: '~59㎡ (소형)' },
-                { key: '59~84', label: '59~84㎡ (중형)' },
-                { key: '84~', label: '84㎡~ (대형)' },
-              ].map(a => pill(a.key, tradeAreaFilter, (v) => { setTradeAreaFilter(v); setTradePage(1); }, a.label))}
-            </div>
-
-            {/* 결과 + 정렬 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
-                총 <strong style={{ color: 'var(--text-primary)' }}>{filteredTrades.length}</strong>건
-              </span>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {([
-                  { key: 'date', label: '최신순' },
-                  { key: 'price_desc', label: '고가순' },
-                  { key: 'price_asc', label: '저가순' },
-                  { key: 'area', label: '면적순' },
-                ] as { key: typeof tradeSort; label: string }[]).map(s => (
-                  <button key={s.key} onClick={() => { setTradeSort(s.key); setTradePage(1); }} style={{
-                    fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                    background: tradeSort === s.key ? '#2563EB' : 'var(--bg-hover)',
-                    color: tradeSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
-                  }}>{s.label}</button>
-                ))}
-              </div>
-            </div>
-
-            {/* 카드 리스트 */}
-            {pagedTrades.map((t: any, i: number) => {
-              const amt = t.deal_amount || 0;
-              const borderColor = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)';
-              // 같은 단지 최고가 대비
-              const sameApt = filteredTrades.filter((x: any) => x.apt_name === t.apt_name && (x.deal_amount || 0) > 0);
-              const maxPrice = sameApt.length > 1 ? Math.max(...sameApt.map((x: any) => x.deal_amount || 0)) : 0;
-              const vsMax = maxPrice > 0 && amt > 0 && maxPrice !== amt ? Math.round(((amt - maxPrice) / maxPrice) * 100) : null;
-              const isMaxRecord = maxPrice > 0 && amt >= maxPrice && sameApt.length >= 2;
-              return (
-                <div key={`${t.id || i}`} onClick={() => setSelectedTrade(t)} style={{
-                  padding: '14px 16px', borderRadius: 14, marginBottom: 8,
-                  background: isMaxRecord ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)',
-                  border: isMaxRecord ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
-                  cursor: 'pointer', transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
-                >
-                  {/* 상단: 배지 + 지역 + 관심 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
-                    {isNew(t, 'transaction') && <NewBadge />}
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'var(--accent-blue-bg)', color: '#93c5fd' }}>{t.trade_type || '매매'}</span>
-                    {isMaxRecord && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(251,191,36,0.15)', color: '#FBBF24', border: '1px solid rgba(251,191,36,0.3)' }}>🏆 신고가</span>}
-                    {vsMax !== null && !isMaxRecord && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
-                    <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
-                      {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
-                    </button>
-                  </div>
-                  {/* 단지명 + 금액 (좌우 분리) */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 4 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 2 }}>{t.apt_name}</div>
-                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                        전용 {t.exclusive_area}㎡ · {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''}
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: borderColor, lineHeight: 1.2 }}>{fmtAmount(amt)}</div>
-                      {t.exclusive_area > 0 && amt > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 1 }}>평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</div>}
-                    </div>
-                  </div>
-                  {/* 하단 날짜 */}
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--border)' }}>
-                    📅 {t.deal_date}
-                  </div>
-                </div>
-              );
-            })}
-
-            {tradePage * 20 < filteredTrades.length && (
-              <button onClick={() => setTradePage(p => p + 1)} style={{
-                width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)',
-                background: 'var(--bg-surface)', color: 'var(--text-secondary)',
-                fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 8,
-              }}>
-                더 보기 ({Math.min(tradePage * 20, filteredTrades.length)} / {filteredTrades.length}건)
-              </button>
-            )}
-
-            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-              📊 데이터 출처: 국토교통부 실거래가 공개시스템 (rt.molit.go.kr) · 공공데이터포털 API (apis.data.go.kr) · 전국 약 200개 시군구 · 평일 매일 08시 자동 수집 · 2026년 1월~현재 거래 기준 · 실제 거래가와 차이가 있을 수 있습니다<br/>⚠️ 본 정보는 참고용이며 투자 권유가 아닙니다. 투자에 따른 손익은 투자자 본인에게 귀속됩니다.
-            </p>
-          </div>
-        );
-      })()}
+      {activeTab === 'trade' && (
+        <TransactionTab
+          transactions={transactions}
+          tradeMonthly={tradeMonthly}
+          aptUser={aptUser}
+          watchlist={watchlist}
+          toggleWatchlist={toggleWatchlist}
+          setCommentTarget={setCommentTarget}
+          showToast={showToast}
+        />
+      )}
 
       {/* 재개발 상세 모달 */}
       {selectedRedev && (() => {
@@ -1867,125 +1559,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       })()}
 
       {/* 실거래가 상세 모달 */}
-      {selectedTrade && (() => {
-        const t = selectedTrade;
-        const related = transactions.filter((x: any) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
-        function fmtAmt(a: number) { return a >= 10000 ? `${(a / 10000).toFixed(1)}억` : `${a.toLocaleString()}만`; }
-        return (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-            onClick={() => setSelectedTrade(null)}>
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
-            <div style={{ position: 'relative', width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: 20 }}
-              onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.apt_name}</h2>
-                <button onClick={() => setSelectedTrade(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
-              </div>
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
-
-              {/* 선택 거래 상세 */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
-                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래가</div>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{fmtAmt(t.deal_amount || 0)}</div>
-                </div>
-                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전용면적</div>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{t.exclusive_area}㎡</div>
-                </div>
-                <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평당가</div>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-blue)', marginTop: 2 }}>{t.exclusive_area > 0 && t.deal_amount > 0 ? fmtAmt(Math.round(t.deal_amount / (t.exclusive_area / 3.3058))) : '-'}</div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 16, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
-                <span>📅 {t.deal_date}</span>
-                <span>🏢 {t.floor}층</span>
-                {t.built_year && <span>🏗️ {t.built_year}년식</span>}
-                {t.trade_type && <span>📋 {t.trade_type}</span>}
-              </div>
-
-              {/* 단지 가격 통계 */}
-              {related.length >= 2 && (() => {
-                const prices = related.map((r: any) => r.deal_amount || 0).filter((v: number) => v > 0);
-                if (prices.length < 2) return null;
-                const avg = Math.round(prices.reduce((s: number, v: number) => s + v, 0) / prices.length);
-                const maxP = Math.max(...prices);
-                const minP = Math.min(...prices);
-                return (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 16 }}>
-                    <div style={{ background: 'var(--accent-red-bg)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
-                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-red)' }}>{fmtAmt(maxP)}</div>
-                    </div>
-                    <div style={{ background: 'var(--accent-blue-bg)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
-                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-blue)' }}>{fmtAmt(minP)}</div>
-                    </div>
-                    <div style={{ background: 'var(--accent-purple-bg)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균가</div>
-                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-purple)' }}>{fmtAmt(avg)}</div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* 지도 바로가기 */}
-              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-                <a href={`https://map.kakao.com/?q=${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
-                <a href={`https://map.naver.com/p/search/${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
-              </div>
-
-              {/* 가격 추이 미니차트 */}
-              {related.length >= 2 && (() => {
-                const sorted = [...related].sort((a: any, b: any) => (a.deal_date || '').localeCompare(b.deal_date || ''));
-                const prices = sorted.map((r: any) => r.deal_amount || 0).filter((v: number) => v > 0);
-                if (prices.length < 2) return null;
-                const min = Math.min(...prices); const max = Math.max(...prices);
-                const range = max - min || 1; const W = 280; const H = 60; const P = 4;
-                const points = prices.map((p: number, i: number) => `${P + (i / (prices.length - 1)) * (W - P * 2)},${H - P - ((p - min) / range) * (H - P * 2)}`).join(' ');
-                const isUp = prices[prices.length - 1] >= prices[0];
-                const changePct = ((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(1);
-                return (
-                  <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 12, marginBottom: 16 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>📈 거래가 추이</span>
-                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>{isUp ? '▲' : '▼'} {changePct}%</span>
-                    </div>
-                    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 60 }}>
-                      <polyline points={points} fill="none" stroke={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} strokeWidth="2" strokeLinecap="round" />
-                      {prices.map((p: number, i: number) => (
-                        <circle key={i} cx={P + (i / (prices.length - 1)) * (W - P * 2)} cy={H - P - ((p - min) / range) * (H - P * 2)} r="3" fill={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} />
-                      ))}
-                    </svg>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
-                      <span>{fmtAmt(prices[0])}</span>
-                      <span>{fmtAmt(prices[prices.length - 1])}</span>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>거래 이력 ({related.length}건)</div>
-              {related.map((r: any, i: number) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
-                  <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>
-                  <span style={{ color: 'var(--text-secondary)' }}>{r.exclusive_area}㎡ · {r.floor}층</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmt(r.deal_amount)}</span>
-                </div>
-              ))}
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 12, marginBottom: 16 }}>국토교통부 실거래가 공개시스템 기준</div>
-
-              {/* 실거래가 전체 추이 차트 */}
-              <AptPriceTrendChart aptName={t.apt_name} region={t.region_nm} />
-
-              {/* 주민 리뷰 */}
-              <AptReviewSection aptName={t.apt_name} region={t.region_nm} />
-            </div>
-          </div>
-        );
-      })()}
-
       {/* 한줄평 바텀시트 */}
       {commentTarget && (
         <AptCommentSheet
