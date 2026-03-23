@@ -69,7 +69,12 @@ export default async function AptDetailPage({ params }: Props) {
     ['일반공급', apt.general_supply_total ? `${Number(apt.general_supply_total).toLocaleString()}세대` : null],
   ].filter(r => r[1]);
 
-  const { data: { user: aptUser } } = await createSupabaseServer().then(s => s.auth.getUser());
+  let aptUser = null;
+  try {
+    const sbAuth = await createSupabaseServer();
+    const { data: { user } } = await sbAuth.auth.getUser();
+    aptUser = user;
+  } catch { /* 비로그인 */ }
 
   let relatedPosts: any[] = [];
   let relatedBlogs: any[] = [];

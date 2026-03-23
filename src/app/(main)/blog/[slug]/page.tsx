@@ -111,8 +111,11 @@ export default async function BlogDetailPage({ params }: Props) {
 
   sb.from('blog_posts').update({ view_count: (post.view_count ?? 0) + 1 }).eq('id', post.id).then(() => {});
 
-  const { data: { user } } = await sb.auth.getUser();
-  const isLoggedIn = !!user;
+  let isLoggedIn = false;
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    isLoggedIn = !!user;
+  } catch { /* 비로그인/만료 세션 */ }
 
   // 관련 글 추천 (태그 유사도 → 같은 카테고리 인기순 폴백)
   let related: any[] = [];

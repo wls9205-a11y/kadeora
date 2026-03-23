@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { isNew, NewBadge, fmtAmount, kstNow, kstToday, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
-import { haptic } from '@/lib/haptic';
+import { isNew, NewBadge, kstNow, kstToday, type SharedTabProps } from './apt-utils';
 import BottomSheet from '@/components/BottomSheet';
 
 interface Props extends SharedTabProps {
@@ -9,7 +8,7 @@ interface Props extends SharedTabProps {
   premiumListings: any[];
 }
 
-export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast }: Props) {
+export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget }: Props) {
   const [ongoingRegion, setOngoingRegion] = useState('전체');
   const [ongoingPage, setOngoingPage] = useState(1);
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
@@ -58,7 +57,6 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
     const unsC = items.filter((o: any) => o.source === 'unsold').length;
     return { name: r, count: items.length, subCount: subC, unsoldCount: unsC, unsoldUnits: items.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0) };
   }).sort((a, b) => b.count - a.count);
-  const maxRegionCount = Math.max(...regionCounts.map(r => r.count), 1);
 
   // ① 입주 임박 현장
   const todayD = kstNow();
@@ -259,7 +257,6 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
         const pMin = o.sale_price_min ? Math.round(o.sale_price_min / 10000 * 10) / 10 : null;
         const pMax = o.sale_price_max ? Math.round(o.sale_price_max / 10000 * 10) / 10 : null;
         const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
-        const mvnStr = o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(0, 4)}.${String(o.mvn_prearnge_ym).slice(4, 6)}` : null;
         const wlKey = isUnsold ? `unsold:${o.link_id}` : `sub:${o.link_id}`;
         const isWatched = watchlist.has(wlKey);
         const accentColor = isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)';

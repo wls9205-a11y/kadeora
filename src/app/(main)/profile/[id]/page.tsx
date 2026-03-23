@@ -19,7 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProfilePage({ params }: Props) {
   const { id } = await params;
   const sb = await createSupabaseServer();
-  const { data: { user: authUser } } = await sb.auth.getUser();
+  let authUser = null;
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    authUser = user;
+  } catch { /* 비로그인 */ }
   const isOwner = authUser?.id === id;
 
   const [

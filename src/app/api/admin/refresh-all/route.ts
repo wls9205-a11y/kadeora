@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/admin-auth';
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const CRON_SEQUENCE = [
   { name: 'health-check', path: '/api/cron/health-check' },

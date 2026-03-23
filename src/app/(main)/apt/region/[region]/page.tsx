@@ -79,7 +79,6 @@ export default async function RegionLandingPage({ params }: Props) {
   }
 
   const data = await fetchRegionData(decoded);
-  const total = data.subscriptions.length + data.transactions.length + data.redevelopments.length + data.unsolds.length;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>

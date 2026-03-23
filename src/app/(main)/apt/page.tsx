@@ -18,7 +18,7 @@ import Disclaimer from '@/components/Disclaimer';
 async function fetchAptData() {
   let apts: any[] = [];
   let unsold: any[] = [];
-  let alertCounts: Record<string, number> = {};
+  const alertCounts: Record<string, number> = {};
   let lastRefreshed: string | null = null;
 
   try {

@@ -91,8 +91,10 @@ export default async function FeedDetailPage({ params }: Props) {
 
   try {
     const sb = await createSupabaseServer();
-    const { data: { user: authUser } } = await sb.auth.getUser();
-    currentUserId = authUser?.id ?? null;
+    try {
+      const { data: { user: authUser } } = await sb.auth.getUser();
+      currentUserId = authUser?.id ?? null;
+    } catch { /* 비로그인/만료 세션 — 무시 */ }
 
     const { data: postData } = await sb
       .from('posts')

@@ -12,7 +12,7 @@ import SubscriptionTab from './tabs/SubscriptionTab';
 import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [] }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[] }) {
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [] }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[] }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade'>('sub');
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
@@ -104,9 +104,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
-          <a href="/apt/map" className="kd-action-link">🗺️ 지도</a>
-          <a href="/apt/search" className="kd-action-link">🔍 검색</a>
-          <a href="/apt/diagnose" className="kd-action-link">🎯 진단</a>
+          <Link href="/apt/map" className="kd-action-link">🗺️ 지도</Link>
+          <Link href="/apt/search" className="kd-action-link">🔍 검색</Link>
+          <Link href="/apt/diagnose" className="kd-action-link">🎯 진단</Link>
         </div>
       </div>
 

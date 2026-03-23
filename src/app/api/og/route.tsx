@@ -131,9 +131,7 @@ export async function GET(req: NextRequest) {
           color: '#E2E8F0',
           lineHeight: 1.35,
           maxWidth: 1000,
-          display: '-webkit-box',
           overflow: 'hidden',
-          textOverflow: 'ellipsis',
         }}>
           {title.length > 90 ? title.slice(0, 87) + '...' : title}
         </div>
