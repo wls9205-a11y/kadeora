@@ -10,10 +10,6 @@ import StockDetailTabs from './StockDetailTabs';
 import StockAlertButton from '@/components/StockAlertButton';
 import { fmtPrice, fmtCap } from '@/lib/format';
 
-T`; if (v >= 1e9) return `$${(v/1e9).toFixed(1)}B`; return `$${(v/1e6).toFixed(0)}M`; }
-  if (v >= 1e12) return `${(v/1e12).toFixed(1)}조`; if (v >= 1e8) return `${Math.round(v/1e8)}억`; return v.toLocaleString();
-}
-
 interface Props { params: Promise<{ symbol: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

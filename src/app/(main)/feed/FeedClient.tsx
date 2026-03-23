@@ -10,8 +10,6 @@ import { getAvatarColor } from '@/lib/avatar';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/EmptyState';
-import PushNudgeBanner from '@/components/PushNudgeBanner';
-import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import PersonalDashboard from '@/components/PersonalDashboard';
 import { timeAgo, numFmt } from '@/lib/format';
@@ -256,55 +254,21 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         </div>
       )}
 
-      {/* 글쓰기 프롬프트 */}
-      {currentUserId && (
-        <Link href="/write" style={{
-          display: 'flex', gap: 12, alignItems: 'center', padding: '12px 16px',
-          background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 16, textDecoration: 'none', marginBottom: 14,
-        }}>
-          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700 }}>+</div>
-          <span style={{ fontSize: 'var(--fs-base)', color: 'var(--text-tertiary)' }}>무슨 소문이 있나요?</span>
-        </Link>
-      )}
-
-      {/* 가이드북 배너 */}
-      {!currentUserId && (
-        <Link href="/guide" style={{
-          display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-          background: 'linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(96,165,250,0.08) 100%)',
-          border: '1px solid rgba(167,139,250,0.15)', borderRadius: 12,
-          textDecoration: 'none', marginBottom: 10,
-        }}>
-          <span style={{ fontSize: 'var(--fs-lg)' }}>📖</span>
-          <div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>카더라 처음이신가요?</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>가이드북에서 활용법을 확인하세요</div>
-          </div>
-          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>→</span>
-        </Link>
-      )}
-
-      {/* 트렌딩 */}
-      <TrendingBar />
-
-      {/* 🔥 실시간 인기글 */}
+      {/* 🔥 이번 주 인기글 (간결하게 3개만) */}
       {showHotBanner && hotPosts.length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 14, position: 'relative' }}>
           <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }}>✕</button>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
-          {hotPosts.map((hp: any, i: number) => (
+          {hotPosts.slice(0, 3).map((hp: any, i: number) => (
             <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 18 }}>{i + 1}</span>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title}</span>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>♥ {hp.likes_count}</span>
             </Link>
           ))}
+          <Link href="/hot" style={{ display: 'block', textAlign: 'center', padding: '6px 0', fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, marginTop: 4 }}>전체 보기 →</Link>
         </div>
       )}
-
-      {/* 출석체크 */}
-      <AttendanceBanner />
 
       {/* 게시글 목록 */}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -375,6 +339,10 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           );
         }).reduce((acc: React.ReactNode[], card, i) => {
           acc.push(card);
+          // 3번째 카드 뒤 출석체크
+          if (i === 2 && currentUserId) {
+            acc.push(<AttendanceBanner key="attend" />);
+          }
           // 비로그인 시 5번째 카드 뒤 가입 유도 배너
           if (i === 4 && !currentUserId) {
             acc.push(

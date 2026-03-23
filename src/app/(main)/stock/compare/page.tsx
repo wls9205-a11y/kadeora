@@ -11,11 +11,6 @@ interface Stock {
   currency?: string; sector?: string; updated_at: string;
 }
 
-T`; if (v >= 1e9) return `$${(v/1e9).toFixed(0)}B`; return `$${(v/1e6).toFixed(0)}M`; }
-  if (v >= 1e12) return `${(v/1e12).toFixed(1)}조`; if (v >= 1e8) return `${Math.round(v/1e8)}억`; return v.toLocaleString();
-}
-
-
 export default function StockComparePage() {
   const searchParams = useSearchParams();
   const [allStocks, setAllStocks] = useState<Stock[]>([]);

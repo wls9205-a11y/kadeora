@@ -44,10 +44,6 @@ export default async function AptSearchPage({ searchParams }: Props) {
     regionStats = rs || [];
   } catch {}
 
-억`;
-    return `${amt.toLocaleString()}만`;
-  }
-
   const totalCount = count || 0;
   const hasMore = (trades?.length || 0) === perPage;
 

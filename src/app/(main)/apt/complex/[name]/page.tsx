@@ -22,10 +22,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-억`;
-  return `${amt.toLocaleString()}만`;
-}
-
 export default async function ComplexDetailPage({ params }: Props) {
   const { name } = await params;
   const decoded = decodeURIComponent(name);
