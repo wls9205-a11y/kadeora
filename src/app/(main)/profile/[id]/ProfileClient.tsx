@@ -13,7 +13,7 @@ import { validateNickname } from '@/lib/nickname-filter';
 
 const GRADE_COLORS: Record<number, string> = {
   1:'var(--accent-green)',2:'var(--accent-blue)',3:'var(--accent-purple)',4:'var(--accent-yellow)',5:'var(--accent-red)',
-  6:'#FB7185',7:'#22D3EE',8:'#FCD34D',9:'#818CF8',10:'#C084FC',
+  6:'#FB7185',7:'#22D3EE',8:'var(--accent-yellow)',9:'var(--accent-purple)',10:'#C084FC',
 };
 const GRADE_TITLES: Record<number, string> = {
   1:'새싹',2:'정보통',3:'동네어른',4:'소문난집',5:'인플루언서',
@@ -655,7 +655,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? '#4ADE80' : isClosed ? 'var(--text-tertiary)' : '#FCD34D' }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? 'var(--accent-green)' : isClosed ? 'var(--text-tertiary)' : 'var(--accent-yellow)' }}>
                           {isOpen ? '접수중' : isClosed ? '마감' : '접수예정'}
                         </span>
                         {a.rcept_bgnde && (

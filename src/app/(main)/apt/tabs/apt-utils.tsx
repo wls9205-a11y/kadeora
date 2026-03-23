@@ -65,8 +65,8 @@ export function dDay(apt: Apt): string {
 }
 
 export const STATUS_BADGE = {
-  open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: '#4ADE80', border: 'var(--accent-green)' },
-  upcoming: { label: '접수예정', bg: 'var(--accent-yellow-bg)', color: '#FCD34D', border: 'var(--accent-yellow)' },
+  open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: 'var(--accent-green)', border: 'var(--accent-green)' },
+  upcoming: { label: '접수예정', bg: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)', border: 'var(--accent-yellow)' },
   closed: { label: '마감', bg: 'transparent', color: 'var(--text-tertiary)', border: 'var(--border)' },
 } as const;
 
@@ -82,7 +82,7 @@ export const STAGE_COLORS: Record<string, { bg: string; color: string; border: s
 export const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
 export function NewBadge() {
-  return <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'var(--accent-red)', color: '#fff', marginRight: 4, animation: 'pulse 2s infinite' }}>NEW</span>;
+  return <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'var(--accent-red)', color: 'var(--text-inverse)', marginRight: 4, animation: 'pulse 2s infinite' }}>NEW</span>;
 }
 
 export function Pill({ value, selected, onSelect, label }: { value: string; selected: string; onSelect: (v: string) => void; label?: string }) {

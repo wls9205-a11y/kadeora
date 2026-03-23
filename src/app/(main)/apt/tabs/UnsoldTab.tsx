@@ -74,7 +74,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             {surgeAlerts.map(a => (
               <button key={a.region_nm} onClick={() => setUnsoldRegion(a.region_nm)} style={{
                 padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 600,
-                background: unsoldRegion === a.region_nm ? '#DC2626' : 'rgba(239,68,68,0.12)',
+                background: unsoldRegion === a.region_nm ? 'var(--accent-red)' : 'rgba(239,68,68,0.12)',
                 color: unsoldRegion === a.region_nm ? '#fff' : 'var(--accent-red)',
                 border: 'none', cursor: 'pointer',
               }}>
@@ -95,7 +95,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           <button onClick={() => setUnsoldRegion('전체')} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
             border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
-            background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
+            background: unsoldRegion === '전체' ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
@@ -106,7 +106,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
               border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
-              background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
+              background: unsoldRegion === r.name ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
@@ -180,7 +180,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           <button onClick={() => setUnsoldRegion('전체')} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
             border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
-            background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
+            background: unsoldRegion === '전체' ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
@@ -191,7 +191,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
               border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
-              background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
+              background: unsoldRegion === r.name ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
@@ -247,7 +247,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
-        총 <strong style={{ color: '#F87171' }}>{fu.length}</strong>건 · {fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0).toLocaleString()}세대
+        총 <strong style={{ color: 'var(--accent-red)' }}>{fu.length}</strong>건 · {fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0).toLocaleString()}세대
       </div>
 
       {/* 리스트 */}

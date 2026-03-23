@@ -705,7 +705,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               <button onClick={() => toggleWatchlist(selectedStock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 8, border: '1px solid var(--border)', background: watchlistSymbols.includes(selectedStock.symbol) ? 'var(--accent-yellow-bg)' : 'var(--bg-hover)', color: watchlistSymbols.includes(selectedStock.symbol) ? 'var(--accent-yellow)' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
                 {watchlistSymbols.includes(selectedStock.symbol) ? '★ 관심종목 해제' : '☆ 관심종목 추가'}
               </button>
-              <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : 'var(--accent-blue)', color: '#fff', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
+              <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : 'var(--accent-blue)', color: 'var(--text-inverse)', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
                 종목 상세 →
               </a>
             </div>

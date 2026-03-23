@@ -115,7 +115,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
           <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
             border: ongoingRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-            background: ongoingRegion === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
+            background: ongoingRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
@@ -125,7 +125,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
             <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
               border: ongoingRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-              background: ongoingRegion === r.name ? '#1E3A5F' : 'var(--bg-surface)',
+              background: ongoingRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
@@ -136,7 +136,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
               </div>
               {r.count > 0 && (
                 <div style={{ width: '100%', height: 3, background: ongoingRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
-                  <div style={{ height: '100%', background: '#60a5fa', width: `${(r.subCount / r.count) * 100}%` }} />
+                  <div style={{ height: '100%', background: 'var(--accent-blue)', width: `${(r.subCount / r.count) * 100}%` }} />
                   <div style={{ height: '100%', background: 'var(--accent-red)', width: `${(r.unsoldCount / r.count) * 100}%` }} />
                 </div>
               )}
@@ -278,7 +278,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                   {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FBBF24,#F59E0B)', color: '#1a1a1a', marginRight: 4 }}>PREMIUM</span>}
                   {isNew(o, 'ongoing') && <NewBadge />}
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? '#f87171' : '#60a5fa', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? '#f87171' : 'var(--accent-blue)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
                     {isUnsold ? '미분양' : '분양중'}
                   </span>
                   {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)' }}>🔥 {o.competition_rate}:1</span>}
@@ -436,7 +436,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
               })()}
 
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                <a href={linkH} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>자세히 보기 →</a>
+                <a href={linkH} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>자세히 보기 →</a>
                 {o.pblanc_url && <a href={o.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>공고 보기</a>}
               </div>
               <div style={{ display: 'flex', gap: 8 }}>

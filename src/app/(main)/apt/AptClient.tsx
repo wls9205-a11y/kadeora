@@ -195,7 +195,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {toast && (
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
-          background: 'var(--bg-elevated, #1e293b)', color: '#fff', padding: '12px 20px',
+          background: 'var(--bg-elevated, #1e293b)', color: 'var(--text-inverse)', padding: '12px 20px',
           borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 600, zIndex: 9999,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
           animation: 'fadeIn 0.2s ease-out',

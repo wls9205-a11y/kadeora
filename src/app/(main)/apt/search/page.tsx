@@ -62,7 +62,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
       <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <input name="q" defaultValue={q} placeholder="단지명, 동 검색..." aria-label="실거래가 검색"
           style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
-        <button type="submit" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--brand)', color: '#fff', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>검색</button>
+        <button type="submit" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>검색</button>
       </form>
 
       {/* 필터 */}

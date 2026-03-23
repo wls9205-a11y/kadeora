@@ -7,10 +7,10 @@ import { SkeletonChart } from '@/components/Skeleton';
 
 type Layer = 'subscription' | 'ongoing' | 'redevelopment' | 'unsold';
 const LAYER_CONF: Record<Layer, { label: string; icon: string; color: string }> = {
-  subscription: { label: '청약', icon: '📋', color: '#3B82F6' },
-  ongoing: { label: '분양중', icon: '🏗️', color: '#34D399' },
-  redevelopment: { label: '재개발', icon: '🔨', color: '#FB923C' },
-  unsold: { label: '미분양', icon: '🏚️', color: '#F87171' },
+  subscription: { label: '청약', icon: '📋', color: 'var(--brand)' },
+  ongoing: { label: '분양중', icon: '🏗️', color: 'var(--accent-green)' },
+  redevelopment: { label: '재개발', icon: '🔨', color: 'var(--accent-orange)' },
+  unsold: { label: '미분양', icon: '🏚️', color: 'var(--accent-red)' },
 };
 
 interface Pin { id: number | string; name: string; address: string; layer: Layer; lat?: number; lng?: number; extra?: string; }

@@ -14,19 +14,19 @@ interface Stock {
 function getColor(pct: number, isKR: boolean): string {
   if (pct === 0) return '#374151';
   if (isKR) {
-    if (pct >= 3) return '#DC2626';
+    if (pct >= 3) return 'var(--accent-red)';
     if (pct >= 1) return '#EF4444';
-    if (pct > 0) return '#F87171';
+    if (pct > 0) return 'var(--accent-red)';
     if (pct <= -3) return '#1D4ED8';
-    if (pct <= -1) return '#3B82F6';
+    if (pct <= -1) return 'var(--brand)';
     return '#60A5FA';
   }
   if (pct >= 3) return '#059669';
   if (pct >= 1) return '#10B981';
-  if (pct > 0) return '#34D399';
-  if (pct <= -3) return '#DC2626';
+  if (pct > 0) return 'var(--accent-green)';
+  if (pct <= -3) return 'var(--accent-red)';
   if (pct <= -1) return '#EF4444';
-  return '#F87171';
+  return 'var(--accent-red)';
 }
 
 export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR: boolean }) {
@@ -75,11 +75,11 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
             >
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{sec.name}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-inverse)', lineHeight: 1.2 }}>{sec.name}</div>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>{sec.stocks.length}종목</div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-inverse)' }}>
                   {sec.avgPct > 0 ? '+' : ''}{sec.avgPct.toFixed(1)}%
                 </span>
                 {topStock && (
@@ -96,7 +96,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
       {/* 범례 */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 12, fontSize: 10, color: 'var(--text-tertiary)' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? '#DC2626' : '#059669' }} />
+          <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? 'var(--accent-red)' : '#059669' }} />
           {isKR ? '상승' : 'Up'}
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
@@ -104,7 +104,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
           보합
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? '#3B82F6' : '#EF4444' }} />
+          <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? 'var(--brand)' : '#EF4444' }} />
           {isKR ? '하락' : 'Down'}
         </span>
       </div>

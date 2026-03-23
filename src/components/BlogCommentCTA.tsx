@@ -21,7 +21,7 @@ export default function BlogCommentCTA({ commentCount }: { commentCount: number 
         background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.25)',
       }}>
         <span style={{ fontSize: 'var(--fs-sm)' }}>🎁</span>
-        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#FBBF24' }}>댓글 작성 시 5P 적립</span>
+        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-yellow)' }}>댓글 작성 시 5P 적립</span>
       </div>
     </div>
   );

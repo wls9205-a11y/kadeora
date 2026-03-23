@@ -86,7 +86,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           <button onClick={() => { setRegion('전체'); setPage(1); }} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
             border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-            background: region === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
+            background: region === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--text-primary)' }}>{transactions.length}</span>
@@ -96,7 +96,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
               border: region === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-              background: region === r.name ? '#1E3A5F' : 'var(--bg-surface)',
+              background: region === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
@@ -181,7 +181,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
               {isNew(t, 'transaction') && <NewBadge />}
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'var(--accent-blue-bg)', color: '#93c5fd' }}>{t.trade_type || '매매'}</span>
-              {isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(251,191,36,0.15)', color: '#FBBF24' }}>🏆 신고가</span>}
+              {isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(251,191,36,0.15)', color: 'var(--accent-yellow)' }}>🏆 신고가</span>}
               {vsMax !== null && !isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
               <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
               <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>

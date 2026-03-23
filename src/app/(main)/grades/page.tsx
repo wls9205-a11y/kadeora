@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 
 const GRADE_COLORS: Record<number, string> = {
   1: 'var(--accent-green)', 2: 'var(--accent-blue)', 3: 'var(--accent-purple)', 4: 'var(--accent-yellow)',
-  5: 'var(--accent-red)', 6: '#FB7185', 7: '#22D3EE', 8: '#FCD34D',
-  9: '#818CF8', 10: '#C084FC',
+  5: 'var(--accent-red)', 6: '#FB7185', 7: '#22D3EE', 8: 'var(--accent-yellow)',
+  9: 'var(--accent-purple)', 10: '#C084FC',
 };
 
 export default async function GradesPage() {

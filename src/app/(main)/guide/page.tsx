@@ -74,7 +74,7 @@ export default function GuidePage() {
             </div>
             {steps.map(s => (
               <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '6px 0' }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
                 <div>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{s.title}</div>
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{s.desc}</div>
@@ -169,7 +169,7 @@ export default function GuidePage() {
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.6 }}>
           버그 신고, 기능 제안, 문의사항이 있으시면 언제든 연락해주세요.
         </div>
-        <a href="mailto:kadeora.app@gmail.com" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>
+        <a href="mailto:kadeora.app@gmail.com" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>
           📧 kadeora.app@gmail.com
         </a>
       </div>

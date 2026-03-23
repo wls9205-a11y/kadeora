@@ -66,7 +66,7 @@ export default async function SeriesDetailPage({ params }: Props) {
             {/* 넘버 서클 */}
             <div style={{
               width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-              background: 'var(--brand)', color: '#fff', display: 'flex',
+              background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex',
               alignItems: 'center', justifyContent: 'center',
               fontSize: 'var(--fs-xs)', fontWeight: 800, zIndex: 1,
               border: '3px solid var(--bg-base)',

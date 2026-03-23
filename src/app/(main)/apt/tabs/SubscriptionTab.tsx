@@ -76,7 +76,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               <button onClick={() => setRegion('전체')} style={{
                 padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                 border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                background: region === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
+                background: region === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--text-primary)' }}>{apts.length}</span>
@@ -86,19 +86,19 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
                   padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                   border: region === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: region === r.name ? '#1E3A5F' : 'var(--bg-surface)',
+                  background: region === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
                   <div style={{ fontSize: 10, display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
                     {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : 'var(--accent-green)' }}>접수{r.open}</span>}
-                    {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : '#FCD34D' }}>예정{r.upcoming}</span>}
+                    {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : 'var(--accent-yellow)' }}>예정{r.upcoming}</span>}
                   </div>
                   {r.total > 0 && (
                     <div style={{ width: '100%', height: 3, background: region === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
                       <div style={{ height: '100%', background: 'var(--accent-green)', width: `${(r.open / r.total) * 100}%` }} />
-                      <div style={{ height: '100%', background: '#FCD34D', width: `${(r.upcoming / r.total) * 100}%` }} />
+                      <div style={{ height: '100%', background: 'var(--accent-yellow)', width: `${(r.upcoming / r.total) * 100}%` }} />
                     </div>
                   )}
                 </button>
@@ -115,8 +115,8 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <button key={k} onClick={() => setAptSort(k)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 'var(--fs-xs)', fontWeight: aptSort === k ? 700 : 500, background: aptSort === k ? 'var(--brand)' : 'var(--bg-hover)', color: aptSort === k ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{l}</button>
               ))}
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, fontSize: 'var(--fs-xs)' }}>
-                <span style={{ color: '#34D399', fontWeight: 700 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}</span>
-                <span style={{ color: '#FCD34D', fontWeight: 700 }}>예정 {filtered.filter(a => getStatus(a) === 'upcoming').length}</span>
+                <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}</span>
+                <span style={{ color: 'var(--accent-yellow)', fontWeight: 700 }}>예정 {filtered.filter(a => getStatus(a) === 'upcoming').length}</span>
                 <span style={{ color: 'var(--text-tertiary)' }}>마감 {filtered.filter(a => getStatus(a) === 'closed').length}</span>
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-blue)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                   📅 이번 주 청약 ({thisWeek.length}건)
                   {opening.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'var(--accent-green-bg)', color: 'var(--accent-green)', fontWeight: 700 }}>접수중 {opening.length}</span>}
-                  {upcoming.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'var(--accent-yellow-bg)', color: '#FCD34D', fontWeight: 700 }}>예정 {upcoming.length}</span>}
+                  {upcoming.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)', fontWeight: 700 }}>예정 {upcoming.length}</span>}
                 </div>
                 {thisWeek.slice(0, 5).map(a => {
                   const st = getStatus(a);

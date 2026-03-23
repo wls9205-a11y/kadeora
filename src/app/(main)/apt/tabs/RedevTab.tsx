@@ -87,7 +87,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: redevRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
-                  background: redevRegion === '전체' ? '#1E3A5F' : 'var(--bg-surface)',
+                  background: redevRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{redevelopment.length}</span>
@@ -97,7 +97,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
                     border: redevRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
-                    background: redevRegion === r.name ? '#1E3A5F' : 'var(--bg-surface)',
+                    background: redevRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
                     <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
@@ -164,7 +164,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               {(() => {
                 const withConstructor = filteredRedev.filter((r: any) => r.constructor);
                 return withConstructor.length > 0 ? (
-                  <span style={{ fontSize: 'var(--fs-xs)', color: '#34D399', fontWeight: 600, marginLeft: 'auto' }}>시공사 확정 {withConstructor.length}건</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)', fontWeight: 600, marginLeft: 'auto' }}>시공사 확정 {withConstructor.length}건</span>
                 ) : null;
               })()}
             </div>
@@ -306,7 +306,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                         border: isCurrent ? '2px solid var(--brand)' : 'none',
                         boxShadow: isCurrent ? '0 0 8px rgba(37,99,235,0.4)' : 'none',
                       }}>
-                        {(isPast || isCurrent) && <span style={{ color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>✓</span>}
+                        {(isPast || isCurrent) && <span style={{ color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>✓</span>}
                       </div>
                       <div style={{ fontSize: 10, color: isCurrent ? 'var(--brand)' : isPast ? 'var(--text-secondary)' : 'var(--text-tertiary)', fontWeight: isCurrent ? 800 : 400, lineHeight: 1.2 }}>
                         {stage.replace('사업시행인가', '시행인가').replace('정비구역지정', '구역지정').replace('관리처분', '관리처분')}

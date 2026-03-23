@@ -77,7 +77,7 @@ export default function ConsultantRegister() {
       <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>분양 상담사 등록</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 24 }}>로그인 후 분양 상담사로 등록하고, 프리미엄 리스팅으로 고객을 만나세요.</p>
-      <Link href="/login" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 10, background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
+      <Link href="/login" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
     </div>
   );
 
@@ -184,7 +184,7 @@ export default function ConsultantRegister() {
               borderWidth: i === 1 ? 2 : 1,
               position: 'relative',
             }}>
-              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 12px', borderRadius: 10, background: tier.color, color: '#fff' }}>인기</div>}
+              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 12px', borderRadius: 10, background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <span style={{ fontSize: 24 }}>{tier.icon}</span>
                 <div>
@@ -237,7 +237,7 @@ export default function ConsultantRegister() {
               <button onClick={() => setStep('register')} style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>수정</button>
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 'var(--fs-lg)' }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-inverse)', fontWeight: 800, fontSize: 'var(--fs-lg)' }}>
                 {name.slice(0, 1)}
               </div>
               <div>
@@ -273,7 +273,7 @@ export default function ConsultantRegister() {
             )) : (
               <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', marginBottom: 8 }}>아직 활성 리스팅이 없어요</div>
-                <button onClick={() => setStep('pricing')} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid var(--brand)', background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>프리미엄 리스팅 시작</button>
+                <button onClick={() => setStep('pricing')} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid var(--brand)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>프리미엄 리스팅 시작</button>
               </div>
             )}
           </div>

@@ -56,7 +56,7 @@ export default function RightPanel() {
               width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
               background: getAvatarColor(profile.nickname), display: 'flex',
               alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 'var(--fs-base)', fontWeight: 700,
+              color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 700,
             }}>
               {profile.nickname[0]?.toUpperCase()}
             </div>

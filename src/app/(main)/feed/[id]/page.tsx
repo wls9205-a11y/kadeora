@@ -213,7 +213,7 @@ export default async function FeedDetailPage({ params }: Props) {
             width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
             background: getAvatarColor(post.profiles?.nickname ?? '익명'),
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 'var(--fs-base)', fontWeight: 700, color: '#fff',
+            fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-inverse)',
           }}>
             {(post.profiles?.nickname ?? '익')[0].toUpperCase()}
           </div>

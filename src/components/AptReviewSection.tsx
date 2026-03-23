@@ -16,8 +16,8 @@ function StarRating({ rating, size = 14, interactive, onChange }: {
   return (
     <div style={{ display: 'flex', gap: 2 }}>
       {[1, 2, 3, 4, 5].map(i => (
-        <Star key={i} size={size} fill={i <= rating ? '#FBBF24' : 'none'}
-          stroke={i <= rating ? '#FBBF24' : 'var(--text-tertiary)'}
+        <Star key={i} size={size} fill={i <= rating ? 'var(--accent-yellow)' : 'none'}
+          stroke={i <= rating ? 'var(--accent-yellow)' : 'var(--text-tertiary)'}
           style={{ cursor: interactive ? 'pointer' : 'default' }}
           onClick={() => interactive && onChange?.(i)} />
       ))}
@@ -96,7 +96,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
         </div>
         <button onClick={() => setShowForm(!showForm)} style={{
           display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px',
-          background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 6,
+          background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 6,
           fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
         }}>
           <PenSquare size={12} /> 리뷰 쓰기
@@ -136,7 +136,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
           {error && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', marginBottom: 6 }}>{error}</div>}
           <button onClick={handleSubmit} disabled={submitting} style={{
             width: '100%', padding: '8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-            background: 'var(--brand)', color: '#fff', fontWeight: 600, fontSize: 'var(--fs-xs)',
+            background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 600, fontSize: 'var(--fs-xs)',
             opacity: submitting ? 0.5 : 1,
           }}>
             {submitting ? '등록 중...' : '리뷰 등록 (+10P)'}
@@ -159,7 +159,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 width: 24, height: 24, borderRadius: '50%',
                 background: getAvatarColor(r.profiles?.nickname || ''), display: 'flex',
                 alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontSize: 10, fontWeight: 700,
+                color: 'var(--text-inverse)', fontSize: 10, fontWeight: 700,
               }}>
                 {(r.profiles?.nickname || '?')[0]}
               </div>

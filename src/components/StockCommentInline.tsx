@@ -115,7 +115,7 @@ export default function StockCommentInline({ symbol, stockName }: { symbol: stri
                   <div style={{
                     width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
                     background: avatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff',
+                    fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)',
                   }}>{nick[0]}</div>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
                 </div>

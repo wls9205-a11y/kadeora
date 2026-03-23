@@ -332,7 +332,7 @@ export default async function BlogDetailPage({ params }: Props) {
             const nick = c.author_name || (c.profiles as any)?.nickname || '사용자';
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>
                   {nick[0].toUpperCase()}
                 </div>
                 <div style={{ flex: 1 }}>

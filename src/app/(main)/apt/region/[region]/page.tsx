@@ -198,7 +198,7 @@ export default async function RegionLandingPage({ params }: Props) {
       <div style={{ textAlign: 'center', padding: 20 }}>
         <Link href="/apt" style={{
           display: 'inline-block', padding: '12px 28px', background: 'var(--brand)',
-          color: '#fff', borderRadius: 10, fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none',
+          color: 'var(--text-inverse)', borderRadius: 10, fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none',
         }}>
           전체 부동산 정보 보기 →
         </Link>

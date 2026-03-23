@@ -21,8 +21,8 @@ const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }
   1:{title:'새싹',emoji:'🌱',color:'var(--accent-green)'},2:{title:'정보통',emoji:'📡',color:'var(--accent-blue)'},
   3:{title:'동네어른',emoji:'🏘️',color:'var(--accent-purple)'},4:{title:'소문난집',emoji:'🏠',color:'var(--accent-yellow)'},
   5:{title:'인플루언서',emoji:'⚡',color:'var(--accent-red)'},6:{title:'빅마우스',emoji:'🔥',color:'#FB7185'},
-  7:{title:'찐고수',emoji:'💎',color:'#22D3EE'},8:{title:'전설',emoji:'🌟',color:'#FCD34D'},
-  9:{title:'신의경지',emoji:'👑',color:'#818CF8'},10:{title:'카더라신',emoji:'🚀',color:'#C084FC'},
+  7:{title:'찐고수',emoji:'💎',color:'#22D3EE'},8:{title:'전설',emoji:'🌟',color:'var(--accent-yellow)'},
+  9:{title:'신의경지',emoji:'👑',color:'var(--accent-purple)'},10:{title:'카더라신',emoji:'🚀',color:'#C084FC'},
 };
 function avc(uid: string | null) { return getAvatarColor(uid ?? ''); }
 function timeAgo(d: string) { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return '방금'; if (m < 60) return m + '분 전'; if (m < 1440) return Math.floor(m / 60) + '시간 전'; return Math.floor(m / 1440) + '일 전'; }

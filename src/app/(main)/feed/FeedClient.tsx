@@ -335,7 +335,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                 {/* 1행: 아바타 + 닉네임 + 등급 + 시간 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)' }}>
                     {displayName[0].toUpperCase()}
                   </div>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }}>{displayName}</span>

@@ -7,7 +7,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   useEffect(() => { Sentry.captureException(error); }, [error]);
   return (
     <div style={{ textAlign: 'center', padding: '80px 20px', maxWidth: 480, margin: '0 auto' }}>
-      <div style={{ fontSize: 56, marginBottom: 16 }}>😵</div>
+      <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 16 }}>😵</div>
       <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>페이지를 불러오지 못했어요</h2>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 28, lineHeight: 1.6 }}>
         일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.

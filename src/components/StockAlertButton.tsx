@@ -60,7 +60,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
         display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8,
         background: myAlerts.length > 0 ? 'rgba(251,191,36,0.1)' : 'var(--bg-hover)',
         border: myAlerts.length > 0 ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
-        color: myAlerts.length > 0 ? '#FBBF24' : 'var(--text-secondary)',
+        color: myAlerts.length > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)',
         fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
       }}>
         🔔 알림 {myAlerts.length > 0 ? `(${myAlerts.length})` : '설정'}
@@ -98,7 +98,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
             placeholder={`목표가 (현재 ${fmtPrice(currentPrice)})`} aria-label="목표가 입력"
             style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
           <button onClick={addAlert} disabled={saving || !threshold} style={{
-            padding: '10px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
+            padding: '10px 20px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)',
             fontSize: 'var(--fs-sm)', fontWeight: 700, border: 'none', cursor: 'pointer',
             opacity: saving || !threshold ? 0.5 : 1,
           }}>{saving ? '...' : '추가'}</button>

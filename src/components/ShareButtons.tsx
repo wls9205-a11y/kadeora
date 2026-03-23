@@ -6,8 +6,8 @@ interface Props { title: string; postId: number | string; content?: string; }
 
 const PLATFORMS = [
   { id: 'kakao', label: '카카오톡', emoji: '💬', bg: '#FEE500', color: '#191919' },
-  { id: 'twitter', label: 'X', emoji: '𝕏', bg: '#1DA1F2', color: '#fff' },
-  { id: 'facebook', label: '페이스북', emoji: 'f', bg: '#1877F2', color: '#fff' },
+  { id: 'twitter', label: 'X', emoji: '𝕏', bg: '#1DA1F2', color: 'var(--text-inverse)' },
+  { id: 'facebook', label: '페이스북', emoji: 'f', bg: '#1877F2', color: 'var(--text-inverse)' },
   { id: 'copy', label: '링크 복사', emoji: '🔗', bg: 'var(--bg-hover)', color: 'var(--text-primary)' },
 ];
 

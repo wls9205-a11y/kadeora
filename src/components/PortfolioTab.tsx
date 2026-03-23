@@ -125,7 +125,7 @@ export default function PortfolioTab() {
           </div>
           <button onClick={handleAdd} disabled={submitting} style={{
             width: '100%', padding: '10px', borderRadius: 8, border: 'none', cursor: 'pointer',
-            background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 'var(--fs-sm)',
+            background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 700, fontSize: 'var(--fs-sm)',
             opacity: submitting ? 0.5 : 1,
           }}>
             {submitting ? '추가 중...' : '추가하기'}

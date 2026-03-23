@@ -217,7 +217,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
       background: avc(nick), display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.38, fontWeight: 700, color: '#fff',
+      fontSize: size * 0.38, fontWeight: 700, color: 'var(--text-inverse)',
     }}>{nick[0]}</div>
   );
 
