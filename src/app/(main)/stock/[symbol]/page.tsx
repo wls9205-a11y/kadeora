@@ -202,9 +202,14 @@ export default async function StockDetailPage({ params }: Props) {
         <ShareButtons title={`${s.name} (${symbol}) 주가`} postId={symbol} />
       </div>
 
-      <Link href="/discuss" style={{ display: 'block', textAlign: 'center', padding: 14, background: 'var(--brand)', borderRadius: 12, textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-inverse)' }}>
-        💬 라운지 입장
-      </Link>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
+          ⚔️ 종목 비교
+        </Link>
+        <Link href="/discuss" style={{ flex: 1, textAlign: 'center', padding: 14, background: 'var(--brand)', borderRadius: 12, textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-inverse)' }}>
+          💬 라운지 입장
+        </Link>
+      </div>
     </div>
   );
 }

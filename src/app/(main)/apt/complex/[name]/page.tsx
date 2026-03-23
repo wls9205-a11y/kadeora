@@ -44,6 +44,16 @@ export default async function ComplexDetailPage({ params }: Props) {
   const dong = trades[0].dong || '';
   const sigungu = trades[0].sigungu || '';
 
+  // 관련 블로그
+  let relatedBlogs: any[] = [];
+  try {
+    const searchTerm = decoded.length > 4 ? decoded.slice(0, 4) : decoded;
+    const { data: rb } = await sb.from('blog_posts').select('slug,title,view_count,published_at')
+      .eq('is_published', true).or(`title.ilike.%${searchTerm}%,title.ilike.%${region.slice(0,2)} 부동산%`)
+      .order('view_count', { ascending: false }).limit(3) as { data: any[] | null };
+    relatedBlogs = rb || [];
+  } catch {}
+
   // 통계 계산
   const amounts = trades.filter(t => t.deal_amount > 0).map(t => t.deal_amount);
   const avgPrice = amounts.length ? Math.round(amounts.reduce((s, a) => s + a, 0) / amounts.length) : 0;
@@ -165,6 +175,19 @@ export default async function ComplexDetailPage({ params }: Props) {
         <a href={`https://map.naver.com/p/search/${encodeURIComponent(decoded + ' ' + dong)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
         <Link href={`/apt/search?q=${encodeURIComponent(decoded)}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🔍 실거래 검색</Link>
       </div>
+
+      {/* 관련 블로그 */}
+      {relatedBlogs.length > 0 && (
+        <div style={card}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 분석</div>
+          {relatedBlogs.map((b: any) => (
+            <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>👀 {b.view_count || 0}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 40px' }}>
         📊 국토교통부 실거래가 공개시스템 기준 · ⚠️ 투자 참고용
