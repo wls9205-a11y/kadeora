@@ -378,6 +378,10 @@
 
 ## 미해결 (다음 세션)
 
+### 핫픽스 (세션 24)
+- [x] 블로그 상세 500 에러 수정 (isomorphic-dompurify → sanitize-html.ts) ✅
+- [x] 피드 콘솔 404 수정 (watchlist → stock_watchlist 테이블명) ✅
+
 ### 긴급
 - [ ] Supabase 세션 24 마이그레이션 실행 (`20260323_session24_evolution.sql`) — ✅ 실행 완료
 - [ ] Vercel ERROR 배포 정리 (동시 빌드 큐)
