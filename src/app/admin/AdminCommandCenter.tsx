@@ -1,6 +1,9 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import dynamic from 'next/dynamic';
+
+const OneClickPanel = dynamic(() => import('./OneClickPanel'), { ssr: false });
 
 /* ─────────────────────── Types ─────────────────────── */
 interface KPI { label: string; value: number; icon: string; color: string }
@@ -413,6 +416,9 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
 
       {/* ═══ MAIN ═══ */}
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '20px 20px 40px' }}>
+
+        {/* 원클릭 작업 + 진단 패널 */}
+        <OneClickPanel />
 
         {/* KPI Cards */}
         <div className="cc-section" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: 10, marginBottom: 16 }}>
