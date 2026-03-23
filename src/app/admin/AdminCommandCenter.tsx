@@ -175,12 +175,12 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', false),
         sb.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', false),
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('constructor_nm', 'is', null),
-        // 세션28 추가 쿼리
-        sb.from('apt_reviews').select('id', { count: 'exact', head: true }).eq('is_deleted', false).catch(() => ({ count: 0 })),
-        sb.from('blog_series').select('id', { count: 'exact', head: true }).eq('is_active', true).catch(() => ({ count: 0 })),
-        sb.from('portfolio_holdings').select('id', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
-        sb.from('price_alerts').select('id', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
-        sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).is('total_households', null).catch(() => ({ count: 0 })),
+        // 세션28 추가 쿼리 — Supabase 쿼리빌더는 .catch 미지원 → Promise.resolve 래핑
+        Promise.resolve(sb.from('apt_reviews').select('id', { count: 'exact', head: true }).eq('is_deleted', false)).catch(() => ({ count: 0 })),
+        Promise.resolve(sb.from('blog_series').select('id', { count: 'exact', head: true }).eq('is_active', true)).catch(() => ({ count: 0 })),
+        Promise.resolve(sb.from('portfolio_holdings').select('id', { count: 'exact', head: true })).catch(() => ({ count: 0 })),
+        Promise.resolve(sb.from('price_alerts').select('id', { count: 'exact', head: true })).catch(() => ({ count: 0 })),
+        Promise.resolve(sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).is('total_households', null)).catch(() => ({ count: 0 })),
       ]);
 
       setKpis([
