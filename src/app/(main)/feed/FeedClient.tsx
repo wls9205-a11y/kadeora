@@ -8,6 +8,7 @@ import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { SkeletonCard } from '@/components/Skeleton';
 import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/EmptyState';
 import AttendanceBanner from '@/components/AttendanceBanner';
@@ -362,8 +363,9 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       </div>
 
       {hasMore && (
-        <div ref={sentinelRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
-          <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>불러오는 중...</span>
+        <div ref={sentinelRef} style={{ marginTop: 8 }}>
+          <SkeletonCard lines={2} />
+          <SkeletonCard lines={2} />
         </div>
       )}
       {!hasMore && posts.length > 0 && (

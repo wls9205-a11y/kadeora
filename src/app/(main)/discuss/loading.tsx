@@ -1,9 +1,9 @@
+import { SkeletonList } from '@/components/Skeleton';
+
 export default function Loading() {
   return (
-    <div style={{ padding:16 }}>
-      {[1,2,3,4,5].map(i => (
-        <div key={i} className="skeleton" style={{ height:120, borderRadius:12, marginBottom:10, width:'100%' }} />
-      ))}
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px' }}>
+      <SkeletonList count={5} type="card" />
     </div>
   );
 }
