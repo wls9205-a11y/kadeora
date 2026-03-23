@@ -16,7 +16,7 @@ export default function GuestCTA() {
 
   if (!show) return null;
   return (
-    <div style={{ position: 'fixed', bottom: 64, left: 0, right: 0, zIndex: 100, padding: '0 16px' }}>
+    <div style={{ position: 'fixed', bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))', left: 0, right: 0, zIndex: 100, padding: '0 16px' }}>
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--brand)', borderRadius: 16,
         padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12,

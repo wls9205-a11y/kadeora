@@ -491,7 +491,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       </div>
 
       {/* 게시글 목록 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '20px 24px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(14px, 3vw, 20px) clamp(14px, 3vw, 24px)' }}>
         {activeTab === 'posts' && (
           displayedPosts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>✏️ 첫 글을 작성해보세요</div>

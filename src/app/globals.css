@@ -12,7 +12,12 @@
 
 /* 카드 호버 효과 */
 .kd-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.kd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+@media (hover: hover) {
+  .kd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+}
+@media (hover: none) {
+  .kd-card:active { transform: scale(0.98); }
+}
 
 /* 태블릿 사이드바 숨김 */
 @media (min-width: 768px) and (max-width: 899px) {

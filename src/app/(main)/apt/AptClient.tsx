@@ -111,7 +111,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       </div>
 
       {/* 탭 */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
           { k: 'sub' as const, l: '📅 청약', type: 'subscription', data: apts },
           { k: 'ongoing' as const, l: '🏢 분양중', type: 'ongoing', data: ongoingApts },
@@ -122,7 +122,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           const hasNew = (data as any[]).some((item: any) => isNew(item, type));
           return (
             <button key={k} onClick={() => handleTabChange(k)} aria-pressed={activeTab === k} style={{
-              flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
+              flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative', minWidth: 'fit-content',
               background: activeTab === k ? 'var(--brand)' : 'transparent',
               color: activeTab === k ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
               boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
