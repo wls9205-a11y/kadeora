@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
@@ -7,6 +8,7 @@ import type { CommentWithProfile } from '@/types/database';
 import type { User } from '@supabase/supabase-js';
 import ReportButton from '@/components/ReportButton';
 import { gradeEmoji, gradeTitle, gradeColor } from '@/lib/constants';
+import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
 
 interface CommentSectionProps {
@@ -88,89 +90,97 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
 
   return (
     <div style={{ marginTop: 8 }}>
-      <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 700, margin: '0 0 12px' }}>
-        댓글 {comments.length}
+      <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 700, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+        💬 대화 {comments.length > 0 && <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 500 }}>{comments.length}개</span>}
       </h3>
 
-      {/* 댓글 입력 — 인라인 (댓글 목록 위) */}
-      <div style={{ marginBottom: 16 }}>
+      {/* 댓글 입력 — 채팅 스타일 */}
+      <div style={{ marginBottom: 20 }}>
         {user ? (
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-            <textarea
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="댓글을 남겨보세요..."
-              maxLength={500}
-              rows={2}
-              style={{
-                flex: 1, background: 'var(--bg-hover)', border: '1px solid var(--border)',
-                borderRadius: 12, color: 'var(--text-primary)', padding: '10px 14px',
-                fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
-              }}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-            />
-            <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
-              padding: '10px 16px', borderRadius: 10, border: 'none', flexShrink: 0,
-              background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
-              color: content.trim() ? 'white' : 'var(--text-tertiary)',
-              cursor: content.trim() ? 'pointer' : 'default', fontSize: 'var(--fs-sm)', fontWeight: 700,
-            }}>등록</button>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 4 }}>나</div>
+            <div style={{ flex: 1 }}>
+              <textarea
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                placeholder="여기에 의견을 남겨보세요..."
+                maxLength={500}
+                rows={2}
+                style={{
+                  width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)',
+                  borderRadius: 16, color: 'var(--text-primary)', padding: '10px 14px',
+                  fontSize: 'var(--fs-sm)', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
+                  transition: 'border-color 0.15s',
+                }}
+                onFocus={e => e.currentTarget.style.borderColor = 'var(--brand)'}
+                onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{content.length}/500</span>
+                <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
+                  padding: '6px 18px', borderRadius: 20, border: 'none',
+                  background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
+                  color: content.trim() ? 'white' : 'var(--text-tertiary)',
+                  cursor: content.trim() ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 700,
+                  transition: 'all 0.15s',
+                }}>등록</button>
+              </div>
+            </div>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '14px', background: 'var(--bg-surface)', borderRadius: 10, border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하면 댓글을 남길 수 있어요
+          <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-surface)', borderRadius: 14, border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+            💬 <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하고 대화에 참여하세요
           </div>
         )}
       </div>
 
-      {/* 댓글 목록 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* 댓글 목록 — 대화 스레드 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {comments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
-            💬 첫 댓글을 남겨보세요
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+            아직 대화가 없어요. 첫 의견을 남겨보세요!
           </div>
         ) : (
           comments.map(comment => (
-            <div key={comment.id} style={{ background: 'var(--bg-surface)', borderRadius: 10, border: '1px solid var(--border)', padding: '14px 16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0 }}>
-                    {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
-                  </div>
-                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{gradeEmoji(comment.profiles?.grade ?? null)} {comment.profiles?.nickname ?? '익명'}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(comment.profiles?.grade ?? null), fontWeight: 600 }}>{gradeTitle(comment.profiles?.grade ?? null)}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
+            <div key={comment.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0' }}>
+              {/* 아바타 */}
+              <Link href={`/profile/${comment.profiles?.id || comment.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: getAvatarColor(comment.profiles?.nickname ?? 'U'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)' }}>
+                  {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {/* 댓글 좋아요 */}
+              </Link>
+              {/* 말풍선 */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '4px 14px 14px 14px', padding: '10px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
+                    <span style={{ fontSize: 11, color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
+                  </div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.55, wordBreak: 'break-word' }}>
+                    {comment.content}
+                  </div>
+                </div>
+                {/* 메타: 시간 + 좋아요 + 신고/삭제 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4, paddingLeft: 4 }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
                   <button
                     onClick={() => handleCommentLike(comment.id, comment.likes_count ?? 0)}
                     disabled={likingIds.has(comment.id)}
                     aria-label="댓글 좋아요"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 4,
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: '2px 6px',
-                      borderRadius: 6, transition: 'all 0.15s',
-                      opacity: likingIds.has(comment.id) ? 0.5 : 1,
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--error)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')}
-                  >
-                    🤍 <span>{comment.likes_count ?? 0}</span>
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
+                    ♡ {(comment.likes_count ?? 0) > 0 ? comment.likes_count : ''}
                   </button>
                   {/* 삭제 버튼 */}
                   {user?.id === comment.author_id && (
                     <button
                       onClick={() => setDeleteTarget(comment.id)}
                       aria-label="댓글 삭제"
-                      style={{ background: 'none', border: 'none', color: 'var(--error)', fontSize: 'var(--fs-sm)', cursor: 'pointer', opacity: 0.7, padding: '2px 4px' }}
-                    >삭제</button>
+                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 11, cursor: 'pointer', padding: 0 }}>삭제</button>
                   )}
                   <ReportButton commentId={comment.id} />
                 </div>
               </div>
-              <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{comment.content}</p>
             </div>
           ))
         )}

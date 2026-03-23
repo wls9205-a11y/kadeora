@@ -272,47 +272,58 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       )}
 
       {/* 게시글 목록 */}
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {visiblePosts.map((post) => {
           const displayName = post.is_anonymous ? '익명' : (post.profiles?.nickname ?? '익명');
           const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           const isLiked = likedPosts.has(post.id as number);
           const postHref = `/feed/${(post as any).slug || post.id}`;
+          const cat = { apt: { label: '부동산', color: '#34D399', bg: 'rgba(52,211,153,0.1)' }, stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.1)' }, local: { label: '우리동네', color: '#FBBF24', bg: 'rgba(251,191,36,0.1)' }, free: { label: '자유', color: '#A78BFA', bg: 'rgba(167,139,250,0.1)' } }[post.category] || { label: '자유', color: '#A78BFA', bg: 'rgba(167,139,250,0.1)' };
+          const commentCount = post.comments_count ?? 0;
           return (
             <div key={post.id} className="animate-fadeIn kd-feed-card"
-              style={{ padding: '10px 4px', borderBottom: '1px solid var(--border)', borderRadius: 8, transition: 'background var(--transition-fast)' }}>
-              <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
-                {/* 1행: 아바타 + 닉네임 + 등급 + 시간 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)' }}>
+              style={{ padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, transition: 'all var(--transition-fast)' }}>
+              {/* 상단: 아바타 + 닉네임 + 등급 + 카테고리 + 시간 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <Link href={post.is_anonymous ? '#' : `/profile/${post.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-inverse)' }}>
                     {displayName[0].toUpperCase()}
                   </div>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }}>{displayName}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(post.profiles?.grade ?? 1), fontWeight: 600 }}>{gradeTitle(post.profiles?.grade ?? 1)}</span>
-                  <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>· {timeAgo(post.created_at)}</span>
+                </Link>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }}>{displayName}</span>
+                    <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji} {gradeTitle(post.profiles?.grade ?? 1)}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 1 }}>
+                    <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                  </div>
                 </div>
+              </div>
 
-                {/* 본문: 제목 + 본문 2줄 */}
+              <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                {/* 제목 */}
                 {post.title && (
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.45, marginBottom: 4 }}>
                     {post.title}
                   </div>
                 )}
-                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                {/* 본문 미리보기 */}
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                   {(post as any).excerpt || post.content}
                 </div>
                 {/* 이미지 썸네일 */}
                 {(post as any).images && (post as any).images.length > 0 && (
-                  <div style={{ marginTop: 8, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+                  <div style={{ marginTop: 10, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
                     {((post as any).images as string[]).slice(0, 3).map((img: string, i: number) => (
-                      <div key={i} style={{ width: 80, height: 80, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
-                        <Image src={img} alt="게시글 이미지" fill sizes="80px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
+                      <div key={i} style={{ width: 90, height: 90, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
+                        <Image src={img} alt="게시글 이미지" fill sizes="90px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
                       </div>
                     ))}
                     {(post as any).images.length > 3 && (
-                      <div style={{ width: 80, height: 80, borderRadius: 8, flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                      <div style={{ width: 90, height: 90, borderRadius: 10, flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
                         +{(post as any).images.length - 3}
                       </div>
                     )}
@@ -320,22 +331,22 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 )}
               </Link>
 
-              {/* 인터랙션: 좋아요 + 댓글 + 공유 (3개만) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
+              {/* 인터랙션 바: 좋아요 + 댓글 + 공유 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
                   aria-label="좋아요"
                   className={isLiked ? 'animate-like' : ''}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', color: isLiked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0, transition: 'color var(--transition-fast)' }}>
-                  <Heart size={18} fill={isLiked ? 'var(--accent-red)' : 'none'} stroke={isLiked ? 'var(--accent-red)' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : ''}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: isLiked ? 'rgba(239,68,68,0.08)' : 'var(--bg-hover)', border: 'none', borderRadius: 20, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: isLiked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontWeight: 600, fontFamily: 'inherit', padding: '5px 12px', transition: 'all var(--transition-fast)' }}>
+                  <Heart size={15} fill={isLiked ? 'var(--accent-red)' : 'none'} stroke={isLiked ? 'var(--accent-red)' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : '좋아요'}
                 </button>
                 <Link href={`${postHref}#comments`} aria-label="댓글"
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', padding: 0 }}>
-                  <MessageCircle size={18} /> {(post.comments_count ?? 0) > 0 ? numFmt(post.comments_count ?? 0) : ''}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600, background: 'var(--bg-hover)', borderRadius: 20, padding: '5px 12px' }}>
+                  <MessageCircle size={15} /> {commentCount > 0 ? `댓글 ${numFmt(commentCount)}` : '댓글'}
                 </Link>
                 <button onClick={(e) => handleShare(e, post)}
                   aria-label="공유"
-                  style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 0 }}>
-                  <Share2 size={18} />
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-hover)', border: 'none', borderRadius: 20, cursor: 'pointer', color: 'var(--text-tertiary)', padding: '5px 12px', fontSize: 'var(--fs-xs)', fontWeight: 600, fontFamily: 'inherit' }}>
+                  <Share2 size={15} /> 공유
                 </button>
               </div>
             </div>
@@ -349,12 +360,20 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           // 비로그인 시 5번째 카드 뒤 가입 유도 배너
           if (i === 4 && !currentUserId) {
             acc.push(
-              <div key="signup-cta" style={{ padding: '20px 16px', margin: '8px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>카더라 회원이 되면</div>
-                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 16 }}>
-                  관심 종목 알림 · 청약 마감 알림<br />글 전문 보기 · 댓글 참여 · 포인트 적립
+              <div key="signup-cta" style={{ padding: '20px 16px', margin: '4px 0', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--brand-bg, rgba(37,99,235,0.06)) 100%)', border: '1px solid var(--brand-border, rgba(37,99,235,0.15))', borderRadius: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>💬</div>
+                  <div>
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>대화에 참여해보세요</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>111명의 투자자가 함께합니다</div>
+                  </div>
                 </div>
-                <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
+                  {['관심 종목 알림', '청약 마감 알림', '댓글 참여', '포인트 적립'].map(f => (
+                    <span key={f} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f}</span>
+                  ))}
+                </div>
+                <Link href="/login" style={{ display: 'block', textAlign: 'center', padding: '11px 0', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
                   카카오로 3초 가입
                 </Link>
               </div>

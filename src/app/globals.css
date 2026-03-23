@@ -679,7 +679,8 @@ input, textarea, select {
 }
 
 /* 피드 카드 hover */
-.kd-feed-card:hover { background: var(--bg-hover); }
+.kd-feed-card { transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease; }
+.kd-feed-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--brand) !important; }
 
 /* 카드 등장 stagger 애니메이션 */
 @keyframes fadeInUp {

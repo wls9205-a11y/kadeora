@@ -222,7 +222,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
   // 마크다운 → HTML
   const htmlFull = injectInternalLinks(sanitizeHtml(marked(post.content) as string));
-  const cutoff = Math.floor(htmlFull.length * 0.4);
+  const cutoff = Math.floor(htmlFull.length * 0.7);
   const htmlTruncated = htmlFull.slice(0, cutoff);
 
   // 목차 추출
