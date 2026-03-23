@@ -118,7 +118,30 @@ export default async function BlogDetailPage({ params }: Props) {
   const { data: { user } } = await sb.auth.getUser();
   const isLoggedIn = !!user;
 
-  const { data: related } = await sb.from('blog_posts').select('slug, title').eq('category', post.category).eq('is_published', true).neq('id', post.id).not('published_at', 'is', null).order('published_at', { ascending: false }).limit(3);
+  // 관련 글 추천 (태그 유사도 → 같은 카테고리 인기순 폴백)
+  let related: any[] = [];
+  try {
+    const postTags = post.tags || [];
+    if (postTags.length > 0) {
+      // 태그 기반 추천 (첫 2개 태그로 검색)
+      const tagQueries = postTags.slice(0, 2).map((t: string) => `tags.cs.{${t}}`).join(',');
+      const { data: tagRelated } = await sb.from('blog_posts')
+        .select('slug, title, view_count').eq('category', post.category).eq('is_published', true)
+        .neq('id', post.id).or(tagQueries)
+        .order('view_count', { ascending: false }).limit(5);
+      related = tagRelated || [];
+    }
+    // 태그 추천 부족하면 같은 카테고리 인기순으로 보충
+    if (related.length < 3) {
+      const existingSlugs = related.map((r: any) => r.slug);
+      const { data: catRelated } = await sb.from('blog_posts')
+        .select('slug, title, view_count').eq('category', post.category).eq('is_published', true)
+        .neq('id', post.id).not('published_at', 'is', null)
+        .order('view_count', { ascending: false }).limit(5 - related.length);
+      const extra = (catRelated || []).filter((r: any) => !existingSlugs.includes(r.slug));
+      related = [...related, ...extra].slice(0, 5);
+    }
+  } catch { }
 
   // 시리즈 정보
   let seriesInfo: { series: any; posts: any[] } | null = null;
@@ -181,7 +204,7 @@ export default async function BlogDetailPage({ params }: Props) {
         '@type': 'Comment',
         text: c.content,
         dateCreated: c.created_at,
-        author: { '@type': 'Person', name: (c.profiles as any)?.nickname ?? '사용자' },
+        author: { '@type': 'Person', name: c.author_name || (c.profiles as any)?.nickname || '사용자' },
       })),
     } : {}),
     interactionStatistic: {
@@ -372,10 +395,11 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>관련 글</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📚 관련 글</div>
           {related!.map((r: any) => (
-            <Link key={r.slug} href={`/blog/${r.slug}`} style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>
-              {r.title}
+            <Link key={r.slug} href={`/blog/${r.slug}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</span>
+              {r.view_count > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>👀 {r.view_count}</span>}
             </Link>
           ))}
         </div>

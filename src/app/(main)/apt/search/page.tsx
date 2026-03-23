@@ -154,6 +154,20 @@ export default async function AptSearchPage({ searchParams }: Props) {
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '20px 0' }}>
         📊 국토교통부 실거래가 공개시스템 기준 · ⚠️ 투자 참고용
       </p>
+
+      {/* 지역별 부동산 내부 링크 (SEO) */}
+      <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 20 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏙️ 지역별 부동산 정보</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
+            <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{
+              padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
+              background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
+              border: '1px solid var(--border)',
+            }}>{r}</Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

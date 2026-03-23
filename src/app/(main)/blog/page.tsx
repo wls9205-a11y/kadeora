@@ -82,7 +82,7 @@ export default async function BlogPage({ searchParams }: Props) {
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
   if (category !== 'all') q2 = q2.eq('category', category);
-  if (q) q2 = q2.ilike('title', `%${q}%`);
+  if (q) q2 = q2.or(`title.ilike.%${q}%,excerpt.ilike.%${q}%`);
   if (sort === 'popular') {
     q2 = q2.order('view_count', { ascending: false });
   } else {
