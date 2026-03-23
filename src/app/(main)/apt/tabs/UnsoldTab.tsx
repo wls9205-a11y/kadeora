@@ -261,14 +261,11 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const dangerColor = unsoldCount >= 1000 ? 'var(--accent-red)' : unsoldCount >= 500 ? 'var(--accent-orange)' : unsoldCount >= 100 ? 'var(--accent-yellow)' : 'var(--accent-green)';
 
         return (
-          <div key={u.id} style={{
+          <div key={u.id} className="kd-card-hover" style={{
             padding: '16px 16px', borderRadius: 12, marginBottom: 8,
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderLeft: `4px solid ${dangerColor}`,
-            transition: 'background 0.15s', cursor: 'pointer',
+            borderLeft: `4px solid ${dangerColor}`, cursor: 'pointer',
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
           >
             {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>

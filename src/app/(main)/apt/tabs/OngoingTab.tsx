@@ -267,7 +267,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
         const isPremium = !!premiumMatch;
 
         return (
-          <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{
+          <div key={o.id} onClick={() => setSelectedOngoing(o)} className="kd-card-hover" style={{
             background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03))' : 'var(--bg-surface)',
             border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8,
             borderLeft: `4px solid ${isPremium ? 'var(--accent-yellow)' : accentColor}`, cursor: 'pointer',

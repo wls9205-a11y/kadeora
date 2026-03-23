@@ -184,14 +184,12 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               const stageIdx = STAGE_ORDER.indexOf(r.stage);
               const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
               return (
-                <div key={r.id} onClick={() => setSelectedRedev(r)} style={{
+                <div key={r.id} onClick={() => setSelectedRedev(r)} className="kd-card-hover" style={{
                   padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  cursor: 'pointer', transition: 'background 0.15s',
+                  cursor: 'pointer',
                   position: 'relative', overflow: 'hidden',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
                 >
                   {/* 상단 진행률 바 (전체 너비) */}
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3 }}>

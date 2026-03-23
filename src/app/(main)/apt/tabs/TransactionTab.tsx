@@ -172,7 +172,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const vsMax = maxP > 0 && amt > 0 && maxP !== amt ? Math.round(((amt - maxP) / maxP) * 100) : null;
         const isMax = maxP > 0 && amt >= maxP && sameApt.length >= 2;
         return (
-          <div key={`${t.id || i}`} onClick={() => setSelected(t)} style={{
+          <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="kd-card-hover" style={{
             padding: '14px 16px', borderRadius: 14, marginBottom: 8,
             background: isMax ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)',
             border: isMax ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',

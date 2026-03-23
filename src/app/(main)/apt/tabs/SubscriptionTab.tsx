@@ -269,13 +269,12 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             // 간략 주소: 전체 주소에서 구+동 추출
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
-              <Link key={apt.id} href={`/apt/${apt.house_manage_no || apt.id}`} style={{
+              <Link key={apt.id} href={`/apt/${apt.house_manage_no || apt.id}`} className="kd-card-hover" style={{
                 display: 'block', padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
                 background: st === 'open' ? 'linear-gradient(135deg, var(--bg-surface), rgba(96,165,250,0.04))' : 'var(--bg-surface)',
                 border: st === 'open' ? '1.5px solid rgba(96,165,250,0.3)' : '1px solid var(--border)',
                 opacity: st === 'closed' ? 0.55 : 1,
                 textDecoration: 'none', color: 'inherit',
-                transition: 'transform 0.1s, box-shadow 0.15s',
               }}>
                 {/* 1행: 상태배지 + D-day + 특성 + 지역 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap' }}>
