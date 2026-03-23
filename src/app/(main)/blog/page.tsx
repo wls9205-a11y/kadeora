@@ -186,7 +186,7 @@ export default async function BlogPage({ searchParams }: Props) {
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 인기 글</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {(popularPosts ?? []).map((p: any, i: number) => (
-              <Link key={p.id} href={`/blog/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
+              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 22 }}>{i + 1}</span>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>

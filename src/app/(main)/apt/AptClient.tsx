@@ -61,7 +61,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 12px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 8 }}>
