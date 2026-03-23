@@ -14,7 +14,7 @@ import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
 
 export const revalidate = 300;
-const SITE = 'https://kadeora.app';
+import { SITE_URL as SITE } from '@/lib/constants';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();

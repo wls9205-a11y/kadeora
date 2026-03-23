@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { notFound } from 'next/navigation';
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${decoded} 부동산 정보 — 청약·실거래·재개발·미분양`,
     description: `${decoded} 지역 아파트 청약 일정, 실거래가, 재개발 현황, 미분양 정보를 한눈에. 카더라에서 ${decoded} 부동산 정보를 확인하세요.`,
-    alternates: { canonical: `https://kadeora.app/apt/region/${encodeURIComponent(decoded)}` },
+    alternates: { canonical: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}` },
     openGraph: {
       title: `${decoded} 부동산 종합 정보`,
       description: `${decoded} 청약·실거래·재개발·미분양 한눈에`,
@@ -209,8 +210,8 @@ export default async function RegionLandingPage({ params }: Props) {
         '@type': 'WebPage',
         name: `${decoded} 부동산 종합 정보`,
         description: `${decoded} 지역 아파트 청약, 실거래가, 재개발, 미분양 정보`,
-        url: `https://kadeora.app/apt/region/${encodeURIComponent(decoded)}`,
-        isPartOf: { '@type': 'WebSite', name: '카더라', url: 'https://kadeora.app' },
+        url: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,
+        isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
       })}} />
     </div>
   );

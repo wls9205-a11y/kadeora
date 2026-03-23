@@ -7,7 +7,7 @@ import EmptyState from '@/components/EmptyState';
 
 export const revalidate = 300;
 
-const SITE = 'https://kadeora.app';
+import { SITE_URL as SITE } from '@/lib/constants';
 
 const CAT_META: Record<string, { title: string; desc: string }> = {
   all: { title: '블로그 — 주식·청약·부동산 정보', desc: '코스피 코스닥 시세, 아파트 청약 일정, 미분양 현황, 재테크 정보를 매일 업데이트합니다.' },

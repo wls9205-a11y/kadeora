@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import OfflineBanner from '@/components/OfflineBanner';
@@ -10,21 +11,21 @@ import KakaoInit from '@/components/KakaoInit';
 const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://kadeora.app'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: '카더라 — 대한민국 소리소문 정보 커뮤니티',
     template: '%s | 카더라',
   },
   description: '아는 사람만 아는 그 정보 — 주식 시세, 아파트 청약, 우리동네 소식을 가장 빠르게',
   keywords: ['청약', '아파트 청약', '주식', '부동산', '카더라', '청약 일정', '국내주식', '코스피', '코스닥', '실시간 시세', '소문', '커뮤니티'],
-  authors: [{ name: '카더라', url: 'https://kadeora.app' }],
+  authors: [{ name: '카더라', url: SITE_URL }],
   creator: '카더라',
   openGraph: {
     title: '카더라 — 아는 사람만 아는 그 정보',
     description: '주식 시세, 아파트 청약, 우리동네 소식을 가장 빠르게. 소리소문 정보 커뮤니티.',
-    url: 'https://kadeora.app',
+    url: SITE_URL,
     siteName: '카더라',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-hero.png', width: 1024, height: 1024, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' }],
+    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', width: 1024, height: 1024, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' }],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '카더라 - 대한민국 소리소문 정보 커뮤니티',
     description: '부동산 · 주식 · 청약 · 지역 소식',
-    images: ['https://kadeora.app/images/brand/kadeora-wide.png'],
+    images: [SITE_URL + '/images/brand/kadeora-wide.png'],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   verification: {
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: '카더라' },
   category: '금융, 부동산, 커뮤니티',
-  alternates: { languages: { 'ko-KR': 'https://kadeora.app' } },
+  alternates: { languages: { 'ko-KR': SITE_URL } },
   other: {
     'application-name': '카더라',
     'service-type': '금융·부동산 정보 커뮤니티',
@@ -93,17 +94,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name: '카더라',
           alternateName: ['KADEORA', '카더라 커뮤니티'],
           description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론',
-          url: 'https://kadeora.app',
+          url: SITE_URL,
           applicationCategory: 'FinanceApplication',
           operatingSystem: 'Web, iOS, Android',
           inLanguage: 'ko-KR',
           provider: {
             '@type': 'Organization',
             name: '카더라',
-            url: 'https://kadeora.app',
+            url: SITE_URL,
             logo: {
               '@type': 'ImageObject',
-              url: 'https://kadeora.app/images/brand/kadeora-hero.png',
+              url: SITE_URL + '/images/brand/kadeora-hero.png',
             },
             contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', availableLanguage: '한국어' },
           },
@@ -113,7 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           '@context': 'https://schema.org',
           '@type': 'WebSite',
           name: '카더라',
-          url: 'https://kadeora.app',
+          url: SITE_URL,
           potentialAction: {
             '@type': 'SearchAction',
             target: { '@type': 'EntryPoint', urlTemplate: 'https://kadeora.app/search?q={search_term_string}' },

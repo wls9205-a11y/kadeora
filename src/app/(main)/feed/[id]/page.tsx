@@ -1,5 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
-import { DEMO_POSTS, CATEGORY_MAP, GRADE_EMOJI } from '@/lib/constants';
+import { DEMO_POSTS, CATEGORY_MAP, GRADE_EMOJI, SITE_URL } from '@/lib/constants';
 
 // Cache: 120s — 게시글 상세
 export const revalidate = 120;
@@ -18,7 +18,6 @@ import FontSizeControl from '@/components/FontSizeControl';
 import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
 function parsePostId(param: string): { numId: number; isSlug: boolean } {
   const match = param.match(/-(\d+)$/);
@@ -44,7 +43,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const SITE_URL_META = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  
   try {
     const sb = await createSupabaseServer();
     const numId = await findPostBySlugOrId(sb, id);
@@ -57,7 +56,7 @@ export async function generateMetadata({ params }: Props) {
     if (!post) return {};
     const author = (post.profiles as { nickname?: string } | null)?.nickname ?? '익명';
     const description = post.content.slice(0, 160);
-    const ogImageUrl = `${SITE_URL_META}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}&category=${encodeURIComponent(post.category || '')}&likes=${post.likes_count ?? 0}&comments=${post.comments_count ?? 0}`;
+    const ogImageUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}&category=${encodeURIComponent(post.category || '')}&likes=${post.likes_count ?? 0}&comments=${post.comments_count ?? 0}`;
     return {
       title: post.title,
       description,
@@ -70,7 +69,7 @@ export async function generateMetadata({ params }: Props) {
         type: 'article',
         publishedTime: post.created_at,
         authors: [author],
-        url: `${SITE_URL_META}/feed/${post.slug || numId}`,
+        url: `${SITE_URL}/feed/${post.slug || numId}`,
         images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
       },
       twitter: {
@@ -83,7 +82,7 @@ export async function generateMetadata({ params }: Props) {
   } catch {
     return {
       openGraph: {
-        images: [{ url: `${SITE_URL_META}/og-image.png`, width: 1200, height: 628, alt: '카더라' }],
+        images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 628, alt: '카더라' }],
       },
     };
   }

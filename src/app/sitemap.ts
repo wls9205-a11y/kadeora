@@ -1,7 +1,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { MetadataRoute } from 'next';
 
-const BASE = 'https://kadeora.app';
+import { SITE_URL as BASE } from '@/lib/constants';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

@@ -1,4 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${apt.house_nm} 청약`,
       description: `${apt.region_nm} · ${apt.tot_supply_hshld_co ?? '-'}세대`,
       alternates: {
-        canonical: `https://kadeora.app/apt/${id}`,
+        canonical: `${SITE_URL}/apt/${id}`,
       },
     };
   } catch { return {}; }
@@ -107,7 +108,7 @@ export default async function AptDetailPage({ params }: Props) {
         startDate: apt.rcept_bgnde || undefined,
         endDate: apt.rcept_endde || undefined,
         location: { '@type': 'Place', name: apt.hssply_adres || apt.house_nm, address: apt.hssply_adres || apt.region_nm },
-        url: `https://kadeora.app/apt/${id}`,
+        url: `${SITE_URL}/apt/${id}`,
         organizer: { '@type': 'Organization', name: '청약홈', url: 'https://www.applyhome.co.kr' },
       }) }} />
       {/* 헤더 */}

@@ -1,5 +1,8 @@
 import type { PostWithProfile, TrendingKeyword, StockQuote, DiscussionRoom, ShopProduct, AptSubscription } from '@/types/database';
 
+/** 사이트 기본 URL — 환경변수 우선, 폴백 production URL */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+
 export const DEMO_POSTS: PostWithProfile[] = [
   {
     id: 1, author_id: 'demo-1', category: 'apt', title: '강동구 둔촌주공 재건축 근황 알아봤습니다',

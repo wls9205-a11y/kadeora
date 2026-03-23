@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발',
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '청약·분양중·미분양·재개발',
     description: '전국 아파트 청약 일정, 분양중 현장, 미분양 현황, 재개발·재건축 진행 현황',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-full.png', alt: '카더라 청약·분양중·미분양·재개발' }],
+    images: [{ url: SITE_URL + '/images/brand/kadeora-full.png', alt: '카더라 청약·분양중·미분양·재개발' }],
   },
 };
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
@@ -149,5 +150,5 @@ async function fetchAptData() {
 
 export default async function AptPage() {
   const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts } = await fetchAptData();
-  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://kadeora.app"},{"@type":"ListItem","position":2,"name":"부동산","item":"https://kadeora.app/apt"}]}) }} /><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
+  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL + "/apt"}]}) }} /><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
 }

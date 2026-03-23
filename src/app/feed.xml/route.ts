@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export const revalidate = 3600;
 
-const SITE = 'https://kadeora.app';
+import { SITE_URL as SITE } from '@/lib/constants';
 
 function escapeXml(s: string): string {
   return s

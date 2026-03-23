@@ -1,4 +1,5 @@
 export const revalidate = 300;
+import { SITE_URL } from '@/lib/constants';
 
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
@@ -23,8 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${s.name} (${symbol}) 주가`,
     description: `${s.name} 현재가 ${p} ${ch}. ${s.market} 상장.`,
-    alternates: { canonical: `https://kadeora.app/stock/${symbol}` },
-    openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: `https://kadeora.app/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock` }] },
+    alternates: { canonical: `${SITE_URL}/stock/${symbol}` },
+    openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock` }] },
   };
 }
 
@@ -73,7 +74,7 @@ export default async function StockDetailPage({ params }: Props) {
         '@type': 'WebPage',
         name: `${s.name} (${symbol}) 주가 정보`,
         description: `${s.name} ${s.market} 상장. 현재가 ${fmtPrice(Number(s.price), s.currency)}.`,
-        url: `https://kadeora.app/stock/${symbol}`,
+        url: `${SITE_URL}/stock/${symbol}`,
         mainEntity: {
           '@type': 'FinancialProduct',
           name: s.name,
@@ -81,7 +82,7 @@ export default async function StockDetailPage({ params }: Props) {
           category: s.sector || s.market,
           provider: { '@type': 'Organization', name: s.market || 'Exchange' },
         },
-        isPartOf: { '@type': 'WebSite', name: '카더라', url: 'https://kadeora.app' },
+        isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
       })}} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>

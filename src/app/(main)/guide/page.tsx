@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 
 export const revalidate = 3600;
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '가이드북 — 카더라 100% 활용법',
     description: '카더라 앱 사용 가이드',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-hero.png', alt: '카더라 가이드' }],
+    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 가이드' }],
   },
 };
 
@@ -65,7 +66,7 @@ const INSTALL_STEPS = {
 export default function GuidePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://kadeora.app"},{"@type":"ListItem","position":2,"name":"가이드","item":"https://kadeora.app/guide"}]}) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"가이드","item":SITE_URL + "/guide"}]}) }} />
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>

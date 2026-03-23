@@ -1,4 +1,5 @@
 ﻿import { Suspense } from 'react';
+import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '실시간 주식 시세',
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '실시간 주식 시세',
     description: '국내외 주요 종목 실시간 시세와 등락률',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-wide.png', alt: '카더라 주식' }],
+    images: [{ url: SITE_URL + '/images/brand/kadeora-wide.png', alt: '카더라 주식' }],
   },
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
@@ -93,15 +94,15 @@ export default async function StockPage() {
         "@type": "DataCatalog",
         "name": "카더라 실시간 주식 시세",
         "description": "KOSPI, KOSDAQ, NYSE, NASDAQ 주요 종목 실시간 시세",
-        "url": "https://kadeora.app/stock",
+        "url": SITE_URL + "/stock",
         "inLanguage": "ko-KR",
-        "provider": { "@type": "Organization", "name": "카더라", "url": "https://kadeora.app" }
+        "provider": { "@type": "Organization", "name": "카더라", "url": SITE_URL }
       }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org", "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://kadeora.app" },
-          { "@type": "ListItem", "position": 2, "name": "주식 시세", "item": "https://kadeora.app/stock" },
+          { "@type": "ListItem", "position": 1, "name": "홈", "item": SITE_URL },
+          { "@type": "ListItem", "position": 2, "name": "주식 시세", "item": SITE_URL + "/stock" },
         ]
       }) }} />
       <StockClient initialStocks={stocks} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />

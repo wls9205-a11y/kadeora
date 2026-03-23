@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '오늘의 HOT',
     description: '오늘 가장 인기있는 카더라 게시글',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-hero.png', alt: '카더라 HOT' }],
+    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 HOT' }],
   },
 };
 
@@ -80,7 +81,7 @@ export default async function HotPage() {
 
   return (
     <HotClient>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://kadeora.app"},{"@type":"ListItem","position":2,"name":"HOT 게시글","item":"https://kadeora.app/hot"}]}) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"HOT 게시글","item":SITE_URL + "/hot"}]}) }} />
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>

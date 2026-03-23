@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 export const metadata: Metadata = {
   title: '피드',
   description: '주식, 부동산, 청약 관련 소문과 정보를 나누는 카더라 커뮤니티 피드',
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '피드',
     description: '주식, 부동산, 청약 정보 커뮤니티',
-    images: [{ url: 'https://kadeora.app/images/brand/kadeora-hero.png', alt: '카더라 피드' }],
+    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 피드' }],
   },
 };
 import { Suspense } from 'react';
