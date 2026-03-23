@@ -52,14 +52,20 @@ export async function GET(req: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'claude-sonnet-4-20250514',
-            max_tokens: 3000,
+            max_tokens: 4096,
             messages: [{
               role: 'user',
               content: `한국 금융·부동산 전문 블로그 작가로서 아래 글을 리라이팅하세요.
 
 스타일: ${style}
 
-규칙: 수치 데이터 유지 / 마크다운 형식 유지 / 내부 링크 유지 / 1200자+ / 면책 문구 포함 / 마크다운만 출력
+규칙:
+- 반드시 3000자 이상 작성 (핵심 요구사항)
+- 서론/본론/결론 구조로 깊이 있게 다루기
+- 수치 데이터 유지 / 마크다운 형식 유지 / 내부 링크 유지
+- 소제목(##) 3~5개 포함
+- 각 섹션에 구체적 예시·수치·비교 포함
+- 면책 문구 포함 / 마크다운만 출력
 
 카테고리: ${post.category}
 
@@ -71,7 +77,7 @@ ${post.content}`
         if (!res.ok) continue;
         const data = await res.json();
         const newContent = data.content?.[0]?.text;
-        if (!newContent || newContent.length < 800) continue;
+        if (!newContent || newContent.length < 2000) continue;
 
         const clean = newContent.replace(/[#|*\n\r\-\[\]\(\)/]/g, ' ').replace(/\s+/g, ' ').trim();
 
