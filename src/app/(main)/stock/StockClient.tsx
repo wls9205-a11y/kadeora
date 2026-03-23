@@ -188,7 +188,9 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <a href="/stock/compare" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>⚔️ 비교</a>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
           <span style={{ color: 'var(--text-tertiary)' }}>원/달러</span>
           <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>₩{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
           {exchangeHistory && exchangeHistory.length > 1 && (() => {
@@ -205,6 +207,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               </>
             );
           })()}
+        </div>
         </div>
       </div>
 
@@ -536,7 +539,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 섹터 필터 (시총/등락률) */}
       {(currentTab === 'ranking' || currentTab === 'movers') && (() => {
         const targetStocks = isDomestic ? domesticStocks : globalStocks;
-        const sectorSet = new Set(targetStocks.map(s => s.sector).filter(Boolean));
+        const sectorSet = new Set(targetStocks.map(s => s.sector).filter((s): s is string => !!s));
         const sectorList = ['all', ...Array.from(sectorSet).sort()];
         if (sectorList.length < 3) return null;
         return (

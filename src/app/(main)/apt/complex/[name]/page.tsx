@@ -1,0 +1,174 @@
+import { createSupabaseServer } from '@/lib/supabase-server';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
+
+const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'), { ssr: false });
+const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), { ssr: false });
+
+export const revalidate = 3600;
+
+interface Props { params: Promise<{ name: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  const decoded = decodeURIComponent(name);
+  return {
+    title: `${decoded} 실거래가·시세 분석`,
+    description: `${decoded} 아파트 실거래가 이력, 평당가 추이, 면적별 비교, 주민 리뷰`,
+    alternates: { canonical: `https://kadeora.app/apt/complex/${name}` },
+  };
+}
+
+function fmtAmt(amt: number) {
+  if (!amt) return '-';
+  if (amt >= 10000) return `${(amt / 10000).toFixed(1)}억`;
+  return `${amt.toLocaleString()}만`;
+}
+
+export default async function ComplexDetailPage({ params }: Props) {
+  const { name } = await params;
+  const decoded = decodeURIComponent(name);
+  const sb = await createSupabaseServer();
+
+  const { data: trades } = await sb.from('apt_transactions')
+    .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type')
+    .eq('apt_name', decoded)
+    .order('deal_date', { ascending: false })
+    .limit(200) as { data: any[] | null };
+
+  if (!trades?.length) notFound();
+
+  const region = trades[0].region_nm || '';
+  const dong = trades[0].dong || '';
+  const sigungu = trades[0].sigungu || '';
+
+  // 통계 계산
+  const amounts = trades.filter(t => t.deal_amount > 0).map(t => t.deal_amount);
+  const avgPrice = amounts.length ? Math.round(amounts.reduce((s, a) => s + a, 0) / amounts.length) : 0;
+  const maxPrice = amounts.length ? Math.max(...amounts) : 0;
+  const minPrice = amounts.length ? Math.min(...amounts) : 0;
+  const latestPrice = trades[0].deal_amount || 0;
+
+  // 면적별 그룹핑
+  const areaMap = new Map<string, { count: number; avg: number; trades: any[] }>();
+  trades.forEach(t => {
+    const area = `${Math.round(t.exclusive_area)}㎡`;
+    const cur = areaMap.get(area) || { count: 0, avg: 0, trades: [] };
+    cur.count++;
+    cur.trades.push(t);
+    areaMap.set(area, cur);
+  });
+  areaMap.forEach((v) => {
+    const amts = v.trades.filter((t: any) => t.deal_amount > 0).map((t: any) => t.deal_amount);
+    v.avg = amts.length ? Math.round(amts.reduce((s: number, a: number) => s + a, 0) / amts.length) : 0;
+  });
+  const areaStats = Array.from(areaMap.entries())
+    .map(([area, data]) => ({ area, ...data }))
+    .sort((a, b) => b.count - a.count);
+
+  // 연도별 평균가 추이
+  const yearMap = new Map<string, { sum: number; cnt: number }>();
+  trades.forEach(t => {
+    if (!t.deal_date || !t.deal_amount) return;
+    const ym = t.deal_date.slice(0, 7);
+    const cur = yearMap.get(ym) || { sum: 0, cnt: 0 };
+    cur.sum += t.deal_amount;
+    cur.cnt++;
+    yearMap.set(ym, cur);
+  });
+
+  const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
+
+  return (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      {/* JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'Place',
+        name: `${decoded} 아파트`,
+        address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: `${sigungu} ${dong}` },
+      })}} />
+
+      <Link href="/apt/search" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 실거래 검색</Link>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '8px 0 4px' }}>{decoded}</h1>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 거래 {trades.length}건</p>
+
+      {/* 요약 카드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+        {[
+          { label: '최근 거래가', value: fmtAmt(latestPrice), color: 'var(--text-primary)' },
+          { label: '평균', value: fmtAmt(avgPrice), color: 'var(--brand)' },
+          { label: '최고가', value: fmtAmt(maxPrice), color: 'var(--accent-red)' },
+          { label: '최저가', value: fmtAmt(minPrice), color: 'var(--accent-blue)' },
+        ].map(s => (
+          <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.label}</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* 면적별 비교 */}
+      {areaStats.length > 1 && (
+        <div style={card}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📐 면적별 비교</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
+            {areaStats.slice(0, 8).map(a => (
+              <div key={a.area} style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 12px' }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.area}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>평균 {fmtAmt(a.avg)}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.count}건</div>
+                {a.trades[0]?.exclusive_area > 0 && a.avg > 0 && (
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue)', fontWeight: 600, marginTop: 2 }}>
+                    평당 {fmtAmt(Math.round(a.avg / (a.trades[0].exclusive_area / 3.3058)))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 가격 추이 차트 */}
+      <AptPriceTrendChart aptName={decoded} region={region} />
+
+      {/* 거래 이력 */}
+      <div style={card}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 거래 이력 ({trades.length}건)</div>
+        {trades.slice(0, 50).map((t, i) => {
+          const amt = t.deal_amount || 0;
+          const color = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)';
+          return (
+            <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
+              <div>
+                <span style={{ color: 'var(--text-tertiary)' }}>{t.deal_date}</span>
+                <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{t.exclusive_area}㎡ · {t.floor}층</span>
+              </div>
+              <span style={{ fontWeight: 700, color }}>{fmtAmt(amt)}</span>
+            </div>
+          );
+        })}
+        {trades.length > 50 && (
+          <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+            +{trades.length - 50}건 더 있음
+          </div>
+        )}
+      </div>
+
+      {/* 주민 리뷰 */}
+      <AptReviewSection aptName={decoded} region={region} />
+
+      {/* 외부 링크 */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <a href={`https://map.kakao.com/?q=${encodeURIComponent(decoded + ' ' + dong)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+        <a href={`https://map.naver.com/p/search/${encodeURIComponent(decoded + ' ' + dong)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+        <Link href={`/apt/search?q=${encodeURIComponent(decoded)}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🔍 실거래 검색</Link>
+      </div>
+
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 40px' }}>
+        📊 국토교통부 실거래가 공개시스템 기준 · ⚠️ 투자 참고용
+      </p>
+    </div>
+  );
+}
