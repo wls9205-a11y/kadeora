@@ -148,7 +148,7 @@
 - [ ] 네이버 서치콘솔에서 루트 URL 색인 요청
 - [ ] 실제 서비스 스크린샷으로 프리뷰 이미지 교체
 
-## 세션 31B — 모바일 UX 전면 개선 (3커밋, 19파일)
+## 세션 31B — 모바일 UX 전면 개선 (6커밋, 38파일)
 
 ### 1. 하단 배너 지옥 해소
 - GuestCTA: InstallBanner와 순차 표시 (동시 2개 이상 안 뜸)
@@ -176,6 +176,18 @@
 - 주식 비교 모바일 반응형
 - 블로그 카드 터치 피드백
 - 모바일 탭 active 스타일 보강
+
+
+### 6. 2차 완전 재점검 (24파일 추가)
+- fontSize 11→var(--fs-xs) 전수 전환 (18개 파일)
+- fontSize 10→var(--fs-xs) 전수 전환
+- iOS 자동 줌 글로벌 CSS 차단 (input/textarea/select 16px)
+- 패딩 누락 6곳 추가 (discuss/[id], faq, notifications/settings, shop/banner, shop/megaphone, apt/diagnose)
+- 블로그 테이블 모바일 수평 스크롤
+- 모바일 h1~h3 word-break: keep-all
+- 모바일 버튼/링크 최소 터치 타겟 36px
+- font-small 모드 모바일 최소 12px 보장
+- globals.css orphaned } 문법 에러 수정 (빌드 실패→복구)
 
 ---
 
