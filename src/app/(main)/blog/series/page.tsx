@@ -39,10 +39,10 @@ export default async function BlogSeriesPage() {
       ) : (
         <div style={{ display: 'grid', gap: 12 }}>
           {seriesList.map(s => (
-            <Link key={s.id} href={`/blog/series/${s.slug}`} style={{
+            <Link key={s.id} href={`/blog/series/${s.slug}`} className="kd-card-hover" style={{
               display: 'block', textDecoration: 'none',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
-              borderRadius: 12, padding: 16, transition: 'transform 0.15s',
+              borderRadius: 12, padding: 16,
             }}>
               <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                 {s.cover_image && (
