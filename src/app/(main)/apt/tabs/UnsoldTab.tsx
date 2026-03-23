@@ -1,0 +1,281 @@
+'use client';
+import { useState } from 'react';
+import { isNew, NewBadge, fmtAmount, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
+import Link from 'next/link';
+import MiniLineChart from '@/components/charts/MiniLineChart';
+import MiniBarChart from '@/components/charts/MiniBarChart';
+
+interface Props extends SharedTabProps {
+  unsold: any[];
+  unsoldMonthly: any[];
+  unsoldSummary: any;
+}
+
+export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast }: Props) {
+  const [unsoldRegion, setUnsoldRegion] = useState('전체');
+  const [unsoldSearch, setUnsoldSearch] = useState('');
+
+  const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
+    <button key={v} onClick={() => set(v)} style={{
+      padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+      background: sel === v ? '#2563EB' : 'var(--bg-hover)',
+      color: sel === v ? '#fff' : 'var(--text-secondary)',
+      border: 'none', cursor: 'pointer', flexShrink: 0,
+    }}>
+      {label || v}
+    </button>
+  );
+
+  if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏚️ 미분양 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>매월 국토교통부 통계 업데이트 시 반영됩니다</span></div>;
+  const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+  const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
+  const fu = (unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion)).filter((u: any) => {
+    if (!unsoldSearch) return true;
+    const q = unsoldSearch.toLowerCase();
+    return (u.house_nm || '').toLowerCase().includes(q) || (u.region_nm || '').toLowerCase().includes(q) || (u.sigungu_nm || '').toLowerCase().includes(q);
+  });
+  const usRaw = unsoldSummary;
+  const us: any = typeof usRaw === 'string' ? (() => { try { return JSON.parse(usRaw); } catch { return null; } })()
+    : usRaw?.total != null ? usRaw
+    : usRaw?.data?.total != null ? usRaw.data : null;
+
+  // 지역별 현황판 데이터 집계
+  const unsoldRegionStats = regs.filter(r => r !== '전체').map(r => {
+    const items = unsold.filter((u: any) => (u.region_nm || '기타') === r);
+    const unitCount = items.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+    return { name: r, siteCount: items.length, unitCount };
+  }).sort((a, b) => b.unitCount - a.unitCount);
+
+
+    return (
+    <div>
+      {/* 지역별 현황 */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#f87171' }}>총 {total.toLocaleString()}세대</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+          <button onClick={() => setUnsoldRegion('전체')} style={{
+            padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+            border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
+            background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+          }}>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+            <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
+          </button>
+          {unsoldRegionStats.map(r => (
+            <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
+              padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+              border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
+              background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+            }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+              <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+              {total > 0 && (
+                <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
+                  <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 종합 현황판 */}
+      {(() => {
+        const filteredTotal = fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+        const filteredAfterCompletion = fu.reduce((s: number, u: any) => s + (u.after_completion_unsold || 0), 0);
+        const capitalR = ['서울', '경기', '인천'];
+        const filteredCapital = fu.filter((u: any) => capitalR.some(c => (u.region_nm || '').includes(c))).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+        const filteredLocal = filteredTotal - filteredCapital;
+        return (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {unsoldRegion !== '전체' ? `${unsoldRegion} ` : ''}미분양 현황</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{unsoldRegion !== '전체' ? unsoldRegion : '전국'}</div>
+              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--brand)' }}>{filteredTotal.toLocaleString()}호</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>준공후(악성)</div>
+              <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{filteredAfterCompletion.toLocaleString()}호</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>단지 수</div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length}곳</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 미분양</div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>국토교통부 통계누리 기준</div>
+        </div>
+        );
+      })()}
+
+      {/* 미분양 지역별 TOP5 */}
+      {unsoldRegionStats.length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏚️ 미분양 많은 지역 TOP5</div>
+          {unsoldRegionStats.slice(0, 5).map((r, i) => (
+            <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
+              <span style={{ flex: 1, fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.name}</span>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}호</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 지역별 현황판 */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 미분양 현황</span>
+          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6 }}>
+          <button onClick={() => setUnsoldRegion('전체')} style={{
+            padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+            border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
+            background: unsoldRegion === '전체' ? '#2D1520' : 'var(--bg-surface)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+          }}>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+            <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
+          </button>
+          {unsoldRegionStats.map(r => (
+            <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
+              padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+              border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
+              background: unsoldRegion === r.name ? '#2D1520' : 'var(--bg-surface)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+            }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+              <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+              {total > 0 && (
+                <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
+                  <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 미분양 추이 차트 */}
+      {unsoldMonthly.length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📈 전국 미분양 추이 (12개월)</div>
+          <MiniLineChart
+            data={(() => {
+              const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-12);
+              return months.map(m => {
+                const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
+                const total = rows.reduce((sum: number, r: any) => sum + (r.total_unsold || 0), 0);
+                return { label: String(m).slice(5), value: total };
+              });
+            })()}
+            color="#60A5FA"
+            secondaryData={(() => {
+              const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-12);
+              return months.map(m => {
+                const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
+                const total = rows.reduce((sum: number, r: any) => sum + (r.after_completion || 0), 0);
+                return { label: String(m).slice(5), value: total };
+              });
+            })()}
+            secondaryColor="#F87171"
+            height={140}
+            title=""
+          />
+          <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+            <span><span style={{ display: 'inline-block', width: 12, height: 2, background: 'var(--accent-blue)', marginRight: 4, verticalAlign: 'middle' }} />전체 미분양</span>
+            <span><span style={{ display: 'inline-block', width: 12, height: 2, background: 'var(--accent-red)', marginRight: 4, verticalAlign: 'middle', borderTop: '1px dashed #F87171' }} />준공후 미분양</span>
+          </div>
+        </div>
+      )}
+
+      {/* 안내 + 검색 + 필터 */}
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
+      <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+      <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
+        {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
+      </div>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
+        총 <strong style={{ color: '#F87171' }}>{fu.length}</strong>건 · {fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0).toLocaleString()}세대
+      </div>
+
+      {/* 리스트 */}
+      {fu.map((u: any, i: number) => {
+        const rate = u.tot_supply_hshld_co ? Math.round((u.tot_unsold_hshld_co / u.tot_supply_hshld_co) * 100) : null;
+        const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
+        const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
+        const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
+
+        const unsoldCount = u.tot_unsold_hshld_co || 0;
+        const dangerColor = unsoldCount >= 1000 ? 'var(--accent-red)' : unsoldCount >= 500 ? 'var(--accent-orange)' : unsoldCount >= 100 ? 'var(--accent-yellow)' : 'var(--accent-green)';
+
+        return (
+          <div key={u.id} style={{
+            padding: '16px 16px', borderRadius: 12, marginBottom: 8,
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            borderLeft: `4px solid ${dangerColor}`,
+            transition: 'background 0.15s', cursor: 'pointer',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'; }}
+          >
+            {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+              <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
+              <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
+                {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} 미분양 {unsoldCount.toLocaleString()}세대
+              </span>
+              {u.after_completion_unsold > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 8, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>악성 {u.after_completion_unsold}호</span>}
+              {priceStr && <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
+              <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
+                {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
+              </button>
+            </div>
+
+            {/* 줄2: 지역 + 세대 */}
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
+              {u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}
+              {u.tot_supply_hshld_co && <span> · 총 {u.tot_supply_hshld_co.toLocaleString()}세대</span>}
+              {u.completion_ym && <span> · 준공 {u.completion_ym.slice(0, 4)}.{u.completion_ym.slice(4, 6)}</span>}
+            </div>
+
+            {/* 미분양률 바 */}
+            {rate !== null && (
+              <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 10 }}>
+                <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
+                <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-red)' }}>{rate}%</span>
+              </div>
+            )}
+
+            {/* 줄3: pill 버튼 */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
+                style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
+              <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
+              {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
+            </div>
+          </div>
+        );
+      })}
+
+      {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>해당 지역 데이터가 없습니다</div>}
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>📊 데이터 출처: 국토교통부 미분양주택현황 통계 (stat.molit.go.kr) · 매월 말 발표 기준, 2~3개월 지연 반영 · 개별 단지 정보는 청약홈(applyhome.co.kr) 병행 수집<br/>⚠️ 본 정보는 참고용이며 투자 권유가 아닙니다. 투자에 따른 손익은 투자자 본인에게 귀속됩니다.</p>
+    </div>
+  );
+
+}
