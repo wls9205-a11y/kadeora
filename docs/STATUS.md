@@ -371,8 +371,8 @@
 - [x] blog_series 시리즈 10개 + 1,393편 매핑 ✅ 세션 24
 
 ### 코드
-- [ ] AptClient 2045줄 탭별 분할 (SubscriptionTab/OngoingTab/UnsoldTab/RedevTab/TransactionTab)
-- [ ] AptClient 탭별 lazy fetch 적용 (tab-data API 이미 생성, 연결만 필요)
+- [x] AptClient 2060→570줄 탭별 분할 (4개 탭 + apt-utils) ✅ 세션 24
+- [ ] AptClient 탭별 lazy fetch 적용 (tab-data API 생성 완료, 연결만 필요)
 - [ ] crawl-nationwide-redev API 키 등록 후 실행
 - [ ] 재개발 세대수 크론 검증 수집
 - [ ] 청약 상세의 신규 필드 데이터 채우기

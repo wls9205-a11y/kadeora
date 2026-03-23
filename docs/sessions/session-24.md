@@ -187,6 +187,37 @@ supabase/migrations/20260323_session24_evolution.sql
 
 ---
 
+## AptClient 2060→570줄 분할 (72% 감소)
+
+| 파일 | 줄수 | 역할 |
+|------|------|------|
+| AptClient.tsx | 570 | 탭 전환 + 공유 상태 + 청약 탭 |
+| OngoingTab.tsx | 466 | 분양중 탭 + 모달 |
+| RedevTab.tsx | 392 | 재개발 탭 + 모달 |
+| UnsoldTab.tsx | 281 | 미분양 탭 |
+| TransactionTab.tsx | 273 | 실거래 탭 + 모달 |
+| apt-utils.tsx | 107 | 공유 타입/상수/유틸 |
+
+각 탭이 자체 필터 state를 관리하고, 데이터+콜백은 props로 전달하는 구조.
+
+## blog_series 시드 완료
+
+| 시리즈 | 편수 |
+|--------|------|
+| 종목 분석 시리즈 | 200 |
+| 실거래가 분석 리포트 | 200 |
+| 재개발·재건축 현황 | 200 |
+| 미분양 리포트 | 200 |
+| 청약 일정·분석 | 200 |
+| 부동산 초보 가이드 | 100 |
+| 종목 비교 시리즈 | 100 |
+| 배당주 투자 가이드 | 100 |
+| 재테크 기본서 | 50 |
+| 부동산 세금·절세 | 43 |
+| **합계** | **1,393** |
+
+---
+
 ## 다음 세션
 
 ### 즉시
@@ -195,11 +226,11 @@ supabase/migrations/20260323_session24_evolution.sql
 - [ ] blog_series 초기 시리즈 데이터 시드
 
 ### 중기 (코드)
-- [ ] AptClient 2045줄 탭별 분할 (5개 서브 컴포넌트)
-- [ ] AptClient 탭별 lazy fetch 연결 (tab-data API 활용)
-- [ ] safe-catch.ts 전면 적용 (빈 catch 65개)
-- [ ] useModalA11y 모달 전면 적용
-- [ ] 블로그 시리즈 시드 크론 (14,578건 자동 묶기)
+- [x] AptClient 2060→570줄 분할 ✅
+- [ ] AptClient 탭별 lazy fetch 연결 (tab-data API 활용) — 연결만 남음
+- [x] safe-catch 주요 파일 적용 ✅
+- [x] 모달 Escape+스크롤방지 적용 ✅
+- [x] 블로그 시리즈 시드 (10개 시리즈, 1,393편) ✅
 - [ ] 포트폴리오 수익률 히스토리 (일일 스냅샷)
 - [ ] 지도뷰 클러스터링
 
