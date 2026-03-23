@@ -23,6 +23,7 @@ export default function MapClient() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const clustererRef = useRef<any>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [layers, setLayers] = useState<Set<Layer>>(new Set(['subscription', 'redevelopment']));
   const [pins, setPins] = useState<Pin[]>([]);
@@ -39,7 +40,7 @@ export default function MapClient() {
       if (layers.has('subscription')) {
         const { data } = await sb.from('apt_subscriptions')
           .select('id, house_nm, hssply_adres, region_nm, tot_supply_hshld_co, rcept_endde')
-          .order('rcept_endde', { ascending: false }).limit(100) as { data: any[] | null };
+          .order('rcept_endde', { ascending: false }).limit(300) as { data: any[] | null };
         (data || []).forEach((d: any) => allPins.push({
           id: d.id, name: d.house_nm, address: d.hssply_adres || d.region_nm || '',
           layer: 'subscription', extra: `${d.tot_supply_hshld_co || '?'}세대 · ~${(d.rcept_endde || '').slice(5)}`,
@@ -49,7 +50,7 @@ export default function MapClient() {
       if (layers.has('redevelopment')) {
         const { data } = await sb.from('redevelopment_projects')
           .select('id, project_name, address, region, stage, total_households')
-          .eq('is_active', true).limit(100) as { data: any[] | null };
+          .eq('is_active', true).limit(300) as { data: any[] | null };
         (data || []).forEach((d: any) => allPins.push({
           id: `r${d.id}`, name: d.project_name || d.address || '', address: d.address || d.region || '',
           layer: 'redevelopment', extra: d.stage || '진행중',
@@ -59,7 +60,7 @@ export default function MapClient() {
       if (layers.has('unsold')) {
         const { data } = await sb.from('unsold_apts')
           .select('id, complex_name, region, unsold_count')
-          .eq('is_active', true).limit(100) as { data: any[] | null };
+          .eq('is_active', true).limit(300) as { data: any[] | null };
         (data || []).forEach((d: any) => allPins.push({
           id: `u${d.id}`, name: d.complex_name || '', address: d.region || '',
           layer: 'unsold', extra: `${d.unsold_count || 0}세대 미분양`,
@@ -93,18 +94,26 @@ export default function MapClient() {
     } catch { }
   }, [sdkReady]);
 
-  // 핀 표시 (주소→좌표 변환 없이 리스트 방식)
-  // 카카오맵 주소 검색 서비스로 geocode
+  // 핀 표시 — MarkerClusterer로 클러스터링
   useEffect(() => {
     if (!mapInstance.current || !window.kakao?.maps?.services) return;
 
-    // 기존 마커 제거
+    // 기존 마커/클러스터 제거
     markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = [];
+    if (clustererRef.current) {
+      clustererRef.current.clear();
+      clustererRef.current = null;
+    }
 
     const geocoder = new window.kakao.maps.services.Geocoder();
+    const newMarkers: any[] = [];
+    let geocoded = 0;
 
-    pins.slice(0, 50).forEach(pin => {
+    // 클러스터러 생성 (라이브러리 로드 확인)
+    const hasClusterer = !!window.kakao.maps.MarkerClusterer;
+
+    pins.forEach(pin => {
       if (!pin.address) return;
       geocoder.addressSearch(pin.address, (result: any, status: any) => {
         if (status !== window.kakao.maps.services.Status.OK || !result.length) return;
@@ -112,7 +121,6 @@ export default function MapClient() {
         const conf = LAYER_CONF[pin.layer];
 
         const marker = new window.kakao.maps.Marker({
-          map: mapInstance.current,
           position: coords,
           title: pin.name,
         });
@@ -131,9 +139,35 @@ export default function MapClient() {
           infowindow.close();
         });
 
-        markersRef.current.push(marker);
+        newMarkers.push(marker);
+        geocoded++;
+
+        // 모든 geocoding 완료 후 클러스터러에 추가
+        if (geocoded === pins.filter(p => p.address).length && hasClusterer && newMarkers.length > 0) {
+          clustererRef.current = new window.kakao.maps.MarkerClusterer({
+            map: mapInstance.current,
+            averageCenter: true,
+            minLevel: 5,
+            disableClickZoom: false,
+            styles: [{
+              width: '44px', height: '44px', background: 'rgba(37,99,235,0.85)',
+              borderRadius: '50%', color: '#fff', textAlign: 'center',
+              lineHeight: '44px', fontSize: '13px', fontWeight: '800',
+            }, {
+              width: '54px', height: '54px', background: 'rgba(37,99,235,0.9)',
+              borderRadius: '50%', color: '#fff', textAlign: 'center',
+              lineHeight: '54px', fontSize: '14px', fontWeight: '800',
+            }],
+          });
+          clustererRef.current.addMarkers(newMarkers);
+        } else if (!hasClusterer) {
+          // 클러스터러 없으면 개별 표시
+          marker.setMap(mapInstance.current);
+        }
       });
     });
+
+    markersRef.current = newMarkers;
   }, [pins]);
 
   const toggleLayer = (layer: Layer) => {
@@ -150,7 +184,7 @@ export default function MapClient() {
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
       <Script
-        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services&autoload=false`}
+        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services,clusterer&autoload=false`}
         strategy="afterInteractive"
         onLoad={() => setSdkReady(true)}
       />
