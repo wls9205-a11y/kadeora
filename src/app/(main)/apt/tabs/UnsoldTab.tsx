@@ -130,7 +130,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const filteredCapital = fu.filter((u: any) => capitalR.some(c => (u.region_nm || '').includes(c))).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const filteredLocal = filteredTotal - filteredCapital;
         return (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+        <div className="kd-card" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {unsoldRegion !== '전체' ? `${unsoldRegion} ` : ''}미분양 현황</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
@@ -157,7 +157,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 미분양 지역별 TOP5 */}
       {unsoldRegionStats.length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+        <div className="kd-card" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏚️ 미분양 많은 지역 TOP5</div>
           {unsoldRegionStats.slice(0, 5).map((r, i) => (
             <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
@@ -209,7 +209,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 미분양 추이 차트 */}
       {unsoldMonthly.length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📈 전국 미분양 추이 (12개월)</div>
           <MiniLineChart
             data={(() => {

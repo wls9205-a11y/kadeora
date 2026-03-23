@@ -134,7 +134,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 재개발 단계별 파이프라인 */}
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <div className="kd-card">
               <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏗️ 단계별 파이프라인</div>
               <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
                 {STAGE_ORDER.map((stage, i) => {

@@ -82,7 +82,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: s
 
   if (slicedData.length < 2) {
     return (
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+      <div className="kd-card">
         <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
           📊 거래 데이터가 쌓이면 차트가 표시됩니다
           <br /><span style={{ fontSize: 'var(--fs-xs)' }}>보통 상장 후 2~3일 내에 업데이트</span>
@@ -92,7 +92,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: s
   }
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+    <div className="kd-card">
       {/* 컨트롤 바: 차트 타입 토글 + 기간 선택 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
         {/* 차트 타입 토글 */}
@@ -214,7 +214,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
         <div>
           {/* 미니 차트 (개요 상단) */}
           {priceHistory.length >= 2 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <div className="kd-card">
               <MiniChart data={priceHistory} />
             </div>
           )}
@@ -222,7 +222,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             const signalColor = aiComment.signal === 'bullish' ? '#059669' : aiComment.signal === 'bearish' ? 'var(--accent-red)' : 'var(--text-tertiary)';
             const signalLabel = aiComment.signal === 'bullish' ? '🟢 매수 우위' : aiComment.signal === 'bearish' ? '🔴 매도 우위' : '🟡 중립';
             return (
-              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+              <div className="kd-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: signalColor }}>{signalLabel}</span>
@@ -254,7 +254,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
 
       {/* 수급 */}
       {tab === 'flow' && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 투자자별 수급</div>
           {investorFlow.length > 0 && (() => {
             const totalForeign = investorFlow.reduce((s: number, d: any) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
@@ -309,7 +309,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
 
       {/* 뉴스 */}
       {tab === 'news' && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
           {news.length > 0 && (() => {
             const pos = news.filter((n: any) => n.sentiment_label === 'positive' || n.sentiment === 'positive').length;
@@ -361,7 +361,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
 
       {/* 공시 */}
       {tab === 'disclosure' && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📋 최근 공시</div>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{disclosures.length}건</span>
@@ -389,7 +389,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
 
       {/* 토론 */}
       {tab === 'discuss' && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <StockComments symbol={symbol} stockName={stockName} />
         </div>
       )}

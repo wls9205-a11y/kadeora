@@ -76,7 +76,7 @@ export const STAGE_COLORS: Record<string, { bg: string; color: string; border: s
   '사업시행인가': { bg: 'rgba(251,191,36,0.2)', color: '#FDE047', border: 'var(--accent-yellow)' },
   '관리처분': { bg: 'rgba(251,146,60,0.2)', color: '#FDBA74', border: 'var(--accent-orange)' },
   '착공': { bg: 'rgba(52,211,153,0.2)', color: '#86EFAC', border: 'var(--accent-green)' },
-  '준공': { bg: 'rgba(37,99,235,0.15)', color: 'var(--brand)', border: 'var(--brand)' },
+  '준공': { bg: 'var(--brand-border)', color: 'var(--brand)', border: 'var(--brand)' },
 };
 
 export const STAGE_ORDER = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];

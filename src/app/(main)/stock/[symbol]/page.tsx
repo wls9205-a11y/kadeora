@@ -140,7 +140,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 비슷한 종목 */}
       {(similarR.data ?? []).length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 같은 섹터 종목 ({s.sector})</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {(similarR.data ?? []).map((sim: any) => {
@@ -171,7 +171,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 관련 블로그 */}
       {(relatedBlogsR.data ?? []).length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 {s.name} 관련 분석</div>
           {(relatedBlogsR.data ?? []).map((blog: any) => (
             <Link key={blog.slug} href={`/blog/${blog.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '8px 4px', borderRadius: 6, transition: 'background var(--transition-fast)', borderBottom: '1px solid var(--border)' }}>

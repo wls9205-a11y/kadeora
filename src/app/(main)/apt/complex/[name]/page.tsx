@@ -84,7 +84,7 @@ export default async function ComplexDetailPage({ params }: Props) {
     yearMap.set(ym, cur);
   });
 
-  const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
+  const card = 'kd-card';
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -116,7 +116,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
       {/* 면적별 비교 */}
       {areaStats.length > 1 && (
-        <div style={card}>
+        <div className={card}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📐 면적별 비교</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
             {areaStats.slice(0, 8).map(a => (
@@ -139,7 +139,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       <AptPriceTrendChart aptName={decoded} region={region} />
 
       {/* 거래 이력 */}
-      <div style={card}>
+      <div className={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 거래 이력 ({trades.length}건)</div>
         {trades.slice(0, 50).map((t, i) => {
           const amt = t.deal_amount || 0;
@@ -173,7 +173,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
       {/* 관련 블로그 */}
       {relatedBlogs.length > 0 && (
-        <div style={card}>
+        <div className={card}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 분석</div>
           {relatedBlogs.map((b: any) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 4px', borderRadius: 6, transition: 'background var(--transition-fast)', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>

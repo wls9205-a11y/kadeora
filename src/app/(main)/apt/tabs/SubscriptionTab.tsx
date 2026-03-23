@@ -170,7 +170,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           })()}
 
           {/* 청약 캘린더 */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div className="kd-card">
             {(() => {
               const now = kstNow();
               const targetDate = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);

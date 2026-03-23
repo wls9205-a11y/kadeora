@@ -90,7 +90,7 @@ export default async function AptDetailPage({ params }: Props) {
     relatedBlogs = rb.data || [];
   } catch { relatedPosts = []; relatedBlogs = []; }
 
-  const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
+  const card = 'kd-card';
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -118,7 +118,7 @@ export default async function AptDetailPage({ params }: Props) {
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{apt.house_nm}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{apt.region_nm} · {apt.hssply_adres}{apt.tot_supply_hshld_co ? ` · ${Number(apt.tot_supply_hshld_co).toLocaleString()}세대` : ''}</div>
         {apt.ai_summary && (
-          <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(139,92,246,0.06))', border: '1px solid rgba(37,99,235,0.15)' }}>
+          <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, var(--brand-bg), rgba(139,92,246,0.06))', border: '1px solid var(--brand-border)' }}>
             <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--brand)', marginBottom: 3 }}>🤖 AI 한줄 분석</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{apt.ai_summary}</div>
           </div>
@@ -136,7 +136,7 @@ export default async function AptDetailPage({ params }: Props) {
       </div>
 
       {/* 분양 일정 */}
-      <div style={card}>
+      <div className={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📅 분양 일정</div>
         {rows.map(([label, value], i) => (
           <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
@@ -147,7 +147,7 @@ export default async function AptDetailPage({ params }: Props) {
       </div>
 
       {/* 단지 개요 (신규) */}
-      <div style={card}>
+      <div className={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏗️ 단지 개요</div>
         {[
           ['시공사', apt.constructor_nm],
@@ -173,7 +173,7 @@ export default async function AptDetailPage({ params }: Props) {
       </div>
 
       {/* 분양 조건 (신규) */}
-      <div style={card}>
+      <div className={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 분양 조건</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
           {apt.is_price_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>✓ 분양가상한제</span>}
@@ -232,7 +232,7 @@ export default async function AptDetailPage({ params }: Props) {
       )}
 
       {/* 위치 및 교통 */}
-      <div style={card}>
+      <div className={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 주변환경</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 10 }}>{apt.hssply_adres}</div>
         {(apt.nearest_station || apt.nearest_school) && (
@@ -252,13 +252,13 @@ export default async function AptDetailPage({ params }: Props) {
       </div>
 
       {/* 한줄평 */}
-      <div style={card}>
+      <div className={card}>
         <AptCommentInline houseKey={apt.house_manage_no || String(apt.id)} houseNm={apt.house_nm} houseType="sub" />
       </div>
 
       {/* 관련 게시글 */}
       {relatedPosts.length > 0 && (
-        <div style={card}>
+        <div className={card}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
           {relatedPosts.map((rp: any) => (
             <Link key={rp.id} href={`/feed/${rp.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
@@ -271,7 +271,7 @@ export default async function AptDetailPage({ params }: Props) {
 
       {/* 관련 블로그 분석 */}
       {relatedBlogs.length > 0 && (
-        <div style={card}>
+        <div className={card}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📰 관련 분석 블로그</div>
           {relatedBlogs.map((b: any) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 4px', borderRadius: 6, transition: 'background var(--transition-fast)', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>

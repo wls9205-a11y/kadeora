@@ -31,7 +31,7 @@ export default function AttendanceBanner() {
 
   return (
     <div style={{
-      background: 'linear-gradient(90deg, rgba(37,99,235,0.12), rgba(37,99,235,0.06))',
+      background: 'linear-gradient(90deg, var(--brand-bg), var(--brand-bg))',
       borderBottom: '1px solid rgba(37,99,235,0.2)',
       padding: '10px 16px',
       display: 'flex',

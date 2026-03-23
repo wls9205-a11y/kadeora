@@ -58,7 +58,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
     }
   } catch {}
 
-  const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 };
+  const card = 'kd-card';
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -124,7 +124,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
       </div>
 
       {/* 미분양 현황 */}
-      <div style={card}>
+      <div className={card}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>미분양</div>
@@ -147,10 +147,10 @@ export default async function UnsoldDetailPage({ params }: Props) {
       </div>
 
       {/* 분양 정보 */}
-      <div style={card}>
+      <div className={card}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 분양 정보</div>
         {u.key_features && (
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'rgba(37,99,235,0.08)' }}>💡 {u.key_features}</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'var(--brand-bg)' }}>💡 {u.key_features}</div>
         )}
         {u.discount_info && (
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-green)', marginBottom: 10, padding: '8px 12px', borderRadius: 8, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)' }}>🏷️ {u.discount_info}</div>
@@ -174,7 +174,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
 
       {/* 위치 */}
       {(u.supply_addr || u.house_nm) && (
-        <div style={card}>
+        <div className={card}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🚇 위치 및 주변환경</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 10 }}>{u.supply_addr || u.house_nm}</div>
           {u.nearest_station && (
@@ -192,13 +192,13 @@ export default async function UnsoldDetailPage({ params }: Props) {
       )}
 
       {/* 한줄평 */}
-      <div style={card}>
+      <div className={card}>
         <AptCommentInline houseKey={`unsold_${u.id}`} houseNm={u.house_nm || '미분양 단지'} houseType="unsold" />
       </div>
 
       {/* 관련 게시글 */}
       {relatedPosts.length > 0 && (
-        <div style={card}>
+        <div className={card}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 관련 게시글</div>
           {relatedPosts.map((rp: any) => (
             <Link key={rp.id} href={`/feed/${rp.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
@@ -211,7 +211,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
 
       {/* 근처 청약 */}
       {nearbySubscriptions.length > 0 && (
-        <div style={card}>
+        <div className={card}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏠 근처 청약</div>
           {nearbySubscriptions.map((ns: any) => (
             <Link key={ns.id} href={`/apt/${ns.id}`} style={{ display: 'block', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>

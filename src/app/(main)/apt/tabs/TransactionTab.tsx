@@ -107,7 +107,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       </div>
 
       {/* 대시보드 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+      <div className="kd-card" style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {region !== '전체' ? `${region} ` : ''}최근 거래 현황</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           <div style={{ textAlign: 'center' }}>
@@ -131,7 +131,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const active = chartRegion || regions[0] || '';
         const data = tradeMonthly.filter((s: any) => s.region === active);
         return (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div className="kd-card">
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
             <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
               {regions.slice(0, 8).map(r => (
@@ -241,7 +241,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
               <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
                 <a href={`https://map.kakao.com/?q=${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
                 <a href={`https://map.naver.com/p/search/${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
-                <a href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)', color: 'var(--brand)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>📊 단지 상세</a>
+                <a href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--brand-bg)', border: '1px solid var(--brand-border)', color: 'var(--brand)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>📊 단지 상세</a>
               </div>
 
               {/* 거래 이력 */}

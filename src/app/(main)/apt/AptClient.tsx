@@ -65,9 +65,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
-          <a href="/apt/map" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '5px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🗺️ 지도</a>
-          <a href="/apt/search" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '5px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🔍 검색</a>
-          <a href="/apt/diagnose" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '5px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🎯 진단</a>
+          <a href="/apt/map" className="kd-action-link">🗺️ 지도</a>
+          <a href="/apt/search" className="kd-action-link">🔍 검색</a>
+          <a href="/apt/diagnose" className="kd-action-link">🎯 진단</a>
         </div>
       </div>
 

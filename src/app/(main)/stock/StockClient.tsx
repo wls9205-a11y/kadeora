@@ -193,7 +193,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <a href="/stock/compare" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>⚔️ 비교</a>
+          <a href="/stock/compare" className="kd-action-link">⚔️ 비교</a>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
           <span style={{ color: 'var(--text-tertiary)' }}>원/달러</span>
           <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>₩{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
@@ -217,7 +217,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* AI 일일 시황 */}
       {briefing && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <span style={{ fontSize: 'var(--fs-lg)' }}>{briefing.sentiment === 'bullish' ? '🐂' : briefing.sentiment === 'bearish' ? '🐻' : '😐'}</span>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{briefing.title}</div>
@@ -320,7 +320,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             {sectors.map(s => (
               <button key={s.name} onClick={() => { setSectorFilter(s.name === sectorFilter ? 'all' : s.name); setDomesticTab('ranking'); }} style={{
                 padding: '6px 10px', borderRadius: 8, border: sectorFilter === s.name ? '1px solid var(--brand)' : '1px solid var(--border)',
-                background: sectorFilter === s.name ? 'rgba(37,99,235,0.1)' : s.avg > 1 ? 'rgba(248,113,113,0.08)' : s.avg < -1 ? 'rgba(96,165,250,0.08)' : 'var(--bg-surface)',
+                background: sectorFilter === s.name ? 'var(--brand-bg)' : s.avg > 1 ? 'rgba(248,113,113,0.08)' : s.avg < -1 ? 'rgba(96,165,250,0.08)' : 'var(--bg-surface)',
                 cursor: 'pointer', flexShrink: 0, minWidth: 70, textAlign: 'center',
               }}>
                 <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{s.name}</div>
@@ -450,7 +450,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* M7 카드 (해외) */}
       {!isDomestic && globalTab === 'm7' && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div className="kd-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>🏆 Magnificent 7</div>
             {(() => {
