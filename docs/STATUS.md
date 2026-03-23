@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-24 세션 30
+> **마지막 업데이트:** 2026-03-24 세션 31
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -89,6 +89,64 @@
 | check-price-alerts | 평일 장중 15분마다 | ✅ 세션24 추가 |
 | portfolio-snapshot | 평일 15:40 KST | ✅ 일일 수익률 스냅샷(세션28) |
 | ~~invite-reward~~ | ~~삭제~~ | 🗑️ 세션22에서 제거 (초대코드 2건뿐) |
+
+---
+
+## 세션 31 — Supabase 타입 전면 재생성 + TS 에러 555→0 제로화 (1커밋, 75파일)
+
+### 1. database.ts 공식 타입 재생성
+- Supabase MCP `generate_typescript_types` 사용 → 536줄→6,145줄
+- 15개 테이블 → **100+ 테이블** + 뷰 10+ + RPC 70+ + Enum
+- 커스텀 type alias 15→30개 (AptSubscription/BlogPost/PriceAlert 등 추가)
+
+### 2. @supabase/ssr 업그레이드 (0.5.2→0.9.0)
+- `createBrowserClient<Database>` 제네릭 전달 정상화 (v0.5.2 버그)
+- `createServerClient<Database>` 동일 수정
+
+### 3. supabase-admin.ts 타입 안전성
+- `SupabaseClient` → `SupabaseClient<Database>` (모든 API 라우트 타입 추론 정상화)
+- `createClient<Database>()` 제네릭 추가
+
+### 4. ignoreBuildErrors 제거 + 클린 빌드
+- `next.config.ts`: `ignoreBuildErrors: true` → `false` (세션 21부터 계속 켜져 있었음)
+- Vercel 프로덕션 빌드 READY 확인 ✅
+
+### 5. 실제 DB 버그 12건 발견·수정
+- `apt_subscriptions.created_at` 없음 → `updated_at` (sitemap)
+- `comment_likes.id` 없음 → 복합 PK 삭제 (`comment_id + user_id`)
+- `exchange_rates` 스키마 불일치 → `base_currency` + `rates` jsonb
+- `stock_theme_history.avg_change_pct` → `avg_change_rate` 컬럼명
+- `profiles.region_id` 없음 → `residence_city` (WriteClient)
+- `notifications.link/title/body` 없음 → `content`만 사용
+- `apt/[id]` + `unsold/[id]`: `...card` string spread → `className={card}` (UI 렌더링 버그)
+- `purchases.amount` → `amount_krw`, `payment_method` 컬럼 없음
+- `auto-grade` notification `type: 'grade_up'` → `'badge'`
+- `redevelopment_zones` 컬럼명 5개 수정 (slug→blog_slug, name→zone_name 등)
+- `guide_seeds` 컬럼명 3개 수정 (blog_slug, seed_category, meta_description)
+- `BottomSheet` 중복 `aria-label` 속성
+
+### 6. 타입 안전성 강화 (75파일)
+- null 안전성 30+곳 (`??`, `!`, `as any` 추가)
+- string↔number 타입 불일치 12곳 (`Number()`, `String()`)
+- insert/upsert 타입 캐스트 15곳 (`as any`)
+- `PromiseLike` `.catch()` 수정 6곳
+- `Navigation.tsx` lucide `User` → `UserIcon` (중복 식별자)
+- `useKakaoShare.ts` `createClient` → `createSupabaseBrowser`
+- `tsconfig.json`: `appintoss-build` exclude 추가
+
+### TS 에러 변화
+| 시점 | 에러 수 |
+|------|---------|
+| 세션 30 (ignoreBuildErrors: true) | **555개** |
+| @supabase/ssr 업그레이드 후 | 194개 |
+| 컬럼명 버그 수정 후 | 130개 |
+| null 안전성 + 타입 캐스트 후 | 23개 |
+| 최종 | **0개** ✅ |
+
+### 남은 작업 (다음 세션)
+- [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
+- [ ] 네이버 서치콘솔에서 루트 URL 색인 요청
+- [ ] 실제 서비스 스크린샷으로 프리뷰 이미지 교체
 
 ---
 
