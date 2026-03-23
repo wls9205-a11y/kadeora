@@ -61,6 +61,10 @@
       "schedule": "0 14 * * *"
     },
     {
+      "path": "/api/cron/blog-series-assign",
+      "schedule": "30 3 * * *"
+    },
+    {
       "path": "/api/cron/blog-monthly-theme",
       "schedule": "0 10 1 * *"
     },

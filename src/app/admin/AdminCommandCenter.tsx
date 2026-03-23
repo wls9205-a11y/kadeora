@@ -53,6 +53,7 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'blog-daily':            { display: '블로그 자동발행',   group: '블로그' },
   'blog-afternoon':        { display: '오후 블로그',      group: '블로그' },
   'blog-publish-queue':    { display: '발행 큐 처리',     group: '블로그' },
+  'blog-series-assign':    { display: '시리즈 자동 묶기',  group: '블로그' },
   'blog-rewrite':          { display: 'AI 리라이팅',      group: '블로그' },
   'blog-weekly-market':    { display: '주간 시장 리뷰',   group: '블로그' },
   'blog-monthly-market':   { display: '월간 시장 리뷰',   group: '블로그' },
