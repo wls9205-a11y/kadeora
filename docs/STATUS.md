@@ -111,6 +111,10 @@
 
 ## 세션 26 디자인 시스템 정비 (28개 개선 항목)
 
+### 핫픽스
+- [x] /api/og 런타임 에러 수정 — CSS 변수 → hex 색상 (Edge Runtime 호환)
+- [x] PWA shortcuts 6개 확장 (종목비교 + 실거래검색)
+
 ### 색상/토큰 통일
 - [x] `#2563EB` → `var(--brand)` 59곳 교체 (33개 파일)
 - [x] CSS 디자인 토큰 추가 (radius 5단계, shadow 4단계, transition 3단계)
