@@ -80,7 +80,7 @@ export const DEMO_TRENDING: TrendingKeyword[] = [
   { id: 10, keyword: '리츠 배당', rank: 10, count: 456, created_at: new Date().toISOString() },
 ];
 
-export const DEMO_STOCKS: StockQuote[] = [
+export const DEMO_STOCKS: any[] = [
   { id: 1, symbol: '005930', name: '삼성전자', price: 58400, change_amount: 800, change_rate: 1.39, volume: 12847320, market_cap: 348700000000000, updated_at: new Date().toISOString() },
   { id: 2, symbol: '000660', name: 'SK하이닉스', price: 183000, change_amount: -2500, change_rate: -1.35, volume: 4523156, market_cap: 133200000000000, updated_at: new Date().toISOString() },
   { id: 3, symbol: '035420', name: 'NAVER', price: 178500, change_amount: 3200, change_rate: 1.82, volume: 1238946, market_cap: 29300000000000, updated_at: new Date().toISOString() },
@@ -93,7 +93,7 @@ export const DEMO_STOCKS: StockQuote[] = [
   { id: 10, symbol: '003550', name: 'LG', price: 73200, change_amount: 600, change_rate: 0.83, volume: 678234, market_cap: 12800000000000, updated_at: new Date().toISOString() },
 ];
 
-export const DEMO_DISCUSS: DiscussionRoom[] = [
+export const DEMO_DISCUSS: any[] = [
   { id: 1, title: '삼성전자 6만원 복귀 가능할까? 🔥', description: '현재 주가 분석 및 전망 토론', category: 'stock', participants_count: 234, messages_count: 1847, is_active: true, created_at: new Date().toISOString() },
   { id: 2, title: '2026 청약 전략 공유방', description: '청약 가점, 지역, 타이밍 등 전략 공유', category: 'apt', participants_count: 189, messages_count: 2341, is_active: true, created_at: new Date().toISOString() },
   { id: 3, title: 'HBM 반도체 슈퍼사이클 얼마나 갈까', description: 'AI 반도체 시장 전망 토론', category: 'stock', participants_count: 312, messages_count: 3102, is_active: true, created_at: new Date().toISOString() },

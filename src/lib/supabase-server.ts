@@ -1,7 +1,9 @@
 import 'server-only';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { Database } from '@/types/database';
+
+type CookieEntry = { name: string; value: string; options?: CookieOptions };
 
 export async function createSupabaseServer() {
   const cookieStore = await cookies();
@@ -13,10 +15,10 @@ export async function createSupabaseServer() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieEntry[]) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+            cookiesToSet.forEach(({ name, value, options }: CookieEntry) =>
+              cookieStore.set(name, value, options as any)
             );
           } catch {
             // The `setAll` method was called from a Server Component.
@@ -37,10 +39,10 @@ export async function createSupabaseAdmin() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieEntry[]) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+            cookiesToSet.forEach(({ name, value, options }: CookieEntry) =>
+              cookieStore.set(name, value, options as any)
             );
           } catch {}
         },
