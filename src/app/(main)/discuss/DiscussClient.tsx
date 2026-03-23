@@ -52,7 +52,7 @@ function TopicCard({ topic }: { topic: Topic }) {
 
   return (
     <Link href={`/discuss/${topic.id}`} style={{ textDecoration: 'none' }}>
-      <div style={{
+      <div className="kd-card-hover" style={{
         padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 12, marginBottom: 8,
       }}>

@@ -89,13 +89,14 @@ export default async function HotPage() {
           (topPosts ?? []).map((post: any, i: number) => {
               const isTop3 = i < 3;
               return (
-              <Link key={post.id} href={`/feed/${post.slug || post.id}`} style={{
+              <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{
                 textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12,
-                padding: isTop3 ? '14px 12px' : '10px 0',
+                padding: isTop3 ? '14px 12px' : '10px 4px',
                 borderBottom: i < (topPosts?.length ?? 0) - 1 ? '1px solid var(--border)' : 'none',
                 background: isTop3 ? 'rgba(37,99,235,0.06)' : 'transparent',
-                borderRadius: isTop3 ? 10 : 0,
+                borderRadius: isTop3 ? 10 : 6,
                 marginBottom: isTop3 ? 4 : 0,
+                transition: 'background var(--transition-fast)',
               }}>
                 <span style={{ fontSize: isTop3 ? 24 : 18, width: 32, textAlign: 'center', flexShrink: 0 }}>
                   {MEDAL[i + 1] ?? `${i + 1}`}
@@ -123,7 +124,7 @@ export default async function HotPage() {
           <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
             <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📍 {region} TOP 3</h2>
             {posts.map((post: any, i: number) => (
-                <Link key={post.id} href={`/feed/${post.slug || post.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 4px', borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
                   <span style={{ fontSize: 'var(--fs-xl)', width: 28, textAlign: 'center', flexShrink: 0 }}>
                     {MEDAL[i + 1] ?? `${i + 1}`}
                   </span>
