@@ -36,10 +36,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
           <div style={{ display: 'flex', gap: 5 }}>
             {[0, 1, 2].map(i => (
-              <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--brand)' }} />
+              <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: '#2563EB' }} />
             ))}
           </div>
-          <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--brand)' }}>카더라</span>
+          <span style={{ fontSize: '30px', fontWeight: 800, color: '#2563EB' }}>카더라</span>
         </div>
 
         <div style={{
@@ -49,10 +49,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 32 }}>
-          {category && <span style={{ fontSize: 'var(--fs-lg)', color: '#9DB0C7' }}>{category}</span>}
-          <span style={{ fontSize: 'var(--fs-lg)', color: '#9DB0C7' }}>@{nickname}</span>
-          <span style={{ fontSize: 'var(--fs-lg)', color: '#9DB0C7' }}>❤ {likes}</span>
-          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-base)', color: '#7D8DA3' }}>kadeora.app</span>
+          {category && <span style={{ fontSize: '20px', color: '#9DB0C7' }}>{category}</span>}
+          <span style={{ fontSize: '20px', color: '#9DB0C7' }}>@{nickname}</span>
+          <span style={{ fontSize: '20px', color: '#9DB0C7' }}>❤ {likes}</span>
+          <span style={{ marginLeft: 'auto', fontSize: '17px', color: '#7D8DA3' }}>kadeora.app</span>
         </div>
       </div>
     ),

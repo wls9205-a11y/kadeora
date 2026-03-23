@@ -397,7 +397,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📚 관련 글</div>
           {related!.map((r: any) => (
-            <Link key={r.slug} href={`/blog/${r.slug}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
+            <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 4px', borderBottom: '1px solid var(--border)', textDecoration: 'none', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
               <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</span>
               {r.view_count > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>👀 {r.view_count}</span>}
             </Link>
