@@ -118,7 +118,7 @@ export default function RightPanel() {
             <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>추천 읽을거리</span>
             <Link href="/blog" style={{ fontSize: 10, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>더보기 →</Link>
           </div>
-          {recBlogs.map(b => (
+          {recBlogs.map((b: any) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{
               display: 'block', padding: '5px 0', textDecoration: 'none',
               fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', lineHeight: 1.4,
@@ -127,6 +127,15 @@ export default function RightPanel() {
             }}>{b.title}</Link>
           ))}
         </div>
+      )}
+
+      {/* 비로그인 가입 유도 */}
+      {isLoggedIn === false && (
+        <Link href="/login" style={{
+          display: 'block', textAlign: 'center', padding: '12px 14px',
+          borderRadius: 12, background: '#FEE500', textDecoration: 'none',
+          fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#191919',
+        }}>카카오로 3초 가입</Link>
       )}
 
       {/* 등급 안내 (항상 펼침) */}
