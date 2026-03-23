@@ -9,19 +9,15 @@ const OPTIONAL_SERVER = [
   'CRON_SECRET',
   'UPSTASH_REDIS_REST_URL',
   'UPSTASH_REDIS_REST_TOKEN',
-  'KIS_APP_KEY',
-  'KIS_APP_SECRET',
   'NEXT_PUBLIC_KAKAO_JS_KEY',
-  'ANTHROPIC_API_KEY',
-  'NEXT_PUBLIC_TOSS_CLIENT_KEY',
-  'TOSS_SECRET_KEY',
 ] as const;
 
-let validated = false;
+// globalThis 사용 — serverless 환경에서도 콜드스타트당 1회만 실행
+const VALIDATED_KEY = '__kd_env_validated';
 
 export function validateEnv() {
-  if (validated) return;
-  validated = true;
+  if ((globalThis as any)[VALIDATED_KEY]) return;
+  (globalThis as any)[VALIDATED_KEY] = true;
 
   const missing: string[] = [];
   for (const key of REQUIRED_SERVER) {
@@ -40,7 +36,7 @@ export function validateEnv() {
     if (!process.env[key]) warnings.push(key);
   }
   if (warnings.length > 0) {
-    console.warn(`[env] ⚠️ 선택 환경변수 미설정: ${warnings.join(', ')}`);
+    console.info(`[env] ℹ️ 선택 환경변수 미설정: ${warnings.join(', ')}`);
   }
 }
 
