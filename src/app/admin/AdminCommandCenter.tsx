@@ -35,6 +35,7 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'crawl-apt-trade':       { display: '실거래 수집',      group: '부동산' },
   'crawl-apt-resale':      { display: '재매매 수집',      group: '부동산' },
   'crawl-apt-subscription':{ display: '청약 수집',        group: '부동산' },
+  'apt-backfill-details':  { display: '청약 상세 백필',    group: '부동산' },
   'crawl-competition-rate':{ display: '경쟁률 수집',      group: '부동산' },
   'crawl-unsold-molit':    { display: '미분양 수집',      group: '부동산' },
   'crawl-seoul-redev':     { display: '서울 재개발',      group: '부동산' },
@@ -85,6 +86,7 @@ const QUICK_ACTIONS = [
   { id: 'blog-daily',    label: '블로그 발행',  path: '/api/cron/blog-daily',    icon: '📰' },
   { id: 'aggregate',     label: '거래 집계',    path: '/api/cron/aggregate-trade-stats', icon: '📋' },
   { id: 'redev-verify',  label: '세대수 검증',  path: '/api/cron/redev-verify-households', icon: '🏘️' },
+  { id: 'apt-backfill',  label: '청약 상세 백필', path: '/api/cron/apt-backfill-details', icon: '🔄' },
   { id: 'series-assign', label: '시리즈 묶기',  path: '/api/cron/blog-series-assign', icon: '📚' },
   { id: 'pf-snapshot',   label: '포트폴리오 스냅샷', path: '/api/cron/portfolio-snapshot', icon: '📸' },
 ];

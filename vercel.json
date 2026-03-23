@@ -193,6 +193,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/cron/apt-backfill-details",
+      "schedule": "0 5 * * 3"
+    },
+    {
       "path": "/api/cron/crawl-nationwide-redev",
       "schedule": "0 7 * * 1"
     },

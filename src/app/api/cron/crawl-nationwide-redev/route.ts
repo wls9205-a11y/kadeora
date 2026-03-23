@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 120;
@@ -44,15 +45,9 @@ function guessType(text: string | null): string {
   return '재개발';
 }
 
-export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const GET = withCronAuth(async (req: NextRequest) => {
   const apiKey = process.env.BUSAN_DATA_API_KEY || process.env.MOLIT_STAT_API_KEY;
-  if (!apiKey) return NextResponse.json({ success: true, error: 'API key not set' });
+  if (!apiKey) return NextResponse.json({ success: true, error: 'API key not set (BUSAN_DATA_API_KEY or MOLIT_STAT_API_KEY)' });
 
   const result = await withCronLogging('crawl-nationwide-redev', async () => {
     const supabase = getSupabaseAdmin();
@@ -67,7 +62,7 @@ export async function GET(req: NextRequest) {
         try {
           // 정비사업정보서비스 API
           const url = `https://apis.data.go.kr/1613000/MntncBizInfoSvc/getMntncBizList?serviceKey=${encodeURIComponent(apiKey)}&sigunguCd=${sigunguCode}&numOfRows=200&pageNo=1&resultType=json`;
-          const res = await fetch(url);
+          const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
           
           if (!res.ok) {
             debugInfo[`${regionKey}_${sigunguName}`] = { status: res.status, statusText: res.statusText };
@@ -133,4 +128,4 @@ export async function GET(req: NextRequest) {
 
   if (!result.success) return NextResponse.json({ success: true, error: result.error });
   return NextResponse.json({ ok: true, ...result });
-}
+});
