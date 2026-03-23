@@ -254,7 +254,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </div>
 
       <article style={{ paddingBottom: 40 }}>
-        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px' }}>{post.title}</h1>
+        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px', wordBreak: 'keep-all' }}>{post.title}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
           <span>{new Date(post.published_at || post.created_at).toLocaleDateString('ko-KR')}</span>
           <span>조회 {post.view_count ?? 0}</span>
