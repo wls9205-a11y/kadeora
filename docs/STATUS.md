@@ -85,7 +85,7 @@
 
 ---
 
-## 세션 24 변경 요약 (10대 진화, 21개 신규 + 7개 수정)
+## 세션 24 변경 요약 (10대 진화 + 20개 품질 강화, 총 47파일)
 
 ### 1. 개인화 대시보드
 - 피드 상단에 관심종목 등락률 + 관심청약 D-day + 읽지않은 알림 위젯
@@ -93,7 +93,7 @@
 
 ### 2. 가격 알림 시스템
 - 주식 목표가/등락률, 부동산 청약 D-day 알림
-- check-price-alerts 크론 (평일 장중 15분마다)
+- check-price-alerts 크론 (평일 장중 15분마다, 중복실행 방지 lock)
 - price_alerts 테이블 (유저당 최대 20개)
 
 ### 3. 블로그 시리즈 시스템
@@ -132,6 +132,14 @@
 - 어드민 시스템에 크론 현황 테이블 + 실패 알림 배너
 - 기간 선택 (6시간/24시간/3일/7일)
 - RPC get_cron_summary + 직접 쿼리 폴백
+
+### 11. 품질 강화 (20개 항목)
+- **SEO:** sitemap에 지역랜딩 30개 + 시리즈 + 맵 추가, 블로그/주식 OG 동적 생성
+- **보안:** API rate-limit 3개 적용, 입력값 검증+sanitize, 환경변수 검증
+- **성능:** StockClient visibility 폴링, 피드 이미지 next/Image, 탭별 lazy fetch API
+- **접근성:** Toast aria-live, useModalA11y 훅 (Escape+포커스트랩), EmptyState 통일
+- **품질:** cron-lock (중복실행 방지), safe-catch (빈catch 대체), eslint no-console
+- **인프라:** DB 커넥션 싱글톤 (getSupabaseAdmin), 부동산 내부링크 그리드
 
 ---
 
@@ -349,12 +357,13 @@
 ## 미해결 (다음 세션)
 
 ### 긴급
-- [ ] Supabase 세션 24 마이그레이션 실행 (`20260323_session24_evolution.sql`)
+- [ ] Supabase 세션 24 마이그레이션 실행 (`20260323_session24_evolution.sql`) — ✅ 실행 완료
 - [ ] Vercel ERROR 배포 정리 (동시 빌드 큐)
 
 ### 관리자 수동
 - [x] Supabase FTS 마이그레이션 실행 ✅ 세션 22
 - [x] Supabase 상세 필드 마이그레이션 실행 ✅ 세션 22
+- [x] Supabase 세션 24 마이그레이션 실행 ✅ 세션 24 (테이블4+RPC5+인덱스6)
 - [ ] Google/네이버 서치콘솔 sitemap 제출
 - [ ] 토스 라이브키 교체
 - [ ] KIS_APP_KEY + KIS_APP_SECRET 환경변수
@@ -362,16 +371,18 @@
 - [ ] blog_series 초기 시리즈 데이터 시드
 
 ### 코드
+- [ ] AptClient 2045줄 탭별 분할 (SubscriptionTab/OngoingTab/UnsoldTab/RedevTab/TransactionTab)
+- [ ] AptClient 탭별 lazy fetch 적용 (tab-data API 이미 생성, 연결만 필요)
 - [ ] crawl-nationwide-redev API 키 등록 후 실행
 - [ ] 재개발 세대수 크론 검증 수집
-- [x] 부동산 지도뷰 ✅ 세션 24
-- [x] 주식 캔들차트 ✅ 세션 23
 - [ ] 청약 상세의 신규 필드 데이터 채우기
 - [ ] 블로그 시리즈 시드 크론 (14,578건 자동 묶기)
 - [ ] 포트폴리오 수익률 히스토리 (일일 스냅샷)
 - [ ] 지도뷰 클러스터링 (마커 50개+ 시 성능 최적화)
 - [ ] 리뷰 좋아요/신고 기능
 - [ ] Skeleton UI 피드/주식/블로그 전 탭 확대 적용
+- [ ] safe-catch.ts 전면 적용 (빈 catch 65개 → silentCatch 전환)
+- [ ] useModalA11y 모달 전면 적용 (AptClient 3개 모달, StockClient 모달)
 
 ### 완료
 - [x] 분양중 골드 하이라이트 ✅

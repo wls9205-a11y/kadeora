@@ -139,13 +139,38 @@ docs/sessions/session-24.md
 ## 수정 파일 (7개)
 
 ```
-src/app/(main)/feed/FeedClient.tsx         — PersonalDashboard 추가
-src/app/(main)/stock/StockClient.tsx       — 포트폴리오 탭 추가
-src/app/(main)/apt/AptClient.tsx           — 지도 링크 + 차트 + 리뷰
+src/app/(main)/feed/FeedClient.tsx         — PersonalDashboard 추가 + next/Image
+src/app/(main)/stock/StockClient.tsx       — 포트폴리오 탭 + visibility 폴링
+src/app/(main)/apt/AptClient.tsx           — 지도 링크 + 차트 + 리뷰 + 지역 내부링크
 src/app/(main)/blog/page.tsx               — 시리즈 탭 추가
-src/app/(main)/blog/[slug]/page.tsx        — 시리즈 네비게이션
+src/app/(main)/blog/[slug]/page.tsx        — 시리즈 네비게이션 + 동적 OG 이미지
 src/app/admin/system/page.tsx              — CronDashboard 추가
 vercel.json                                — check-price-alerts 크론
+```
+
+## 품질 강화 (2차 커밋, +7개 신규 파일)
+
+### 신규 파일
+```
+src/lib/env-validate.ts     — 환경변수 검증 유틸
+src/lib/safe-catch.ts       — 빈 catch 대체 (Sentry 리포트)
+src/lib/cron-lock.ts        — 크론 중복 실행 방지
+src/lib/use-modal-a11y.ts   — 모달 접근성 훅 (Escape+포커스트랩)
+src/app/api/apt/tab-data/route.ts — 탭별 경량 데이터 API
+```
+
+### 수정 파일
+```
+src/lib/supabase-admin.ts            — env 검증 + 싱글톤
+src/app/api/portfolio/route.ts       — rate-limit + sanitize + 검증
+src/app/api/alerts/route.ts          — rate-limit + 싱글톤
+src/app/api/apt/reviews/route.ts     — rate-limit + sanitize + 검증
+src/app/api/cron/check-price-alerts  — 싱글톤 + cron-lock 재작성
+src/app/sitemap.ts                   — 지역30개 + 시리즈 + 맵
+src/app/(main)/stock/[symbol]/page.tsx — 동적 OG 이미지
+src/components/Toast.tsx             — aria-live 접근성
+src/components/PortfolioTab.tsx      — EmptyState 통일
+eslint.config.mjs                    — no-console 규칙
 ```
 
 ---
@@ -165,13 +190,20 @@ supabase/migrations/20260323_session24_evolution.sql
 ## 다음 세션
 
 ### 즉시
-- [ ] Supabase 마이그레이션 실행
-- [ ] blog_series에 초기 시리즈 데이터 시드
-- [ ] Vercel 배포 확인
+- [ ] Google Search Console sitemap 재제출
+- [ ] 네이버 서치어드바이저 sitemap 제출
+- [ ] blog_series 초기 시리즈 데이터 시드
 
-### 중기
-- [ ] 블로그 시리즈 시드 크론 (기존 14,578건을 시리즈로 자동 묶기)
+### 중기 (코드)
+- [ ] AptClient 2045줄 탭별 분할 (5개 서브 컴포넌트)
+- [ ] AptClient 탭별 lazy fetch 연결 (tab-data API 활용)
+- [ ] safe-catch.ts 전면 적용 (빈 catch 65개)
+- [ ] useModalA11y 모달 전면 적용
+- [ ] 블로그 시리즈 시드 크론 (14,578건 자동 묶기)
 - [ ] 포트폴리오 수익률 히스토리 (일일 스냅샷)
-- [ ] 지도뷰 클러스터링 (마커 50개+ 시 성능 최적화)
+- [ ] 지도뷰 클러스터링
+
+### 장기
+- [ ] Skeleton UI 전 탭 확대 적용
 - [ ] 리뷰 좋아요/신고 기능
-- [ ] Skeleton UI를 피드/주식/블로그 전 탭 확대 적용
+- [ ] GSC 색인 현황/CWV 점검
