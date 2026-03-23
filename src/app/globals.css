@@ -1202,14 +1202,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   }
 }
 
-
-  table::-webkit-scrollbar { display: none; }
-  td, th {
-    white-space: nowrap;
-    padding: 8px 10px !important;
-  }
-}
-
 /* ═══ 모바일 테이블 수평 스크롤 ═══ */
 @media screen and (max-width: 640px) {
   .blog-content table {
