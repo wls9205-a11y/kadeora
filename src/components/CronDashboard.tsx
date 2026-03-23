@@ -1,21 +1,11 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { timeAgo } from '@/lib/format';
 
 interface CronSummary {
   cron_name: string; total_runs: number; success_count: number;
   error_count: number; avg_duration_ms: number; last_run: string; last_status: string;
-}
-
-function timeAgo(d: string) {
-  if (!d) return '-';
-  const diff = Date.now() - new Date(d).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return '방금';
-  if (m < 60) return `${m}분 전`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}시간 전`;
-  return `${Math.floor(h / 24)}일 전`;
 }
 
 export default function CronDashboard() {

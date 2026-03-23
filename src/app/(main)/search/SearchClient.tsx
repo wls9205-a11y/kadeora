@@ -30,11 +30,6 @@ interface AptResult {
   rcept_endde: string;
 }
 
-분 전`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}시간 전`;
-  return `${Math.floor(h / 24)}일 전`;
-}
 
 function highlight(text: string, query: string): React.ReactNode {
   if (!query) return text;

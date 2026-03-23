@@ -18,11 +18,6 @@ interface Notif {
   title?: string | null;
 }
 
-분 전`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}시간 전`;
-  return `${Math.floor(h / 24)}일 전`;
-}
 
 const TYPE_ICON: Record<string, string> = {
   post_like: '❤️', comment: '💬', reply: '↩️',

@@ -4,12 +4,6 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import BottomSheet from '@/components/BottomSheet';
 import { timeAgo } from '@/lib/format';
 
-분 전`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}시간 전`;
-  return `${Math.floor(h / 24)}일 전`;
-}
-
 interface Props { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev'; open: boolean; onClose: () => void; }
 
 export default function AptCommentSheet({ houseKey, houseNm, houseType, open, onClose }: Props) {

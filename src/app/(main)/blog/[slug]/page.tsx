@@ -49,10 +49,6 @@ const GEO_CODES: Record<string, string> = {
   '전북': 'KR-45', '전남': 'KR-46', '경북': 'KR-47', '경남': 'KR-48', '제주': 'KR-50',
 };
 
-분 전`;
-  const h = Math.floor(m / 60); if (h < 24) return `${h}시간 전`;
-  return `${Math.floor(h / 24)}일 전`;
-}
 
 const CTA_BY_CAT: Record<string, string> = {
   apt: '이 단지에 대해 어떻게 생각하세요?',

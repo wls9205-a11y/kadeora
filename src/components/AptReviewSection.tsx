@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Star, ThumbsUp, PenSquare } from 'lucide-react';
 import { getAvatarColor } from '@/lib/avatar';
+import { timeAgo } from '@/lib/format';
 
 interface Review {
   id: string; apt_name: string; rating: number; pros: string | null;
@@ -23,17 +24,6 @@ function StarRating({ rating, size = 14, interactive, onChange }: {
       ))}
     </div>
   );
-}
-
-function timeAgo(d: string) {
-  const diff = Date.now() - new Date(d).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 60) return `${m}분 전`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}시간 전`;
-  const days = Math.floor(h / 24);
-  if (days < 30) return `${days}일 전`;
-  return new Date(d).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 }
 
 export default function AptReviewSection({ aptName, region }: { aptName: string; region?: string }) {

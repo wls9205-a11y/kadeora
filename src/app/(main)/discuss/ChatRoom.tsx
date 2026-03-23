@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { ReportModal } from '@/components/modals/ReportModal';
-import EmptyState from '@/components/shared/EmptyState';
+import EmptyState from '@/components/EmptyState';
 import type { User } from '@supabase/supabase-js';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';

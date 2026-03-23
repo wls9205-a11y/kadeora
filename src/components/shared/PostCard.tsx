@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Heart, MessageCircle, Eye } from 'lucide-react';
 import { getAvatarColor } from "@/lib/avatar";
 import { gradeEmoji as getGradeEmoji, gradeColor, gradeTitle } from "@/lib/constants";
+import { timeAgo } from '@/lib/format';
 
 export interface PostAuthor { id: string; nickname: string; avatar_url?: string | null; grade?: number; }
 export interface Post {
@@ -19,15 +20,6 @@ export interface PostCardProps {
   onLike?: (postId: number | string) => Promise<void>;
   variant?: "default" | "compact";
   showAuthor?: boolean;
-}
-function timeAgo(dateStr: string | null | undefined): string {
-  if (!dateStr) return '';
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return "방금 전";
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
-  return new Date(dateStr).toLocaleDateString("ko-KR");
 }
 
 function PostCard({ post, variant = "default", showAuthor = true }: PostCardProps) {

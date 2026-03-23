@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { timeAgo } from '@/lib/format';
 
 interface StockComment {
   id: string;
@@ -8,14 +9,6 @@ interface StockComment {
   content: string;
   created_at: string;
   profiles?: { nickname: string | null } | null;
-}
-
-function timeAgo(d: string) {
-  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-  if (m < 1) return '방금';
-  if (m < 60) return m + '분 전';
-  if (m < 1440) return Math.floor(m / 60) + '시간 전';
-  return Math.floor(m / 1440) + '일 전';
 }
 
 function avatarColor(name: string) {

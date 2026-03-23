@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import { getAvatarColor } from '@/lib/avatar';
+import { timeAgo } from '@/lib/format';
 
 interface StockComment {
   id: string; author_id: string; content: string; created_at: string;
@@ -15,14 +16,6 @@ const avc = getAvatarColor;
 const GL = (g?: number) => { if(!g||g<2) return '새싹'; if(g<4) return '정보통'; if(g<6) return '동네어른'; if(g<8) return '소문난집'; return '인플루언서'; };
 
 const REACTIONS = ['📉','📈','❤️','👍','🙏','😊','😮'];
-
-function timeAgo(d: string) {
-  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-  if (m < 1) return '방금';
-  if (m < 60) return m + '분 전';
-  if (m < 1440) return Math.floor(m / 60) + '시간 전';
-  return Math.floor(m / 1440) + '일 전';
-}
 
 export default function StockComments({ symbol, stockName }: { symbol: string; stockName: string }) {
   const [comments, setComments] = useState<StockComment[]>([]);

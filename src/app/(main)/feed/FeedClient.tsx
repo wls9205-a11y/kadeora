@@ -9,7 +9,7 @@ import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import PullToRefresh from '@/components/PullToRefresh';
-import EmptyState from '@/components/shared/EmptyState';
+import EmptyState from '@/components/EmptyState';
 import PushNudgeBanner from '@/components/PushNudgeBanner';
 import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
@@ -404,7 +404,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
         </div>
       )}
       {posts.length === 0 && (
-        <EmptyState icon="📝" title="아직 게시글이 없어요" description="첫 번째 글의 주인공이 되어보세요" actionLabel="글쓰기" actionHref="/write" />
+        <EmptyState icon="📝" title="아직 게시글이 없어요" description="첫 번째 글의 주인공이 되어보세요" action={{ label: "글쓰기", href: "/write" }} />
       )}
     </div>
     </PullToRefresh>
