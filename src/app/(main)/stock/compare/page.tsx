@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { fmtCap, fmtPrice } from '@/lib/format';
+import Disclaimer from '@/components/Disclaimer';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number;
@@ -171,9 +172,7 @@ export default function StockComparePage() {
         </div>
       </div>
 
-      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0' }}>
-        ⚠️ 투자 참고용이며 투자 권유가 아닙니다.
-      </p>
+      <Disclaimer type="stock" compact />
     </div>
   );
 }

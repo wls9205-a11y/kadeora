@@ -212,7 +212,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       )}
 
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-        📊 국토교통부 실거래가 공개시스템 기준 · ⚠️ 투자 참고용이며 투자 권유가 아닙니다.
+        📊 국토교통부 실거래가 공개시스템 기준
       </p>
 
       {/* 실거래 상세 모달 */}

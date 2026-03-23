@@ -42,7 +42,7 @@ export default function TermsPage() {
           본 약관은 대한민국 법령에 따라 해석되고 적용됩니다.
         </p>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '8px 0 0' }}>
-          주식 시세: Naver Finance / Yahoo Finance API · 청약 정보: 청약홈(applyhome.co.kr) 공공데이터
+          주식: 금융위원회 공공데이터 API(data.go.kr) · 청약: 공공데이터포털(data.go.kr) · 실거래: 국토교통부
         </p>
       </div>
     </div>

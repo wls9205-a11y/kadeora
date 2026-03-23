@@ -185,7 +185,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       )}
 
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 40px' }}>
-        📊 국토교통부 실거래가 공개시스템 기준 · ⚠️ 투자 참고용
+        📊 국토교통부 실거래가 공개시스템 기준
       </p>
     </div>
   );

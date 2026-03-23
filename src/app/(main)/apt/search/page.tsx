@@ -153,7 +153,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
       )}
 
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '20px 0' }}>
-        📊 국토교통부 실거래가 공개시스템 기준 · ⚠️ 투자 참고용
+        📊 국토교통부 실거래가 공개시스템 기준
       </p>
 
       {/* 지역별 부동산 내부 링크 (SEO) */}

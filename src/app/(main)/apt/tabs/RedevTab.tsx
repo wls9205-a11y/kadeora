@@ -245,9 +245,6 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             )}
 
             {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>조건에 맞는 프로젝트가 없습니다</div>}
-            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-              📊 데이터 출처: 서울시 열린데이터광장(openapi.seoul.go.kr) · 경기도 공공데이터(openapi.gg.go.kr) · 부산시 공공데이터(apis.data.go.kr) · 매주 월요일 갱신 · 실제 진행 상황은 해당 조합 또는 지자체에 직접 확인하세요<br/>⚠️ 본 정보는 참고용이며 투자 권유가 아닙니다. 투자에 따른 손익은 투자자 본인에게 귀속됩니다.
-            </p>
           </div>
 
       {/* 재개발 상세 모달 */}

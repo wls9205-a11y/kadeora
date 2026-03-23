@@ -9,6 +9,7 @@ import StockWatchlistButton from './WatchlistButton';
 import StockDetailTabs from './StockDetailTabs';
 import StockAlertButton from '@/components/StockAlertButton';
 import { fmtPrice, fmtCap } from '@/lib/format';
+import Disclaimer from '@/components/Disclaimer';
 
 interface Props { params: Promise<{ symbol: string }> }
 
@@ -187,9 +188,7 @@ export default async function StockDetailPage({ params }: Props) {
       )}
 
       {/* 면책고지 */}
-      <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-        ⚠️ 본 정보는 투자 권유가 아니며, 투자에 따른 손익은 투자자 본인에게 귀속됩니다. 금융투자상품은 원금 손실이 발생할 수 있습니다.
-      </div>
+      <Disclaimer type="stock" compact />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>공유</span>

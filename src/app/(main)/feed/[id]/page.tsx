@@ -16,6 +16,7 @@ import ReportButton from '@/components/ReportButton';
 import PostActions from '@/components/PostActions';
 import FontSizeControl from '@/components/FontSizeControl';
 import { timeAgo } from '@/lib/format';
+import Disclaimer from '@/components/Disclaimer';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
@@ -249,18 +250,7 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
         {(post.category === 'apt' || post.category === 'stock') && (
-          <div style={{
-            background: 'rgba(37,99,235,0.04)',
-            border: '1px solid rgba(37,99,235,0.12)',
-            borderRadius: 8,
-            padding: '8px 12px',
-            fontSize: 'var(--fs-xs)',
-            color: 'var(--text-tertiary)',
-            marginBottom: 24,
-            lineHeight: 1.5,
-          }}>
-            📌 이 게시글은 개인의 의견이며 투자 권유가 아닙니다. 모든 투자 판단과 손익은 투자자 본인에게 귀속됩니다.
-          </div>
+          <Disclaimer type="feed" compact />
         )}
 
         {/* Image gallery */}

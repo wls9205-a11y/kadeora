@@ -54,7 +54,7 @@ export default function FAQPage() {
 
       <div style={{ marginTop: 40, padding: '24px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, textAlign: 'center' }}>
         <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)' }}>찾는 답이 없으신가요?</p>
-        <a href="mailto:support@kadeora.com" style={{
+        <a href="mailto:kadeora.app@gmail.com" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '10px 20px', borderRadius: 8,
           background: 'var(--brand)', color: 'var(--text-inverse)',
