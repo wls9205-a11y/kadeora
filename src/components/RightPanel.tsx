@@ -42,7 +42,6 @@ export default function RightPanel() {
       .then(({ data }) => { if (data?.length) setRecBlogs(data); })
       .catch(() => {});
 
-    const sb = createSupabaseBrowser();
     sb.auth.getSession().then(async ({ data }) => {
       if (!data.session?.user) { setIsLoggedIn(false); return; }
       setIsLoggedIn(true);
