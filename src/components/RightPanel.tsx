@@ -26,10 +26,20 @@ export default function RightPanel() {
   const [trending, setTrending] = useState<{ keyword: string }[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [recBlogs, setRecBlogs] = useState<{ slug: string; title: string }[]>([]);
 
   useEffect(() => {
     fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 5)); })
+      .catch(() => {});
+
+    // 추천 블로그 (인기순 3개)
+    const sb = createSupabaseBrowser();
+    sb.from('blog_posts').select('slug, title')
+      .eq('is_published', true)
+      .order('view_count', { ascending: false })
+      .limit(3)
+      .then(({ data }) => { if (data?.length) setRecBlogs(data); })
       .catch(() => {});
 
     const sb = createSupabaseBrowser();
@@ -101,6 +111,24 @@ export default function RightPanel() {
           </Link>
         ))}
       </div>
+
+      {/* 추천 읽을거리 */}
+      {recBlogs.length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>추천 읽을거리</span>
+            <Link href="/blog" style={{ fontSize: 10, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>더보기 →</Link>
+          </div>
+          {recBlogs.map(b => (
+            <Link key={b.slug} href={`/blog/${b.slug}`} style={{
+              display: 'block', padding: '5px 0', textDecoration: 'none',
+              fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', lineHeight: 1.4,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              borderBottom: '1px solid var(--border)',
+            }}>{b.title}</Link>
+          ))}
+        </div>
+      )}
 
       {/* 등급 안내 (항상 펼침) */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
