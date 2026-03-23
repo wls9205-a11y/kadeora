@@ -4,10 +4,9 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { SITE_URL as SITE } from '@/lib/constants';
 
 export const revalidate = 3600;
-
-const SITE = 'https://kadeora.app';
 
 export const metadata: Metadata = {
   title: '카더라 — 대한민국 소리소문 정보 커뮤니티',
