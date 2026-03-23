@@ -82,7 +82,7 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   // 공개 전용 페이지: auth 체크 없이 바로 통과 (속도 대폭 향상)
-  const PUBLIC_ONLY = ['/feed', '/stock', '/apt', '/blog', '/discuss', '/hot', '/search', '/faq', '/terms', '/privacy', '/guide', '/grades', '/discussion'];
+  const PUBLIC_ONLY = ['/', '/feed', '/stock', '/apt', '/blog', '/discuss', '/hot', '/search', '/faq', '/terms', '/privacy', '/guide', '/grades', '/discussion'];
   const isPublicOnly = PUBLIC_ONLY.some(p => pathname === p || pathname.startsWith(p + '/'));
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
 

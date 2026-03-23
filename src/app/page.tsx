@@ -1,2 +1,393 @@
+import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-export default function RootPage() { redirect('/feed'); }
+import Link from 'next/link';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+
+export const revalidate = 3600;
+
+const SITE = 'https://kadeora.app';
+
+export const metadata: Metadata = {
+  title: '카더라 — 대한민국 소리소문 정보 커뮤니티',
+  description: '주식 시세, 아파트 청약, 미분양, 재개발, 실거래가 정보와 커뮤니티를 한 곳에서. 코스피 코스닥 실시간 시세, 전국 청약 일정, 부동산 분석을 매일 업데이트합니다.',
+  alternates: { canonical: SITE },
+  openGraph: {
+    title: '카더라 — 아는 사람만 아는 그 정보',
+    description: '주식 시세, 아파트 청약, 미분양·재개발·실거래가, 커뮤니티 토론을 하나의 앱에서.',
+    url: SITE,
+    siteName: '카더라',
+    images: [{ url: `${SITE}/images/brand/kadeora-wide.png`, width: 1200, height: 630, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' }],
+    locale: 'ko_KR',
+    type: 'website',
+  },
+};
+
+const SECTIONS = [
+  {
+    href: '/stock',
+    emoji: '📊',
+    title: '실시간 주식 시세',
+    desc: '코스피·코스닥·나스닥·S&P500 종목 시세, 테마별 동향, AI 분석을 한눈에',
+    tags: ['코스피', '코스닥', '나스닥', '환율'],
+  },
+  {
+    href: '/apt',
+    emoji: '🏢',
+    title: '아파트 청약·부동산',
+    desc: '전국 청약 일정, 미분양 현황, 재개발 진행 상황, 실거래가 조회까지',
+    tags: ['청약일정', '미분양', '재개발', '실거래가'],
+  },
+  {
+    href: '/blog',
+    emoji: '📰',
+    title: '투자 정보 블로그',
+    desc: '매일 업데이트되는 시황 분석, 청약 가이드, 재테크 정보 14,000편+',
+    tags: ['시황분석', '청약가이드', '재테크'],
+  },
+  {
+    href: '/feed',
+    emoji: '💬',
+    title: '커뮤니티 피드',
+    desc: '주식, 부동산, 우리동네 소식을 자유롭게 나누는 소통 공간',
+    tags: ['자유토론', '우리동네', '정보공유'],
+  },
+  {
+    href: '/discuss',
+    emoji: '🗣️',
+    title: '실시간 토론방',
+    desc: '주식방, 부동산방, 자유방에서 실시간 채팅과 투표에 참여하세요',
+    tags: ['실시간채팅', '투표', '종목토론'],
+  },
+  {
+    href: '/hot',
+    emoji: '🔥',
+    title: '이번 주 HOT',
+    desc: '이번 주 가장 많은 관심을 받은 인기 게시글 모아보기',
+    tags: ['인기글', '주간랭킹', '트렌드'],
+  },
+];
+
+const TOOLS = [
+  { href: '/apt/map', label: '부동산 지도뷰', emoji: '🗺️' },
+  { href: '/apt/diagnose', label: '청약 진단', emoji: '🏥' },
+  { href: '/stock/compare', label: '종목 비교', emoji: '⚖️' },
+  { href: '/search', label: '통합 검색', emoji: '🔍' },
+  { href: '/guide', label: '가이드북', emoji: '📖' },
+  { href: '/grades', label: '등급 안내', emoji: '🏅' },
+];
+
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const hasSession = cookieStore.getAll().some(c =>
+    c.name.startsWith('sb-') && c.name.includes('-auth-token')
+  );
+  if (hasSession) redirect('/feed');
+
+  let stats = { blogs: 14500, stocks: 150, apts: 2500, posts: 3700, profiles: 110, redev: 217 };
+  try {
+    const sb = getSupabaseAdmin();
+    const [blogR, stockR, aptR, postR, profileR, redevR] = await Promise.all([
+      sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
+      sb.from('stock_quotes').select('id', { count: 'exact', head: true }),
+      sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }),
+      sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
+      sb.from('profiles').select('id', { count: 'exact', head: true }),
+      sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    ]);
+    stats = {
+      blogs: blogR.count ?? stats.blogs,
+      stocks: stockR.count ?? stats.stocks,
+      apts: aptR.count ?? stats.apts,
+      posts: postR.count ?? stats.posts,
+      profiles: profileR.count ?? stats.profiles,
+      redev: redevR.count ?? stats.redev,
+    };
+  } catch {}
+
+  const fmtNum = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}만` : n >= 1000 ? `${(n / 1000).toFixed(1)}천` : String(n);
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        itemListElement: SECTIONS.map((s, i) => ({
+          '@type': 'SiteNavigationElement',
+          position: i + 1,
+          name: s.title,
+          url: `${SITE}${s.href}`,
+          description: s.desc,
+        })),
+      }) }} />
+
+      <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+
+        {/* ━━━ 헤더 ━━━ */}
+        <header style={{
+          position: 'sticky', top: 0, zIndex: 50,
+          background: 'rgba(11,20,38,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--border)',
+        }}>
+          <div style={{
+            maxWidth: 1200, margin: '0 auto', padding: '12px 20px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+              <svg width={32} height={32} viewBox="0 0 72 72" aria-hidden="true">
+                <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1E40AF" /><stop offset="100%" stopColor="#3B82F6" /></linearGradient></defs>
+                <rect width={72} height={72} rx={18} fill="url(#hg)" />
+                <circle cx={18} cy={36} r={7} fill="white" /><circle cx={36} cy={36} r={7} fill="white" /><circle cx={54} cy={36} r={7} fill="white" />
+              </svg>
+              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>카더라</span>
+            </Link>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Link href="/feed" className="home-nav-link">피드</Link>
+              <Link href="/stock" className="home-nav-link">주식</Link>
+              <Link href="/apt" className="home-nav-link">부동산</Link>
+              <Link href="/blog" className="home-nav-link">블로그</Link>
+              <Link href="/login" style={{
+                marginLeft: 8, padding: '8px 18px', borderRadius: 999,
+                background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 14,
+                textDecoration: 'none', border: 'none', display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}>시작하기</Link>
+            </nav>
+          </div>
+        </header>
+
+        {/* ━━━ 히어로 ━━━ */}
+        <section style={{
+          maxWidth: 1200, margin: '0 auto', padding: 'clamp(48px, 10vw, 100px) 20px clamp(40px, 8vw, 80px)',
+          textAlign: 'center',
+        }}>
+          <div style={{
+            display: 'inline-block', padding: '6px 16px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+            background: 'var(--brand-bg)', color: 'var(--brand-hover)', border: '1px solid var(--brand-border)',
+            marginBottom: 20,
+          }}>
+            대한민국 소리소문 정보 커뮤니티
+          </div>
+          <h1 style={{
+            fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.03em',
+            margin: '0 0 16px',
+            background: 'linear-gradient(135deg, #E2E8F0 0%, #93C5FD 50%, #3B82F6 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}>
+            아는 사람만 아는{'\n'}그 정보, 카더라
+          </h1>
+          <p style={{
+            fontSize: 'clamp(15px, 2vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.7,
+            maxWidth: 540, margin: '0 auto 32px',
+          }}>
+            주식 시세, 아파트 청약, 미분양·재개발·실거래가,{' '}
+            투자 정보와 커뮤니티를 하나의 앱에서 만나보세요.
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/feed" style={{
+              padding: '14px 32px', borderRadius: 14, fontSize: 16, fontWeight: 700,
+              background: 'var(--brand)', color: '#fff', textDecoration: 'none',
+              boxShadow: '0 4px 20px rgba(37,99,235,0.3)',
+            }}>
+              둘러보기
+            </Link>
+            <Link href="/login" style={{
+              padding: '14px 32px', borderRadius: 14, fontSize: 16, fontWeight: 700,
+              background: 'var(--bg-surface)', color: 'var(--text-primary)', textDecoration: 'none',
+              border: '1px solid var(--border-strong)',
+            }}>
+              카카오로 3초 가입
+            </Link>
+          </div>
+        </section>
+
+        {/* ━━━ 실시간 통계 ━━━ */}
+        <section style={{ maxWidth: 1200, margin: '0 auto 48px', padding: '0 20px' }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12,
+            background: 'var(--bg-surface)', borderRadius: 16, padding: 'clamp(16px, 3vw, 24px)',
+            border: '1px solid var(--border)',
+          }}>
+            {[
+              { label: '블로그 글', value: fmtNum(stats.blogs), suffix: '편' },
+              { label: '종목 시세', value: String(stats.stocks), suffix: '종목' },
+              { label: '청약 정보', value: fmtNum(stats.apts), suffix: '건' },
+              { label: '재개발 구역', value: String(stats.redev), suffix: '곳' },
+              { label: '커뮤니티 글', value: fmtNum(stats.posts), suffix: '건' },
+              { label: '가입 회원', value: String(stats.profiles), suffix: '명' },
+            ].map(s => (
+              <div key={s.label} style={{ textAlign: 'center', padding: '8px 0' }}>
+                <div style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, color: 'var(--brand-hover)', letterSpacing: '-0.02em' }}>
+                  {s.value}<span style={{ fontSize: '0.5em', fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: 2 }}>{s.suffix}</span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ━━━ 주요 서비스 ━━━ */}
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
+          <h2 style={{
+            fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, textAlign: 'center', marginBottom: 12,
+            letterSpacing: '-0.02em',
+          }}>
+            카더라에서 할 수 있는 것들
+          </h2>
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 15, marginBottom: 36 }}>
+            금융·부동산 정보부터 커뮤니티까지, 하나의 앱으로
+          </p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))',
+            gap: 16,
+          }}>
+            {SECTIONS.map(s => (
+              <Link key={s.href} href={s.href} className="home-card" style={{
+                display: 'block', textDecoration: 'none', padding: 'clamp(18px, 3vw, 24px)',
+                background: 'var(--bg-surface)', borderRadius: 16,
+                border: '1px solid var(--border)', transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
+              }}>
+                <div style={{ fontSize: 28, marginBottom: 12 }}>{s.emoji}</div>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 12px' }}>{s.desc}</p>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {s.tags.map(t => (
+                    <span key={t} style={{
+                      fontSize: 11, padding: '3px 8px', borderRadius: 6,
+                      background: 'var(--brand-bg)', color: 'var(--info)', fontWeight: 500,
+                    }}>{t}</span>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ━━━ 편의 도구 ━━━ */}
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
+          <h2 style={{
+            fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, textAlign: 'center', marginBottom: 24,
+            letterSpacing: '-0.02em',
+          }}>
+            편의 도구
+          </h2>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {TOOLS.map(t => (
+              <Link key={t.href} href={t.href} className="home-tool" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 18px', borderRadius: 12,
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600,
+                textDecoration: 'none', transition: 'border-color 0.2s, color 0.2s',
+              }}>
+                <span>{t.emoji}</span> {t.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ━━━ CTA 배너 ━━━ */}
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1E3A5F 0%, #0F1D35 100%)',
+            borderRadius: 20, padding: 'clamp(32px, 5vw, 56px)', textAlign: 'center',
+            border: '1px solid var(--border-strong)',
+          }}>
+            <h2 style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, marginBottom: 12 }}>
+              지금 바로 시작하세요
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 24, lineHeight: 1.7 }}>
+              카카오 계정으로 3초 만에 가입하고,<br />
+              주식·부동산·커뮤니티 모든 기능을 무료로 이용하세요.
+            </p>
+            <Link href="/login" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '14px 36px', borderRadius: 14, fontSize: 16, fontWeight: 700,
+              background: '#FEE500', color: '#191919', textDecoration: 'none',
+              boxShadow: '0 4px 16px rgba(254,229,0,0.2)',
+            }}>
+              <svg width={20} height={20} viewBox="0 0 24 24" fill="#191919"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.79 1.86 5.234 4.66 6.595-.145.524-.935 3.378-.967 3.595 0 0-.02.164.087.227.107.063.232.03.232.03.306-.043 3.55-2.318 4.107-2.715.59.083 1.2.127 1.82.127h.061c5.523 0 10-3.463 10-7.691 0-4.228-4.477-7.691-10-7.691V3z" /></svg>
+              카카오로 시작하기
+            </Link>
+          </div>
+        </section>
+
+        {/* ━━━ 푸터 ━━━ */}
+        <footer style={{
+          borderTop: '1px solid var(--border)', padding: '32px 20px 48px',
+          maxWidth: 1200, margin: '0 auto',
+        }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 24,
+            marginBottom: 32,
+          }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>서비스</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Link href="/stock" className="home-flink">주식 시세</Link>
+                <Link href="/apt" className="home-flink">아파트 청약</Link>
+                <Link href="/blog" className="home-flink">블로그</Link>
+                <Link href="/feed" className="home-flink">커뮤니티</Link>
+              </nav>
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>부동산</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Link href="/apt" className="home-flink">청약 일정</Link>
+                <Link href="/apt" className="home-flink">미분양 현황</Link>
+                <Link href="/apt" className="home-flink">재개발 정보</Link>
+                <Link href="/apt" className="home-flink">실거래가</Link>
+              </nav>
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>도구</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Link href="/apt/map" className="home-flink">지도뷰</Link>
+                <Link href="/apt/diagnose" className="home-flink">청약 진단</Link>
+                <Link href="/stock/compare" className="home-flink">종목 비교</Link>
+                <Link href="/search" className="home-flink">통합 검색</Link>
+              </nav>
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>카더라</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Link href="/guide" className="home-flink">가이드북</Link>
+                <Link href="/grades" className="home-flink">등급 안내</Link>
+                <Link href="/terms" className="home-flink">이용약관</Link>
+                <Link href="/privacy" className="home-flink">개인정보처리방침</Link>
+              </nav>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.9 }}>
+            <p style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>사업자 정보</p>
+            <p>업체명: 카더라 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801 &nbsp;|&nbsp; 대표자: 노영진</p>
+            <p>이메일: kadeora.app@gmail.com</p>
+            <p style={{ marginTop: 4 }}>© 2026 카더라. All rights reserved.</p>
+          </div>
+        </footer>
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .home-nav-link {
+          padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600;
+          color: var(--text-secondary); text-decoration: none; transition: color 0.2s, background 0.2s;
+        }
+        .home-nav-link:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .home-card:hover {
+          transform: translateY(-4px);
+          border-color: var(--brand) !important;
+          box-shadow: 0 8px 32px rgba(37,99,235,0.12);
+        }
+        .home-tool:hover { border-color: var(--brand) !important; color: var(--text-primary) !important; }
+        .home-flink {
+          font-size: 13px; color: var(--text-tertiary); text-decoration: none; transition: color 0.15s;
+        }
+        .home-flink:hover { color: var(--text-primary); }
+        @media (max-width: 640px) {
+          .home-nav-link { display: none; }
+        }
+      ` }} />
+    </>
+  );
+}
