@@ -83,7 +83,7 @@
       "url": "/feed",
       "icons": [
         {
-          "src": "/icons/icon-96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
@@ -94,7 +94,18 @@
       "url": "/stock",
       "icons": [
         {
-          "src": "/icons/icon-96.png",
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "종목 비교",
+      "short_name": "비교",
+      "url": "/stock/compare",
+      "icons": [
+        {
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
@@ -105,18 +116,18 @@
       "url": "/apt",
       "icons": [
         {
-          "src": "/icons/icon-96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "부동산 지도",
-      "short_name": "지도",
-      "url": "/apt/map",
+      "name": "실거래 검색",
+      "short_name": "검색",
+      "url": "/apt/search",
       "icons": [
         {
-          "src": "/icons/icon-96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
@@ -127,7 +138,7 @@
       "url": "/blog",
       "icons": [
         {
-          "src": "/icons/icon-96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
