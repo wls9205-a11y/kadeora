@@ -143,10 +143,14 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     e.preventDefault();
     e.stopPropagation();
     const url = `${window.location.origin}/feed/${(post as any).slug || post.id}`;
+    let platform = 'clipboard';
     if (navigator.share) {
-      try { await navigator.share({ title: post.title, url }); return; } catch {}
+      try { await navigator.share({ title: post.title, url }); platform = 'native'; } catch { return; }
+    } else {
+      try { await navigator.clipboard.writeText(url); } catch {}
     }
-    try { await navigator.clipboard.writeText(url); } catch {}
+    // 공유 로그 + 포인트 적립
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: post.id, platform }) }).catch(() => {});
   };
 
   const loadMorePosts = useCallback(async () => {

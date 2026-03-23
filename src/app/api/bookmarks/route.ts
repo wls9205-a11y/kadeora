@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest) {
 
 // POST: 북마크 토글
 export async function POST(request: NextRequest) {
+  if (!(await rateLimit(request, 'api'))) return rateLimitResponse();
   try {
     const supabase = await createSupabaseServer();
     const { data: { user }, error: authError } = await supabase.auth.getUser();

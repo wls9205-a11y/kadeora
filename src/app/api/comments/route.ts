@@ -5,6 +5,7 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizeComment } from '@/lib/sanitize'
 import { filterContent } from '@/lib/filter'
 import { containsBannedWord } from '@/lib/nickname-filter'
+import { CommentCreateSchema, parseBody } from '@/lib/validations'
 
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
@@ -13,13 +14,14 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     const body = await req.json();
-    const content = sanitizeComment(body.content);
-    const postId = body.post_id;
+    const { data: parsed, error: zodErr } = parseBody(CommentCreateSchema, body);
+    if (zodErr) return NextResponse.json({ error: zodErr }, { status: 400 });
+    const content = sanitizeComment(parsed!.content);
+    const postId = parsed!.post_id;
     if (!content || content.length < 1) return NextResponse.json({ error: '댓글 내용을 입력해주세요.' }, { status: 400 });
     if (containsBannedWord(content)) return NextResponse.json({ error: '부적절한 표현이 포함되어 있습니다.' }, { status: 400 });
     const { isBlocked, reason } = filterContent(content);
     if (isBlocked) return NextResponse.json({ error: reason ?? '내용을 다시 확인해주세요' }, { status: 400 });
-    if (!postId) return NextResponse.json({ error: '게시글 ID가 필요합니다.' }, { status: 400 });
 
     // 댓글 INSERT (유저 세션 — 본인 데이터)
     const { data, error } = await supabase.from('comments').insert({ content, post_id: postId, author_id: user.id }).select('*').single();

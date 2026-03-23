@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const { id } = await params;
     const topicId = parseInt(id, 10);

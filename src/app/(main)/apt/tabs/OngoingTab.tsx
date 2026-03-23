@@ -375,21 +375,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         청약홈·국토교통부 미분양 통계 기준 · 청약 마감 후 입주 전 현장 + 미분양 현장 통합 · 정확한 분양 정보는 각 현장에 직접 확인하세요
       </p>
 
-      {/* 상담사 CTA 배너 */}
-      <a href="/consultant" style={{
-        display: 'block', marginTop: 16, padding: 20, borderRadius: 14, textDecoration: 'none',
-        background: 'linear-gradient(135deg, var(--accent-purple-bg), var(--accent-blue-bg))',
-        border: '1px solid rgba(167,139,250,0.2)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontSize: 32, lineHeight: 1 }}>🏢</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>분양 상담사이신가요?</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.4 }}>프리미엄 리스팅으로 분양 관심 고객에게 직접 노출되세요. 월 4.9만원~</div>
-          </div>
-          <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-purple)', fontWeight: 700, flexShrink: 0 }}>등록 →</span>
-        </div>
-      </a>
+      {/* 상담사 CTA 배너 — 유저 100명 이후 오픈 예정 */}
 
       {/* ⑦ 모달 상세 */}
       {selectedOngoing && (() => {

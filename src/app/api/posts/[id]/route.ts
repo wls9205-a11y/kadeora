@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { z } from 'zod';
@@ -13,7 +14,8 @@ interface Params {
   params: Promise<{ id: string }>;
 }
 
-export async function PATCH(req: Request, { params }: Params) {
+export async function PATCH(req: NextRequest, { params }: Params) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const { id } = await params;
     const postId = Number(id);
@@ -48,7 +50,8 @@ export async function PATCH(req: Request, { params }: Params) {
   }
 }
 
-export async function DELETE(_req: Request, { params }: Params) {
+export async function DELETE(req: NextRequest, { params }: Params) {
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const { id } = await params;
     const postId = Number(id);

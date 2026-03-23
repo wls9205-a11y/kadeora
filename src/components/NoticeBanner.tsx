@@ -255,14 +255,10 @@ export default function NoticeBanner() {
             )}
 
             {/* 유료 표시 + 구매 유도 */}
-            {notice.is_paid ? (
+            {notice.is_paid && (
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 12 }}>
                 이 전광판은 유료 노출 상품으로 등록된 콘텐츠입니다
               </div>
-            ) : (
-              <a href="/shop/banner" style={{ display: 'block', textAlign: 'center', padding: '10px 16px', background: 'var(--brand-light)', borderRadius: 10, textDecoration: 'none', marginBottom: 12, fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>
-                📡 나도 전광판에 광고하기 →
-              </a>
             )}
 
             <button onClick={() => setShowSheet(false)} style={{ width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>닫기</button>

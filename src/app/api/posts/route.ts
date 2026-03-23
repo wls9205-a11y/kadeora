@@ -6,6 +6,7 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizePostInput } from '@/lib/sanitize'
 import { containsBannedWord } from '@/lib/nickname-filter'
 import { generateEnglishSlug } from '@/lib/slug-utils'
+import { PostCreateSchema, parseBody } from '@/lib/validations'
 
 export async function GET(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
@@ -30,15 +31,15 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     const body = await req.json();
-    const { title, content, category, tag } = sanitizePostInput(body);
-    if (!title || title.length < 2) return NextResponse.json({ error: '제목은 2자 이상이어야 합니다.' }, { status: 400 });
-    if (!content || content.length < 5) return NextResponse.json({ error: '내용은 5자 이상이어야 합니다.' }, { status: 400 });
+    const { data: parsed, error: zodErr } = parseBody(PostCreateSchema, body);
+    if (zodErr) return NextResponse.json({ error: zodErr }, { status: 400 });
+    const { title, content, category, tag } = sanitizePostInput(parsed!);
     if (containsBannedWord(title) || containsBannedWord(content)) return NextResponse.json({ error: '부적절한 표현이 포함되어 있습니다.' }, { status: 400 });
-    const regionId = (category === 'local' && body.region_id && typeof body.region_id === 'string') ? body.region_id : 'all';
+    const regionId = (category === 'local' && parsed!.region_id) ? parsed!.region_id : 'all';
 
     // 게시글 INSERT (유저 세션 — 본인 데이터)
-    const images = Array.isArray(body.images) ? body.images.filter((u: unknown) => typeof u === 'string').slice(0, 5) : [];
-    const tags = Array.isArray(body.tags) ? body.tags.filter((t: unknown) => typeof t === 'string').slice(0, 5) : [];
+    const images = parsed!.images ?? [];
+    const tags = parsed!.tags ?? [];
     const slug = generateEnglishSlug(title, String(Date.now()));
     const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId, images, tags, slug }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
