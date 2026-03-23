@@ -78,7 +78,7 @@ export default async function BlogPage({ searchParams }: Props) {
   // 메인 쿼리
   const now = new Date().toISOString();
   let q2 = sb.from('blog_posts')
-    .select('id, slug, title, excerpt, category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min')
+    .select('id, slug, title, excerpt, category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min, comment_count')
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
   if (category !== 'all') q2 = q2.eq('category', category);
@@ -260,6 +260,7 @@ export default async function BlogPage({ searchParams }: Props) {
                     <span>{new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
                     <span>📖 {readMin}분</span>
                     {p.view_count > 0 && <span>👀 {p.view_count}</span>}
+                    {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
                     {(p.tags ?? []).slice(0, 2).map((t: string) => <span key={t} style={{ background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>#{t}</span>)}
                   </div>
                 </div>

@@ -59,6 +59,32 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
     return (
     <div>
+      {/* 미분양 급증 경고 배너 */}
+      {surgeAlerts.length > 0 && (
+        <div style={{
+          marginBottom: 14, padding: '12px 16px', borderRadius: 12,
+          background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <span style={{ fontSize: 16 }}>⚠️</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)' }}>미분양 급증 감지</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전월 대비 20%+ 증가</span>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {surgeAlerts.map(a => (
+              <button key={a.region_nm} onClick={() => setUnsoldRegion(a.region_nm)} style={{
+                padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 600,
+                background: unsoldRegion === a.region_nm ? '#DC2626' : 'rgba(239,68,68,0.12)',
+                color: unsoldRegion === a.region_nm ? '#fff' : 'var(--accent-red)',
+                border: 'none', cursor: 'pointer',
+              }}>
+                {a.region_nm} <span style={{ fontWeight: 800 }}>+{a.change_pct}%</span> ({a.current_count.toLocaleString()}세대)
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 지역별 현황 */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
