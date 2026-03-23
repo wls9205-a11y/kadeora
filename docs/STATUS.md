@@ -41,12 +41,13 @@
 
 ---
 
-## 크론 현황 (50개 등록, vercel.json — 세션 28에서 +4개)
+## 크론 현황 (52개 등록, vercel.json — 세션 28에서 +6개)
 
 ### 부동산
 | 크론 | 주기 | 상태 |
 |------|------|------|
 | crawl-apt-subscription | 매일 06시 | ✅ 2,500건 |
+| apt-backfill-details | 매주 수요일 | ✅ 청약 상세 NULL 자동 백필(세션28) |
 | crawl-apt-trade | 평일 08시 | ✅ 올해 전체, 231개 시군구 |
 | crawl-apt-resale | 주 1회 | ✅ 35개 시군구 확대 |
 | crawl-competition-rate | 매일 12시 | ✅ |
@@ -54,7 +55,7 @@
 | crawl-seoul-redev | 주 1회 | ✅ total_households 매핑 추가(세션22) |
 | crawl-busan-redev | 주 1회 | ✅ 매핑 필드 9개 확대+범위검증(세션22) |
 | crawl-gyeonggi-redev | 주 1회 | ✅ |
-| crawl-nationwide-redev | 매주 월요일 | ⚠️ API 키 필요 |
+| crawl-nationwide-redev | 매주 월요일 | ✅ withCronAuth 전환+timeout(세션28) |
 | redev-verify-households | 매주 화요일 | ✅ 세대수 NULL 자동 검증(세션28) |
 | aggregate-trade-stats | 매일 | ✅ |
 
@@ -90,7 +91,7 @@
 
 ---
 
-## 세션 28 — 미해결 항목 8건 해소 (10커밋)
+## 세션 28 — 미해결 항목 10건 해소 (12커밋)
 
 ### 1. 리뷰 좋아요/신고 기능
 - POST /api/apt/reviews/[id]/like — 좋아요 토글 (apt_review_likes 테이블)
@@ -133,7 +134,16 @@
 - dataCounts 8→12개 (시리즈/가격알림/포트폴리오/리뷰 추가)
 - 품질 현황: 세대수 미확인 건수 표시
 - CRON_MAP 완전 동기화 (check-price-alerts 누락 보충)
-- QUICK_ACTIONS +3개 (세대수검증/시리즈묶기/포트폴리오스냅샷)
+- QUICK_ACTIONS +5개 (세대수검증/시리즈묶기/포트폴리오스냅샷/청약백필)
+
+### 9. crawl-nationwide-redev 안정화
+- withCronAuth 전환 (수동 auth 코드 제거)
+- fetch timeout 10s 추가 (API 타임아웃 방지)
+
+### 10. 청약 상세 필드 백필 크론 (apt-backfill-details)
+- 매주 수 05:00, constructor_nm NULL인 레코드 최대 200건 대상
+- 20페이지 탐색 (10,000건) + 무순위/잔여세대 폴백
+- 9개 상세필드: 시공사/시행사/동수/최고층/주차/난방/상한제/전매/견본주택
 
 ---
 
@@ -591,9 +601,9 @@
 ### 코드
 - [x] AptClient 2060→205줄 완전 분할 (5개 탭 + apt-utils, 90% 감소) ✅ 세션 24
 - [x] AptClient 탭별 lazy fetch 적용 (SSR 60%+ 감소) ✅ 세션 28
-- [ ] crawl-nationwide-redev API 키 등록 후 실행
+- [x] crawl-nationwide-redev withCronAuth+timeout 안정화 ✅ 세션 28
 - [x] 재개발 세대수 크론 검증 수집 (redev-verify-households 매주 화) ✅ 세션 28
-- [ ] 청약 상세의 신규 필드 데이터 채우기
+- [x] 청약 상세의 신규 필드 데이터 채우기 (apt-backfill-details 매주 수) ✅ 세션 28
 - [x] 블로그 시리즈 시드 크론 (blog-series-assign 매일 03:30) ✅ 세션 28
 - [x] 포트폴리오 수익률 히스토리 (portfolio-snapshot + 30일 차트) ✅ 세션 28
 - [x] 지도뷰 클러스터링 (MarkerClusterer + limit 300) ✅ 세션 28
