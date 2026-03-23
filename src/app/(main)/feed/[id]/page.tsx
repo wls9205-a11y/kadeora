@@ -20,12 +20,21 @@ import Disclaimer from '@/components/Disclaimer';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
-function parsePostId(param: string): number {
+function parsePostId(param: string): { numId: number; isSlug: boolean } {
   const match = param.match(/-(\d+)$/);
-  if (match) return parseInt(match[1]);
+  if (match) return { numId: parseInt(match[1]), isSlug: false };
   const num = parseInt(param);
-  if (!isNaN(num)) return num;
-  return 0;
+  if (!isNaN(num)) return { numId: num, isSlug: false };
+  return { numId: 0, isSlug: true };
+}
+
+async function findPostBySlugOrId(sb: any, param: string) {
+  const { numId, isSlug } = parsePostId(param);
+  if (isSlug) {
+    const { data } = await sb.from('posts').select('id').eq('slug', param).eq('is_deleted', false).maybeSingle();
+    return data?.id ?? 0;
+  }
+  return numId;
 }
 
 
@@ -35,10 +44,10 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const numId = parsePostId(id);
   const SITE_URL_META = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
   try {
     const sb = await createSupabaseServer();
+    const numId = await findPostBySlugOrId(sb, id);
     const { data: post } = await sb
       .from('posts')
       .select('title, content, created_at, slug, category, likes_count, comments_count, profiles!posts_author_id_fkey(nickname)')
@@ -82,12 +91,12 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function FeedDetailPage({ params }: Props) {
   const { id } = await params;
-  const numId = parsePostId(id);
 
   let post: PostWithProfile | null = null;
   let comments: CommentWithProfile[] = [];
   let related: any[] = [];
   let currentUserId: string | null = null;
+  let numId = 0;
 
   try {
     const sb = await createSupabaseServer();
@@ -95,6 +104,8 @@ export default async function FeedDetailPage({ params }: Props) {
       const { data: { user: authUser } } = await sb.auth.getUser();
       currentUserId = authUser?.id ?? null;
     } catch { /* 비로그인/만료 세션 — 무시 */ }
+
+    numId = await findPostBySlugOrId(sb, id);
 
     const { data: postData } = await sb
       .from('posts')
@@ -147,7 +158,7 @@ export default async function FeedDetailPage({ params }: Props) {
     ];
   }
 
-  if (post?.slug && id === String(numId) && !isNaN(Number(id))) {
+  if (post?.slug && !isNaN(Number(id)) && post.slug !== id) {
     permanentRedirect(`/feed/${post.slug}`);
   }
 
