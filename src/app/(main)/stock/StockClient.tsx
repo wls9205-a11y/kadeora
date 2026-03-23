@@ -486,7 +486,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         <div>
           <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
             {([['up','📈 상승'],['down','📉 하락'],['volume','🔥 거래량']] as const).map(([k,l]) => (
-              <button key={k} onClick={() => setMoversTab(k)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: moversTab===k?'var(--brand)':'var(--bg-hover)', color: moversTab===k?'#fff':'var(--text-secondary)' }}>{l}</button>
+              <button key={k} onClick={() => setMoversTab(k)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: moversTab===k?'var(--brand)':'var(--bg-hover)', color: moversTab===k?'var(--text-inverse)':'var(--text-secondary)' }}>{l}</button>
             ))}
           </div>
           {isDomestic && (() => {
@@ -533,7 +533,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {isDomestic && domesticTab === 'ranking' && (
         <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
           {(['ALL','KOSPI','KOSDAQ'] as const).map(m => (
-            <button key={m} onClick={() => setDomesticMarket(m)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: domesticMarket===m?(isDomestic?'var(--brand)':'var(--accent-blue)'):'var(--bg-hover)', color: domesticMarket===m?'#fff':'var(--text-secondary)' }}>
+            <button key={m} onClick={() => setDomesticMarket(m)} style={{ padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', background: domesticMarket===m?(isDomestic?'var(--brand)':'var(--accent-blue)'):'var(--bg-hover)', color: domesticMarket===m?'var(--text-inverse)':'var(--text-secondary)' }}>
               {m==='ALL'?'전체':m}
             </button>
           ))}

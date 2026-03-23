@@ -323,7 +323,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           })}
 
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-            청약홈(applyhome.co.kr) 공공데이터 · 공공데이터포털(data.go.kr) API 기준 · 매일 06시 자동 갱신 · 정확한 일정과 분양가는 반드시 청약홈에서 재확인하세요
+            📊 청약홈·공공데이터포털 API 기준 · 매일 06시 자동 갱신
           </p>
         </div>
 

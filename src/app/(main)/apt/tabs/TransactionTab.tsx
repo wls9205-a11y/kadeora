@@ -254,8 +254,6 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 </div>
               ))}
 
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 12, marginBottom: 16 }}>국토교통부 실거래가 공개시스템 기준</div>
-
               <AptPriceTrendChart aptName={t.apt_name} region={t.region_nm} />
               <AptReviewSection aptName={t.apt_name} region={t.region_nm} />
           </BottomSheet>

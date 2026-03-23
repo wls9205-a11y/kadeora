@@ -161,7 +161,7 @@ export default function ConsultantRegister() {
           <button onClick={handleSave} disabled={saving || !name.trim() || !phone.trim()} style={{
             width: '100%', padding: '14px 0', borderRadius: 10, border: 'none', cursor: 'pointer',
             background: (!name.trim() || !phone.trim()) ? 'var(--bg-hover)' : 'var(--brand)',
-            color: (!name.trim() || !phone.trim()) ? 'var(--text-tertiary)' : '#fff',
+            color: (!name.trim() || !phone.trim()) ? 'var(--text-tertiary)' : 'var(--text-inverse)',
             fontSize: 'var(--fs-base)', fontWeight: 700,
           }}>
             {saving ? '저장 중...' : profile ? '프로필 수정' : '상담사 등록'}

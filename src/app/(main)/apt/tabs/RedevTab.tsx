@@ -368,10 +368,6 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
           </div>
         )}
-
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center' }}>
-          본 정보는 참고용이며, 투자 판단의 근거로 사용하면 안 됩니다.
-        </div>
     </BottomSheet>
   );
 
