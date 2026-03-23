@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .from('reports')
       .select('id', { count: 'exact', head: true })
       .eq('reporter_id', user.id)
-      .eq('comment_id', id)
+      .eq('comment_id', Number(id))
     if (count && count > 0) {
       return NextResponse.json({ error: '이미 신고한 댓글입니다.' }, { status: 409 })
     }
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const body = await req.json().catch(() => ({}))
     const { error } = await supabase.from('reports').insert({
       reporter_id: user.id,
-      comment_id: id,
+      comment_id: Number(id),
       reason: body.reason || '사용자 신고',
       details: body.details ?? null,
       status: 'pending',

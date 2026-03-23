@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User, PenSquare, BookOpen, LogOut, FileText } from 'lucide-react';
+import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User as UserIcon, PenSquare, BookOpen, LogOut, FileText } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import ThemeToggle from '@/components/ThemeToggle';
 import { haptic } from '@/lib/haptic';
@@ -291,7 +291,7 @@ export function Navigation() {
                     }}>
                       {[
                         { href:'/search',             label:'검색', LIcon: Search },
-                        { href:`/profile/${user.id}`, label:'내 프로필', LIcon: User },
+                        { href:`/profile/${user.id}`, label:'내 프로필', LIcon: UserIcon },
                         { href:'/write',              label:'글쓰기', LIcon: PenSquare },
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
                         { href:'/hot',                label:'이번주 HOT', LIcon: Flame },

@@ -38,11 +38,11 @@ export async function GET(req: Request) {
   const counts: Record<string, { count: number; firstUsed: string }> = {}
   for (const inv of invites) {
     if (!counts[inv.creator_id]) {
-      counts[inv.creator_id] = { count: 0, firstUsed: inv.used_at }
+      counts[inv.creator_id] = { count: 0, firstUsed: inv.used_at ?? '' }
     }
     counts[inv.creator_id].count++
-    if (inv.used_at < counts[inv.creator_id].firstUsed) {
-      counts[inv.creator_id].firstUsed = inv.used_at
+    if ((inv.used_at ?? '') < counts[inv.creator_id].firstUsed) {
+      counts[inv.creator_id].firstUsed = inv.used_at ?? ''
     }
   }
 

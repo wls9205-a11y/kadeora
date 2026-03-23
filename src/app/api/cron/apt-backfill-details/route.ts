@@ -45,7 +45,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
   const missingMap = new Map<string, string>();
   for (const m of missing) {
-    if (m.house_manage_no) missingMap.set(m.house_manage_no, m.id);
+    if (m.house_manage_no) missingMap.set(m.house_manage_no, String(m.id));
   }
 
   let updated = 0;

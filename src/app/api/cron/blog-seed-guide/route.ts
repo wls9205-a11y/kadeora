@@ -110,10 +110,11 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('blog-seed-guide', async () => {
     const admin = getSupabaseAdmin();
-    const { data: seeds, error: fetchErr } = await admin.from('guide_seeds').select('*').eq('blog_generated', false);
+    const { data: seedsRaw, error: fetchErr } = await admin.from('guide_seeds').select('*').eq('blog_generated', false);
+    const seeds = (seedsRaw || []) as any[];
 
     if (fetchErr) { console.error('[blog-seed-guide] fetch error:', fetchErr); throw new Error(fetchErr.message); }
-    if (!seeds || seeds.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'anthropic', api_calls: 0 } };
+    if (seeds.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'anthropic', api_calls: 0 } };
 
     console.info(`[blog-seed-guide] Found ${seeds.length} seeds, columns:`, Object.keys(seeds[0] || {}));
 

@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     // 큐 상태도 조회 (로그용)
     const { data: queueStatus } = await admin.rpc('blog_queue_status');
 
-    const published = publishResult?.published ?? 0;
+    const published = (publishResult as any)?.published ?? 0;
     console.info(`[blog-publish-queue] Result: ${JSON.stringify(publishResult)}, Queue: ${JSON.stringify(queueStatus)}`);
 
     return {

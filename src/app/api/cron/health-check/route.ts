@@ -80,12 +80,12 @@ export async function GET(request: Request) {
 
   const { data: quotas } = await supabase.from('api_quotas').select('*');
   for (const q of quotas || []) {
-    if (q.daily_limit && q.daily_used / q.daily_limit > 0.8) {
+    if (q.daily_limit && (q.daily_used ?? 0) / (q.daily_limit ?? 1) > 0.8) {
       await supabase.from('admin_alerts').insert({
         type: 'quota_warning',
         severity: 'warning',
         title: `API 할당량 80% 초과: ${q.api_name}`,
-        message: `일일 ${q.daily_used}/${q.daily_limit} 사용`,
+        message: `일일 ${q.daily_used ?? 0}/${q.daily_limit} 사용`,
       });
     }
   }

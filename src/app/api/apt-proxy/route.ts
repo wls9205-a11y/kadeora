@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       const items = json?.data || json?.response?.body?.items?.item || [];
       if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ success: true, synced: 0 });
       const supabase = getSupabaseAdmin();
-      const { data, error } = await supabase.from('apt_subscriptions').upsert(items.map(mapItem), { onConflict: 'house_manage_no' }).select();
+      const { data, error } = await supabase.from('apt_subscriptions').upsert(items.map(mapItem) as any, { onConflict: 'house_manage_no' }).select();
       if (error) throw error;
       return NextResponse.json({ success: true, synced: data?.length || 0 });
     }

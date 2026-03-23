@@ -44,7 +44,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
     setSaving(false);
   };
 
-  const deleteAlert = async (id: number) => {
+  const deleteAlert = async (id: string) => {
     if (!userId) return;
     const sb = createSupabaseBrowser();
     await sb.from('price_alerts').delete().eq('id', id).eq('user_id', userId);

@@ -85,12 +85,12 @@ export default function WriteClient() {
       if (!data.session) { router.push('/login?redirect=/write'); return; }
       setUserId(data.session.user.id);
       const { data: profile } = await sb.from('profiles')
-        .select('region_id, region_text').eq('id', data.session.user.id).single();
-      if (profile?.region_id) {
-        const matched = REGIONS.find(r => r.value !== 'all' && r.value === profile.region_id);
+        .select('residence_city, region_text').eq('id', data.session.user.id).single();
+      if (profile?.residence_city) {
+        const matched = REGIONS.find(r => r.value !== 'all' && r.value === profile.residence_city);
         if (matched) { setRegionId(matched.value); if (!editId) setCategory('local'); }
       } else if (profile?.region_text) {
-        const matched = REGIONS.find(r => r.value !== 'all' && profile.region_text.startsWith(r.value));
+        const matched = REGIONS.find(r => r.value !== 'all' && ((profile.region_text ?? '') as string).startsWith(r.value));
         if (matched) { setRegionId(matched.value); if (!editId) setCategory('local'); }
       }
     });

@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sb = await createSupabaseServer();
   const { data: s } = await sb.from('stock_quotes').select('name,market,price,currency,change_pct').eq('symbol', symbol).single();
   if (!s) return { title: '카더라' };
-  const p = fmtPrice(Number(s.price), s.currency);
+  const p = fmtPrice(Number(s.price), s.currency ?? undefined);
   const ch = `${Number(s.change_pct) >= 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
   return {
     title: `${s.name} (${symbol}) 주가`,
@@ -58,7 +58,7 @@ export default async function StockDetailPage({ params }: Props) {
   const low52 = priceHist.length ? Math.min(...priceHist) : null;
 
   const items = [
-    { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency) },
+    { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined) },
     { label: '거래량', value: s.volume ? Number(s.volume).toLocaleString() : '-' },
     { label: '섹터', value: s.sector || '-' },
     { label: '전일대비', value: s.change_amt ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
@@ -73,7 +73,7 @@ export default async function StockDetailPage({ params }: Props) {
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         name: `${s.name} (${symbol}) 주가 정보`,
-        description: `${s.name} ${s.market} 상장. 현재가 ${fmtPrice(Number(s.price), s.currency)}.`,
+        description: `${s.name} ${s.market} 상장. 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}.`,
         url: `${SITE_URL}/stock/${symbol}`,
         mainEntity: {
           '@type': 'FinancialProduct',
@@ -88,7 +88,7 @@ export default async function StockDetailPage({ params }: Props) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
         <div style={{ display: 'flex', gap: 6 }}>
-          <StockAlertButton symbol={symbol} stockName={s.name} currentPrice={Number(s.price)} currency={s.currency} />
+          <StockAlertButton symbol={symbol} stockName={s.name} currentPrice={Number(s.price)} currency={s.currency ?? 'KRW'} />
           <StockWatchlistButton symbol={symbol} />
         </div>
       </div>
@@ -101,7 +101,7 @@ export default async function StockDetailPage({ params }: Props) {
           <span style={{ fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 10px', borderRadius: 6 }}>{s.market}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 'clamp(24px, 7vw, 36px)', fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency)}</span>
+          <span style={{ fontSize: 'clamp(24px, 7vw, 36px)', fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
           {!isStale && (
             <span style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
@@ -135,8 +135,8 @@ export default async function StockDetailPage({ params }: Props) {
         news={newsR.data || []}
         investorFlow={flowR.data || []}
         disclosures={discR.data || []}
-        description={s.description || `${s.name}은(는) ${s.market} 상장 종목입니다. 자세한 기업 정보는 공식 홈페이지나 증권사 앱에서 확인해보세요.`}
-        currency={s.currency}
+        description={s.description ?? `${s.name}은(는) ${s.market} 상장 종목입니다. 자세한 기업 정보는 공식 홈페이지나 증권사 앱에서 확인해보세요.`}
+        currency={s.currency ?? 'KRW'}
       />
 
       {/* 비슷한 종목 */}

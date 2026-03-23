@@ -41,7 +41,7 @@ export async function withCronLogging(
         records_failed: result.failed || 0,
         metadata: result.metadata || {},
       })
-      .eq('id', log?.id);
+      .eq('id', log?.id as string);
 
     // API 사용량 추적
     if (result.metadata?.api_name) {
@@ -72,7 +72,7 @@ export async function withCronLogging(
         duration_ms: duration,
         error_message: error.message?.substring(0, 1000),
       })
-      .eq('id', log?.id);
+      .eq('id', log?.id as string);
 
     // 실패 알림 자동 생성
     await supabase.from('admin_alerts').insert({

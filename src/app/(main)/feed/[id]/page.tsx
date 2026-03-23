@@ -147,17 +147,19 @@ export default async function FeedDetailPage({ params }: Props) {
       {
         id: 1, post_id: numId, author_id: 'demo-a', content: '좋은 정보 감사합니다! 많이 배워갑니다.',
         is_deleted: false, created_at: new Date(Date.now() - 30 * 60000).toISOString(),
-        profiles: { id: 'demo-a', nickname: '정보킹', avatar_url: null },
+        profiles: { id: 'demo-a', nickname: '정보킹', avatar_url: null, grade: 1 },
       },
       {
         id: 2, post_id: numId, author_id: 'demo-b', content: '저도 비슷한 생각이에요. 특히 두 번째 포인트가 핵심이라 봅니다.',
         is_deleted: false, created_at: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
-        profiles: { id: 'demo-b', nickname: '투자마니아', avatar_url: null },
+        profiles: { id: 'demo-b', nickname: '투자마니아', avatar_url: null, grade: 1 },
       },
-    ];
+    ] as any[];
   }
 
-  if (post?.slug && !isNaN(Number(id)) && post.slug !== id) {
+  if (!post) return notFound();
+
+  if (post.slug && !isNaN(Number(id)) && post.slug !== id) {
     permanentRedirect(`/feed/${post.slug}`);
   }
 

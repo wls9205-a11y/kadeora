@@ -47,7 +47,7 @@ export default async function ProfilePage({ params }: Props) {
   return (
     <>
     <ProfileClient
-      profile={profile}
+      profile={profile as any}
       posts={posts ?? []}
       isOwner={isOwner}
       commentCount={commentCount ?? 0}

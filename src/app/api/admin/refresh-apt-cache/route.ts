@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     const mapped = allItems.filter(i => (i.HOUSE_MANAGE_NO || i.houseManageNo)).map(mapItem);
     if (mapped.length > 0) {
-      await supabase.from('apt_subscriptions').upsert(mapped, { onConflict: 'house_manage_no' });
+      await supabase.from('apt_subscriptions').upsert(mapped as any, { onConflict: 'house_manage_no' });
     }
 
     try { revalidatePath('/apt'); revalidatePath('/'); } catch {}

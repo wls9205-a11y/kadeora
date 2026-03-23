@@ -72,9 +72,9 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
         const { data: profile } = await sb.from('profiles')
           .select('region_text').eq('id', userId).single();
-        if (profile && !profile.region_text) setShowRegionBanner(true);
+        if (profile && !(profile.region_text ?? '')) setShowRegionBanner(true);
         if (profile?.region_text) {
-          const matched = REGIONS.find(r => r.value !== 'all' && profile.region_text.startsWith(r.value));
+          const matched = REGIONS.find(r => r.value !== 'all' && ((profile.region_text ?? '') as string).startsWith(r.value));
           if (matched) setUserRegion(matched.value);
         }
 

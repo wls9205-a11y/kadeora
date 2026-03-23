@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { createClient } from "@/lib/supabase-browser";
+import { createSupabaseBrowser } from "@/lib/supabase-browser";
 
 declare global {
   interface Window {
@@ -25,7 +25,7 @@ interface ShareParams {
 
 // ✅ 마케팅팀 피드백: 카카오 공유 바이럴화
 export function useKakaoShare() {
-  const supabase = createClient();
+  const supabase = createSupabaseBrowser();
 
   const share = useCallback(async (params: ShareParams) => {
     const { title, description, imageUrl, linkUrl, postId } = params;
@@ -61,8 +61,8 @@ export function useKakaoShare() {
       if (user) {
         await supabase.from("share_logs").insert({
           user_id: user.id,
-          post_id: postId,
-          platform: "kakao" as const,
+          post_id: Number(postId),
+          platform: "kakao",
         });
       }
     }

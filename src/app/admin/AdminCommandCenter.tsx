@@ -327,7 +327,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
   };
 
   /* ─── Alert dismiss ─── */
-  const dismissAlert = async (id: number) => {
+  const dismissAlert = async (id: string) => {
     const sb = createSupabaseBrowser();
     await sb.from('admin_alerts').update({ is_read: true }).eq('id', id);
     setAlerts(prev => prev.map(a => a.id === id ? { ...a, is_read: true } : a));

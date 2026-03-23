@@ -8,7 +8,7 @@ import type { User } from '@supabase/supabase-js';
 import { timeAgo } from '@/lib/format';
 
 interface Notif {
-  id: string;
+  id: number;
   type: string;
   content: string;
   is_read: boolean;
@@ -49,7 +49,7 @@ export default function NotificationsPage() {
       if (u) {
         const { data: n } = await sb
           .from('notifications')
-          .select('id, type, content, is_read, created_at, link, message, title')
+          .select('id, type, content, is_read, created_at')
           .eq('user_id', u.id)
           .order('created_at', { ascending: false })
           .limit(50);
@@ -68,7 +68,7 @@ export default function NotificationsPage() {
     success('모두 읽음 처리됐습니다');
   }
 
-  async function markOneRead(id: string) {
+  async function markOneRead(id: number) {
     const sb = createSupabaseBrowser();
     await sb.from('notifications').update({ is_read: true }).eq('id', id);
     setNotifs(p => p.map(n => n.id === id ? { ...n, is_read: true } : n));

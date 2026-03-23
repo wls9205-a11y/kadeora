@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     if (targets.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'already_done' } };
 
     const prompt = `오늘(${today}) 한국 증시 주요 종목 데이터:
-${targets.map(s => `${s.name}(${s.symbol}): ${s.change_pct > 0 ? '+' : ''}${s.change_pct?.toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 시총 ${s.market_cap ? (s.market_cap / 1e8).toFixed(0) + '억' : '-'}`).join('\n')}
+${targets.map(s => `${s.name}(${s.symbol}): ${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${s.change_pct?.toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 시총 ${s.market_cap ? (s.market_cap / 1e8).toFixed(0) + '억' : '-'}`).join('\n')}
 
 각 종목에 대해 오늘의 외국인/기관 순매수(양수)/순매도(음수) 금액을 추정하세요.
 - 상승 + 대량거래 = 외국인/기관 매수 가능성 높음

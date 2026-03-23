@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
-  const { data: post } = await sb.from('blog_posts').select('title, excerpt, category, tags, created_at, published_at, cover_image, image_alt, meta_description, meta_keywords').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('title,excerpt,category,tags,created_at,published_at,cover_image,image_alt,meta_description,meta_keywords,author_name').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
   const BRAND_COVERS: Record<string, string> = {
     stock: `${SITE}/images/brand/kadeora-wide.png`,
@@ -256,7 +256,7 @@ export default async function BlogDetailPage({ params }: Props) {
       <article style={{ paddingBottom: 40 }}>
         <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px', wordBreak: 'keep-all' }}>{post.title}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
-          <span>{new Date(post.published_at || post.created_at).toLocaleDateString('ko-KR')}</span>
+          <span>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</span>
           <span>조회 {post.view_count ?? 0}</span>
           <span>·</span>
           <span>약 {readingTimeMin}분</span>
@@ -264,7 +264,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {(post.tags ?? []).length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-            {post.tags.map((t: string) => <span key={t} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>#{t}</span>)}
+            {(post.tags ?? []).map((t: string) => <span key={t} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>#{t}</span>)}
           </div>
         )}
 

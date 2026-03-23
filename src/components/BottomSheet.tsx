@@ -77,7 +77,7 @@ export default function BottomSheet({ open, onClose, children, maxWidth = 520, t
         {title && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{title}</h2>
-            <button onClick={onClose} aria-label="닫기" style={{
+            <button onClick={onClose} style={{
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               borderRadius: '50%', width: 32, height: 32,
               display: 'flex', alignItems: 'center', justifyContent: 'center',

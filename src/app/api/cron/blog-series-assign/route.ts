@@ -54,7 +54,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
   }
 
   // 4. 매칭
-  const assignments: { postId: string; seriesId: string }[] = [];
+  const assignments: { postId: number; seriesId: string }[] = [];
 
   for (const post of unassigned) {
     const title = post.title || '';
@@ -80,7 +80,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
   }
 
   // 5. 시리즈별로 그룹화 후 series_order 부여
-  const bySeriesMap = new Map<string, string[]>();
+  const bySeriesMap = new Map<string, number[]>();
   for (const a of assignments) {
     const arr = bySeriesMap.get(a.seriesId) || [];
     arr.push(a.postId);

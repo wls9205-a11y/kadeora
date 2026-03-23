@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       started_at: new Date().toISOString(),
       duration_ms: 0,
       records_processed: 1,
-    }).catch(() => {});
+    });
 
     return NextResponse.json({ success: true, message: '일일 통계 캡처 완료' });
   } catch (error: any) {

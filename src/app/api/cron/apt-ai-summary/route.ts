@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
 
     for (const r of (redevs || [])) {
       const summary = generateRedevSummary(r);
-      await supabase.from('redevelopment_projects').update({ ai_summary: summary }).eq('id', r.id);
+      await supabase.from('redevelopment_projects').update({ ai_summary: summary } as any).eq('id', r.id);
       updated++;
     }
 

@@ -9,11 +9,11 @@ import { withCronLogging } from '@/lib/cron-logger';
 export const dynamic = 'force-dynamic';
 
 function generateRedevelopmentBlog(z: any): string {
-  const name = z.zone_name || z.name || '구역';
+  const name = z.zone_name || z.zone_name || '구역';
   const region = z.region || '';
   const district = z.district || '';
-  const zType = z.zone_type || z.project_type || '재개발';
-  const stage = z.progress_stage || z.stage || '추진 중';
+  const zType = z.zone_type || z.zone_type || '재개발';
+  const stage = z.progress_stage || z.progress_stage || '추진 중';
   const builder = z.contractors || z.builder || '';
   const estCost = z.estimated_contribution || z.est_contribution || '';
   const units = z.planned_units || z.total_units || 0;
@@ -124,14 +124,14 @@ export async function GET(req: NextRequest) {
     let created = 0;
     for (const zone of zones) {
       try {
-        const slug = zone.blog_slug || zone.slug;
+        const slug = zone.blog_slug || (zone as any).slug;
         if (!slug) continue;
 
         const { data: exists } = await admin.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
         if (exists) { await admin.from('redevelopment_zones').update({ blog_generated: true }).eq(zone.blog_slug ? 'blog_slug' : 'slug', slug); continue; }
 
-        const zName = zone.zone_name || zone.name || '';
-        const zType = zone.zone_type || zone.project_type || '재개발';
+        const zName = zone.zone_name || (zone as any).name || '';
+        const zType = zone.zone_type || (zone as any).project_type || '재개발';
         const title = `${zone.region || ''} ${zName} ${zType} 현황 — 진행 단계·시공사·분담금·투자 전망 (2026)`;
         const content = generateRedevelopmentBlog(zone);
         const tags = zone.tags || [zone.region, zName, zType].filter(Boolean);
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
         const _r = await safeBlogInsert(admin, {
           slug, title,
           content: ensureMinLength(content, 'apt'),
-          excerpt: `${zName} ${zType} ${zone.progress_stage || zone.stage || ''} 시공사 분담금 투자전망 2026`,
+          excerpt: `${zName} ${zType} ${zone.progress_stage || (zone as any).stage || ''} 시공사 분담금 투자전망 2026`,
           category: 'apt', tags, cron_type: 'redevelopment',
           cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&type=blog`,
           image_alt: generateImageAlt('apt', title),
@@ -149,7 +149,7 @@ export async function GET(req: NextRequest) {
       if (_r.success) await admin.from('redevelopment_zones').update({ blog_generated: true }).eq(zone.blog_slug ? 'blog_slug' : 'slug', slug);
         created++;
       } catch (e: any) {
-        console.error(`[blog-redevelopment] Error for ${zone.blog_slug || zone.slug}:`, e.message);
+        console.error(`[blog-redevelopment] Error for ${zone.blog_slug || (zone as any).slug}:`, e.message);
       }
     }
 

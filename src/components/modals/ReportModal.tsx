@@ -35,7 +35,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
       await sb.from('content_reports').insert({
         reporter_id: user.id,
         target_type: targetType,
-        target_id: targetId,
+        target_id: Number(targetId),
         reason: `${reason}${detail ? `: ${detail}` : ''}`,
       });
       setSubmitted(true);

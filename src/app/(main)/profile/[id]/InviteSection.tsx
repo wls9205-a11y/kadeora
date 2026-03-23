@@ -7,10 +7,6 @@ interface Props {
   onCopy: (msg: string) => void;
 }
 
-declare global {
-  interface Window { Kakao?: any; }
-}
-
 export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props) {
   const inviteUrl = `${SITE_URL}/login?invite=${inviteCode}`;
 

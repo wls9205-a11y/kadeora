@@ -20,7 +20,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
   const { data: u } = await sb.from('unsold_apts').select('*').eq('id', Number(id)).single();
   if (!u) notFound();
 
-  const rate = u.tot_supply_hshld_co ? Math.round((u.tot_unsold_hshld_co / u.tot_supply_hshld_co) * 100) : null;
+  const rate = u.tot_supply_hshld_co ? Math.round(((u.tot_unsold_hshld_co ?? 0) / u.tot_supply_hshld_co) * 100) : null;
   const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
   const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
 
@@ -80,7 +80,7 @@ export default async function UnsoldDetailPage({ params }: Props) {
       </div>
 
       {/* 현황 요약 */}
-      <div style={{ ...card, borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? 'var(--accent-red)' : (u.tot_unsold_hshld_co || 0) >= 1000 ? 'var(--accent-yellow)' : 'var(--accent-green)'}` }}>
+      <div className={card} style={{ borderLeft: `3px solid ${(u.tot_unsold_hshld_co || 0) >= 3000 ? 'var(--accent-red)' : (u.tot_unsold_hshld_co || 0) >= 1000 ? 'var(--accent-yellow)' : 'var(--accent-green)'}` }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📊 현황 요약</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 'var(--fs-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>

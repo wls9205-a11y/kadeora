@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
         .in('author_id', batch);
 
       for (const p of (postCounts || [])) {
-        postCountMap[p.author_id] = (postCountMap[p.author_id] || 0) + 1;
+        postCountMap[p.author_id!] = (postCountMap[p.author_id!] || 0) + 1;
       }
 
       const { data: commentCounts } = await supabase
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
         .in('author_id', batch);
 
       for (const c of (commentCounts || [])) {
-        commentCountMap[c.author_id] = (commentCountMap[c.author_id] || 0) + 1;
+        commentCountMap[c.author_id!] = (commentCountMap[c.author_id!] || 0) + 1;
       }
     }
 
@@ -127,9 +127,8 @@ export async function GET(req: NextRequest) {
           // 등급 승급 알림
           await supabase.from('notifications').insert({
             user_id: profile.id,
-            type: 'grade_up',
-            title: `🎉 ${GRADE_TITLES[newGrade]} 등급으로 승급!`,
-            body: `축하합니다! 활발한 활동 덕분에 등급 ${currentGrade} → ${newGrade}(${GRADE_TITLES[newGrade]})로 승급했습니다.`,
+            type: 'badge' as any,
+            content: `🎉 ${GRADE_TITLES[newGrade]} 등급으로 승급! 축하합니다!`,
           }).then(() => {});
         }
       } else {

@@ -33,18 +33,18 @@ export async function GET(req: Request) {
         let message = '';
 
         if (alert.alert_type === 'stock_price') {
-          if (alert.condition === 'above' && stock.price >= alert.threshold) {
+          if (alert.condition === 'above' && stock.price >= (alert.threshold ?? 0)) {
             shouldTrigger = true;
-            message = `${stock.name} 현재가 ${stock.price.toLocaleString()}원이 목표가 ${Number(alert.threshold).toLocaleString()}원 이상 도달`;
-          } else if (alert.condition === 'below' && stock.price <= alert.threshold) {
+            message = `${stock.name} 현재가 ${stock.price.toLocaleString()}원이 목표가 ${Number(alert.threshold ?? 0).toLocaleString()}원 이상 도달`;
+          } else if (alert.condition === 'below' && stock.price <= (alert.threshold ?? 0)) {
             shouldTrigger = true;
-            message = `${stock.name} 현재가 ${stock.price.toLocaleString()}원이 목표가 ${Number(alert.threshold).toLocaleString()}원 이하 도달`;
+            message = `${stock.name} 현재가 ${stock.price.toLocaleString()}원이 목표가 ${Number(alert.threshold ?? 0).toLocaleString()}원 이하 도달`;
           }
         } else if (alert.alert_type === 'stock_pct') {
-          if (alert.condition === 'change_pct_up' && stock.change_pct >= alert.threshold) {
+          if (alert.condition === 'change_pct_up' && stock.change_pct >= (alert.threshold ?? 0)) {
             shouldTrigger = true;
             message = `${stock.name} 오늘 +${stock.change_pct.toFixed(1)}% 상승 (설정: ${alert.threshold}%)`;
-          } else if (alert.condition === 'change_pct_down' && stock.change_pct <= -alert.threshold) {
+          } else if (alert.condition === 'change_pct_down' && stock.change_pct <= -(alert.threshold ?? 0)) {
             shouldTrigger = true;
             message = `${stock.name} 오늘 ${stock.change_pct.toFixed(1)}% 하락 (설정: -${alert.threshold}%)`;
           }

@@ -73,11 +73,11 @@ export default function PersonalDashboard() {
         // 최근 알림 — 테이블 미존재 방어
         try {
           const { data: notifs } = await sb.from('notifications')
-            .select('id,type,content,created_at,link')
+            .select('id,type,content,created_at')
             .eq('user_id', uid).eq('is_read', false)
             .order('created_at', { ascending: false })
             .limit(3);
-          if (notifs) setAlerts(notifs as Alert[]);
+          if (notifs) setAlerts(notifs as unknown as Alert[]);
         } catch {}
 
         // 관심종목 기반 블로그 추천

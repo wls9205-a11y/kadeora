@@ -90,7 +90,7 @@ export default function DiscussionRoomPage() {
         if (data) {
           setMessages(
             data.map((m: Record<string, unknown>) => ({
-              ...(m as Message),
+              ...(m as unknown as Message),
               is_mine: (m as { author_id?: string }).author_id === currentUser?.id,
             }))
           );
@@ -130,7 +130,7 @@ export default function DiscussionRoomPage() {
               is_anonymous: m.is_anonymous as boolean,
               profiles: p,
               is_mine: m.author_id === currentUser?.id,
-            },
+            } as Message,
           ]);
           setTimeout(scrollToBottom, 50);
         }

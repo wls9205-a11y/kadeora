@@ -28,7 +28,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 const REGION_SECTIONS = ['서울', '부산', '경기', '인천'];
 
-const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
+const withTimeout = <T,>(p: PromiseLike<T>, ms = 5000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
 export default async function HotPage() {

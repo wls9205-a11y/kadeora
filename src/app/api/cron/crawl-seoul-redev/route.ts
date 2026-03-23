@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
     let insertErrors: string[] = [];
     for (let i = 0; i < mapped.length; i += 100) {
       const batch = mapped.slice(i, i + 100);
-      const { error } = await supabase.from('redevelopment_projects').insert(batch);
+      const { error } = await supabase.from('redevelopment_projects').insert(batch as any);
       if (!error) inserted += batch.length;
       else insertErrors.push(error.message);
     }

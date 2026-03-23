@@ -3,7 +3,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   generateBuildId: () => `build-${process.env.NEXT_PUBLIC_CACHE_VERSION || '20260318'}`,
-  typescript: { ignoreBuildErrors: true },
+  typescript: { ignoreBuildErrors: false },
   eslint: { ignoreDuringBuilds: true },
   compress: true,
   poweredByHeader: false,

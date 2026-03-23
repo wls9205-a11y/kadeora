@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     // RPC 먼저 시도
     const { data: rpcData, error: rpcErr } = await sb.rpc('get_apt_price_trend', {
       p_apt_name: aptName,
-      p_region: region || null,
+      p_region: region || undefined,
     });
 
     if (!rpcErr && rpcData?.length) {
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
     if (error) throw error;
 
-    const trend = (data || []).map(t => ({
+    const trend = ((data || []) as any[]).map((t: any) => ({
       deal_date: t.deal_date,
       price: t.deal_amount,
       area: t.exclusive_area,

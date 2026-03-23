@@ -24,20 +24,20 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
-    // Fallback: use existing exchange_rates table
+    // Fallback: use existing exchange_rate_history table
     if (!rate) {
-      const { data: existing } = await supabase.from('exchange_rates').select('rate').eq('currency_pair', 'USD/KRW').single();
-      if (existing?.rate) rate = existing.rate;
+      const { data: existing } = await supabase.from('exchange_rate_history').select('rate').eq('currency_pair', 'USD/KRW').order('recorded_at', { ascending: false }).limit(1).single();
+      if (existing?.rate) rate = Number(existing.rate);
     }
 
     if (!rate) return { processed: 0, created: 0, failed: 1 };
 
     // Update exchange_rates
     await supabase.from('exchange_rates').upsert({
-      currency_pair: 'USD/KRW',
-      rate,
+      base_currency: 'KRW',
+      rates: { 'USD/KRW': rate } as any,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'currency_pair' });
+    }, { onConflict: 'base_currency' });
 
     // Record history
     await supabase.from('exchange_rate_history').insert({

@@ -145,7 +145,7 @@ export async function GET(req: NextRequest) {
       const [regionPart, sigunguPart] = label.split(' ');
       let count = 0;
       for (const ym of months) {
-        const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey=${encodeURIComponent(apiKey)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
+        const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey=${encodeURIComponent(apiKey!)}&LAWD_CD=${lawdCd}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1000`;
         const res = await fetch(url);
         const xml = await res.text();
         const items = parseXmlItems(xml);

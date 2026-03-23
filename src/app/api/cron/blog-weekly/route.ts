@@ -130,7 +130,7 @@ ${(hot ?? []).length >= 3 ? `1위 글 **"${(hot ?? [])[0]?.title}"**이 좋아�
         .order('rcept_bgnde', { ascending: false }).limit(20);
       // 같은 지역 페어 찾기
       const byRegion: Record<string, any[]> = {};
-      (allApts ?? []).forEach(a => { const r = a.region_nm; if (!byRegion[r]) byRegion[r] = []; byRegion[r].push(a); });
+      (allApts ?? []).forEach(a => { const r = a.region_nm ?? 'unknown'; if (!byRegion[r]) byRegion[r] = []; byRegion[r].push(a); });
       const pair = Object.entries(byRegion).find(([, v]) => v.length >= 2);
       if (pair) {
         const [region, items] = pair;

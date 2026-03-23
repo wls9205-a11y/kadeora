@@ -3,7 +3,8 @@ import type { PostWithProfile, TrendingKeyword, StockQuote, DiscussionRoom, Shop
 /** 사이트 기본 URL — 환경변수 우선, 폴백 production URL */
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
-export const DEMO_POSTS: PostWithProfile[] = [
+// Demo data uses simplified shapes for SSR fallbacks — typed loosely
+export const DEMO_POSTS: any[] = [
   {
     id: 1, author_id: 'demo-1', category: 'apt', title: '강동구 둔촌주공 재건축 근황 알아봤습니다',
     content: '현장 직접 방문해서 공사 진행 상황 체크해왔어요. 외벽 마감 거의 다 됐고 조경도 들어가고 있네요. 입주 일정은 계획대로 진행 중이라고 합니다. 분양가 대비 현재 프리미엄 붙어있는 상황이고...',
@@ -70,7 +71,7 @@ export const DEMO_POSTS: PostWithProfile[] = [
   },
 ];
 
-export const DEMO_TRENDING: TrendingKeyword[] = [
+export const DEMO_TRENDING: any[] = [
   { id: 1, keyword: '삼성전자', rank: 1, count: 2341, created_at: new Date().toISOString() },
   { id: 2, keyword: '청약 경쟁률', rank: 2, count: 1876, created_at: new Date().toISOString() },
   { id: 3, keyword: '코스피 3000', rank: 3, count: 1543, created_at: new Date().toISOString() },
@@ -109,7 +110,7 @@ export const DEMO_DISCUSS: any[] = [
   { id: 10, title: '금리 인하 시점과 투자 전략', description: '한은 금통위 전망 및 대응 전략', category: 'free', participants_count: 534, messages_count: 5678, is_active: true, created_at: new Date().toISOString() },
 ];
 
-export const DEMO_APT: AptSubscription[] = [
+export const DEMO_APT: any[] = [
   { id: 1, name: '래미안 원베일리', location: '서울 서초구', total_units: 2990, subscription_type: '민간분양', rcept_bgnde: '2026-03-20', application_end: '2026-03-22', move_in_date: '2027-12-01', min_price: 150000, max_price: 280000, status: 'upcoming', competition_rate: null, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
   { id: 2, name: '힐스테이트 광교중앙역', location: '경기 수원시', total_units: 845, subscription_type: '민간분양', rcept_bgnde: '2026-03-15', application_end: '2026-03-17', move_in_date: '2027-06-01', min_price: 58000, max_price: 95000, status: 'open', competition_rate: 47.3, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
   { id: 3, name: '검단 푸르지오 더 파크', location: '인천 서구', total_units: 1284, subscription_type: '공공분양', rcept_bgnde: '2026-03-10', application_end: '2026-03-12', move_in_date: '2027-03-01', min_price: 35000, max_price: 52000, status: 'closed', competition_rate: 23.1, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
@@ -118,7 +119,7 @@ export const DEMO_APT: AptSubscription[] = [
   { id: 6, name: '위례 자이 더 시티', location: '경기 성남시', total_units: 698, subscription_type: '민간분양', rcept_bgnde: '2026-02-28', application_end: '2026-03-02', move_in_date: '2026-12-01', min_price: 75000, max_price: 125000, status: 'closed', competition_rate: 128.7, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
 ];
 
-export const DEMO_PRODUCTS: ShopProduct[] = [
+export const DEMO_PRODUCTS: any[] = [
   { id: 'megaphone-1d', name: '1일 메가폰', description: '24시간 동안 내 게시글을 피드 상단에 고정해드립니다', price_krw: 500, icon: '📢', is_active: true, created_at: new Date().toISOString() },
   { id: 'megaphone-3d', name: '3일 메가폰', description: '72시간 상단 고정 + HOT 배지 부착', price_krw: 1200, icon: '🔥', is_active: true, created_at: new Date().toISOString() },
   { id: 'megaphone-7d', name: '7일 메가폰', description: '7일 상단 고정 + 추천 섹션 등록', price_krw: 2500, icon: '🚀', is_active: true, created_at: new Date().toISOString() },

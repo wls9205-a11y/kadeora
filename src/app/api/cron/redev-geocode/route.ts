@@ -74,7 +74,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
     if (coords && coords.lat > 33 && coords.lat < 39 && coords.lng > 124 && coords.lng < 132) {
       const { error } = await sb.from('redevelopment_projects')
-        .update({ latitude: coords.lat, longitude: coords.lng })
+        .update({ latitude: coords.lat, longitude: coords.lng } as any)
         .eq('id', p.id);
       if (!error) updated++;
       else failed++;

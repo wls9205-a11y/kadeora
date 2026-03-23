@@ -89,7 +89,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
     if (households && households > 0) {
       const { error } = await sb.from('redevelopment_projects')
-        .update({ total_households: households })
+        .update({ total_households: households } as any)
         .eq('id', p.id);
       if (!error) updated++;
       else failed++;

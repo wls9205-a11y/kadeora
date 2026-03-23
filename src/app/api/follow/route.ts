@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           user_id: targetId, type: 'follow',
           content: `${profile?.nickname ?? '누군가'}님이 팔로우했어요`,
         });
-      } catch (e) { console.error(`[${new URL(req.url).pathname}]`, e); }
+      } catch (e) { console.error(`[${new URL(request.url).pathname}]`, e); }
 
       return NextResponse.json({ following: true });
     }

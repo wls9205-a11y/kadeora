@@ -67,7 +67,7 @@ const getCachedExchangeHistory = unstable_cache(fetchExchangeHistory, ['exchange
 const getCachedThemeHistory = unstable_cache(fetchThemeHistory, ['theme-history', 'v1'], { revalidate: 600 });
 
 export default async function StockPage() {
-  let stocks: { symbol: string; name: string; market: string; price: number; change_amt: number; change_pct: number; volume: number; market_cap: number; updated_at: string }[] = [];
+  let stocks: any[] = [];
   let briefing: any = null;
   let exchangeHistory: any[] = [];
   let themeHistory: any[] = [];
@@ -105,7 +105,7 @@ export default async function StockPage() {
           { "@type": "ListItem", "position": 2, "name": "주식 시세", "item": SITE_URL + "/stock" },
         ]
       }) }} />
-      <StockClient initialStocks={stocks} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
+      <StockClient initialStocks={stocks as any} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
     </Suspense>
   );

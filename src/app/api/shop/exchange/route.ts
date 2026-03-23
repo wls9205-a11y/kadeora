@@ -29,12 +29,12 @@ export async function POST(req: NextRequest) {
       .single();
     if (!profile) return NextResponse.json({ error: '프로필을 찾을 수 없습니다' }, { status: 404 });
 
-    if ((profile.points ?? 0) < product.point_price) {
-      return NextResponse.json({ error: `포인트가 부족합니다. ${product.point_price - (profile.points ?? 0)}P 더 필요해요.` }, { status: 400 });
+    if ((profile.points ?? 0) < (product.point_price ?? 0)) {
+      return NextResponse.json({ error: `포인트가 부족합니다. ${(product.point_price ?? 0) - (profile.points ?? 0)}P 더 필요해요.` }, { status: 400 });
     }
 
     // 포인트 차감
-    await admin.rpc('deduct_points', { p_user_id: user.id, p_amount: product.point_price });
+    await admin.rpc('deduct_points', { p_user_id: user.id, p_amount: product.point_price ?? 0 });
 
     // 상품 적용
     if (product_id === 'nickname_change') {
@@ -46,12 +46,11 @@ export async function POST(req: NextRequest) {
     await admin.from('purchases').insert({
       user_id: user.id,
       product_id: product.id,
-      amount: product.point_price,
-      payment_method: 'points',
+      amount_krw: product.point_price ?? 0,
       status: 'completed',
-    });
+    } as any);
 
-    return NextResponse.json({ success: true, remaining_points: (profile.points ?? 0) - product.point_price });
+    return NextResponse.json({ success: true, remaining_points: (profile.points ?? 0) - (product.point_price ?? 0) });
   } catch (err) {
     console.error('[Shop Exchange]', err);
     return NextResponse.json({ error: '서버 오류' }, { status: 500 });

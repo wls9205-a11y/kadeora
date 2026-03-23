@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     if (!stocks?.length) return { processed: 0, created: 0, failed: 0 };
 
     const topGainers = stocks.slice(0, 5);
-    const topLosers = [...stocks].sort((a, b) => a.change_pct - b.change_pct).slice(0, 5);
+    const topLosers = [...stocks].sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 5);
     const topVolume = [...stocks].sort((a, b) => (b.volume || 0) - (a.volume || 0)).slice(0, 5);
 
     // 2. AI로 종목별 시장 분석 노트 생성
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     const targetStocks = stocks.filter(s => targetSymbols.includes(s.symbol));
 
     const prompt = `오늘 한국 증시 주요 종목 데이터:
-${targetStocks.map(s => `- ${s.name}(${s.symbol}): ${s.price?.toLocaleString()}원, ${s.change_pct > 0 ? '+' : ''}${s.change_pct?.toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 섹터: ${s.sector || '기타'}`).join('\n')}
+${targetStocks.map(s => `- ${s.name}(${s.symbol}): ${s.price?.toLocaleString()}원, ${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${s.change_pct?.toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 섹터: ${s.sector || '기타'}`).join('\n')}
 
 각 종목에 대해 1-2문장의 시장 분석 노트를 작성하세요. 가격 변동 이유 추정, 섹터 흐름, 투자자 참고 사항 등.
 

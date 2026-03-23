@@ -31,7 +31,6 @@ export default function RightPanel() {
   useEffect(() => {
     fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 5)); })
-      .catch(() => {});
 
     // 추천 블로그 (인기순 3개)
     const sb = createSupabaseBrowser();
@@ -40,7 +39,6 @@ export default function RightPanel() {
       .order('view_count', { ascending: false })
       .limit(3)
       .then(({ data }) => { if (data?.length) setRecBlogs(data); })
-      .catch(() => {});
 
     sb.auth.getSession().then(async ({ data }) => {
       if (!data.session?.user) { setIsLoggedIn(false); return; }

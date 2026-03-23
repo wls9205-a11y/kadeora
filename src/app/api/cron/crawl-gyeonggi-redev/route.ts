@@ -112,12 +112,12 @@ export async function GET(req: NextRequest) {
       const allSeeds = [...GYEONGGI_SEED, ...INCHEON_SEED];
       await supabase.from('redevelopment_projects').delete().in('source', ['gyeonggi_seed', 'incheon_seed']);
       let inserted = 0;
-      const { error: seedErr } = await supabase.from('redevelopment_projects').insert(allSeeds);
+      const { error: seedErr } = await supabase.from('redevelopment_projects').insert(allSeeds as any);
       if (seedErr) {
         // Try individually
         let seedInserted = 0;
         for (const seed of allSeeds) {
-          const { error } = await supabase.from('redevelopment_projects').insert(seed);
+          const { error } = await supabase.from('redevelopment_projects').insert(seed as any);
           if (!error) seedInserted++;
         }
         inserted = seedInserted;

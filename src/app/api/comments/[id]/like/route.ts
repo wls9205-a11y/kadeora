@@ -32,14 +32,14 @@ export async function POST(
     // 중복 좋아요 방지 (comment_likes 테이블 있으면 사용, 없으면 단순 증가)
     try {
       const { data: existing } = await admin.from('comment_likes')
-        .select('id')
+        .select('comment_id')
         .eq('comment_id', commentId)
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (existing) {
         // 이미 좋아요 → 취소
-        await admin.from('comment_likes').delete().eq('id', existing.id);
+        await admin.from('comment_likes').delete().eq('comment_id', commentId).eq('user_id', user.id);
         await admin.from('comments').update({
           likes_count: Math.max(0, (comment.likes_count ?? 0) - 1),
         }).eq('id', commentId);

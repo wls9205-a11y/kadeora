@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .lte('published_at', now.toISOString())
         .order('published_at', { ascending: false }).limit(50000),
       supabase.from('stock_quotes').select('symbol, updated_at'),
-      supabase.from('apt_subscriptions').select('house_manage_no, created_at').order('rcept_bgnde', { ascending: false }).limit(5000),
+      supabase.from('apt_subscriptions').select('house_manage_no, updated_at').order('rcept_bgnde', { ascending: false }).limit(5000),
       supabase.from('blog_series').select('slug, created_at').eq('is_active', true),
       supabase.from('posts').select('id, slug, created_at, updated_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000),
     ]);
@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return {
         url: `${BASE}/blog/${b.slug}`,
         lastModified: new Date(b.updated_at || b.published_at || Date.now()),
-        changeFrequency: (daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly') as const,
+        changeFrequency: (daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly') as 'daily' | 'weekly' | 'monthly',
         priority: daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5,
       };
     });
@@ -66,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     aptPages = (aptsR.data || []).map(a => ({
       url: `${BASE}/apt/${a.house_manage_no}`,
-      lastModified: new Date(a.created_at || Date.now()),
+      lastModified: new Date(a.updated_at || Date.now()),
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     }));

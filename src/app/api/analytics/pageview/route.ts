@@ -16,9 +16,9 @@ export async function POST(req: NextRequest) {
     }
   } catch {}
 
-  // Fire-and-forget: don't await
+  // Fire-and-forget
   const sb = getSupabaseAdmin();
-  sb.from('page_views').insert({ visitor_id: body.visitor_id, path: body.path, referrer: body.referrer || null }).then(() => {}).catch(() => {});
+  sb.from('page_views').insert({ visitor_id: body.visitor_id, path: body.path, referrer: body.referrer || null } as any).then(() => {});
 
   return NextResponse.json({ ok: true });
 }

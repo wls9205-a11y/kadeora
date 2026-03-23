@@ -43,11 +43,11 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
   const [mentionList, setMentionList] = useState<{ id: string; nickname: string; grade: number }[]>([]);
   const [showMention, setShowMention] = useState(false);
   const [mentionIndex, setMentionIndex] = useState(0);
-  const mentionTimer = useRef<ReturnType<typeof setTimeout>>();
+  const mentionTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isFirst = useRef(true);
-  const { error } = useToast();
+  const { error, success } = useToast();
 
   const loadMessages = useCallback(async (before?: string) => {
     const sb = createSupabaseBrowser();
@@ -133,7 +133,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
       const lastKey = `kd_chat_point_${user.id}`;
       const last = parseInt(localStorage.getItem(lastKey) || '0');
       if (Date.now() - last > 60000) {
-        await sb.rpc('award_points', { target_user_id: user.id, amount: 1 });
+        await sb.rpc('award_points', { p_user_id: user.id, p_amount: 1, p_reason: '채팅참여' });
         localStorage.setItem(lastKey, String(Date.now()));
         success('+1P 획득!');
       }

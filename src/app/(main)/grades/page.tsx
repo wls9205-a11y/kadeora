@@ -54,7 +54,7 @@ export default async function GradesPage() {
 
       {/* 등급 목록 */}
       <div className="space-y-3">
-        {(grades ?? []).map((g: { grade: number; emoji: string; name: string; min_score: number; max_score: number | null; perks: string | null }) => (
+        {(grades ?? []).map((g: any) => (
           <div
             key={g.grade}
             className="rounded-xl p-4 flex items-center gap-4"

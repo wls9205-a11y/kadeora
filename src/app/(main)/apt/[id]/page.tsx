@@ -196,7 +196,7 @@ export default async function AptDetailPage({ params }: Props) {
 
       {/* 경쟁률 */}
       {apt.competition_rate_1st && Number(apt.competition_rate_1st) > 0 && (
-        <div style={{ ...card, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
+        <div className={card} style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🏆 청약 경쟁률</div>
           <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--accent-purple)', marginBottom: 12 }}>{Number(apt.competition_rate_1st).toFixed(1)} : 1 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>1순위 평균</span></div>
           {apt.total_apply_count && apt.supply_count && (

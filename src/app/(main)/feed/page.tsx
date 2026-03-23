@@ -20,7 +20,7 @@ import Disclaimer from '@/components/Disclaimer';
 // Cache: 60s — 피드 목록 (force-dynamic 제거: revalidate와 충돌)
 export const revalidate = 60;
 
-const withTimeout = <T,>(p: Promise<T>, ms = 5000): Promise<T | null> =>
+const withTimeout = <T,>(p: PromiseLike<T>, ms = 5000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
 async function getPosts(category: string, region: string = 'all') {

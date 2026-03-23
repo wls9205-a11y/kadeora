@@ -122,7 +122,7 @@ export default function BannerPurchaseForm({ onClose }: BannerPurchaseFormProps)
         display_end: displayEnd?.toISOString() || null,
         max_impressions: selected.maxImpressions,
         priority: selected.priority,
-      });
+      } as any);
       if (insertErr) throw insertErr;
 
       // 포인트 차감 (포인트 결제인 경우)

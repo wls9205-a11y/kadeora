@@ -19,11 +19,11 @@ export async function GET(req: NextRequest) {
 
     const allStocks = stocks || [];
     const topGainers = allStocks.slice(0, 5);
-    const topLosers = [...allStocks].sort((a, b) => a.change_pct - b.change_pct).slice(0, 5);
+    const topLosers = [...allStocks].sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 5);
 
     // Get theme data
     const { data: themeHistory } = await supabase.from('stock_theme_history')
-      .select('theme_name, avg_change_pct')
+      .select('theme_name, avg_change_rate')
       .eq('history_date', new Date().toISOString().slice(0, 10));
 
     // Calculate sector performance
@@ -46,10 +46,10 @@ export async function GET(req: NextRequest) {
     if (process.env.ANTHROPIC_API_KEY) {
       try {
         const prompt = `오늘 한국 증시 데이터:
-상승 TOP5: ${topGainers.map(s => `${s.name}(${s.change_pct > 0 ? '+' : ''}${s.change_pct?.toFixed(1)}%)`).join(', ')}
-하락 TOP5: ${topLosers.map(s => `${s.name}(${s.change_pct?.toFixed(1)}%)`).join(', ')}
+상승 TOP5: ${topGainers.map(s => `${s.name}(${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${Number(s.change_pct ?? 0).toFixed(1)}%)`).join(', ')}
+하락 TOP5: ${topLosers.map(s => `${s.name}(${Number(s.change_pct ?? 0).toFixed(1)}%)`).join(', ')}
 섹터: ${sectorPerf.slice(0, 5).map(s => `${s.name}(${s.avg_pct > 0 ? '+' : ''}${s.avg_pct}%)`).join(', ')}
-${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${t.avg_change_pct > 0 ? '+' : ''}${t.avg_change_pct?.toFixed(1)}%)`).join(', ')}` : ''}
+${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${Number(t.avg_change_rate ?? 0) > 0 ? '+' : ''}${Number(t.avg_change_rate ?? 0).toFixed(1)}%)`).join(', ')}` : ''}
 
 200자 이내로 시황을 요약하세요. JSON만 응답: {"title":"제목(20자이내)","summary":"요약","sentiment":"bullish|neutral|bearish"}`;
 
@@ -74,10 +74,10 @@ ${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${t.a
     }
 
     if (!summary) {
-      const upPct = allStocks.filter(s => s.change_pct > 0).length / (allStocks.length || 1) * 100;
+      const upPct = allStocks.filter(s => Number(s.change_pct ?? 0) > 0).length / (allStocks.length || 1) * 100;
       sentiment = upPct > 55 ? 'bullish' : upPct < 45 ? 'bearish' : 'neutral';
       title = sentiment === 'bullish' ? '강세장 지속' : sentiment === 'bearish' ? '약세장 흐름' : '혼조세 마감';
-      summary = `상승 ${allStocks.filter(s => s.change_pct > 0).length}종목, 하락 ${allStocks.filter(s => s.change_pct < 0).length}종목.`;
+      summary = `상승 ${allStocks.filter(s => Number(s.change_pct ?? 0) > 0).length}종목, 하락 ${allStocks.filter(s => Number(s.change_pct ?? 0) < 0).length}종목.`;
     }
 
     const today = new Date().toISOString().slice(0, 10);
