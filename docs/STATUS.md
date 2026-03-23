@@ -156,6 +156,64 @@
 
 ---
 
+## 세션 27 — 전수 디자인 감사 + 구조 리팩토링 + 디자인 클린업
+
+### 구조 리팩토링
+- [x] lib/format.ts — timeAgo/fmtAmount/fmtPrice/fmtCap/stockColor/fmt/numFmt 통합 (17곳→1곳)
+- [x] lib/cron-auth.ts — withCronAuth 크론 인증 미들웨어
+- [x] createClient(process.env...) → getSupabaseAdmin() 40개 API 라우트 통일
+- [x] EmptyState 2개 → 1개 통합
+- [x] Disclaimer 타입별 컴포넌트 (stock/apt/unsold/redev/trade/feed/general)
+
+### 디자인 전수 감사
+- [x] 하드코딩 색상 207곳+ → CSS 변수 전환 (#fff 포함)
+- [x] rgba(37,99,235) 21곳 → var(--brand-bg/--brand-border)
+- [x] 카드 인라인 스타일 25곳 → className="kd-card"
+- [x] 헤더 버튼 4곳 → className="kd-action-link"
+- [x] maxWidth 680→720 통일 (6파일)
+- [x] 모바일 padding 6페이지 추가
+- [x] 에러 페이지 12개 fontSize CSS 변수 통일
+- [x] text-tertiary 대비 #7D8DA3→#8A9BB0 (WCAG AA)
+- [x] privacy 페이지 하드코딩 rem 19곳 → CSS 변수
+- [x] BottomSheet 모달 8개 컴포넌트 통일
+- [x] hover 효과 12곳+ 전면 적용
+- [x] 검색 인풋 글로벌 클래스 (kd-search-input)
+- [x] 탭 borderRadius 4/2 → 10/8 (주식/토론 통일)
+- [x] #2563EB → var(--brand) 온보딩/InstallBanner/PushSubscribe
+
+### 피드 클린업 (~250px 절감)
+- [x] 글쓰기 프롬프트 제거 (하단 NAV에 이미 있음)
+- [x] 가이드북 배너 제거 (메뉴에 이미 있음)
+- [x] TrendingBar 제거 (인기글/HOT 3중 중복)
+- [x] 인기글 3개로 제한 + "전체 보기" 링크
+- [x] AttendanceBanner 3번째 게시글 뒤로 이동
+
+### 주식/부동산/토론 디자인
+- [x] 주식: 시장요약 4칸 삭제 (비율 바와 중복)
+- [x] 주식: "오늘의 테마" 서브탭 위에서 제거
+- [x] 주식: maxWidth 1000→720 + padding 추가
+- [x] 부동산: 헤더 버튼 4→3개 (청약홈 제거)
+- [x] 부동산: 탭 aria-pressed 추가
+
+### 법적/정보 수정
+- [x] FAQ 이메일 support@kadeora.com → kadeora.app@gmail.com
+- [x] terms 출처 Yahoo Finance → 금융위원회 API
+- [x] RightPanel (주)카더라 → 카더라
+- [x] Navigation 상점 메뉴 제거 (결제 미구현)
+- [x] 면책고지 10곳 하드코딩 → Disclaimer 컴포넌트 통합
+
+### 데드코드 삭제
+- [x] TrendingBar.tsx, PushNudgeBanner.tsx 삭제
+- [x] shared/EmptyState.tsx 삭제
+- [x] ShoppingBag import 제거
+
+### 핫픽스
+- [x] /api/og Edge Runtime CSS 변수 에러 수정
+- [x] feed/[id] opengraph-image CSS 변수 수정
+- [x] 빌드 에러 (함수 제거 잔해 5파일) 수정
+
+---
+
 ### 세션 25 후반 추가
 - [x] 아파트 단지별 상세 (/apt/complex/[name]) ✅
 - [x] 종목 비교 (/stock/compare) ✅

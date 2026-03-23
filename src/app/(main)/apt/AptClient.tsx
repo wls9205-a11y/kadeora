@@ -82,7 +82,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         ].map(({ k, l, type, data }) => {
           const hasNew = (data as any[]).some((item: any) => isNew(item, type));
           return (
-            <button key={k} onClick={() => { setActiveTab(k); haptic('light'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
+            <button key={k} onClick={() => { setActiveTab(k); haptic('light'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-pressed={activeTab === k} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
               background: activeTab === k ? 'var(--brand)' : 'transparent',
               color: activeTab === k ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',

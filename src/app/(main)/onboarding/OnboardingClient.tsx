@@ -223,7 +223,7 @@ export default function OnboardingClient() {
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(3)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
               <button onClick={handleComplete} disabled={saving || !region}
-                style={{ flex: 2, padding: '16px', fontSize: 'var(--fs-base)', fontWeight: 800, border: 'none', borderRadius: 12, cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, #2563EB, #60A5FA)', boxShadow: '0 4px 16px rgba(37,99,235,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
+                style={{ flex: 2, padding: '16px', fontSize: 'var(--fs-base)', fontWeight: 800, border: 'none', borderRadius: 12, cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, var(--brand), var(--accent-blue))', boxShadow: '0 4px 16px rgba(37,99,235,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
                 {saving ? '저장 중...' : !region ? '지역을 선택해주세요' : '카더라 시작하기 🚀'}
               </button>
             </div>
