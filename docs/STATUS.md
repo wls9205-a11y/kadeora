@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-23 세션 24 종료
+> **마지막 업데이트:** 2026-03-23 세션 28 종료
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -18,7 +18,7 @@
 
 ---
 
-## DB 현황 (2026-03-23 세션 24 기준)
+## DB 현황 (2026-03-23 세션 28 기준)
 
 | 테이블 | 건수 | 비고 |
 |--------|------|------|
@@ -26,12 +26,14 @@
 | blog_series | 신규 | 세션24: 시리즈 시스템 |
 | apt_transactions | 3,885+ | 올해 1~3월, 전국 231개 시군구 |
 | apt_reviews | 신규 | 세션24: UGC 아파트 리뷰 |
+| apt_review_likes | 신규 | 세션28: 리뷰 좋아요 |
 | posts | 3,764+ | 커뮤니티 게시글 |
 | apt_subscriptions | 2,500+ | 매일 06시 자동 수집 |
 | redevelopment_projects (활성) | 217 | 11개 지역 (서울114/부산35/경기24/인천18+) |
 | unsold_apts (활성) | 180 | 활성 (수동입력23건 비활성화) |
 | price_alerts | 신규 | 세션24: 주식+부동산 가격 알림 |
 | portfolio_holdings | 신규 | 세션24: 포트폴리오 시뮬레이터 |
+| portfolio_snapshots | 신규 | 세션28: 일일 수익률 스냅샷 |
 | stock_quotes (활성) | 150 | 공공데이터 API |
 | profiles | 111 | |
 | apt_trade_monthly | 44 | RPC 수정 완료, 정상 집계 |
@@ -39,7 +41,7 @@
 
 ---
 
-## 크론 현황 (46개 등록, vercel.json — 세션 24에서 +1개)
+## 크론 현황 (48개 등록, vercel.json — 세션 28에서 +2개)
 
 ### 부동산
 | 크론 | 주기 | 상태 |
@@ -72,6 +74,7 @@
 | seed-chat | 6시간마다 | ✅ UUID v4 자연스럽게(세션22) |
 | daily-stats | 매일 14:55 | ✅ |
 | blog-publish-queue | 2회/일(09,14시) | ✅ 3→2회 정리(세션22) |
+| blog-series-assign | 매일 03:30 | ✅ 시리즈 자동 묶기(세션28) |
 | blog-* (10+개) | 다양 | ✅ AI 자동 생성 |
 
 ### 시스템
@@ -81,7 +84,39 @@
 | health-check | 30분마다 | ✅ |
 | cleanup | 매일 03시 | ✅ |
 | check-price-alerts | 평일 장중 15분마다 | ✅ 세션24 추가 |
+| portfolio-snapshot | 평일 15:40 KST | ✅ 일일 수익률 스냅샷(세션28) |
 | ~~invite-reward~~ | ~~삭제~~ | 🗑️ 세션22에서 제거 (초대코드 2건뿐) |
+
+---
+
+## 세션 28 — 미해결 항목 5건 해소 (5커밋)
+
+### 1. 리뷰 좋아요/신고 기능
+- POST /api/apt/reviews/[id]/like — 좋아요 토글 (apt_review_likes 테이블)
+- POST /api/apt/reviews/[id]/report — 신고 접수 (reports.review_id)
+- AptReviewSection: 좋아요/신고 버튼 + haptic + 토스트
+- 마이그레이션: `20260323_review_likes.sql`
+
+### 2. AptClient 탭별 lazy fetch 연결 (SSR 60%+ 감소)
+- page.tsx SSR: 8개 쿼리 → 3개 (청약+미분양+알림만)
+- 미분양/재개발/실거래: 탭 최초 클릭 시 /api/apt/tab-data lazy fetch
+- tab-data API: unsoldMonthly/unsoldSummary/tradeMonthly 동시 반환
+- 탭 전환 시 SkeletonList 로딩 표시
+
+### 3. 블로그 시리즈 자동 묶기 크론 (blog-series-assign)
+- 매일 03:30 실행, 미할당 블로그 최대 2000건 스캔
+- 시리즈 slug→키워드 매핑으로 제목 매칭 (score 기반)
+- series_order 자동 부여 + post_count 동기화
+
+### 4. 포트폴리오 수익률 히스토리
+- portfolio_snapshots 테이블 + RLS
+- /api/cron/portfolio-snapshot — 평일 15:40 KST 실행
+- /api/portfolio/history — 최근 30~90일 스냅샷 조회
+- PortfolioTab: 30일 수익률 추이 SVG 스파크라인
+
+### 5. Skeleton UI 전 페이지 확대 적용
+- loading.tsx 11개 파일 → SkeletonList/SkeletonCard/SkeletonChart 통일
+- FeedClient loadingMore sentinel → SkeletonCard shimmer
 
 ---
 
@@ -534,18 +569,19 @@
 - [ ] KIS_APP_KEY + KIS_APP_SECRET 환경변수
 - [ ] STOCK_DATA_API_KEY 발급
 - [x] blog_series 시리즈 10개 + 1,393편 매핑 ✅ 세션 24
+- [ ] Supabase 세션 28 마이그레이션 실행 (`20260323_review_likes.sql` + `20260323_portfolio_snapshots.sql`)
 
 ### 코드
 - [x] AptClient 2060→205줄 완전 분할 (5개 탭 + apt-utils, 90% 감소) ✅ 세션 24
-- [ ] AptClient 탭별 lazy fetch 적용 (tab-data API 생성 완료, 연결만 필요)
+- [x] AptClient 탭별 lazy fetch 적용 (SSR 60%+ 감소) ✅ 세션 28
 - [ ] crawl-nationwide-redev API 키 등록 후 실행
 - [ ] 재개발 세대수 크론 검증 수집
 - [ ] 청약 상세의 신규 필드 데이터 채우기
-- [ ] 블로그 시리즈 시드 크론 (14,578건 자동 묶기)
-- [ ] 포트폴리오 수익률 히스토리 (일일 스냅샷)
+- [x] 블로그 시리즈 시드 크론 (blog-series-assign 매일 03:30) ✅ 세션 28
+- [x] 포트폴리오 수익률 히스토리 (portfolio-snapshot + 30일 차트) ✅ 세션 28
 - [ ] 지도뷰 클러스터링 (마커 50개+ 시 성능 최적화)
-- [ ] 리뷰 좋아요/신고 기능
-- [ ] Skeleton UI 피드/주식/블로그 전 탭 확대 적용
+- [x] 리뷰 좋아요/신고 기능 ✅ 세션 28
+- [x] Skeleton UI 피드/주식/블로그 전 탭 확대 적용 (11개 loading.tsx) ✅ 세션 28
 - [x] safe-catch 주요 파일 적용 (FeedClient/StockClient/AptClient) ✅ 세션 24
 - [x] 모달 Escape+배경스크롤방지 (AptClient/StockClient) ✅ 세션 24
 
@@ -595,3 +631,6 @@
 - blog_series 테이블 시드 필요 — 시리즈 데이터 없으면 /blog/series 빈 페이지 (세션24)
 - 부동산 지도뷰: NEXT_PUBLIC_KAKAO_JS_KEY 환경변수 필수 (세션24)
 - check-price-alerts 크론: 평일 장중 15분마다 실행, price_alerts 테이블 필요 (세션24)
+- apt_review_likes 테이블 필요 — 마이그레이션 미실행 시 좋아요 단순 증가 폴백 (세션28)
+- portfolio_snapshots 테이블 필요 — 마이그레이션 미실행 시 수익률 차트 미표시 (세션28)
+- 부동산 탭 lazy fetch: 미분양/재개발/실거래는 SSR이 아닌 클라이언트 fetch, tab-data API 의존 (세션28)
