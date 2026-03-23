@@ -171,7 +171,7 @@ export default function DiscussClient() {
         flexShrink: 0,
       }}>
         {TABS.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)} style={{
+          <button key={t.key} onClick={() => setTab(t.key)} aria-pressed={tab === t.key} style={{
             padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', flexShrink: 0,
             fontWeight: 700, fontSize: 'var(--fs-sm)',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
@@ -189,7 +189,7 @@ export default function DiscussClient() {
           {/* 투표 카테고리 서브필터 */}
           <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {POLL_CATS.map(c => (
-              <button key={c.key} onClick={() => setPollCat(c.key)} style={{
+              <button key={c.key} onClick={() => setPollCat(c.key)} aria-pressed={pollCat === c.key} style={{
                 padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
                 background: pollCat === c.key ? 'var(--text-primary)' : 'var(--bg-hover)',
                 color: pollCat === c.key ? 'var(--bg-base)' : 'var(--text-secondary)',

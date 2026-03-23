@@ -134,7 +134,8 @@ export default function WriteClient() {
       if (editId) {
         const res = await fetch(`/api/posts/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '수정 실패');
-        success('수정되었습니다'); clearDraft(); router.push(`/feed/${editId}`);
+        const { post: updated } = await res.json();
+        success('수정되었습니다'); clearDraft(); router.push(`/feed/${updated?.slug || editId}`);
       } else {
         const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '작성 실패');

@@ -271,13 +271,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 국내/해외 메인 토글 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-        <button onClick={() => { setMode('domestic'); setSearch(''); setSectorFilter('all'); }} style={{
+        <button onClick={() => { setMode('domestic'); setSearch(''); setSectorFilter('all'); }} aria-pressed={isDomestic} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
           background: isDomestic ? 'var(--brand)' : 'var(--bg-surface)',
           color: isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           border: isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇰🇷 국내주식</button>
-        <button onClick={() => { setMode('global'); setSearch(''); setSectorFilter('all'); }} style={{
+        <button onClick={() => { setMode('global'); setSearch(''); setSectorFilter('all'); }} aria-pressed={!isDomestic} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
           background: !isDomestic ? 'var(--accent-blue)' : 'var(--bg-surface)',
           color: !isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -327,7 +327,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 서브 탭 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px' }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
-          <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as any) : setGlobalTab(k as any); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
+          <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as any) : setGlobalTab(k as any); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-pressed={currentTab === k} style={{
             padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 700, fontSize: 'var(--fs-sm)',
             background: currentTab === k ? 'var(--brand)' : 'transparent',
             color: currentTab === k ? 'var(--text-inverse)' : 'var(--text-secondary)',
