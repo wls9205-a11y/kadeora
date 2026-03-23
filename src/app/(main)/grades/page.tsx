@@ -4,6 +4,7 @@ import { createSupabaseServer as createClient } from '@/lib/supabase-server';
 export const metadata: Metadata = {
   title: '회원 등급 안내',
   description: '카더라 회원 등급 시스템 안내 — 새싹부터 카더라신까지',
+  alternates: { canonical: 'https://kadeora.app/grades' },
 };
 
 const GRADE_COLORS: Record<number, string> = {
