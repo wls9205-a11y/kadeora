@@ -170,7 +170,7 @@ export default async function BlogPage({ searchParams }: Props) {
           <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
             style={{
               padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,
-              background: sort === s.key ? '#2563EB' : 'var(--bg-hover)',
+              background: sort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
               color: sort === s.key ? '#fff' : 'var(--text-tertiary)',
               textDecoration: 'none', border: 'none',
             }}>

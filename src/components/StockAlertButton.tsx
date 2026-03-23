@@ -107,7 +107,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
               {[{ key: 'above' as const, label: '📈 이상 도달' }, { key: 'below' as const, label: '📉 이하 도달' }].map(t => (
                 <button key={t.key} onClick={() => setAlertType(t.key)} style={{
                   flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 600,
-                  background: alertType === t.key ? '#2563EB' : 'var(--bg-hover)',
+                  background: alertType === t.key ? 'var(--brand)' : 'var(--bg-hover)',
                   color: alertType === t.key ? '#fff' : 'var(--text-secondary)',
                   border: alertType === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer',
                 }}>{t.label}</button>
@@ -127,7 +127,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
                 }}
               />
               <button onClick={addAlert} disabled={saving || !threshold} style={{
-                padding: '10px 20px', borderRadius: 8, background: '#2563EB', color: '#fff',
+                padding: '10px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
                 fontSize: 'var(--fs-sm)', fontWeight: 700, border: 'none', cursor: 'pointer',
                 opacity: saving || !threshold ? 0.5 : 1,
               }}>

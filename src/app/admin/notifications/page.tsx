@@ -239,7 +239,7 @@ function PushSection() {
             <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 12 }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Android</div>
               <div style={{ background: '#2a2a3e', borderRadius: 8, padding: '8px 10px', display: 'flex', gap: 8 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 6, background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={16} /></div>
+                <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={16} /></div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#fff' }}>{title || '제목'}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.3 }}>{body || '내용'}</div>
@@ -250,7 +250,7 @@ function PushSection() {
               <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>iPhone</div>
               <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 5, background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={12} /></div>
+                  <div style={{ width: 22, height: 22, borderRadius: 5, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><LogoSvg size={12} /></div>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>카더라</span>
                 </div>
                 <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: '#fff' }}>{title || '제목'}</div>

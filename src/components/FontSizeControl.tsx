@@ -38,7 +38,7 @@ export default function FontSizeControl() {
           style={{
             padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
             fontSize: 'var(--fs-xs)', fontWeight: size === s.value ? 700 : 400,
-            background: size === s.value ? '#2563EB' : 'var(--bg-hover)',
+            background: size === s.value ? 'var(--brand)' : 'var(--bg-hover)',
             color: size === s.value ? '#fff' : 'var(--text-tertiary)',
           }}
         >

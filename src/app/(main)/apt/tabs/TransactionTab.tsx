@@ -67,7 +67,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
   const pill = (k: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={k} onClick={() => { set(k); setPage(1); }} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
-      background: sel === k ? '#2563EB' : 'var(--bg-hover)',
+      background: sel === k ? 'var(--brand)' : 'var(--bg-hover)',
       color: sel === k ? '#fff' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>{label || k}</button>
@@ -134,7 +134,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
             <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
               {regions.slice(0, 8).map(r => (
-                <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? '#2563EB' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
+                <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
               ))}
             </div>
             <MiniLineChart data={data.map((s: any) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))} color="#34D399" showValues={true} height={140} />
@@ -156,7 +156,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           {[{ key: 'date', label: '최신순' }, { key: 'price_desc', label: '고가순' }, { key: 'price_asc', label: '저가순' }, { key: 'area', label: '면적순' }].map(s => (
             <button key={s.key} onClick={() => { setSort(s.key as any); setPage(1); }} style={{
               fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-              background: sort === s.key ? '#2563EB' : 'var(--bg-hover)', color: sort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
+              background: sort === s.key ? 'var(--brand)' : 'var(--bg-hover)', color: sort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
             }}>{s.label}</button>
           ))}
         </div>

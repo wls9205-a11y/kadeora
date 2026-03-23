@@ -28,7 +28,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
-      background: sel === v ? '#2563EB' : 'var(--bg-hover)',
+      background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
       color: sel === v ? '#fff' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>

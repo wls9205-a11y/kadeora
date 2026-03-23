@@ -94,7 +94,7 @@ export default function AdminContent() {
             {['all', 'pending', 'resolved', 'dismissed'].map(f => (
               <button key={f} onClick={() => setReportFilter(f)} style={{
                 padding: '4px 12px', borderRadius: 16, border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700,
-                background: reportFilter === f ? '#2563EB' : 'var(--bg-hover)',
+                background: reportFilter === f ? 'var(--brand)' : 'var(--bg-hover)',
                 color: reportFilter === f ? '#fff' : 'var(--text-secondary)',
               }}>{{ all: '전체', pending: '미처리', resolved: '처리됨', dismissed: '기각' }[f]}</button>
             ))}
@@ -114,7 +114,7 @@ export default function AdminContent() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
-                    background: r.content_type === 'post' ? '#2563EB' : r.content_type === 'comment' ? 'var(--accent-yellow)' : 'var(--accent-purple)',
+                    background: r.content_type === 'post' ? 'var(--brand)' : r.content_type === 'comment' ? 'var(--accent-yellow)' : 'var(--accent-purple)',
                     color: '#fff',
                   }}>{{ post: '게시글', comment: '댓글', chat: '채팅' }[r.content_type] || r.content_type}</span>
                   <span style={{

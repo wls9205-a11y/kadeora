@@ -91,9 +91,9 @@ export default function ShopClient() {
           <button key={cat} onClick={() => setSelectedCategory(cat)} style={{
             padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
             fontSize: 'var(--fs-sm)', fontWeight: 600,
-            background: selectedCategory === cat ? '#2563EB' : 'var(--bg-surface)',
+            background: selectedCategory === cat ? 'var(--brand)' : 'var(--bg-surface)',
             color: selectedCategory === cat ? 'var(--text-inverse)' : 'var(--text-secondary)',
-            outline: `1px solid ${selectedCategory === cat ? '#2563EB' : 'var(--border)'}`,
+            outline: `1px solid ${selectedCategory === cat ? 'var(--brand)' : 'var(--border)'}`,
             transition: 'all 0.15s',
           }}>
             {cat === 'all' ? '전체' : CATEGORY_LABELS[cat] ?? cat}

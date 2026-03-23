@@ -28,7 +28,7 @@ const PRESET_ICONS: Record<string, any> = {
   'system-maintenance': Settings,
 };
 const PRESET_COLORS: Record<string, string> = {
-  'full-refresh': '#2563EB',
+  'full-refresh': 'var(--brand)',
   'all-data': 'var(--accent-green)',
   'all-content': 'var(--accent-purple)',
   'system-maintenance': 'var(--accent-yellow)',
@@ -183,7 +183,7 @@ export default function OneClickPanel() {
       }}>
         {presets.map(p => {
           const Icon = PRESET_ICONS[p.key] || Zap;
-          const color = PRESET_COLORS[p.key] || '#2563EB';
+          const color = PRESET_COLORS[p.key] || 'var(--brand)';
           const isRunning = running === p.key;
           return (
             <button key={p.key} onClick={() => runBatch(p.key)} disabled={!!running} style={{

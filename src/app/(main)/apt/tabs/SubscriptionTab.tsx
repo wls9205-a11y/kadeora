@@ -25,7 +25,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
-      background: sel === v ? '#2563EB' : 'var(--bg-hover)',
+      background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
       color: sel === v ? '#fff' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>
@@ -244,7 +244,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               ]).map(s => (
                 <button key={s.key} onClick={() => setAptSort(s.key)} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                  background: aptSort === s.key ? '#2563EB' : 'var(--bg-hover)',
+                  background: aptSort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
                   color: aptSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
                 }}>{s.label}</button>
               ))}

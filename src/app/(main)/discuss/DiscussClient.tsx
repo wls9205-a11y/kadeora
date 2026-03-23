@@ -181,7 +181,7 @@ export default function DiscussClient() {
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
             fontWeight: 700, fontSize: 'var(--fs-sm)',
-            background: tab === t.key ? '#2563EB' : 'transparent',
+            background: tab === t.key ? 'var(--brand)' : 'transparent',
             color: tab === t.key ? '#fff' : 'var(--text-secondary)',
           }}>{t.label}</button>
         ))}
@@ -217,7 +217,7 @@ export default function DiscussClient() {
                 {['stock', 'apt', 'economy', 'free'].map(c => (
                   <button key={c} onClick={() => setNewCat(c)} style={{
                     padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer',
-                    background: newCat === c ? '#2563EB' : 'var(--bg-hover)',
+                    background: newCat === c ? 'var(--brand)' : 'var(--bg-hover)',
                     color: newCat === c ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>{(CAT_STYLE[c] || CAT_STYLE.free).label}</button>
                 ))}

@@ -30,7 +30,7 @@ export default function AdminNav() {
           <Link key={n.href} href={n.href} style={{
             padding: '6px 12px', borderRadius: 8, fontSize: 'var(--fs-xs)',
             fontWeight: active ? 700 : 500, flexShrink: 0, textDecoration: 'none',
-            background: active ? '#2563EB' : 'transparent',
+            background: active ? 'var(--brand)' : 'transparent',
             color: active ? '#fff' : 'var(--text-secondary)',
             border: active ? 'none' : '1px solid var(--border)',
           }}>

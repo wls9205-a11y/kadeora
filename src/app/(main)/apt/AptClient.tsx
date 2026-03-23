@@ -85,7 +85,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           return (
             <button key={k} onClick={() => { setActiveTab(k); haptic('light'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
-              background: activeTab === k ? '#2563EB' : 'transparent',
+              background: activeTab === k ? 'var(--brand)' : 'transparent',
               color: activeTab === k ? '#fff' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
               boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
             }}>

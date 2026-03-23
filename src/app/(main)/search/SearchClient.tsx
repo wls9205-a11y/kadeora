@@ -481,9 +481,9 @@ export default function SearchClient() {
           <button key={k} onClick={() => { setCategory(k); setPage(0); }}
             style={{
               padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
-              background: category === k ? '#2563EB' : 'var(--bg-surface)',
+              background: category === k ? 'var(--brand)' : 'var(--bg-surface)',
               color: category === k ? 'var(--text-inverse)' : 'var(--text-secondary)',
-              border: `1px solid ${category === k ? '#2563EB' : 'var(--border)'}`,
+              border: `1px solid ${category === k ? 'var(--brand)' : 'var(--border)'}`,
               transition: 'all 0.15s',
             }}
           >{l}</button>

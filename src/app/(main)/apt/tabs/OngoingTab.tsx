@@ -19,7 +19,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
-      background: sel === v ? '#2563EB' : 'var(--bg-hover)',
+      background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
       color: sel === v ? '#fff' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>
@@ -237,8 +237,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
         {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
           <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
             padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
-            border: `1px solid ${ongoingSort === k ? '#2563EB' : 'var(--border)'}`,
-            background: ongoingSort === k ? '#2563EB' : 'transparent',
+            border: `1px solid ${ongoingSort === k ? 'var(--brand)' : 'var(--border)'}`,
+            background: ongoingSort === k ? 'var(--brand)' : 'transparent',
             color: ongoingSort === k ? '#fff' : 'var(--text-tertiary)',
           }}>{l}</button>
         ))}
@@ -365,8 +365,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
           {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(p => (
             <button key={p} onClick={() => { setOngoingPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
               padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
-              border: `1px solid ${ongoingPage === p ? '#2563EB' : 'var(--border)'}`,
-              background: ongoingPage === p ? '#2563EB' : 'transparent',
+              border: `1px solid ${ongoingPage === p ? 'var(--brand)' : 'var(--border)'}`,
+              background: ongoingPage === p ? 'var(--brand)' : 'transparent',
               color: ongoingPage === p ? '#fff' : 'var(--text-tertiary)',
             }}>{p}</button>
           ))}

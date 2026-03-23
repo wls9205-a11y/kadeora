@@ -6,7 +6,7 @@ const STAGES = [
   { key: '사업시행인가', label: '사업시행', color: '#FBBF24', icon: '📜' },
   { key: '관리처분', label: '관리처분', color: '#F97316', icon: '⚖️' },
   { key: '착공', label: '착공', color: '#34D399', icon: '🏗️' },
-  { key: '준공', label: '준공', color: '#2563EB', icon: '🏢' },
+  { key: '준공', label: '준공', color: 'var(--brand)', icon: '🏢' },
 ];
 
 export default function RedevTimeline({ currentStage }: { currentStage: string }) {

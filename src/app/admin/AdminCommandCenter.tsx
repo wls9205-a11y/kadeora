@@ -340,7 +340,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
     return (
       <div style={{ minHeight: '100vh', background: '#0B1426', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 36, height: 36, border: '3px solid rgba(37,99,235,0.2)', borderTopColor: '#2563EB', borderRadius: '50%', animation: 'spin .7s linear infinite', margin: '0 auto 16px' }} />
+          <div style={{ width: 36, height: 36, border: '3px solid rgba(37,99,235,0.2)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin .7s linear infinite', margin: '0 auto 16px' }} />
           <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 600 }}>커맨드센터 로딩 중...</div>
         </div>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -380,7 +380,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
       <div style={{ background: 'linear-gradient(180deg,#0F1D35 0%,#0B1426 100%)', borderBottom: '1px solid #1E3050', padding: '14px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', maxWidth: 1300, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#2563EB', letterSpacing: -0.5 }}>카더라</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--brand)', letterSpacing: -0.5 }}>카더라</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: '#7D8DA3', letterSpacing: 1 }}>COMMAND CENTER</span>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 0 }}>
@@ -398,7 +398,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             {unreadAlerts > 0 && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 10, background: 'rgba(251,191,36,0.12)', color: 'var(--accent-yellow)', fontWeight: 700 }}>알림 {unreadAlerts}</span>}
           </div>
           {lastRefresh && <span style={{ fontSize: 10, color: '#7D8DA3' }}>갱신: {lastRefresh.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span>}
-          <button className="cc-btn" onClick={handleRefreshAll} disabled={refresh.running} style={{ background: refresh.running ? '#1E3050' : '#2563EB', color: '#fff', padding: '8px 16px' }}>
+          <button className="cc-btn" onClick={handleRefreshAll} disabled={refresh.running} style={{ background: refresh.running ? '#1E3050' : 'var(--brand)', color: '#fff', padding: '8px 16px' }}>
             {refresh.running ? (<><span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />{((refresh.elapsed/1000)|0)}초</>) : '⚡ 전체 갱신'}
           </button>
           <button className="cc-btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#1E3050', color: '#9DB0C7', fontSize: 11, padding: '6px 12px' }}>🔄</button>
@@ -722,7 +722,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>전광판 공지</div>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
                   <input value={noticeText} onChange={e => setNoticeText(e.target.value)} placeholder="전광판 공지 입력..." style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid #1E3050', background: '#0F1D35', color: 'var(--text-primary)', fontSize: 11, outline: 'none' }} />
-                  <button className="cc-btn" onClick={postNotice} disabled={noticeSaving||!noticeText.trim()} style={{ background: '#2563EB', color: '#fff' }}>등록</button>
+                  <button className="cc-btn" onClick={postNotice} disabled={noticeSaving||!noticeText.trim()} style={{ background: 'var(--brand)', color: '#fff' }}>등록</button>
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>SEO</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10, marginBottom: 10 }}>
