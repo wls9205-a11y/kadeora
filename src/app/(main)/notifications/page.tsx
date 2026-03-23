@@ -127,15 +127,13 @@ export default function NotificationsPage() {
           {notifs.map(n => (
             <div key={n.id}
               onClick={() => { if (!n.is_read) markOneRead(n.id); router.push(getNotifLink(n)); }}
+              className="kd-feed-card"
               style={{
                 display: 'flex', alignItems: 'flex-start', gap: 12,
-                padding: '14px 16px', borderRadius: 4, cursor: 'pointer',
+                padding: '14px 16px', borderRadius: 10, cursor: 'pointer',
                 background: n.is_read ? 'var(--bg-surface)' : 'var(--brand-light)',
-                border: `1px solid ${n.is_read ? 'var(--border)' : 'rgba(37,99,235,0.2)'}`,
-                transition: 'background 0.15s',
+                border: `1px solid ${n.is_read ? 'var(--border)' : 'var(--brand-border)'}`,
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-              onMouseLeave={e => (e.currentTarget.style.background = n.is_read ? 'var(--bg-surface)' : 'var(--brand-light)')}
             >
               <span style={{ fontSize: 'var(--fs-xl)', flexShrink: 0 }}>
                 {TYPE_ICON[n.type] ?? '🔔'}

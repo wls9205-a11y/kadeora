@@ -228,11 +228,7 @@ export default function SearchClient() {
     </div>
   );
 
-  const acItemStyle: React.CSSProperties = {
-    padding: '10px 12px',
-    cursor: 'pointer',
-    transition: 'background 0.1s',
-  };
+  const acItemCls = 'kd-feed-card';
 
   return (
     <PullToRefresh>
@@ -297,10 +293,8 @@ export default function SearchClient() {
                 {acStocks.map(stock => (
                   <div
                     key={stock.symbol}
-                    style={acItemStyle}
+                    className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
                     onClick={() => handleAcNavigate(`/stock/${stock.symbol}`)}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
@@ -330,10 +324,8 @@ export default function SearchClient() {
                 {acApts.map(apt => (
                   <div
                     key={apt.id}
-                    style={acItemStyle}
+                    className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
                     onClick={() => handleAcNavigate(`/apt/${apt.id}`)}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(apt.house_nm, inputVal)}</div>
                     <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -354,10 +346,8 @@ export default function SearchClient() {
                   return (
                     <div
                       key={post.id}
-                      style={acItemStyle}
+                      className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
                       onClick={() => handleAcNavigate(`/feed/${post.id}`)}
-                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
@@ -375,10 +365,8 @@ export default function SearchClient() {
                 {acBlogs.map(blog => (
                   <div
                     key={blog.id}
-                    style={acItemStyle}
+                    className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
                     onClick={() => handleAcNavigate(`/blog/${blog.slug}`)}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(167,139,250,0.15)', color: 'var(--accent-purple)' }}>📝 블로그</span>
@@ -399,10 +387,8 @@ export default function SearchClient() {
               <div>
                 {acSectionHeader('재개발·재건축')}
                 {acRedevs.map((r: any) => (
-                  <div key={r.id} style={acItemStyle}
-                    onClick={() => { handleAcNavigate('/apt'); }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                  <div key={r.id} className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
+                    onClick={() => { handleAcNavigate('/apt'); }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(251,146,60,0.15)', color: 'var(--accent-orange)' }}>🏗️ {r.project_type}</span>
                       <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(r.district_name || '', inputVal)}</span>
@@ -418,10 +404,8 @@ export default function SearchClient() {
               <div>
                 {acSectionHeader('미분양')}
                 {acUnsolds.map((u: any) => (
-                  <div key={u.id} style={acItemStyle}
-                    onClick={() => handleAcNavigate(`/apt/unsold/${u.id}`)}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                  <div key={u.id} className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
+                    onClick={() => handleAcNavigate(`/apt/unsold/${u.id}`)}>
                     <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(u.house_nm || '', inputVal)}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{highlight(u.region_nm || '', inputVal)}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''} · {(u.tot_unsold_hshld_co || 0).toLocaleString()}세대 미분양</div>
                   </div>
@@ -434,10 +418,8 @@ export default function SearchClient() {
               <div>
                 {acSectionHeader('실거래')}
                 {acTrades.map((t: any) => (
-                  <div key={t.id} style={acItemStyle}
-                    onClick={() => { handleAcNavigate('/apt'); }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                  <div key={t.id} className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
+                    onClick={() => { handleAcNavigate('/apt'); }}>
                     <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(t.apt_name || '', inputVal)}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{t.region_nm} · {t.deal_amount >= 10000 ? `${(t.deal_amount / 10000).toFixed(1)}억` : `${(t.deal_amount || 0).toLocaleString()}만`} · {t.exclusive_area}㎡ · {t.deal_date}</div>
                   </div>
@@ -450,10 +432,8 @@ export default function SearchClient() {
               <div>
                 {acSectionHeader('토론')}
                 {acDiscuss.map((d: any) => (
-                  <div key={d.id} style={acItemStyle}
-                    onClick={() => handleAcNavigate('/discuss')}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                  <div key={d.id} className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
+                    onClick={() => handleAcNavigate('/discuss')}>
                     <div style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(d.title || '', inputVal)}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>찬성 {d.vote_yes || 0} · 반대 {d.vote_no || 0}</div>
                   </div>
