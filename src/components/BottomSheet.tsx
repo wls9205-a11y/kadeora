@@ -82,7 +82,7 @@ export default function BottomSheet({ open, onClose, children, maxWidth = 520, t
               borderRadius: '50%', width: 32, height: 32,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 16,
-            }}>✕</button>
+            }} aria-label="닫기">✕</button>
           </div>
         )}
 

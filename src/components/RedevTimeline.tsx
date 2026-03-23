@@ -2,7 +2,7 @@
 
 const STAGES = [
   { key: '정비구역지정', label: '구역지정', color: 'var(--text-tertiary)', icon: '📋' },
-  { key: '조합설립', label: '조합설립', color: '#60A5FA', icon: '🤝' },
+  { key: '조합설립', label: '조합설립', color: 'var(--accent-blue)', icon: '🤝' },
   { key: '사업시행인가', label: '사업시행', color: 'var(--accent-yellow)', icon: '📜' },
   { key: '관리처분', label: '관리처분', color: '#F97316', icon: '⚖️' },
   { key: '착공', label: '착공', color: 'var(--accent-green)', icon: '🏗️' },

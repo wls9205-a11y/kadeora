@@ -258,7 +258,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       {/* 🔥 이번 주 인기글 (간결하게 3개만) */}
       {showHotBanner && hotPosts.length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 14, position: 'relative' }}>
-          <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }}>✕</button>
+          <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }} aria-label="닫기">✕</button>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
           {hotPosts.slice(0, 3).map((hp: any, i: number) => (
             <Link key={hp.id} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
@@ -323,15 +323,17 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               {/* 인터랙션: 좋아요 + 댓글 + 공유 (3개만) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
+                  aria-label="좋아요"
                   className={isLiked ? 'animate-like' : ''}
                   style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', color: isLiked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0, transition: 'color var(--transition-fast)' }}>
                   <Heart size={18} fill={isLiked ? 'var(--accent-red)' : 'none'} stroke={isLiked ? 'var(--accent-red)' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : ''}
                 </button>
-                <Link href={`${postHref}#comments`}
+                <Link href={`${postHref}#comments`} aria-label="댓글"
                   style={{ display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', padding: 0 }}>
                   <MessageCircle size={18} /> {(post.comments_count ?? 0) > 0 ? numFmt(post.comments_count ?? 0) : ''}
                 </Link>
                 <button onClick={(e) => handleShare(e, post)}
+                  aria-label="공유"
                   style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 0 }}>
                   <Share2 size={18} />
                 </button>

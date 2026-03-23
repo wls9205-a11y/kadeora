@@ -261,7 +261,7 @@ export default function WriteClient() {
               display: 'inline-flex', alignItems: 'center', gap: 4,
             }}>
               #{t}
-              <button onClick={() => setTags(prev => prev.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: 0 }}>×</button>
+              <button onClick={() => setTags(prev => prev.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: 0 }} aria-label="닫기">×</button>
             </span>
           ))}
         </div>

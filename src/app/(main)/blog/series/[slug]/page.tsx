@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { notFound } from 'next/navigation';
 
@@ -93,9 +94,9 @@ export default async function SeriesDetailPage({ params }: Props) {
             </div>
 
             {post.cover_image && (
-              <img src={post.cover_image} alt="" style={{
-                width: 56, height: 42, objectFit: 'cover', borderRadius: 6, flexShrink: 0,
-              }} />
+              <div style={{ width: 56, height: 42, borderRadius: 6, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                <Image src={post.cover_image} alt="" fill sizes="56px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!post.cover_image.includes('supabase.co')} />
+              </div>
             )}
           </Link>
         ))}

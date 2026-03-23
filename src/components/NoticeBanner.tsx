@@ -201,7 +201,7 @@ export default function NoticeBanner() {
                   </span>
                 )}
               </div>
-              <button onClick={() => setShowSheet(false)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setShowSheet(false)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }} aria-label="닫기">✕</button>
             </div>
 
             {/* 작성자 (유료) */}

@@ -31,7 +31,7 @@ export default function GuestCTA() {
           fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
         }}>1초 가입</Link>
         <button onClick={() => { setShow(false); localStorage.setItem('kd_guest_cta', String(Date.now() + 24 * 60 * 60 * 1000)); }}
-          style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer', padding: 4 }}>×</button>
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer', padding: 4 }} aria-label="닫기">×</button>
       </div>
     </div>
   );

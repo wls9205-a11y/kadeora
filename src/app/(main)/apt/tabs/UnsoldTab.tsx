@@ -94,7 +94,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
           <button onClick={() => setUnsoldRegion('전체')} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-            border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
+            border: unsoldRegion === '전체' ? '2px solid var(--accent-red)' : '1px solid var(--border)',
             background: unsoldRegion === '전체' ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
@@ -105,7 +105,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           {unsoldRegionStats.map(r => (
             <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-              border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
+              border: unsoldRegion === r.name ? '2px solid var(--accent-red)' : '1px solid var(--border)',
               background: unsoldRegion === r.name ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
@@ -179,7 +179,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6 }}>
           <button onClick={() => setUnsoldRegion('전체')} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-            border: unsoldRegion === '전체' ? '2px solid #F87171' : '1px solid var(--border)',
+            border: unsoldRegion === '전체' ? '2px solid var(--accent-red)' : '1px solid var(--border)',
             background: unsoldRegion === '전체' ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
@@ -190,7 +190,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           {unsoldRegionStats.map(r => (
             <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-              border: unsoldRegion === r.name ? '2px solid #F87171' : '1px solid var(--border)',
+              border: unsoldRegion === r.name ? '2px solid var(--accent-red)' : '1px solid var(--border)',
               background: unsoldRegion === r.name ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
@@ -220,7 +220,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 return { label: String(m).slice(5), value: total };
               });
             })()}
-            color="#60A5FA"
+            color="var(--accent-blue)"
             secondaryData={(() => {
               const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-12);
               return months.map(m => {
@@ -229,13 +229,13 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 return { label: String(m).slice(5), value: total };
               });
             })()}
-            secondaryColor="#F87171"
+            secondaryColor="var(--accent-red)"
             height={140}
             title=""
           />
           <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
             <span><span style={{ display: 'inline-block', width: 12, height: 2, background: 'var(--accent-blue)', marginRight: 4, verticalAlign: 'middle' }} />전체 미분양</span>
-            <span><span style={{ display: 'inline-block', width: 12, height: 2, background: 'var(--accent-red)', marginRight: 4, verticalAlign: 'middle', borderTop: '1px dashed #F87171' }} />준공후 미분양</span>
+            <span><span style={{ display: 'inline-block', width: 12, height: 2, background: 'var(--accent-red)', marginRight: 4, verticalAlign: 'middle', borderTop: '1px dashed var(--accent-red)' }} />준공후 미분양</span>
           </div>
         </div>
       )}

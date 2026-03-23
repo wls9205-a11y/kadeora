@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { BookOpen } from 'lucide-react';
 
@@ -43,7 +44,9 @@ export default async function BlogSeriesPage() {
             }}>
               <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                 {s.cover_image && (
-                  <img src={s.cover_image} alt="" style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+                  <div style={{ width: 80, height: 60, borderRadius: 8, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                    <Image src={s.cover_image} alt={s.title || ''} fill sizes="80px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!s.cover_image.includes('supabase.co')} />
+                  </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{s.title}</h2>

@@ -85,7 +85,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
           <button onClick={() => { setRegion('전체'); setPage(1); }} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-            border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+            border: region === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
             background: region === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
@@ -95,7 +95,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           {regStats.map(r => (
             <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-              border: region === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+              border: region === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
               background: region === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
@@ -138,7 +138,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
               ))}
             </div>
-            <MiniLineChart data={data.map((s: any) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))} color="#34D399" showValues={true} height={140} />
+            <MiniLineChart data={data.map((s: any) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))} color="var(--accent-green)" showValues={true} height={140} />
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>단위: 억원</div>
           </div>
         );

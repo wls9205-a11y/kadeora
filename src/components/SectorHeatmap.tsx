@@ -19,7 +19,7 @@ function getColor(pct: number, isKR: boolean): string {
     if (pct > 0) return 'var(--accent-red)';
     if (pct <= -3) return '#1D4ED8';
     if (pct <= -1) return 'var(--brand)';
-    return '#60A5FA';
+    return 'var(--accent-blue)';
   }
   if (pct >= 3) return '#059669';
   if (pct >= 1) return '#10B981';

@@ -234,7 +234,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
         {replyTarget && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 14px', background: 'var(--brand-bg)', borderBottom: '1px solid var(--border)' }}>
             <span style={{ color: 'var(--brand)', fontWeight: 600, fontSize: 'var(--fs-sm)' }}>💬 @{replyTarget.nickname} 에게 답글</span>
-            <button onClick={() => { setReplyTarget(null); setInput(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)', padding: 0, lineHeight: 1 }}>×</button>
+            <button onClick={() => { setReplyTarget(null); setInput(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)', padding: 0, lineHeight: 1 }} aria-label="닫기">×</button>
           </div>
         )}
         {user ? (
