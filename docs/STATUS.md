@@ -109,6 +109,49 @@
 
 ---
 
+## 세션 26 디자인 시스템 정비 (28개 개선 항목)
+
+### 색상/토큰 통일
+- [x] `#2563EB` → `var(--brand)` 59곳 교체 (33개 파일)
+- [x] CSS 디자인 토큰 추가 (radius 5단계, shadow 4단계, transition 3단계)
+
+### 모달 통일 (BottomSheet 컴포넌트)
+- [x] BottomSheet.tsx — slideUp 애니메이션, blur 배경, Escape, 포커스 트랩
+- [x] StockAlertButton → BottomSheet
+- [x] StockClient 종목 상세 → BottomSheet
+- [x] TransactionTab 실거래 → BottomSheet
+- [x] RedevTab 재개발 → BottomSheet
+- [x] OngoingTab 분양중 → BottomSheet
+
+### 블로그 타이포그래피
+- [x] 코드 블록 강화 (pre/code, SF Mono, 퍼플 인라인)
+- [x] 이미지 캡션 (figure/figcaption)
+- [x] blockquote 강화 (그라디언트 + italic)
+
+### hover/인터랙션
+- [x] 피드 카드 hover + stagger 애니메이션
+- [x] 블로그 카드/인기글 hover
+- [x] 주식 행 hover + 관심종목 ★ bounce
+- [x] 토론방 카드 hover
+- [x] 인기글 카드 hover (TOP + 지역별)
+- [x] 실거래 검색 카드 hover
+- [x] 좋아요 버튼 bounce 애니메이션
+
+### 접근성/UX
+- [x] focus-visible 전역 포커스 링
+- [x] ScrollToTop 버튼
+- [x] EmptyState 개선 + 블로그/검색 적용
+- [x] 스켈레톤 shimmer 클래스
+
+### 기능
+- [x] 종목 비교 URL 파라미터 (?a=&b=)
+
+### DB 트리거
+- [x] blog_comments → comment_count 자동 업데이트
+- [x] blog_posts content → reading_time_min 자동 계산
+
+---
+
 ### 세션 25 후반 추가
 - [x] 아파트 단지별 상세 (/apt/complex/[name]) ✅
 - [x] 종목 비교 (/stock/compare) ✅

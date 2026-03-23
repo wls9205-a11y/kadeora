@@ -80,31 +80,31 @@ StockClient, FeedClient, BlogPage, SearchClient 등
 
 ## 세션 26 작업 계획
 
-### Phase 1: 디자인 토큰 통일 (CSS 변수)
+### Phase 1: 디자인 토큰 통일 ✅ 완료
 1. border-radius 5단계 토큰 정의 + 전체 교체
 2. spacing 토큰 활용도 확장
 3. 하드코딩 색상 → CSS 변수 교체 (주요 파일)
 
-### Phase 2: 카드/모달/버튼 일관성
+### Phase 2: 카드/모달/버튼 일관성 ✅ 완료
 4. 모달 통일 (배경, 닫기, 드래그 핸들, border-radius)
 5. 카드 hover 효과 전역 적용
 6. 필(Pill) 버튼 통일 컴포넌트
 7. Empty State 전면 적용
 
-### Phase 3: 블로그 타이포그래피
+### Phase 3: 블로그 타이포그래피 ✅ 완료
 8. 코드 블록 스타일 강화
 9. 이미지 캡션 + figure 스타일
 10. blockquote 강화
 
-### Phase 4: 인터랙션/애니메이션
+### Phase 4: 인터랙션/애니메이션 ✅ 완료
 11. 카드 등장 stagger 애니메이션
 12. 좋아요/관심 bounce 효과
 13. 스크롤 to top 버튼
 
-### Phase 5: 추가 기능
+### Phase 5: 추가 기능 (일부 완료)
 14. 주식 크론 데이터 채우기
 15. 실거래가 YoY 비교 (2025 데이터)
-16. 종목 비교 URL 파라미터 지원
+16. 종목 비교 URL 파라미터 지원 ✅
 
 ---
 
