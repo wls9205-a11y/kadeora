@@ -147,6 +147,47 @@ export default async function HomePage() {
           height: 500,
         })),
       }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: '카더라는 무료인가요?', acceptedAnswer: { '@type': 'Answer', text: '네, 카더라의 모든 기본 기능은 완전 무료입니다. 주식 시세 조회, 아파트 청약 일정 확인, 커뮤니티 글 작성, 블로그 열람 등 핵심 기능을 무료로 이용할 수 있습니다.' } },
+          { '@type': 'Question', name: '어떤 주식 정보를 볼 수 있나요?', acceptedAnswer: { '@type': 'Answer', text: '코스피, 코스닥, 나스닥, S&P500 등 국내외 150개+ 종목의 실시간 시세를 제공합니다. 테마별 동향, 섹터 히트맵, AI 종목 분석, 투자자 매매동향 등 다양한 투자 정보를 확인할 수 있습니다.' } },
+          { '@type': 'Question', name: '아파트 청약 정보는 어떻게 확인하나요?', acceptedAnswer: { '@type': 'Answer', text: '카더라 부동산 페이지에서 전국 2,500건+ 청약 일정, 경쟁률, 미분양 현황, 217개 재개발 구역 정보, 실거래가를 확인할 수 있습니다.' } },
+          { '@type': 'Question', name: '블로그에는 어떤 글이 있나요?', acceptedAnswer: { '@type': 'Answer', text: '매일 자동 업데이트되는 14,000편+ 투자 정보 블로그를 운영합니다. 코스피·코스닥 시황 분석, 청약 가이드, 미분양 리포트 등을 매일 발행합니다.' } },
+          { '@type': 'Question', name: '카더라 앱은 어디서 다운로드하나요?', acceptedAnswer: { '@type': 'Answer', text: '카더라는 웹앱(PWA)으로, 별도 앱스토어 다운로드 없이 브라우저에서 바로 사용할 수 있습니다. 모바일에서 홈 화면에 추가하면 앱처럼 사용 가능합니다.' } },
+          { '@type': 'Question', name: '개인정보는 안전한가요?', acceptedAnswer: { '@type': 'Answer', text: '카더라는 Supabase 서울 리전에 데이터를 저장하며, HTTPS 암호화, RLS(Row Level Security), CSRF 보호, Rate Limiting으로 보안을 강화하고 있습니다.' } },
+        ],
+      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE },
+          { '@type': 'ListItem', position: 2, name: '주식 시세', item: `${SITE}/stock` },
+          { '@type': 'ListItem', position: 3, name: '부동산', item: `${SITE}/apt` },
+          { '@type': 'ListItem', position: 4, name: '블로그', item: `${SITE}/blog` },
+          { '@type': 'ListItem', position: 5, name: '커뮤니티', item: `${SITE}/feed` },
+          { '@type': 'ListItem', position: 6, name: '토론', item: `${SITE}/discuss` },
+        ],
+      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: '카더라',
+        alternateName: ['KADEORA', '카더라 커뮤니티'],
+        url: SITE,
+        logo: `${SITE}/images/brand/kadeora-hero.png`,
+        description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론',
+        foundingDate: '2026',
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'customer service',
+          email: 'kadeora.app@gmail.com',
+          availableLanguage: 'Korean',
+        },
+        sameAs: [],
+      }) }} />
 
       <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
 
@@ -325,6 +366,45 @@ export default async function HomePage() {
               }}>
                 <span>{t.emoji}</span> {t.label}
               </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ━━━ FAQ 섹션 (리치 결과 면적 확대) ━━━ */}
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
+          <h2 style={{
+            fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, textAlign: 'center', marginBottom: 24,
+            letterSpacing: '-0.02em',
+          }}>
+            자주 묻는 질문
+          </h2>
+          <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[
+              { q: '카더라는 무료인가요?', a: '네, 카더라의 모든 기본 기능은 완전 무료입니다. 주식 시세 조회, 아파트 청약 일정 확인, 커뮤니티 글 작성, 블로그 열람 등 핵심 기능을 무료로 이용할 수 있습니다. 카카오 계정으로 3초 만에 가입하세요.' },
+              { q: '어떤 주식 정보를 볼 수 있나요?', a: '코스피, 코스닥, 나스닥, S&P500 등 국내외 150개+ 종목의 실시간 시세를 제공합니다. 테마별 동향, 섹터 히트맵, AI 종목 분석, 투자자 매매동향, 뉴스 감성 분석 등 다양한 투자 정보를 한눈에 확인할 수 있습니다.' },
+              { q: '아파트 청약 정보는 어떻게 확인하나요?', a: '카더라 부동산 페이지에서 전국 2,500건+ 청약 일정, 경쟁률, 미분양 현황, 217개 재개발 구역 정보, 실거래가를 확인할 수 있습니다. 청약 캘린더, 지도뷰, 청약 진단 도구도 제공합니다.' },
+              { q: '블로그에는 어떤 글이 있나요?', a: '매일 자동 업데이트되는 14,000편+ 투자 정보 블로그를 운영하고 있습니다. 코스피·코스닥 시황 분석, 청약 가이드, 미분양 리포트, ETF 비교 등 주식과 부동산 관련 정보를 매일 발행합니다.' },
+              { q: '카더라 앱은 어디서 다운로드하나요?', a: '카더라는 웹앱(PWA)으로, 별도 앱스토어 다운로드 없이 브라우저에서 바로 사용할 수 있습니다. 모바일 브라우저에서 kadeora.app에 접속한 후 "홈 화면에 추가"를 누르면 앱처럼 사용할 수 있습니다.' },
+              { q: '개인정보는 안전한가요?', a: '카더라는 Supabase 서울 리전에 데이터를 저장하며, 모든 통신은 HTTPS로 암호화됩니다. Row Level Security(RLS)를 적용하여 본인의 데이터만 접근할 수 있으며, CSRF 보호와 Rate Limiting으로 보안을 강화하고 있습니다.' },
+            ].map((faq, i) => (
+              <details key={i} style={{
+                background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)',
+                overflow: 'hidden',
+              }}>
+                <summary style={{
+                  padding: '16px 20px', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                  color: 'var(--text-primary)', listStyle: 'none',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                }}>
+                  {faq.q}
+                  <span style={{ fontSize: 18, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 12 }}>+</span>
+                </summary>
+                <div style={{
+                  padding: '0 20px 16px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7,
+                }}>
+                  {faq.a}
+                </div>
+              </details>
             ))}
           </div>
         </section>
