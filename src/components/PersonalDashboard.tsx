@@ -48,7 +48,7 @@ export default function PersonalDashboard() {
 
       try {
         // 관심종목 가져오기
-        const { data: wl } = await sb.from('watchlist').select('symbol').eq('user_id', uid) as { data: any[] | null };
+        const { data: wl } = await sb.from('stock_watchlist').select('symbol').eq('user_id', uid) as { data: any[] | null };
         if (wl?.length) {
           const symbols = wl.map((w: any) => w.symbol);
           const { data: stocks } = await sb.from('stock_quotes')

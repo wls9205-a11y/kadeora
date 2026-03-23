@@ -2,7 +2,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import ShareButtons from '@/components/ShareButtons';
@@ -25,14 +25,6 @@ renderer.image = function ({ href, title, text }: { href: string; title: string 
   return `<img src="${href}" alt="${text || ''}" ${title ? `title="${title}"` : ''} loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:8px" />`;
 };
 marked.setOptions({ breaks: true, gfm: true, renderer });
-
-function sanitizeHtml(html: string): string {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','br','strong','em','b','i','u','s','del','a','ul','ol','li','blockquote','pre','code','img','table','thead','tbody','tr','th','td','hr','div','span','sup','sub'],
-    ALLOWED_ATTR: ['href','src','alt','title','id','class','style','loading','decoding','target','rel','width','height'],
-    ALLOW_DATA_ATTR: false,
-  });
-}
 
 interface Props { params: Promise<{ slug: string }> }
 
