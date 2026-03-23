@@ -148,5 +148,5 @@ async function fetchAptData() {
 
 export default async function AptPage() {
   const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts } = await fetchAptData();
-  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
+  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://kadeora.app"},{"@type":"ListItem","position":2,"name":"부동산","item":"https://kadeora.app/apt"}]}) }} /><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
 }

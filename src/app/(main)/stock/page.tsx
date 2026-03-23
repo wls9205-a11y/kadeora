@@ -96,6 +96,13 @@ export default async function StockPage() {
         "inLanguage": "ko-KR",
         "provider": { "@type": "Organization", "name": "카더라", "url": "https://kadeora.app" }
       }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org", "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://kadeora.app" },
+          { "@type": "ListItem", "position": 2, "name": "주식 시세", "item": "https://kadeora.app/stock" },
+        ]
+      }) }} />
       <StockClient initialStocks={stocks} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
     </Suspense>

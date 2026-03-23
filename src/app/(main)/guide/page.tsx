@@ -59,6 +59,7 @@ const INSTALL_STEPS = {
 export default function GuidePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://kadeora.app"},{"@type":"ListItem","position":2,"name":"가이드","item":"https://kadeora.app/guide"}]}) }} />
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>

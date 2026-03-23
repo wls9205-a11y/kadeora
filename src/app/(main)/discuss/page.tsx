@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 export default function DiscussPage() {
   return (
     <Suspense>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://kadeora.app"},{"@type":"ListItem","position":2,"name":"토론","item":"https://kadeora.app/discuss"}]}) }} />
       <DiscussClient />
       <Disclaimer />
     </Suspense>
