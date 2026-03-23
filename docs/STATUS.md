@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-24 세션 29 최종
+> **마지막 업데이트:** 2026-03-24 세션 30
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -92,6 +92,71 @@
 
 ---
 
+## 세션 30 — 홈 랜딩 페이지 + SEO 면적 극대화 (4커밋)
+
+### 1. 홈 랜딩 페이지 신규 생성
+- page.tsx: `redirect('/feed')` → 풀 랜딩 페이지 (393줄)
+- 로그인 유저는 쿠키 감지 → 자동 `/feed` 리다이렉트 (기존 UX 유지)
+- 비로그인 유저 전용: 히어로 + 실시간 통계(ISR 1시간) + 6개 서비스 카드 + 편의도구 6개 + CTA
+- 히어로: 그라데이션 텍스트 "아는 사람만 아는 그 정보, 카더라"
+- 실시간 통계: DB에서 실제 수치 fetch (blogs/stocks/apts/redev/posts/profiles)
+- 푸터: 서비스/부동산/도구/카더라 4열 네비게이션 + 사업자 정보
+
+### 2. 서비스 프리뷰 이미지 6개 생성 (이미지 캐러셀용)
+- `public/images/previews/` — Pillow + Noto Sans CJK 한글 폰트
+- stock-preview.png (48KB) — 시세표 + KOSPI/KOSDAQ/NASDAQ 지수 카드
+- apt-preview.png (31KB) — 청약 5탭 + 단지 카드 4개 + 진행률 바
+- blog-preview.png (49KB) — 블로그 카테고리 필터 + 글 목록 4개
+- feed-preview.png (36KB) — 커뮤니티 게시글 카드 4개 + 등급 표시
+- discuss-preview.png (43KB) — 실시간 채팅 말풍선 6개
+- main-preview.png (23KB) — 브랜드 로고 + 6개 기능 칩
+- 각 이미지에 SEO alt 텍스트 (한글 키워드 풍부)
+
+### 3. JSON-LD 구조화 데이터 8종 적용 (검색 면적 극대화)
+- SiteNavigationElement: 6개 하위 페이지 사이트링크 유도
+- ImageGallery: 6개 서비스 프리뷰 이미지 (네이버 이미지 캐러셀)
+- **FAQPage**: 6개 Q&A 리치 결과 (검색 면적 +4~8줄)
+- **BreadcrumbList**: 카더라 > 주식 > 부동산 > 블로그 > 커뮤니티 > 토론
+- **Organization**: 로고, 연락처, 설립일 (지식 패널 가능성)
+- WebSite + SearchAction: 검색박스 사이트링크 (layout.tsx에서 기존)
+- WebApplication: 앱 정보 (layout.tsx에서 기존)
+
+### 4. FAQ 섹션 UI 구현
+- details/summary 아코디언 6개 항목
+- 질문: 무료여부/주식정보/청약확인/블로그내용/앱다운로드/개인정보보안
+- 카드 스타일: bg-surface + border + borderRadius 12
+
+### 5. 미들웨어 최적화
+- `'/'` PUBLIC_ONLY 배열 추가 → 루트 페이지 auth 스킵
+
+### SEO 최종 적용 현황
+| 항목 | 상태 |
+|------|------|
+| canonical | ✅ `https://kadeora.app` |
+| OG title/desc/image | ✅ 1200x630 |
+| Twitter Card | ✅ summary_large_image |
+| Geo meta | ✅ KR, 서울 좌표, ICBM |
+| Google 인증 | ✅ |
+| Naver 인증 | ✅ |
+| Bing 인증 | ✅ |
+| robots.txt | ✅ Allow / + Yeti + Sitemap |
+| sitemap.xml | ✅ 60,000+ URL, 루트 priority 1 |
+| JSON-LD (8종) | ✅ WebApp/WebSite/SiteNav/ImageGallery/FAQ/Breadcrumb/Organization/SearchAction |
+| 이미지 캐러셀 | ✅ 6개 프리뷰 + alt 텍스트 |
+| ISR | ✅ 1시간 revalidate |
+
+### 검색 면적 변화
+- Before: "피드 | 카더라" + 1줄 설명 = **3줄**
+- After: 타이틀 + 설명 + 사이트링크 + 이미지 캐러셀 + FAQ 펼침 + 경로 = **최대 15~20줄**
+
+### 남은 작업 (다음 세션)
+- [ ] Supabase 타입 재생성 (`supabase gen types`) → ignoreBuildErrors 제거
+- [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
+- [ ] 네이버 서치콘솔에서 루트 URL 색인 요청 (FAQ 리치결과 반영)
+- [ ] 실제 서비스 스크린샷으로 프리뷰 이미지 교체 (현재는 생성 이미지)
+
+---
+
 ## 세션 29 — 풀스택 감사 실행 + 커뮤니티 리디자인 + 런타임 에러 제로 (22커밋)
 
 ### 1. 빌드 에러 긴급 수정
@@ -178,6 +243,8 @@
 ### 19. ProfileClient InviteSection 추출 (709→673줄)
 
 ### 남은 작업 (다음 세션)
+- [x] 홈 랜딩 페이지 신규 생성 ✅ 세션 30
+- [x] SEO 구조화 데이터 8종 + 이미지 캐러셀 + FAQ 리치결과 ✅ 세션 30
 - [ ] Supabase 타입 재생성 (`supabase gen types`) → ignoreBuildErrors 제거
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 
