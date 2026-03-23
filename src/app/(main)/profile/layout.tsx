@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '종목 비교',
-  description: '두 종목의 시가총액·등락률·거래량을 한눈에 비교해보세요.',
+  title: '내 프로필',
+  description: '카더라 프로필 — 활동 내역, 포인트, 등급을 확인하세요.',
 };
 export default function Layout({ children }: { children: React.ReactNode }) { return children; }

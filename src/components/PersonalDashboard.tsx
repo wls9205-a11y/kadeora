@@ -56,49 +56,54 @@ export default function PersonalDashboard() {
           if (stocks) setWatchStocks(stocks as WatchStock[]);
         }
 
-        // 관심 청약 (북마크)
-        const { data: bm } = await sb.from('apt_bookmarks').select('apt_id').eq('user_id', uid).limit(5) as { data: any[] | null };
-        if (bm?.length) {
-          const ids = bm.map((b: any) => b.apt_id);
-          const { data: apts } = await sb.from('apt_subscriptions')
-            .select('id,house_nm,rcept_endde,region_nm')
-            .in('id', ids)
-            .order('rcept_endde', { ascending: true })
-            .limit(3);
-          if (apts) setFavApts(apts as FavApt[]);
-        }
+        // 관심 청약 (북마크) — 테이블 미존재 방어
+        try {
+          const { data: bm } = await sb.from('apt_bookmarks').select('apt_id').eq('user_id', uid).limit(5) as { data: any[] | null };
+          if (bm?.length) {
+            const ids = bm.map((b: any) => b.apt_id);
+            const { data: apts } = await sb.from('apt_subscriptions')
+              .select('id,house_nm,rcept_endde,region_nm')
+              .in('id', ids)
+              .order('rcept_endde', { ascending: true })
+              .limit(3);
+            if (apts) setFavApts(apts as FavApt[]);
+          }
+        } catch {}
 
-        // 최근 알림
-        const { data: notifs } = await sb.from('notifications')
-          .select('id,type,content,created_at,link')
-          .eq('user_id', uid).eq('is_read', false)
-          .order('created_at', { ascending: false })
-          .limit(3);
-        if (notifs) setAlerts(notifs as Alert[]);
+        // 최근 알림 — 테이블 미존재 방어
+        try {
+          const { data: notifs } = await sb.from('notifications')
+            .select('id,type,content,created_at,link')
+            .eq('user_id', uid).eq('is_read', false)
+            .order('created_at', { ascending: false })
+            .limit(3);
+          if (notifs) setAlerts(notifs as Alert[]);
+        } catch {}
 
         // 관심종목 기반 블로그 추천
-        if (wl?.length) {
-          const stockNames = (await sb.from('stock_quotes').select('name').in('symbol', wl.map((w: any) => w.symbol)).limit(3)).data || [];
-          const nameQueries = stockNames.map((s: any) => `title.ilike.%${s.name}%`).join(',');
-          if (nameQueries) {
+        try {
+          if (wl?.length) {
+            const stockNames = (await sb.from('stock_quotes').select('name').in('symbol', wl.map((w: any) => w.symbol)).limit(3)).data || [];
+            const nameQueries = stockNames.map((s: any) => `title.ilike.%${s.name}%`).join(',');
+            if (nameQueries) {
+              const { data: blogs } = await sb.from('blog_posts')
+                .select('slug,title,category,view_count')
+                .eq('is_published', true)
+                .or(nameQueries)
+                .order('view_count', { ascending: false })
+                .limit(3);
+              if (blogs) setRecBlogs(blogs as RecBlog[]);
+            }
+          }
+          if (!wl?.length) {
             const { data: blogs } = await sb.from('blog_posts')
               .select('slug,title,category,view_count')
               .eq('is_published', true)
-              .or(nameQueries)
               .order('view_count', { ascending: false })
               .limit(3);
             if (blogs) setRecBlogs(blogs as RecBlog[]);
           }
-        }
-        // 관심종목 없으면 인기 블로그 추천
-        if (!wl?.length) {
-          const { data: blogs } = await sb.from('blog_posts')
-            .select('slug,title,category,view_count')
-            .eq('is_published', true)
-            .order('view_count', { ascending: false })
-            .limit(3);
-          if (blogs) setRecBlogs(blogs as RecBlog[]);
-        }
+        } catch {}
       } catch { }
       setLoading(false);
     });

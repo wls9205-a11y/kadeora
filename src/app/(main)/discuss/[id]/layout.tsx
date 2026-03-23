@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '종목 비교',
-  description: '두 종목의 시가총액·등락률·거래량을 한눈에 비교해보세요.',
+  title: '토론방',
+  description: '실시간 토론에 참여하세요. 주식·부동산·경제 이슈를 함께 이야기합니다.',
 };
 export default function Layout({ children }: { children: React.ReactNode }) { return children; }

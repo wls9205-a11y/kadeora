@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { MetadataRoute } from 'next';
 
 const BASE = 'https://kadeora.app';
@@ -32,10 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let aptPages: MetadataRoute.Sitemap = [];
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = getSupabaseAdmin();
 
     const [blogsR, stocksR, aptsR, seriesR] = await Promise.all([
       supabase.from('blog_posts').select('slug, updated_at, published_at')
