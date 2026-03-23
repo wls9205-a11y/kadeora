@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PullToRefresh from '@/components/PullToRefresh';
 import type { PostWithProfile } from '@/types/database';
+import { timeAgo } from '@/lib/format';
 
 const CATEGORY_MAP: Record<string, { label: string; bg: string; color: string }> = {
   stock:   { label: '주식',  bg: 'var(--info-bg)',      color: 'var(--info)' },
@@ -29,11 +30,7 @@ interface AptResult {
   rcept_endde: string;
 }
 
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return '방금 전';
-  if (m < 60) return `${m}분 전`;
+분 전`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}시간 전`;
   return `${Math.floor(h / 24)}일 전`;

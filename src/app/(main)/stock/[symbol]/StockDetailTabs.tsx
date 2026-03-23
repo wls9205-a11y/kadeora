@@ -2,12 +2,11 @@
 import { useState } from 'react';
 import StockComments from '@/components/StockComments';
 import CandlestickChart from '@/components/charts/CandlestickChart';
+import { timeAgo } from '@/lib/format';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
-function timeAgo(d: string) {
-  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-  if (m < 60) return `${m}분 전`;
+분 전`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}시간 전`;
   return `${Math.floor(h / 24)}일 전`;

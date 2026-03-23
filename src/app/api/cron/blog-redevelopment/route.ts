@@ -1,6 +1,6 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('blog-redevelopment', async () => {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
     const { data: zones, error: fetchErr } = await admin.from('redevelopment_zones').select('*').eq('blog_generated', false);
 
     if (fetchErr) { console.error('[blog-redevelopment] fetch error:', fetchErr); throw new Error(fetchErr.message); }

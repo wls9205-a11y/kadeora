@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 60;
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   if (!APT_API_KEY) return NextResponse.json({ success: true, error: 'APT_DATA_API_KEY not set' });
 
   const result = await withCronLogging('crawl-competition-rate', async () => {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
 
     // 접수 마감 + 경쟁률 없는 청약 조회 (최근 6개월)
     const sixMonthsAgo = new Date(Date.now() - 180 * 86400000).toISOString().slice(0, 10);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const SEED_USERS = Array.from({ length: 89 }, (_, i) => {
   const h = (v: number) => ((v * 2654435761 + 0x9e3779b9) >>> 0).toString(16).padStart(8, '0');
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
     const { data: seedUsers } = await admin.rpc('get_seed_users');
     const userId = seedUsers?.[Math.floor(Math.random() * (seedUsers?.length || 1))]?.id
       || SEED_USERS[Math.floor(Math.random() * SEED_USERS.length)];

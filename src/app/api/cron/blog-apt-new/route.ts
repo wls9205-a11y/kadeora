@@ -1,6 +1,6 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { withCronLogging } from '@/lib/cron-logger';
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const result = await withCronLogging('blog-apt-new', async () => {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
     let created = 0;
 
     // 1. apt_subscriptions에서 블로그 없는 현장

@@ -6,6 +6,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import type { User } from '@supabase/supabase-js';
 import ChatRoom from './ChatRoom';
+import { timeAgo } from '@/lib/format';
 
 const TABS = [
   { key: 'lounge', label: '💬 전체' },
@@ -28,14 +29,6 @@ const CAT_STYLE: Record<string, { bg: string; color: string; label: string }> = 
   economy: { bg: 'rgba(251,191,36,0.12)', color: 'var(--accent-yellow)', label: '💹 경제' },
   free: { bg: 'rgba(167,139,250,0.12)', color: 'var(--accent-purple)', label: '✏️ 자유' },
 };
-
-function timeAgo(d: string) {
-  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-  if (m < 1) return '방금';
-  if (m < 60) return m + '분 전';
-  if (m < 1440) return Math.floor(m / 60) + '시간 전';
-  return Math.floor(m / 1440) + '일 전';
-}
 
 interface Topic {
   id: number; title: string; category: string; topic_type: string;

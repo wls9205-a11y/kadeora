@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
 
     // 리라이팅 안 된 글 3건
     const { data: posts } = await admin.from('blog_posts')

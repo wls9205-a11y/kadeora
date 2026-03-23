@@ -6,6 +6,7 @@ import { ReportModal } from '@/components/modals/ReportModal';
 import EmptyState from '@/components/shared/EmptyState';
 import type { User } from '@supabase/supabase-js';
 import { getAvatarColor } from '@/lib/avatar';
+import { timeAgo } from '@/lib/format';
 import BottomSheet from '@/components/BottomSheet';
 
 interface MsgProfile { id: string; nickname: string | null; grade: number | null; points: number | null; }
@@ -25,7 +26,6 @@ const GRADE_INFO: Record<number, { title: string; emoji: string; color: string }
   9:{title:'신의경지',emoji:'👑',color:'var(--accent-purple)'},10:{title:'카더라신',emoji:'🚀',color:'#C084FC'},
 };
 function avc(uid: string | null) { return getAvatarColor(uid ?? ''); }
-function timeAgo(d: string) { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return '방금'; if (m < 60) return m + '분 전'; if (m < 1440) return Math.floor(m / 60) + '시간 전'; return Math.floor(m / 1440) + '일 전'; }
 function renderContent(text: string) { return text.split(/(@\S+)/g).map((p, i) => p.startsWith('@') ? <span key={i} style={{ color: 'var(--brand)', fontWeight: 700 }}>{p}</span> : p); }
 
 export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: User | null; myNickname?: string | null; room?: string }) {

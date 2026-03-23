@@ -1,11 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const revalidate = 0;
 
 export async function GET() {
   const start = Date.now();
   try {
-    const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const sb = getSupabaseAdmin();
 
     const [postsR, usersR, commentsR, todayR] = await Promise.all([
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),

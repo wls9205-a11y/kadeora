@@ -1,6 +1,6 @@
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { generateEnglishSlug } from '@/lib/slug-utils';
 import { ensureMinLength } from '@/lib/blog-padding';
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('blog-weekly-market', async () => {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
 
     const now = new Date();
     const weekAgo = new Date(Date.now() - 7 * 86400000);

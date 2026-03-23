@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 function guessSector(name: string): string {
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('stock-price', async () => {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
     const today = new Date().toISOString().split('T')[0];
 
     // KIS API 키가 있으면 실시간 시세 갱신 (향후 구현)

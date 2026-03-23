@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     // 관리자 세션 체크
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
     // 간단한 인증 (실제로는 세션 기반)
   }
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const batchSize = Math.min(body.batchSize || 5, 10);
     const cronType = body.cronType || null;
 
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
 
     // 리라이팅 안 된 글 가져오기 (rewritten_at이 NULL)
     let query = admin.from('blog_posts')

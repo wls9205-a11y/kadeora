@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
     await supabase.rpc('reset_daily_api_usage');
 
     const today = new Date();

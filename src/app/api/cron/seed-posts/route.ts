@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { withCronLogging } from '@/lib/cron-logger';
 
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('seed-posts', async () => {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
 
     const { data: seedUsers } = await admin.rpc('get_seed_users');
     if (!seedUsers || seedUsers.length === 0) {

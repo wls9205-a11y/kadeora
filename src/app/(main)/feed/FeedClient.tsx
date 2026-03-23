@@ -14,22 +14,7 @@ import PushNudgeBanner from '@/components/PushNudgeBanner';
 import TrendingBar from '@/components/TrendingBar';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import PersonalDashboard from '@/components/PersonalDashboard';
-
-function timeAgo(dateStr: string | null | undefined) {
-  if (!dateStr) return '';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  if (isNaN(diff)) return '';
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return '방금 전';
-  if (m < 60) return `${m}분 전`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}시간 전`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `${d}일 전`;
-  return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
-}
-function numFmt(n: number) { return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n); }
-
+import { timeAgo, numFmt } from '@/lib/format';
 const PAGE_SIZE = 20;
 
 interface Props { posts: PostWithProfile[]; activeCategory: string; activeRegion?: string; }

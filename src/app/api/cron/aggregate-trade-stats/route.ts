@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 30;
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('aggregate-trade-stats', async () => {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
 
     // RPC 호출 → 실패 시 에러 메시지 포함
     const { error } = await supabase.rpc('aggregate_trade_monthly_stats');

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 60;
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
   if (!APT_API_KEY) return NextResponse.json({ success: true, error: 'APT_DATA_API_KEY not set' });
 
   const result = await withCronLogging('crawl-apt-subscription', async () => {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
     let totalSynced = 0;
 
     // 1. APT 분양정보 상세 — 페이지별 최대 500건씩

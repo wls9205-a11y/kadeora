@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const SEED_USERS = Array.from({ length: 89 }, (_, i) => {
   // 자연스러운 UUID v4 형태 생성 (고정 시드 기반)
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
 
     // Get random post with category
     const { data: posts } = await admin.from('posts').select('id, category').eq('is_deleted', false).limit(50);

@@ -3,17 +3,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
+import { timeAgo } from '@/lib/format';
 
 const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 const CAT_LABEL: Record<string, string> = { stock: '📊 주식', apt: '🏢 부동산', economy: '💹 경제', free: '✏️ 자유' };
-
-function timeAgo(d: string) {
-  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-  if (m < 1) return '방금';
-  if (m < 60) return m + '분 전';
-  if (m < 1440) return Math.floor(m / 60) + '시간 전';
-  return Math.floor(m / 1440) + '일 전';
-}
 
 interface Topic {
   id: number; title: string; description: string | null; category: string; topic_type: string;

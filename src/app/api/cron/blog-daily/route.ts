@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const admin = getSupabaseAdmin();
     const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
     const dateSlug = new Date().toISOString().slice(0, 10);
 

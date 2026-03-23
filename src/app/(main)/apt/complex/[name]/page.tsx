@@ -2,6 +2,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { fmtAmount } from '@/lib/format';
 import dynamic from 'next/dynamic';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
@@ -21,9 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function fmtAmt(amt: number) {
-  if (!amt) return '-';
-  if (amt >= 10000) return `${(amt / 10000).toFixed(1)}억`;
+억`;
   return `${amt.toLocaleString()}만`;
 }
 
@@ -107,10 +106,10 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* 요약 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
         {[
-          { label: '최근 거래가', value: fmtAmt(latestPrice), color: 'var(--text-primary)' },
-          { label: '평균', value: fmtAmt(avgPrice), color: 'var(--brand)' },
-          { label: '최고가', value: fmtAmt(maxPrice), color: 'var(--accent-red)' },
-          { label: '최저가', value: fmtAmt(minPrice), color: 'var(--accent-blue)' },
+          { label: '최근 거래가', value: fmtAmount(latestPrice), color: 'var(--text-primary)' },
+          { label: '평균', value: fmtAmount(avgPrice), color: 'var(--brand)' },
+          { label: '최고가', value: fmtAmount(maxPrice), color: 'var(--accent-red)' },
+          { label: '최저가', value: fmtAmount(minPrice), color: 'var(--accent-blue)' },
         ].map(s => (
           <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.label}</div>
@@ -127,11 +126,11 @@ export default async function ComplexDetailPage({ params }: Props) {
             {areaStats.slice(0, 8).map(a => (
               <div key={a.area} style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 12px' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.area}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>평균 {fmtAmt(a.avg)}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>평균 {fmtAmount(a.avg)}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.count}건</div>
                 {a.trades[0]?.exclusive_area > 0 && a.avg > 0 && (
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue)', fontWeight: 600, marginTop: 2 }}>
-                    평당 {fmtAmt(Math.round(a.avg / (a.trades[0].exclusive_area / 3.3058)))}
+                    평당 {fmtAmount(Math.round(a.avg / (a.trades[0].exclusive_area / 3.3058)))}
                   </div>
                 )}
               </div>
@@ -155,7 +154,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                 <span style={{ color: 'var(--text-tertiary)' }}>{t.deal_date}</span>
                 <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{t.exclusive_area}㎡ · {t.floor}층</span>
               </div>
-              <span style={{ fontWeight: 700, color }}>{fmtAmt(amt)}</span>
+              <span style={{ fontWeight: 700, color }}>{fmtAmount(amt)}</span>
             </div>
           );
         })}

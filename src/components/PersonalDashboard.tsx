@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { TrendingUp, Building2, Bell, ChevronRight, Star } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { stockColor } from '@/lib/format';
 import { SkeletonDashboard } from '@/components/Skeleton';
 
 interface WatchStock { symbol: string; name: string; price: number; change_pct: number; currency?: string; }
@@ -18,12 +19,6 @@ function dDay(endDate: string): string {
   if (diff < 0) return '마감';
   if (diff === 0) return 'D-Day';
   return `D-${diff}`;
-}
-
-function stockColor(pct: number, isKR: boolean) {
-  if (pct === 0) return 'var(--text-tertiary)';
-  if (isKR) return pct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)';
-  return pct > 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 }
 
 export default function PersonalDashboard() {

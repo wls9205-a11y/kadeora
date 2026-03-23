@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
 const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr: false });
 import MiniSparkline from '@/components/MiniSparkline';
+import { fmtCap, stockColor, fmt } from '@/lib/format';
 import BottomSheet from '@/components/BottomSheet';
 
 interface Stock {
@@ -17,10 +18,7 @@ interface Theme { id: number; theme_name: string; change_pct: number; is_hot: bo
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
 interface Props { initialStocks: Stock[]; briefing?: any; exchangeHistory?: any[]; themeHistory?: any[]; }
 
-function fmt(n: number) { return n ? n.toLocaleString('ko-KR') : '0'; }
-function fmtCap(n: number, cur?: string) {
-  if (!n) return '-';
-  if (cur === 'USD') { if (n >= 1e12) return `$${(n/1e12).toFixed(1)}T`; if (n >= 1e9) return `$${(n/1e9).toFixed(0)}B`; return `$${(n/1e6).toFixed(0)}M`; }
+T`; if (n >= 1e9) return `$${(n/1e9).toFixed(0)}B`; return `$${(n/1e6).toFixed(0)}M`; }
   if (n >= 1e12) return `${(n/1e12).toFixed(1)}조`; if (n >= 1e8) return `${Math.round(n/1e8)}억`; return fmt(n);
 }
 function isIdx(s: Stock) { return ['KOSPI','KOSDAQ','NASDAQ','S&P 500','DOW','NIKKEI'].some(idx => s.name.toUpperCase().includes(idx) || s.symbol.toUpperCase().includes(idx)); }
@@ -29,12 +27,6 @@ const M7 = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA'];
 const SECTORS = ['all','반도체','바이오','금융','자동차','방산','IT/소프트웨어','에너지','2차전지','소비재','건설','통신','유틸리티','화학','미디어'];
 
 // 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
-function stockColor(pct: number, isKR: boolean) {
-  if (pct === 0) return 'var(--text-tertiary)';
-  if (isKR) return pct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)';
-  return pct > 0 ? 'var(--accent-green)' : 'var(--accent-red)';
-}
-
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [mode, setMode] = useState<'domestic'|'global'>('domestic');

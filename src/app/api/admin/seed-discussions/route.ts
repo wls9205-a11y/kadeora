@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const SEED_TOPICS = [
   // 주식 10
@@ -42,7 +42,7 @@ export async function POST() {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
 
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const admin = getSupabaseAdmin();
 
   let created = 0;
   for (const topic of SEED_TOPICS) {

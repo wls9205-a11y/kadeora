@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
+import { fmtAmount } from '@/lib/format';
 
 export const metadata: Metadata = {
   title: '아파트 실거래가 검색 | 카더라',
@@ -43,9 +44,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
     regionStats = rs || [];
   } catch {}
 
-  function fmtAmt(amt: number) {
-    if (!amt) return '-';
-    if (amt >= 10000) return `${(amt / 10000).toFixed(1)}억`;
+억`;
     return `${amt.toLocaleString()}만`;
   }
 
@@ -116,9 +115,9 @@ export default async function AptSearchPage({ searchParams }: Props) {
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color }}>{fmtAmt(amt)}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color }}>{fmtAmount(amt)}</div>
                   {t.exclusive_area > 0 && amt > 0 && (
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평당 {fmtAmt(Math.round(amt / (t.exclusive_area / 3.3058)))}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평당 {fmtAmount(Math.round(amt / (t.exclusive_area / 3.3058)))}</div>
                   )}
                 </div>
               </div>

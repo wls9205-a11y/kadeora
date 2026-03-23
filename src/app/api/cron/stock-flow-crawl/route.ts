@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const maxDuration = 60;
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('stock-flow-crawl', async () => {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = getSupabaseAdmin();
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_api_key' } };

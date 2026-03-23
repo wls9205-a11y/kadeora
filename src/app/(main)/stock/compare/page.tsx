@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { fmtCap, fmtPrice } from '@/lib/format';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number;
@@ -10,13 +11,10 @@ interface Stock {
   currency?: string; sector?: string; updated_at: string;
 }
 
-function fmtCap(v: number, c?: string) {
-  if (!v) return '-';
-  if (c === 'USD') { if (v >= 1e12) return `$${(v/1e12).toFixed(1)}T`; if (v >= 1e9) return `$${(v/1e9).toFixed(0)}B`; return `$${(v/1e6).toFixed(0)}M`; }
+T`; if (v >= 1e9) return `$${(v/1e9).toFixed(0)}B`; return `$${(v/1e6).toFixed(0)}M`; }
   if (v >= 1e12) return `${(v/1e12).toFixed(1)}조`; if (v >= 1e8) return `${Math.round(v/1e8)}억`; return v.toLocaleString();
 }
 
-function fmtPrice(p: number, c?: string) { return c === 'USD' ? `$${p.toFixed(2)}` : `₩${p.toLocaleString()}`; }
 
 export default function StockComparePage() {
   const searchParams = useSearchParams();
