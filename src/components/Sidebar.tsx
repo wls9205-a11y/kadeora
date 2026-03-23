@@ -19,6 +19,8 @@ export default function Sidebar() {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
+    // 모바일에서는 숨겨져 있으므로 API 호출 스킵
+    if (typeof window !== 'undefined' && window.innerWidth < 900) return;
     const sb = createSupabaseBrowser();
     sb.auth.getSession().then(({ data }) => {
       if (data.session?.user) {

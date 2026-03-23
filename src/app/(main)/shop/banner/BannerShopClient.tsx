@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import BannerPurchaseForm from '@/components/BannerPurchaseForm';
 
 export default function BannerShopClient() {
@@ -35,7 +36,7 @@ export default function BannerShopClient() {
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 20 }}>
               전광판에 곧 노출됩니다
             </div>
-            <a
+            <Link
               href="/feed"
               style={{
                 display: 'inline-block',
@@ -49,7 +50,7 @@ export default function BannerShopClient() {
               }}
             >
               피드로 돌아가기
-            </a>
+            </Link>
           </div>
         )}
       </div>

@@ -469,7 +469,7 @@ export default function SearchClient() {
             ? '검색 중...'
             : total > 0
               ? <><span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span> 검색 결과 <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{total.toLocaleString()}</span>건</>
-              : <>🔍 <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span>에 대한 검색 결과가 없어요. <a href="/blog" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>블로그에서 찾아보기 →</a></>
+              : <>🔍 <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>&ldquo;{query}&rdquo;</span>에 대한 검색 결과가 없어요. <Link href="/blog" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>블로그에서 찾아보기 →</Link></>
           }
         </div>
       )}

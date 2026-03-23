@@ -298,7 +298,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }}>{displayName}</span>
-                    <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji} {gradeTitle(post.profiles?.grade ?? 1)}</span>
+                    <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}<span className="grade-title-text"> {gradeTitle(post.profiles?.grade ?? 1)}</span></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 1 }}>
                     <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>

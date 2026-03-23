@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const totalUnsold = unsoldData.reduce((s: number, u: any) => s + (u.unsold_count || 0), 0);
     const totalTrades = trades.reduce((s: number, t: any) => s + (t.trade_count || 0), 0);
 
-    let title = `${monthKey} 월간 시장 종합 리뷰`;
+    const title = `${monthKey} 월간 시장 종합 리뷰`;
     let content = '';
     let apiCalls = 0;
 

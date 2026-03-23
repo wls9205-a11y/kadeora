@@ -29,6 +29,9 @@ export default function RightPanel() {
   const [recBlogs, setRecBlogs] = useState<{ slug: string; title: string }[]>([]);
 
   useEffect(() => {
+    // 모바일/태블릿에서는 숨겨져 있으므로 API 호출 스킵
+    if (typeof window !== 'undefined' && window.innerWidth < 1200) return;
+
     fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 5)); })
 

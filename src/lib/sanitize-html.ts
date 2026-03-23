@@ -4,13 +4,13 @@
  * 블로그 콘텐츠는 AI 크론으로 생성되므로 기본 보호만 필요
  */
 
-const ALLOWED_TAGS = new Set([
+const _ALLOWED_TAGS = new Set([
   'h1','h2','h3','h4','h5','h6','p','br','strong','em','b','i','u','s','del',
   'a','ul','ol','li','blockquote','pre','code','img','table','thead','tbody',
   'tr','th','td','hr','div','span','sup','sub','figure','figcaption',
 ]);
 
-const ALLOWED_ATTRS = new Set([
+const _ALLOWED_ATTRS = new Set([
   'href','src','alt','title','id','class','style','loading','decoding',
   'target','rel','width','height','colspan','rowspan',
 ]);

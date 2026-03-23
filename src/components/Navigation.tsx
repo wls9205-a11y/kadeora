@@ -4,7 +4,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User as UserIcon, PenSquare, BookOpen, LogOut, FileText } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import ThemeToggle from '@/components/ThemeToggle';
 import { haptic } from '@/lib/haptic';
 import type { User } from '@supabase/supabase-js';
 
@@ -21,12 +20,13 @@ const MOBILE_TABS = [
   { href: '/feed',    label: '피드',   Icon: Home },
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/apt',     label: '부동산', Icon: Building2 },
-  { href: '/discuss', label: '토론',   Icon: MessageCircle },
+  { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 
 const MORE_ITEMS = [
-  { href: '/blog',          emoji: '📰', label: '블로그' },
+  { href: '/discuss',       emoji: '💬', label: '라운지 토론' },
   { href: '/hot',           emoji: '🔥', label: '이번주 HOT' },
+  { href: '/shop',          emoji: '🛒', label: '포인트 상점' },
   { href: '/guide',         emoji: '📖', label: '가이드북' },
   { href: '/grades',        emoji: '🏅', label: '등급 안내' },
 ];
@@ -209,7 +209,6 @@ export function Navigation() {
 
           {/* 우측 액션 */}
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
-            <ThemeToggle />
 
             {/* 더보기 (모바일 헤더) */}
             <button

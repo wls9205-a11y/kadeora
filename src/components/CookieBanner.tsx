@@ -24,7 +24,7 @@ export default function CookieBanner() {
     <div
       style={{
         position: 'fixed',
-        bottom: 0,
+        bottom: 'calc(0px + env(safe-area-inset-bottom, 0px))',
         left: 0,
         right: 0,
         zIndex: 1000,

@@ -199,7 +199,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <a href="/stock/compare" className="kd-action-link">⚔️ 비교</a>
+          <Link href="/stock/compare" className="kd-action-link">⚔️ 비교</Link>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
           <span style={{ color: 'var(--text-tertiary)' }}>원/달러</span>
           <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>₩{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>

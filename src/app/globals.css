@@ -1156,3 +1156,40 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/* 모바일에서 등급 텍스트 숨김 (이모지만 유지) */
+@media (max-width: 480px) {
+  .grade-title-text { display: none; }
+}
+
+/* 주식 비교 — 모바일 반응형 */
+@media (max-width: 480px) {
+  .stock-compare-grid { grid-template-columns: 1fr 60px 1fr !important; gap: 4px !important; font-size: var(--fs-sm); }
+}
+
+/* 더보기 메뉴 — 5개 아이템 정렬 개선 */
+@media (max-width: 767px) {
+  .kd-more-menu { padding: 14px !important; }
+}
+
+/* 모바일 탭바 — 블로그 탭 active 스타일 보강 */
+@media (max-width: 767px) {
+  nav[class*="md:hidden"] a[aria-current="page"] span {
+    font-weight: 700 !important;
+  }
+}
+
+/* 모바일 카드 내 이미지 — 최소 높이 보장 */
+@media (max-width: 480px) {
+  .kd-feed-card img { min-height: 60px; }
+}
+
+/* 주식 비교 페이지 — 모바일 테이블 스크롤 */
+@media (max-width: 480px) {
+  .stock-compare-row { font-size: var(--fs-sm) !important; }
+}
+
+/* 블로그 카드 — 모바일 터치 피드백 */
+@media (hover: none) {
+  .blog-card:active { transform: scale(0.98); }
+}
