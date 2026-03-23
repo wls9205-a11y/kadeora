@@ -515,7 +515,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
       {/* 탭 — 게시글 / 북마크(본인만) */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 12, padding: 4, border: '1px solid var(--border)', overflowX: 'auto' }}>
         {(['posts', 'comments', ...(isOwner ? ['stocks', 'apts', 'bookmarks'] : [])] as ('posts'|'comments'|'bookmarks'|'stocks'|'apts')[]).map(tab => (
-          <button key={tab} onClick={() => handleTabChange(tab)} style={{
+          <button key={tab} onClick={() => handleTabChange(tab)} aria-pressed={activeTab === tab} style={{
             flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
             background: activeTab === tab ? 'var(--brand)' : 'transparent',
             color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',

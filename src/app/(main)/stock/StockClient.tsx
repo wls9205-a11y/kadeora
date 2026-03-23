@@ -8,7 +8,7 @@ const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr:
 import MiniSparkline from '@/components/MiniSparkline';
 import { fmtCap, stockColor, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
-import BottomSheet from '@/components/BottomSheet';
+import StockDetailSheet from './StockDetailSheet';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -593,49 +593,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 종목 모달 */}
       {selectedStock && (
-        <BottomSheet open={!!selectedStock} onClose={() => setSelectedStock(null)} title={selectedStock.name}>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-              <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.symbol}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.market}</span>
-              {selectedStock.sector && <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.sector}</span>}
-            </div>
-
-            {/* 가격 + 등락 */}
-            <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 12 }}>
-              <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)' }}>
-                {selectedStock.currency === 'USD' ? `$${selectedStock.price?.toFixed(2)}` : `₩${fmt(selectedStock.price)}`}
-              </div>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: stockColor(selectedStock.change_pct??0, isDomestic), marginTop: 4 }}>
-                {(selectedStock.change_pct??0)>0?'▲':'▼'} {selectedStock.change_amt ? `${(selectedStock.change_amt>0?'+':'')}${fmt(Math.abs(selectedStock.change_amt))}` : ''} ({Math.abs(selectedStock.change_pct??0).toFixed(2)}%)
-              </div>
-            </div>
-
-            {/* 상세 지표 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
-              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>시가총액</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{fmtCap(selectedStock.market_cap, selectedStock.currency)}</div>
-              </div>
-              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래량</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{selectedStock.volume ? fmt(selectedStock.volume) : '-'}</div>
-              </div>
-              <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전일대비</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: stockColor(selectedStock.change_pct??0, isDomestic), marginTop: 2 }}>{selectedStock.change_amt ? `${selectedStock.change_amt>0?'+':''}${fmt(selectedStock.change_amt)}` : '-'}</div>
-              </div>
-            </div>
-
-            {/* 관심종목 + 상세 버튼 */}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => toggleWatchlist(selectedStock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 8, border: '1px solid var(--border)', background: watchlistSymbols.includes(selectedStock.symbol) ? 'var(--accent-yellow-bg)' : 'var(--bg-hover)', color: watchlistSymbols.includes(selectedStock.symbol) ? 'var(--accent-yellow)' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
-                {watchlistSymbols.includes(selectedStock.symbol) ? '★ 관심종목 해제' : '☆ 관심종목 추가'}
-              </button>
-              <a href={`/stock/${encodeURIComponent(selectedStock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : 'var(--accent-blue)', color: 'var(--text-inverse)', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
-                종목 상세 →
-              </a>
-            </div>
-        </BottomSheet>
+        <StockDetailSheet
+          stock={selectedStock}
+          onClose={() => setSelectedStock(null)}
+          isDomestic={isDomestic}
+          isWatched={watchlistSymbols.includes(selectedStock.symbol)}
+          onToggleWatchlist={toggleWatchlist}
+        />
       )}
     </div>
   );
