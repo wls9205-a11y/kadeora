@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
@@ -18,6 +19,7 @@ function fmtCap(v: number, c?: string) {
 function fmtPrice(p: number, c?: string) { return c === 'USD' ? `$${p.toFixed(2)}` : `₩${p.toLocaleString()}`; }
 
 export default function StockComparePage() {
+  const searchParams = useSearchParams();
   const [allStocks, setAllStocks] = useState<Stock[]>([]);
   const [stockA, setStockA] = useState<Stock | null>(null);
   const [stockB, setStockB] = useState<Stock | null>(null);
@@ -29,8 +31,17 @@ export default function StockComparePage() {
     const sb = createSupabaseBrowser();
     sb.from('stock_quotes').select('symbol, name, market, price, change_pct, market_cap, volume, currency, sector, updated_at')
       .gt('price', 0).order('market_cap', { ascending: false })
-      .then(({ data }) => { setAllStocks(data || []); setLoading(false); });
-  }, []);
+      .then(({ data }) => {
+        const stocks = (data || []) as Stock[];
+        setAllStocks(stocks);
+        // URL 파라미터로 종목 자동 선택 (?a=005930&b=000660)
+        const paramA = searchParams.get('a');
+        const paramB = searchParams.get('b');
+        if (paramA) { const found = stocks.find(s => s.symbol === paramA || s.name === paramA); if (found) setStockA(found); }
+        if (paramB) { const found = stocks.find(s => s.symbol === paramB || s.name === paramB); if (found) setStockB(found); }
+        setLoading(false);
+      });
+  }, [searchParams]);
 
   const filterStocks = (q: string) => {
     if (!q) return [];

@@ -107,7 +107,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
           const amt = t.deal_amount || 0;
           const color = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)';
           return (
-            <Link key={t.id} href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} style={{ display: 'block', padding: '12px 16px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+            <Link key={t.id} href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} className="kd-card-hover" style={{ display: 'block', padding: '12px 16px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{t.apt_name}</div>

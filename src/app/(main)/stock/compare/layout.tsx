@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: '종목 비교 | 카더라',
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function CompareLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <Suspense fallback={<div style={{ textAlign: 'center', padding: 60, color: 'var(--text-tertiary)' }}>로딩 중...</div>}>{children}</Suspense>;
 }

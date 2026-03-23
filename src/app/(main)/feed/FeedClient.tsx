@@ -373,7 +373,8 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               {/* 인터랙션: 좋아요 + 댓글 + 공유 (3개만) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', color: isLiked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0 }}>
+                  className={isLiked ? 'animate-like' : ''}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', color: isLiked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontWeight: isLiked ? 600 : 400, fontFamily: 'inherit', padding: 0, transition: 'color var(--transition-fast)' }}>
                   <Heart size={18} fill={isLiked ? 'var(--accent-red)' : 'none'} stroke={isLiked ? 'var(--accent-red)' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : ''}
                 </button>
                 <Link href={`${postHref}#comments`}
