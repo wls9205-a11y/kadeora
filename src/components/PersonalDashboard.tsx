@@ -8,6 +8,7 @@ import { SkeletonDashboard } from '@/components/Skeleton';
 interface WatchStock { symbol: string; name: string; price: number; change_pct: number; currency?: string; }
 interface FavApt { id: number; house_nm: string; rcept_endde: string; region_nm: string; }
 interface Alert { id: string; type: string; content: string; created_at: string; link?: string; }
+interface RecBlog { slug: string; title: string; category: string; view_count: number; }
 
 function kstToday(): string { return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10); }
 
@@ -31,6 +32,7 @@ export default function PersonalDashboard() {
   const [watchStocks, setWatchStocks] = useState<WatchStock[]>([]);
   const [favApts, setFavApts] = useState<FavApt[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [recBlogs, setRecBlogs] = useState<RecBlog[]>([]);
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -78,6 +80,30 @@ export default function PersonalDashboard() {
           .order('created_at', { ascending: false })
           .limit(3);
         if (notifs) setAlerts(notifs as Alert[]);
+
+        // 관심종목 기반 블로그 추천
+        if (wl?.length) {
+          const stockNames = (await sb.from('stock_quotes').select('name').in('symbol', wl.map((w: any) => w.symbol)).limit(3)).data || [];
+          const nameQueries = stockNames.map((s: any) => `title.ilike.%${s.name}%`).join(',');
+          if (nameQueries) {
+            const { data: blogs } = await sb.from('blog_posts')
+              .select('slug,title,category,view_count')
+              .eq('is_published', true)
+              .or(nameQueries)
+              .order('view_count', { ascending: false })
+              .limit(3);
+            if (blogs) setRecBlogs(blogs as RecBlog[]);
+          }
+        }
+        // 관심종목 없으면 인기 블로그 추천
+        if (!wl?.length) {
+          const { data: blogs } = await sb.from('blog_posts')
+            .select('slug,title,category,view_count')
+            .eq('is_published', true)
+            .order('view_count', { ascending: false })
+            .limit(3);
+          if (blogs) setRecBlogs(blogs as RecBlog[]);
+        }
       } catch { }
       setLoading(false);
     });
@@ -85,7 +111,7 @@ export default function PersonalDashboard() {
 
   if (loading) return <SkeletonDashboard />;
   if (!userId) return null;
-  if (!watchStocks.length && !favApts.length && !alerts.length) return null;
+  if (!watchStocks.length && !favApts.length && !alerts.length && !recBlogs.length) return null;
 
   const toggle = () => {
     const next = !collapsed;
@@ -176,6 +202,27 @@ export default function PersonalDashboard() {
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                   {a.content}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* 추천 블로그 */}
+          {recBlogs.length > 0 && (
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                <span style={{ fontSize: 14 }}>📰</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>추천 읽을거리</span>
+                <Link href="/blog" style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>더보기 →</Link>
+              </div>
+              {recBlogs.map(b => (
+                <Link key={b.slug} href={`/blog/${b.slug}`} style={{
+                  display: 'block', padding: '5px 0', textDecoration: 'none',
+                  borderBottom: '1px solid var(--border)',
+                  fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', fontWeight: 500,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {b.title}
                 </Link>
               ))}
             </div>
