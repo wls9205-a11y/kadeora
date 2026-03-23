@@ -59,6 +59,21 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    // CSRF 방어: POST/PATCH/DELETE API에 Origin 헤더 검증
+    const method = request.method;
+    if (method === 'POST' || method === 'PATCH' || method === 'DELETE') {
+      // 크론/웹훅은 제외 (Authorization 헤더로 인증)
+      const isCron = pathname.startsWith('/api/cron/') || pathname.startsWith('/api/revalidate');
+      const hasBearer = request.headers.get('authorization')?.startsWith('Bearer ');
+      if (!isCron && !hasBearer) {
+        const origin = request.headers.get('origin');
+        const host = request.headers.get('host');
+        if (origin && host && !origin.includes(host) && !origin.includes('kadeora.app') && !origin.includes('localhost')) {
+          return NextResponse.json({ error: 'CSRF: Origin mismatch' }, { status: 403 });
+        }
+      }
+    }
+
     // API는 자체 auth 처리 → middleware auth/profile 쿼리 스킵
     return NextResponse.next();
   }

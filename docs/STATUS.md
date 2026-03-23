@@ -92,7 +92,7 @@
 
 ---
 
-## 세션 29 — 풀스택 감사 실행 + 커뮤니티 리디자인 + 런타임 에러 제로 (18커밋)
+## 세션 29 — 풀스택 감사 실행 + 커뮤니티 리디자인 + 런타임 에러 제로 (20커밋)
 
 ### 1. 빌드 에러 긴급 수정
 - RightPanel.tsx `const sb` 중복 선언 → 삭제
@@ -166,12 +166,15 @@
 
 ### 16. StockDetailSheet 추출 + ProfileClient aria-pressed
 
+### 17. 테스트 22개 + 블로그 3000자+ + CSRF
+- format/slug-utils/validations 테스트 3파일 22개
+- blog-rewrite 크론: 프롬프트 1200자→3000자+, max_tokens 4096
+- middleware: CSRF Origin 검증 (POST/PATCH/DELETE)
+
 ### 남은 작업 (다음 세션)
 - [ ] Supabase 타입 재생성 (`supabase gen types`) → ignoreBuildErrors 제거
-- [ ] 블로그 콘텐츠 길이 개선 (1,576자 → 3,000자+)
-- [ ] CSRF 토큰 적용
-- [ ] 테스트 파일 작성
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
+- [ ] 기존 sanitize 테스트 4개 수정 (HTML strip 로직)
 
 ---
 
