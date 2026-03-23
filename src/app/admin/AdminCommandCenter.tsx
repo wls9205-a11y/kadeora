@@ -119,7 +119,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
   const [rewriteRunning, setRewriteRunning] = useState(false);
   const [rewriteLog, setRewriteLog] = useState<string[]>([]);
   const [expandedPanel, setExpandedPanel] = useState<string | null>(null);
-  const [qualityStats, setQualityStats] = useState<{ redevInactive: number; unsoldInactive: number; subWithConstructor: number; aiSumSub: number; aiSumRedev: number; aiSumUnsold: number }>({ redevInactive: 0, unsoldInactive: 0, subWithConstructor: 0, aiSumSub: 0, aiSumRedev: 0, aiSumUnsold: 0 });
+  const [qualityStats, setQualityStats] = useState<{ redevInactive: number; unsoldInactive: number; subWithConstructor: number; aiSumSub: number; aiSumRedev: number; aiSumUnsold: number; redevNullHouseholds: number }>({ redevInactive: 0, unsoldInactive: 0, subWithConstructor: 0, aiSumSub: 0, aiSumRedev: 0, aiSumUnsold: 0, redevNullHouseholds: 0 });
   const [noticeText, setNoticeText] = useState('');
   const [noticeSaving, setNoticeSaving] = useState(false);
 
@@ -141,6 +141,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         aiSumSubR, aiSumRedevR, aiSumUnsoldR,
         redevInactiveR, unsoldInactiveR,
         subWithConstructorR,
+        // 세션28 추가
+        reviewsR, seriesR, portfolioR, priceAlertsR, redevNullHouseholdsR,
       ] = await Promise.all([
         sb.from('profiles').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', today),
@@ -171,6 +173,12 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', false),
         sb.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', false),
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('constructor_nm', 'is', null),
+        // 세션28 추가 쿼리
+        sb.from('apt_reviews').select('id', { count: 'exact', head: true }).eq('is_deleted', false).catch(() => ({ count: 0 })),
+        sb.from('blog_series').select('id', { count: 'exact', head: true }).eq('is_active', true).catch(() => ({ count: 0 })),
+        sb.from('portfolio_holdings').select('id', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
+        sb.from('price_alerts').select('id', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
+        sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).is('total_households', null).catch(() => ({ count: 0 })),
       ]);
 
       setKpis([
@@ -184,11 +192,15 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         { label: '유저', value: usersR.count || 0, icon: '👥' },
         { label: '게시글', value: postsR.count || 0, icon: '📝' },
         { label: '블로그', value: blogsR.count || 0, icon: '📰' },
+        { label: '시리즈', value: (seriesR as any)?.count || 0, icon: '📚' },
         { label: '주식', value: stocksR.count || 0, icon: '📈' },
+        { label: '가격알림', value: (priceAlertsR as any)?.count || 0, icon: '🔔' },
+        { label: '포트폴리오', value: (portfolioR as any)?.count || 0, icon: '💰' },
         { label: '청약', value: aptSubR.count || 0, icon: '🏠' },
         { label: '실거래', value: aptTradeR.count || 0, icon: '🏗' },
         { label: '재개발(활성)', value: redevR.count || 0, icon: '🔨' },
         { label: '미분양(활성)', value: unsoldR.count || 0, icon: '📉' },
+        { label: '리뷰', value: (reviewsR as any)?.count || 0, icon: '⭐' },
       ]);
 
       const allLogs = logsRes.data || [];
@@ -219,6 +231,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         aiSumSub: aiSumSubR?.count || 0,
         aiSumRedev: aiSumRedevR?.count || 0,
         aiSumUnsold: aiSumUnsoldR?.count || 0,
+        redevNullHouseholds: (redevNullHouseholdsR as any)?.count || 0,
       });
       setLastRefresh(new Date());
     } catch (e) { console.error('Admin load error', e); }
@@ -507,6 +520,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               {[
                 { icon: '🔨', label: '재개발(비활성)', value: qualityStats.redevInactive, color: 'var(--accent-red)' },
                 { icon: '📉', label: '미분양(비활성)', value: qualityStats.unsoldInactive, color: 'var(--accent-red)' },
+                { icon: '🏘️', label: '세대수 미확인', value: qualityStats.redevNullHouseholds, color: 'var(--accent-orange)' },
                 { icon: '🏗️', label: '시공사 입력', value: qualityStats.subWithConstructor, color: 'var(--accent-green)' },
               ].map(item => (
                 <div key={item.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#1E305040' }}>
