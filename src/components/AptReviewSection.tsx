@@ -187,22 +187,22 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 width: 24, height: 24, borderRadius: '50%',
                 background: getAvatarColor(r.profiles?.nickname || ''), display: 'flex',
                 alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-inverse)', fontSize: 10, fontWeight: 700,
+                color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 700,
               }}>
                 {(r.profiles?.nickname || '?')[0]}
               </div>
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.profiles?.nickname || '익명'}</span>
               <StarRating rating={r.rating} size={10} />
               {r.is_resident && (
-                <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 3, background: 'var(--accent-green-bg)', color: 'var(--accent-green)' }}>거주중</span>
+                <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 4px', borderRadius: 3, background: 'var(--accent-green-bg)', color: 'var(--accent-green)' }}>거주중</span>
               )}
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(r.created_at)}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeAgo(r.created_at)}</span>
             </div>
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>{r.content}</p>
             {(r.pros || r.cons) && (
               <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                {r.pros && <span style={{ fontSize: 10, color: 'var(--accent-green)' }}>👍 {r.pros}</span>}
-                {r.cons && <span style={{ fontSize: 10, color: 'var(--accent-red)' }}>👎 {r.cons}</span>}
+                {r.pros && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)' }}>👍 {r.pros}</span>}
+                {r.cons && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)' }}>👎 {r.cons}</span>}
               </div>
             )}
             {/* 좋아요 / 신고 */}
@@ -211,7 +211,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
                 background: likedSet.has(r.id) ? 'var(--brand-bg)' : 'transparent',
                 border: `1px solid ${likedSet.has(r.id) ? 'var(--brand)' : 'var(--border)'}`,
-                borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                borderRadius: 6, cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600,
                 color: likedSet.has(r.id) ? 'var(--brand)' : 'var(--text-tertiary)',
                 transition: 'all 0.15s ease',
               }}>
@@ -221,7 +221,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
               <button onClick={() => handleReport(r.id)} style={{
                 display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
                 background: 'transparent', border: 'none', cursor: 'pointer',
-                fontSize: 11, color: reportedSet.has(r.id) ? 'var(--accent-red)' : 'var(--text-tertiary)',
+                fontSize: 'var(--fs-xs)', color: reportedSet.has(r.id) ? 'var(--accent-red)' : 'var(--text-tertiary)',
                 opacity: reportedSet.has(r.id) ? 0.5 : 1,
               }} disabled={reportedSet.has(r.id)}>
                 <Flag size={11} /> {reportedSet.has(r.id) ? '신고됨' : '신고'}

@@ -117,7 +117,7 @@ export default async function HotPage() {
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ fontSize: isTop3 ? 14 : 12, color: 'var(--brand)', fontWeight: 700 }}>❤ {post.likes_count ?? 0}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>💬 {post.comments_count ?? 0} · 👁 {post.view_count ?? 0}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>💬 {post.comments_count ?? 0} · 👁 {post.view_count ?? 0}</div>
                 </div>
               </Link>
               );

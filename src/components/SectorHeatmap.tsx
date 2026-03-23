@@ -75,15 +75,15 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
             >
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-inverse)', lineHeight: 1.2 }}>{sec.name}</div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>{sec.stocks.length}종목</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', lineHeight: 1.2 }}>{sec.name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>{sec.stocks.length}종목</div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-inverse)' }}>
                   {sec.avgPct > 0 ? '+' : ''}{sec.avgPct.toFixed(1)}%
                 </span>
                 {topStock && (
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.6)', maxWidth: '50%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', maxWidth: '50%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {topStock.name}
                   </span>
                 )}
@@ -94,7 +94,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
       </div>
 
       {/* 범례 */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, fontSize: 10, color: 'var(--text-tertiary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? 'var(--accent-red)' : '#059669' }} />
           {isKR ? '상승' : 'Up'}

@@ -302,7 +302,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 border: '1px solid var(--border)', transition: 'border-color var(--transition-fast)',
               }}>
                 <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.post_count}편</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.post_count}편</div>
               </Link>
             ))}
           </div>

@@ -117,7 +117,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{content.length}/500</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{content.length}/500</span>
                 <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
                   padding: '6px 18px', borderRadius: 20, border: 'none',
                   background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
@@ -155,7 +155,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '4px 14px 14px 14px', padding: '10px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
-                    <span style={{ fontSize: 11, color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
                   </div>
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.55, wordBreak: 'break-word' }}>
                     {comment.content}
@@ -163,12 +163,12 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 </div>
                 {/* 메타: 시간 + 좋아요 + 신고/삭제 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4, paddingLeft: 4 }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
                   <button
                     onClick={() => handleCommentLike(comment.id, comment.likes_count ?? 0)}
                     disabled={likingIds.has(comment.id)}
                     aria-label="댓글 좋아요"
-                    style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
                     ♡ {(comment.likes_count ?? 0) > 0 ? comment.likes_count : ''}
                   </button>
                   {/* 삭제 버튼 */}
@@ -176,7 +176,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     <button
                       onClick={() => setDeleteTarget(comment.id)}
                       aria-label="댓글 삭제"
-                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 11, cursor: 'pointer', padding: 0 }}>삭제</button>
+                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0 }}>삭제</button>
                   )}
                   <ReportButton commentId={comment.id} />
                 </div>

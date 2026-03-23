@@ -298,12 +298,12 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }}>{displayName}</span>
-                    <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}<span className="grade-title-text"> {gradeTitle(post.profiles?.grade ?? 1)}</span></span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}<span className="grade-title-text"> {gradeTitle(post.profiles?.grade ?? 1)}</span></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 1 }}>
-                    <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
-                    {(post.view_count ?? 0) > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>· 조회 {numFmt(post.view_count ?? 0)}</span>}
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                    {(post.view_count ?? 0) > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>· 조회 {numFmt(post.view_count ?? 0)}</span>}
                   </div>
                 </div>
               </div>
@@ -375,7 +375,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
                   {['관심 종목 알림', '청약 마감 알림', '댓글 참여', '포인트 적립'].map(f => (
-                    <span key={f} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f}</span>
+                    <span key={f} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 20, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f}</span>
                   ))}
                 </div>
                 <Link href="/login" style={{ display: 'block', textAlign: 'center', padding: '11px 0', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>

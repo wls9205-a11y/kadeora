@@ -7,7 +7,7 @@ export default function BannerShopClient() {
   const [showForm, setShowForm] = useState(true);
 
   return (
-    <div style={{ maxWidth: 520, margin: '0 auto' }}>
+    <div style={{ maxWidth: 520, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>
           📡 전광판 노출권

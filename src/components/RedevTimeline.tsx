@@ -48,7 +48,7 @@ export default function RedevTimeline({ currentStage }: { currentStage: string }
                 {isCurrent ? s.icon : isPast ? '✓' : ''}
               </div>
               <span style={{
-                fontSize: 9, fontWeight: isCurrent ? 800 : 500, textAlign: 'center',
+                fontSize: 10, fontWeight: isCurrent ? 800 : 500, textAlign: 'center',
                 color: isCurrent ? s.color : isPast ? 'var(--text-secondary)' : 'var(--text-tertiary)',
                 lineHeight: 1.2,
               }}>

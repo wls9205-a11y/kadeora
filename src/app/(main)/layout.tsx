@@ -56,7 +56,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <footer className="hidden md:block" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
       }}>
-        <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize:11, color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.9}}>
+        <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.9}}>
           <p style={{fontWeight:600, color:'var(--text-secondary)', marginBottom:4}}>사업자 정보</p>
           <p>업체명: 카더라 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801 &nbsp;|&nbsp; 대표자: 노영진</p>
           <p>이메일: kadeora.app@gmail.com</p>

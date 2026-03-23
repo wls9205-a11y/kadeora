@@ -100,7 +100,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
             <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
-            <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
           </button>
           {unsoldRegionStats.map(r => (
             <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
@@ -111,7 +111,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-              <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
               {total > 0 && (
                 <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
                   <div style={{ height: '100%', background: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
@@ -185,7 +185,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
             <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
-            <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
           </button>
           {unsoldRegionStats.map(r => (
             <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
@@ -196,7 +196,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-              <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
               {total > 0 && (
                 <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
                   <div style={{ height: '100%', background: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />

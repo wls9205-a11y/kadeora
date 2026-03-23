@@ -100,7 +100,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
             <div key={s.label} style={{
               flex: 1, padding: '6px 8px', background: 'var(--bg-hover)', borderRadius: 6, textAlign: 'center',
             }}>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.label}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
               <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: s.color }}>{s.value}</div>
             </div>
           ))}

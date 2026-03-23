@@ -247,7 +247,7 @@ export function Navigation() {
                       position:'absolute', top:-2, right:-2,
                       width:17, height:17, borderRadius:'50%',
                       background:'var(--brand)', color:'var(--text-inverse)',
-                      fontSize:10, fontWeight:800,
+                      fontSize: 'var(--fs-xs)', fontWeight:800,
                       display:'flex', alignItems:'center', justifyContent:'center',
                       border:'2px solid var(--nav-bg)',
                     }}>
@@ -271,14 +271,14 @@ export function Navigation() {
                     <span style={{
                       width:22, height:22, borderRadius:'50%', background:'var(--brand)',
                       display:'flex', alignItems:'center', justifyContent:'center',
-                      fontSize:10, fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
+                      fontSize: 'var(--fs-xs)', fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
                     }}>
                       {(nickname ?? user.email ?? 'U')[0].toUpperCase()}
                     </span>
                     <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                       {nickname ?? '유저'}
                     </span>
-                    <span style={{ fontSize:10, color:'var(--text-tertiary)' }}>▼</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)' }}>▼</span>
                   </button>
 
                   {menuOpen && (

@@ -146,7 +146,7 @@ export default function PortfolioTab() {
               {/* 선 */}
               <polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#3b82f6'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
               <span>{history[0]?.snapshot_date?.slice(5)}</span>
               <span>{history[history.length - 1]?.snapshot_date?.slice(5)}</span>
             </div>

@@ -122,7 +122,7 @@ export default function DiscussDetailPage() {
   const pctB = 100 - pctA;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* Back */}
       <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: '8px 0', marginBottom: 8 }}>
         ← 돌아가기

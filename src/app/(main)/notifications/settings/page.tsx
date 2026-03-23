@@ -53,7 +53,7 @@ export default function NotificationSettingsPage() {
   if (!settings) return <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>로그인이 필요합니다. <Link href="/login" style={{ color: 'var(--brand)' }}>로그인</Link></div>;
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto' }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
         <Link href="/notifications" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)' }}>← 알림</Link>
         <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>알림 설정</h1>

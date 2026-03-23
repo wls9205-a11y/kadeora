@@ -102,7 +102,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   }}>
                     <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.total}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-                    <div style={{ fontSize: 10, display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
                       {r.redev > 0 && <span style={{ color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-blue)' }}>개발{r.redev}</span>}
                       {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>건축{r.rebuild}</span>}
                     </div>
@@ -303,7 +303,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                       }}>
                         {(isPast || isCurrent) && <span style={{ color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>✓</span>}
                       </div>
-                      <div style={{ fontSize: 10, color: isCurrent ? 'var(--brand)' : isPast ? 'var(--text-secondary)' : 'var(--text-tertiary)', fontWeight: isCurrent ? 800 : 400, lineHeight: 1.2 }}>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: isCurrent ? 'var(--brand)' : isPast ? 'var(--text-secondary)' : 'var(--text-tertiary)', fontWeight: isCurrent ? 800 : 400, lineHeight: 1.2 }}>
                         {stage.replace('사업시행인가', '시행인가').replace('정비구역지정', '구역지정').replace('관리처분', '관리처분')}
                       </div>
                     </div>

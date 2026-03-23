@@ -75,7 +75,7 @@ export default function ShopClient() {
 
   return (
     <PullToRefresh>
-    <div>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
       <ComingSoonBanner feature="토스페이먼츠 결제" description="사업자 등록 심사 완료 후 즉시 활성화됩니다." eta="2026년 4월 예정" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>

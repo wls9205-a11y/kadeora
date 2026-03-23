@@ -128,7 +128,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.count}</span>
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-              <div style={{ display: 'flex', gap: 2, fontSize: 10, color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+              <div style={{ display: 'flex', gap: 2, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
                 {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>분양{r.subCount}</span>}
                 {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)' }}>미분양{r.unsoldCount}</span>}
               </div>

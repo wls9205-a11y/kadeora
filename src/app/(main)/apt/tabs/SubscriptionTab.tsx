@@ -91,7 +91,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 }}>
                   <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.total}</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-                  <div style={{ fontSize: 10, display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
                     {r.open > 0 && <span style={{ color: region === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>접수{r.open}</span>}
                     {r.upcoming > 0 && <span style={{ color: region === r.name ? 'var(--text-inverse)' : 'var(--accent-yellow)' }}>예정{r.upcoming}</span>}
                   </div>
@@ -204,7 +204,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                       border: calOffset === 0 && c.day === kstNow().getDate() ? '2px solid var(--brand)' : '1px solid transparent',
                     }}>
                       <div style={{ color: c.apts.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: c.apts.length > 0 ? 700 : 400 }}>{c.day}</div>
-                      {c.apts.length > 0 && <div style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 700 }}>{c.apts.length}건</div>}
+                      {c.apts.length > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue)', fontWeight: 700 }}>{c.apts.length}건</div>}
                     </div>
                   ))}
                 </div>

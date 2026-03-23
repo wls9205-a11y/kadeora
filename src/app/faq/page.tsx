@@ -16,7 +16,7 @@ export default function FAQPage() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 0' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
       <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>자주 묻는 질문</h1>
       <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', marginBottom: 32 }}>카더라 사용에 관해 자주 묻는 질문들을 모았습니다</p>
 
