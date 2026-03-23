@@ -1,19 +1,32 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode; isLoggedIn: boolean }) {
   const [showGate, setShowGate] = useState(false);
 
   useEffect(() => {
+    // 서버에서 로그인 확인됐으면 즉시 리턴
     if (isLoggedIn) return;
     // 세션당 한 번만
     if (sessionStorage.getItem('kd_gate_shown')) return;
-    const timer = setTimeout(() => {
-      setShowGate(true);
-      sessionStorage.setItem('kd_gate_shown', '1');
-    }, 5000);
-    return () => clearTimeout(timer);
+
+    // 클라이언트에서도 한번 더 확인 (chunked cookie 미인식 방어)
+    const checkAuth = async () => {
+      try {
+        const { data } = await createSupabaseBrowser().auth.getSession();
+        if (data.session) return; // 로그인 상태 → 게이트 안 띄움
+      } catch { }
+
+      const timer = setTimeout(() => {
+        setShowGate(true);
+        sessionStorage.setItem('kd_gate_shown', '1');
+      }, 5000);
+      return () => clearTimeout(timer);
+    };
+
+    checkAuth();
   }, [isLoggedIn]);
 
   return (

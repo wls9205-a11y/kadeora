@@ -74,7 +74,10 @@ export async function middleware(request: NextRequest) {
   // 공개 페이지이고 보호 경로가 아니면 → auth 스킵, CSP만 붙여서 바로 반환
   if (isPublicOnly && !isProtected) {
     // 쿠키에 세션이 있으면 최소한 헤더에 표시 (layout에서 사용)
-    const hasSession = request.cookies.getAll().some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
+    // Supabase는 큰 JWT를 청크로 분할: sb-xxx-auth-token.0, .1 등
+    const hasSession = request.cookies.getAll().some(c =>
+      c.name.startsWith('sb-') && c.name.includes('-auth-token')
+    );
     if (hasSession) {
       response.headers.set('x-user-logged-in', '1');
     }
