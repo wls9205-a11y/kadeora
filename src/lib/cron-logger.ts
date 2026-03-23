@@ -58,6 +58,15 @@ export async function withCronLogging(
   } catch (error: any) {
     const duration = Date.now() - startTime;
 
+    // Sentry 에러 리포트 (크론 컨텍스트 태그 포함)
+    try {
+      const Sentry = await import('@sentry/nextjs');
+      Sentry.captureException(error, {
+        tags: { source: 'cron', cron_name: cronName },
+        extra: { duration_ms: duration },
+      });
+    } catch {}
+
     await supabase
       .from('cron_logs')
       .update({

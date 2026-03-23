@@ -1,4 +1,5 @@
-﻿import type { Metadata } from 'next';
+﻿import { Suspense } from 'react';
+import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '실시간 주식 시세',
   description: '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.',
@@ -85,7 +86,7 @@ export default async function StockPage() {
   }
 
   return (
-    <>
+    <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>주식 시세를 불러오는 중...</div>}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "DataCatalog",
@@ -97,6 +98,6 @@ export default async function StockPage() {
       }) }} />
       <StockClient initialStocks={stocks} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
-    </>
+    </Suspense>
   );
 }

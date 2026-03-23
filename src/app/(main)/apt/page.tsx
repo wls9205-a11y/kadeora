@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발',
@@ -178,5 +179,5 @@ async function fetchAptData() {
 
 export default async function AptPage() {
   const { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts } = await fetchAptData();
-  return <><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} ongoingApts={ongoingApts} /><Disclaimer /></>;
+  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
 }

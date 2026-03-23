@@ -170,11 +170,15 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     setLoadingMore(true);
     try {
       const sb = createSupabaseBrowser();
+      // cursor 기반 페이지네이션 — offset보다 안전 (새 글 추가 시 중복 방지)
+      const lastPost = posts[posts.length - 1];
+      const cursor = lastPost?.created_at;
       let q = sb.from('posts')
         .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
-        .range(posts.length, posts.length + PAGE_SIZE - 1);
+        .limit(PAGE_SIZE);
+      if (cursor) q = q.lt('created_at', cursor);
       if (activeCategory !== 'all') q = q.eq('category', activeCategory);
       if (activeCategory === 'local' && activeRegion !== 'all') q = q.eq('region_id', activeRegion);
       const { data } = await q;
@@ -187,7 +191,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
     } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[FeedClient.loadMore]', e); } finally {
       setLoadingMore(false);
     }
-  }, [posts.length, loadingMore, hasMore, activeCategory, activeRegion]);
+  }, [posts, loadingMore, hasMore, activeCategory, activeRegion]);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {

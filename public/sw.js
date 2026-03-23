@@ -1,8 +1,8 @@
 // Kadeora Service Worker — CACHE_VERSION은 빌드 스크립트가 주입
-const CACHE_VERSION = '20260321';
+const CACHE_VERSION = '20260323';
 const CACHE_NAME = 'kadeora-v' + CACHE_VERSION;
-const PRECACHE = ['/feed', '/offline.html', '/icons/icon-192.png'];
-const OFFLINE_PAGES = ['/feed', '/stock', '/hot', '/apt'];
+const PRECACHE = ['/feed', '/offline.html', '/icons/icon-192.png', '/blog', '/apt/map'];
+const OFFLINE_PAGES = ['/feed', '/stock', '/hot', '/apt', '/blog'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

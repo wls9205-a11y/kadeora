@@ -216,13 +216,17 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
-  /* ─── Quick Action ─── */
+  /* ─── Quick Action (trigger-cron API 경유 — CRON_SECRET 서버에서 처리) ─── */
   const runQuickAction = async (action: typeof QUICK_ACTIONS[number]) => {
     if (actionRunning) return;
     setActionRunning(action.id);
     setActionResults(prev => ({ ...prev, [action.id]: { ok: true, msg: '실행 중...' } }));
     try {
-      const res = await fetch(action.path, { headers: { 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ''}` } });
+      const res = await fetch('/api/admin/trigger-cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: action.path }),
+      });
       setActionResults(prev => ({ ...prev, [action.id]: { ok: res.ok, msg: res.ok ? '✓ 완료' : `✗ ${res.status}` } }));
       if (res.ok) setTimeout(() => loadAll(), 1000);
     } catch { setActionResults(prev => ({ ...prev, [action.id]: { ok: false, msg: '✗ 에러' } })); }

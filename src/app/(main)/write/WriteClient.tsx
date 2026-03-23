@@ -213,6 +213,7 @@ export default function WriteClient() {
         value={title}
         onChange={e => setTitle(e.target.value)}
         placeholder="제목을 입력하세요"
+        aria-label="게시글 제목"
         maxLength={100}
         style={{
           width: '100%', fontSize: 'var(--fs-lg)', fontWeight: 700, padding: '12px 16px',
@@ -233,6 +234,7 @@ export default function WriteClient() {
           e.target.style.height = e.target.scrollHeight + 'px';
         }}
         placeholder="무슨 소문이 있나요? 자유롭게 이야기해주세요."
+        aria-label="게시글 내용"
         maxLength={5000}
         autoFocus
         style={{

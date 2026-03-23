@@ -69,6 +69,23 @@ export default async function StockDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      {/* JSON-LD 구조화 데이터 */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: `${s.name} (${symbol}) 주가 정보`,
+        description: `${s.name} ${s.market} 상장. 현재가 ${fmtPrice(Number(s.price), s.currency)}.`,
+        url: `https://kadeora.app/stock/${symbol}`,
+        mainEntity: {
+          '@type': 'FinancialProduct',
+          name: s.name,
+          identifier: symbol,
+          category: s.sector || s.market,
+          provider: { '@type': 'Organization', name: s.market || 'Exchange' },
+        },
+        isPartOf: { '@type': 'WebSite', name: '카더라', url: 'https://kadeora.app' },
+      })}} />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
         <StockWatchlistButton symbol={symbol} />

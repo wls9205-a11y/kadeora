@@ -120,6 +120,22 @@ export function Navigation() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // 알림 뱃지 30초 폴링 (탭 활성 시만)
+  useEffect(() => {
+    if (!user) return;
+    const poll = async () => {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        const sb = createSupabaseBrowser();
+        const { count } = await sb.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false);
+        setUnread(count ?? 0);
+      } catch {}
+    };
+    const id = setInterval(poll, 30000);
+    document.addEventListener('visibilitychange', poll);
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', poll); };
+  }, [user]);
+
   const handleLogout = async () => {
     await createSupabaseBrowser().auth.signOut();
     router.push('/login'); setMenuOpen(false);

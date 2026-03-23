@@ -6,6 +6,7 @@ import { ToastProvider } from '@/components/Toast';
 import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, GuestCTA, PageViewTracker } from '@/components/ClientDynamics';
+import TopLoadingBar from '@/components/TopLoadingBar';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
@@ -20,6 +21,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <ToastProvider>
+      <TopLoadingBar />
       <Navigation />
       <NoticeBanner />
       <TrendingTicker />
