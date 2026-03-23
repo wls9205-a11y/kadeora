@@ -40,14 +40,14 @@ describe("PostCreateSchema", () => {
 describe("CommentCreateSchema", () => {
   it("accepts valid comment", () => {
     const result = parseInput(CommentCreateSchema, {
-      postId: "550e8400-e29b-41d4-a716-446655440000",
+      postId: 123,
       content: "좋은 분석이네요!",
     });
     expect(result.success).toBe(true);
   });
 
   it("rejects invalid UUID", () => {
-    const result = parseInput(CommentCreateSchema, { postId: "not-a-uuid", content: "댓글" });
+    const result = parseInput(CommentCreateSchema, { postId: "not-a-number", content: "댓글" });
     expect(result.success).toBe(false);
   });
 

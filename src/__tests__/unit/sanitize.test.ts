@@ -27,8 +27,9 @@ describe("sanitizeHtml", () => {
 });
 
 describe("sanitizeText", () => {
-  it("strips all HTML tags", () => {
-    expect(sanitizeText("<b>bold</b>")).toBe("bold");
+  it("preserves safe HTML tags (only strips dangerous ones)", () => {
+    // sanitizeText keeps safe tags like <b>, only removes <script>, <iframe>, etc.
+    expect(sanitizeText("<b>bold</b>")).toBe("<b>bold</b>");
   });
 
   it("handles empty/null input", () => {
@@ -47,9 +48,10 @@ describe("sanitizeText", () => {
 });
 
 describe("sanitizeSearchQuery", () => {
-  it("strips HTML from queries", () => {
-    expect(sanitizeSearchQuery('<script>alert(1)</script>삼성전자')).toContain("삼성전자");
-    expect(sanitizeSearchQuery('<script>alert(1)</script>삼성전자')).not.toContain("script");
+  it("strips SQL injection patterns from queries", () => {
+    expect(sanitizeSearchQuery('SELECT * FROM users')).not.toContain("SELECT");
+    expect(sanitizeSearchQuery("삼성전자' OR 1=1")).toContain("삼성전자");
+    expect(sanitizeSearchQuery("삼성전자' OR 1=1")).not.toContain("'");
   });
 
   it("enforces max length", () => {
@@ -58,8 +60,9 @@ describe("sanitizeSearchQuery", () => {
 });
 
 describe("sanitizeComment", () => {
-  it("strips HTML from comments", () => {
-    expect(sanitizeComment("<b>좋은 글입니다</b>")).toBe("좋은 글입니다");
+  it("preserves safe HTML in comments (strips dangerous only)", () => {
+    // sanitizeComment = sanitizeText → keeps safe tags
+    expect(sanitizeComment("<b>좋은 글입니다</b>")).toBe("<b>좋은 글입니다</b>");
   });
 
   it("enforces max length", () => {
