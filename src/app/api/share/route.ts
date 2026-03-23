@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         if ((count ?? 0) <= 1) {
           await admin.rpc('award_points', { p_user_id: user.id, p_amount: 5, p_reason: '공유', p_meta: null });
         }
-      } catch {}
+      } catch (e) { console.error(`[${new URL(req.url).pathname}]`, e); }
     }
 
     return NextResponse.json({ ok: true });

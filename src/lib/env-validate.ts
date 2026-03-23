@@ -30,14 +30,7 @@ export function validateEnv() {
       throw new Error(`필수 환경변수 누락: ${missing.join(', ')}`);
     }
   }
-
-  const warnings: string[] = [];
-  for (const key of OPTIONAL_SERVER) {
-    if (!process.env[key]) warnings.push(key);
-  }
-  if (warnings.length > 0) {
-    console.info(`[env] ℹ️ 선택 환경변수 미설정: ${warnings.join(', ')}`);
-  }
+  // 선택 환경변수는 로깅하지 않음 (serverless 환경에서 매 콜드스타트마다 불필요한 warning 발생)
 }
 
 // 안전한 환경변수 접근 (! 대신 사용)

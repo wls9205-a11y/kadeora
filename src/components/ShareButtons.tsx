@@ -43,9 +43,12 @@ export default function ShareButtons({ title, postId, content }: Props) {
         await navigator.clipboard.writeText(shareUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+        fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: postId, platform: 'copy' }) }).catch(() => {});
         return;
     }
     setOpen(false);
+    // 공유 로그 + 포인트 적립
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: postId, platform }) }).catch(() => {});
   };
 
   return (

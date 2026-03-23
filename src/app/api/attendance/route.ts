@@ -82,13 +82,13 @@ export async function POST(req: NextRequest) {
     try {
       const reason = bonus ? '출석연속보너스' : '출석체크';
       await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: pointsEarned, p_reason: reason, p_meta: null });
-    } catch {}
+    } catch (e) { console.error(`[${new URL(req.url).pathname}]`, e); }
 
     // 알림
     try {
       const msg = bonus ? `출석 체크 완료! +${pointsEarned}P (${bonus})` : `출석 체크 완료! +10P 🌱`;
       await sb.from('notifications').insert({ user_id: user.id, type: 'system', content: msg });
-    } catch {}
+    } catch (e) { console.error(`[${new URL(req.url).pathname}]`, e); }
 
     return NextResponse.json({ streak, total_days: totalDays, points_earned: pointsEarned, bonus });
   } catch {
