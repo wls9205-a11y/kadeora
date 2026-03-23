@@ -91,7 +91,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
     else pipeCounts['청약마감']++;
   });
   const pipeTotal = filtered.length || 1;
-  const pipeColors = ['#7D8DA3', 'var(--accent-blue)', 'var(--accent-yellow)', 'var(--accent-orange)', 'var(--accent-green)'];
+  const pipeColors = ['var(--text-tertiary)', 'var(--accent-blue)', 'var(--accent-yellow)', 'var(--accent-orange)', 'var(--accent-green)'];
 
   // ④ 분양가 TOP10
   const priceTop = [...filtered].filter(o => o.sale_price_max && o.sale_price_max > 0).sort((a, b) => (b.sale_price_max || 0) - (a.sale_price_max || 0)).slice(0, 10);
@@ -278,7 +278,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                   {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FBBF24,#F59E0B)', color: '#1a1a1a', marginRight: 4 }}>PREMIUM</span>}
                   {isNew(o, 'ongoing') && <NewBadge />}
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? '#f87171' : 'var(--accent-blue)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
                     {isUnsold ? '미분양' : '분양중'}
                   </span>
                   {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)' }}>🔥 {o.competition_rate}:1</span>}
@@ -405,7 +405,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
         return (
           <BottomSheet open={!!selectedOngoing} onClose={() => setSelectedOngoing(null)} title={o.house_nm}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? '#f87171' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? 'var(--accent-red)' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
 

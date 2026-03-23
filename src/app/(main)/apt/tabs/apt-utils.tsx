@@ -71,7 +71,7 @@ export const STATUS_BADGE = {
 } as const;
 
 export const STAGE_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  '정비구역지정': { bg: 'rgba(107,114,128,0.15)', color: '#9DB0C7', border: '#7D8DA3' },
+  '정비구역지정': { bg: 'rgba(107,114,128,0.15)', color: 'var(--text-secondary)', border: 'var(--text-tertiary)' },
   '조합설립': { bg: 'rgba(96,165,250,0.2)', color: '#93C5FD', border: 'var(--accent-blue)' },
   '사업시행인가': { bg: 'rgba(251,191,36,0.2)', color: '#FDE047', border: 'var(--accent-yellow)' },
   '관리처분': { bg: 'rgba(251,146,60,0.2)', color: '#FDBA74', border: 'var(--accent-orange)' },

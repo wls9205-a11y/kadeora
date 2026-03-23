@@ -108,7 +108,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
 
           {/* 검색 + 정렬 + 통계 요약 */}
           <div style={{ marginBottom: 12 }}>
-            <input value={subSearch} onChange={e => setSubSearch(e.target.value)} placeholder="단지명, 지역 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+            <input value={subSearch} onChange={e => setSubSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" />
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginRight: 4 }}>정렬</span>
               {([['date', '최신순'], ['deadline', '마감임박'], ['supply', '세대수'], ['competition', '경쟁률']] as const).map(([k, l]) => (

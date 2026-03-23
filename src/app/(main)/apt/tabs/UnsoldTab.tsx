@@ -89,7 +89,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: '#f87171' }}>총 {total.toLocaleString()}세대</span>
+          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
           <button onClick={() => setUnsoldRegion('전체')} style={{
@@ -242,7 +242,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 안내 + 검색 + 필터 */}
       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
-      <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+      <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" />
       <div style={{ display: 'flex', gap: 5, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
         {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
       </div>

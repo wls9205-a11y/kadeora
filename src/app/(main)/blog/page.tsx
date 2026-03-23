@@ -50,7 +50,7 @@ const CATS = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-orange)', finance: 'var(--accent-purple)', general: '#7D8DA3',
+  stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-orange)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
 };
 
 interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string }> }
@@ -216,7 +216,7 @@ export default async function BlogPage({ searchParams }: Props) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {(posts ?? []).map((p: any) => {
-            const catColor = CAT_COLORS[p.category] || '#7D8DA3';
+            const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
             const catEmoji: Record<string, string> = { apt: '🏢', stock: '📈', unsold: '🏚️', finance: '💰', general: '📝' };
             const readMin = p.reading_time_min || 3;
             return (

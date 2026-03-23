@@ -225,7 +225,7 @@ html.font-large {
   --border-focus:  #3B82F6;
   --text-primary:   #E2E8F0;
   --text-secondary: #9DB0C7;
-  --text-tertiary:  #7D8DA3;
+  --text-tertiary:  #8A9BB0;
   --text-disabled:  #334155;
   --text-inverse:   #0B1426;
   --text-link:      #60A5FA;
@@ -893,3 +893,79 @@ html.font-large .kd-card { padding: var(--card-p); }
 html.font-small .kd-card { padding: var(--card-p); }
 html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 
+
+/* 검색 인풋 공통 스타일 */
+.kd-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  outline: none;
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+  margin-bottom: 8px;
+}
+.kd-search-input:focus {
+  border-color: var(--brand);
+}
+.kd-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* 필 버튼 공통 */
+.kd-pill {
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.kd-pill-active {
+  background: var(--brand);
+  color: var(--text-inverse);
+}
+.kd-pill-inactive {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+/* 카드 공통 */
+.kd-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* 지역 필터 버튼 */
+.kd-region-btn {
+  padding: 10px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.kd-region-btn:hover {
+  border-color: var(--border-strong);
+}
+.kd-region-btn-active {
+  border: 2px solid var(--brand);
+  background: var(--brand-light);
+}
+
+/* 텍스트 대비 개선: 소형 텍스트용 */
+.text-tertiary-strong {
+  color: #8E9DB5;
+}

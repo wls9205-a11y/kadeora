@@ -233,7 +233,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{briefing.title}</div>
             <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
               background: briefing.sentiment === 'bullish' ? 'var(--accent-green-bg)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.15)',
-              color: briefing.sentiment === 'bullish' ? 'var(--accent-green)' : briefing.sentiment === 'bearish' ? 'var(--accent-red)' : '#9DB0C7',
+              color: briefing.sentiment === 'bullish' ? 'var(--accent-green)' : briefing.sentiment === 'bearish' ? 'var(--accent-red)' : 'var(--text-secondary)',
             }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
           </div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>{briefing.summary}</div>

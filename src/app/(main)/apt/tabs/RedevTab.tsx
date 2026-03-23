@@ -168,7 +168,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 ) : null;
               })()}
             </div>
-            <input value={redevSearch} onChange={e => { setRedevSearch(e.target.value); setRedevPage(1); }} placeholder="구역명, 지역, 시공사 검색..." style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', marginBottom: 8 }} />
+            <input value={redevSearch} onChange={e => { setRedevSearch(e.target.value); setRedevPage(1); }} placeholder="구역명, 지역, 시공사 검색..." className="kd-search-input" />
 
             {/* 안내 */}
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준 · 매주 월요일 자동 갱신</div>
