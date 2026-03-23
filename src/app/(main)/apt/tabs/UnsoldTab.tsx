@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { isNew, NewBadge, fmtAmount, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import Link from 'next/link';
 import MiniLineChart from '@/components/charts/MiniLineChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface Props extends SharedTabProps {
   unsold: any[];
@@ -14,6 +15,15 @@ interface Props extends SharedTabProps {
 export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast }: Props) {
   const [unsoldRegion, setUnsoldRegion] = useState('전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
+  const [surgeAlerts, setSurgeAlerts] = useState<{ region_nm: string; current_count: number; change_pct: number }[]>([]);
+
+  // 미분양 급증 감지
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    (sb.rpc as any)('detect_unsold_surge').then(({ data }: any) => {
+      if (data?.length) setSurgeAlerts(data.slice(0, 5));
+    }).catch(() => {});
+  }, []);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{

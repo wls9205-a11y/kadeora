@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
 const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr: false });
+import MiniSparkline from '@/components/MiniSparkline';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -48,6 +49,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
 
   useEffect(() => {
     fetch('/api/stock/themes').then(r => r.ok ? r.json() : null).then(d => { if (d?.themes) setThemes(d.themes); }).catch(() => {});
@@ -82,6 +84,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     document.addEventListener('visibilitychange', onVisible);
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
   }, [refresh]);
+
+  // 관심종목 스파크라인 데이터 로드
+  useEffect(() => {
+    if (!watchlistSymbols.length) return;
+    fetch(`/api/stock/sparkline?symbols=${watchlistSymbols.join(',')}`)
+      .then(r => r.json()).then(d => { if (d.data) setSparklines(d.data); }).catch(() => {});
+  }, [watchlistSymbols]);
 
   const isDomestic = mode === 'domestic';
   const domesticStocks = stocks.filter(s => (s.market === 'KOSPI' || s.market === 'KOSDAQ') && !isIdx(s));
@@ -155,6 +164,10 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             {s.market_cap > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{fmtCap(s.market_cap, s.currency)}</span>}
           </div>
         </div>
+        {/* 미니 스파크라인 (관심종목에 히스토리 있을 때) */}
+        {sparklines[s.symbol]?.length >= 2 && (
+          <MiniSparkline data={sparklines[s.symbol]} width={48} height={20} />
+        )}
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           {s.price === 0 ? (
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>시세 미제공</span>
