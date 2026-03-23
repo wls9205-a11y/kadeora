@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import { sanitizeHtml } from '@/lib/sanitize-html';
+import { injectInternalLinks } from '@/lib/blog-auto-link';
 import BlogCommentInput from '@/components/BlogCommentInput';
 import BlogCommentCTA from '@/components/BlogCommentCTA';
 import ShareButtons from '@/components/ShareButtons';
@@ -220,7 +221,7 @@ export default async function BlogDetailPage({ params }: Props) {
   };
 
   // 마크다운 → HTML
-  const htmlFull = sanitizeHtml(marked(post.content) as string);
+  const htmlFull = injectInternalLinks(sanitizeHtml(marked(post.content) as string));
   const cutoff = Math.floor(htmlFull.length * 0.4);
   const htmlTruncated = htmlFull.slice(0, cutoff);
 

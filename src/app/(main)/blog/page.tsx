@@ -94,6 +94,20 @@ export default async function BlogPage({ searchParams }: Props) {
 
   const hasMore = (posts ?? []).length === perPage;
 
+  // 인기 시리즈 (1페이지, 카테고리 전체일 때만)
+  let topSeries: any[] = [];
+  if (pageNum === 1 && category === 'all') {
+    try {
+      const { data } = await sb.from('blog_series')
+        .select('slug, title, post_count, cover_image')
+        .eq('is_active', true)
+        .gt('post_count', 10)
+        .order('post_count', { ascending: false })
+        .limit(5);
+      topSeries = data || [];
+    } catch {}
+  }
+
   const catLabel = CATS.find(c => c.key === category)?.label || '전체';
   const breadcrumbLd = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -270,6 +284,28 @@ export default async function BlogPage({ searchParams }: Props) {
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {/* 인기 시리즈 (SEO 내부링크) */}
+      {topSeries.length > 0 && (
+        <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>📚 인기 시리즈</span>
+            <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
+          </div>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+            {topSeries.map(s => (
+              <Link key={s.slug} href={`/blog/series/${s.slug}`} style={{
+                flexShrink: 0, width: 140, padding: '10px 12px',
+                background: 'var(--bg-hover)', borderRadius: 10, textDecoration: 'none',
+                border: '1px solid var(--border)', transition: 'border-color var(--transition-fast)',
+              }}>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.post_count}편</div>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 
