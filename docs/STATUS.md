@@ -109,6 +109,16 @@
 
 ---
 
+### 세션 25 후반 추가
+- [x] 아파트 단지별 상세 (/apt/complex/[name]) ✅
+- [x] 종목 비교 (/stock/compare) ✅
+- [x] 관심종목 미니 스파크라인 (10일 차트) ✅
+- [x] 미분양 급증 감지 + 경고 배너 ✅
+- [x] 블로그 시드 댓글 1,020건 ✅
+- [x] 블로그 댓글 수 표시 (comment_count) ✅
+- [x] detect_unsold_surge() RPC ✅
+- [x] /api/stock/sparkline API ✅
+
 ## 어드민 원클릭 대시보드 (세션 24 추가)
 
 ### 자동 진단 패널
