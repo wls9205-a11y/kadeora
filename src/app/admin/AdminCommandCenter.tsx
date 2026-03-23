@@ -41,9 +41,11 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'crawl-busan-redev':     { display: '부산 재개발',      group: '부동산' },
   'crawl-gyeonggi-redev':  { display: '경기 재개발',      group: '부동산' },
   'crawl-nationwide-redev': { display: '전국 재개발',     group: '부동산' },
+  'redev-verify-households': { display: '세대수 검증',   group: '부동산' },
   'aggregate-trade-stats': { display: '거래 집계',        group: '부동산' },
   'apt-ai-summary':        { display: 'AI 한줄 분석',     group: '부동산' },
   'push-apt-deadline':     { display: '청약 마감 알림',    group: '부동산' },
+  'check-price-alerts':    { display: '가격 알림 체크',    group: '주식' },
   'invest-calendar-refresh': { display: '투자 캘린더',    group: '부동산' },
   // ─── 콘텐츠 ───
   'seed-posts':            { display: '시드 게시글',      group: '콘텐츠' },
@@ -82,6 +84,9 @@ const QUICK_ACTIONS = [
   { id: 'seed-comments', label: '시드 댓글',    path: '/api/cron/seed-comments', icon: '💬' },
   { id: 'blog-daily',    label: '블로그 발행',  path: '/api/cron/blog-daily',    icon: '📰' },
   { id: 'aggregate',     label: '거래 집계',    path: '/api/cron/aggregate-trade-stats', icon: '📋' },
+  { id: 'redev-verify',  label: '세대수 검증',  path: '/api/cron/redev-verify-households', icon: '🏘️' },
+  { id: 'series-assign', label: '시리즈 묶기',  path: '/api/cron/blog-series-assign', icon: '📚' },
+  { id: 'pf-snapshot',   label: '포트폴리오 스냅샷', path: '/api/cron/portfolio-snapshot', icon: '📸' },
 ];
 
 const GROUPS_ORDER = ['시스템', '주식', '부동산', '콘텐츠', '블로그'];

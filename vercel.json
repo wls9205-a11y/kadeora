@@ -93,6 +93,10 @@
       "schedule": "0 6 * * 1"
     },
     {
+      "path": "/api/cron/redev-verify-households",
+      "schedule": "0 4 * * 2"
+    },
+    {
       "path": "/api/cron/crawl-unsold-molit",
       "schedule": "0 7 1 * *"
     },
