@@ -19,13 +19,8 @@ async function fetchAptData() {
   const sb = await createSupabaseServer();
   let apts: any[] = [];
   let unsold: any[] = [];
-  let redevelopment: any[] = [];
-  let transactions: any[] = [];
-  let unsoldSummary: any = null;
   let alertCounts: Record<string, number> = {};
   let lastRefreshed: string | null = null;
-  let unsoldMonthly: any[] = [];
-  let tradeMonthly: any[] = [];
 
   try {
     const sb = await createSupabaseServer();
@@ -42,25 +37,17 @@ async function fetchAptData() {
       }
     } catch {}
 
-    const [aptsR, unsoldR, alertsR, redevelopmentR, unsoldSummaryR, transactionsR, unsoldMonthlyR, tradeMonthlyR] = await Promise.all([
+    // SSR: 청약 + 미분양(ongoingApts 생성용) + 알림 카운트만 로드
+    // 실거래/재개발/월별통계는 클라이언트에서 탭 클릭 시 lazy fetch
+    const [aptsR, unsoldR, alertsR] = await Promise.all([
       sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(1000),
       sb.from('unsold_apts').select('id, house_nm, region_nm, sigungu_nm, tot_supply_hshld_co, tot_unsold_hshld_co, supply_addr, completion_ym, sale_price_min, sale_price_max, pblanc_url, contact_tel, source, created_at, is_active').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
       sb.from('apt_alerts').select('house_manage_no'),
-      sb.from('redevelopment_projects').select('id, district_name, region, sigungu, project_type, stage, area_sqm, total_households, constructor, approval_date, expected_completion, address, notes, summary, is_active, created_at, updated_at, latitude, longitude').eq('is_active', true).order('total_households', { ascending: false }),
-      sb.from('apt_cache').select('data').eq('cache_type', 'unsold_summary').maybeSingle(),
-      sb.from('apt_transactions').select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type, created_at').gte('deal_date', `${new Date(Date.now() + 9 * 60 * 60 * 1000).getFullYear()}-01-01`).order('deal_date', { ascending: false }).limit(3000),
-      sb.from('unsold_monthly_stats').select('stat_month, region, total_unsold, total_after_completion').order('stat_month', { ascending: true }),
-      sb.from('apt_trade_monthly_stats').select('stat_month, region, total_deals, avg_price, total_amount').order('stat_month', { ascending: true }),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
-    if (redevelopmentR.data?.length) redevelopment = redevelopmentR.data;
-    if (unsoldSummaryR?.data) unsoldSummary = unsoldSummaryR.data;
-    if (transactionsR.data?.length) transactions = transactionsR.data;
-    if (unsoldMonthlyR.data?.length) unsoldMonthly = unsoldMonthlyR.data;
-    if (tradeMonthlyR.data?.length) tradeMonthly = tradeMonthlyR.data;
     (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
   } catch {}
 
@@ -83,23 +70,6 @@ async function fetchAptData() {
   const competitionMap: Record<string, number> = {};
   apts.forEach((a: any) => {
     if (a.competition_rate_1st) competitionMap[a.house_manage_no] = a.competition_rate_1st;
-  });
-
-  // 지역별 평균 실거래가 (만원) 계산
-  const regionAvgPrice: Record<string, number> = {};
-  const regionTradeCount: Record<string, number> = {};
-  transactions.forEach((t: any) => {
-    const r = t.region_nm || t.sigungu_nm || '';
-    if (!r || !t.deal_amount) return;
-    const amt = typeof t.deal_amount === 'string' ? parseInt(t.deal_amount.replace(/,/g, '')) : t.deal_amount;
-    if (!amt || amt <= 0) return;
-    const regionKey = r.split(' ')[0]; // 시도명만 추출
-    if (!regionAvgPrice[regionKey]) { regionAvgPrice[regionKey] = 0; regionTradeCount[regionKey] = 0; }
-    regionAvgPrice[regionKey] += amt;
-    regionTradeCount[regionKey]++;
-  });
-  Object.keys(regionAvgPrice).forEach(k => {
-    if (regionTradeCount[k] > 0) regionAvgPrice[k] = Math.round(regionAvgPrice[k] / regionTradeCount[k]);
   });
 
   // 소스1: 청약 마감 + 입주 전 (분양 진행 중)
@@ -135,7 +105,7 @@ async function fetchAptData() {
       przwner_presnatn_de: a.przwner_presnatn_de || null,
       cntrct_cncls_bgnde: a.cntrct_cncls_bgnde || null,
       cntrct_cncls_endde: a.cntrct_cncls_endde || null,
-      nearby_avg_price: regionAvgPrice[(a.region_nm || '').split(' ')[0]] || null,
+      nearby_avg_price: null as number | null,
     }));
 
   // 소스2: 미분양 (준공 후 포함)
@@ -166,7 +136,7 @@ async function fetchAptData() {
     przwner_presnatn_de: null as string | null,
     cntrct_cncls_bgnde: null as string | null,
     cntrct_cncls_endde: null as string | null,
-    nearby_avg_price: regionAvgPrice[(u.region_nm || '').split(' ')[0]] || null,
+    nearby_avg_price: null as number | null,
   }));
 
   // 중복 제거: 같은 단지명+지역이면 unsold 우선 (미분양 세대수 정보가 더 정확)
@@ -174,10 +144,10 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, redevelopment, transactions, unsoldSummary, alertCounts, lastRefreshed, regionStats, unsoldMonthly, tradeMonthly, ongoingApts } = await fetchAptData();
-  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} unsoldSummary={unsoldSummary} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} unsoldMonthly={unsoldMonthly} tradeMonthly={tradeMonthly} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts } = await fetchAptData();
+  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
 }

@@ -23,8 +23,15 @@ export async function GET(req: NextRequest) {
         .order('deal_date', { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
       if (region && region !== '전체') q = q.ilike('region_nm', `%${region}%`);
-      const { data, count } = await q;
-      return NextResponse.json({ data: data || [], count }, {
+      const [{ data, count }, tradeMonthlyR] = await Promise.all([
+        q,
+        sb.from('apt_trade_monthly_stats').select('stat_month, region, total_deals, avg_price, total_amount').order('stat_month', { ascending: true }),
+      ]);
+      return NextResponse.json({
+        data: data || [],
+        count,
+        tradeMonthly: tradeMonthlyR.data || [],
+      }, {
         headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
       });
     }
@@ -47,8 +54,16 @@ export async function GET(req: NextRequest) {
         .eq('is_active', true)
         .order('tot_unsold_hshld_co', { ascending: false });
       if (region && region !== '전체') q = q.ilike('region_nm', `%${region}%`);
-      const { data } = await q;
-      return NextResponse.json({ data: data || [] }, {
+      const [{ data }, monthlyR, summaryR] = await Promise.all([
+        q,
+        sb.from('unsold_monthly_stats').select('stat_month, region, total_unsold, total_after_completion').order('stat_month', { ascending: true }),
+        sb.from('apt_cache').select('data').eq('cache_type', 'unsold_summary').maybeSingle(),
+      ]);
+      return NextResponse.json({
+        data: data || [],
+        unsoldMonthly: monthlyR.data || [],
+        unsoldSummary: summaryR?.data || null,
+      }, {
         headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
       });
     }

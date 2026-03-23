@@ -9,6 +9,7 @@ import RedevTab from './tabs/RedevTab';
 import OngoingTab from './tabs/OngoingTab';
 import UnsoldTab from './tabs/UnsoldTab';
 import SubscriptionTab from './tabs/SubscriptionTab';
+import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
 
 export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, lastRefreshed, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [] }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[] }) {
@@ -17,6 +18,44 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [premiumListings, setPremiumListings] = useState<any[]>([]);
+
+  // ━━━ Lazy fetch state ━━━
+  const [lazyUnsold, setLazyUnsold] = useState<any[] | null>(unsold.length > 0 ? unsold : null);
+  const [lazyRedev, setLazyRedev] = useState<any[] | null>(redevelopment.length > 0 ? redevelopment : null);
+  const [lazyTx, setLazyTx] = useState<any[] | null>(transactions.length > 0 ? transactions : null);
+  const [lazyTradeMonthly, setLazyTradeMonthly] = useState<any[]>(tradeMonthly);
+  const [lazyUnsoldMonthly, setLazyUnsoldMonthly] = useState<any[]>(unsoldMonthly);
+  const [lazyUnsoldSummary, setLazyUnsoldSummary] = useState<any>(unsoldSummary);
+  const [tabLoading, setTabLoading] = useState<string | null>(null);
+
+  const fetchTabData = async (tab: string) => {
+    setTabLoading(tab);
+    try {
+      const res = await fetch(`/api/apt/tab-data?tab=${tab}&limit=5000`);
+      const json = await res.json();
+      if (tab === 'unsold') {
+        setLazyUnsold(json.data || []);
+        if (json.unsoldMonthly) setLazyUnsoldMonthly(json.unsoldMonthly);
+        if (json.unsoldSummary) setLazyUnsoldSummary(json.unsoldSummary);
+      }
+      if (tab === 'redevelopment') setLazyRedev(json.data || []);
+      if (tab === 'transactions') {
+        setLazyTx(json.data || []);
+        if (json.tradeMonthly) setLazyTradeMonthly(json.tradeMonthly);
+      }
+    } catch { }
+    setTabLoading(null);
+  };
+
+  const handleTabChange = (tab: 'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade') => {
+    setActiveTab(tab);
+    haptic('light');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Lazy fetch on first click
+    if (tab === 'unsold' && !lazyUnsold) fetchTabData('unsold');
+    if (tab === 'redev' && !lazyRedev) fetchTabData('redevelopment');
+    if (tab === 'trade' && !lazyTx) fetchTabData('transactions');
+  };
 
   useEffect(() => {
     fetch('/api/consultant/listing').then(r => r.json()).then(d => {
@@ -76,13 +115,13 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         {[
           { k: 'sub' as const, l: '📅 청약', type: 'subscription', data: apts },
           { k: 'ongoing' as const, l: '🏢 분양중', type: 'ongoing', data: ongoingApts },
-          { k: 'unsold' as const, l: '🏚️ 미분양', type: 'unsold', data: unsold },
-          { k: 'redev' as const, l: '🏗️ 재개발', type: 'redevelopment', data: redevelopment },
-          { k: 'trade' as const, l: '💰 실거래', type: 'transaction', data: transactions },
+          { k: 'unsold' as const, l: '🏚️ 미분양', type: 'unsold', data: lazyUnsold || [] },
+          { k: 'redev' as const, l: '🏗️ 재개발', type: 'redevelopment', data: lazyRedev || [] },
+          { k: 'trade' as const, l: '💰 실거래', type: 'transaction', data: lazyTx || [] },
         ].map(({ k, l, type, data }) => {
           const hasNew = (data as any[]).some((item: any) => isNew(item, type));
           return (
-            <button key={k} onClick={() => { setActiveTab(k); haptic('light'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-pressed={activeTab === k} style={{
+            <button key={k} onClick={() => handleTabChange(k)} aria-pressed={activeTab === k} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
               background: activeTab === k ? 'var(--brand)' : 'transparent',
               color: activeTab === k ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
@@ -128,10 +167,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 미분양 탭 ━━━ */}
       {activeTab === 'unsold' && (
+        tabLoading === 'unsold' ? <SkeletonList count={4} type="apt" /> :
         <UnsoldTab
-          unsold={unsold}
-          unsoldMonthly={unsoldMonthly}
-          unsoldSummary={unsoldSummary}
+          unsold={lazyUnsold || []}
+          unsoldMonthly={lazyUnsoldMonthly}
+          unsoldSummary={lazyUnsoldSummary}
           aptUser={aptUser}
           watchlist={watchlist}
           toggleWatchlist={toggleWatchlist}
@@ -141,8 +181,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       )}
 
       {activeTab === 'redev' && (
+        tabLoading === 'redevelopment' ? <SkeletonList count={4} type="apt" /> :
         <RedevTab
-          redevelopment={redevelopment}
+          redevelopment={lazyRedev || []}
           aptUser={aptUser}
           watchlist={watchlist}
           toggleWatchlist={toggleWatchlist}
@@ -153,9 +194,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* ━━━ 실거래가 탭 ━━━ */}
       {activeTab === 'trade' && (
+        tabLoading === 'transactions' ? <SkeletonList count={4} type="apt" /> :
         <TransactionTab
-          transactions={transactions}
-          tradeMonthly={tradeMonthly}
+          transactions={lazyTx || []}
+          tradeMonthly={lazyTradeMonthly}
           aptUser={aptUser}
           watchlist={watchlist}
           toggleWatchlist={toggleWatchlist}
