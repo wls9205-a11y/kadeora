@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import { isNew, NewBadge, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import RedevTimeline from '@/components/RedevTimeline';
+import BottomSheet from '@/components/BottomSheet';
 
 interface Props extends SharedTabProps {
   redevelopment: any[];
@@ -254,24 +255,12 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
         const r = selectedRedev;
         const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
         return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-      onClick={() => setSelectedRedev(null)}
-      onKeyDown={(e) => { if (e.key === 'Escape') setSelectedRedev(null); }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
-      <div style={{
-        position: 'relative', width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto',
-        background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: '16px 16px 0 0', padding: 20,
-      }} onClick={e => e.stopPropagation()}>
-        {/* 헤더 */}
+    <BottomSheet open={!!selectedRedev} onClose={() => setSelectedRedev(null)} title={r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}>
+        {/* 헤더 뱃지 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
           <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
           <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? '#93c5fd' : '#fdba74' }}>{r.project_type}</span>
-          <button onClick={() => setSelectedRedev(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)', padding: 4 }}>✕</button>
         </div>
-
-        {/* 제목 */}
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}</h2>
         {r.address && (
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 4 }}>
             📍 {r.address}
@@ -386,8 +375,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center' }}>
           본 정보는 참고용이며, 투자 판단의 근거로 사용하면 안 됩니다.
         </div>
-      </div>
-    </div>
+    </BottomSheet>
   );
 
       })()}

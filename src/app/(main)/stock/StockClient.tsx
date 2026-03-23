@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
 const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr: false });
 import MiniSparkline from '@/components/MiniSparkline';
+import BottomSheet from '@/components/BottomSheet';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -666,20 +667,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 종목 모달 */}
       {selectedStock && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={() => setSelectedStock(null)}>
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: 24, width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
-            {/* 핸들 바 */}
-            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{selectedStock.name}</h2>
-                <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.symbol}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.market}</span>
-                  {selectedStock.sector && <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.sector}</span>}
-                </div>
-              </div>
-              <button onClick={() => setSelectedStock(null)} style={{ background: 'none', border: 'none', fontSize: 'var(--fs-xl)', cursor: 'pointer', color: 'var(--text-secondary)' }}>✕</button>
+        <BottomSheet open={!!selectedStock} onClose={() => setSelectedStock(null)} title={selectedStock.name}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+              <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.symbol}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.market}</span>
+              {selectedStock.sector && <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{selectedStock.sector}</span>}
             </div>
 
             {/* 가격 + 등락 */}
@@ -717,8 +709,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 종목 상세 →
               </a>
             </div>
-          </div>
-        </div>
+        </BottomSheet>
       )}
     </div>
   );

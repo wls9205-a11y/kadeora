@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { isNew, NewBadge, fmtAmount, kstNow, kstToday, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import { haptic } from '@/lib/haptic';
+import BottomSheet from '@/components/BottomSheet';
 
 interface Props extends SharedTabProps {
   ongoingApts: any[];
@@ -402,15 +403,10 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
         const mvn = o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(0, 4)}년 ${parseInt(String(o.mvn_prearnge_ym).slice(4, 6))}월` : null;
         const linkH = isU ? `/apt/unsold/${o.link_id}` : `/apt/${o.link_id}`;
         return (
-          <>
-            <div onClick={() => setSelectedOngoing(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }} />
-            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', maxHeight: '75vh', overflowY: 'auto' }}>
-              <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 12px' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <BottomSheet open={!!selectedOngoing} onClose={() => setSelectedOngoing(null)} title={o.house_nm}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? '#f87171' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
-                <button onClick={() => setSelectedOngoing(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)', cursor: 'pointer' }}>×</button>
               </div>
-              <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{o.house_nm}</h2>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
@@ -456,8 +452,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
                     style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
                 </div>
               )}
-            </div>
-          </>
+          </BottomSheet>
         );
       })()}
     </div>

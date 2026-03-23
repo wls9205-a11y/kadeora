@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { isNew, NewBadge, fmtAmount, type SharedTabProps } from './apt-utils';
+import BottomSheet from '@/components/BottomSheet';
 import MiniLineChart from '@/components/charts/MiniLineChart';
 import dynamic from 'next/dynamic';
 
@@ -219,15 +220,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const t = selected;
         const related = transactions.filter((x: any) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
         return (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-            onClick={() => setSelected(null)}>
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
-            <div style={{ position: 'relative', width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: 20 }}
-              onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.apt_name}</h2>
-                <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
-              </div>
+          <BottomSheet open={!!selected} onClose={() => setSelected(null)} title={t.apt_name}>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
@@ -265,8 +258,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
               <AptPriceTrendChart aptName={t.apt_name} region={t.region_nm} />
               <AptReviewSection aptName={t.apt_name} region={t.region_nm} />
-            </div>
-          </div>
+          </BottomSheet>
         );
       })()}
     </div>
