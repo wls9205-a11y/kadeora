@@ -312,7 +312,7 @@ export function Navigation() {
                         <div style={{ fontSize:12, color:'var(--text-tertiary)', marginBottom:6, fontWeight:600 }}>글씨 크기</div>
                         <div style={{ display:'flex', gap:4 }}>
                           {([['small','작게'],['medium','보통'],['large','크게']] as const).map(([val, label]) => (
-                            <button key={val} onClick={() => handleFontSize(val)} style={{
+                            <button key={val} onClick={() => handleFontSize(val)} aria-label={`글씨 크기 ${label}`} aria-pressed={fontSize === val} style={{
                               flex:1, padding:'4px 0', borderRadius:6, fontSize: val === 'small' ? 11 : val === 'large' ? 15 : 13,
                               fontWeight: fontSize === val ? 700 : 400, border:'none', cursor:'pointer',
                               background: fontSize === val ? 'var(--brand)' : 'var(--bg-hover)',
@@ -321,7 +321,7 @@ export function Navigation() {
                           ))}
                         </div>
                       </div>
-                      <button onClick={handleLogout} style={{
+                      <button onClick={handleLogout} aria-label="로그아웃" style={{
                         display:'block', width:'100%', padding:'11px 16px',
                         color:'var(--error)', fontSize:14,
                         background:'transparent', border:'none',

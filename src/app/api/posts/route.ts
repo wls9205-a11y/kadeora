@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizePostInput } from '@/lib/sanitize'
 import { containsBannedWord } from '@/lib/nickname-filter'
+import { generateEnglishSlug } from '@/lib/slug-utils'
 
 export async function GET(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
@@ -38,7 +39,8 @@ export async function POST(req: NextRequest) {
     // 게시글 INSERT (유저 세션 — 본인 데이터)
     const images = Array.isArray(body.images) ? body.images.filter((u: unknown) => typeof u === 'string').slice(0, 5) : [];
     const tags = Array.isArray(body.tags) ? body.tags.filter((t: unknown) => typeof t === 'string').slice(0, 5) : [];
-    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId, images, tags }).select().single();
+    const slug = generateEnglishSlug(title, String(Date.now()));
+    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId, images, tags, slug }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
 
     try { revalidatePath('/feed'); } catch {}
