@@ -28,6 +28,7 @@ const BATCH_PRESETS: Record<string, { label: string; endpoints: string[] }> = {
       '/api/cron/seed-chat',
       '/api/cron/blog-daily',
       '/api/cron/blog-publish-queue',
+      '/api/cron/blog-seed-comments',
       '/api/cron/stock-daily-briefing',
     ],
   },

@@ -61,6 +61,7 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'blog-redevelopment':    { display: '재개발 블로그',    group: '블로그' },
   'blog-seed-guide':       { display: '가이드 블로그',    group: '블로그' },
   'blog-monthly-theme':    { display: '월별 테마 블로그',  group: '블로그' },
+  'blog-seed-comments':    { display: '블로그 시드 댓글',  group: '블로그' },
 };
 
 const QUICK_ACTIONS = [

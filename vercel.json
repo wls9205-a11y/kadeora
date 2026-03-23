@@ -173,6 +173,10 @@
       "schedule": "30 */4 * * *"
     },
     {
+      "path": "/api/cron/blog-seed-comments",
+      "schedule": "0 14 * * *"
+    },
+    {
       "path": "/api/cron/crawl-apt-subscription",
       "schedule": "0 6 * * *"
     },

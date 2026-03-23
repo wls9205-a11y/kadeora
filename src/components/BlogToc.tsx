@@ -47,7 +47,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
           onClick={() => scrollTo(item.id)}
           style={{
             display: 'block', width: '100%', textAlign: 'left',
-            padding: '4px 0', paddingLeft: item.level === 3 ? 16 : 0,
+            padding: '4px 0',
             background: 'none', border: 'none', cursor: 'pointer',
             fontSize: 'var(--fs-sm)', lineHeight: 1.5,
             color: activeId === item.id ? 'var(--brand)' : 'var(--text-secondary)',

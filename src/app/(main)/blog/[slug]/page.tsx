@@ -140,7 +140,7 @@ export default async function BlogDetailPage({ params }: Props) {
   let comments: any[] = [];
   try {
     const { data } = await sb.from('blog_comments')
-      .select('id, content, created_at, author_id, profiles!blog_comments_author_id_fkey(nickname)')
+      .select('id, content, created_at, author_id, author_name, is_seed, profiles!blog_comments_author_id_fkey(nickname)')
       .eq('blog_post_id', post.id).order('created_at', { ascending: true });
     comments = data ?? [];
   } catch {}
@@ -306,7 +306,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* 댓글 목록 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {comments.map((c: any) => {
-            const nick = (c.profiles as any)?.nickname ?? '사용자';
+            const nick = c.author_name || (c.profiles as any)?.nickname || '사용자';
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10 }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>

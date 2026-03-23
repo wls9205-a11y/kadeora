@@ -64,10 +64,10 @@ export async function GET(req: Request) {
     // 이미 댓글이 있는 글 제외
     const { data: existingComments } = await sb
       .from('blog_comments')
-      .select('post_id')
-      .in('post_id', posts.map(p => p.id));
+      .select('blog_post_id')
+      .in('blog_post_id', posts.map(p => p.id));
 
-    const postsWithComments = new Set((existingComments || []).map((c: any) => c.post_id));
+    const postsWithComments = new Set((existingComments || []).map((c: any) => c.blog_post_id));
     const postsNeedComments = posts.filter(p => !postsWithComments.has(p.id));
 
     // 각 글에 1~2개 시드 댓글 생성
@@ -81,7 +81,7 @@ export async function GET(req: Request) {
         const nickname = NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
 
         await sb.from('blog_comments').insert({
-          post_id: post.id,
+          blog_post_id: post.id,
           content: comment,
           author_name: nickname,
           is_seed: true,

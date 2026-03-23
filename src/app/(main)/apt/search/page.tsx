@@ -37,7 +37,11 @@ export default async function AptSearchPage({ searchParams }: Props) {
   const { data: trades, count } = await query;
 
   // 인기 지역
-  const { data: regionStats } = await sb.rpc('get_trade_region_stats').catch(() => ({ data: null })) as any;
+  let regionStats: any[] = [];
+  try {
+    const { data: rs } = await sb.rpc('get_trade_region_stats');
+    regionStats = rs || [];
+  } catch {}
 
   function fmtAmt(amt: number) {
     if (!amt) return '-';
