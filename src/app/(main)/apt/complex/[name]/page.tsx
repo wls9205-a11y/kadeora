@@ -4,8 +4,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 
-const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'), { ssr: false });
-const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), { ssr: false });
+const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
+const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
 
 export const revalidate = 3600;
 
