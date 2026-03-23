@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-23 세션 28 종료
+> **마지막 업데이트:** 2026-03-23 세션 28 최종
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -41,7 +41,7 @@
 
 ---
 
-## 크론 현황 (52개 등록, vercel.json — 세션 28에서 +6개)
+## 크론 현황 (53개 등록, vercel.json — 세션 28에서 +7개)
 
 ### 부동산
 | 크론 | 주기 | 상태 |
@@ -57,6 +57,7 @@
 | crawl-gyeonggi-redev | 주 1회 | ✅ |
 | crawl-nationwide-redev | 매주 월요일 | ✅ withCronAuth 전환+timeout(세션28) |
 | redev-verify-households | 매주 화요일 | ✅ 세대수 NULL 자동 검증(세션28) |
+| redev-geocode | 매주 목요일 | ✅ 좌표 NULL 카카오 API 수집(세션28) |
 | aggregate-trade-stats | 매일 | ✅ |
 
 ### 주식
@@ -91,7 +92,7 @@
 
 ---
 
-## 세션 28 — 미해결 항목 10건 해소 (12커밋)
+## 세션 28 — 미해결 전건 + 풀스택 감사 + 진화 (25커밋)
 
 ### 1. 리뷰 좋아요/신고 기능
 - POST /api/apt/reviews/[id]/like — 좋아요 토글 (apt_review_likes 테이블)
@@ -144,6 +145,39 @@
 - 매주 수 05:00, constructor_nm NULL인 레코드 최대 200건 대상
 - 20페이지 탐색 (10,000건) + 무순위/잔여세대 폴백
 - 9개 상세필드: 시공사/시행사/동수/최고층/주차/난방/상한제/전매/견본주택
+
+### 11. 풀스택 감사 + 핫픽스 (A+B 전건)
+- 로그인 모달 반복: chunked cookie 인식 + 클라이언트 이중 검증
+- 어드민 크래시: Promise.resolve() 래핑
+- PWA icon-96x96 404 → icon-96 수정
+- refresh-all 504: 순차→5개 병렬 배치
+- 크론 27개 status 500→200 (재시도 루프 방지)
+- apt/page.tsx 이중 sb + apt/price-trend 이중 sb 삭제
+- 피드 400: PersonalDashboard 쿼리 개별 try-catch
+- SEO 메타데이터 6페이지 + error.tsx 8페이지 추가
+- 접근성 aria-label 닫기 8곳 + 좋아요/댓글/공유
+- blog/series img → next/image + 하드코딩 hex 15곳 CSS변수
+- 미사용 컴포넌트 7개 삭제 (-658줄)
+
+### 12. auto-grade 크론 수정
+- commentCounts 스코프 오류 → 3일 연속 실패 해결
+
+### 13. 재개발 좌표 수집 크론 (redev-geocode)
+- 매주 목 04:30, 좌표 NULL 40건/회 → 카카오 주소+키워드 2중 폴백
+- 202건 지도 미표시 문제 해결
+
+### 14. cleanup 크론 강화
+- stuck 크론 자동 정리 + cron_logs 60일 로테이션 + alerts 정리
+- createClient→getSupabaseAdmin + withCronAuth 전환
+
+### 15. createClient 전체 통일 (24 API 파일)
+- API routes에서 createClient 직접 사용 0건 달성
+- getSupabaseAdmin 싱글턴으로 완전 통일
+
+### 16. 블로그 시리즈 대량 매핑 (DB)
+- SQL ILIKE 패턴 매칭 10패턴 적용
+- 13,185건 미할당 → 473건 (96.8% 매핑)
+- 크론 키워드 맵 실제 slug 기준으로 확대
 
 ---
 
@@ -596,7 +630,7 @@
 - [ ] KIS_APP_KEY + KIS_APP_SECRET 환경변수
 - [ ] STOCK_DATA_API_KEY 발급
 - [x] blog_series 시리즈 10개 + 1,393편 매핑 ✅ 세션 24
-- [ ] Supabase 세션 28 마이그레이션 실행 (`20260323_review_likes.sql` + `20260323_portfolio_snapshots.sql`)
+- [x] Supabase 세션 28 마이그레이션 실행 ✅ (apt_review_likes + portfolio_snapshots)
 
 ### 코드
 - [x] AptClient 2060→205줄 완전 분할 (5개 탭 + apt-utils, 90% 감소) ✅ 세션 24
@@ -609,6 +643,12 @@
 - [x] 지도뷰 클러스터링 (MarkerClusterer + limit 300) ✅ 세션 28
 - [x] 리뷰 좋아요/신고 기능 ✅ 세션 28
 - [x] Skeleton UI 피드/주식/블로그 전 탭 확대 적용 (11개 loading.tsx) ✅ 세션 28
+- [x] auto-grade 크론 commentCounts 스코프 오류 수정 ✅ 세션 28
+- [x] 재개발 좌표 수집 크론 (redev-geocode 매주 목) ✅ 세션 28
+- [x] cleanup 크론 강화 (stuck 정리 + 로그 로테이션) ✅ 세션 28
+- [x] createClient→getSupabaseAdmin 전체 통일 (API 0건 잔존) ✅ 세션 28
+- [x] 블로그 시리즈 대량 매핑 96.8% (13,185→473 미할당) ✅ 세션 28
+- [x] 풀스택 감사 A+B 전건 수정 (런타임+SEO+접근성+보안) ✅ 세션 28
 - [x] safe-catch 주요 파일 적용 (FeedClient/StockClient/AptClient) ✅ 세션 24
 - [x] 모달 Escape+배경스크롤방지 (AptClient/StockClient) ✅ 세션 24
 
@@ -658,6 +698,8 @@
 - blog_series 테이블 시드 필요 — 시리즈 데이터 없으면 /blog/series 빈 페이지 (세션24)
 - 부동산 지도뷰: NEXT_PUBLIC_KAKAO_JS_KEY 환경변수 필수 (세션24)
 - check-price-alerts 크론: 평일 장중 15분마다 실행, price_alerts 테이블 필요 (세션24)
-- apt_review_likes 테이블 필요 — 마이그레이션 미실행 시 좋아요 단순 증가 폴백 (세션28)
-- portfolio_snapshots 테이블 필요 — 마이그레이션 미실행 시 수익률 차트 미표시 (세션28)
+- apt_review_likes 테이블 ✅ 마이그레이션 실행 완료 (세션28)
+- portfolio_snapshots 테이블 ✅ 마이그레이션 실행 완료 (세션28)
 - 부동산 탭 lazy fetch: 미분양/재개발/실거래는 SSR이 아닌 클라이언트 fetch, tab-data API 의존 (세션28)
+- API routes에서 createClient 직접 사용 0건 — 반드시 getSupabaseAdmin() 사용 (세션28 통일)
+- redev-geocode 크론: NEXT_PUBLIC_KAKAO_JS_KEY가 REST API 키로도 사용됨 (세션28)
