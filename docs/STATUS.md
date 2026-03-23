@@ -371,7 +371,7 @@
 - [x] blog_series 시리즈 10개 + 1,393편 매핑 ✅ 세션 24
 
 ### 코드
-- [x] AptClient 2060→570줄 탭별 분할 (4개 탭 + apt-utils) ✅ 세션 24
+- [x] AptClient 2060→205줄 완전 분할 (5개 탭 + apt-utils, 90% 감소) ✅ 세션 24
 - [ ] AptClient 탭별 lazy fetch 적용 (tab-data API 생성 완료, 연결만 필요)
 - [ ] crawl-nationwide-redev API 키 등록 후 실행
 - [ ] 재개발 세대수 크론 검증 수집
@@ -383,6 +383,19 @@
 - [ ] Skeleton UI 피드/주식/블로그 전 탭 확대 적용
 - [x] safe-catch 주요 파일 적용 (FeedClient/StockClient/AptClient) ✅ 세션 24
 - [x] 모달 Escape+배경스크롤방지 (AptClient/StockClient) ✅ 세션 24
+
+- [x] RLS 적용 (price_alerts/portfolio_holdings/apt_reviews/blog_series) ✅ 세션 24
+- [x] 블로그 XSS 방어 (DOMPurify + marked 이미지 lazy) ✅ 세션 24
+- [x] CRON_SECRET 클라이언트 노출 수정 ✅ 세션 24
+- [x] 주요 4페이지 Suspense 경계 추가 ✅ 세션 24
+- [x] 피드 cursor 페이지네이션 ✅ 세션 24
+- [x] 알림 뱃지 30초 폴링 ✅ 세션 24
+- [x] TopLoadingBar 페이지 전환 인디케이터 ✅ 세션 24
+- [x] 주식 상세 JSON-LD ✅ 세션 24
+- [x] 글쓰기 폼 aria-label ✅ 세션 24
+- [x] Sentry 크론 에러 태그 ✅ 세션 24
+- [x] PWA shortcuts + SW 캐시 버전 업데이트 ✅ 세션 24
+- [x] apt_transactions GIN 인덱스 ✅ 세션 24
 
 ### 완료
 - [x] 분양중 골드 하이라이트 ✅
