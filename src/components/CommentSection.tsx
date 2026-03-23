@@ -109,7 +109,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 style={{
                   width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)',
                   borderRadius: 16, color: 'var(--text-primary)', padding: '10px 14px',
-                  fontSize: 'var(--fs-sm)', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
+                  fontSize: 16, resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
                   transition: 'border-color 0.15s',
                 }}
                 onFocus={e => e.currentTarget.style.borderColor = 'var(--brand)'}

@@ -88,7 +88,7 @@ export default function OnboardingClient() {
 
   return (
     <div style={{ maxWidth: 480, margin: '40px auto', padding: '0 16px' }}>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '40px 36px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: 'clamp(20px, 5vw, 40px) clamp(16px, 4vw, 36px)' }}>
         {/* 진행 바 */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>

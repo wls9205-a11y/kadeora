@@ -256,8 +256,8 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                 <textarea id="chat-input" value={input} onChange={e => handleInput(e.target.value)} onKeyDown={handleKeyDown}
                   placeholder={replyTarget ? `@${replyTarget.nickname}에게 답글...` : '소문 남기기... (@멘션, Enter 전송)'}
                   maxLength={300} rows={1}
-                  style={{ width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', padding: '8px 58px 8px 12px', fontSize: 'var(--fs-sm)', fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5, minHeight: 38 }} />
-                <button onClick={send} disabled={!input.trim() || sending} style={{ position: 'absolute', right: 6, bottom: 6, padding: '3px 10px', borderRadius: 6, border: 'none', background: input.trim() ? (replyTarget ? 'var(--accent-purple)' : 'var(--brand)') : 'transparent', color: input.trim() ? 'white' : 'var(--text-tertiary)', fontWeight: 700, fontSize: 'var(--fs-xs)', cursor: input.trim() ? 'pointer' : 'default' }}>{replyTarget ? '↩' : '↑'}</button>
+                  style={{ width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', padding: '10px 58px 10px 12px', fontSize: 16, fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5, minHeight: 42 }} />
+                <button onClick={send} disabled={!input.trim() || sending} style={{ position: 'absolute', right: 6, bottom: 6, padding: '6px 14px', borderRadius: 8, border: 'none', background: input.trim() ? (replyTarget ? 'var(--accent-purple)' : 'var(--brand)') : 'transparent', color: input.trim() ? 'white' : 'var(--text-tertiary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: input.trim() ? 'pointer' : 'default', minHeight: 32 }}>{replyTarget ? '↩' : '↑'}</button>
               </div>
             </div>
           </div>

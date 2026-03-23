@@ -148,13 +148,12 @@ export default function DiscussClient() {
 
   // Fullscreen flex layout for chat tabs, normal scroll for poll tab
   const containerStyle: React.CSSProperties = isChat ? {
-    maxWidth: 720, margin: '0 auto',
+    maxWidth: 720, margin: '0 auto', padding: '0 16px',
     display: 'flex', flexDirection: 'column',
     height: 'calc(100dvh - 104px)',
-    // fallback for browsers without dvh
     minHeight: 'calc(100vh - 160px)',
   } : {
-    maxWidth: 720, margin: '0 auto',
+    maxWidth: 720, margin: '0 auto', padding: '0 16px',
   };
 
   return (

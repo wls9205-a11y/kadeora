@@ -82,7 +82,7 @@ export default async function RegionLandingPage({ params }: Props) {
   const data = await fetchRegionData(decoded);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
         <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>

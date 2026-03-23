@@ -337,7 +337,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               </Link>
 
               {/* 인터랙션 바: 좋아요 + 댓글 + 공유 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+              <div className="kd-interaction-bar" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
                 <button onClick={(e) => handleUpvote(e, post.id as number)}
                   aria-label="좋아요"
                   className={isLiked ? 'animate-like' : ''}

@@ -243,7 +243,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {/* Content body */}
         {currentUserId ? (
-          <div style={{ fontSize: 'var(--content-font-size, 16px)' as any, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
+          <div className="feed-detail-content" style={{ fontSize: 'var(--content-font-size, 16px)' as any, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
             {post.content}
           </div>
         ) : (
