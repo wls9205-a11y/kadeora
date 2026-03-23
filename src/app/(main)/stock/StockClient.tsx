@@ -185,7 +185,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             </>
           )}
         </div>
-        <Link href={`/stock/${encodeURIComponent(s.symbol)}`} onClick={e => e.stopPropagation()} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 999, background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)', textDecoration: 'none', flexShrink: 0 }}>상세</Link>
+        <Link href={`/stock/${encodeURIComponent(s.symbol)}`} onClick={e => e.stopPropagation()} style={{ fontSize: 'var(--fs-xs)', padding: '6px 12px', borderRadius: 999, background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)', textDecoration: 'none', flexShrink: 0, minHeight: 32, display: 'flex', alignItems: 'center' }}>상세</Link>
       </div>
     );
   }
