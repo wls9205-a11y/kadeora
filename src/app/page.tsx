@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const revalidate = 3600;
@@ -30,6 +31,8 @@ const SECTIONS = [
     title: '실시간 주식 시세',
     desc: '코스피·코스닥·나스닥·S&P500 종목 시세, 테마별 동향, AI 분석을 한눈에',
     tags: ['코스피', '코스닥', '나스닥', '환율'],
+    img: '/images/previews/stock-preview.png',
+    imgAlt: '카더라 실시간 주식 시세 — 코스피 코스닥 나스닥 종목 현재가 등락률',
   },
   {
     href: '/apt',
@@ -37,6 +40,8 @@ const SECTIONS = [
     title: '아파트 청약·부동산',
     desc: '전국 청약 일정, 미분양 현황, 재개발 진행 상황, 실거래가 조회까지',
     tags: ['청약일정', '미분양', '재개발', '실거래가'],
+    img: '/images/previews/apt-preview.png',
+    imgAlt: '카더라 아파트 청약 — 전국 청약 일정 미분양 재개발 실거래가',
   },
   {
     href: '/blog',
@@ -44,6 +49,8 @@ const SECTIONS = [
     title: '투자 정보 블로그',
     desc: '매일 업데이트되는 시황 분석, 청약 가이드, 재테크 정보 14,000편+',
     tags: ['시황분석', '청약가이드', '재테크'],
+    img: '/images/previews/blog-preview.png',
+    imgAlt: '카더라 투자 블로그 — 시황 분석 청약 가이드 재테크 정보',
   },
   {
     href: '/feed',
@@ -51,6 +58,8 @@ const SECTIONS = [
     title: '커뮤니티 피드',
     desc: '주식, 부동산, 우리동네 소식을 자유롭게 나누는 소통 공간',
     tags: ['자유토론', '우리동네', '정보공유'],
+    img: '/images/previews/feed-preview.png',
+    imgAlt: '카더라 커뮤니티 — 주식 부동산 자유토론 게시글 피드',
   },
   {
     href: '/discuss',
@@ -58,6 +67,8 @@ const SECTIONS = [
     title: '실시간 토론방',
     desc: '주식방, 부동산방, 자유방에서 실시간 채팅과 투표에 참여하세요',
     tags: ['실시간채팅', '투표', '종목토론'],
+    img: '/images/previews/discuss-preview.png',
+    imgAlt: '카더라 실시간 토론방 — 주식방 부동산방 채팅 투표',
   },
   {
     href: '/hot',
@@ -65,6 +76,8 @@ const SECTIONS = [
     title: '이번 주 HOT',
     desc: '이번 주 가장 많은 관심을 받은 인기 게시글 모아보기',
     tags: ['인기글', '주간랭킹', '트렌드'],
+    img: '/images/previews/main-preview.png',
+    imgAlt: '카더라 — 주식 청약 부동산 커뮤니티 올인원 앱',
   },
 ];
 
@@ -118,6 +131,20 @@ export default async function HomePage() {
           name: s.title,
           url: `${SITE}${s.href}`,
           description: s.desc,
+        })),
+      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'ImageGallery',
+        name: '카더라 서비스 미리보기',
+        description: '카더라의 주요 서비스 화면 — 주식 시세, 아파트 청약, 블로그, 커뮤니티, 토론방',
+        image: SECTIONS.map(s => ({
+          '@type': 'ImageObject',
+          url: `${SITE}${s.img}`,
+          name: s.title,
+          description: s.imgAlt,
+          width: 800,
+          height: 500,
         })),
       }) }} />
 
@@ -244,20 +271,35 @@ export default async function HomePage() {
           }}>
             {SECTIONS.map(s => (
               <Link key={s.href} href={s.href} className="home-card" style={{
-                display: 'block', textDecoration: 'none', padding: 'clamp(18px, 3vw, 24px)',
+                display: 'block', textDecoration: 'none',
                 background: 'var(--bg-surface)', borderRadius: 16,
                 border: '1px solid var(--border)', transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
+                overflow: 'hidden',
               }}>
-                <div style={{ fontSize: 28, marginBottom: 12 }}>{s.emoji}</div>
-                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.title}</h3>
-                <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 12px' }}>{s.desc}</p>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {s.tags.map(t => (
-                    <span key={t} style={{
-                      fontSize: 11, padding: '3px 8px', borderRadius: 6,
-                      background: 'var(--brand-bg)', color: 'var(--info)', fontWeight: 500,
-                    }}>{t}</span>
-                  ))}
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '8/5', overflow: 'hidden' }}>
+                  <Image
+                    src={s.img}
+                    alt={s.imgAlt}
+                    width={800}
+                    height={500}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    loading="eager"
+                  />
+                </div>
+                <div style={{ padding: 'clamp(14px, 2vw, 20px)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 22 }}>{s.emoji}</span>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{s.title}</h3>
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 10px' }}>{s.desc}</p>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {s.tags.map(t => (
+                      <span key={t} style={{
+                        fontSize: 11, padding: '3px 8px', borderRadius: 6,
+                        background: 'var(--brand-bg)', color: 'var(--info)', fontWeight: 500,
+                      }}>{t}</span>
+                    ))}
+                  </div>
                 </div>
               </Link>
             ))}
