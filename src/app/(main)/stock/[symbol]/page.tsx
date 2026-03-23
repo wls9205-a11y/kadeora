@@ -44,13 +44,15 @@ export default async function StockDetailPage({ params }: Props) {
   const isStale = !s.updated_at || s.updated_at.startsWith('2000-01-01');
 
   // Parallel fetch all data (필요 컬럼만 select)
-  const [histR, aiR, newsR, flowR, discR, similarR] = await Promise.all([
+  const [histR, aiR, newsR, flowR, discR, similarR, relatedBlogsR] = await Promise.all([
     sb.from('stock_price_history').select('date, close_price, open_price, high_price, low_price, volume, change_pct').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
     sb.from('stock_ai_comments').select('id, symbol, comment, content, signal, created_at').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('stock_news').select('id, title, url, source, published_at, sentiment, sentiment_label, sentiment_score, ai_summary').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
     sb.from('stock_investor_flow').select('id, date, foreign_buy, foreign_sell, inst_buy, inst_sell').eq('symbol', symbol).order('date', { ascending: false }).limit(5),
     sb.from('stock_disclosures').select('id, title, disclosure_type, source, published_at, created_at').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
     s.sector ? sb.from('stock_quotes').select('symbol, name, price, change_pct, market_cap, currency').eq('sector', s.sector).neq('symbol', symbol).gt('price', 0).order('market_cap', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
+    // 관련 블로그 (종목명으로 검색)
+    sb.from('blog_posts').select('slug, title, category, view_count, published_at').eq('is_published', true).or(`title.ilike.%${s.name}%,title.ilike.%${symbol}%`).order('published_at', { ascending: false }).limit(5),
   ]);
 
   // 52주 최고/최저 (price_history에서 계산)
@@ -165,6 +167,24 @@ export default async function StockDetailPage({ params }: Props) {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* 관련 블로그 */}
+      {(relatedBlogsR.data ?? []).length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 {s.name} 관련 분석</div>
+          {(relatedBlogsR.data ?? []).map((blog: any) => (
+            <Link key={blog.slug} href={`/blog/${blog.slug}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.title}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                  {blog.published_at?.slice(0, 10)} · 조회 {blog.view_count || 0}
+                </div>
+              </div>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>→</span>
+            </Link>
+          ))}
         </div>
       )}
 

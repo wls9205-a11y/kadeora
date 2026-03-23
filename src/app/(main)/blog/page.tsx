@@ -78,7 +78,7 @@ export default async function BlogPage({ searchParams }: Props) {
   // 메인 쿼리
   const now = new Date().toISOString();
   let q2 = sb.from('blog_posts')
-    .select('id, slug, title, excerpt, category, tags, created_at, view_count, cover_image, image_alt, published_at')
+    .select('id, slug, title, excerpt, category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min')
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
   if (category !== 'all') q2 = q2.eq('category', category);
@@ -214,24 +214,30 @@ export default async function BlogPage({ searchParams }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {(posts ?? []).map((p: any) => {
             const catColor = CAT_COLORS[p.category] || '#7D8DA3';
+            const catEmoji: Record<string, string> = { apt: '🏢', stock: '📈', unsold: '🏚️', finance: '💰', general: '📝' };
+            const readMin = p.reading_time_min || 3;
             return (
               <Link key={p.id} href={`/blog/${p.slug}`} style={{
                 display: 'flex', gap: 14, padding: '14px 16px', borderRadius: 12,
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 textDecoration: 'none', color: 'inherit', transition: 'background 0.15s',
               }}>
-                {/* 썸네일 */}
-                {p.cover_image && (
-                  <div style={{
-                    width: 80, height: 80, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
-                    background: 'var(--bg-hover)', position: 'relative',
-                  }}>
+                {/* 썸네일 (이미지 없으면 카테고리 이모지) */}
+                <div style={{
+                  width: 80, height: 80, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
+                  background: p.cover_image ? 'var(--bg-hover)' : `${catColor}15`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'relative',
+                }}>
+                  {p.cover_image ? (
                     <Image src={p.cover_image} alt={p.image_alt || p.title}
                       width={80} height={80}
                       style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                       loading="lazy" />
-                  </div>
-                )}
+                  ) : (
+                    <span style={{ fontSize: 32 }}>{catEmoji[p.category] || '📝'}</span>
+                  )}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {/* 카테고리 뱃지 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -252,6 +258,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   {/* 메타 */}
                   <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                     <span>{new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
+                    <span>📖 {readMin}분</span>
                     {p.view_count > 0 && <span>👀 {p.view_count}</span>}
                     {(p.tags ?? []).slice(0, 2).map((t: string) => <span key={t} style={{ background: 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>#{t}</span>)}
                   </div>
