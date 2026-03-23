@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User, PenSquare, ShoppingBag, BookOpen, LogOut, FileText } from 'lucide-react';
+import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User, PenSquare, BookOpen, LogOut, FileText } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import ThemeToggle from '@/components/ThemeToggle';
 import { haptic } from '@/lib/haptic';
@@ -27,7 +27,6 @@ const MOBILE_TABS = [
 const MORE_ITEMS = [
   { href: '/blog',          emoji: '📰', label: '블로그' },
   { href: '/hot',           emoji: '🔥', label: '이번주 HOT' },
-  { href: '/shop/megaphone', emoji: '🛒', label: '상점' },
   { href: '/guide',         emoji: '📖', label: '가이드북' },
   { href: '/grades',        emoji: '🏅', label: '등급 안내' },
 ];
@@ -292,7 +291,6 @@ export function Navigation() {
                     }}>
                       {[
                         { href:'/search',             label:'검색', LIcon: Search },
-                        { href:'/shop/megaphone',     label:'상점', LIcon: ShoppingBag },
                         { href:`/profile/${user.id}`, label:'내 프로필', LIcon: User },
                         { href:'/write',              label:'글쓰기', LIcon: PenSquare },
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
