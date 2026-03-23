@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import EmptyState from '@/components/EmptyState';
 
 export const revalidate = 300;
 
@@ -207,9 +208,11 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 글 목록 — 카드형 */}
       {(posts ?? []).length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
-          {q ? `"${q}"에 대한 검색 결과가 없습니다` : '아직 블로그 글이 없어요'}
-        </div>
+        <EmptyState
+          icon={q ? '🔍' : '📝'}
+          title={q ? `"${q}"에 대한 검색 결과가 없습니다` : '아직 블로그 글이 없어요'}
+          description={q ? '다른 검색어로 시도해보세요' : '곧 새로운 분석이 올라옵니다'}
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {(posts ?? []).map((p: any) => {
@@ -217,10 +220,10 @@ export default async function BlogPage({ searchParams }: Props) {
             const catEmoji: Record<string, string> = { apt: '🏢', stock: '📈', unsold: '🏚️', finance: '💰', general: '📝' };
             const readMin = p.reading_time_min || 3;
             return (
-              <Link key={p.id} href={`/blog/${p.slug}`} style={{
+              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-card-hover" style={{
                 display: 'flex', gap: 14, padding: '14px 16px', borderRadius: 12,
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                textDecoration: 'none', color: 'inherit', transition: 'background 0.15s',
+                textDecoration: 'none', color: 'inherit',
               }}>
                 {/* 썸네일 (이미지 없으면 카테고리 이모지) */}
                 <div style={{

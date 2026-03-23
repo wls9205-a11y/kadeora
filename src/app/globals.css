@@ -674,6 +674,22 @@ input, textarea, select {
   border-radius: 4px;
 }
 
+/* 피드 카드 hover */
+.kd-feed-card:hover { background: var(--bg-hover); }
+
+/* 카드 등장 stagger 애니메이션 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn { animation: fadeInUp 0.3s ease both; }
+.animate-fadeIn:nth-child(1) { animation-delay: 0s; }
+.animate-fadeIn:nth-child(2) { animation-delay: 0.03s; }
+.animate-fadeIn:nth-child(3) { animation-delay: 0.06s; }
+.animate-fadeIn:nth-child(4) { animation-delay: 0.09s; }
+.animate-fadeIn:nth-child(5) { animation-delay: 0.12s; }
+.animate-fadeIn:nth-child(n+6) { animation-delay: 0.15s; }
+
 /* ========================================
    반응형 강화
    ======================================== */

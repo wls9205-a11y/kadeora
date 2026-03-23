@@ -149,7 +149,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     const isGlobal = s.currency === 'USD';
     const isWatched = watchlistSymbols.includes(s.symbol);
     return (
-      <div onClick={() => setSelectedStock(s)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
+      <div onClick={() => setSelectedStock(s)} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 4px', borderBottom: '1px solid var(--border)', cursor: 'pointer', borderRadius: 8, transition: 'background var(--transition-fast)' }}>
         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 22, textAlign: 'center' }}>{rank}</span>
         <button onClick={e => { e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 'var(--fs-lg)', lineHeight: 1, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0 }} title={isWatched ? '관심 해제' : '관심 추가'}>
           {isWatched ? '★' : '☆'}

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import BottomSheet from '@/components/BottomSheet';
 
 export default function StockAlertButton({ symbol, stockName, currentPrice, currency }: { symbol: string; stockName: string; currentPrice: number; currency?: string }) {
   const [open, setOpen] = useState(false);
@@ -30,13 +31,8 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
     try {
       const sb = createSupabaseBrowser();
       await (sb.from('price_alerts') as any).insert({
-        user_id: userId,
-        alert_type: 'stock_price',
-        condition: alertType,
-        threshold: Number(threshold),
-        target_symbol: symbol,
-        is_active: true,
-        is_triggered: false,
+        user_id: userId, alert_type: 'stock_price', condition: alertType,
+        threshold: Number(threshold), target_symbol: symbol, is_active: true, is_triggered: false,
       });
       const { data: alerts } = await sb.from('price_alerts')
         .select('id, alert_type, condition, threshold, is_triggered')
@@ -70,73 +66,44 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
         🔔 알림 {myAlerts.length > 0 ? `(${myAlerts.length})` : '설정'}
       </button>
 
-      {open && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-        }} onClick={() => setOpen(false)}>
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
-          <div style={{
-            position: 'relative', width: '100%', maxWidth: 480,
-            background: 'var(--bg-surface)', borderRadius: '16px 16px 0 0',
-            padding: '16px 20px 32px', maxHeight: '60vh', overflowY: 'auto',
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 12px' }} />
-            <h3 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>🔔 {stockName} 알림</h3>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>현재가 {fmtPrice(currentPrice)}</div>
-
-            {/* 기존 알림 목록 */}
-            {myAlerts.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>활성 알림</div>
-                {myAlerts.map(a => (
-                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-                    <span style={{ fontSize: 'var(--fs-sm)', color: a.is_triggered ? 'var(--accent-green)' : 'var(--text-primary)' }}>
-                      {a.condition === 'above' ? '📈 이상' : '📉 이하'} {fmtPrice(a.threshold)}
-                      {a.is_triggered && ' ✅ 도달'}
-                    </span>
-                    <button onClick={() => deleteAlert(a.id)} style={{ background: 'none', border: 'none', color: 'var(--accent-red)', cursor: 'pointer', fontSize: 'var(--fs-sm)' }}>삭제</button>
-                  </div>
-                ))}
+      <BottomSheet open={open} onClose={() => setOpen(false)} title={`🔔 ${stockName} 알림`} maxWidth={480}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16, marginTop: -8 }}>현재가 {fmtPrice(currentPrice)}</div>
+        {myAlerts.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>활성 알림</div>
+            {myAlerts.map(a => (
+              <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ fontSize: 'var(--fs-sm)', color: a.is_triggered ? 'var(--accent-green)' : 'var(--text-primary)' }}>
+                  {a.condition === 'above' ? '📈 이상' : '📉 이하'} {fmtPrice(a.threshold)}
+                  {a.is_triggered && ' ✅ 도달'}
+                </span>
+                <button onClick={() => deleteAlert(a.id)} style={{ background: 'none', border: 'none', color: 'var(--accent-red)', cursor: 'pointer', fontSize: 'var(--fs-sm)' }}>삭제</button>
               </div>
-            )}
-
-            {/* 새 알림 추가 */}
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>새 알림 추가</div>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-              {[{ key: 'above' as const, label: '📈 이상 도달' }, { key: 'below' as const, label: '📉 이하 도달' }].map(t => (
-                <button key={t.key} onClick={() => setAlertType(t.key)} style={{
-                  flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 600,
-                  background: alertType === t.key ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: alertType === t.key ? '#fff' : 'var(--text-secondary)',
-                  border: alertType === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer',
-                }}>{t.label}</button>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                type="number"
-                value={threshold}
-                onChange={e => setThreshold(e.target.value)}
-                placeholder={`목표가 (현재 ${fmtPrice(currentPrice)})`}
-                aria-label="목표가 입력"
-                style={{
-                  flex: 1, padding: '10px 14px', borderRadius: 8,
-                  border: '1px solid var(--border)', background: 'var(--bg-hover)',
-                  color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none',
-                }}
-              />
-              <button onClick={addAlert} disabled={saving || !threshold} style={{
-                padding: '10px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
-                fontSize: 'var(--fs-sm)', fontWeight: 700, border: 'none', cursor: 'pointer',
-                opacity: saving || !threshold ? 0.5 : 1,
-              }}>
-                {saving ? '...' : '추가'}
-              </button>
-            </div>
+            ))}
           </div>
+        )}
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>새 알림 추가</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {[{ key: 'above' as const, label: '📈 이상 도달' }, { key: 'below' as const, label: '📉 이하 도달' }].map(t => (
+            <button key={t.key} onClick={() => setAlertType(t.key)} style={{
+              flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 600,
+              background: alertType === t.key ? 'var(--brand)' : 'var(--bg-hover)',
+              color: alertType === t.key ? '#fff' : 'var(--text-secondary)',
+              border: alertType === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer',
+            }}>{t.label}</button>
+          ))}
         </div>
-      )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input type="number" value={threshold} onChange={e => setThreshold(e.target.value)}
+            placeholder={`목표가 (현재 ${fmtPrice(currentPrice)})`} aria-label="목표가 입력"
+            style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
+          <button onClick={addAlert} disabled={saving || !threshold} style={{
+            padding: '10px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
+            fontSize: 'var(--fs-sm)', fontWeight: 700, border: 'none', cursor: 'pointer',
+            opacity: saving || !threshold ? 0.5 : 1,
+          }}>{saving ? '...' : '추가'}</button>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

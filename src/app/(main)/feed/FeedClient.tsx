@@ -330,8 +330,8 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const isLiked = likedPosts.has(post.id as number);
           const postHref = `/feed/${(post as any).slug || post.id}`;
           return (
-            <div key={post.id} className="animate-fadeIn"
-              style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+            <div key={post.id} className="animate-fadeIn kd-feed-card"
+              style={{ padding: '10px 4px', borderBottom: '1px solid var(--border)', borderRadius: 8, transition: 'background var(--transition-fast)' }}>
               <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                 {/* 1행: 아바타 + 닉네임 + 등급 + 시간 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>

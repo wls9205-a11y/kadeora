@@ -132,7 +132,13 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
       {(trades || []).length === 0 && (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
-          {q ? `"${q}" 검색 결과가 없습니다` : '검색어를 입력하세요'}
+          <div style={{ fontSize: 48, marginBottom: 12 }}>{q ? '🔍' : '🏠'}</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+            {q ? `"${q}" 검색 결과가 없습니다` : '실거래가를 검색하세요'}
+          </div>
+          <div style={{ fontSize: 'var(--fs-sm)' }}>
+            {q ? '다른 단지명이나 동 이름으로 시도해보세요' : '단지명, 동 이름으로 검색하면 실거래 이력을 확인할 수 있어요'}
+          </div>
         </div>
       )}
 
