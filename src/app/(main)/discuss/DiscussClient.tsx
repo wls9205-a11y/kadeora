@@ -167,15 +167,15 @@ export default function DiscussClient() {
       {/* 탭 */}
       <div style={{
         display: 'flex', gap: 4, marginBottom: isChat ? 8 : 12, overflowX: 'auto', scrollbarWidth: 'none',
-        background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '8px 10px',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px',
         flexShrink: 0,
       }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
-            padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0,
+            padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', flexShrink: 0,
             fontWeight: 700, fontSize: 'var(--fs-sm)',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
-            color: tab === t.key ? '#fff' : 'var(--text-secondary)',
+            color: tab === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
           }}>{t.label}</button>
         ))}
       </div>

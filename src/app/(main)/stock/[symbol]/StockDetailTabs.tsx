@@ -103,7 +103,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: s
                 padding: '5px 12px', border: 'none', borderRadius: 6, cursor: 'pointer',
                 fontSize: 'var(--fs-xs)', fontWeight: 600,
                 background: chartType === t ? 'var(--brand)' : 'transparent',
-                color: chartType === t ? '#fff' : 'var(--text-tertiary)',
+                color: chartType === t ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 transition: 'all 0.15s',
               }}>
                 {t === 'candle' ? '🕯️ 캔들' : '📈 라인'}
@@ -119,7 +119,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: s
               padding: '4px 10px', border: 'none', borderRadius: 6, cursor: 'pointer',
               fontSize: 'var(--fs-xs)', fontWeight: 600,
               background: period === p.key ? 'var(--brand)' : 'var(--bg-hover)',
-              color: period === p.key ? '#fff' : 'var(--text-tertiary)',
+              color: period === p.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
               transition: 'all 0.15s',
             }}>
               {p.label}

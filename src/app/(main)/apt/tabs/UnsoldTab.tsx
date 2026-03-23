@@ -29,7 +29,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
-      color: sel === v ? '#fff' : 'var(--text-secondary)',
+      color: sel === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>
       {label || v}
@@ -75,7 +75,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <button key={a.region_nm} onClick={() => setUnsoldRegion(a.region_nm)} style={{
                 padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 600,
                 background: unsoldRegion === a.region_nm ? 'var(--accent-red)' : 'rgba(239,68,68,0.12)',
-                color: unsoldRegion === a.region_nm ? '#fff' : 'var(--accent-red)',
+                color: unsoldRegion === a.region_nm ? 'var(--text-inverse)' : 'var(--accent-red)',
                 border: 'none', cursor: 'pointer',
               }}>
                 {a.region_nm} <span style={{ fontWeight: 800 }}>+{a.change_pct}%</span> ({a.current_count.toLocaleString()}세대)
@@ -98,8 +98,8 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             background: unsoldRegion === '전체' ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
             <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
           </button>
           {unsoldRegionStats.map(r => (
@@ -109,12 +109,12 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               background: unsoldRegion === r.name ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
               <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
               {total > 0 && (
                 <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
-                  <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
+                  <div style={{ height: '100%', background: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
                 </div>
               )}
             </button>
@@ -183,8 +183,8 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             background: unsoldRegion === '전체' ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? '#fff' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{total.toLocaleString()}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
             <span style={{ fontSize: 10, color: unsoldRegion === '전체' ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{unsold.length}곳</span>
           </button>
           {unsoldRegionStats.map(r => (
@@ -194,12 +194,12 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               background: unsoldRegion === r.name ? 'rgba(220,38,38,0.15)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
               <span style={{ fontSize: 10, color: unsoldRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
               {total > 0 && (
                 <div style={{ width: '100%', height: 3, background: unsoldRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', marginTop: 2 }}>
-                  <div style={{ height: '100%', background: unsoldRegion === r.name ? '#fff' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
+                  <div style={{ height: '100%', background: unsoldRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
                 </div>
               )}
             </button>

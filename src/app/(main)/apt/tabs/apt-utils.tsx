@@ -90,7 +90,7 @@ export function Pill({ value, selected, onSelect, label }: { value: string; sele
     <button onClick={() => onSelect(value)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: selected === value ? 'var(--brand)' : 'var(--bg-hover)',
-      color: selected === value ? '#fff' : 'var(--text-secondary)',
+      color: selected === value ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>
       {label || value}

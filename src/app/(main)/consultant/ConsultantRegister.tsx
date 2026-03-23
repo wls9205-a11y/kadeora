@@ -102,7 +102,7 @@ export default function ConsultantRegister() {
           const active = steps.indexOf(step) >= i;
           return (
             <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? '#fff' : 'var(--text-tertiary)' }}>{i + 1}</div>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{i + 1}</div>
               <span style={{ fontSize: 'var(--fs-xs)', color: active ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: active ? 600 : 400 }}>{s}</span>
               {i < 2 && <span style={{ color: 'var(--text-tertiary)', margin: '0 4px' }}>→</span>}
             </div>
@@ -152,7 +152,7 @@ export default function ConsultantRegister() {
                   padding: '6px 12px', borderRadius: 16, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                   border: `1px solid ${regions.includes(r) ? 'var(--brand)' : 'var(--border)'}`,
                   background: regions.includes(r) ? 'var(--brand)' : 'transparent',
-                  color: regions.includes(r) ? '#fff' : 'var(--text-tertiary)',
+                  color: regions.includes(r) ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 }}>{r}</button>
               ))}
             </div>
@@ -205,7 +205,7 @@ export default function ConsultantRegister() {
               }} style={{
                 width: '100%', padding: '10px 0', borderRadius: 8, border: `1px solid ${tier.color}`, cursor: 'pointer',
                 background: i === 1 ? tier.color : 'transparent',
-                color: i === 1 ? '#fff' : tier.color,
+                color: i === 1 ? 'var(--text-inverse)' : tier.color,
                 fontSize: 'var(--fs-sm)', fontWeight: 700,
               }}>
                 {tier.name} 시작하기

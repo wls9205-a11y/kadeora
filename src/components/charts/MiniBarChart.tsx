@@ -41,7 +41,7 @@ export default function MiniBarChart({
                 {showValues && (
                   <span style={{
                     position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: 'var(--fs-xs)', fontWeight: 700, color: pct > 50 ? '#fff' : 'var(--text-tertiary)',
+                    fontSize: 'var(--fs-xs)', fontWeight: 700, color: pct > 50 ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                   }}>
                     {d.value.toLocaleString()}
                   </span>

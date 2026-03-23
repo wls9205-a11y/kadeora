@@ -64,11 +64,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <a href="/apt/map" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🗺️ 지도</a>
-          <a href="/apt/search" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🔍 검색</a>
-          <a href="/apt/diagnose" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🎯 가점진단</a>
-          <a href="https://www.applyhome.co.kr" target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>🏠 청약홈</a>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <a href="/apt/map" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '5px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🗺️ 지도</a>
+          <a href="/apt/search" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '5px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🔍 검색</a>
+          <a href="/apt/diagnose" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '5px 10px', borderRadius: 8, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>🎯 진단</a>
         </div>
       </div>
 
@@ -86,7 +85,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             <button key={k} onClick={() => { setActiveTab(k); haptic('light'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
               background: activeTab === k ? 'var(--brand)' : 'transparent',
-              color: activeTab === k ? '#fff' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
+              color: activeTab === k ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
               boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
             }}>
               {l}

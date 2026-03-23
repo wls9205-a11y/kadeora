@@ -21,7 +21,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
-      color: sel === v ? '#fff' : 'var(--text-secondary)',
+      color: sel === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>
       {label || v}
@@ -118,8 +118,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
             background: ongoingRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
           </button>
           {regionCounts.map(r => (
             <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
@@ -128,11 +128,11 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
               background: ongoingRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.count}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.count}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
               <div style={{ display: 'flex', gap: 2, fontSize: 10, color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : 'var(--accent-green)' }}>분양{r.subCount}</span>}
-                {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? '#fff' : 'var(--accent-red)' }}>미분양{r.unsoldCount}</span>}
+                {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>분양{r.subCount}</span>}
+                {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)' }}>미분양{r.unsoldCount}</span>}
               </div>
               {r.count > 0 && (
                 <div style={{ width: '100%', height: 3, background: ongoingRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
@@ -240,7 +240,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
             padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
             border: `1px solid ${ongoingSort === k ? 'var(--brand)' : 'var(--border)'}`,
             background: ongoingSort === k ? 'var(--brand)' : 'transparent',
-            color: ongoingSort === k ? '#fff' : 'var(--text-tertiary)',
+            color: ongoingSort === k ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           }}>{l}</button>
         ))}
       </div>
@@ -368,7 +368,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, aptUser, watc
               padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
               border: `1px solid ${ongoingPage === p ? 'var(--brand)' : 'var(--border)'}`,
               background: ongoingPage === p ? 'var(--brand)' : 'transparent',
-              color: ongoingPage === p ? '#fff' : 'var(--text-tertiary)',
+              color: ongoingPage === p ? 'var(--text-inverse)' : 'var(--text-tertiary)',
             }}>{p}</button>
           ))}
         </div>

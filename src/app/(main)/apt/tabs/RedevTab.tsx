@@ -20,7 +20,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
-      color: sel === v ? '#fff' : 'var(--text-secondary)',
+      color: sel === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>
       {label || v}
@@ -90,8 +90,8 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   background: redevRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? '#fff' : 'var(--text-primary)' }}>{redevelopment.length}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{redevelopment.length}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
                 </button>
                 {redevRegionStats.map(r => (
                   <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
@@ -100,11 +100,11 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                     background: redevRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.total}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
                     <div style={{ fontSize: 10, display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                      {r.redev > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : 'var(--accent-blue)' }}>개발{r.redev}</span>}
-                      {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? '#fff' : 'var(--accent-green)' }}>건축{r.rebuild}</span>}
+                      {r.redev > 0 && <span style={{ color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-blue)' }}>개발{r.redev}</span>}
+                      {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>건축{r.rebuild}</span>}
                     </div>
                     {r.total > 0 && (
                       <div style={{ width: '100%', height: 3, background: redevRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>

@@ -26,7 +26,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
     <button key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
-      color: sel === v ? '#fff' : 'var(--text-secondary)',
+      color: sel === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
     }}>
       {label || v}
@@ -79,8 +79,8 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 background: region === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? '#fff' : 'var(--text-primary)' }}>{apts.length}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === '전체' ? '#fff' : 'var(--text-secondary)' }}>전체</span>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{apts.length}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
               </button>
               {regionStats.map(r => (
                 <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
@@ -89,11 +89,11 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   background: region === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? '#fff' : 'var(--text-primary)' }}>{r.total}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? '#fff' : 'var(--text-secondary)' }}>{r.name}</span>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.total}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
                   <div style={{ fontSize: 10, display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                    {r.open > 0 && <span style={{ color: region === r.name ? '#fff' : 'var(--accent-green)' }}>접수{r.open}</span>}
-                    {r.upcoming > 0 && <span style={{ color: region === r.name ? '#fff' : 'var(--accent-yellow)' }}>예정{r.upcoming}</span>}
+                    {r.open > 0 && <span style={{ color: region === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>접수{r.open}</span>}
+                    {r.upcoming > 0 && <span style={{ color: region === r.name ? 'var(--text-inverse)' : 'var(--accent-yellow)' }}>예정{r.upcoming}</span>}
                   </div>
                   {r.total > 0 && (
                     <div style={{ width: '100%', height: 3, background: region === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
@@ -112,7 +112,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginRight: 4 }}>정렬</span>
               {([['date', '최신순'], ['deadline', '마감임박'], ['supply', '세대수'], ['competition', '경쟁률']] as const).map(([k, l]) => (
-                <button key={k} onClick={() => setAptSort(k)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 'var(--fs-xs)', fontWeight: aptSort === k ? 700 : 500, background: aptSort === k ? 'var(--brand)' : 'var(--bg-hover)', color: aptSort === k ? '#fff' : 'var(--text-secondary)', cursor: 'pointer' }}>{l}</button>
+                <button key={k} onClick={() => setAptSort(k)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 'var(--fs-xs)', fontWeight: aptSort === k ? 700 : 500, background: aptSort === k ? 'var(--brand)' : 'var(--bg-hover)', color: aptSort === k ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{l}</button>
               ))}
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, fontSize: 'var(--fs-xs)' }}>
                 <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}</span>
@@ -245,7 +245,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <button key={s.key} onClick={() => setAptSort(s.key)} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
                   background: aptSort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: aptSort === s.key ? '#fff' : 'var(--text-tertiary)', fontWeight: 600,
+                  color: aptSort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600,
                 }}>{s.label}</button>
               ))}
             </div>

@@ -172,7 +172,7 @@ export default async function BlogPage({ searchParams }: Props) {
             style={{
               padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,
               background: sort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
-              color: sort === s.key ? '#fff' : 'var(--text-tertiary)',
+              color: sort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
               textDecoration: 'none', border: 'none',
             }}>
             {s.label}

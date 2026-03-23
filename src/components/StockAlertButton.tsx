@@ -88,7 +88,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
             <button key={t.key} onClick={() => setAlertType(t.key)} style={{
               flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 600,
               background: alertType === t.key ? 'var(--brand)' : 'var(--bg-hover)',
-              color: alertType === t.key ? '#fff' : 'var(--text-secondary)',
+              color: alertType === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
               border: alertType === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer',
             }}>{t.label}</button>
           ))}

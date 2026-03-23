@@ -80,7 +80,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
               padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
               fontSize: 'var(--fs-xs)', fontWeight: 600,
               background: mode === m ? 'var(--brand)' : 'var(--bg-hover)',
-              color: mode === m ? '#fff' : 'var(--text-tertiary)',
+              color: mode === m ? 'var(--text-inverse)' : 'var(--text-tertiary)',
             }}>
               {m === 'price' ? '거래가' : '평당가'}
             </button>

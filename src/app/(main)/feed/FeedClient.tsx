@@ -245,7 +245,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                   padding: '5px 12px', borderRadius: 999, border: `1px solid ${isActive ? 'var(--brand)' : 'var(--border)'}`, cursor: 'pointer', flexShrink: 0,
                   fontWeight: 600, fontSize: 'var(--fs-xs)', fontFamily: 'inherit',
                   background: isActive ? 'var(--brand)' : 'transparent',
-                  color: isActive ? '#fff' : 'var(--text-tertiary)',
+                  color: isActive ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 }}>
                 {r.label}
               </button>

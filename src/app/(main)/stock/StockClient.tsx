@@ -188,7 +188,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const globalTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['m7','🏆 M7'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
@@ -268,33 +268,16 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         <button onClick={() => { setMode('domestic'); setSearch(''); setSectorFilter('all'); }} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
           background: isDomestic ? 'var(--brand)' : 'var(--bg-surface)',
-          color: isDomestic ? '#fff' : 'var(--text-tertiary)',
+          color: isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           border: isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇰🇷 국내주식</button>
         <button onClick={() => { setMode('global'); setSearch(''); setSectorFilter('all'); }} style={{
           flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
           background: !isDomestic ? 'var(--accent-blue)' : 'var(--bg-surface)',
-          color: !isDomestic ? '#fff' : 'var(--text-tertiary)',
+          color: !isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           border: !isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇺🇸 해외주식</button>
       </div>
-
-      {/* 시장 요약 */}
-      {sentimentStocks.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
-          {[
-            { label: '종목 수', value: sentimentStocks.length, color: 'var(--text-primary)' },
-            { label: '평균 등락', value: `${(sentimentStocks.reduce((s, st) => s + (st.change_pct ?? 0), 0) / sentTotal) > 0 ? '+' : ''}${(sentimentStocks.reduce((s, st) => s + (st.change_pct ?? 0), 0) / sentTotal).toFixed(2)}%`, color: stockColor(sentimentStocks.reduce((s, st) => s + (st.change_pct ?? 0), 0) / sentTotal, isDomestic) },
-            { label: '상승', value: upCount, color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)' },
-            { label: '하락', value: downCount, color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)' },
-          ].map(item => (
-            <div key={item.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{item.label}</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: item.color, marginTop: 1 }}>{item.value}</div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* 지수 바 */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
@@ -366,30 +349,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         </div>
       )}
 
-      {/* 테마 (국내만) */}
-      {isDomestic && themes.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🔥 오늘의 테마</div>
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
-            {themes.map(t => (
-              <div key={t.id} onClick={() => { setDomesticTab('themes'); setSelectedTheme(t.theme_name); }} style={{ minWidth: 110, padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, flexShrink: 0, cursor: 'pointer' }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot && '🔥'}{t.theme_name}</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, marginTop: 3, color: stockColor(t.change_pct??0, true) }}>
-                  {(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* 서브 탭 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 4, padding: '6px 8px' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px' }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
           <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as any) : setGlobalTab(k as any); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
-            padding: '7px 14px', borderRadius: 2, border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 700, fontSize: 'var(--fs-sm)',
+            padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 700, fontSize: 'var(--fs-sm)',
             background: currentTab === k ? 'var(--brand)' : 'transparent',
-            color: currentTab === k ? '#fff' : 'var(--text-secondary)',
+            color: currentTab === k ? 'var(--text-inverse)' : 'var(--text-secondary)',
           }}>{l}</button>
         ))}
       </div>
@@ -424,9 +390,9 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         <div style={{ marginBottom: 16 }}>
           {/* 테마 필터 칩 */}
           <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
-            <button onClick={() => setSelectedTheme(null)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: !selectedTheme ? 'var(--brand)' : 'var(--bg-hover)', color: !selectedTheme ? '#fff' : 'var(--text-tertiary)' }}>전체</button>
+            <button onClick={() => setSelectedTheme(null)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: !selectedTheme ? 'var(--brand)' : 'var(--bg-hover)', color: !selectedTheme ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>전체</button>
             {themes.map(t => (
-              <button key={t.id} onClick={() => setSelectedTheme(selectedTheme === t.theme_name ? null : t.theme_name)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: selectedTheme === t.theme_name ? 'var(--brand)' : 'var(--bg-hover)', color: selectedTheme === t.theme_name ? '#fff' : 'var(--text-tertiary)' }}>{t.is_hot ? '🔥' : ''}{t.theme_name}</button>
+              <button key={t.id} onClick={() => setSelectedTheme(selectedTheme === t.theme_name ? null : t.theme_name)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: selectedTheme === t.theme_name ? 'var(--brand)' : 'var(--bg-hover)', color: selectedTheme === t.theme_name ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{t.is_hot ? '🔥' : ''}{t.theme_name}</button>
             ))}
           </div>
           {themes.filter(t => !selectedTheme || t.theme_name === selectedTheme).map(t => {

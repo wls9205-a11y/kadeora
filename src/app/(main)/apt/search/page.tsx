@@ -71,7 +71,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
           <Link key={f.key} href={`/apt/search?${q ? `q=${q}&` : ''}${region ? `region=${region}&` : ''}${f.key ? `area=${f.key}` : ''}`} style={{
             padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
             background: area === f.key ? 'var(--brand)' : 'var(--bg-hover)',
-            color: area === f.key ? '#fff' : 'var(--text-secondary)',
+            color: area === f.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
             textDecoration: 'none', border: 'none',
           }}>{f.label}</Link>
         ))}
@@ -86,7 +86,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
               <Link key={r.region_nm} href={`/apt/search?region=${r.region_nm}`} style={{
                 padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
                 background: region === r.region_nm ? 'var(--brand)' : 'var(--bg-surface)',
-                color: region === r.region_nm ? '#fff' : 'var(--text-secondary)',
+                color: region === r.region_nm ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 textDecoration: 'none', border: '1px solid var(--border)',
               }}>{r.region_nm} ({r.cnt}건)</Link>
             ))}

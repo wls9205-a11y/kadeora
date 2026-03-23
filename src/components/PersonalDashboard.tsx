@@ -172,7 +172,7 @@ export default function PersonalDashboard() {
                     fontSize: 'var(--fs-xs)', fontWeight: 700, flexShrink: 0, marginLeft: 8,
                     padding: '2px 6px', borderRadius: 4,
                     background: dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--accent-red)' : 'var(--bg-hover)',
-                    color: dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? '#fff' : 'var(--text-secondary)',
+                    color: dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>
                     {dDay(a.rcept_endde)}
                   </span>

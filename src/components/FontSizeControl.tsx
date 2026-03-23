@@ -39,7 +39,7 @@ export default function FontSizeControl() {
             padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
             fontSize: 'var(--fs-xs)', fontWeight: size === s.value ? 700 : 400,
             background: size === s.value ? 'var(--brand)' : 'var(--bg-hover)',
-            color: size === s.value ? '#fff' : 'var(--text-tertiary)',
+            color: size === s.value ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           }}
         >
           {s.label}
