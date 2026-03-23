@@ -232,7 +232,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       </div>
 
       {/* 정렬 + 상태 필터 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
           <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
             padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',

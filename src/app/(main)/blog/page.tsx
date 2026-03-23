@@ -294,7 +294,7 @@ export default async function BlogPage({ searchParams }: Props) {
             <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>📚 인기 시리즈</span>
             <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
           </div>
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
             {topSeries.map(s => (
               <Link key={s.slug} href={`/blog/series/${s.slug}`} style={{
                 flexShrink: 0, width: 140, padding: '10px 12px',

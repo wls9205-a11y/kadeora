@@ -186,7 +186,7 @@ export default function WriteClient() {
       )}
 
       {/* 카테고리 칩 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 2 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         {CATEGORIES.map(c => (
           <button key={c.value} onClick={() => setCategory(c.value)} style={{
             padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,

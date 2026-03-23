@@ -219,7 +219,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       <PersonalDashboard />
 
       {/* 카테고리 pill 탭 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 2 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', scrollbarWidth: 'none', flexWrap: 'nowrap', paddingBottom: 2 }}>
         {categories.map(cat => {
           const isActive = activeCategory === cat.key;
           return (
@@ -240,7 +240,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
       {/* 지역 필터 (우리동네만) */}
       {activeCategory === 'local' && (
-        <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', flexWrap: 'nowrap' }}>
+        <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none', flexWrap: 'nowrap' }}>
           {REGIONS.map(r => {
             const isActive = activeRegion === r.value || (activeRegion === 'all' && r.value === 'all');
             return (
