@@ -248,7 +248,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               {briefing.sector_analysis.slice(0, 6).map((sec: any) => (
                 <div key={sec.name} style={{
                   fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6,
-                  background: (sec.avg_pct || 0) > 0 ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)',
+                  background: (sec.avg_pct || 0) > 0 ? 'rgba(248,113,113,0.08)' : 'rgba(96,165,250,0.08)',
                   color: (sec.avg_pct || 0) > 0 ? 'var(--accent-red)' : 'var(--accent-blue)',
                   fontWeight: 600,
                 }}>
@@ -301,37 +301,6 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           );
         })}
       </div>
-
-      {/* 섹터 히트맵 (국내) */}
-      {isDomestic && (() => {
-        const sectorMap = new Map<string, { up: number; down: number; flat: number; totalPct: number; count: number }>();
-        domesticStocks.forEach(s => {
-          if (!s.sector) return;
-          const cur = sectorMap.get(s.sector) || { up: 0, down: 0, flat: 0, totalPct: 0, count: 0 };
-          const pct = s.change_pct ?? 0;
-          if (pct > 0) cur.up++; else if (pct < 0) cur.down++; else cur.flat++;
-          cur.totalPct += pct; cur.count++;
-          sectorMap.set(s.sector, cur);
-        });
-        const sectors = Array.from(sectorMap.entries()).map(([name, d]) => ({ name, avg: d.count > 0 ? d.totalPct / d.count : 0, ...d })).sort((a, b) => b.avg - a.avg);
-        if (sectors.length < 2) return null;
-        return (
-          <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
-            {sectors.map(s => (
-              <button key={s.name} onClick={() => { setSectorFilter(s.name === sectorFilter ? 'all' : s.name); setDomesticTab('ranking'); }} style={{
-                padding: '6px 10px', borderRadius: 8, border: sectorFilter === s.name ? '1px solid var(--brand)' : '1px solid var(--border)',
-                background: sectorFilter === s.name ? 'var(--brand-bg)' : s.avg > 1 ? 'rgba(248,113,113,0.08)' : s.avg < -1 ? 'rgba(96,165,250,0.08)' : 'var(--bg-surface)',
-                cursor: 'pointer', flexShrink: 0, minWidth: 70, textAlign: 'center',
-              }}>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{s.name}</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: stockColor(s.avg, true), marginTop: 2 }}>
-                  {s.avg > 0 ? '+' : ''}{s.avg.toFixed(1)}%
-                </div>
-              </button>
-            ))}
-          </div>
-        );
-      })()}
 
       {/* 상승/하락 비율 */}
       {sentimentStocks.length > 0 && (
@@ -544,7 +513,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && (
         <div style={{ position: 'relative', marginBottom: 10 }}>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="종목명 또는 코드 검색"
-            style={{ padding: '8px 36px 8px 14px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', width: '100%', boxSizing: 'border-box' }} />
+            className="kd-search-input" style={{ paddingRight: 36 }} />
           {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-sm)', padding: 4 }}>✕</button>}
         </div>
       )}
@@ -627,7 +596,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
             {/* 가격 + 등락 */}
             <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 12 }}>
-              <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)' }}>
                 {selectedStock.currency === 'USD' ? `$${selectedStock.price?.toFixed(2)}` : `₩${fmt(selectedStock.price)}`}
               </div>
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: stockColor(selectedStock.change_pct??0, isDomestic), marginTop: 4 }}>

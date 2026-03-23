@@ -234,6 +234,8 @@ html.font-large {
   --brand-light:    #1E3A5F;
   --brand-bg:       rgba(37,99,235,0.08);
   --brand-border:   rgba(37,99,235,0.15);
+  --accent-blue-light:  #93c5fd;
+  --accent-orange-light: #fdba74;
   --brand-dark:     #1E40AF;
   --success:        #4ADE80;
   --success-bg:     #0A1F1A;
