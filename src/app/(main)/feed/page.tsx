@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '피드',
   description: '주식, 부동산, 청약 관련 소문과 정보를 나누는 카더라 커뮤니티 피드',
+  alternates: { canonical: 'https://kadeora.app/feed' },
   openGraph: {
     title: '피드',
     description: '주식, 부동산, 청약 정보 커뮤니티',

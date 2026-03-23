@@ -5,6 +5,7 @@ import SearchClient from './SearchClient';
 export const metadata: Metadata = {
   title: '검색',
   description: '카더라 통합 검색 — 게시글, 종목, 토론방 검색',
+  alternates: { canonical: 'https://kadeora.app/search' },
 };
 
 export default function SearchPage() {

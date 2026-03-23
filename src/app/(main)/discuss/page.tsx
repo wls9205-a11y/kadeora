@@ -8,6 +8,7 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: '토론',
   description: '지금 뜨거운 토론과 실시간 라운지',
+  alternates: { canonical: 'https://kadeora.app/discuss' },
   openGraph: {
     title: '토론',
     description: '실시간 라운지와 뜨거운 토론',

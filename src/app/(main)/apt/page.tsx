@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발',
   description: '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.',
+  alternates: { canonical: 'https://kadeora.app/apt' },
   openGraph: {
     title: '청약·분양중·미분양·재개발',
     description: '전국 아파트 청약 일정, 분양중 현장, 미분양 현황, 재개발·재건축 진행 현황',

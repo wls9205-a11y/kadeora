@@ -7,6 +7,7 @@ import { BookOpen } from 'lucide-react';
 export const metadata: Metadata = {
   title: '블로그 시리즈',
   description: '카더라 블로그 시리즈 — 주제별로 엮인 연재 콘텐츠',
+  alternates: { canonical: 'https://kadeora.app/blog/series' },
 };
 
 export const revalidate = 3600;
