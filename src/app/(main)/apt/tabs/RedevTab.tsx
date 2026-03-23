@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { isNew, NewBadge, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
+import RedevTimeline from '@/components/RedevTimeline';
 
 interface Props extends SharedTabProps {
   redevelopment: any[];
@@ -285,6 +286,9 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{r.ai_summary}</div>
           </div>
         )}
+
+        {/* 진행 타임라인 */}
+        <RedevTimeline currentStage={r.stage || '정비구역지정'} />
 
         {/* 사업 진행률 파이프라인 */}
         {(() => {

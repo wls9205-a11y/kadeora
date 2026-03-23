@@ -4,6 +4,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
+const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr: false });
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -546,6 +547,14 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         </div>
         );
       })()}
+
+      {/* 섹터 히트맵 (시총순위 탭) */}
+      {domesticTab === 'ranking' && isDomestic && (
+        <SectorHeatmap stocks={stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')} isKR={true} />
+      )}
+      {!isDomestic && globalTab === 'ranking' && (
+        <SectorHeatmap stocks={stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')} isKR={false} />
+      )}
 
       {/* KOSPI/KOSDAQ 토글 (국내 시총 탭) */}
       {isDomestic && domesticTab === 'ranking' && (
