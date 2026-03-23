@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    console.log(`[blog-monthly-theme] Created ${created} for ${monthKey}`);
+    console.info(`[blog-monthly-theme] Created ${created} for ${monthKey}`);
     return {
       processed: themes.length,
       created,

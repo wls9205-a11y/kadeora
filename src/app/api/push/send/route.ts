@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import webpush from 'web-push';
 
@@ -16,10 +16,7 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await sb.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const admin = getSupabaseAdmin();
 
   const { data: profile } = await admin
     .from('profiles').select('is_admin').eq('id', user.id).single();

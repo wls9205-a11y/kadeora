@@ -3,7 +3,7 @@
 // Yahoo: US stocks (NYSE/NASDAQ) - v7 quote API with previousClose fallback
 // Usage: Personal/non-commercial display only
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
@@ -307,10 +307,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = getSupabaseAdmin();
 
   // 장 운영시간 체크 (KST 09:00~15:30)
   const now = new Date();

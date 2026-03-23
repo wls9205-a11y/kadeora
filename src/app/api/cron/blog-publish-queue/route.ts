@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export const dynamic = 'force-dynamic';
@@ -26,10 +26,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('blog-publish-queue', async () => {
-    const admin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const admin = getSupabaseAdmin();
 
     // DB RPC로 발행 (설정값도 DB에서 읽음 — 코드 배포 없이 속도 조절 가능)
     const { data: publishResult, error: publishError } = await admin.rpc('blog_publish_from_queue');
@@ -43,7 +40,7 @@ export async function GET(req: NextRequest) {
     const { data: queueStatus } = await admin.rpc('blog_queue_status');
 
     const published = publishResult?.published ?? 0;
-    console.log(`[blog-publish-queue] Result: ${JSON.stringify(publishResult)}, Queue: ${JSON.stringify(queueStatus)}`);
+    console.info(`[blog-publish-queue] Result: ${JSON.stringify(publishResult)}, Queue: ${JSON.stringify(queueStatus)}`);
 
     return {
       processed: published,

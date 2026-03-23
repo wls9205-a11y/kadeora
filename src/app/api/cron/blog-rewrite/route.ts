@@ -84,7 +84,7 @@ ${post.content}`
         }).eq('id', post.id);
 
         rewritten++;
-        console.log(`[blog-rewrite] Rewritten: ${post.slug}`);
+        console.info(`[blog-rewrite] Rewritten: ${post.slug}`);
       } catch (err: any) {
         console.error(`[blog-rewrite] Error: ${post.slug}`, err.message);
       }

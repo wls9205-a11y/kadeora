@@ -2,25 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-// 시리즈 슬러그 → 타이틀 키워드 매핑
-// 시리즈 title/slug에서 자동으로 키워드를 추출하고,
-// 블로그 제목에 해당 키워드가 포함되면 매칭
+// 시리즈 ID → 키워드 매핑 (DB의 실제 시리즈 ID 기준)
 const SERIES_KEYWORD_MAP: Record<string, string[]> = {
-  // 투자 가이드 시리즈
-  'isa': ['ISA', 'isa', '개인종합자산', '중개형ISA'],
-  'etf': ['ETF', 'etf', '상장지수', '인덱스펀드'],
-  'dividend': ['배당', '배당주', '배당금', '고배당', '배당수익'],
-  'value-investing': ['가치투자', '저평가', 'PER', 'PBR', '내재가치', '밸류'],
-  'chart-analysis': ['차트분석', '기술적분석', '캔들', '이동평균', '볼린저', 'RSI', 'MACD', '매매기법'],
-  'tax-saving': ['절세', '세금', '양도세', '증여세', '종합소득세', '세액공제', '소득공제'],
-  'real-estate-tax': ['부동산세', '취득세', '재산세', '종부세', '종합부동산세'],
-  // 부동산 시리즈
-  'subscription-guide': ['청약', '청약가점', '청약통장', '특별공급', '일반공급', '당첨'],
-  'redevelopment': ['재개발', '재건축', '정비사업', '조합', '관리처분'],
-  'unsold': ['미분양', '악성미분양', '준공후미분양'],
-  // 지역/아파트 분석
-  'apt-analysis': ['아파트분석', '단지분석', '실거래분석', '시세분석'],
-  'region-analysis': ['지역분석', '부동산전망', '투자전망'],
+  // 부동산
+  'trade-analysis': ['실거래', '실거래가', '거래가 TOP', '시세', '평당가', '매매 동향', '거래 동향'],
+  'subscription-analysis': ['청약 총정리', '청약', '당첨 전략', '분양', '특별공급', '일반공급', '청약가점', '청약통장'],
+  'apt-beginner-guide': ['투자 분석', '투자 가치', '분양 분석', '완전 분석', '실거주 가이드', '투자 전망', '단지 분석', '아파트 분석'],
+  'redevelopment-status': ['재개발', '재건축', '정비사업', '조합설립', '관리처분', '정비구역'],
+  'unsold-report': ['미분양', '잔여세대', '악성미분양', '준공후미분양'],
+  'real-estate-tax': ['부동산세', '취득세', '재산세', '종부세', '양도세', '절세', '세금', '세액공제'],
+  // 주식
+  'stock-analysis': ['종목 분석', '주가 전망', '성장성 분석', '리스크 분석', '밸류에이션', '투자 포인트', '기술적 분석', '기본적 분석', '테마 분석', '관련주', '수혜주'],
+  'stock-comparison': ['비교', 'vs', 'VS'],
+  'dividend-investing': ['배당', '배당주', '배당금', '고배당', '배당수익'],
+  'finance-basics': ['ETF', 'etf', 'ISA', 'isa', '펀드', '재테크', '가치투자', 'PER', 'PBR', 'RSI', 'MACD', '차트분석'],
 };
 
 export const GET = withCronAuth(async (req: NextRequest) => {
@@ -122,7 +117,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
     await sb.from('blog_series').update({ post_count: count || 0 }).eq('id', seriesId);
   }
 
-  console.log(`[blog-series-assign] ${totalAssigned}건 할당 (${bySeriesMap.size}개 시리즈)`);
+  console.info(`[blog-series-assign] ${totalAssigned}건 할당 (${bySeriesMap.size}개 시리즈)`);
 
   return NextResponse.json({
     ok: true,

@@ -99,7 +99,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
     await new Promise(r => setTimeout(r, 300));
   }
 
-  console.log(`[redev-verify-households] scanned=${projects.length} updated=${updated} failed=${failed}`);
+  console.info(`[redev-verify-households] scanned=${projects.length} updated=${updated} failed=${failed}`);
 
   return NextResponse.json({
     ok: true,

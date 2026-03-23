@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 export async function GET(req: NextRequest) {
@@ -11,10 +11,7 @@ export async function GET(req: NextRequest) {
   const apiKey = process.env.MOLIT_STAT_API_KEY;
   if (!apiKey) return NextResponse.json({ error: 'MOLIT_STAT_API_KEY not set' }, { status: 200 });
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = getSupabaseAdmin();
 
   const result = await withCronLogging('crawl-unsold-molit', async () => {
     // 최신 월 데이터 (보통 2~3개월 전까지 제공)

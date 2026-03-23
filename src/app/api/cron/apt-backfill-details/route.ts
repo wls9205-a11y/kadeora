@@ -117,7 +117,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
     } catch {}
   }
 
-  console.log(`[apt-backfill-details] scanned=${scanned} updated=${updated} remaining=${missingMap.size}`);
+  console.info(`[apt-backfill-details] scanned=${scanned} updated=${updated} remaining=${missingMap.size}`);
 
   return NextResponse.json({
     ok: true,

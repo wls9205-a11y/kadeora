@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get('action');
 
     if (!action || action === 'list') {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+      const supabase = getSupabaseAdmin();
       const { data, error } = await supabase.from('apt_subscriptions').select('*').order('rcept_endde', { ascending: false }).limit(50);
       if (error) throw error;
       return NextResponse.json({ success: true, data, count: data?.length || 0 });
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       const json = await apiRes.json();
       const items = json?.data || json?.response?.body?.items?.item || [];
       if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ success: true, synced: 0 });
-      const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+      const supabase = getSupabaseAdmin();
       const { data, error } = await supabase.from('apt_subscriptions').upsert(items.map(mapItem), { onConflict: 'house_manage_no' }).select();
       if (error) throw error;
       return NextResponse.json({ success: true, synced: data?.length || 0 });

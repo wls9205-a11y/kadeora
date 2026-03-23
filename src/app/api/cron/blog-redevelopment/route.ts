@@ -152,7 +152,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    console.log(`[blog-redevelopment] Created ${created}/${zones.length}`);
+    console.info(`[blog-redevelopment] Created ${created}/${zones.length}`);
     return {
       processed: zones.length,
       created,

@@ -170,7 +170,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    console.log(`[blog-apt-landmark] Created ${created}/${apts.length}`);
+    console.info(`[blog-apt-landmark] Created ${created}/${apts.length}`);
     return {
       processed: apts.length,
       created,

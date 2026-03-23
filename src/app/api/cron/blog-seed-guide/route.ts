@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
     if (fetchErr) { console.error('[blog-seed-guide] fetch error:', fetchErr); throw new Error(fetchErr.message); }
     if (!seeds || seeds.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'anthropic', api_calls: 0 } };
 
-    console.log(`[blog-seed-guide] Found ${seeds.length} seeds, columns:`, Object.keys(seeds[0] || {}));
+    console.info(`[blog-seed-guide] Found ${seeds.length} seeds, columns:`, Object.keys(seeds[0] || {}));
 
     let created = 0;
     let skipped = 0;
@@ -155,7 +155,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    console.log(`[blog-seed-guide] Created ${created}/${seeds.length}, skipped ${skipped}`);
+    console.info(`[blog-seed-guide] Created ${created}/${seeds.length}, skipped ${skipped}`);
     return {
       processed: seeds.length,
       created,

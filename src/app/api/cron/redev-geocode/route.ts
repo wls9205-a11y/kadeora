@@ -86,6 +86,6 @@ export const GET = withCronAuth(async (req: NextRequest) => {
     await new Promise(r => setTimeout(r, 200));
   }
 
-  console.log(`[redev-geocode] scanned=${projects.length} updated=${updated} failed=${failed}`);
+  console.info(`[redev-geocode] scanned=${projects.length} updated=${updated} failed=${failed}`);
   return NextResponse.json({ ok: true, scanned: projects.length, updated, failed });
 });

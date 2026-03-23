@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest) {
@@ -8,10 +8,7 @@ export async function POST(req: NextRequest) {
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { subscription } = await req.json();
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const admin = getSupabaseAdmin();
 
   await admin.from('push_subscriptions').upsert({
     user_id: user.id,
@@ -29,10 +26,7 @@ export async function DELETE() {
   const { data: { user }, error: authError } = await sb.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const admin = getSupabaseAdmin();
   await admin.from('push_subscriptions').delete().eq('user_id', user.id);
   return NextResponse.json({ ok: true });
 }

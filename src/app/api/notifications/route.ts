@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 async function getUser() {
   const cookieStore = await cookies();
@@ -24,7 +22,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Number(searchParams.get('limit')) || 30, 100);
     const offset = Number(searchParams.get('offset')) || 0;
     const unreadOnly = searchParams.get('unread') === 'true';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = getSupabaseAdmin();
     let query = supabase.from('notifications').select('*', { count: 'exact' })
       .eq('user_id', user.id).order('created_at', { ascending: false }).range(offset, offset + limit - 1);
     if (unreadOnly) query = query.eq('is_read', false);
@@ -43,7 +41,7 @@ export async function PATCH(request: NextRequest) {
     const user = await getUser();
     if (!user) return NextResponse.json({ success: false, error: '로그인 필요' }, { status: 401 });
     const body = await request.json();
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = getSupabaseAdmin();
 
     // notifications/page.tsx 에서 { all: true } 또는 { id: string } 으로 보냄
     if (body.all === true || body.markAllRead === true) {

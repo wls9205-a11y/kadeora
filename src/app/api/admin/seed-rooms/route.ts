@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const DEFAULT_ROOMS = [
   { room_key: 'stock_005930', display_name: '삼성전자 토론방', description: '삼성전자(005930) 실시간 토론', room_type: 'stock' },
@@ -15,10 +15,7 @@ export async function POST() {
   const auth = await requireAdmin()
   if ('error' in auth) return auth.error
 
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const admin = getSupabaseAdmin();
 
   let created = 0
   let skipped = 0

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const EXPECTED_AUTH =
   process.env.TOSS_DISCONNECT_BASIC_AUTH ||
@@ -18,10 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'user_id or user_ci is required' }, { status: 400 })
     }
 
-    const admin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const admin = getSupabaseAdmin();
 
     const { error } = await admin
       .from('profiles')

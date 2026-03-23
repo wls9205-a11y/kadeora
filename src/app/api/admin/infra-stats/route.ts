@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
-
 export async function GET(req: Request) {
-  const supabaseAdmin = getAdminClient();
+  const supabaseAdmin = getSupabaseAdmin();
   // Admin auth check
   const { createSupabaseServer } = await import('@/lib/supabase-server');
   const sb = await createSupabaseServer();

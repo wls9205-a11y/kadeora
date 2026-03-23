@@ -1,8 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 
 export async function POST(request: NextRequest) {
@@ -16,7 +14,7 @@ export async function POST(request: NextRequest) {
     if (!authHeader) {
       return NextResponse.json({ success: false, error: '인증이 필요합니다' }, { status: 401 });
     }
-    const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabaseAuth = getSupabaseAdmin();
     const token = authHeader.replace('Bearer ', '');
     const { data: { user } } = await supabaseAuth.auth.getUser(token);
     if (!user) {
@@ -100,7 +98,7 @@ export async function GET(request: NextRequest) {
     if (!authHeader) {
       return NextResponse.json({ success: false, error: '인증이 필요합니다' }, { status: 401 });
     }
-    const supabaseGet = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabaseGet = getSupabaseAdmin();
     const { data: { user: getUser } } = await supabaseGet.auth.getUser(authHeader.replace('Bearer ', ''));
     if (!getUser) {
       return NextResponse.json({ success: false, error: '유효하지 않은 인증' }, { status: 401 });

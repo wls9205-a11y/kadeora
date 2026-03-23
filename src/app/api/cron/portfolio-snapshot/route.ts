@@ -74,6 +74,6 @@ export const GET = withCronAuth(async (req: NextRequest) => {
     }
   }
 
-  console.log(`[portfolio-snapshot] ${saved} saved, ${skipped} skipped, ${uniqueUsers.length} total users`);
+  console.info(`[portfolio-snapshot] ${saved} saved, ${skipped} skipped, ${uniqueUsers.length} total users`);
   return NextResponse.json({ ok: true, snapshots: saved, skipped, users: uniqueUsers.length });
 });

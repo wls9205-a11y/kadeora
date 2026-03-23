@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 /**
@@ -61,10 +61,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await withCronLogging('auto-grade', async () => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = getSupabaseAdmin();
 
     // 모든 활성 유저의 포인트 조회
     const { data: profiles, error: profileErr } = await supabase
