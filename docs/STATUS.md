@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-23 세션 28 최종
+> **마지막 업데이트:** 2026-03-24 세션 29 최종
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -89,6 +89,62 @@
 | check-price-alerts | 평일 장중 15분마다 | ✅ 세션24 추가 |
 | portfolio-snapshot | 평일 15:40 KST | ✅ 일일 수익률 스냅샷(세션28) |
 | ~~invite-reward~~ | ~~삭제~~ | 🗑️ 세션22에서 제거 (초대코드 2건뿐) |
+
+---
+
+## 세션 29 — 풀스택 감사 실행 + 커뮤니티 리디자인 + 런타임 에러 제로 (9커밋)
+
+### 1. 빌드 에러 긴급 수정
+- RightPanel.tsx `const sb` 중복 선언 → 삭제
+- notifications/route.ts `SUPABASE_URL` 복원
+
+### 2. 피드 커뮤니티 리디자인 (FeedClient + CommentSection)
+- 카드: borderBottom → 독립 카드 (bg-surface + border + borderRadius 14)
+- 아바타 28→36px + 프로필 링크 + 닉네임 기반 컬러
+- 카테고리 컬러 뱃지 인라인 (주식/부동산/우리동네/자유)
+- 인터랙션: icon only → pill 버튼 ("좋아요" "댓글 3" "공유")
+- 댓글: 카드 → 말풍선 (4px 14px 14px 14px) + 글자수 카운터
+- 가입 CTA: "대화에 참여" + pill 태그 4개 + 카카오 버튼
+- 블로그 비로그인 콘텐츠 40→70% 공개
+
+### 3. 런타임 에러 5건 제로화
+- OG 이미지: satori 미지원 `-webkit-box` display 제거 (반복 20+회/일 에러)
+- auth.getUser() try-catch: feed/apt/blog/profile 4페이지 (봇 크래시 해결)
+- refresh-all: maxDuration 60→120초 (504 타임아웃)
+
+### 4. Lint 경고 7건 수정
+- AptClient: `<a>` → `<Link>` 3곳
+- OngoingTab: 미사용 import 4개 + prop 2개 + 변수 2개 제거
+- apt/page.tsx: let→const, apt/region: 미사용 total 변수
+
+### 5. SEO — canonical URL 9페이지 + OG 이미지 2페이지
+- canonical: /stock, /apt, /discuss, /hot, /guide, /feed, /search, /blog/series, /grades
+- OG 이미지: /hot, /guide
+
+### 6. 사이드바 개선
+- 블로그 📝 링크 추가 (메인 메뉴 아래)
+- 비로그인: "카카오로 3초 가입" CTA 버튼
+
+### 7. 환경변수 + 검색 개선
+- env-validate: globalThis 캐시로 경고 스팸 제거
+- 검색 빈결과: "블로그에서 찾아보기 →" 링크
+
+### 8. TypeScript 타입 부분 수정
+- supabase-server.ts: CookieOptions 타입 명시
+- middleware.ts: CookieOptions import + 타입
+- tsconfig.json: supabase/functions exclude (Deno 에러 제거)
+- constants.ts: DEMO_STOCKS/DEMO_DISCUSS → any[] (스키마 불일치)
+
+### 9. 비로그인 관심종목 + sitemap 확대
+- StockClient: 관심종목 localStorage 폴백 (비로그인 가치 체험)
+- sitemap: 피드 게시글 최신 5,000건 포함
+
+### 남은 작업 (다음 세션)
+- [ ] Supabase 타입 재생성 (`supabase gen types`) → ignoreBuildErrors 제거
+- [ ] 상점/상담사 페이지 숨기기 (유저 100명 전)
+- [ ] Zod 검증 확대 (POST/PATCH API 전체)
+- [ ] 블로그 콘텐츠 길이 개선 (1,575자 → 3,000자+)
+- [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 
 ---
 
