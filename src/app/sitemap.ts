@@ -30,11 +30,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let blogPages: MetadataRoute.Sitemap = [];
   let stockPages: MetadataRoute.Sitemap = [];
   let aptPages: MetadataRoute.Sitemap = [];
+  let feedPages: MetadataRoute.Sitemap = [];
 
   try {
     const supabase = getSupabaseAdmin();
 
-    const [blogsR, stocksR, aptsR, seriesR] = await Promise.all([
+    const [blogsR, stocksR, aptsR, seriesR, postsR] = await Promise.all([
       supabase.from('blog_posts').select('slug, updated_at, published_at')
         .eq('is_published', true).not('published_at', 'is', null)
         .lte('published_at', now.toISOString())
@@ -42,6 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       supabase.from('stock_quotes').select('symbol, updated_at'),
       supabase.from('apt_subscriptions').select('house_manage_no, created_at').order('rcept_bgnde', { ascending: false }).limit(5000),
       supabase.from('blog_series').select('slug, created_at').eq('is_active', true),
+      supabase.from('posts').select('id, created_at, updated_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000),
     ]);
 
     blogPages = (blogsR.data || []).map(b => {
@@ -76,7 +78,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
     blogPages = [...blogPages, ...seriesPages];
+
+    feedPages = (postsR.data || []).map((p: any) => ({
+      url: `${BASE}/feed/${p.id}`,
+      lastModified: new Date(p.updated_at || p.created_at || Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }));
   } catch {}
 
-  return [...staticPages, ...regionPages, ...blogPages, ...stockPages, ...aptPages];
+  return [...staticPages, ...regionPages, ...blogPages, ...stockPages, ...aptPages, ...feedPages];
 }

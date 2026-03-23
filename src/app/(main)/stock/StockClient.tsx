@@ -42,10 +42,16 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
 
+  const LS_WATCHLIST_KEY = 'kd_stock_watchlist';
+
   useEffect(() => {
     fetch('/api/stock/themes').then(r => r.ok ? r.json() : null).then(d => { if (d?.themes) setThemes(d.themes); }).catch(() => {});
     fetch('/api/stock/calendar').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setCalendarEvents(d.events); }).catch(() => {});
-    fetch('/api/stock/watchlist').then(r => r.ok ? r.json() : null).then(d => { if (d?.symbols) setWatchlistSymbols(d.symbols); }).catch(() => {});
+    // 관심종목: API → localStorage 폴백
+    fetch('/api/stock/watchlist').then(r => r.ok ? r.json() : null).then(d => {
+      if (d?.symbols?.length) { setWatchlistSymbols(d.symbols); }
+      else { try { const ls = JSON.parse(localStorage.getItem(LS_WATCHLIST_KEY) || '[]'); if (Array.isArray(ls)) setWatchlistSymbols(ls); } catch {} }
+    }).catch(() => { try { const ls = JSON.parse(localStorage.getItem(LS_WATCHLIST_KEY) || '[]'); if (Array.isArray(ls)) setWatchlistSymbols(ls); } catch {} });
     fetch('https://open.er-api.com/v6/latest/USD').then(r => r.json()).then(d => { if (d?.rates?.KRW) setExchangeRate(d.rates.KRW); }).catch(() => {});
   }, []);
 
@@ -123,15 +129,15 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
   const toggleWatchlist = useCallback(async (symbol: string) => {
     const isWatched = watchlistSymbols.includes(symbol);
+    const newList = isWatched ? watchlistSymbols.filter(s => s !== symbol) : [...watchlistSymbols, symbol];
+    setWatchlistSymbols(newList);
+    try { localStorage.setItem(LS_WATCHLIST_KEY, JSON.stringify(newList)); } catch {}
     try {
-      const res = await fetch('/api/stock/watchlist', {
+      await fetch('/api/stock/watchlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol, action: isWatched ? 'remove' : 'add' }),
       });
-      if (res.ok) {
-        setWatchlistSymbols(prev => isWatched ? prev.filter(s => s !== symbol) : [...prev, symbol]);
-      }
     } catch {}
   }, [watchlistSymbols]);
 
