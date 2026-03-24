@@ -84,23 +84,27 @@ async function fetchViaKis(supabase: any): Promise<{ stocks: any[]; success: num
   let success = 0;
   let failed = 0;
 
-  for (const stock of allStocks) {
-    const quote = await fetchKisQuote(stock.symbol, token, appkey, appsecret);
-    if (quote) {
-      await supabase.from('stock_quotes')
-        .update({
-          price: quote.price,
-          change_amt: quote.change_amt,
-          change_pct: quote.change_pct,
-          volume: quote.volume,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('symbol', stock.symbol);
-      success++;
-    } else {
-      failed++;
+  // KIS는 API rate limit이 있으므로 5개씩 병렬
+  const BATCH = 5;
+  for (let i = 0; i < allStocks.length; i += BATCH) {
+    const batch = allStocks.slice(i, i + BATCH);
+    const results = await Promise.allSettled(
+      batch.map(async (stock: any) => {
+        const quote = await fetchKisQuote(stock.symbol, token, appkey, appsecret);
+        if (quote) {
+          await supabase.from('stock_quotes')
+            .update({ price: quote.price, change_amt: quote.change_amt, change_pct: quote.change_pct, volume: quote.volume, updated_at: new Date().toISOString() })
+            .eq('symbol', stock.symbol);
+          return true;
+        }
+        return false;
+      })
+    );
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value) success++;
+      else failed++;
     }
-    await sleep(50);
+    if (i + BATCH < allStocks.length) await sleep(200);
   }
 
   const { data } = await supabase
@@ -115,12 +119,16 @@ async function fetchViaKis(supabase: any): Promise<{ stocks: any[]; success: num
 async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_amt: number; change_pct: number; volume: number } | null> {
   try {
     // 1순위: Naver 폴링 API
+    const ctrl1 = new AbortController();
+    const t1 = setTimeout(() => ctrl1.abort(), 5000);
     const res = await fetch(`https://polling.finance.naver.com/api/realtime/domestic/stock/${symbol}`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://finance.naver.com/',
       },
+      signal: ctrl1.signal,
     });
+    clearTimeout(t1);
     if (res.ok) {
       const json = await res.json();
       const d = json?.result?.datas?.[0];
@@ -140,12 +148,16 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
 
   try {
     // 2순위: Naver 모바일 API
+    const ctrl2 = new AbortController();
+    const t2 = setTimeout(() => ctrl2.abort(), 5000);
     const res = await fetch(`https://m.stock.naver.com/api/stock/${symbol}/basic`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
         'Referer': 'https://m.stock.naver.com/',
       },
+      signal: ctrl2.signal,
     });
+    clearTimeout(t2);
     if (res.ok) {
       const json = await res.json();
       const price = parseInt(String(json?.closePrice ?? '0').replace(/,/g, ''));
@@ -176,23 +188,33 @@ async function fetchViaNaver(supabase: any): Promise<{ stocks: any[]; success: n
   let success = 0;
   let failed = 0;
 
-  for (const stock of allStocks) {
-    const quote = await fetchNaverQuote(stock.symbol);
-    if (quote) {
-      await supabase.from('stock_quotes')
-        .update({
-          price: quote.price,
-          change_amt: quote.change_amt,
-          change_pct: quote.change_pct,
-          volume: quote.volume,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('symbol', stock.symbol);
-      success++;
-    } else {
-      failed++;
+  // 동시 10개씩 배치 처리 (순차→병렬, 타임아웃 대폭 단축)
+  const BATCH_SIZE = 10;
+  for (let i = 0; i < allStocks.length; i += BATCH_SIZE) {
+    const batch = allStocks.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map(async (stock: any) => {
+        const quote = await fetchNaverQuote(stock.symbol);
+        if (quote) {
+          await supabase.from('stock_quotes')
+            .update({
+              price: quote.price,
+              change_amt: quote.change_amt,
+              change_pct: quote.change_pct,
+              volume: quote.volume,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('symbol', stock.symbol);
+          return true;
+        }
+        return false;
+      })
+    );
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value) success++;
+      else failed++;
     }
-    await sleep(30);
+    if (i + BATCH_SIZE < allStocks.length) await sleep(100);
   }
 
   const { data } = await supabase

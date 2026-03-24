@@ -167,7 +167,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'DiscussionForumPosting',
     headline: post.title,
     description: post.content.slice(0, 160),
     datePublished: post.created_at,
@@ -180,6 +180,7 @@ export default async function FeedDetailPage({ params }: Props) {
       '@type': 'Organization',
       name: '카더라',
       url: SITE_URL,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.svg` },
     },
     url: `${SITE_URL}/feed/${post.id}`,
     mainEntityOfPage: {
@@ -191,6 +192,10 @@ export default async function FeedDetailPage({ params }: Props) {
       { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: post.comments_count ?? 0 },
     ],
     inLanguage: 'ko-KR',
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', 'article p:first-of-type'],
+    },
   };
 
   return (
