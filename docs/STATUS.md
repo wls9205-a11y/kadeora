@@ -144,6 +144,21 @@
 | 최종 | **0개** ✅ |
 
 ### 남은 작업 (다음 세션)
+
+## 세션 31D — 보안 강화 + 에러 핸들링 (1커밋, 33파일)
+
+### Rate limit 전량 추가 (31개 API)
+- 모든 user-facing API에 `rateLimit(req)` 추가
+- Upstash Redis sliding window (30req/1min)
+- 미설정 시 in-memory fallback
+
+### try/catch 에러 핸들링 (8개 API)
+- apt/bookmark, apt/watchlist, ping, profile/avatar-point
+- push/subscribe, stock/sparkline
+
+### 블로그 로그인 벽 모바일 반응형
+- maxHeight 500px → clamp(280px, 40vh, 500px)
+
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 - [ ] 네이버 서치콘솔에서 루트 URL 색인 요청
 - [ ] 실제 서비스 스크린샷으로 프리뷰 이미지 교체
@@ -262,6 +277,21 @@
 
 ### 남은 작업 (다음 세션)
 - [ ] Supabase 타입 재생성 (`supabase gen types`) → ignoreBuildErrors 제거
+
+## 세션 31D — 보안 강화 + 에러 핸들링 (1커밋, 33파일)
+
+### Rate limit 전량 추가 (31개 API)
+- 모든 user-facing API에 `rateLimit(req)` 추가
+- Upstash Redis sliding window (30req/1min)
+- 미설정 시 in-memory fallback
+
+### try/catch 에러 핸들링 (8개 API)
+- apt/bookmark, apt/watchlist, ping, profile/avatar-point
+- push/subscribe, stock/sparkline
+
+### 블로그 로그인 벽 모바일 반응형
+- maxHeight 500px → clamp(280px, 40vh, 500px)
+
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 - [ ] 네이버 서치콘솔에서 루트 URL 색인 요청 (FAQ 리치결과 반영)
 - [ ] 실제 서비스 스크린샷으로 프리뷰 이미지 교체 (현재는 생성 이미지)
@@ -369,6 +399,21 @@
 - [x] 홈 랜딩 페이지 신규 생성 ✅ 세션 30
 - [x] SEO 구조화 데이터 8종 + 이미지 캐러셀 + FAQ 리치결과 ✅ 세션 30
 - [ ] Supabase 타입 재생성 (`supabase gen types`) → ignoreBuildErrors 제거
+
+## 세션 31D — 보안 강화 + 에러 핸들링 (1커밋, 33파일)
+
+### Rate limit 전량 추가 (31개 API)
+- 모든 user-facing API에 `rateLimit(req)` 추가
+- Upstash Redis sliding window (30req/1min)
+- 미설정 시 in-memory fallback
+
+### try/catch 에러 핸들링 (8개 API)
+- apt/bookmark, apt/watchlist, ping, profile/avatar-point
+- push/subscribe, stock/sparkline
+
+### 블로그 로그인 벽 모바일 반응형
+- maxHeight 500px → clamp(280px, 40vh, 500px)
+
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 
 ## 세션 31C — 스크린샷 기반 실사용 버그 수정 (1커밋, 8파일)
