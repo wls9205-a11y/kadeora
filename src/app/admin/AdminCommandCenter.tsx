@@ -361,7 +361,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               </>
             )}
           </button>
-          {/* 갓버튼 포함 항목 요약 */}
+          {/* 갓버튼 포함 항목 요약 (대기 상태) */}
           {!runningSection && progress.results.length === 0 && (
             <div style={{ maxWidth: 640, margin: '8px auto 0', display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
               {['헬스체크', '주식시세', '환율', '청약수집', '실거래', '경쟁률', '미분양', '서울재개발', '부산재개발', '거래집계', '현장싱크', '현장이미지', '검색트렌드', '주변인프라', 'AI분석', '테마갱신', 'AI시황', '시드게시글', '블로그큐', '일일통계', '등급갱신', '데이터정리', '동의파기', 'Bing색인'].map(t => (
@@ -369,6 +369,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               ))}
             </div>
           )}
+          {/* 진행바 */}
+          {isGodRunning && progress.total > 0 && (
             <div style={{ maxWidth: 640, margin: '8px auto 0' }}>
               <div className="bar"><div className="bar-fill" style={{ width: `${pct(progress.done, progress.total)}%`, background: 'var(--brand)' }} /></div>
             </div>
