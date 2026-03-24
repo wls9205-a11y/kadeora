@@ -1,6 +1,11 @@
 import type { Metadata } from 'next';
+
 export const metadata: Metadata = {
-  title: '토론방',
-  description: '실시간 토론에 참여하세요. 주식·부동산·경제 이슈를 함께 이야기합니다.',
+  title: '실시간 토론방 | 카더라',
+  description: '주식방, 부동산방, 자유방에서 실시간으로 토론하세요',
+  robots: { index: true, follow: true },
 };
-export default function Layout({ children }: { children: React.ReactNode }) { return children; }
+
+export default function DiscussDetailLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}

@@ -56,7 +56,6 @@ export async function safeBlogInsert(
 
     // 1. 최소 콘텐츠 길이 체크
     if (data.content.length < config.min_content_length) {
-      console.log(`[safeBlogInsert] Content too short: ${data.content.length} < ${config.min_content_length} (${data.slug})`);
       return { success: false, reason: 'content_too_short' };
     }
 
@@ -78,7 +77,6 @@ export async function safeBlogInsert(
         p_threshold: config.title_similarity_threshold,
       });
       if (similar && similar.length > 0) {
-        console.log(`[safeBlogInsert] Similar title: "${data.title}" ≈ "${similar[0].title}" (${(similar[0].similarity * 100).toFixed(0)}%)`);
         return { success: false, reason: 'similar_title', similarTo: similar[0].title };
       }
     } catch {
@@ -94,7 +92,6 @@ export async function safeBlogInsert(
       .gte('created_at', todayStart.toISOString());
 
     if ((count ?? 0) >= config.daily_create_limit) {
-      console.log(`[safeBlogInsert] Daily create limit: ${count}/${config.daily_create_limit}`);
       return { success: false, reason: 'daily_limit' };
     }
 
