@@ -6,9 +6,24 @@ import type { Metadata } from 'next';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: '아파트 현장 정보 — 전국 분양·재개발·미분양 현장 목록',
+  title: '아파트 현장 정보 — 전국 분양·재개발·미분양 현장 목록 | 카더라',
   description: '전국 3,000+ 아파트 현장의 분양 정보, 청약 일정, 재개발 진행 현황, 미분양 현황을 한눈에. 현장명으로 검색하세요.',
   alternates: { canonical: `${SITE_URL}/apt/sites` },
+  robots: {
+    index: true,
+    follow: true,
+    'max-snippet': -1,
+    'max-image-preview': 'large' as const,
+  },
+  openGraph: {
+    title: '아파트 현장 정보 — 전국 분양·재개발·미분양 | 카더라',
+    description: '전국 3,000+ 아파트 현장의 분양 정보, 청약 일정, 재개발 진행 현황을 한눈에.',
+    url: `${SITE_URL}/apt/sites`,
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('아파트 현장 정보')}&subtitle=${encodeURIComponent('전국 3,000+ 분양·재개발·미분양')}`, width: 1200, height: 630 }],
+  },
 };
 
 const typeLabel: Record<string, string> = { subscription: '분양', redevelopment: '재개발', unsold: '미분양', landmark: '랜드마크', complex: '기존단지' };

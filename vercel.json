@@ -266,6 +266,10 @@
     {
       "path": "/api/cron/purge-withdrawn-consents",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/indexnow",
+      "schedule": "0 7 * * *"
     }
   ]
 }

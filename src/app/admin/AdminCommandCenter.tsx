@@ -52,6 +52,7 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'collect-site-trends':   { display: '검색 트렌드 수집',  group: '부동산' },
   'collect-site-facilities': { display: '주변 인프라 수집', group: '부동산' },
   'purge-withdrawn-consents': { display: '동의 철회 파기', group: '시스템' },
+  'indexnow':                { display: 'Bing 즉시 색인',  group: '시스템' },
   'apt-ai-summary':        { display: 'AI 한줄 분석',     group: '부동산' },
   'push-apt-deadline':     { display: '청약 마감 알림',    group: '부동산' },
   'check-price-alerts':    { display: '가격 알림 체크',    group: '주식' },

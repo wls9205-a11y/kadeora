@@ -53,23 +53,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description: desc.trim(),
     alternates: { canonical: `${SITE_URL}/apt/sites/${slug}` },
+    robots: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large' as const,
+      'max-video-preview': -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-snippet': -1,
+        'max-image-preview': 'large' as const,
+        'max-video-preview': -1,
+      },
+    },
     openGraph: {
       title,
       description: desc.trim(),
       url: `${SITE_URL}/apt/sites/${slug}`,
       siteName: '카더라',
       locale: 'ko_KR',
-      type: 'website',
+      type: 'article',
       images: [{ url: ogImage, width: 1200, height: 630, alt: `${site.name} 분양정보` }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description: desc.trim(),
+      site: '@kadeora_app',
       images: [ogImage],
     },
     other: {
-      'naver-site-verification': '',
+      'article:published_time': '',
+      'article:section': '부동산',
+      'article:tag': `${site.name},${site.region || ''},${typeLabel[site.site_type] || '분양'},청약,분양가`,
     },
   };
 }
