@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const sb = await createSupabaseServer();
     const today = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('invest_calendar')
-      .select('*')
+      .select('id,title,event_type,event_date,description,importance,country')
       .gte('event_date', today)
       .order('event_date', { ascending: true })
       .limit(20);

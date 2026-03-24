@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
           headers: { Authorization: `Basic ${encryptedKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ cancelReason: '서버 오류로 인한 자동 취소' }),
         });
-      } catch {}
+      } catch (e) { console.error('[payment] Error:', e); }
       return NextResponse.json({ success: false, error: '결제 처리 중 오류가 발생했습니다. 결제가 자동 취소됩니다.' }, { status: 500 });
     }
 

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseAdmin();
     const today = new Date().toISOString().slice(0, 10);
 
-    const { data: themes } = await supabase.from('stock_themes').select('*');
+    const { data: themes } = await supabase.from('stock_themes').select('id,theme_name,change_pct,description,related_symbols,is_hot,date');
     const { data: stocks } = await supabase.from('stock_quotes').select('symbol, change_pct').in('market', ['KOSPI', 'KOSDAQ']);
 
     if (!themes?.length || !stocks?.length) return { processed: 0, created: 0, failed: 0 };

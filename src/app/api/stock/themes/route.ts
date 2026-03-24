@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   try {
     const sb = await createSupabaseServer();
     const { data, error } = await sb.from('stock_themes')
-      .select('*')
+      .select('id,theme_name,change_pct,description,related_symbols,is_hot,date')
       .order('change_pct', { ascending: false })
       .limit(10);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

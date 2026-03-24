@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if (slug) {
       // 특정 시리즈 + 포스트 목록
       const { data: series } = await sb.from('blog_series')
-        .select('*').eq('slug', slug).eq('is_active', true).single();
+        .select('id,title,slug,description,cover_image,category,post_count,is_active').eq('slug', slug).eq('is_active', true).single();
       if (!series) return NextResponse.json({ error: '시리즈를 찾을 수 없습니다' }, { status: 404 });
 
       const { data: posts } = await sb.from('blog_posts')
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     // 전체 시리즈 목록
     const { data: seriesList } = await sb.from('blog_series')
-      .select('*')
+      .select('id,title,slug,description,cover_image,category,post_count,is_active')
       .eq('is_active', true)
       .order('post_count', { ascending: false });
 

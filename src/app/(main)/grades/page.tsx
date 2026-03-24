@@ -20,7 +20,7 @@ export default async function GradesPage() {
   const supabase = await createClient();
   const { data: grades } = await supabase
     .from('grade_definitions')
-    .select('*')
+    .select('grade,title,emoji,color_hex,description,min_score')
     .order('grade');
 
   return (

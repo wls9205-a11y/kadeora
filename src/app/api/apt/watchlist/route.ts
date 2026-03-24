@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return NextResponse.json({ items: [] });
 
-  const { data } = await sb.from('apt_watchlist').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+  const { data } = await sb.from('apt_watchlist').select('id,item_id,item_type,memo,notify_enabled,created_at').eq('user_id', user.id).order('created_at', { ascending: false });
   return NextResponse.json({ items: data || [] });
   } catch (e) { console.error('[watchlist GET]', e); return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 }); }
 }

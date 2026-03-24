@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       const { data: profile } = await authSb.from('profiles').select('is_admin').eq('id', user.id).single();
       if (profile?.is_admin) return NextResponse.json({ ok: true, skipped: 'admin' });
     }
-  } catch {}
+  } catch { /* fire-and-forget pageview, ignore errors */ }
 
   // Fire-and-forget
   const sb = getSupabaseAdmin();

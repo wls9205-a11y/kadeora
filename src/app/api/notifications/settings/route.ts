@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { data } = await sb.from('notification_settings').select('*').eq('user_id', user.id).maybeSingle();
+    const { data } = await sb.from('notification_settings').select('user_id,push_apt_deadline,push_attendance,push_comments,push_daily_digest,push_follows,push_hot_post,push_likes,push_news,push_stock_alert,quiet_start,quiet_end,updated_at').eq('user_id', user.id).maybeSingle();
     if (!data) {
       // 기본값으로 생성 (전부 ON — 유저가 개별적으로 끌 수 있음)
       const defaults = { user_id: user.id, push_comments: true, push_likes: true, push_follows: true, push_apt_deadline: true, push_hot_posts: true, push_stock_alert: true, push_attendance: true, push_marketing: true };

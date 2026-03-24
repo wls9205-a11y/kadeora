@@ -35,7 +35,7 @@ export default function ShopClient() {
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
-    sb.from('shop_products').select('*')
+    sb.from('shop_products').select('id,name,description,icon,price_krw,point_price,purchase_type,category,is_active,is_popular')
       .eq('is_active', true)
       .eq('purchase_type', 'cash')
       .order('price_krw')

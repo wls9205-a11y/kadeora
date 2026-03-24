@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   // 심볼별로 그룹핑하여 최근 10일 가격만 반환
   const map: Record<string, number[]> = {};
-  (data || []).forEach((d: any) => {
+  (data || []).forEach((d) => {
     if (!map[d.symbol]) map[d.symbol] = [];
     map[d.symbol].push(Number(d.close_price));
   });

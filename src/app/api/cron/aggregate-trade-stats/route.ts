@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     // 집계 결과 확인
     const { data: stats } = await supabase.from('apt_trade_monthly_stats')
-      .select('*').order('stat_month', { ascending: false }).limit(40);
+      .select('region,stat_month,trade_count,avg_price,avg_area').order('stat_month', { ascending: false }).limit(40);
 
     if (stats && stats.length > 1) {
       // Group by region, compare latest 2 months

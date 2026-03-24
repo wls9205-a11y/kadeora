@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     let triggered = 0;
 
     const { data: alerts } = await sb.from('price_alerts')
-      .select('*').eq('is_active', true).eq('is_triggered', false);
+      .select('id,user_id,alert_type,condition,threshold,target_symbol,target_apt_id,is_active,is_triggered,last_checked_at').eq('is_active', true).eq('is_triggered', false);
 
     if (!alerts?.length) return { checked: 0, triggered: 0 };
 

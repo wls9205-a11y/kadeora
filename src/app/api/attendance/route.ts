@@ -20,7 +20,7 @@ export async function GET() {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
 
-    const { data } = await sb.from('attendance').select('*').eq('user_id', user.id).maybeSingle();
+    const { data } = await sb.from('attendance').select('user_id,streak,total_days,last_date,updated_at').eq('user_id', user.id).maybeSingle();
     const today = todayKST();
     return NextResponse.json({
       streak: data?.streak ?? 0,
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     const today = todayKST();
     const yesterday = yesterdayKST();
-    const { data: existing } = await sb.from('attendance').select('*').eq('user_id', user.id).maybeSingle();
+    const { data: existing } = await sb.from('attendance').select('user_id,streak,total_days,last_date,updated_at').eq('user_id', user.id).maybeSingle();
 
     if (existing?.last_date === today) {
       return NextResponse.json({ already: true, streak: existing.streak, total_days: existing.total_days, points_earned: 0 });
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       .eq('user_id', user.id)
       .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
       .gt('amount', 0)
-    const total1h = recentPoints?.reduce((sum: number, r: any) => sum + (r.amount ?? 0), 0) ?? 0
+    const total1h = recentPoints?.reduce((sum: number, r) => sum + (r.amount ?? 0), 0) ?? 0
     if (total1h >= 200) {
       console.warn('[point-anomaly] suspicious attendance:', user.id, 'total1h:', total1h)
       return NextResponse.json({ error: '잠시 후 다시 시도해주세요.' }, { status: 429 })

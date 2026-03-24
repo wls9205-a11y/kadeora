@@ -25,7 +25,7 @@ async function handler(req: NextRequest) {
     .gte('updated_at', since)
     .limit(100);
 
-  const urls = (sites || []).map((s: any) => `${SITE_URL}/apt/sites/${s.slug}`);
+  const urls = (sites || []).map((s) => `${SITE_URL}/apt/sites/${s.slug}`);
 
   // 정적 중요 페이지도 포함
   urls.push(`${SITE_URL}/apt/sites`);

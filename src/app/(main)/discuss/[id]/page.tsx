@@ -39,7 +39,7 @@ export default function DiscussDetailPage() {
 
   const loadTopic = useCallback(async () => {
     const sb = createSupabaseBrowser();
-    const { data } = await sb.from('discussion_topics').select('*').eq('id', parseInt(topicId, 10)).single();
+    const { data } = await sb.from('discussion_topics').select('id,title,description,category,topic_type,option_a,option_b,vote_a,vote_b,comment_count,view_count,is_hot,is_pinned,expires_at,created_at').eq('id', parseInt(topicId, 10)).single();
     if (data) setTopic(data as Topic);
     // Increment view
     if (data) sb.from('discussion_topics').update({ view_count: (data.view_count || 0) + 1 }).eq('id', data.id).then(() => {});

@@ -18,7 +18,7 @@ export default async function BlogSeriesPage() {
   try {
     const sb = getSupabaseAdmin();
     const { data } = await sb.from('blog_series')
-      .select('*').eq('is_active', true)
+      .select('id,title,slug,description,cover_image,category,post_count,is_active').eq('is_active', true)
       .order('post_count', { ascending: false });
     seriesList = data || [];
   } catch { }

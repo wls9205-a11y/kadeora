@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     if (error) {
       // RPC 없으면 직접 조인
       const { data: holdings } = await getSupabaseAdmin().from('portfolio_holdings')
-        .select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+        .select('id,symbol,quantity,buy_price,buy_date,memo,created_at').eq('user_id', user.id).order('created_at', { ascending: false });
       if (!holdings?.length) return NextResponse.json({ holdings: [], summary: { totalInvested: 0, totalCurrent: 0, totalPnl: 0, pnlPct: 0 } });
 
       const symbols = holdings.map(h => h.symbol);

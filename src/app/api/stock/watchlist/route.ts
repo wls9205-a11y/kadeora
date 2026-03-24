@@ -13,7 +13,7 @@ export async function GET() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    return NextResponse.json({ symbols: (data || []).map((d: any) => d.symbol) });
+    return NextResponse.json({ symbols: (data || []).map((d) => d.symbol) });
   } catch { return NextResponse.json({ symbols: [] }); }
 }
 

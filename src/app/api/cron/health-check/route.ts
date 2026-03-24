@@ -78,7 +78,7 @@ export async function GET(request: Request) {
       last_checked_at: new Date().toISOString(),
     }, { onConflict: 'service_name' });
 
-  const { data: quotas } = await supabase.from('api_quotas').select('*');
+  const { data: quotas } = await supabase.from('api_quotas').select('api_name,daily_used,daily_limit,monthly_used,monthly_limit,last_reset_at');
   for (const q of quotas || []) {
     if (q.daily_limit && (q.daily_used ?? 0) / (q.daily_limit ?? 1) > 0.8) {
       await supabase.from('admin_alerts').insert({

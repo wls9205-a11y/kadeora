@@ -107,7 +107,7 @@ export default async function SiteDetailPage({ params }: Props) {
   const decoded = decodeURIComponent(slug);
   const sb = await createSupabaseServer();
 
-  const { data: site } = await sb.from('apt_sites').select('*').eq('slug', decoded).single();
+  const { data: site } = await sb.from('apt_sites').select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,og_image_url,satellite_image_url,sitemap_wave,source_ids,created_at,updated_at').eq('slug', decoded).single();
   if (!site) notFound();
 
   // 페이지뷰 증가 (비동기, 에러 무시)

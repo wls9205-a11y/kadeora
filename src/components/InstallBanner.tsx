@@ -23,7 +23,7 @@ export default function InstallBanner() {
     }
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(ios);
-    const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e); setShow(true); };
+    const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); setShow(true); };
     window.addEventListener('beforeinstallprompt', handler);
     if (ios) setTimeout(() => setShow(true), 4000);
     return () => window.removeEventListener('beforeinstallprompt', handler);

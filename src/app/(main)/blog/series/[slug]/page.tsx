@@ -25,7 +25,7 @@ export const revalidate = 3600;
 export default async function SeriesDetailPage({ params }: Props) {
   const { slug } = await params;
   const { data: series } = await sb().from('blog_series')
-    .select('*').eq('slug', slug).eq('is_active', true).single();
+    .select('id,title,slug,description,cover_image,category,post_count,is_active').eq('slug', slug).eq('is_active', true).single();
   if (!series) notFound();
 
   const { data: posts } = await sb().from('blog_posts')

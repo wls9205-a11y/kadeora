@@ -24,7 +24,7 @@ export default function PaymentClient() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const { data } = await supabase.from('shop_products').select('*').order('price_krw', { ascending: true });
+        const { data } = await supabase.from('shop_products').select('id,name,description,icon,price_krw,point_price,purchase_type,category,is_active,is_popular').order('price_krw', { ascending: true });
         setProducts(data || []);
         if (productId && data) { const found = data.find((p: Product) => p.id === productId); if (found) { setProduct(found); setStep('confirm'); } }
       } catch { setError('상품을 불러오는데 실패했습니다'); } finally { setLoading(false); }

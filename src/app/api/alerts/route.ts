@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
 
     const { data } = await getSupabaseAdmin().from('price_alerts')
-      .select('*')
+      .select('id,house_manage_no,house_nm,created_at')
       .eq('user_id', user.id)
       .eq('is_active', true)
       .order('created_at', { ascending: false });

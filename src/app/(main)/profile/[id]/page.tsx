@@ -34,7 +34,7 @@ export default async function ProfilePage({ params }: Props) {
     { count: followingCount },
     followCheck,
   ] = await Promise.all([
-    sb.from('profiles').select('*').eq('id', id).single(),
+    sb.from('profiles').select('id,nickname,avatar_url,bio,grade,grade_title,influence_score,points,posts_count,likes_count,followers_count,following_count,streak_days,is_premium,is_admin,is_banned,is_seed,residence_city,created_at,updated_at,interests').eq('id', id).single(),
     sb.from('posts').select('id,title,category,created_at,view_count,likes_count,comments_count').eq('author_id', id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(20),
     sb.from('comments').select('*', { count: 'exact', head: true }).eq('author_id', id).eq('is_deleted', false),
     sb.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', id),

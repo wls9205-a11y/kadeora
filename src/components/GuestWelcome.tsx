@@ -40,7 +40,7 @@ export default function GuestWelcome() {
       }
 
       // 새로 발생할 수도 있으므로 리스너도 등록
-      const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e); };
+      const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
       window.addEventListener('beforeinstallprompt', handler);
 
       setTimeout(() => setShow(true), 1000);
