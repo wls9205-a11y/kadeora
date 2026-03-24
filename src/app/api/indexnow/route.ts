@@ -13,7 +13,7 @@ const INDEXNOW_KEY = '3a23def313e1b1283822c54a0f9a5675';
  * 
  * 사용: GET /api/indexnow → 최근 업데이트된 현장 URL을 일괄 제출
  */
-async function handler(req: NextRequest) {
+async function handler(_req: NextRequest) {
   const sb = getSupabaseAdmin();
 
   // 최근 24시간 내 업데이트된 현장 URL 수집

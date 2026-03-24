@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { createSupabaseServer } from '@/lib/supabase-server';
-import { notFound } from 'next/navigation';
+import { } from 'next/navigation';
 import ProfileClient from './ProfileClient';
 import { DeleteAccountSection } from '@/components/DeleteAccountSection';
 

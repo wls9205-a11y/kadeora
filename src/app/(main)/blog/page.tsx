@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';

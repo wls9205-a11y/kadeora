@@ -25,7 +25,7 @@ function extractDetails(item: Record<string, any>) {
   };
 }
 
-export const GET = withCronAuth(async (req: NextRequest) => {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const APT_API_KEY = process.env.APT_DATA_API_KEY;
   if (!APT_API_KEY) return NextResponse.json({ ok: true, error: 'APT_DATA_API_KEY not set' });
 

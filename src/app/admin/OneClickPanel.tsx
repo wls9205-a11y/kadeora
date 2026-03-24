@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, Zap, Database, FileText, Settings, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Zap, Database, FileText, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 
 interface BatchResult {
   endpoint: string;

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { isNew, NewBadge, fmtAmount, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
+import { type SharedTabProps } from './apt-utils';
 import Link from 'next/link';
 import MiniLineChart from '@/components/charts/MiniLineChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';

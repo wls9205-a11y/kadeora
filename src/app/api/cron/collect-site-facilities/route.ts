@@ -31,7 +31,7 @@ async function searchLocal(query: string, display = 3): Promise<{ title: string;
   } catch { return []; }
 }
 
-async function handler(req: NextRequest) {
+async function handler(_req: NextRequest) {
   const start = Date.now();
   const sb = getSupabaseAdmin();
   let collected = 0;

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         approved_at: tossData.approvedAt, method: tossData.method, raw_response: tossData,
       });
       if (insertError) throw insertError;
-    } catch (dbErr) {
+    } catch (_dbErr) {
       // DB 저장 실패 시 토스 결제 취소
       try {
         await fetch(`https://api.tosspayments.com/v1/payments/${paymentKey}/cancel`, {

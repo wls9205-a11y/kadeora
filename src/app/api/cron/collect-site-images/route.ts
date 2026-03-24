@@ -28,12 +28,12 @@ async function searchNaverImages(query: string, display = 3): Promise<{ title: s
   }
 }
 
-async function handler(req: NextRequest) {
+async function handler(_req: NextRequest) {
   const start = Date.now();
   const sb = getSupabaseAdmin();
   let collected = 0;
   let skipped = 0;
-  let errors: string[] = [];
+  const errors: string[] = [];
 
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
     return NextResponse.json({ error: 'NAVER_CLIENT_ID/SECRET not set' }, { status: 200 });
@@ -60,7 +60,7 @@ async function handler(req: NextRequest) {
         `${site.name} 아파트`,
       ];
 
-      let allImages: any[] = [];
+      const allImages: any[] = [];
       for (const q of queries) {
         const results = await searchNaverImages(q, 2);
         allImages.push(...results);

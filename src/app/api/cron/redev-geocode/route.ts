@@ -46,7 +46,7 @@ async function geocodeKeyword(query: string): Promise<{ lat: number; lng: number
   } catch { return null; }
 }
 
-export const GET = withCronAuth(async (req: NextRequest) => {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const sb = getSupabaseAdmin();
 
   const { data: projects } = await sb.from('redevelopment_projects')

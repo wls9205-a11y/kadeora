@@ -30,7 +30,7 @@ export default function RedevTimeline({ currentStage }: { currentStage: string }
         {STAGES.map((s, i) => {
           const isPast = i < activeIdx;
           const isCurrent = i === activeIdx;
-          const isFuture = i > activeIdx;
+          const _isFuture = i > activeIdx;
           return (
             <div key={s.key} style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center',

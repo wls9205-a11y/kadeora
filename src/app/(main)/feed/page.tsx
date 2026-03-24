@@ -53,7 +53,7 @@ export default async function FeedPage({ searchParams }: Props) {
   const { category = 'all', region = 'all' } = await searchParams;
   const [postsData, trendingData] = await Promise.allSettled([getPosts(category, region), getTrending()]);
   const posts = postsData.status === 'fulfilled' && postsData.value ? postsData.value : category === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(p => p.category === category);
-  const trending = trendingData.status === 'fulfilled' && trendingData.value ? trendingData.value : DEMO_TRENDING;
+  const _trending = trendingData.status === 'fulfilled' && trendingData.value ? trendingData.value : DEMO_TRENDING;
   return (
     <Suspense>
       <FeedClient posts={posts} activeCategory={category} activeRegion={region} />

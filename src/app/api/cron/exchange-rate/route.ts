@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('exchange-rate', async () => {
     const supabase = getSupabaseAdmin();
-    const today = new Date().toISOString().slice(0, 10);
+    const _today = new Date().toISOString().slice(0, 10);
     let rate = 0;
     let apiCalls = 0;
 

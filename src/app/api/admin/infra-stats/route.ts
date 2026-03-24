@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const supabaseAdmin = getSupabaseAdmin();
   // Admin auth check
   const { createSupabaseServer } = await import('@/lib/supabase-server');

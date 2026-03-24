@@ -1,4 +1,3 @@
-import type { PostWithProfile, TrendingKeyword, StockQuote, DiscussionRoom, ShopProduct, AptSubscription } from '@/types/database';
 
 /** 사이트 기본 URL — 환경변수 우선, 폴백 production URL */
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';

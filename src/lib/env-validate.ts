@@ -5,13 +5,6 @@ const REQUIRED_SERVER = [
   'SUPABASE_SERVICE_ROLE_KEY',
 ] as const;
 
-const OPTIONAL_SERVER = [
-  'CRON_SECRET',
-  'UPSTASH_REDIS_REST_URL',
-  'UPSTASH_REDIS_REST_TOKEN',
-  'NEXT_PUBLIC_KAKAO_JS_KEY',
-] as const;
-
 // globalThis 사용 — serverless 환경에서도 콜드스타트당 1회만 실행
 const VALIDATED_KEY = '__kd_env_validated';
 

@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 
-async function handler(req: NextRequest) {
+async function handler(_req: NextRequest) {
   const start = Date.now();
   const sb = getSupabaseAdmin();
   let inserted = 0;
   let updated = 0;
-  let errors: string[] = [];
+  const errors: string[] = [];
 
   // ━━━ Step 1: 신규 청약 → apt_sites ━━━
   try {

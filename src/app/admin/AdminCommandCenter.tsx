@@ -1,3 +1,4 @@
+import Link from 'next/link';
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -330,7 +331,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           </div>
           {lastRefresh && <span style={{ fontSize: 9, color: '#7D8DA3' }}>{lastRefresh.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>}
           <button className="btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#152240', color: '#94A8C4', fontSize: 10 }}>🔄</button>
-          <a href="/feed" style={{ fontSize: 10, color: '#7D8DA3', textDecoration: 'none' }}>← 사이트</a>
+          <Link href="/feed" style={{ fontSize: 10, color: '#7D8DA3', textDecoration: 'none' }}>← 사이트</Link>
         </div>
       </div>
 

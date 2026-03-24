@@ -75,11 +75,11 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [postsOffset, setPostsOffset] = useState(posts.length);
   const [hasMorePosts, setHasMorePosts] = useState(posts.length >= 20);
   const [loadingMorePosts, setLoadingMorePosts] = useState(false);
-  const [activityTab, setActivityTab] = useState<'posts'|'comments'|null>(null);
-  const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [_activityTab, _setActivityTab] = useState<'posts'|'comments'|null>(null);
+  const [_myPosts, setMyPosts] = useState<any[]>([]);
   const [myComments, setMyComments] = useState<any[]>([]);
-  const [postsPage, setPostsPage] = useState(1);
-  const [commentsPage, setCommentsPage] = useState(1);
+  const [_postsPage, _setPostsPage] = useState(1);
+  const [_commentsPage, _setCommentsPage] = useState(1);
   const [regionText, setRegionText] = useState(profile.region_text ?? '');
   const [inviteCode, setInviteCode] = useState('');
   const [inviteCount, setInviteCount] = useState(0);
@@ -231,7 +231,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [commentsLoaded, setCommentsLoaded] = useState(false);
 
-  const loadMyPosts = async () => {
+  const _loadMyPosts = async () => {
     if (postsLoaded) return;
     const sb = createSupabaseBrowser();
     const { data } = await sb.from('posts').select('id,title,created_at,likes_count,comments_count')

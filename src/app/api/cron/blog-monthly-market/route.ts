@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     const { data: exists } = await supabase.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
     if (exists) return { processed: 0, created: 0, failed: 0 };
 
-    const [stocksRes, tradeRes, unsoldRes, blogCountRes] = await Promise.all([
+    const [stocksRes, tradeRes, unsoldRes, _blogCountRes] = await Promise.all([
       supabase.from('stock_quotes').select('name, change_pct, market').in('market', ['KOSPI', 'KOSDAQ']),
       supabase.from('apt_trade_monthly_stats').select('region,stat_month,trade_count,avg_price,avg_area,avg_price_per_pyeong').eq('stat_month', monthKey),
       supabase.from('unsold_monthly_stats').select('region,stat_month,total_unsold,after_completion').eq('stat_month', monthKey),

@@ -220,7 +220,7 @@ export default function AdminSites() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <div style={{ fontSize: 11, color: '#94A8C4', lineHeight: 1.8 }}>
                 <div style={{ fontWeight: 700, color: '#3B7BF6', marginBottom: 4 }}>회원 등록</div>
-                ① 현장 페이지에서 "등록하기" 클릭<br/>
+                ① 현장 페이지에서 &quot;등록하기&quot; 클릭<br/>
                 ② apt_site_interests에 user_id로 저장<br/>
                 ③ interest_count +1 (소셜 프루프)<br/>
                 ④ +50P 포인트 적립

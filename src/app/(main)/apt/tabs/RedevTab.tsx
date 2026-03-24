@@ -1,6 +1,6 @@
 'use client';
-import { useState, useMemo } from 'react';
-import { isNew, NewBadge, STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
+import { useState } from 'react';
+import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import RedevTimeline from '@/components/RedevTimeline';
 import BottomSheet from '@/components/BottomSheet';
 

@@ -55,7 +55,7 @@ async function fetchNationwideHouseholds(districtName: string, sigunguCode?: str
   } catch { return null; }
 }
 
-export const GET = withCronAuth(async (req: NextRequest) => {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const sb = getSupabaseAdmin();
   
   // NULL 세대수 프로젝트 조회

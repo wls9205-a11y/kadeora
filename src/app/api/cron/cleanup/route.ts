@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export const dynamic = 'force-dynamic'
 
-export const GET = withCronAuth(async (req: NextRequest) => {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const admin = getSupabaseAdmin()
 
   try {

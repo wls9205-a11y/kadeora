@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       push_failed: pushResult.failed,
       notifications_created: notifications.length,
     });
-  } catch (err) {
+  } catch (_err) {
     return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }

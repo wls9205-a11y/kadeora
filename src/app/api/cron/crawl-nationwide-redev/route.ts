@@ -45,7 +45,7 @@ function guessType(text: string | null): string {
   return '재개발';
 }
 
-export const GET = withCronAuth(async (req: NextRequest) => {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const apiKey = process.env.BUSAN_DATA_API_KEY || process.env.MOLIT_STAT_API_KEY;
   if (!apiKey) return NextResponse.json({ success: true, error: 'API key not set (BUSAN_DATA_API_KEY or MOLIT_STAT_API_KEY)' });
 

@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const { data: settings } = await admin.from('notification_settings')
       .select('user_id')
       .eq('push_apt_deadline', true);
-    const optedInIds = new Set((settings ?? []).map(s => s.user_id));
+    const _optedInIds = new Set((settings ?? []).map(s => s.user_id));
 
     // notification_settings가 없는 유저는 기본값(true)이므로 전체 유저에서 옵트아웃 제외
     const { data: allUsers } = await admin.from('profiles')

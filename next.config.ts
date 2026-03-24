@@ -4,10 +4,10 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   generateBuildId: () => `build-${process.env.NEXT_PUBLIC_CACHE_VERSION || '20260318'}`,
   typescript: { ignoreBuildErrors: false },
-  eslint: { ignoreDuringBuilds: true },
+  eslint: { ignoreDuringBuilds: false },
   compress: true,
   poweredByHeader: false,
-  reactStrictMode: false,
+  reactStrictMode: true,
 
   images: {
     remotePatterns: [

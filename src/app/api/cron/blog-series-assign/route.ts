@@ -18,7 +18,7 @@ const SERIES_KEYWORD_MAP: Record<string, string[]> = {
   'finance-basics': ['ETF', 'etf', 'ISA', 'isa', '펀드', '재테크', '가치투자', 'PER', 'PBR', 'RSI', 'MACD', '차트분석'],
 };
 
-export const GET = withCronAuth(async (req: NextRequest) => {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const sb = getSupabaseAdmin();
   const batchSize = 500;
   let totalAssigned = 0;

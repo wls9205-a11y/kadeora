@@ -29,7 +29,7 @@ async function fetchTrend(keyword: string): Promise<{ period: string; ratio: num
   } catch { return []; }
 }
 
-async function handler(req: NextRequest) {
+async function handler(_req: NextRequest) {
   const start = Date.now();
   const sb = getSupabaseAdmin();
   let collected = 0;

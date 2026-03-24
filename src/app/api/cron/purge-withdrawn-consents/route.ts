@@ -10,11 +10,11 @@ import { withCronAuth } from '@/lib/cron-auth';
  * 3. privacy_consents에서 guest_identifier를 '삭제됨'으로 마스킹
  *    (동의 증빙 이력 자체는 3년 보관 — 개인정보보호법 근거)
  */
-async function handler(req: NextRequest) {
+async function handler(_req: NextRequest) {
   const start = Date.now();
   const sb = getSupabaseAdmin();
   let purged = 0;
-  let errors: string[] = [];
+  const errors: string[] = [];
 
   try {
     // 5일 전 날짜

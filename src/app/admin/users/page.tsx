@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
   const regions = Array.from(new Set(users.map(u => u.region_text).filter(Boolean) as string[])).sort();
   const totalUsers = users.length;
   const regionSetCount = users.filter(u => u.region_text).length;
-  const regionUnsetCount = totalUsers - regionSetCount;
+  const _regionUnsetCount = totalUsers - regionSetCount;
   const regionPct = totalUsers > 0 ? Math.round((regionSetCount / totalUsers) * 100) : 0;
 
   const isSeed = (id: string) => id.startsWith('aaaaaaaa');

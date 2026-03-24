@@ -14,8 +14,8 @@ export const maxDuration = 60;
 
 function mapItem(item: Record<string, string>) {
   const totSupply = parseInt(item.TOT_SUPLY_HSHLDCO || item.totSuplyHshldco || '0') || 0;
-  const area = parseFloat(item.EXCLUSE_AR || item.excluseAr || '0') || 0;
-  const price = parseInt(item.LTTOT_TOP_AMOUNT || item.lttotTopAmount || '0') || 0;
+  const _area = parseFloat(item.EXCLUSE_AR || item.excluseAr || '0') || 0;
+  const _price = parseInt(item.LTTOT_TOP_AMOUNT || item.lttotTopAmount || '0') || 0;
   return {
     house_manage_no: item.HOUSE_MANAGE_NO || item.houseManageNo || '',
     house_nm: item.HOUSE_NM || item.houseNm || '',

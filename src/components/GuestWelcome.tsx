@@ -12,7 +12,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 export default function GuestWelcome() {
   const [show, setShow] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isIOS, setIsIOS] = useState(false);
+  const [_isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

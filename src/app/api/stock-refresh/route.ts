@@ -8,12 +8,6 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-const KOSDAQ_SYMBOLS = new Set([
-  '086520','247540','196170','357780','091990','214150','039030','145020',
-  '041510','035900','122870','112040','263750','293490','042700','240810',
-  '018290','950130',
-]);
-
 async function getKisToken(appkey: string, appsecret: string): Promise<string | null> {
   try {
     const res = await fetch('https://openapi.koreainvestment.com:9443/oauth2/tokenP', {

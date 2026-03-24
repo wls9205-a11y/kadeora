@@ -3,7 +3,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 // 매일 장 마감 후 (15:40 KST) 각 유저 포트폴리오 스냅샷 저장
-export const GET = withCronAuth(async (req: NextRequest) => {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const sb = getSupabaseAdmin();
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 

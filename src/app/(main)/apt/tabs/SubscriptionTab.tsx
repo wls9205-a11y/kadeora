@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { haptic } from '@/lib/haptic';
-import { type Apt, getStatus, fmtD, kstToday, kstNow, isNew, NewBadge, STATUS_BADGE, type SharedTabProps } from './apt-utils';
+import { type Apt, getStatus, fmtD, kstNow, isNew, NewBadge, STATUS_BADGE, type SharedTabProps } from './apt-utils';
 
 interface Props extends SharedTabProps {
   apts: Apt[];
@@ -33,7 +33,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
     </button>
   );
 
-  const availableRegions = useMemo(() => ['전체', ...Array.from(new Set(apts.map(a => a.region_nm).filter(Boolean))).sort()], [apts]);
+  const _availableRegions = useMemo(() => ['전체', ...Array.from(new Set(apts.map(a => a.region_nm).filter(Boolean))).sort()], [apts]);
   const filtered = useMemo(() => {
     const f = apts.filter(a => {
       if (region !== '전체' && a.region_nm !== region) return false;
@@ -50,7 +50,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
     return f;
   }, [apts, region, statusFilter, aptSort, subSearch]);
 
-  const toggleAlert = async (apt: Apt) => {
+  const _toggleAlert = async (apt: Apt) => {
     if (!aptUser) return;
     const sb = createSupabaseBrowser();
     const h = apt.house_manage_no || String(apt.id);
@@ -252,15 +252,15 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             const st = getStatus(apt);
             const bd = SB[st];
             const h = apt.house_manage_no || String(apt.id);
-            const ac = alertCounts[h] || 0;
-            const my = myAlerts.has(h);
+            const _ac = alertCounts[h] || 0;
+            const _my = myAlerts.has(h);
             const dday = (() => {
               if (st === 'open' && apt.rcept_endde) return Math.ceil((new Date(apt.rcept_endde).getTime() - Date.now()) / 86400000);
               if (st === 'upcoming' && apt.rcept_bgnde) return Math.ceil((new Date(apt.rcept_bgnde).getTime() - Date.now()) / 86400000);
               return null;
             })();
 
-            const accentColor = st === 'open' ? 'var(--accent-green)' : st === 'upcoming' ? 'var(--accent-blue)' : 'var(--border)';
+            const _accentColor = st === 'open' ? 'var(--accent-green)' : st === 'upcoming' ? 'var(--accent-blue)' : 'var(--border)';
             // 간략 주소: 전체 주소에서 구+동 추출
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (

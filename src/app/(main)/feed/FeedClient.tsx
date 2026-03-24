@@ -23,12 +23,12 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   const [posts, setPosts] = useState<PostWithProfile[]>(initialPosts);
   const [hasMore, setHasMore] = useState(initialPosts.length >= PAGE_SIZE);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [showRegionBanner, setShowRegionBanner] = useState(false);
-  const [tipSeen, setTipSeen] = useState(true);
+  const [_showRegionBanner, setShowRegionBanner] = useState(false);
+  const [_tipSeen, setTipSeen] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
-  const [userRegion, setUserRegion] = useState<string | null>(null);
+  const [_userRegion, setUserRegion] = useState<string | null>(null);
   const [showHotBanner, setShowHotBanner] = useState(false);
   const [hotPosts, setHotPosts] = useState<any[]>([]);
 
