@@ -69,7 +69,7 @@ function PostCard({ post, variant = "default", showAuthor = true }: PostCardProp
         <p style={{
           fontSize: 'var(--fs-sm)', color: "var(--text-tertiary)", lineHeight: 1.6,
           margin: "0 0 10px",
-          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any,
+          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as React.CSSProperties["WebkitBoxOrient"],
           overflow: "hidden",
         }}>{post.content}</p>
       )}

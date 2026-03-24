@@ -12,11 +12,11 @@ const cardStyle: React.CSSProperties = {
 
 interface Report {
   id: number;
-  reason: string;
-  details: string;
-  content_type: string;
-  status: string;
-  auto_hidden: boolean;
+  reason: string | null;
+  details: string | null;
+  content_type: string | null;
+  status: string | null;
+  auto_hidden: boolean | null;
   created_at: string;
   post_id: number | null;
   comment_id: number | null;
@@ -41,7 +41,7 @@ export default function AdminContent() {
       total: blogTotal.count || 0,
       thisWeek: blogWeek.count || 0,
     });
-    setReports((reportsRes.data as any) || []);
+    setReports(reportsRes.data || []);
     setLoading(false);
   };
 
@@ -116,12 +116,12 @@ export default function AdminContent() {
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: r.content_type === 'post' ? 'var(--brand)' : r.content_type === 'comment' ? 'var(--accent-yellow)' : 'var(--accent-purple)',
                     color: '#fff',
-                  }}>{{ post: '게시글', comment: '댓글', chat: '채팅' }[r.content_type] || r.content_type}</span>
+                  }}>{{ post: '게시글', comment: '댓글', chat: '채팅' }[r.content_type ?? ''] || r.content_type}</span>
                   <span style={{
                     fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700,
                     background: r.status === 'pending' ? 'rgba(251,191,36,0.3)' : r.status === 'resolved' ? 'rgba(52,211,153,0.12)' : 'rgba(148,163,184,0.15)',
                     color: r.status === 'pending' ? 'var(--accent-yellow)' : r.status === 'resolved' ? 'var(--accent-green)' : '#7D8DA3',
-                  }}>{{ pending: '미처리', resolved: '처리됨', dismissed: '기각' }[r.status] || r.status}</span>
+                  }}>{{ pending: '미처리', resolved: '처리됨', dismissed: '기각' }[r.status ?? ''] || r.status}</span>
                   {r.auto_hidden && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, fontWeight: 700, background: 'rgba(248,113,113,0.1)', color: 'var(--accent-red)' }}>자동숨김</span>}
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{r.reason}</div>

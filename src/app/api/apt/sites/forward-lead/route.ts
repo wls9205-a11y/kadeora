@@ -31,9 +31,9 @@ export async function POST(req: NextRequest) {
 /** 피처 플래그 상태 + 통계 확인 */
 export async function GET() {
   const sb = getSupabaseAdmin();
-  const { data: flagData } = await (sb as any).from('feature_flags').select('enabled').eq('key', 'premium_consultant_forwarding').single();
-  const { data: leadsData } = await (sb as any).from('consultant_leads').select('status');
-  const { data: consultants } = await (sb as any).from('consultant_profiles')
+  const { data: flagData } = await sb.from('feature_flags').select('enabled').eq('key', 'premium_consultant_forwarding').single();
+  const { data: leadsData } = await sb.from('consultant_leads').select('status');
+  const { data: consultants } = await sb.from('consultant_profiles')
     .select('id').eq('is_active', true);
 
   return NextResponse.json({

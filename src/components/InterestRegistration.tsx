@@ -35,7 +35,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       setUser(data?.user || null);
       if (data?.user) {
         // Check if already registered
-        (sb as any).from('apt_site_interests').select('id')
+        sb.from('apt_site_interests').select('id')
           .eq('site_id', siteId).eq('user_id', data.user.id).maybeSingle()
           .then(({ data: existing }: any) => { if (existing) setRegistered(true); });
       }

@@ -2,9 +2,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
-interface SiteRow { id: string; slug: string; name: string; site_type: string; region: string; sigungu: string; content_score: number; interest_count: number; page_views: number; is_active: boolean; sitemap_wave: number; created_at: string; }
-interface InterestRow { id: number; site_id: string; user_id: string | null; guest_name: string | null; guest_phone_last4: string | null; guest_city: string | null; guest_district: string | null; is_member: boolean; created_at: string; site_name?: string; }
-interface ConsentRow { id: number; consent_type: string; is_agreed: boolean; guest_identifier: string | null; consented_at: string; withdrawn_at: string | null; }
+interface SiteRow { id: string; slug: string; name: string; site_type: string; region: string | null; sigungu: string | null; content_score: number | null; interest_count: number | null; page_views: number | null; is_active: boolean | null; sitemap_wave: number | null; created_at: string | null; }
+interface InterestRow { id: number; site_id: string; user_id: string | null; guest_name: string | null; guest_phone_last4: string | null; guest_city: string | null; guest_district: string | null; is_member: boolean | null; created_at: string | null; site_name?: string; }
+interface ConsentRow { id: number; consent_type: string; is_agreed: boolean; guest_identifier: string | null; consented_at: string | null; withdrawn_at: string | null; }
 
 const card = { background: '#0A1225', borderRadius: 12, padding: '14px 16px', border: '1px solid #152240', marginBottom: 14 };
 const hdr: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: '#E8EDF5', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
@@ -29,9 +29,9 @@ export default function AdminSites() {
   const loadKPI = useCallback(async () => {
     try {
       const [sitesR, interestsR, consentsR] = await Promise.all([
-        (sb as any).from('apt_sites').select('id, content_score, interest_count, page_views, is_active', { count: 'exact' }),
-        (sb as any).from('apt_site_interests').select('id, created_at', { count: 'exact' }),
-        (sb as any).from('privacy_consents').select('id, withdrawn_at', { count: 'exact' }),
+        sb.from('apt_sites').select('id, content_score, interest_count, page_views, is_active', { count: 'exact' }),
+        sb.from('apt_site_interests').select('id, created_at', { count: 'exact' }),
+        sb.from('privacy_consents').select('id, withdrawn_at', { count: 'exact' }),
       ]);
       const allSites = sitesR.data || [];
       const published = allSites.filter((s: any) => s.content_score >= 40 && s.is_active).length;
@@ -46,13 +46,13 @@ export default function AdminSites() {
 
   const loadFlags = useCallback(async () => {
     try {
-      const { data } = await (sb as any).from('feature_flags').select('key, enabled');
+      const { data } = await sb.from('feature_flags').select('key, enabled');
       const map: Record<string, boolean> = {};
       (data || []).forEach((f: any) => { map[f.key] = f.enabled; });
       setFlags(map);
     } catch {}
     try {
-      const { data } = await (sb as any).from('consultant_leads').select('status');
+      const { data } = await sb.from('consultant_leads').select('status');
       const all = data || [];
       setLeads({
         total: all.length,
@@ -65,13 +65,13 @@ export default function AdminSites() {
 
   const toggleFlag = async (key: string) => {
     const newVal = !flags[key];
-    await (sb as any).from('feature_flags').update({ enabled: newVal, updated_at: new Date().toISOString() }).eq('key', key);
+    await sb.from('feature_flags').update({ enabled: newVal, updated_at: new Date().toISOString() }).eq('key', key);
     setFlags(prev => ({ ...prev, [key]: newVal }));
   };
 
   const loadSites = useCallback(async () => {
     setLoading(true);
-    let q = (sb as any).from('apt_sites').select('id, slug, name, site_type, region, sigungu, content_score, interest_count, page_views, is_active, sitemap_wave, created_at')
+    let q = sb.from('apt_sites').select('id, slug, name, site_type, region, sigungu, content_score, interest_count, page_views, is_active, sitemap_wave, created_at')
       .order('interest_count', { ascending: false }).limit(100);
     if (filter.region) q = q.eq('region', filter.region);
     if (filter.type) q = q.eq('site_type', filter.type);
@@ -83,13 +83,13 @@ export default function AdminSites() {
 
   const loadInterests = useCallback(async () => {
     setLoading(true);
-    const { data } = await (sb as any).from('apt_site_interests')
+    const { data } = await sb.from('apt_site_interests')
       .select('id, site_id, user_id, guest_name, guest_phone_last4, guest_city, guest_district, is_member, created_at')
       .order('created_at', { ascending: false }).limit(100);
     // 현장명 매칭
     if (data?.length) {
       const siteIds = [...new Set(data.map((d: any) => d.site_id))];
-      const { data: siteNames } = await (sb as any).from('apt_sites').select('id, name').in('id', siteIds);
+      const { data: siteNames } = await sb.from('apt_sites').select('id, name').in('id', siteIds);
       const nameMap = Object.fromEntries((siteNames || []).map((s: any) => [s.id, s.name]));
       data.forEach((d: any) => d.site_name = nameMap[d.site_id] || '');
     }
@@ -99,7 +99,7 @@ export default function AdminSites() {
 
   const loadConsents = useCallback(async () => {
     setLoading(true);
-    const { data } = await (sb as any).from('privacy_consents')
+    const { data } = await sb.from('privacy_consents')
       .select('id, consent_type, is_agreed, guest_identifier, consented_at, withdrawn_at')
       .order('consented_at', { ascending: false }).limit(100);
     setConsents(data || []);
@@ -126,7 +126,7 @@ export default function AdminSites() {
   };
 
   const toggleSiteActive = async (site: SiteRow) => {
-    await (sb as any).from('apt_sites').update({ is_active: !site.is_active }).eq('id', site.id);
+    await sb.from('apt_sites').update({ is_active: !site.is_active }).eq('id', site.id);
     loadSites();
   };
 
@@ -343,7 +343,7 @@ export default function AdminSites() {
                       </td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4', whiteSpace: 'nowrap' }}>{s.region} {s.sigungu || ''}</td>
                       <td style={{ padding: '6px 4px' }}><span style={badge(typeClr[s.site_type] ? `${typeClr[s.site_type]}22` : '#15224050', typeClr[s.site_type] || '#94A8C4')}>{typeLbl[s.site_type] || s.site_type}</span></td>
-                      <td style={{ padding: '6px 4px', color: s.content_score >= 40 ? '#2EE8A5' : '#FFD43B', fontWeight: 700 }}>{s.content_score}</td>
+                      <td style={{ padding: '6px 4px', color: (s.content_score ?? 0) >= 40 ? '#2EE8A5' : '#FFD43B', fontWeight: 700 }}>{s.content_score}</td>
                       <td style={{ padding: '6px 4px', color: '#3B7BF6', fontWeight: 700 }}>{s.interest_count}</td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4' }}>{s.page_views}</td>
                       <td style={{ padding: '6px 4px' }}>

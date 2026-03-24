@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       supabase.from('apt_subscriptions').select('house_manage_no, updated_at').order('rcept_bgnde', { ascending: false }).limit(5000),
       supabase.from('blog_series').select('slug, created_at').eq('is_active', true),
       supabase.from('posts').select('id, slug, created_at, updated_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000),
-      (supabase as any).from('apt_sites').select('slug, updated_at, site_type, content_score, sitemap_wave')
+      supabase.from('apt_sites').select('slug, updated_at, site_type, content_score, sitemap_wave')
         .eq('is_active', true).gte('content_score', 40).gt('sitemap_wave', 0)
         .order('interest_count', { ascending: false }).limit(10000),
     ]);

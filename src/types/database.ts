@@ -442,6 +442,214 @@ export type Database = {
           },
         ]
       }
+      apt_site_interests: {
+        Row: {
+          consent_id: number | null
+          created_at: string | null
+          guest_birth_date: string | null
+          guest_city: string | null
+          guest_district: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          guest_phone_hash: string | null
+          guest_phone_last4: string | null
+          id: number
+          is_member: boolean | null
+          notification_enabled: boolean | null
+          site_id: string
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          consent_id?: number | null
+          created_at?: string | null
+          guest_birth_date?: string | null
+          guest_city?: string | null
+          guest_district?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guest_phone_hash?: string | null
+          guest_phone_last4?: string | null
+          id?: number
+          is_member?: boolean | null
+          notification_enabled?: boolean | null
+          site_id: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          consent_id?: number | null
+          created_at?: string | null
+          guest_birth_date?: string | null
+          guest_city?: string | null
+          guest_district?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guest_phone_hash?: string | null
+          guest_phone_last4?: string | null
+          id?: number
+          is_member?: boolean | null
+          notification_enabled?: boolean | null
+          site_id?: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apt_site_interests_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "apt_sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apt_site_interests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_interest_consent"
+            columns: ["consent_id"]
+            isOneToOne: false
+            referencedRelation: "privacy_consents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apt_sites: {
+        Row: {
+          address: string | null
+          builder: string | null
+          built_year: number | null
+          content_score: number | null
+          created_at: string | null
+          description: string | null
+          developer: string | null
+          dong: string | null
+          faq_items: Json | null
+          id: string
+          images: Json | null
+          interest_count: number | null
+          is_active: boolean | null
+          key_features: Json | null
+          latitude: number | null
+          longitude: number | null
+          move_in_date: string | null
+          name: string
+          name_variants: Json | null
+          nearby_facilities: Json | null
+          nearby_station: string | null
+          og_image_url: string | null
+          page_views: number | null
+          price_comparison: Json | null
+          price_max: number | null
+          price_min: number | null
+          region: string | null
+          satellite_image_url: string | null
+          school_district: string | null
+          search_trend: Json | null
+          seo_description: string | null
+          seo_title: string | null
+          sigungu: string | null
+          site_type: string
+          sitemap_wave: number | null
+          slug: string
+          source_ids: Json | null
+          status: string | null
+          total_units: number | null
+          transit_score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          builder?: string | null
+          built_year?: number | null
+          content_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          developer?: string | null
+          dong?: string | null
+          faq_items?: Json | null
+          id?: string
+          images?: Json | null
+          interest_count?: number | null
+          is_active?: boolean | null
+          key_features?: Json | null
+          latitude?: number | null
+          longitude?: number | null
+          move_in_date?: string | null
+          name: string
+          name_variants?: Json | null
+          nearby_facilities?: Json | null
+          nearby_station?: string | null
+          og_image_url?: string | null
+          page_views?: number | null
+          price_comparison?: Json | null
+          price_max?: number | null
+          price_min?: number | null
+          region?: string | null
+          satellite_image_url?: string | null
+          school_district?: string | null
+          search_trend?: Json | null
+          seo_description?: string | null
+          seo_title?: string | null
+          sigungu?: string | null
+          site_type?: string
+          sitemap_wave?: number | null
+          slug: string
+          source_ids?: Json | null
+          status?: string | null
+          total_units?: number | null
+          transit_score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          builder?: string | null
+          built_year?: number | null
+          content_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          developer?: string | null
+          dong?: string | null
+          faq_items?: Json | null
+          id?: string
+          images?: Json | null
+          interest_count?: number | null
+          is_active?: boolean | null
+          key_features?: Json | null
+          latitude?: number | null
+          longitude?: number | null
+          move_in_date?: string | null
+          name?: string
+          name_variants?: Json | null
+          nearby_facilities?: Json | null
+          nearby_station?: string | null
+          og_image_url?: string | null
+          page_views?: number | null
+          price_comparison?: Json | null
+          price_max?: number | null
+          price_min?: number | null
+          region?: string | null
+          satellite_image_url?: string | null
+          school_district?: string | null
+          search_trend?: Json | null
+          seo_description?: string | null
+          seo_title?: string | null
+          sigungu?: string | null
+          site_type?: string
+          sitemap_wave?: number | null
+          slug?: string
+          source_ids?: Json | null
+          status?: string | null
+          total_units?: number | null
+          transit_score?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       apt_subscriptions: {
         Row: {
           ai_summary: string | null
@@ -1472,6 +1680,70 @@ export type Database = {
           },
         ]
       }
+      consultant_leads: {
+        Row: {
+          consultant_id: string | null
+          contacted_at: string | null
+          converted_at: string | null
+          created_at: string | null
+          forwarded_at: string | null
+          id: number
+          interest_id: number
+          notes: string | null
+          site_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          consultant_id?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string | null
+          forwarded_at?: string | null
+          id?: number
+          interest_id: number
+          notes?: string | null
+          site_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          consultant_id?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string | null
+          forwarded_at?: string | null
+          id?: number
+          interest_id?: number
+          notes?: string | null
+          site_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_leads_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "consultant_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_leads_interest_id_fkey"
+            columns: ["interest_id"]
+            isOneToOne: false
+            referencedRelation: "apt_site_interests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_leads_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "apt_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_profiles: {
         Row: {
           bio: string | null
@@ -1987,6 +2259,38 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          description: string | null
+          enabled: boolean | null
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          enabled?: boolean | null
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          enabled?: boolean | null
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_flags_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       follows: {
         Row: {
@@ -3191,6 +3495,112 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "price_alerts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_type: string | null
+          created_at: string | null
+          detail: Json | null
+          id: number
+          ip_address: string | null
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_type?: string | null
+          created_at?: string | null
+          detail?: Json | null
+          id?: number
+          ip_address?: string | null
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_type?: string | null
+          created_at?: string | null
+          detail?: Json | null
+          id?: number
+          ip_address?: string | null
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_consents: {
+        Row: {
+          collected_items: string[] | null
+          consent_text: string | null
+          consent_type: string
+          consent_version: string
+          consented_at: string | null
+          created_at: string | null
+          guest_identifier: string | null
+          id: number
+          ip_address: string | null
+          is_agreed: boolean
+          purpose: string | null
+          retention_period: string | null
+          user_agent: string | null
+          user_id: string | null
+          withdrawn_at: string | null
+        }
+        Insert: {
+          collected_items?: string[] | null
+          consent_text?: string | null
+          consent_type: string
+          consent_version?: string
+          consented_at?: string | null
+          created_at?: string | null
+          guest_identifier?: string | null
+          id?: number
+          ip_address?: string | null
+          is_agreed: boolean
+          purpose?: string | null
+          retention_period?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          withdrawn_at?: string | null
+        }
+        Update: {
+          collected_items?: string[] | null
+          consent_text?: string | null
+          consent_type?: string
+          consent_version?: string
+          consented_at?: string | null
+          created_at?: string | null
+          guest_identifier?: string | null
+          id?: number
+          ip_address?: string | null
+          is_agreed?: boolean
+          purpose?: string | null
+          retention_period?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_consents_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -5450,6 +5860,10 @@ export type Database = {
         Args: { p_created_at: string; p_downvotes: number; p_upvotes: number }
         Returns: number
       }
+      calculate_site_content_score: {
+        Args: { p_site_id: string }
+        Returns: number
+      }
       capture_daily_stats: { Args: never; Returns: undefined }
       check_attendance: { Args: { p_user_id: string }; Returns: Json }
       check_blog_similarity: {
@@ -5491,6 +5905,10 @@ export type Database = {
       deactivate_expired_banners: { Args: never; Returns: number }
       deactivate_expired_listings: { Args: never; Returns: number }
       decrement_likes: { Args: { row_id: number }; Returns: undefined }
+      decrement_site_interest: {
+        Args: { p_site_id: string }
+        Returns: undefined
+      }
       deduct_points: {
         Args: { p_amount: number; p_user_id: string }
         Returns: number
@@ -5817,6 +6235,11 @@ export type Database = {
         Returns: undefined
       }
       increment_post_view: { Args: { p_post_id: number }; Returns: undefined }
+      increment_site_interest: {
+        Args: { p_site_id: string }
+        Returns: undefined
+      }
+      increment_site_view: { Args: { p_site_id: string }; Returns: undefined }
       increment_user_likes: {
         Args: { p_amount?: number; p_user_id: string }
         Returns: undefined

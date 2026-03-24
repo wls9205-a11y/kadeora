@@ -156,7 +156,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
         <span>💬 오늘의 라운지 ({new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}) — 채팅 1회 = 1P</span>
       </div>
       {/* Messages */}
-      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: 0, WebkitOverflowScrolling: 'touch' as any }}>
+      <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: 0, WebkitOverflowScrolling: 'touch' as React.CSSProperties["WebkitOverflowScrolling"] }}>
         {loadingMore && <div style={{ textAlign: 'center', padding: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>이전 메시지...</div>}
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '40px 0' }}>채팅 불러오는 중...</div>

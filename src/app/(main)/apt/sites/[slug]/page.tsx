@@ -17,7 +17,7 @@ interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
   const sb = getSupabaseAdmin();
-  const { data } = await (sb as any).from('apt_sites')
+  const { data } = await sb.from('apt_sites')
     .select('slug')
     .eq('is_active', true)
     .gte('content_score', 25)
@@ -28,7 +28,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const sb = getSupabaseAdmin();
-  const { data: site } = await (sb as any).from('apt_sites')
+  const { data: site } = await sb.from('apt_sites')
     .select('name, seo_title, seo_description, region, sigungu, site_type, total_units, price_min, price_max, builder')
     .eq('slug', decodeURIComponent(slug)).single();
   if (!site) return {};
@@ -107,12 +107,12 @@ export default async function SiteDetailPage({ params }: Props) {
   const decoded = decodeURIComponent(slug);
   const sb = await createSupabaseServer();
 
-  const { data: site } = await (sb as any).from('apt_sites').select('*').eq('slug', decoded).single();
+  const { data: site } = await sb.from('apt_sites').select('*').eq('slug', decoded).single();
   if (!site) notFound();
 
   // 페이지뷰 증가 (비동기, 에러 무시)
   const admin = getSupabaseAdmin();
-  try { await (admin as any).rpc('increment_site_view', { p_site_id: site.id }); } catch {}
+  try { await admin.rpc('increment_site_view', { p_site_id: site.id }); } catch {}
 
   const sourceIds = (site.source_ids || {}) as Record<string, string>;
   const hasSub = !!sourceIds.subscription_id;
@@ -159,7 +159,7 @@ export default async function SiteDetailPage({ params }: Props) {
   } catch {}
 
   try {
-    const { data } = await (sb as any).from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status')
+    const { data } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status')
       .eq('is_active', true).eq('region', site.region || '').neq('id', site.id)
       .gte('content_score', 25).order('interest_count', { ascending: false }).limit(4);
     nearbySites = data || [];
@@ -171,7 +171,7 @@ export default async function SiteDetailPage({ params }: Props) {
 
   const features = Array.isArray(site.key_features) ? site.key_features : [];
   const faqItems = Array.isArray(site.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
-  const noindex = site.content_score < 40;
+  const noindex = (site.content_score ?? 0) < 40;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -206,14 +206,14 @@ export default async function SiteDetailPage({ params }: Props) {
             offerCount: site.total_units || 1,
           },
         } : {}),
-        ...(site.images?.length > 0 ? {
-          image: (site.images as any[]).slice(0, 3).map((img: any) => img.url || img.thumbnail),
+        ...(Array.isArray(site.images) && site.images.length > 0 ? {
+          image: (site.images as { url?: string; thumbnail?: string }[]).slice(0, 3).map((img) => img.url || img.thumbnail),
         } : {}),
-        ...(site.interest_count > 0 ? {
+        ...((site.interest_count ?? 0) > 0 ? {
           aggregateRating: {
             '@type': 'AggregateRating',
-            ratingValue: Math.min(4.5 + (site.interest_count / 100), 5.0).toFixed(1),
-            ratingCount: Math.max(site.interest_count, 1),
+            ratingValue: Math.min(4.5 + ((site.interest_count ?? 0) / 100), 5.0).toFixed(1),
+            ratingCount: Math.max(site.interest_count ?? 1, 1),
             bestRating: '5',
           },
         } : {}),
@@ -344,9 +344,9 @@ export default async function SiteDetailPage({ params }: Props) {
       {/* 특징 태그 */}
       {features.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-          {features.map((f: string, i: number) => (
+          {features.map((f, i: number) => (
             <span key={i} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(59,123,246,0.1)', color: '#6CB4FF', border: '1px solid rgba(59,123,246,0.15)' }}>
-              {f}
+              {String(f)}
             </span>
           ))}
         </div>

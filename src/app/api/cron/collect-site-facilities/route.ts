@@ -40,7 +40,7 @@ async function handler(req: NextRequest) {
     return NextResponse.json({ error: 'NAVER API keys not set' }, { status: 200 });
   }
 
-  const { data: sites } = await (sb as any).from('apt_sites')
+  const { data: sites } = await sb.from('apt_sites')
     .select('id, name, region, sigungu, address, nearby_facilities, nearby_station')
     .eq('is_active', true).gte('content_score', 40)
     .order('interest_count', { ascending: false })
@@ -79,14 +79,14 @@ async function handler(req: NextRequest) {
         updateData.nearby_station = nearestStation;
       }
 
-      await (sb as any).from('apt_sites').update(updateData).eq('id', site.id);
+      await sb.from('apt_sites').update(updateData).eq('id', site.id);
       collected++;
     } catch {}
   }
 
   // content_score 재계산 (nearby_station 추가분)
   for (const site of targets) {
-    try { await (sb as any).rpc('calculate_site_content_score', { p_site_id: site.id }); } catch {}
+    try { await sb.rpc('calculate_site_content_score', { p_site_id: site.id }); } catch {}
   }
 
   return NextResponse.json({ success: true, collected, total_checked: targets.length, elapsed: `${Date.now() - start}ms` });

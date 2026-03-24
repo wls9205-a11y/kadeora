@@ -112,7 +112,7 @@ export default async function HotPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: isTop3 ? 15 : 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                    {CATEGORY_LABEL[post.category] ?? ''} · {(post.profiles as any)?.nickname ?? '익명'}
+                    {CATEGORY_LABEL[post.category] ?? ''} · {post.profiles?.nickname ?? '익명'}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -139,7 +139,7 @@ export default async function HotPage() {
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{(post.profiles as any)?.nickname ?? '익명'}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{post.profiles?.nickname ?? '익명'}</div>
                   </div>
                   <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>
                 </Link>

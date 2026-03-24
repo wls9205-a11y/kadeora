@@ -38,7 +38,7 @@ async function handler(req: NextRequest) {
     return NextResponse.json({ error: 'NAVER API keys not set' }, { status: 200 });
   }
 
-  const { data: sites } = await (sb as any).from('apt_sites')
+  const { data: sites } = await sb.from('apt_sites')
     .select('id, name, search_trend')
     .eq('is_active', true).gte('content_score', 40)
     .order('interest_count', { ascending: false })
@@ -55,7 +55,7 @@ async function handler(req: NextRequest) {
     try {
       const trend = await fetchTrend(site.name);
       if (trend.length === 0) continue;
-      await (sb as any).from('apt_sites').update({
+      await sb.from('apt_sites').update({
         search_trend: { data: trend, updated_at: new Date().toISOString(), keyword: site.name },
         updated_at: new Date().toISOString(),
       }).eq('id', site.id);

@@ -207,7 +207,7 @@ export default async function BlogDetailPage({ params }: Props) {
         '@type': 'Comment',
         text: c.content,
         dateCreated: c.created_at,
-        author: { '@type': 'Person', name: c.author_name || (c.profiles as any)?.nickname || '사용자' },
+        author: { '@type': 'Person', name: c.author_name || c.profiles?.nickname || '사용자' },
       })),
     } : {}),
     interactionStatistic: {
@@ -332,7 +332,7 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* 댓글 목록 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {comments.map((c: any) => {
-            const nick = c.author_name || (c.profiles as any)?.nickname || '사용자';
+            const nick = c.author_name || c.profiles?.nickname || '사용자';
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10 }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>

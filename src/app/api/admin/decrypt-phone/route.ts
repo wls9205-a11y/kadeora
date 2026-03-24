@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     // 4. 암호화된 전화번호 가져오기
     const admin = getSupabaseAdmin();
-    const { data: interest } = await (admin as any).from('apt_site_interests')
+    const { data: interest } = await admin.from('apt_site_interests')
       .select('id, guest_phone, guest_name, site_id')
       .eq('id', interest_id).single();
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     // 6. 감사 로그 기록 (필수 — 이 로그 없이는 복호화 불가)
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
-    await (admin as any).from('privacy_audit_log').insert({
+    await admin.from('privacy_audit_log').insert({
       action: 'decrypt_phone',
       actor_id: user.id,
       actor_type: 'admin',

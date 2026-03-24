@@ -25,7 +25,7 @@ async function handler(req: NextRequest) {
         ? (s.supply_addr.match(/(?:시|도)\s+(\S+구|\S+시|\S+군)/)?.[1] || null)
         : null;
 
-      const { error } = await (sb as any).from('apt_sites').upsert({
+      const { error } = await sb.from('apt_sites').upsert({
         slug,
         name: s.house_nm.trim(),
         site_type: 'subscription',
@@ -59,11 +59,11 @@ async function handler(req: NextRequest) {
       const slug = r.district_name.trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase();
       if (!slug) continue;
 
-      const { data: existing } = await (sb as any).from('apt_sites').select('id, source_ids').eq('slug', slug).maybeSingle();
+      const { data: existing } = await sb.from('apt_sites').select('id, source_ids').eq('slug', slug).maybeSingle();
 
       if (existing) {
         const srcIds = (existing.source_ids || {}) as Record<string, string>;
-        await (sb as any).from('apt_sites').update({
+        await sb.from('apt_sites').update({
           source_ids: { ...srcIds, redev_id: String(r.id), redev_stage: r.stage },
           latitude: r.latitude || undefined,
           longitude: r.longitude || undefined,
@@ -71,7 +71,7 @@ async function handler(req: NextRequest) {
         }).eq('id', existing.id);
         updated++;
       } else {
-        await (sb as any).from('apt_sites').insert({
+        await sb.from('apt_sites').insert({
           slug,
           name: r.district_name.trim(),
           site_type: 'redevelopment',
@@ -97,10 +97,11 @@ async function handler(req: NextRequest) {
 
   // ━━━ Step 3: content_score 재계산 (전체) ━━━
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     try { await (sb as any).rpc('refresh_all_site_scores'); } catch {}
 
     // 직접 점수 계산
-    const { data: allSites } = await (sb as any).from('apt_sites')
+    const { data: allSites } = await sb.from('apt_sites')
       .select('id, name, region, sigungu, total_units, price_min, price_max, source_ids, description, faq_items, images, latitude, longitude, nearby_station, builder')
       .limit(5000);
 
@@ -121,13 +122,13 @@ async function handler(req: NextRequest) {
       if (s.nearby_station) score += 5;
       if (s.builder) score += 3;
 
-      await (sb as any).from('apt_sites').update({ content_score: score }).eq('id', s.id);
+      await sb.from('apt_sites').update({ content_score: score }).eq('id', s.id);
     }
   } catch (e: any) { errors.push(`score: ${e.message}`); }
 
   // ━━━ Step 4: Wave 1 활성화 (score >= 40) ━━━
   try {
-    await (sb as any).from('apt_sites')
+    await sb.from('apt_sites')
       .update({ sitemap_wave: 1 })
       .gte('content_score', 40)
       .eq('sitemap_wave', 0);

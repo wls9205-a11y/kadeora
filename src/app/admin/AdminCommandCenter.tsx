@@ -206,15 +206,15 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         { label: '유저', value: usersR.count || 0, icon: '👥' },
         { label: '게시글', value: postsR.count || 0, icon: '📝' },
         { label: '블로그', value: blogsR.count || 0, icon: '📰' },
-        { label: '시리즈', value: (seriesR as any)?.count || 0, icon: '📚' },
+        { label: '시리즈', value: seriesR?.count || 0, icon: '📚' },
         { label: '주식', value: stocksR.count || 0, icon: '📈' },
-        { label: '가격알림', value: (priceAlertsR as any)?.count || 0, icon: '🔔' },
-        { label: '포트폴리오', value: (portfolioR as any)?.count || 0, icon: '💰' },
+        { label: '가격알림', value: priceAlertsR?.count || 0, icon: '🔔' },
+        { label: '포트폴리오', value: portfolioR?.count || 0, icon: '💰' },
         { label: '청약', value: aptSubR.count || 0, icon: '🏠' },
         { label: '실거래', value: aptTradeR.count || 0, icon: '🏗' },
         { label: '재개발(활성)', value: redevR.count || 0, icon: '🔨' },
         { label: '미분양(활성)', value: unsoldR.count || 0, icon: '📉' },
-        { label: '리뷰', value: (reviewsR as any)?.count || 0, icon: '⭐' },
+        { label: '리뷰', value: reviewsR?.count || 0, icon: '⭐' },
       ]);
 
       const allLogs = logsRes.data || [];
@@ -245,7 +245,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         aiSumSub: aiSumSubR?.count || 0,
         aiSumRedev: aiSumRedevR?.count || 0,
         aiSumUnsold: aiSumUnsoldR?.count || 0,
-        redevNullHouseholds: (redevNullHouseholdsR as any)?.count || 0,
+        redevNullHouseholds: redevNullHouseholdsR?.count || 0,
       });
       setLastRefresh(new Date());
     } catch (e) { console.error('Admin load error', e); }
@@ -634,7 +634,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                       <div key={f.k} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
                         <span style={{ fontSize: 10, color: '#7D8DA3', minWidth: 55 }}>{f.l}</span>
                         <input className="cc-input" type="number" min={f.min} max={f.max} step={f.k === 'title_similarity_threshold' ? 0.05 : f.k === 'min_content_length' ? 100 : 1}
-                          value={(blogConfig as any)[f.k]} onChange={e => setBlogConfig({...blogConfig,[f.k]: f.k === 'title_similarity_threshold' ? parseFloat(e.target.value) : parseInt(e.target.value)})} />
+                          value={blogConfig[f.k as keyof typeof blogConfig]} onChange={e => setBlogConfig({...blogConfig,[f.k]: f.k === 'title_similarity_threshold' ? parseFloat(e.target.value) : parseInt(e.target.value)})} />
                       </div>
                     ))}
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>

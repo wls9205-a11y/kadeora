@@ -196,8 +196,8 @@ export default function DiscussDetailPage() {
         {/* Comment list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {comments.map(c => {
-            const nick = (c.profiles as any)?.nickname ?? '사용자';
-            const grade = (c.profiles as any)?.grade ?? 1;
+            const nick = c.profiles?.nickname ?? '사용자';
+            const grade = c.profiles?.grade ?? 1;
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10 }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-base)' }}>

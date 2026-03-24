@@ -267,7 +267,7 @@ export default function AdminContentPage() {
                 {chatMsgs.map(m => (
                   <tr key={m.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '10px 12px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {(m.profiles as any)?.nickname || '-'}
+                      {m.profiles?.nickname || '-'}
                     </td>
                     <td style={{ padding: '10px 8px', color: 'var(--text-secondary)', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {m.content}

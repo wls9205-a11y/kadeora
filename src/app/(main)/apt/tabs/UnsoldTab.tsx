@@ -20,9 +20,9 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
   // 미분양 급증 감지
   useEffect(() => {
     const sb = createSupabaseBrowser();
-    (sb.rpc as any)('detect_unsold_surge').then(({ data }: any) => {
+    sb.rpc('detect_unsold_surge').then(({ data }: { data: { region_nm: string; change_pct: number; current_count: number; prev_count: number }[] | null }) => {
       if (data?.length) setSurgeAlerts(data.slice(0, 5));
-    }).catch(() => {});
+    });
   }, []);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (

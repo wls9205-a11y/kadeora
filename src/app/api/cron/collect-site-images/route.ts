@@ -40,7 +40,7 @@ async function handler(req: NextRequest) {
   }
 
   // 이미지가 없는 현장 중 score 40+ 우선
-  const { data: sites } = await (sb as any).from('apt_sites')
+  const { data: sites } = await sb.from('apt_sites')
     .select('id, name, region, sigungu, site_type, images')
     .eq('is_active', true)
     .gte('content_score', 25)
@@ -89,7 +89,7 @@ async function handler(req: NextRequest) {
         collected_at: new Date().toISOString(),
       }));
 
-      await (sb as any).from('apt_sites').update({
+      await sb.from('apt_sites').update({
         images: imageData,
         updated_at: new Date().toISOString(),
       }).eq('id', site.id);
@@ -103,7 +103,7 @@ async function handler(req: NextRequest) {
   // content_score 재계산 (이미지 추가분)
   for (const site of targets) {
     try {
-      await (sb as any).rpc('calculate_site_content_score', { p_site_id: site.id });
+      await sb.rpc('calculate_site_content_score', { p_site_id: site.id });
     } catch {}
   }
 

@@ -18,7 +18,7 @@ async function handler(req: NextRequest) {
 
   // 최근 24시간 내 업데이트된 현장 URL 수집
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { data: sites } = await (sb as any).from('apt_sites')
+  const { data: sites } = await sb.from('apt_sites')
     .select('slug')
     .eq('is_active', true)
     .gte('content_score', 40)

@@ -21,7 +21,7 @@ async function handler(req: NextRequest) {
     const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
 
     // 철회된 동의 중 5일 이상 지난 것 (아직 파기 안 된 것)
-    const { data: withdrawnConsents } = await (sb as any).from('privacy_consents')
+    const { data: withdrawnConsents } = await sb.from('privacy_consents')
       .select('id, guest_identifier, consent_type, withdrawn_at')
       .not('withdrawn_at', 'is', null)
       .lte('withdrawn_at', fiveDaysAgo)
@@ -38,7 +38,7 @@ async function handler(req: NextRequest) {
         // 해당 사용자의 모든 관심고객 데이터 삭제
         if (consent.guest_identifier && consent.guest_identifier !== '삭제됨') {
           // 비회원 관심고객 중 해당 전화번호 뒤 4자리로 매칭되는 레코드 삭제
-          const { data: interests } = await (sb as any).from('apt_site_interests')
+          const { data: interests } = await sb.from('apt_site_interests')
             .select('id, guest_phone')
             .not('guest_phone', 'is', null);
 
@@ -47,11 +47,11 @@ async function handler(req: NextRequest) {
           );
 
           for (const interest of toDelete) {
-            await (sb as any).from('apt_site_interests').delete().eq('id', interest.id);
+            await sb.from('apt_site_interests').delete().eq('id', interest.id);
           }
 
           // 동의 기록에서 개인 식별자 마스킹 (증빙 이력은 유지)
-          await (sb as any).from('privacy_consents').update({
+          await sb.from('privacy_consents').update({
             guest_identifier: '삭제됨',
             ip_address: null,
             user_agent: null,

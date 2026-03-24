@@ -22,7 +22,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     .single();
 
   const title = post?.title ?? '카더라';
-  const nickname = (post?.profiles as any)?.nickname ?? '익명';
+  const nickname = ((post?.profiles as unknown) as { nickname: string } | null)?.nickname ?? '익명';
   const category = CATEGORY_LABEL[post?.category ?? ''] ?? '';
   const likes = post?.likes_count ?? 0;
 

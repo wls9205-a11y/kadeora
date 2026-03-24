@@ -93,7 +93,7 @@ export default function OneClickPanel() {
       // 미처리 신고
       const { count: reportCount } = await sb.from('reports')
         .select('id', { count: 'exact', head: true })
-        .eq('status', 'pending') as any;
+        .eq('status', 'pending');
       items.push({
         label: '미처리 신고',
         status: (reportCount || 0) === 0 ? 'ok' : (reportCount || 0) < 5 ? 'warn' : 'error',

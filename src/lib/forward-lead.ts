@@ -3,13 +3,13 @@ import { decrypt, hasEncryptionKey } from '@/lib/encryption';
 
 /** 피처 플래그 확인 */
 async function isFeatureEnabled(sb: any, key: string): Promise<boolean> {
-  const { data } = await (sb as any).from('feature_flags').select('enabled').eq('key', key).single();
+  const { data } = await sb.from('feature_flags').select('enabled').eq('key', key).single();
   return data?.enabled === true;
 }
 
 /** 감사 로그 기록 */
 async function auditLog(sb: any, action: string, detail: Record<string, any>, actorId?: string, ip?: string) {
-  await (sb as any).from('privacy_audit_log').insert({
+  await sb.from('privacy_audit_log').insert({
     action,
     actor_id: actorId || null,
     actor_type: actorId ? 'admin' : 'system',
@@ -32,10 +32,10 @@ export async function autoForwardLead(interestId: number, siteId: string) {
   const enabled = await isFeatureEnabled(sb, 'premium_consultant_forwarding');
   if (!enabled) return { forwarded: false, reason: 'feature_disabled' };
 
-  const { data: site } = await (sb as any).from('apt_sites').select('region, sigungu, name').eq('id', siteId).single();
+  const { data: site } = await sb.from('apt_sites').select('region, sigungu, name').eq('id', siteId).single();
   if (!site) return { forwarded: false, reason: 'site_not_found' };
 
-  const { data: consultants } = await (sb as any).from('consultant_profiles')
+  const { data: consultants } = await sb.from('consultant_profiles')
     .select('id, name, phone, user_id')
     .eq('is_active', true)
     .eq('is_verified', true)
@@ -45,12 +45,12 @@ export async function autoForwardLead(interestId: number, siteId: string) {
     return { forwarded: false, reason: 'no_matching_consultant' };
   }
 
-  const { data: interest } = await (sb as any).from('apt_site_interests')
+  const { data: interest } = await sb.from('apt_site_interests')
     .select('id, guest_name, guest_phone, guest_phone_last4, guest_city, guest_district')
     .eq('id', interestId).single();
   if (!interest) return { forwarded: false, reason: 'interest_not_found' };
 
-  const { data: existingLead } = await (sb as any).from('consultant_leads')
+  const { data: existingLead } = await sb.from('consultant_leads')
     .select('id').eq('interest_id', interestId).maybeSingle();
   if (existingLead) return { forwarded: false, reason: 'already_forwarded' };
 
@@ -62,7 +62,7 @@ export async function autoForwardLead(interestId: number, siteId: string) {
 
   const consultant = consultants[0];
 
-  await (sb as any).from('consultant_leads').insert({
+  await sb.from('consultant_leads').insert({
     interest_id: interestId,
     site_id: siteId,
     consultant_id: consultant.id,
@@ -82,12 +82,10 @@ export async function autoForwardLead(interestId: number, siteId: string) {
 
   if (consultant.user_id) {
     try {
-      await (sb as any).from('notifications').insert({
+      await sb.from('notifications').insert({
         user_id: consultant.user_id,
         type: 'consultant_lead',
-        title: `새 관심고객: ${site.name}`,
-        message: `${interest.guest_name || '고객'}님이 ${site.name}에 관심을 등록했습니다. (****${interest.guest_phone_last4 || '????'})`,
-        data: { site_id: siteId, interest_id: interestId },
+        content: `새 관심고객: ${site.name} — ${interest.guest_name || '고객'}님 (****${interest.guest_phone_last4 || '????'})`,
       });
     } catch {}
   }
