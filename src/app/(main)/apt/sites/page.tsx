@@ -24,7 +24,7 @@ export default async function SitesListPage({ searchParams }: { searchParams: Pr
   const perPage = 30;
 
   const sb = getSupabaseAdmin();
-  let query = sb.from('apt_sites' as any).select('slug, name, site_type, region, sigungu, total_units, status, interest_count, content_score', { count: 'exact' })
+  let query = (sb as any).from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status, interest_count, content_score', { count: 'exact' })
     .eq('is_active', true).gte('content_score', 25)
     .order('interest_count', { ascending: false })
     .range((page - 1) * perPage, page * perPage - 1);
@@ -39,7 +39,7 @@ export default async function SitesListPage({ searchParams }: { searchParams: Pr
   const REGIONS = ['서울','부산','경기','인천','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'];
 
   // 지역별 카운트
-  const { data: regionCounts } = await sb.from('apt_sites' as any)
+  const { data: regionCounts } = await (sb as any).from('apt_sites')
     .select('region').eq('is_active', true).gte('content_score', 25);
   const rCounts: Record<string, number> = {};
   (regionCounts || []).forEach((r: any) => { rCounts[r.region] = (rCounts[r.region] || 0) + 1; });

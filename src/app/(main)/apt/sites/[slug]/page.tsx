@@ -17,18 +17,18 @@ interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
   const sb = getSupabaseAdmin();
-  const { data } = await sb.from('apt_sites' as any)
+  const { data } = await (sb as any).from('apt_sites')
     .select('slug')
     .eq('is_active', true)
     .gte('content_score', 25)
     .limit(10000);
-  return (data || []).map(s => ({ slug: s.slug }));
+  return ((data || []) as any[]).map(s => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const sb = getSupabaseAdmin();
-  const { data: site } = await sb.from('apt_sites' as any)
+  const { data: site } = await (sb as any).from('apt_sites')
     .select('name, seo_title, seo_description, region, sigungu, site_type, total_units, price_min, price_max, builder')
     .eq('slug', decodeURIComponent(slug)).single();
   if (!site) return {};
@@ -78,7 +78,7 @@ export default async function SiteDetailPage({ params }: Props) {
   const decoded = decodeURIComponent(slug);
   const sb = await createSupabaseServer();
 
-  const { data: site } = await sb.from('apt_sites' as any).select('*').eq('slug', decoded).single();
+  const { data: site } = await (sb as any).from('apt_sites').select('*').eq('slug', decoded).single();
   if (!site) notFound();
 
   // 페이지뷰 증가 (비동기, 에러 무시)
@@ -130,7 +130,7 @@ export default async function SiteDetailPage({ params }: Props) {
   } catch {}
 
   try {
-    const { data } = await sb.from('apt_sites' as any).select('slug, name, site_type, region, sigungu, total_units, status')
+    const { data } = await (sb as any).from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status')
       .eq('is_active', true).eq('region', site.region || '').neq('id', site.id)
       .gte('content_score', 25).order('interest_count', { ascending: false }).limit(4);
     nearbySites = data || [];
