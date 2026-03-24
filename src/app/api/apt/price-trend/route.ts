@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const sb = getSupabaseAdmin();
     const { searchParams } = new URL(req.url);

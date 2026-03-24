@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // GET: 활성 프리미엄 리스팅 목록 (분양중 탭에서 호출)
 export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const admin = getSupabaseAdmin();
     const { data } = await admin.from('premium_listings')
@@ -21,6 +23,7 @@ export async function GET(req: NextRequest) {
 
 // POST: 프리미엄 리스팅 생성 (결제 후 호출)
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();

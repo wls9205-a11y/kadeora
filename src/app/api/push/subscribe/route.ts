@@ -1,8 +1,11 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
+  try {
   const sb = await createSupabaseServer();
   const { data: { user }, error: authError } = await sb.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -19,9 +22,16 @@ export async function POST(req: NextRequest) {
   }, { onConflict: 'user_id' });
 
   return NextResponse.json({ ok: true });
+
+  } catch (e) {
+    console.error('[src/app/api/push/subscribe/route.ts]', e);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
+  try {
   const sb = await createSupabaseServer();
   const { data: { user }, error: authError } = await sb.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -29,4 +39,9 @@ export async function DELETE() {
   const admin = getSupabaseAdmin();
   await admin.from('push_subscriptions').delete().eq('user_id', user.id);
   return NextResponse.json({ ok: true });
+
+  } catch (e) {
+    console.error('[src/app/api/push/subscribe/route.ts]', e);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

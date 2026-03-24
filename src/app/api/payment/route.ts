@@ -1,9 +1,11 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 
 export async function POST(request: NextRequest) {
+  const rl = await rateLimit(request); if (!rl) return rateLimitResponse();
   try {
     const body = await request.json();
     const { paymentKey, orderId, amount } = body;
@@ -93,6 +95,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const rl = await rateLimit(request); if (!rl) return rateLimitResponse();
   try {
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) {

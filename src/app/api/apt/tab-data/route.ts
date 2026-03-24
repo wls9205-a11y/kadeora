@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // 탭별 데이터만 가져오는 경량 API
 // 기존: page.tsx에서 전체 5탭 데이터 한번에 → 클라이언트로 전송 (수MB)
 // 개선: 활성 탭만 필요할 때 fetch → 초기 payload 80% 감소
 
 export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   const { searchParams } = new URL(req.url);
   const tab = searchParams.get('tab');
   const region = searchParams.get('region') || '';

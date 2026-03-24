@@ -1,5 +1,6 @@
-﻿import { NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const SYMBOLS = [
   '005930','000660','005380','035420','035720','068270','207940','006400',
@@ -28,7 +29,8 @@ async function fetchYahoo(symbols: string[]) {
   return json?.quoteResponse?.result ?? [];
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

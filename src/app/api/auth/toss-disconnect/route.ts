@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const EXPECTED_AUTH =
   process.env.TOSS_DISCONNECT_BASIC_AUTH ||
   'Basic a2FkZW9yYTprYWRlb3JhLXRvc3MtMjAyNg=='
 
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const auth = req.headers.get('authorization')
     if (!auth || auth !== EXPECTED_AUTH) {

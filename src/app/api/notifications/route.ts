@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -16,6 +17,7 @@ async function getUser() {
 }
 
 export async function GET(request: NextRequest) {
+  const rl = await rateLimit(request); if (!rl) return rateLimitResponse();
   try {
     const user = await getUser();
     if (!user) return NextResponse.json({ success: false, error: '로그인 필요' }, { status: 401 });

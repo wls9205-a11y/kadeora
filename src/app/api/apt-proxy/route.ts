@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -34,6 +35,7 @@ function mapItem(item: Record<string, string>) {
 }
 
 export async function GET(request: NextRequest) {
+  const rl = await rateLimit(request); if (!rl) return rateLimitResponse();
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');

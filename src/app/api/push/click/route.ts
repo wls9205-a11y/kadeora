@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const { log_id } = await req.json();
     if (!log_id) return NextResponse.json({ ok: false });

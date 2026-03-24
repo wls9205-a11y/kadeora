@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   const body = await req.json().catch(() => null);
   if (!body?.visitor_id || !body?.path) return NextResponse.json({ ok: false });
 

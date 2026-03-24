@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // GET /api/stock/sparkline?symbols=005930,000660,035420
 export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
+  try {
   const symbols = req.nextUrl.searchParams.get('symbols')?.split(',').filter(Boolean).slice(0, 20);
   if (!symbols?.length) return NextResponse.json({ data: {} });
 
@@ -27,4 +30,9 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ data: map }, {
     headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
   });
+
+  } catch (e) {
+    console.error('[src/app/api/stock/sparkline/route.ts]', e);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

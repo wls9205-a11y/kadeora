@@ -1,8 +1,11 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   const start = Date.now();
   try {
     const sb = getSupabaseAdmin();

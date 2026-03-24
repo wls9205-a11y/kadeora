@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export const revalidate = 300;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data, error } = await sb.from('stock_themes')

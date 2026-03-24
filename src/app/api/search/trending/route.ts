@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // Cache: 600s — 트렌딩 검색어
 export const revalidate = 600;
@@ -7,7 +8,8 @@ export const revalidate = 600;
 const withTimeout = <T>(p: PromiseLike<T>, ms = 3000): Promise<T | null> =>
   Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
 

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // GET: 현재 유저의 상담사 프로필 조회
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();
@@ -22,6 +24,7 @@ export async function GET() {
 
 // POST: 상담사 등록/수정
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
     const sb = await createSupabaseServer();
     const { data: { user } } = await sb.auth.getUser();

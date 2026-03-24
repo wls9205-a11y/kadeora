@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
+  try {
   const sb = await createSupabaseServer()
   const { data: { user } } = await sb.auth.getUser()
 
@@ -61,4 +64,9 @@ export async function POST() {
   })
 
   return NextResponse.json({ granted: true, points: 30 })
+
+  } catch (e) {
+    console.error('[src/app/api/profile/avatar-point/route.ts]', e);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
