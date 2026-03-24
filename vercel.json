@@ -250,6 +250,14 @@
     {
       "path": "/api/cron/sync-apt-sites",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/collect-site-images",
+      "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/purge-withdrawn-consents",
+      "schedule": "0 5 * * *"
     }
   ]
 }

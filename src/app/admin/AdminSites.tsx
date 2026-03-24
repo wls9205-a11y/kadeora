@@ -187,6 +187,8 @@ export default function AdminSites() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
             {[
               { label: '현장 싱크', icon: '🔄', path: '/api/cron/sync-apt-sites', desc: '5개 테이블 통합' },
+              { label: '이미지 수집', icon: '🖼️', path: '/api/cron/collect-site-images', desc: '네이버 검색 일괄' },
+              { label: '동의 파기', icon: '🗑️', path: '/api/cron/purge-withdrawn-consents', desc: '철회 5일 이후' },
               { label: '관심고객 CSV', icon: '📥', action: 'csv', desc: '마스킹 다운로드' },
               { label: 'KPI 새로고침', icon: '📊', action: 'refresh', desc: '최신 데이터' },
             ].map(a => (

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { validateNickname } from '@/lib/nickname-filter';
+import { REGIONS, SIGUNGU_MAP } from '@/lib/regions';
 
 const INTERESTS = [
   { key: 'stock',   label: '📈 주식' },
@@ -15,8 +16,6 @@ const INTERESTS = [
   { key: 'side',    label: '🛠 부업/재테크' },
   { key: 'news',    label: '📰 경제뉴스' },
 ];
-
-const REGIONS = ['서울','경기','인천','부산','대구','광주','대전','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'];
 
 const AGE_GROUPS = [
   { value: '20s', label: '20대' },
@@ -31,6 +30,7 @@ export default function OnboardingClient() {
   const [nickname, setNickname] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [region, setRegion] = useState('');
+  const [district, setDistrict] = useState('');
   const [ageGroup, setAgeGroup] = useState('');
   const [marketing, setMarketing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -58,6 +58,8 @@ export default function OnboardingClient() {
       const { error: updateErr } = await sb.from('profiles').update({
         nickname: nickname.trim(), nickname_set: true,
         interests: selectedInterests, region_text: region || null,
+        residence_city: region || null,
+        residence_district: district || null,
         age_group: ageGroup, font_size_preference: fontPref,
         marketing_agreed: marketing, onboarded: true,
         updated_at: new Date().toISOString(),
@@ -194,14 +196,27 @@ export default function OnboardingClient() {
                 📍 지역을 선택해야 맞춤 피드를 받을 수 있어요
               </div>
             )}
-            <select value={region} onChange={e => setRegion(e.target.value)} style={{
-              width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 20,
+            <select value={region} onChange={e => { setRegion(e.target.value); setDistrict(''); }} style={{
+              width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 8,
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
             }}>
-              <option value="">지역을 선택해주세요</option>
+              <option value="">시·도를 선택해주세요</option>
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
+            {region && SIGUNGU_MAP[region] && (
+              <select value={district} onChange={e => setDistrict(e.target.value)} style={{
+                width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 20,
+                background: 'var(--bg-hover)', border: '1px solid var(--border)',
+                color: district ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
+              }}>
+                <option value="">시·군·구 선택 (선택사항)</option>
+                {SIGUNGU_MAP[region].map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            )}
+            {!region && !district && (
+              <div style={{ height: 20, marginBottom: 20 }} />
+            )}
             <label style={{
               display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: '14px',
               borderRadius: 10, marginBottom: 24,
