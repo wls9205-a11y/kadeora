@@ -72,7 +72,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {apts.length}건</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+            <div className="apt-region-grid">
               <button onClick={() => setRegion('전체')} style={{
                 padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                 border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',

@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0B1426 0%, #0F1D35 100%)',
+            background: 'linear-gradient(135deg, #050A18 0%, #0A1225 100%)',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           }}
         >
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #0B1426 0%, #0F1D35 100%)',
+          background: 'linear-gradient(135deg, #050A18 0%, #0A1225 100%)',
           padding: '56px 64px',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}

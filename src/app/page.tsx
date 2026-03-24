@@ -411,7 +411,7 @@ export default async function HomePage() {
         {/* ━━━ CTA 배너 ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #1E3A5F 0%, #0F1D35 100%)',
+            background: 'linear-gradient(135deg, #152850 0%, #0A1225 100%)',
             borderRadius: 20, padding: 'clamp(32px, 5vw, 56px)', textAlign: 'center',
             border: '1px solid var(--border-strong)',
           }}>

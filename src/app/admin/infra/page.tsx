@@ -14,7 +14,7 @@ function DonutGauge({ value, max, label, color }: { value: number; max: number; 
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ position: 'relative', width: 128, height: 128 }}>
         <svg width="128" height="128" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx="60" cy="60" r={radius} fill="none" stroke="#1E3050" strokeWidth="8" />
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="#152240" strokeWidth="8" />
           <circle cx="60" cy="60" r={radius} fill="none" stroke={statusColor} strokeWidth="8"
             strokeDasharray={circumference} strokeDashoffset={offset}
             strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />

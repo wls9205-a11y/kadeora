@@ -91,7 +91,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
           <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+        <div className="apt-region-grid">
           <button onClick={() => setUnsoldRegion('전체')} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
             border: unsoldRegion === '전체' ? '2px solid var(--accent-red)' : '1px solid var(--border)',

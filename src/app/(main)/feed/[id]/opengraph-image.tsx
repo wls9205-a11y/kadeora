@@ -29,7 +29,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   return new ImageResponse(
     (
       <div style={{
-        width: 1200, height: 630, background: '#0B1426',
+        width: 1200, height: 630, background: '#050A18',
         display: 'flex', flexDirection: 'column', padding: '60px 80px',
         fontFamily: 'sans-serif',
       }}>

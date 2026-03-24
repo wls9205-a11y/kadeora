@@ -83,7 +83,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>총 {redevelopment.length}건</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+              <div className="apt-region-grid">
                 <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
                   border: redevRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',

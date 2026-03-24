@@ -100,9 +100,9 @@ function NoticeSection() {
         </button>
       </div>
       {preview && content.trim() && (
-        <div style={{ marginTop: 12, borderRadius: 8, overflow: 'hidden', border: '1px solid #1E3050' }}>
+        <div style={{ marginTop: 12, borderRadius: 8, overflow: 'hidden', border: '1px solid #152240' }}>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 10px', background: 'var(--bg-hover)' }}>미리보기</div>
-          <div style={{ background: '#0B1426', height: 32, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+          <div style={{ background: '#050A18', height: 32, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
             <div style={{ whiteSpace: 'nowrap', animation: 'kd-notice-preview 20s linear infinite', paddingLeft: '100%', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--accent-green)' }}>
               📡&nbsp;{content}<span style={{ margin: '0 48px', color: '#059669' }}>◆</span>📡&nbsp;{content}
             </div>

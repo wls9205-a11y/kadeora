@@ -9,7 +9,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="ko">
-      <body style={{ margin:0, fontFamily:'sans-serif', background:'var(--bg-base, #0B1426)', color:'var(--text-primary, #E2E8F0)', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', textAlign:'center' }}>
+      <body style={{ margin:0, fontFamily:'sans-serif', background:'var(--bg-base, #050A18)', color:'var(--text-primary, #E8EDF5)', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', textAlign:'center' }}>
         <div style={{ padding:'40px 20px' }}>
           <div style={{ fontSize:64, marginBottom:20 }}>💥</div>
           <h1 style={{ fontSize:24, fontWeight:800, marginBottom:12 }}>서비스에 문제가 발생했습니다</h1>

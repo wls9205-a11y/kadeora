@@ -200,9 +200,9 @@ html.font-large {
    핵심: 배경-카드-인풋 3단계 명도차 + 경계선 + 그림자
    ======================================== */
 
-/* Dark Mode Only — 네이비 다크모드 */
+/* Dark Mode Only — 딥 네이비 다크모드 */
 :root {
-  --bg-base:       #0B1426;
+  --bg-base:       #050A18;
 
   /* ─── 디자인 토큰 ─── */
   --radius-xs: 6px;
@@ -212,66 +212,66 @@ html.font-large {
   --radius-xl: 20px;
   --radius-full: 999px;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.3);
-  --shadow-xl: 0 16px 48px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.5);
 
   --transition-fast: 0.12s ease;
   --transition-normal: 0.2s ease;
   --transition-slow: 0.35s ease;
-  --bg-surface:    #0F1D35;
-  --bg-elevated:   #162544;
-  --bg-sunken:     #070E1A;
-  --bg-hover:      #162544;
-  --bg-active:     #1E3050;
-  --border:        #1E3050;
-  --border-strong: #2A4060;
-  --border-focus:  #3B82F6;
-  --text-primary:   #E2E8F0;
-  --text-secondary: #9DB0C7;
-  --text-tertiary:  #8A9BB0;
-  --text-disabled:  #334155;
-  --text-inverse:   #0B1426;
-  --text-link:      #60A5FA;
-  --brand:          #2563EB;
-  --brand-hover:    #3B82F6;
-  --brand-light:    #1E3A5F;
-  --brand-bg:       rgba(37,99,235,0.08);
-  --brand-border:   rgba(37,99,235,0.15);
-  --accent-blue-light:  #93c5fd;
-  --accent-orange-light: #fdba74;
-  --brand-dark:     #1E40AF;
-  --success:        #4ADE80;
-  --success-bg:     #0A1F1A;
-  --warning:        #FBBF24;
+  --bg-surface:    #0A1225;
+  --bg-elevated:   #0F1A32;
+  --bg-sunken:     #030710;
+  --bg-hover:      #0F1A32;
+  --bg-active:     #152240;
+  --border:        #152240;
+  --border-strong: #1E2E52;
+  --border-focus:  #5B93FF;
+  --text-primary:   #E8EDF5;
+  --text-secondary: #94A8C4;
+  --text-tertiary:  #6B82A0;
+  --text-disabled:  #2A3650;
+  --text-inverse:   #050A18;
+  --text-link:      #6CB4FF;
+  --brand:          #3B7BF6;
+  --brand-hover:    #5B93FF;
+  --brand-light:    #152850;
+  --brand-bg:       rgba(59,123,246,0.10);
+  --brand-border:   rgba(59,123,246,0.20);
+  --accent-blue-light:  #8BB8FF;
+  --accent-orange-light: #FFB06A;
+  --brand-dark:     #2556C4;
+  --success:        #2EE8A5;
+  --success-bg:     #061F18;
+  --warning:        #FFD43B;
   --warning-bg:     #1A1708;
-  --error:          #F87171;
-  --error-bg:       #2D0F0F;
-  --info:           #60A5FA;
-  --info-bg:        #0C1C32;
+  --error:          #FF6B6B;
+  --error-bg:       #250D0D;
+  --info:           #6CB4FF;
+  --info-bg:        #081828;
   --font-base:      15px;
   /* 주식 시세 */
-  --stock-up:       #F87171;
-  --stock-down:     #60A5FA;
-  --stock-flat:     #9DB0C7;
+  --stock-up:       #FF6B6B;
+  --stock-down:     #6CB4FF;
+  --stock-flat:     #94A8C4;
   /* 시맨틱 액센트 (카테고리/상태별) */
-  --accent-green:   #34D399;
-  --accent-green-bg: rgba(52,211,153,0.12);
-  --accent-purple:  #A78BFA;
-  --accent-purple-bg: rgba(167,139,250,0.12);
-  --accent-orange:  #FB923C;
-  --accent-orange-bg: rgba(251,146,60,0.12);
-  --accent-yellow:  #FBBF24;
-  --accent-yellow-bg: rgba(251,191,36,0.12);
-  --accent-red:     #F87171;
-  --accent-red-bg:  rgba(248,113,113,0.12);
-  --accent-blue:    #60A5FA;
-  --accent-blue-bg: rgba(96,165,250,0.12);
+  --accent-green:   #2EE8A5;
+  --accent-green-bg: rgba(46,232,165,0.10);
+  --accent-purple:  #B794FF;
+  --accent-purple-bg: rgba(183,148,255,0.10);
+  --accent-orange:  #FF9F43;
+  --accent-orange-bg: rgba(255,159,67,0.10);
+  --accent-yellow:  #FFD43B;
+  --accent-yellow-bg: rgba(255,212,59,0.10);
+  --accent-red:     #FF6B6B;
+  --accent-red-bg:  rgba(255,107,107,0.10);
+  --accent-blue:    #6CB4FF;
+  --accent-blue-bg: rgba(108,180,255,0.10);
   /* 네비게이션 */
-  --nav-bg:         #0F1D35;
-  --nav-border:     #1E3050;
-  --nav-text:       #E2E8F0;
+  --nav-bg:         #0A1225;
+  --nav-border:     #152240;
+  --nav-text:       #E8EDF5;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
   --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
@@ -1269,4 +1269,138 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   .stock-price-text { font-size: var(--fs-sm) !important; }
   /* 원화 환산 숨김 */
   .stock-krw-text { display: none !important; }
+}
+
+/* ═══ 부동산 지역별 현황 그리드 ═══ */
+.apt-region-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+@media screen and (max-width: 480px) {
+  .apt-region-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+}
+@media screen and (min-width: 720px) {
+  .apt-region-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+.apt-region-card {
+  padding: 10px 6px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+.apt-region-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.apt-region-card.selected {
+  border: 2px solid var(--brand);
+  background: var(--brand-light);
+}
+.apt-region-card .region-count {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.apt-region-card.selected .region-count {
+  color: var(--text-inverse);
+}
+.apt-region-card .region-name {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.apt-region-card.selected .region-name {
+  color: var(--text-inverse);
+}
+.apt-region-card .region-sub {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.apt-region-card .region-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  margin-top: 4px;
+}
+.apt-region-card.selected .region-bar {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ═══ 부동산 지역 그리드 디자인 개선 ═══ */
+.apt-region-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+.apt-region-card {
+  padding: 12px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  position: relative;
+  overflow: hidden;
+}
+.apt-region-card:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+}
+.apt-region-card.active {
+  border-color: var(--accent-blue);
+  background: var(--brand-bg);
+  box-shadow: 0 0 12px rgba(108,180,255,0.15);
+}
+.apt-region-card .region-count {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.apt-region-card .region-name {
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+.apt-region-card.active .region-count {
+  color: var(--accent-blue);
+}
+.apt-region-card .region-bar {
+  height: 3px;
+  border-radius: 2px;
+  margin-top: 6px;
+  background: var(--border);
+  overflow: hidden;
+  display: flex;
+}
+@media screen and (max-width: 480px) {
+  .apt-region-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .apt-region-card {
+    padding: 10px 4px;
+    border-radius: 10px;
+  }
 }
