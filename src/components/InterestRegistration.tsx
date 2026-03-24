@@ -14,7 +14,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [registered, setRegistered] = useState(false);
-  const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showGuestForm, setShowGuestForm] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [count, setCount] = useState(interestCount);
