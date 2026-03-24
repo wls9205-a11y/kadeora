@@ -129,7 +129,7 @@ export default async function SiteDetailPage({ params }: Props) {
 
   try {
     if (hasSub) {
-      const { data } = await sb.from('apt_subscriptions').select('*')
+      const { data } = await sb.from('apt_subscriptions').select('house_nm,hssply_adres,rcept_bgnde,rcept_endde,tot_supply_hshld_co,status,competition_rate_1st,region_nm,house_manage_no')
         .eq('id', Number(sourceIds.subscription_id)).single();
       subData = data;
     }

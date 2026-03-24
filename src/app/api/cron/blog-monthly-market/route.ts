@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
 
     const [stocksRes, tradeRes, unsoldRes, blogCountRes] = await Promise.all([
       supabase.from('stock_quotes').select('name, change_pct, market').in('market', ['KOSPI', 'KOSDAQ']),
-      supabase.from('apt_trade_monthly_stats').select('*').eq('stat_month', monthKey),
-      supabase.from('unsold_monthly_stats').select('*').eq('stat_month', monthKey),
+      supabase.from('apt_trade_monthly_stats').select('region,stat_month,trade_count,avg_price,avg_area,avg_price_per_pyeong').eq('stat_month', monthKey),
+      supabase.from('unsold_monthly_stats').select('region,stat_month,total_unsold,after_completion').eq('stat_month', monthKey),
       supabase.from('blog_posts').select('id', { count: 'exact', head: true }).gte('created_at', prevMonth.toISOString()),
     ]);
 

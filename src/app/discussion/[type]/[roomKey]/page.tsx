@@ -67,7 +67,7 @@ export default function DiscussionRoomPage() {
     const load = async () => {
       const { data: rd } = await supabase
         .from('discussion_rooms')
-        .select('*')
+        .select('id,display_name,room_key,room_type,description,member_count,post_count,messages_count,is_active,is_premium,source_ref,created_at')
         .eq('room_key', roomKey)
         .single();
       if (rd) setRoom(rd);

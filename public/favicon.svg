@@ -1,7 +1,11 @@
 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
   <rect width="32" height="32" rx="7" fill="#08102A"/>
-  <rect x="5" y="5" width="22" height="16" rx="4" fill="#3B7BF6"/>
-  <polygon points="9,21 14,21 11,26" fill="#3B7BF6"/>
+  <!-- 말풍선 본체 -->
+  <rect x="4" y="5" width="24" height="16" rx="4" fill="#3B7BF6"/>
+  <!-- 꼬리 -->
+  <polygon points="7,21 14,21 9,28" fill="#3B7BF6"/>
+  <!-- 흰 점 3개 -->
   <circle cx="11" cy="13" r="2.2" fill="white"/>
   <circle cx="16" cy="13" r="2.2" fill="white"/>
   <circle cx="21" cy="13" r="2.2" fill="white"/>
