@@ -5,10 +5,10 @@ import dynamic from 'next/dynamic';
 
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
 const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr: false });
+const StockDetailSheet = dynamic(() => import('./StockDetailSheet'), { ssr: false });
 import MiniSparkline from '@/components/MiniSparkline';
 import { fmtCap, stockColor, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
-import StockDetailSheet from './StockDetailSheet';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;

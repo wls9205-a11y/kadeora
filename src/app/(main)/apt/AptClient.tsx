@@ -1,14 +1,15 @@
 'use client';
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
 import { haptic } from '@/lib/haptic';
-import TransactionTab from './tabs/TransactionTab';
-import RedevTab from './tabs/RedevTab';
-import OngoingTab from './tabs/OngoingTab';
-import UnsoldTab from './tabs/UnsoldTab';
 import SubscriptionTab from './tabs/SubscriptionTab';
+const TransactionTab = dynamic(() => import('./tabs/TransactionTab'), { ssr: false });
+const RedevTab = dynamic(() => import('./tabs/RedevTab'), { ssr: false });
+const OngoingTab = dynamic(() => import('./tabs/OngoingTab'), { ssr: false });
+const UnsoldTab = dynamic(() => import('./tabs/UnsoldTab'), { ssr: false });
 import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
 

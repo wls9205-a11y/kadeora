@@ -101,7 +101,7 @@ export default async function HomePage() {
     const sb = getSupabaseAdmin();
     const [blogR, stockR, aptR, postR, profileR, redevR] = await Promise.all([
       sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
-      sb.from('stock_quotes').select('id', { count: 'exact', head: true }),
+      sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }),
       sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }),
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
       sb.from('profiles').select('id', { count: 'exact', head: true }),
