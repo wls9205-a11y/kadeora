@@ -1,7 +1,31 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-25 세션 36
+> **마지막 업데이트:** 2026-03-25 세션 37
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
+
+## 세션 37 작업 내역 (2026-03-25)
+
+### SEO 노출 면적 극대화
+- JSON-LD 5→7종: Product(가격칩), HowTo(4단계), SpeakableSpecification
+- 포털별 메타: naver:written_time, naver:updated_time, dg:plink, og:price, article:tag
+- /apt 메인: ItemList(Google 캐러셀) + CollectionPage + OG 강화
+- 시맨틱 HTML: `<article itemScope>` + `<h2>` 12개 섹션
+- RSS 피드: 700→900건 (부동산 200건 추가)
+- 사이트맵: 3,307 URL, content_score 25+, daily/weekly frequency
+
+### 부동산 페이지 개선
+- KPI 요약바: 접수중/예정/분양중/미분양 4칸 그리드
+- 마감 임박 배너: D-3 이내 접수중 자동 표시
+
+### InterestRegistration 원클릭
+- 로그인 유저: 즉시 원클릭 버튼 (게스트 폼 숨김)
+- 비로그인: 기존처럼 게스트 폼 기본 표시
+
+### 어드민 전면 개편
+- 미사용 컴포넌트 20개 삭제 (~3,139줄)
+- 어드민 루트 파일: 26개 → 6개 (-79%)
+- AdminHub: 3탭 → 단일 스크롤 (ControlTower + AdminSites)
+- CommandCenter → ControlTower 갓버튼으로 통합
 
 ---
 
