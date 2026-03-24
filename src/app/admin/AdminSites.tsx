@@ -22,6 +22,7 @@ export default function AdminSites() {
   const [filter, setFilter] = useState({ region: '', type: '', q: '' });
   const [actionResult, setActionResult] = useState('');
   const [running, setRunning] = useState('');
+  const [revealedPhones, setRevealedPhones] = useState<Record<number, string>>({});
 
   const sb = createSupabaseBrowser();
 
@@ -127,6 +128,28 @@ export default function AdminSites() {
   const toggleSiteActive = async (site: SiteRow) => {
     await (sb as any).from('apt_sites').update({ is_active: !site.is_active }).eq('id', site.id);
     loadSites();
+  };
+
+  const revealPhone = async (interestId: number) => {
+    if (revealedPhones[interestId]) {
+      // 이미 열람한 건 → 토글로 숨기기
+      setRevealedPhones(prev => { const n = { ...prev }; delete n[interestId]; return n; });
+      return;
+    }
+    if (!confirm('전화번호 원본을 열람합니다.\n감사 로그에 기록됩니다. 계속할까요?')) return;
+    try {
+      const res = await fetch('/api/admin/decrypt-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interest_id: interestId }),
+      });
+      const data = await res.json();
+      if (data.phone) {
+        setRevealedPhones(prev => ({ ...prev, [interestId]: data.phone }));
+      } else {
+        alert(data.error || '복호화 실패');
+      }
+    } catch { alert('API 호출 실패'); }
   };
 
   const exportCSV = () => {
@@ -365,7 +388,14 @@ export default function AdminSites() {
                         </span>
                       </td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4' }}>{i.guest_name || '(회원)'}</td>
-                      <td style={{ padding: '6px 4px', color: '#94A8C4' }}>{i.guest_phone_last4 ? `****${i.guest_phone_last4}` : '-'}</td>
+                      <td style={{ padding: '6px 4px', color: '#94A8C4', whiteSpace: 'nowrap' }}>
+                        {revealedPhones[i.id]
+                          ? <span onClick={() => revealPhone(i.id)} style={{ cursor: 'pointer', color: '#2EE8A5', fontWeight: 700 }}>{revealedPhones[i.id]}</span>
+                          : i.guest_phone_last4
+                            ? <span>****{i.guest_phone_last4} <button onClick={() => revealPhone(i.id)} style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, cursor: 'pointer', border: '1px solid #3B7BF6', background: 'transparent', color: '#3B7BF6', marginLeft: 4 }}>보기</button></span>
+                            : '-'
+                        }
+                      </td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4', whiteSpace: 'nowrap' }}>{[i.guest_city, i.guest_district].filter(Boolean).join(' ') || '-'}</td>
                       <td style={{ padding: '6px 4px', color: '#6B82A0', whiteSpace: 'nowrap' }}>{i.created_at?.slice(0, 10)}</td>
                     </tr>
