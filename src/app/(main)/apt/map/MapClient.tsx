@@ -49,21 +49,25 @@ export default function MapClient() {
 
       if (layers.has('redevelopment')) {
         const { data } = await sb.from('redevelopment_projects')
-          .select('id, project_name, address, region, stage, total_households')
+          .select('id, district_name, address, region, stage, total_households, latitude, longitude')
           .eq('is_active', true).limit(300) as { data: any[] | null };
         (data || []).forEach((d: any) => allPins.push({
-          id: `r${d.id}`, name: d.project_name || d.address || '', address: d.address || d.region || '',
+          id: `r${d.id}`, name: d.district_name || d.address || '', address: d.address || d.region || '',
           layer: 'redevelopment', extra: d.stage || '진행중',
+          lat: d.latitude ? parseFloat(d.latitude) : undefined,
+          lng: d.longitude ? parseFloat(d.longitude) : undefined,
         }));
       }
 
       if (layers.has('unsold')) {
         const { data } = await sb.from('unsold_apts')
-          .select('id, complex_name, region, unsold_count')
+          .select('id, house_nm, region_nm, tot_unsold_hshld_co, latitude, longitude')
           .eq('is_active', true).limit(300) as { data: any[] | null };
         (data || []).forEach((d: any) => allPins.push({
-          id: `u${d.id}`, name: d.complex_name || '', address: d.region || '',
-          layer: 'unsold', extra: `${d.unsold_count || 0}세대 미분양`,
+          id: `u${d.id}`, name: d.house_nm || '', address: d.region_nm || '',
+          layer: 'unsold', extra: `${d.tot_unsold_hshld_co || 0}세대 미분양`,
+          lat: d.latitude ? parseFloat(d.latitude) : undefined,
+          lng: d.longitude ? parseFloat(d.longitude) : undefined,
         }));
       }
     } catch { }
@@ -108,62 +112,59 @@ export default function MapClient() {
 
     const geocoder = new window.kakao.maps.services.Geocoder();
     const newMarkers: any[] = [];
-    let geocoded = 0;
+    let processed = 0;
+    const total = pins.length;
 
     // 클러스터러 생성 (라이브러리 로드 확인)
     const hasClusterer = !!window.kakao.maps.MarkerClusterer;
 
-    pins.forEach(pin => {
-      if (!pin.address) return;
-      geocoder.addressSearch(pin.address, (result: any, status: any) => {
-        if (status !== window.kakao.maps.services.Status.OK || !result.length) return;
-        const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
-        const conf = LAYER_CONF[pin.layer];
+    const addMarker = (pin: Pin, lat: number, lng: number) => {
+      const coords = new window.kakao.maps.LatLng(lat, lng);
+      const conf = LAYER_CONF[pin.layer];
+      const marker = new window.kakao.maps.Marker({ position: coords, title: pin.name });
+      const infoContent = `<div style="padding:6px 10px;font-size:12px;font-weight:600;white-space:nowrap;background:#1e293b;color:#fff;border-radius:6px;border:1px solid ${conf.color}">${conf.icon} ${pin.name}</div>`;
+      const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent });
+      window.kakao.maps.event.addListener(marker, 'click', () => { setSelectedPin(pin); infowindow.open(mapInstance.current, marker); });
+      window.kakao.maps.event.addListener(marker, 'mouseover', () => { infowindow.open(mapInstance.current, marker); });
+      window.kakao.maps.event.addListener(marker, 'mouseout', () => { infowindow.close(); });
+      newMarkers.push(marker);
+    };
 
-        const marker = new window.kakao.maps.Marker({
-          position: coords,
-          title: pin.name,
-        });
-
-        const infoContent = `<div style="padding:6px 10px;font-size:12px;font-weight:600;white-space:nowrap;background:#1e293b;color:#fff;border-radius:6px;border:1px solid ${conf.color}">${conf.icon} ${pin.name}</div>`;
-        const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent });
-
-        window.kakao.maps.event.addListener(marker, 'click', () => {
-          setSelectedPin(pin);
-          infowindow.open(mapInstance.current, marker);
-        });
-        window.kakao.maps.event.addListener(marker, 'mouseover', () => {
-          infowindow.open(mapInstance.current, marker);
-        });
-        window.kakao.maps.event.addListener(marker, 'mouseout', () => {
-          infowindow.close();
-        });
-
-        newMarkers.push(marker);
-        geocoded++;
-
-        // 모든 geocoding 완료 후 클러스터러에 추가
-        if (geocoded === pins.filter(p => p.address).length && hasClusterer && newMarkers.length > 0) {
-          clustererRef.current = new window.kakao.maps.MarkerClusterer({
-            map: mapInstance.current,
-            averageCenter: true,
-            minLevel: 5,
-            disableClickZoom: false,
-            styles: [{
-              width: '44px', height: '44px', background: 'rgba(37,99,235,0.85)',
-              borderRadius: '50%', color: '#fff', textAlign: 'center',
-              lineHeight: '44px', fontSize: '13px', fontWeight: '800',
-            }, {
-              width: '54px', height: '54px', background: 'rgba(37,99,235,0.9)',
-              borderRadius: '50%', color: '#fff', textAlign: 'center',
-              lineHeight: '54px', fontSize: '14px', fontWeight: '800',
-            }],
+    const tryFinalize = () => {
+      processed++;
+      if (processed >= total && hasClusterer && newMarkers.length > 0) {
+        clustererRef.current = new window.kakao.maps.MarkerClusterer({
+          map: mapInstance.current, averageCenter: true, minLevel: 5, disableClickZoom: false,
+          styles: [{
+            width: '44px', height: '44px', background: 'rgba(37,99,235,0.85)',
+            borderRadius: '50%', color: '#fff', textAlign: 'center',
+            lineHeight: '44px', fontSize: '13px', fontWeight: '800',
+          }, {
+            width: '54px', height: '54px', background: 'rgba(37,99,235,0.9)',
+            borderRadius: '50%', color: '#fff', textAlign: 'center',
+            lineHeight: '54px', fontSize: '14px', fontWeight: '800',
+          }],
           });
           clustererRef.current.addMarkers(newMarkers);
-        } else if (!hasClusterer) {
-          // 클러스터러 없으면 개별 표시
-          marker.setMap(mapInstance.current);
+        } else if (!hasClusterer && newMarkers.length > 0) {
+          newMarkers.forEach(m => m.setMap(mapInstance.current));
         }
+    };
+
+    pins.forEach(pin => {
+      // 좌표가 이미 있으면 바로 사용 (Geocoding 스킵)
+      if (pin.lat && pin.lng) {
+        addMarker(pin, pin.lat, pin.lng);
+        tryFinalize();
+        return;
+      }
+      // 좌표 없으면 주소로 Geocoding
+      if (!pin.address) { tryFinalize(); return; }
+      geocoder.addressSearch(pin.address, (result: any, status: any) => {
+        if (status === window.kakao.maps.services.Status.OK && result.length) {
+          addMarker(pin, result[0].y, result[0].x);
+        }
+        tryFinalize();
       });
     });
 
