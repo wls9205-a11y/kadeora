@@ -238,9 +238,10 @@ export default function AdminSites() {
             {[
               { label: '현장 싱크', icon: '🔄', path: '/api/cron/sync-apt-sites', desc: '5개 테이블 통합' },
               { label: '이미지 수집', icon: '🖼️', path: '/api/cron/collect-site-images', desc: '네이버 검색 일괄' },
+              { label: '트렌드 수집', icon: '📈', path: '/api/cron/collect-site-trends', desc: '네이버 Datalab' },
+              { label: '인프라 수집', icon: '🏫', path: '/api/cron/collect-site-facilities', desc: '주변 시설 분석' },
               { label: '동의 파기', icon: '🗑️', path: '/api/cron/purge-withdrawn-consents', desc: '철회 5일 이후' },
               { label: '관심고객 CSV', icon: '📥', action: 'csv', desc: '마스킹 다운로드' },
-              { label: 'KPI 새로고침', icon: '📊', action: 'refresh', desc: '최신 데이터' },
             ].map(a => (
               <button key={a.label} onClick={() => {
                 if (a.action === 'csv') { setTab('interests'); setTimeout(exportCSV, 500); }

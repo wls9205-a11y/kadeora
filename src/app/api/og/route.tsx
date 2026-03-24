@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
   try {
   const { searchParams } = new URL(req.url);
   const title = searchParams.get('title');
+  const subtitle = searchParams.get('subtitle') ?? '';
   const author = searchParams.get('author') ?? '';
   const category = searchParams.get('category') ?? '';
   const likes = searchParams.get('likes') ?? '0';
@@ -124,16 +125,28 @@ export async function GET(req: NextRequest) {
           )}
         </div>
 
-        {/* Center: title */}
-        <div style={{
-          fontSize: title.length > 50 ? 34 : title.length > 30 ? 40 : 48,
-          fontWeight: 800,
-          color: '#E8EDF5',
-          lineHeight: 1.35,
-          maxWidth: 1000,
-          overflow: 'hidden',
-        }}>
-          {title.length > 90 ? title.slice(0, 87) + '...' : title}
+        {/* Center: title + subtitle */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{
+            fontSize: title.length > 50 ? 34 : title.length > 30 ? 40 : 48,
+            fontWeight: 800,
+            color: '#E8EDF5',
+            lineHeight: 1.35,
+            maxWidth: 1000,
+            overflow: 'hidden',
+          }}>
+            {title.length > 90 ? title.slice(0, 87) + '...' : title}
+          </div>
+          {subtitle && (
+            <div style={{
+              fontSize: 22,
+              fontWeight: 500,
+              color: '#94A8C4',
+              lineHeight: 1.4,
+            }}>
+              {subtitle.length > 80 ? subtitle.slice(0, 77) + '...' : subtitle}
+            </div>
+          )}
         </div>
 
         {/* Bottom: author + stats */}
