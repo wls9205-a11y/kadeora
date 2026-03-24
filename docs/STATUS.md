@@ -1384,3 +1384,28 @@ guest_phone_last4 = 뒤 4자리 평문 → 어드민 표시용 (****5678)
 - payment/route.ts: 빈 `catch {}` → `console.error`
 - analytics/pageview: fire-and-forget 주석 명시
 - rate-limit.ts: 프로덕션 console.log 제거
+
+## 세션 34 추가 — 코드 품질 4차 + PWA 아이콘 + DB 인덱스
+
+### 미사용 변수/import 전면 정리 [COMPLETED]
+- req → _req: cron 14개 라우트 파라미터 통일
+- 미사용 import 50+ 항목 제거 (useMemo, Suspense, XCircle, TAG_LENGTH 등)
+- 미사용 변수 _prefix 처리 (showToast, setCommentTarget 등)
+- TS 에러: 0 / ESLint 에러: 0 ✅
+
+### next.config.ts 개선 [COMPLETED]
+- `eslint: ignoreDuringBuilds: false` (빌드 시 ESLint 검사 활성화)
+- `reactStrictMode: true` (개발 시 부작용 조기 감지)
+
+### DB 인덱스 20개 추가 [COMPLETED]
+- apt_sites: slug, is_active+content_score, region+sigungu
+- apt_site_interests: site_id, user_id, guest_phone_hash
+- blog_posts: slug, category+published_at, series_id
+- posts: author+created_at, category+created_at, room_id
+- cron_logs: started_at DESC, cron_name+started_at
+- 기타: privacy_consents, feature_flags, notifications, stock_quotes, apt_transactions
+
+### PWA 아이콘 전면 재생성 [COMPLETED]
+- 14개 파일 (72~512px, maskable, apple-touch-icon, favicon.ico)
+- iOS 폴백 해소: apple-touch-icon RGB 변환, 캐시버전 v=4
+- favicon.ico (16/32/48px 멀티사이즈) 신규 추가
