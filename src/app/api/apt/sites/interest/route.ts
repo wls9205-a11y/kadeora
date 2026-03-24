@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { encrypt, hasEncryptionKey } from '@/lib/encryption';
-import { autoForwardLead } from '@/app/api/apt/sites/forward-lead/route';
+import { autoForwardLead } from '@/lib/forward-lead';
 import { z } from 'zod';
 
 const phoneRegex = /^01[016789]-?\d{3,4}-?\d{4}$/;
