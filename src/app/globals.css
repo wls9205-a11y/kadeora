@@ -1271,144 +1271,129 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   .stock-krw-text { display: none !important; }
 }
 
-/* ═══ 부동산 지역별 현황 그리드 ═══ */
+
+/* ═══ 부동산 지역 그리드 ═══ */
 .apt-region-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 10px;
 }
-@media screen and (max-width: 480px) {
-  .apt-region-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-}
-@media screen and (min-width: 720px) {
-  .apt-region-grid { grid-template-columns: repeat(5, 1fr); }
-}
-
 .apt-region-card {
-  padding: 10px 6px 8px;
+  padding: 12px 8px 10px;
   border-radius: 12px;
   cursor: pointer;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--bg-surface);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   transition: all 0.15s ease;
-  position: relative;
-  overflow: hidden;
 }
 .apt-region-card:hover {
   border-color: var(--brand);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.apt-region-card.selected {
-  border: 2px solid var(--brand);
-  background: var(--brand-light);
-}
-.apt-region-card .region-count {
-  font-size: var(--fs-lg);
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
-.apt-region-card.selected .region-count {
-  color: var(--text-inverse);
-}
-.apt-region-card .region-name {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-.apt-region-card.selected .region-name {
-  color: var(--text-inverse);
-}
-.apt-region-card .region-sub {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 3px;
-  font-size: 10px;
-  font-weight: 600;
-  margin-top: 2px;
-}
-.apt-region-card .region-bar {
-  width: 100%;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-  display: flex;
-  margin-top: 4px;
-}
-.apt-region-card.selected .region-bar {
-  background: rgba(255,255,255,0.2);
-}
-
-/* ═══ 부동산 지역 그리드 디자인 개선 ═══ */
-.apt-region-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 8px;
-}
-.apt-region-card {
-  padding: 12px 8px;
-  border-radius: 12px;
-  cursor: pointer;
-  text-align: center;
-  transition: all var(--transition-fast);
-  border: 1.5px solid var(--border);
-  background: var(--bg-surface);
-  position: relative;
-  overflow: hidden;
-}
-.apt-region-card:hover {
-  border-color: var(--border-strong);
-  background: var(--bg-hover);
-}
 .apt-region-card.active {
   border-color: var(--accent-blue);
   background: var(--brand-bg);
   box-shadow: 0 0 12px rgba(108,180,255,0.15);
-}
-.apt-region-card .region-count {
-  font-size: var(--fs-lg);
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
-.apt-region-card .region-name {
-  font-size: var(--fs-xs);
-  color: var(--text-tertiary);
-  margin-top: 2px;
-}
-.apt-region-card.active .region-count {
-  color: var(--accent-blue);
 }
 .apt-region-card.active.danger {
   border-color: var(--accent-red);
   background: var(--accent-red-bg);
   box-shadow: 0 0 12px rgba(255,107,107,0.15);
 }
-.apt-region-card.active.danger .region-count {
-  color: var(--accent-red);
+.apt-region-card .region-count {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.apt-region-card.active .region-count { color: var(--accent-blue); }
+.apt-region-card.active.danger .region-count { color: var(--accent-red); }
+.apt-region-card .region-name {
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
+  margin-top: 1px;
 }
 .apt-region-card .region-bar {
+  width: 100%;
   height: 3px;
   border-radius: 2px;
-  margin-top: 6px;
+  margin-top: 4px;
   background: var(--border);
   overflow: hidden;
   display: flex;
 }
-@media screen and (max-width: 480px) {
-  .apt-region-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+@media (max-width: 480px) {
+  .apt-region-grid { gap: 6px; }
+  .apt-region-card { padding: 8px 4px 6px; border-radius: 10px; }
+  .apt-region-card .region-count { font-size: var(--fs-base); }
+}
+@media (min-width: 768px) {
+  .apt-region-grid { gap: 12px; grid-template-columns: repeat(6, 1fr); }
+  .apt-region-card { padding: 14px 10px 12px; }
+}
+
+/* ═══ 간격 시스템 — 전역 통일 ═══ */
+:root {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --content-max: 720px;
+  --page-padding: clamp(12px, 3vw, 24px);
+}
+
+/* ═══ 전역 카드 간격 ═══ */
+.kd-card {
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+}
+@media (max-width: 480px) {
+  .kd-card { padding: var(--space-md) !important; }
+}
+
+/* ═══ 어드민 간격 ═══ */
+.admin-grid {
+  display: grid;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+.admin-grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.admin-grid-3 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.admin-grid-4 { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+@media (max-width: 640px) {
+  .admin-grid-2, .admin-grid-3, .admin-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
   }
-  .apt-region-card {
-    padding: 10px 4px;
-    border-radius: 10px;
+}
+
+/* ═══ 섹션 간격 ═══ */
+.section-gap { margin-bottom: var(--space-lg); }
+.section-gap-sm { margin-bottom: var(--space-md); }
+.section-gap-lg { margin-bottom: var(--space-xl); }
+
+/* ═══ 하단 탭바 여백 보정 ═══ */
+@media (max-width: 767px) {
+  main, [role="main"] {
+    padding-bottom: 72px !important;
+  }
+}
+
+/* ═══ 데스크톱 사이드바-콘텐츠 간격 ═══ */
+@media (min-width: 900px) {
+  .sidebar-wrapper {
+    position: sticky;
+    top: 60px;
+    padding-top: var(--space-lg);
   }
 }
