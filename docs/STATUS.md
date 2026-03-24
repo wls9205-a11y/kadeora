@@ -1154,3 +1154,120 @@ guest_phone_last4 = 뒤 4자리 평문 → 어드민 표시용 (****5678)
 - `as any` 캐스트 27곳 — supabase gen types 실행 시 제거 가능
 - 프리미엄 상담사 활성화 전 카카오 알림톡 비즈 채널 개설 필요
 - InterestRegistration 컴포넌트: dynamic import (ssr:false 불가 — Server Component이므로)
+
+## 세션 33 — 토스페이먼츠 심사 + 상점 개편 + SEO 확대 + 푸시 실발송 + 전면 UI 개선
+
+### 핵심 성과
+| 항목 | 수치 |
+|------|------|
+| 커밋 | 14건 |
+| 파일 변경 | 30+ 파일 |
+| 코드 삭제 | -536줄 (죽은 코드 6파일) |
+| 504 에러 | 48건/24h → 0건 (stock-refresh 배치 병렬화) |
+| stuck 크론 | 21건 → 0건 (DB 정리) |
+| RSS 항목 | 300→700건 |
+| 블로그 min 길이 | 1200→2000자 |
+| 리라이트 속도 | 9건/일→30건/일 |
+| 활성 상품 | 6개 (전부 원화 결제) |
+
+### 1. 토스페이먼츠 계약심사 대응 [COMPLETED]
+- `/refund` 환불정책 페이지 생성 (7개 조항, 전자상거래법 제17조 근거)
+- 이용약관 제10조 유료서비스/환불 조항 추가
+- 푸터 사업자정보 보강 (주소+전화번호, 메인레이아웃+랜딩 양쪽)
+- 결제경로 PPT 6슬라이드 생성 (상품 6개, 최고가 29,900원)
+- 이메일 회신 초안 작성 → 발송 완료 + 재심사 요청 완료
+- MID: kadeorizy4
+
+### 2. 상점 상품 전면 개편 [COMPLETED]
+- 포인트 = 등급 전용, 모든 상품 = 원화 결제로 전환
+- DB: 포인트 상품 3개 → purchase_type='cash' 전환
+- DB: B2B 리스팅 3개 비활성화
+- 상품 6개: 확성기 4종(4,900~29,900원) + 배지(4,900원) + 닉변(9,900원)
+- ShopClient.tsx 전면 재작성 — DEMO_PRODUCTS 삭제, DB 단일 소스
+- `/shop` → `/shop/megaphone` 리다이렉트
+
+### 3. SEO 노출 면적 확대 [COMPLETED]
+- 블로그 JSON-LD: Article → BlogPosting + speakable 속성 (구글 디스커버+음성검색)
+- 피드 JSON-LD: Article → DiscussionForumPosting + speakable
+- RSS 300→700건 확대 (블로그 500 + 피드 200)
+- robots.txt에 카테고리별 RSS URL 5개 추가
+- consultant 페이지 noindex + robots Disallow
+
+### 4. 실시간 검색어 2026년 현행화 [COMPLETED]
+- 3곳 전부 교체: 코스피 3000→AI 반도체, 토스뱅크→엔비디아 등
+  - src/lib/constants.ts (DEMO_TRENDING)
+  - src/app/api/trend/route.ts (defaults)
+  - src/components/RightPanel.tsx (FALLBACK)
+
+### 5. 웹 푸시 실제 발송 연결 [COMPLETED]
+- src/lib/push-utils.ts 신규 — sendPushToUsers() / sendPushBroadcast()
+- 4개 크론 + 어드민 브로드캐스트에 실제 webpush 발송 연결:
+  - push-apt-deadline, push-daily-reminder, check-price-alerts, admin/push-broadcast
+  - Before: DB 알림만 INSERT → After: DB + 웹 푸시 동시
+
+### 6. 원클릭 푸시 알림 시스템 [COMPLETED]
+- AutoPushPrompt.tsx 신규 — 로그인 후 1.5초 뒤 하단 배너 자동 표시
+  - "허용" 버튼 1개 → 권한 요청 + 구독 + DB 저장 + 알림 설정 전부 ON
+  - X 닫으면 24시간 재표시 안 함, 이미 구독이면 영원히 안 뜸
+- PushSubscribeButton.tsx 전면 재작성 — iOS PWA/Safari/denied/unsupported 5가지 상태 대응
+- 알림 설정 페이지 간소화 — 토글 8개 → 버튼 1개 (전체 ON/OFF)
+- 더보기 메뉴에 🔔 알림 설정 추가
+- notification_settings 기본값 전부 ON으로 변경 (stock_alert, marketing 포함)
+
+### 7. P0 stock-refresh 504 해결 [COMPLETED]
+- 24시간 내 ~48건 504 타임아웃 발생 (5분마다 매번)
+- 순차 fetch → 배치 병렬 처리 (Naver 10개씩, KIS 5개씩)
+- fetch 타임아웃 5초 AbortController 추가
+- 예상: 250종목 순차 ~75초 → 병렬 ~15초
+
+### 8. 부동산 지도 400 에러 수정 [COMPLETED]
+- 컬럼명 3개 수정:
+  - redevelopment: project_name→district_name
+  - unsold: complex_name→house_nm, region→region_nm, unsold_count→tot_unsold_hshld_co
+- 좌표 있는 핀은 Geocoding 스킵 (latitude/longitude 직접 사용), 없을 때만 폴백
+
+### 9. 부동산 5개 탭 지역별 현황판 전면 개선 [COMPLETED]
+- 전체 카드에 현황 표시: 청약(접수/예정/마감), 분양중(분양/미분양), 재개발(개발/건축), 실거래(지역수)
+- 0건인 지역 숨김 처리 (모든 탭)
+- 청약 탭: 마감만 있는 지역도 숨김
+- 실거래 탭: 각 지역 "X건" 표기 추가
+- 미분양: 급증감지 섹션 지역별 현황 아래로 이동
+- 미분양: 하단 중복 "지역별 미분양 현황" 삭제
+
+### 10. UI 정리 [COMPLETED]
+- 부동산 상단 버튼: 현장/지도/검색 유지 (진단 → 더보기)
+- 더보기 메뉴: 6→8개 (분양 현장, 가점 진단, 알림 설정 추가)
+- 더보기 메뉴: md:hidden 제거 → 데스크탑에서도 작동
+- 어드민 모바일 반응형 CSS 추가 (640px 이하 그리드 1fr, 테이블 축소)
+- 포인트 상점 → 상점 명칭 변경
+- 섹터 히트맵: 0% 섹터 숨김 (시세 미갱신 섹터 제외)
+- 죽은 코드 6파일 -536줄 삭제 (ShopMain, ComingSoonBanner, BannerPurchaseForm, /shop/banner)
+
+### 11. 비로그인 통합 온보딩 [COMPLETED]
+- GuestWelcome.tsx 신규 — 쿠키+설치+가입 통합 배너
+  - "카카오로 3초 가입 →": 쿠키 자동동의 + PWA 설치 + 로그인 이동
+  - "먼저 둘러볼게요": 쿠키 동의 + 24시간 숨김
+- 글로벌 beforeinstallprompt 캡처 (window.__pwaPrompt)
+- 가이드북 설치 원버튼 간소화 (12단계 → 기기 자동감지 + 버튼 1개)
+- 비로그인 유도 흐름: GuestWelcome → GuestGate(5초) → GuestCTA(24시간 주기)
+
+### 12. 기타 DB/설정 변경 [COMPLETED]
+- blog_publish_config.min_content_length 1200→2000
+- blog-rewrite 크론 1회 3건→10건 (하루 9→30건, 전체 리라이트 4년→1.3년)
+- stuck 크론 로그 21건 정리 (running 1시간+ → failed 전환)
+
+### 13. 조사 결과 [COMPLETED]
+- 백링크: kadeora.app 외부 백링크 0건 (신생 사이트 정상)
+- 악성 백링크: 자체 제거 불가 → Google Search Console disavow 도구만 가능
+- 블로그 thin content: 14,578건 중 91.8%(13,389건)가 1000~2000자 → min 2000자 상향 + 리라이트 가속
+
+### 현재 시스템 상태 (세션 33 종료 시점)
+- TS 에러: 0 (apt/sites 기존 에러 제외)
+- 런타임 에러: 0건
+- stock 504: 0건 (배치 병렬화 효과)
+- stuck 크론: 0건
+- 활성 상품: 6개 (전부 원화)
+- 푸시 구독자: 1명 (Chrome, iOS 미등록)
+- 블로그: 14,578건 (min 2000자 적용, 리라이트 30건/일)
+- RSS: 700건 (블로그 500 + 피드 200)
+- 배포: Vercel 자동 배포 정상
