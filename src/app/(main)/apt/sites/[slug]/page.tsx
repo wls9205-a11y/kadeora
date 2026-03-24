@@ -83,7 +83,7 @@ export default async function SiteDetailPage({ params }: Props) {
 
   // 페이지뷰 증가 (비동기, 에러 무시)
   const admin = getSupabaseAdmin();
-  admin.rpc('increment_site_view' as any, { p_site_id: site.id }).then(() => {}).catch(() => {});
+  try { await (admin as any).rpc('increment_site_view', { p_site_id: site.id }); } catch {}
 
   const sourceIds = (site.source_ids || {}) as Record<string, string>;
   const hasSub = !!sourceIds.subscription_id;
