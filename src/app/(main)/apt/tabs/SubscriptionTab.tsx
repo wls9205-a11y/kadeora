@@ -82,7 +82,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   {(() => { const c = regionStats.reduce((s, r) => s + r.closed, 0); return c > 0 ? <span style={{ color: 'var(--text-tertiary)' }}>마감{c}</span> : null; })()}
                 </div>
               </button>
-              {regionStats.filter(r => r.total > 0).map(r => (
+              {regionStats.filter(r => r.open > 0 || r.upcoming > 0).map(r => (
                 <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} className={`apt-region-card${region === r.name ? ' active' : ''}`}>
                   <span className="region-count">{r.total}</span>
                   <span className="region-name">{r.name}</span>

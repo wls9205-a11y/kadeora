@@ -160,33 +160,6 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         </div>
       )}
 
-      {/* 지역별 현황판 */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 미분양 현황</span>
-          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
-        </div>
-        <div className="apt-region-grid">
-          <button onClick={() => setUnsoldRegion('전체')} className={`apt-region-card${unsoldRegion === '전체' ? ' active danger' : ''}`}>
-            <span className="region-count" style={{ color: 'var(--accent-red)' }}>{total.toLocaleString()}</span>
-            <span className="region-name">전체</span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{unsold.length}곳</span>
-          </button>
-          {unsoldRegionStats.map(r => (
-            <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} className={`apt-region-card${unsoldRegion === r.name ? ' active danger' : ''}`}>
-              <span className="region-count" style={{ color: 'var(--accent-red)' }}>{r.unitCount.toLocaleString()}</span>
-              <span className="region-name">{r.name}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.siteCount}곳</span>
-              {total > 0 && (
-                <div className="region-bar">
-                  <div style={{ height: '100%', background: 'var(--accent-red)', width: `${(r.unitCount / total) * 100}%` }} />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* 미분양 추이 차트 */}
       {unsoldMonthly.length > 0 && (
         <div className="kd-card">
