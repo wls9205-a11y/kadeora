@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     const SERVICE_CANDIDATES = ['Ggcleanupbiz', 'UrbanMntncBizInfo', 'URBMNTNCBIZ', 'GgClnupBsnsSttus'];
     let allRows: any[] = [];
     let usedService = '';
-    let debugInfo: any = {};
+    const debugInfo: any = {};
 
     for (const svc of SERVICE_CANDIDATES) {
       try {
@@ -176,7 +176,7 @@ export async function GET(req: NextRequest) {
     await supabase.from('redevelopment_projects').delete().eq('source', 'gyeonggi_opendata');
 
     let inserted = 0;
-    let insertErrors: string[] = [];
+    const insertErrors: string[] = [];
     for (let i = 0; i < mapped.length; i += 100) {
       const batch = mapped.slice(i, i + 100);
       const { error } = await supabase.from('redevelopment_projects').insert(batch);

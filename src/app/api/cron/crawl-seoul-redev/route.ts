@@ -120,7 +120,7 @@ export async function GET(req: NextRequest) {
     await supabase.from('redevelopment_projects').delete().eq('source', 'seoul_opendata');
 
     let inserted = 0;
-    let insertErrors: string[] = [];
+    const insertErrors: string[] = [];
     for (let i = 0; i < mapped.length; i += 100) {
       const batch = mapped.slice(i, i + 100);
       const { error } = await supabase.from('redevelopment_projects').insert(batch as any);

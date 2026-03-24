@@ -34,6 +34,18 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
   const [selected, setSelected] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
+  const handleInteraction = useCallback((clientX: number) => {
+    if (!svgRef.current || !data || data.length < 2) return;
+    const P = 8;
+    const gapW = (width - P * 2) / data.length;
+    const rect = svgRef.current.getBoundingClientRect();
+    const svgX = ((clientX - rect.left) / rect.width) * width;
+    const idx = Math.floor((svgX - P) / gapW);
+    if (idx >= 0 && idx < data.length) {
+      setSelected(idx);
+    }
+  }, [data, width]);
+
   if (!data || data.length < 2) return null;
 
   const chartH = showVolume ? height * 0.65 : height - 20;
@@ -53,16 +65,6 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
   const gapW = (width - P * 2) / data.length;
 
   const toY = (price: number) => P + (1 - (price - minP) / rangeP) * (chartH - P * 2);
-
-  const handleInteraction = useCallback((clientX: number) => {
-    if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const svgX = ((clientX - rect.left) / rect.width) * width;
-    const idx = Math.floor((svgX - P) / gapW);
-    if (idx >= 0 && idx < data.length) {
-      setSelected(idx);
-    }
-  }, [data.length, gapW, width]);
 
   const d = selected !== null && selected >= 0 && selected < data.length ? data[selected] : null;
   const changePct = d ? ((d.close - d.open) / d.open * 100) : 0;

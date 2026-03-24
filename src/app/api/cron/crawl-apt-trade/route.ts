@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
 
     const entries = Object.entries(LAWD_CODES);
     let totalInserted = 0;
-    let failed: string[] = [];
+    const failed: string[] = [];
     const BATCH = 15;
 
     async function fetchOne(label: string, lawdCd: string): Promise<number> {

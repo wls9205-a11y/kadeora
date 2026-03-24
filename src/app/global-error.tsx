@@ -18,6 +18,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <button onClick={reset} style={{ background:'var(--brand)', color:'var(--text-inverse, #fff)', border:'none', borderRadius:20, padding:'12px 32px', cursor:'pointer', fontWeight:700, fontSize:16, marginRight:12 }}>
             다시 시도
           </button>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global error boundary, router may be unavailable */}
           <a href="/feed" style={{ color:'var(--brand)', textDecoration:'none', fontSize:15 }}>홈으로</a>
         </div>
       </body>
