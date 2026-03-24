@@ -46,6 +46,26 @@ export default async function SitesListPage({ searchParams }: { searchParams: Pr
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      {/* ItemList — 구글 캐러셀 리치 결과 */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'ItemList',
+        name: `아파트 현장 목록${region ? ` — ${region}` : ''}`,
+        numberOfItems: count || 0,
+        itemListElement: (sites || []).slice(0, 10).map((s: any, i: number) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: s.name,
+          url: `${SITE_URL}/apt/sites/${s.slug}`,
+        })),
+      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'CollectionPage',
+        name: '아파트 현장 정보',
+        description: `전국 ${count || 0}개 아파트 현장의 분양·재개발·미분양 정보`,
+        url: `${SITE_URL}/apt/sites`,
+        isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
+      }) }} />
+
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>아파트 현장 정보</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>전국 {(count || 0).toLocaleString()}개 현장의 분양·재개발·미분양 정보</p>
 
