@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { type SharedTabProps } from './apt-utils';
+import { type SharedTabProps, generateAptSlug } from './apt-utils';
 import Link from 'next/link';
 import MiniLineChart from '@/components/charts/MiniLineChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';
@@ -222,7 +222,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           >
             {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-              <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
+              <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
               <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
                 {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} 미분양 {unsoldCount.toLocaleString()}세대
               </span>
@@ -252,7 +252,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
                 style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>✏️ 한줄평</button>
-              <Link href={`/apt/unsold/${u.id}`} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
+              <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}>자세히 →</Link>
               {u.pblanc_url && <a href={u.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 16, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>홈페이지 →</a>}
             </div>
           </div>

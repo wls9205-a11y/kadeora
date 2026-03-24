@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
     '/guide', '/search', '/faq', '/terms', '/privacy', '/refund',
-    '/apt/map', '/apt/diagnose', '/apt/search', '/apt/sites', '/stock/compare', '/blog/series',
+    '/apt/map', '/apt/diagnose', '/apt/search', '/stock/compare', '/blog/series',
   ].map(path => ({
     url: `${BASE}${path}`,
     lastModified: now,
@@ -42,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .lte('published_at', now.toISOString())
         .order('published_at', { ascending: false }).limit(50000),
       supabase.from('stock_quotes').select('symbol, updated_at'),
-      supabase.from('apt_subscriptions').select('house_manage_no, updated_at').order('rcept_bgnde', { ascending: false }).limit(5000),
+      supabase.from('apt_subscriptions').select('house_manage_no, updated_at').order('rcept_bgnde', { ascending: false }).limit(0), // apt URLs now use apt_sites slugs
       supabase.from('blog_series').select('slug, created_at').eq('is_active', true),
       supabase.from('posts').select('id, slug, created_at, updated_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000),
       supabase.from('apt_sites').select('slug, updated_at, site_type, content_score, sitemap_wave')
@@ -91,7 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     sitePages = (sitesR.data || []).map((s: any) => ({
-      url: `${BASE}/apt/sites/${s.slug}`,
+      url: `${BASE}/apt/${s.slug}`,
       lastModified: new Date(s.updated_at || Date.now()),
       changeFrequency: 'weekly' as const,
       priority: s.site_type === 'subscription' ? 0.8 : 0.7,

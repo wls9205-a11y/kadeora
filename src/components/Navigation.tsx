@@ -28,7 +28,7 @@ const MORE_ITEMS = [
   { href: '/hot',           emoji: '🔥', label: '이번주 HOT' },
   { href: '/shop',          emoji: '🛒', label: '상점' },
   { href: '/notifications/settings', emoji: '🔔', label: '알림 설정' },
-  { href: '/apt/sites',     emoji: '🏗️', label: '분양 현장' },
+  { href: '/apt',     emoji: '🏗️', label: '부동산' },
   { href: '/apt/diagnose',  emoji: '🎯', label: '가점 진단' },
   { href: '/guide',         emoji: '📖', label: '가이드북' },
   { href: '/grades',        emoji: '🏅', label: '등급 안내' },

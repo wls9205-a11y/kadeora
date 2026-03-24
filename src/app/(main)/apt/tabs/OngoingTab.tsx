@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { isNew, NewBadge, kstNow, kstToday, type SharedTabProps } from './apt-utils';
+import { isNew, NewBadge, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
 import BottomSheet from '@/components/BottomSheet';
 
 interface Props extends SharedTabProps {
@@ -378,7 +378,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         const pMin = o.sale_price_min ? (o.sale_price_min / 10000).toFixed(1) : null;
         const pMax = o.sale_price_max ? (o.sale_price_max / 10000).toFixed(1) : null;
         const mvn = o.mvn_prearnge_ym ? `${String(o.mvn_prearnge_ym).slice(0, 4)}년 ${parseInt(String(o.mvn_prearnge_ym).slice(4, 6))}월` : null;
-        const linkH = isU ? `/apt/unsold/${o.link_id}` : `/apt/${o.link_id}`;
+        const linkH = `/apt/${encodeURIComponent(generateAptSlug(o.house_nm) || String(o.link_id))}`;
         return (
           <BottomSheet open={!!selectedOngoing} onClose={() => setSelectedOngoing(null)} title={o.house_nm}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>

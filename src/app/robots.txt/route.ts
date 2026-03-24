@@ -9,7 +9,6 @@ Allow: /
 Allow: /feed/
 Allow: /stock/
 Allow: /apt/
-Allow: /apt/sites/
 Allow: /blog/
 Allow: /discuss
 Disallow: /admin/
@@ -26,7 +25,7 @@ Disallow: /signup
 # ===== Google =====
 User-agent: Googlebot
 Allow: /
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Crawl-delay: 0
 Disallow: /admin/
@@ -39,7 +38,7 @@ Allow: /images/
 # ===== Naver (Yeti) =====
 User-agent: Yeti
 Allow: /
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Allow: /feed.xml
 Crawl-delay: 1
@@ -49,7 +48,7 @@ Disallow: /api/
 # ===== Bing =====
 User-agent: Bingbot
 Allow: /
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Crawl-delay: 0
 Disallow: /admin/
@@ -58,7 +57,7 @@ Disallow: /api/
 # ===== Daum =====
 User-agent: DaumCrawler
 Allow: /
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Crawl-delay: 1
 Disallow: /admin/
@@ -67,7 +66,7 @@ Disallow: /api/
 # ===== Zum =====
 User-agent: ZumBot
 Allow: /
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Crawl-delay: 2
 Disallow: /admin/
@@ -75,19 +74,19 @@ Disallow: /api/
 
 # ===== AI Crawlers (ChatGPT, Claude, Perplexity) =====
 User-agent: GPTBot
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Disallow: /admin/
 Disallow: /api/
 
 User-agent: Claude-Web
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Disallow: /admin/
 Disallow: /api/
 
 User-agent: PerplexityBot
-Allow: /apt/sites/
+Allow: /apt/
 Allow: /blog/
 Disallow: /admin/
 Disallow: /api/

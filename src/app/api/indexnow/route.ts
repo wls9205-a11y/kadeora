@@ -25,10 +25,10 @@ async function handler(_req: NextRequest) {
     .gte('updated_at', since)
     .limit(100);
 
-  const urls = (sites || []).map((s) => `${SITE_URL}/apt/sites/${s.slug}`);
+  const urls = (sites || []).map((s) => `${SITE_URL}/apt/${s.slug}`);
 
   // 정적 중요 페이지도 포함
-  urls.push(`${SITE_URL}/apt/sites`);
+  urls.push(`${SITE_URL}/apt`);
   urls.push(`${SITE_URL}/apt`);
 
   if (urls.length === 0) {

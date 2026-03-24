@@ -157,7 +157,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       {/* 비회원: 폼 토글 */}
       {!user && !showGuestForm && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <a href={`/login?redirect=/apt/sites/${slug}`} style={{
+          <a href={`/login?redirect=/apt/${slug}`} style={{
             display: 'block', padding: 14, borderRadius: 10, background: 'var(--brand)',
             color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none', textAlign: 'center',
           }}>

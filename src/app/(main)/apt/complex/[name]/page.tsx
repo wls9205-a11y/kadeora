@@ -190,7 +190,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       </p>
 
       {/* 현장 허브 페이지 링크 */}
-      <Link href={`/apt/sites?q=${encodeURIComponent(decoded)}`} style={{
+      <Link href={`/apt/search?q=${encodeURIComponent(decoded)}`} style={{
         display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40,
         borderRadius: 12, background: 'var(--brand-bg)', border: '1px solid var(--brand-border)',
         color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none',

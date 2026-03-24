@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { haptic } from '@/lib/haptic';
-import { type Apt, getStatus, fmtD, kstNow, isNew, NewBadge, STATUS_BADGE, type SharedTabProps } from './apt-utils';
+import { type Apt, getStatus, fmtD, kstNow, isNew, NewBadge, STATUS_BADGE, generateAptSlug, type SharedTabProps } from './apt-utils';
 
 interface Props extends SharedTabProps {
   apts: Apt[];
@@ -151,7 +151,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const st = getStatus(a);
                   const sb = SB[st];
                   return (
-                    <a key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(96,165,250,0.1)', textDecoration: 'none', color: 'inherit' }}>
+                    <a key={a.id} href={`/apt/${encodeURIComponent(generateAptSlug(a.house_nm) || a.house_manage_no || String(a.id))}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(96,165,250,0.1)', textDecoration: 'none', color: 'inherit' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: sb.bg, color: sb.color, border: `1px solid ${sb.border}`, fontWeight: 700 }}>{sb.label}</span>
                         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{a.house_nm}</span>
@@ -214,7 +214,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                     📅 {selectedCalDate.slice(5).replace('-', '월 ')}일 청약 일정 ({dayApts.length}건)
                   </div>
                   {dayApts.map(a => (
-                    <a key={a.id} href={`/apt/${a.house_manage_no || a.id}`} style={{ display: 'block', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '6px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', cursor: 'pointer' }}>
+                    <a key={a.id} href={`/apt/${encodeURIComponent(generateAptSlug(a.house_nm) || a.house_manage_no || String(a.id))}`} style={{ display: 'block', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '6px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', cursor: 'pointer' }}>
                       <span style={{ fontWeight: 600, color: 'var(--text-link, #58a6ff)' }}>{a.house_nm}</span>
                       <span style={{ marginLeft: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.tot_supply_hshld_co?.toLocaleString() || '-'}세대</span>
                     </a>
@@ -264,7 +264,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             // 간략 주소: 전체 주소에서 구+동 추출
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
-              <Link key={apt.id} href={`/apt/${apt.house_manage_no || apt.id}`} className="kd-card-hover" style={{
+              <Link key={apt.id} href={`/apt/${encodeURIComponent(generateAptSlug(apt.house_nm) || apt.house_manage_no || String(apt.id))}`} className="kd-card-hover" style={{
                 display: 'block', padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
                 background: st === 'open' ? 'linear-gradient(135deg, var(--bg-surface), rgba(96,165,250,0.04))' : 'var(--bg-surface)',
                 border: st === 'open' ? '1.5px solid rgba(96,165,250,0.3)' : '1px solid var(--border)',

@@ -1,4 +1,5 @@
 // 부동산 탭 공유 타입/유틸/상수
+export { generateAptSlug } from '@/lib/apt-slug';
 
 export interface Apt {
   id: number; house_nm: string; house_manage_no?: string; region_nm: string;

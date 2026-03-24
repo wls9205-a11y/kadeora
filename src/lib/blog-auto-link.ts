@@ -46,8 +46,8 @@ const APT_KEYWORDS: [string, string][] = [
   ['재개발 현황', '/apt'], ['실거래가 검색', '/apt/search'],
   ['재건축', '/apt'], ['분양 일정', '/apt'],
   // 현장 정보 허브
-  ['분양 정보', '/apt/sites'], ['현장 정보', '/apt/sites'],
-  ['아파트 분양', '/apt/sites'], ['분양 현장', '/apt/sites'],
+  ['분양 정보', '/apt'], ['현장 정보', '/apt'],
+  ['아파트 분양', '/apt'], ['분양 현장', '/apt'],
 ];
 
 const FEATURE_KEYWORDS: [string, string][] = [
