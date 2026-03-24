@@ -93,7 +93,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     sitePages = (sitesR.data || []).map((s: any) => ({
       url: `${BASE}/apt/${s.slug}`,
       lastModified: new Date(s.updated_at || Date.now()),
-      changeFrequency: (s.site_type === 'subscription' ? 'daily' : 'weekly') as const,
+      changeFrequency: s.site_type === 'subscription' ? 'daily' as const : 'weekly' as const,
       priority: s.site_type === 'subscription' ? 0.85 : (s.interest_count > 0 ? 0.8 : 0.7),
     }));
   } catch {}
