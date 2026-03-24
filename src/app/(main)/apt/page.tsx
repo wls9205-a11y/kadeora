@@ -2,14 +2,21 @@ import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발',
-  description: '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요.',
+  title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발 | 카더라',
+  description: '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요. 실시간 경쟁률, 실거래가 분석까지.',
   alternates: { canonical: SITE_URL + '/apt' },
+  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
   openGraph: {
-    title: '청약·분양중·미분양·재개발',
-    description: '전국 아파트 청약 일정, 분양중 현장, 미분양 현황, 재개발·재건축 진행 현황',
-    images: [{ url: SITE_URL + '/images/brand/kadeora-full.png', alt: '카더라 청약·분양중·미분양·재개발' }],
+    title: '전국 아파트 청약·분양·미분양·재개발 | 카더라',
+    description: '2026년 전국 청약 일정, 분양중 현장, 미분양 현황, 재개발·재건축, 실거래가 분석',
+    url: SITE_URL + '/apt',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: SITE_URL + '/api/og?title=' + encodeURIComponent('아파트 청약·분양·재개발') + '&subtitle=' + encodeURIComponent('전국 실시간 현황'), width: 1200, height: 630, alt: '카더라 부동산 청약 분양 미분양 재개발' }],
   },
+  twitter: { card: 'summary_large_image', title: '전국 아파트 청약·분양·미분양·재개발 | 카더라', description: '2026년 전국 청약 일정, 분양중 현장, 미분양 현황, 재개발 진행 현황' },
+  other: { 'article:section': '부동산', 'naver:written_time': new Date().toISOString() },
 };
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
 export const revalidate = 3600;
@@ -150,5 +157,22 @@ async function fetchAptData() {
 
 export default async function AptPage() {
   const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts } = await fetchAptData();
-  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL + "/apt"}]}) }} /><AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} /><Disclaimer /></Suspense>;
+  // ItemList for Google carousel rich results
+  const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: a.house_nm,
+    url: `${SITE_URL}/apt/${encodeURIComponent(a.house_nm?.trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.house_manage_no || a.id)}`,
+  }));
+
+  return <Suspense fallback={<div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>부동산 정보를 불러오는 중...</div>}>
+    {/* BreadcrumbList */}
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL + "/apt"}]}) }} />
+    {/* ItemList → Google carousel */}
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"전국 아파트 청약 일정","numberOfItems":apts.length,"itemListElement":itemList}) }} />
+    {/* CollectionPage → search engine context */}
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":"아파트 청약·분양·미분양·재개발","description":`전국 ${apts.length}건 청약, ${ongoingApts.length}건 분양중, ${unsold.length}건 미분양 현황`,"url":SITE_URL+"/apt","isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
+    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} />
+    <Disclaimer />
+  </Suspense>;
 }

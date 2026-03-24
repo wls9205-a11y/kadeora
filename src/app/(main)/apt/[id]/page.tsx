@@ -125,7 +125,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
       openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }] },
       twitter: { card: 'summary_large_image', title, description: desc, site: '@kadeora_app', images: [ogImg] },
-      other: { 'article:published_time': d.site?.created_at || d.sub?.fetched_at || '', 'article:section': '부동산', 'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가` },
+      other: {
+        'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',
+        'article:modified_time': d.site?.updated_at || new Date().toISOString(),
+        'article:section': '부동산',
+        'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가,아파트`,
+        // Kakao/Facebook price display
+        ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min), 'og:price:currency': 'KRW' } : {}),
+        // Naver specific
+        'naver:written_time': d.site?.created_at || d.sub?.fetched_at || '',
+        'naver:updated_time': d.site?.updated_at || new Date().toISOString(),
+        // Daum
+        'dg:plink': `${SITE_URL}/apt/${resolved.slug}`,
+      },
     };
   } catch { return {}; }
 }
@@ -185,8 +197,42 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* JSON-LD 4: Event */}
       {sub?.rcept_bgnde && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Event', name: `${name} 청약 접수`, startDate: sub.rcept_bgnde, endDate: sub.rcept_endde, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', location: { '@type': 'VirtualLocation', url: `${SITE_URL}/apt/${slug}` }, organizer: { '@type': 'Organization', name: site?.builder || sub.constructor_nm || '청약홈', url: sub.pblanc_url || SITE_URL }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent('청약 접수')}` }) }} />}
 
-      {/* JSON-LD 5: Article */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${name} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png` } }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(region)}`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` } }) }} />
+      {/* JSON-LD 5: Article + SpeakableSpecification (voice search, Google Discover) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${name} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png` } }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(region)}`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.site-description'] } }) }} />
+
+      {/* JSON-LD 6: Product (price range → Google price chip in SERP) */}
+      {(site?.price_min || site?.price_max || (unsold?.sale_price_min)) && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org', '@type': 'Product',
+          name: `${name} 분양`,
+          description: `${region} ${name} 아파트 분양`,
+          brand: { '@type': 'Organization', name: site?.builder || sub?.constructor_nm || '카더라' },
+          offers: {
+            '@type': 'AggregateOffer',
+            priceCurrency: 'KRW',
+            lowPrice: site?.price_min || unsold?.sale_price_min || 0,
+            ...(site?.price_max ? { highPrice: site.price_max } : {}),
+            offerCount: site?.total_units || sub?.tot_supply_hshld_co || 1,
+            availability: 'https://schema.org/InStock',
+            url: `${SITE_URL}/apt/${slug}`,
+          },
+        }) }} />
+      )}
+
+      {/* JSON-LD 7: HowTo (청약 절차 → Google step-by-step rich results) */}
+      {sub && subSt !== 'closed' && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org', '@type': 'HowTo',
+          name: `${name} 청약 신청 방법`,
+          description: `${name} 아파트 청약 접수 절차 안내`,
+          step: [
+            { '@type': 'HowToStep', name: '청약홈 접속', text: '청약홈(applyhome.co.kr) 사이트에 접속하여 로그인합니다.' },
+            { '@type': 'HowToStep', name: '청약 신청', text: `${name} 청약 공고를 확인하고 신청합니다.` },
+            { '@type': 'HowToStep', name: '당첨자 확인', text: `당첨자 발표일(${sub.przwner_presnatn_de || '미정'})에 결과를 확인합니다.` },
+            { '@type': 'HowToStep', name: '계약 체결', text: `계약 기간(${sub.cntrct_cncls_bgnde || '미정'}~)에 계약을 체결합니다.` },
+          ],
+        }) }} />
+      )}
 
       <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 12 }}>← 부동산</Link>
 
