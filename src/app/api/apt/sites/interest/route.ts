@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { encrypt, hasEncryptionKey } from '@/lib/encryption';
 import { z } from 'zod';
 
 const phoneRegex = /^01[016789]-?\d{3,4}-?\d{4}$/;
@@ -90,12 +91,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: '올바른 생년월일을 입력해주세요' }, { status: 400 });
       }
 
-      // 전화번호 정규화 (하이픈 제거 후 다시 포맷)
+      // 전화번호 정규화 + 해시 + 암호화
       const cleanPhone = parsed.data.phone.replace(/-/g, '');
+      const crypto = await import('crypto');
+      const phoneHash = crypto.createHash('sha256').update(cleanPhone).digest('hex');
+      const encryptedPhone = hasEncryptionKey() ? encrypt(cleanPhone) : cleanPhone;
 
-      // 중복 체크
+      // 중복 체크 (해시 기반)
       const { data: existing } = await (admin as any).from('apt_site_interests')
-        .select('id').eq('site_id', parsed.data.site_id).eq('guest_phone', cleanPhone).maybeSingle();
+        .select('id').eq('site_id', parsed.data.site_id).eq('guest_phone_hash', phoneHash).maybeSingle();
       if (existing) return NextResponse.json({ error: '이미 등록된 전화번호입니다' }, { status: 409 });
 
       // 개인정보 동의 기록 저장
@@ -150,11 +154,12 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 관심고객 등록
+      // 관심고객 등록 (전화번호 암호화 저장)
       const { error: insertErr } = await (admin as any).from('apt_site_interests').insert({
         site_id: parsed.data.site_id,
         guest_name: parsed.data.name,
-        guest_phone: cleanPhone,
+        guest_phone: encryptedPhone,
+        guest_phone_hash: phoneHash,
         guest_birth_date: parsed.data.birth_date,
         guest_city: parsed.data.city || null,
         guest_district: parsed.data.district || null,
