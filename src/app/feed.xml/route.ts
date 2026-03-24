@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const supabase = getSupabaseAdmin();
   const now = new Date().toISOString();
 
-  // 블로그 200개 + 커뮤니티 100개
+  // 블로그 500개 + 커뮤니티 200개
   let blogQuery = supabase
     .from('blog_posts')
     .select('slug, title, excerpt, category, tags, published_at, updated_at')
@@ -29,14 +29,14 @@ export async function GET(req: NextRequest) {
     .not('published_at', 'is', null)
     .lte('published_at', now)
     .order('published_at', { ascending: false })
-    .limit(200);
+    .limit(500);
 
   let postQuery = supabase
     .from('posts')
     .select('id, title, content, category, created_at, slug')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
-    .limit(100);
+    .limit(200);
 
   // 카테고리 필터
   if (category) {
