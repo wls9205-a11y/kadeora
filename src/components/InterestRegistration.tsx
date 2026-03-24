@@ -14,7 +14,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [registered, setRegistered] = useState(false);
-  const [showGuestForm, setShowGuestForm] = useState(true);
+  const [showGuestForm, setShowGuestForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [count, setCount] = useState(interestCount);
@@ -32,12 +32,16 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   useEffect(() => {
     const sb = createSupabaseBrowser();
     sb.auth.getUser().then(({ data }) => {
-      setUser(data?.user || null);
-      if (data?.user) {
-        // Check if already registered
+      const u = data?.user || null;
+      setUser(u);
+      if (u) {
+        // Logged-in: show one-click button, check if already registered
         sb.from('apt_site_interests').select('id')
-          .eq('site_id', siteId).eq('user_id', data.user.id).maybeSingle()
+          .eq('site_id', siteId).eq('user_id', u.id).maybeSingle()
           .then(({ data: existing }: any) => { if (existing) setRegistered(true); });
+      } else {
+        // Not logged-in: show guest form by default
+        setShowGuestForm(true);
       }
       setLoading(false);
     });
@@ -131,8 +135,8 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0 }}>{siteName}의 분양 소식을 가장 먼저 받아보세요</p>
       </div>
 
-      {/* 회원: 원클릭 등록/해제 */}
-      {user && !showGuestForm && (
+      {/* 회원: 원클릭 등록/해제 — 항상 표시 */}
+      {user && (
         <div style={{ textAlign: 'center' }}>
           {registered ? (
             <button onClick={handleMemberUnregister} disabled={submitting} style={{
@@ -173,8 +177,8 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         </div>
       )}
 
-      {/* 비회원 등록 폼 */}
-      {showGuestForm && (
+      {/* 비회원 등록 폼 — 비로그인만 */}
+      {!user && showGuestForm && (
         <div style={{ marginTop: 8 }}>
           <label style={labelStyle}>이름 <span style={{ color: 'var(--error)' }}>*</span></label>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" style={inputStyle} />
