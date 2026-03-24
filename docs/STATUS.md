@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-25 세션 32 (최종)
+> **마지막 업데이트:** 2026-03-25 세션 36
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -1459,4 +1459,77 @@ src/app/api/admin/god-mode/
 ### 다음 세션 작업
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 - [ ] 네이버 서치콘솔 루트 URL 색인 요청
+- [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
+
+## 세션 36 — 부동산 URL 통합 + SEO 극대화 (1커밋, 17파일, -842줄)
+
+### 핵심 성과
+| 항목 | Before | After |
+|------|--------|-------|
+| 같은 현장 URL 수 | 3개 (apt/[id], unsold/[id], sites/[slug]) | **1개** (/apt/[slug]) |
+| JSON-LD 스키마 | /apt/[id]: 1개(Event) / /apt/sites/[slug]: 5개 | **/apt/[slug]: 5개 통합** |
+| OG meta 풀 스펙 | sites만 | **모든 현장** |
+| 코드 총량 | apt/[id] 307줄 + sites/[slug] 548줄 | **통합 340줄 (-515줄)** |
+| 총 변경 | 17파일, +338줄 -1180줄 | **순 -842줄** |
+
+### 1. /apt/[id] 통합 페이지 [COMPLETED]
+- `resolveParam()`: 숫자 ID → slug 조회 → 301 리다이렉트
+- `fetchUnifiedData()`: apt_sites(enrichment) + apt_subscriptions + unsold_apts + redevelopment_projects + apt_transactions 직접 쿼리
+- JSON-LD 5종 자동 생성: RealEstateListing, FAQPage, BreadcrumbList, Event(청약), Article
+- OG 풀 스펙: dynamic image, article:tag, twitter card, max-snippet:-1, max-image-preview:large
+- generateStaticParams: apt_sites content_score 25 이상 10,000건 사전 빌드
+- 데이터별 조건부 렌더링: 청약일정/단지개요/분양조건/경쟁률/미분양현황/재개발진행/실거래/위치/관심등록/리뷰/FAQ
+
+### 2. 301 리다이렉트 3개 [COMPLETED]
+- /apt/sites/[slug] → /apt/[slug] (permanentRedirect)
+- /apt/sites → /apt (permanentRedirect)
+- /apt/unsold/[id] → /apt/[slug] (DB 조회 → slug 생성 → permanentRedirect)
+- /apt/[숫자ID] → /apt/[slug] (resolveParam 내부 처리)
+
+### 3. SEO 인프라 업데이트 [COMPLETED]
+- sitemap.ts: /apt/sites/ → /apt/ URL 패턴, 숫자 apt URL 제거
+- robots.txt: 7개 크롤러 /apt/sites/ → /apt/ 통합
+- IndexNow: /apt/ URL 패턴으로 제출
+- blog-auto-link: /apt/ 경로 통합
+- Navigation: '분양 현장' → '부동산' 라벨
+
+### 4. 탭 링크 slug 전환 [COMPLETED]
+- apt-slug.ts 유틸: generateAptSlug(name), isNumericId(id)
+- SubscriptionTab: 4곳 (메인 카드, 주간 하이라이트, 캘린더)
+- OngoingTab: 2곳 (모달 자세히 보기)
+- UnsoldTab: 3곳 (자세히 링크)
+- AptClient: 현장 버튼 → 진단 버튼 교체
+
+### 5. 참조 정리 [COMPLETED]
+- complex/[name]: /apt/sites → /apt/search
+- InterestRegistration: /apt/sites/slug → /apt/slug
+- 전체 프로젝트 /apt/sites 참조 0건 (cron/admin 제외)
+
+### 카니발리제이션 해소 효과
+- Before: "래미안 원펜타스" 검색 → 3개 URL 경쟁 → 순위 분산
+- After: 1개 canonical URL → SEO juice 100% 집중
+- 301 리다이렉트 → 기존 색인 점수 완전 이전
+
+### 파일 구조 변경
+```
+변경 전:
+/apt/[id]           → 307줄 (기본 메타만)
+/apt/sites/[slug]   → 548줄 (풀 SEO)
+/apt/sites          → 150줄 (목록 페이지)
+/apt/unsold/[id]    → 233줄 (미분양 상세)
+
+변경 후:
+/apt/[id]           → 340줄 (통합 페이지, 풀 SEO)
+/apt/sites/[slug]   → 7줄 (301 → /apt/[slug])
+/apt/sites          → 5줄 (301 → /apt)
+/apt/unsold/[id]    → 22줄 (301 → /apt/[slug])
+신규: src/lib/apt-slug.ts → 15줄
+```
+
+### 다음 세션 작업
+- [ ] Vercel 배포 확인 + 301 리다이렉트 동작 검증
+- [ ] Google Search Console에서 URL 변경 알림
+- [ ] 네이버 서치콘솔 루트 URL 색인 요청
+- [ ] sync-apt-sites 크론 경량화 (full upsert → 신규 slug 매핑만)
+- [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 - [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
