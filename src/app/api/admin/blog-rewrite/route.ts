@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -28,9 +29,9 @@ export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    // 관리자 세션 체크
-    const admin = getSupabaseAdmin();
-    // 간단한 인증 (실제로는 세션 기반)
+    // 크론 시크릿 없으면 어드민 권한 체크
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
   }
 
   try {
