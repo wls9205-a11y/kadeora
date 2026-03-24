@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 정적 페이지
   const staticPages: MetadataRoute.Sitemap = [
     '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
-    '/guide', '/search', '/faq', '/terms', '/privacy',
+    '/guide', '/search', '/faq', '/terms', '/privacy', '/refund',
     '/apt/map', '/apt/diagnose', '/apt/search', '/apt/sites', '/stock/compare', '/blog/series',
   ].map(path => ({
     url: `${BASE}${path}`,

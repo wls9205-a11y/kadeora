@@ -23,11 +23,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const DEMO_PRODUCTS: ShopProduct[] = [
-  { id: 'megaphone-1d', name: '확성기 1일', description: '내 게시글을 24시간 피드 상단에 고정 노출합니다', price_krw: 500, icon: '📢', is_active: true },
-  { id: 'megaphone-3d', name: '확성기 3일', description: '내 게시글을 72시간 피드 상단에 고정 노출합니다', price_krw: 1200, icon: '🔊', is_active: true },
-  { id: 'megaphone-7d', name: '확성기 7일', description: '내 게시글을 7일간 피드 상단에 고정 노출합니다', price_krw: 2500, icon: '📣', is_active: true },
-  { id: 'badge-gold', name: '골드 뱃지', description: '프로필에 골드 뱃지를 30일간 표시합니다', price_krw: 1000, icon: '🥇', is_active: true },
-  { id: 'badge-vip', name: 'VIP 뱃지', description: '프로필에 VIP 뱃지를 30일간 표시합니다', price_krw: 3000, icon: '👑', is_active: true },
+  { id: 'megaphone-1d', name: '확성기 1일', description: '내 게시글을 24시간 피드 상단에 고정 노출합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 500, icon: '📢', is_active: true },
+  { id: 'megaphone-3d', name: '확성기 3일', description: '내 게시글을 72시간 피드 상단에 고정 노출합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 1200, icon: '🔊', is_active: true },
+  { id: 'megaphone-7d', name: '확성기 7일', description: '내 게시글을 7일간 피드 상단에 고정 노출합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 2500, icon: '📣', is_active: true },
+  { id: 'badge-gold', name: '골드 뱃지', description: '프로필 닉네임 옆에 골드 뱃지를 30일간 표시합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 1000, icon: '🥇', is_active: true },
+  { id: 'badge-vip', name: 'VIP 뱃지', description: '프로필 닉네임 옆에 VIP 뱃지를 30일간 표시합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 3000, icon: '👑', is_active: true },
 ];
 
 export default function ShopClient() {
@@ -141,7 +141,7 @@ export default function ShopClient() {
       </div>
 
       <p style={{ marginTop: 20, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'right' }}>
-        ※ 결제는 토스페이먼츠로 진행됩니다. 구매 전 이용약관을 확인해주세요.
+        ※ 결제는 토스페이먼츠로 진행됩니다. 구매 전 <a href="/terms" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>이용약관</a> 및 <a href="/refund" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>환불정책</a>을 확인해주세요.
       </p>
 
       <ConfirmModal

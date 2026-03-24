@@ -183,7 +183,16 @@ export default async function HomePage() {
           '@type': 'ContactPoint',
           contactType: 'customer service',
           email: 'kadeora.app@gmail.com',
+          telephone: '+82-10-5001-1382',
           availableLanguage: 'Korean',
+        },
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: '전포대로 199번길 9, 1층 104호',
+          addressLocality: '부산진구',
+          addressRegion: '부산광역시',
+          postalCode: '47290',
+          addressCountry: 'KR',
         },
         sameAs: [],
       }) }} />
@@ -482,8 +491,9 @@ export default async function HomePage() {
           </div>
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.9 }}>
             <p style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>사업자 정보</p>
-            <p>업체명: 카더라 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801 &nbsp;|&nbsp; 대표자: 노영진</p>
-            <p>이메일: kadeora.app@gmail.com</p>
+            <p>상호명: 카더라 &nbsp;|&nbsp; 대표자: 노영진 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801</p>
+            <p>사업장 주소: 부산광역시 연제구 연동로 27, 405호</p>
+            <p>전화: 010-5001-1382 &nbsp;|&nbsp; 이메일: kadeora.app@gmail.com</p>
             <p style={{ marginTop: 4 }}>© 2026 카더라. All rights reserved.</p>
           </div>
         </footer>
