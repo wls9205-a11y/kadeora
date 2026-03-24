@@ -107,6 +107,12 @@ export default function AdminSites() {
   }, []);
 
   useEffect(() => { loadKPI(); loadFlags(); }, []);
+  // 갓버튼 완료 시 자동 리프레시
+  useEffect(() => {
+    const handler = () => { loadKPI(); loadFlags(); };
+    window.addEventListener('admin-god-complete', handler);
+    return () => window.removeEventListener('admin-god-complete', handler);
+  }, [loadKPI, loadFlags]);
   useEffect(() => {
     if (tab === 'sites') loadSites();
     if (tab === 'interests') loadInterests();

@@ -68,7 +68,7 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
 };
 
 const SECTIONS = [
-  { id: 'god',     label: '⚡ 전체 실행 (갓버튼)', desc: '모든 데이터·콘텐츠·시스템 한 번에',  color: 'var(--brand)',          glow: 'rgba(37,99,235,0.35)',   endpoints: ['/api/cron/health-check','/api/cron/stock-refresh','/api/cron/exchange-rate','/api/cron/crawl-apt-subscription','/api/cron/crawl-apt-trade','/api/cron/crawl-competition-rate','/api/cron/crawl-unsold-molit','/api/cron/crawl-seoul-redev','/api/cron/crawl-busan-redev','/api/cron/aggregate-trade-stats','/api/cron/sync-apt-sites','/api/cron/stock-theme-daily','/api/cron/stock-daily-briefing','/api/cron/seed-posts','/api/cron/blog-publish-queue','/api/cron/daily-stats','/api/cron/auto-grade','/api/cron/cleanup'] },
+  { id: 'god',     label: '⚡ 전체 실행 (갓버튼)', desc: '모든 데이터·콘텐츠·시스템·현장 한 번에', color: 'var(--brand)',         glow: 'rgba(37,99,235,0.35)',   endpoints: ['/api/cron/health-check','/api/cron/stock-refresh','/api/cron/exchange-rate','/api/cron/crawl-apt-subscription','/api/cron/crawl-apt-trade','/api/cron/crawl-competition-rate','/api/cron/crawl-unsold-molit','/api/cron/crawl-seoul-redev','/api/cron/crawl-busan-redev','/api/cron/aggregate-trade-stats','/api/cron/sync-apt-sites','/api/cron/collect-site-images','/api/cron/collect-site-trends','/api/cron/collect-site-facilities','/api/cron/apt-ai-summary','/api/cron/stock-theme-daily','/api/cron/stock-daily-briefing','/api/cron/seed-posts','/api/cron/blog-publish-queue','/api/cron/daily-stats','/api/cron/auto-grade','/api/cron/cleanup','/api/cron/purge-withdrawn-consents','/api/cron/indexnow'] },
   { id: 'apt',     label: '🏠 부동산',            desc: '청약·실거래·재개발·미분양·현장·AI',  color: 'var(--accent-blue)',    glow: 'rgba(96,165,250,0.3)',   endpoints: ['/api/cron/crawl-apt-subscription','/api/cron/crawl-apt-trade','/api/cron/crawl-competition-rate','/api/cron/crawl-unsold-molit','/api/cron/crawl-seoul-redev','/api/cron/crawl-busan-redev','/api/cron/crawl-gyeonggi-redev','/api/cron/aggregate-trade-stats','/api/cron/sync-apt-sites','/api/cron/collect-site-images','/api/cron/apt-ai-summary'] },
   { id: 'stock',   label: '📈 주식',              desc: '시세·테마·AI시황·환율·수급',         color: 'var(--accent-yellow)',  glow: 'rgba(251,191,36,0.3)',   endpoints: ['/api/cron/stock-refresh','/api/cron/stock-theme-daily','/api/cron/stock-daily-briefing','/api/cron/exchange-rate','/api/cron/stock-news-crawl','/api/cron/stock-flow-crawl'] },
   { id: 'blog',    label: '📰 블로그',            desc: '발행큐·AI생성·시리즈·댓글',          color: 'var(--accent-purple)',  glow: 'rgba(167,139,250,0.3)', endpoints: ['/api/cron/blog-publish-queue','/api/cron/blog-daily','/api/cron/blog-series-assign','/api/cron/blog-seed-comments','/api/cron/blog-apt-new','/api/cron/blog-redevelopment'] },
@@ -224,7 +224,11 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
     if (timerRef.current) clearInterval(timerRef.current);
     setProgress(p => ({ ...p, current: '완료', elapsed: Date.now() - start }));
     setRunningSection(null);
-    setTimeout(() => loadAll(), 1000);
+    setTimeout(() => {
+      loadAll();
+      // 현장관리 센터(AdminSites)에 리프레시 신호 전달
+      window.dispatchEvent(new CustomEvent('admin-god-complete'));
+    }, 1000);
   };
 
   const runQuick = async (q: typeof QUICK[number]) => {
@@ -352,13 +356,19 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <span style={{ fontSize: 36 }}>⚡</span>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: 19, fontWeight: 900, color: '#E8EDF5' }}>전체 실행 — 갓버튼</div>
-                  <div style={{ fontSize: 12, color: '#8BAACF', marginTop: 3 }}>데이터 수집 · 콘텐츠 생성 · 시스템 정리 · {godSection.endpoints.length}개 크론 동시 실행</div>
+                  <div style={{ fontSize: 12, color: '#8BAACF', marginTop: 3 }}>데이터·주식·현장·블로그·시스템 — {godSection.endpoints.length}개 크론 · 현장관리센터 포함</div>
                 </div>
               </>
             )}
           </button>
-          {/* 진행바 */}
-          {isGodRunning && progress.total > 0 && (
+          {/* 갓버튼 포함 항목 요약 */}
+          {!runningSection && progress.results.length === 0 && (
+            <div style={{ maxWidth: 640, margin: '8px auto 0', display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+              {['헬스체크', '주식시세', '환율', '청약수집', '실거래', '경쟁률', '미분양', '서울재개발', '부산재개발', '거래집계', '현장싱크', '현장이미지', '검색트렌드', '주변인프라', 'AI분석', '테마갱신', 'AI시황', '시드게시글', '블로그큐', '일일통계', '등급갱신', '데이터정리', '동의파기', 'Bing색인'].map(t => (
+                <span key={t} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4, background: 'rgba(37,99,235,0.08)', color: '#7D8DA3', border: '1px solid rgba(37,99,235,0.12)' }}>{t}</span>
+              ))}
+            </div>
+          )}
             <div style={{ maxWidth: 640, margin: '8px auto 0' }}>
               <div className="bar"><div className="bar-fill" style={{ width: `${pct(progress.done, progress.total)}%`, background: 'var(--brand)' }} /></div>
             </div>
