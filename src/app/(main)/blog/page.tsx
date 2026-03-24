@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import EmptyState from '@/components/EmptyState';
 
