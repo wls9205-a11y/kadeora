@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
+import GuideInstallButton from '@/components/GuideInstallButton';
 
 export const revalidate = 3600;
 
@@ -42,27 +43,6 @@ const FEATURES = [
   { icon: '📡', title: '전광판 유료 노출', desc: '전광판 노출권을 구매하면 내 글을 전체 사용자에게 스크롤 배너로 홍보.' },
 ];
 
-const INSTALL_STEPS = {
-  ios: [
-    { n: '1', title: 'Safari로 접속', desc: 'Safari 브라우저에서 kadeora.app 접속' },
-    { n: '2', title: '공유 버튼 탭', desc: '하단 가운데 □↑ 모양 공유 버튼을 탭하세요' },
-    { n: '3', title: '홈 화면에 추가', desc: '스크롤해서 "홈 화면에 추가"를 탭하세요' },
-    { n: '4', title: '추가 완료!', desc: '오른쪽 위 "추가"를 탭하면 설치 완료!' },
-  ],
-  android: [
-    { n: '1', title: 'Chrome으로 접속', desc: 'Chrome 브라우저에서 kadeora.app 접속' },
-    { n: '2', title: '설치 배너 탭', desc: '화면 하단의 "📲 설치하기" 배너를 탭하세요' },
-    { n: '3', title: '설치 확인', desc: '팝업에서 "설치" 버튼을 탭하세요' },
-    { n: '4', title: '설치 완료!', desc: '홈 화면에 카더라 아이콘이 생겨요!' },
-  ],
-  desktop: [
-    { n: '1', title: 'Chrome/Edge 접속', desc: 'Chrome 또는 Edge에서 kadeora.app 접속' },
-    { n: '2', title: '설치 아이콘 클릭', desc: '주소창 오른쪽 ⊕ 또는 ↓ 모양 아이콘 클릭' },
-    { n: '3', title: '앱 설치 클릭', desc: '"앱 설치" 또는 "설치" 버튼 클릭' },
-    { n: '4', title: '설치 완료!', desc: '바탕화면에 카더라가 생겨요!' },
-  ],
-};
-
 export default function GuidePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -72,28 +52,9 @@ export default function GuidePage() {
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>
       </div>
 
-      {/* 앱 설치 방법 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <h2 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📲 앱 설치 방법</h2>
-        {Object.entries(INSTALL_STEPS).map(([platform, steps]) => (
-          <div key={platform} style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-              {platform === 'ios' ? '🍎 iPhone / iPad' : platform === 'android' ? '🤖 Android' : '💻 PC / Mac'}
-            </div>
-            {steps.map(s => (
-              <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '6px 0' }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--brand)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0 }}>{s.n}</div>
-                <div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{s.title}</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{s.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-        <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          설치 후 혜택: 🔔 실시간 푸시 알림 · ⚡ 앱처럼 빠른 실행 · 🚫 앱스토어 다운로드 불필요
-        </div>
+      {/* 앱 설치 — 원버튼 */}
+      <div style={{ marginBottom: 16 }}>
+        <GuideInstallButton />
       </div>
 
       {/* 주요 기능 소개 */}
