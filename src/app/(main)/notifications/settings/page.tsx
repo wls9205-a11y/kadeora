@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
+import PushSubscribeButton from '@/components/PushSubscribeButton';
 
 interface Settings {
   push_comments: boolean;
@@ -57,6 +58,15 @@ export default function NotificationSettingsPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
         <Link href="/notifications" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)' }}>← 알림</Link>
         <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>알림 설정</h1>
+      </div>
+
+      {/* 푸시 알림 구독 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>푸시 알림</div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12, lineHeight: 1.5 }}>
+          청약 마감, 종목 알림, 출석 리마인더를 실시간으로 받으려면 아래 버튼을 눌러 알림을 허용해주세요.
+        </div>
+        <PushSubscribeButton />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
