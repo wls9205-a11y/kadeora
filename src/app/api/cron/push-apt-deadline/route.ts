@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { sendPushToUsers } from '@/lib/push-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +94,22 @@ export async function GET(req: NextRequest) {
       inserted += batch.length;
     }
 
-    return NextResponse.json({ sent: inserted, deadlines: deadlines.length, users: users.length });
+    // 웹 푸시 실제 발송
+    const firstApt = deadlines[0];
+    const isToday = firstApt.rcept_endde === today;
+    const pushTitle = isToday ? '🏠 청약 마감 알림' : '🏠 청약 마감 임박';
+    const pushBody = deadlines.length === 1
+      ? (isToday ? `오늘 마감! ${firstApt.house_nm}` : `내일 마감! ${firstApt.house_nm}`)
+      : `${firstApt.house_nm} 외 ${deadlines.length - 1}건 ${isToday ? '오늘' : '내일'} 마감`;
+    const userIds = users.map(u => u.id);
+    const pushResult = await sendPushToUsers(userIds, {
+      title: pushTitle,
+      body: pushBody,
+      url: '/apt',
+      tag: `apt-deadline-${today}`,
+    });
+
+    return NextResponse.json({ sent: inserted, deadlines: deadlines.length, users: users.length, push: pushResult });
   } catch (err) {
     console.error('[push-apt-deadline]', err);
     return NextResponse.json({ error: 'Server error' }, { status: 200 });

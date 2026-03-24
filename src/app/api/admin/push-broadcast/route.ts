@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { sendPushToUsers } from '@/lib/push-utils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,10 +46,19 @@ export async function POST(req: NextRequest) {
 
     await supabaseAdmin.from('notifications').insert(notifications);
 
+    // 웹 푸시 실제 발송
+    const pushResult = await sendPushToUsers(userIds, {
+      title: `📢 ${title}`,
+      body,
+      url: url || '/',
+      tag: `broadcast-${Date.now()}`,
+    });
+
     return NextResponse.json({
       success: true,
       targeted: count ?? 0,
-      push_available: subs?.length ?? 0,
+      push_sent: pushResult.sent,
+      push_failed: pushResult.failed,
       notifications_created: notifications.length,
     });
   } catch (err) {

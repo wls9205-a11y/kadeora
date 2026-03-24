@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { sendPushToUsers } from '@/lib/push-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,16 @@ export async function GET(req: NextRequest) {
       inserted += batch.length;
     }
 
-    return NextResponse.json({ sent: inserted, unchecked: unchecked.length });
+    // 웹 푸시 실제 발송
+    const userIds = unchecked.map(u => u.id);
+    const pushResult = await sendPushToUsers(userIds, {
+      title: '📅 출석체크 리마인더',
+      body: '오늘 출석체크 잊지 마세요! +10P 적립',
+      url: '/feed',
+      tag: `attendance-${today}`,
+    });
+
+    return NextResponse.json({ sent: inserted, unchecked: unchecked.length, push: pushResult });
   } catch (err) {
     console.error('[push-daily-reminder]', err);
     return NextResponse.json({ error: 'Server error' }, { status: 200 });

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLock } from '@/lib/cron-lock';
+import { sendPushToUsers } from '@/lib/push-utils';
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
@@ -53,6 +54,7 @@ export async function GET(req: Request) {
         if (shouldTrigger) {
           await sb.from('price_alerts').update({ is_triggered: true, triggered_at: new Date().toISOString() }).eq('id', alert.id);
           await sb.from('notifications').insert({ user_id: alert.user_id, type: 'price_alert', content: `🔔 ${message}`, link: `/stock/${alert.target_symbol}` });
+          sendPushToUsers([alert.user_id], { title: '🔔 종목 알림', body: message, url: `/stock/${alert.target_symbol}`, tag: `price-${alert.id}` }).catch(() => {});
           triggered++;
         }
       }
@@ -72,6 +74,7 @@ export async function GET(req: Request) {
         const daysLeft = Math.ceil((new Date(apt.rcept_endde).getTime() - new Date(kstToday).getTime()) / 86400000);
         if (daysLeft === 1 || daysLeft === 3) {
           await sb.from('notifications').insert({ user_id: alert.user_id, type: 'apt_alert', content: `🏠 ${apt.house_nm} 청약 마감 D-${daysLeft}`, link: `/apt/${apt.id}` });
+          sendPushToUsers([alert.user_id], { title: '🏠 청약 마감 임박', body: `${apt.house_nm} 청약 마감 D-${daysLeft}`, url: '/apt', tag: `apt-alert-${alert.id}` }).catch(() => {});
           triggered++;
         }
         if (daysLeft < 0) {
