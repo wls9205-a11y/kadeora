@@ -17,7 +17,7 @@ interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
   const sb = getSupabaseAdmin();
-  const { data } = await sb.from('apt_sites')
+  const { data } = await sb.from('apt_sites' as any)
     .select('slug')
     .eq('is_active', true)
     .gte('content_score', 25)
@@ -28,7 +28,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const sb = getSupabaseAdmin();
-  const { data: site } = await sb.from('apt_sites')
+  const { data: site } = await sb.from('apt_sites' as any)
     .select('name, seo_title, seo_description, region, sigungu, site_type, total_units, price_min, price_max, builder')
     .eq('slug', decodeURIComponent(slug)).single();
   if (!site) return {};
@@ -78,12 +78,12 @@ export default async function SiteDetailPage({ params }: Props) {
   const decoded = decodeURIComponent(slug);
   const sb = await createSupabaseServer();
 
-  const { data: site } = await sb.from('apt_sites').select('*').eq('slug', decoded).single();
+  const { data: site } = await sb.from('apt_sites' as any).select('*').eq('slug', decoded).single();
   if (!site) notFound();
 
   // 페이지뷰 증가 (비동기, 에러 무시)
   const admin = getSupabaseAdmin();
-  admin.rpc('increment_site_view', { p_site_id: site.id }).then(() => {}).catch(() => {});
+  admin.rpc('increment_site_view' as any, { p_site_id: site.id }).then(() => {}).catch(() => {});
 
   const sourceIds = (site.source_ids || {}) as Record<string, string>;
   const hasSub = !!sourceIds.subscription_id;
@@ -130,7 +130,7 @@ export default async function SiteDetailPage({ params }: Props) {
   } catch {}
 
   try {
-    const { data } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status')
+    const { data } = await sb.from('apt_sites' as any).select('slug, name, site_type, region, sigungu, total_units, status')
       .eq('is_active', true).eq('region', site.region || '').neq('id', site.id)
       .gte('content_score', 25).order('interest_count', { ascending: false }).limit(4);
     nearbySites = data || [];

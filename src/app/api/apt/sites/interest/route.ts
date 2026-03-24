@@ -52,12 +52,12 @@ export async function POST(req: NextRequest) {
       if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
 
       // 중복 체크
-      const { data: existing } = await admin.from('apt_site_interests')
+      const { data: existing } = await admin.from('apt_site_interests' as any)
         .select('id').eq('site_id', parsed.data.site_id).eq('user_id', user.id).maybeSingle();
       if (existing) return NextResponse.json({ error: '이미 관심 등록된 현장입니다' }, { status: 409 });
 
       // 등록
-      const { error: insertErr } = await admin.from('apt_site_interests').insert({
+      const { error: insertErr } = await admin.from('apt_site_interests' as any).insert({
         site_id: parsed.data.site_id,
         user_id: user.id,
         is_member: true,
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       if (insertErr) throw insertErr;
 
       // 관심 수 증가
-      await admin.rpc('increment_site_interest', { p_site_id: parsed.data.site_id });
+      await admin.rpc('increment_site_interest' as any, { p_site_id: parsed.data.site_id });
 
       // 포인트 +50
       try {
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       const cleanPhone = parsed.data.phone.replace(/-/g, '');
 
       // 중복 체크
-      const { data: existing } = await admin.from('apt_site_interests')
+      const { data: existing } = await admin.from('apt_site_interests' as any)
         .select('id').eq('site_id', parsed.data.site_id).eq('guest_phone', cleanPhone).maybeSingle();
       if (existing) return NextResponse.json({ error: '이미 등록된 전화번호입니다' }, { status: 409 });
 
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       const consents = [];
 
       // 필수 동의
-      const { data: c1 } = await admin.from('privacy_consents').insert({
+      const { data: c1 } = await admin.from('privacy_consents' as any).insert({
         guest_identifier: cleanPhone.slice(-4),
         consent_type: 'interest_collection',
         consent_version: 'v1.0',
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
 
       // 선택 동의: 마케팅
       if (parsed.data.consent_marketing) {
-        await admin.from('privacy_consents').insert({
+        await admin.from('privacy_consents' as any).insert({
           guest_identifier: cleanPhone.slice(-4),
           consent_type: 'marketing',
           consent_version: 'v1.0',
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
 
       // 선택 동의: 제3자 제공
       if (parsed.data.consent_third_party) {
-        await admin.from('privacy_consents').insert({
+        await admin.from('privacy_consents' as any).insert({
           guest_identifier: cleanPhone.slice(-4),
           consent_type: 'third_party',
           consent_version: 'v1.0',
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
       }
 
       // 관심고객 등록
-      const { error: insertErr } = await admin.from('apt_site_interests').insert({
+      const { error: insertErr } = await admin.from('apt_site_interests' as any).insert({
         site_id: parsed.data.site_id,
         guest_name: parsed.data.name,
         guest_phone: cleanPhone,
@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
       if (insertErr) throw insertErr;
 
       // 관심 수 증가
-      await admin.rpc('increment_site_interest', { p_site_id: parsed.data.site_id });
+      await admin.rpc('increment_site_interest' as any, { p_site_id: parsed.data.site_id });
 
       return NextResponse.json({ success: true, message: '관심고객 등록이 완료되었습니다' });
     }
@@ -190,7 +190,7 @@ export async function GET(req: NextRequest) {
     if (!user) return NextResponse.json({ interests: [] });
 
     const admin = getSupabaseAdmin();
-    const { data } = await admin.from('apt_site_interests')
+    const { data } = await admin.from('apt_site_interests' as any)
       .select('site_id, created_at, apt_sites(slug, name, site_type, region)')
       .eq('user_id', user.id).order('created_at', { ascending: false });
 
@@ -218,10 +218,10 @@ export async function DELETE(req: NextRequest) {
     if (!user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
 
     const admin = getSupabaseAdmin();
-    await admin.from('apt_site_interests').delete().eq('site_id', site_id).eq('user_id', user.id);
+    await admin.from('apt_site_interests' as any).delete().eq('site_id', site_id).eq('user_id', user.id);
 
     // 관심 수 감소
-    await admin.from('apt_sites').update({
+    await admin.from('apt_sites' as any).update({
       interest_count: admin.rpc('greatest', { a: 0, b: -1 }) as any,
     }).eq('id', site_id);
 
