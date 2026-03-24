@@ -1052,3 +1052,29 @@
 - `requireAdmin()` 헬퍼로 `is_admin` 권한 검증 통일
 - blog-rewrite, cron-summary, seed-finance-blogs 3개 추가 보호
 - supabase alias 추가로 기존 코드 호환
+
+## 세션 31F — DB 에러 수정 + 성능 최적화
+
+### DB 에러 수정
+- `stock_quotes.id` 컬럼 없음 에러 — 랜딩 페이지 count 쿼리 `select('id')` → `select('symbol')` 변경
+- Supabase postgres 로그에서 반복 에러 확인 후 즉시 수정
+
+### 성능 최적화 — dynamic import (13개)
+- AptClient: 4개 탭 (Transaction/Redev/Ongoing/Unsold) → lazy load
+- StockClient: StockDetailSheet → 종목 클릭 시 lazy load
+- 기존: AptPriceTrendChart, AptReviewSection, PortfolioTab, SectorHeatmap, OneClickPanel, CronDashboard
+- 초기 번들에서 ~2,000줄 제거
+
+### 세션 31 최종 스코어카드
+| 항목 | Before | After |
+|------|--------|-------|
+| TS 에러 | 555 | **0** |
+| ESLint | 7 | **0** |
+| 테스트 | 74/74 | **74/74** |
+| ignoreBuildErrors | true | **false** |
+| 500 런타임 | 다수 | **0건** |
+| 504 타임아웃 | 200+/12h | **0건** |
+| Rate limit 누락 | 31 API | **0건** |
+| 어드민 API 보안 | 6/27 | **27/27** |
+| dynamic import | 5개 | **13개** |
+| 총 커밋 | — | **21건** |
