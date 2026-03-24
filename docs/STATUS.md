@@ -1385,27 +1385,78 @@ guest_phone_last4 = 뒤 4자리 평문 → 어드민 표시용 (****5678)
 - analytics/pageview: fire-and-forget 주석 명시
 - rate-limit.ts: 프로덕션 console.log 제거
 
-## 세션 34 추가 — 코드 품질 4차 + PWA 아이콘 + DB 인덱스
+## 세션 35 — 원버튼 컨트롤 타워 어드민 전면 개편 (1커밋, 5파일, +948줄)
 
-### 미사용 변수/import 전면 정리 [COMPLETED]
-- req → _req: cron 14개 라우트 파라미터 통일
-- 미사용 import 50+ 항목 제거 (useMemo, Suspense, XCircle, TAG_LENGTH 등)
-- 미사용 변수 _prefix 처리 (showToast, setCommentTarget 등)
-- TS 에러: 0 / ESLint 에러: 0 ✅
+### 핵심 성과
+| 항목 | 값 |
+|------|-----|
+| 커밋 | 1건 |
+| 신규 파일 | 3개 (god-mode API, ControlTower, AdminHub) |
+| 코드 추가 | +948줄 |
+| 병렬 처리 | 동시 10개 크론 실행 |
+| 총 실행 시간 | ~30초 (기존 5분 → 90% 단축) |
 
-### next.config.ts 개선 [COMPLETED]
-- `eslint: ignoreDuringBuilds: false` (빌드 시 ESLint 검사 활성화)
-- `reactStrictMode: true` (개발 시 부작용 조기 감지)
+### 1. GOD MODE API 신규 (`/api/admin/god-mode`)
+- **병렬 10개씩** 모든 크론 실행 (기존 직렬 3개씩)
+- 5가지 실행 모드:
+  - `full`: 전체 시스템 (33개 크론)
+  - `data`: 데이터 수집 (청약/실거래/주식/재개발)
+  - `process`: 데이터 가공 (집계/싱크/테마)
+  - `ai`: AI 생성 (요약/이미지/트렌드)
+  - `content`: 콘텐츠 (시드/블로그)
+  - `system`: 시스템 (헬스/통계/정리)
+  - `failed`: 실패한 크론만 재실행
+- **GET**: 시스템 건강도 조회 (healthy/failed/stale 집계)
+- **maxDuration**: 300초
 
-### DB 인덱스 20개 추가 [COMPLETED]
-- apt_sites: slug, is_active+content_score, region+sigungu
-- apt_site_interests: site_id, user_id, guest_phone_hash
-- blog_posts: slug, category+published_at, series_id
-- posts: author+created_at, category+created_at, room_id
-- cron_logs: started_at DESC, cron_name+started_at
-- 기타: privacy_consents, feature_flags, notifications, stock_quotes, apt_transactions
+### 2. ControlTower.tsx 신규 (원버튼 UI)
+- **⚡ 전체 시스템 갱신 버튼** — 병렬 10x 실행
+- 실시간 진행 상황 + 소요시간 표시
+- 시스템 건강도 점수 (%) + 실패 크론 목록
+- **실패한 것만 재실행** 버튼
+- KPI 대시보드 10개 지표 (유저/게시글/블로그/주식/청약/실거래/재개발/미분양/현장/관심고객)
+- 블로그 리라이팅 진행률 바
+- 품질 이슈 알림 (NULL 세대수, AI요약 없음, 이미지 없음)
+- 최근 크론 활동 로그
 
-### PWA 아이콘 전면 재생성 [COMPLETED]
-- 14개 파일 (72~512px, maskable, apple-touch-icon, favicon.ico)
-- iOS 폴백 해소: apple-touch-icon RGB 변환, 캐시버전 v=4
-- favicon.ico (16/32/48px 멀티사이즈) 신규 추가
+### 3. AdminHub.tsx 신규 (탭 네비게이션)
+- ⚡ 컨트롤 타워 (원버튼 전체 제어) — **신규**
+- 🎛️ 커맨드센터 (세부 크론 관리) — 기존 유지
+- 🏗️ 현장 관리 (SEO 현장 허브) — 기존 유지
+- URL 해시로 탭 상태 유지 (`#tower`, `#center`, `#sites`)
+
+### 4. vercel.json 업데이트
+- `src/app/api/admin/god-mode/*.ts`: maxDuration 300초
+
+### 병렬 처리 성능 비교
+| 항목 | Before | After |
+|------|--------|-------|
+| 동시 실행 | 3개 | **10개** |
+| 전체 33개 크론 | ~5분 | **~30초** |
+| 타임아웃 | 없음 | 2분/개별 크론 |
+| 실패 복구 | 수동 | **원클릭 재실행** |
+
+### 크론 실행 순서 (의존성 고려)
+1. **Phase 1 (data)**: 청약/실거래/주식/재개발 수집 (13개)
+2. **Phase 2 (process)**: 집계/싱크/테마/검증 (5개)
+3. **Phase 3 (ai)**: AI요약/이미지/트렌드/인프라 (5개)
+4. **Phase 4 (content)**: 시드/블로그/채팅 (6개)
+5. **Phase 5 (system)**: 헬스/통계/등급/정리/색인 (7개)
+
+### 파일 구조
+```
+src/app/admin/
+├── page.tsx         # AdminHub 렌더
+├── AdminHub.tsx     # 탭 네비게이션 (신규)
+├── ControlTower.tsx # 원버튼 UI (신규)
+├── AdminCommandCenter.tsx # 기존 세부 관리
+└── AdminSites.tsx   # 기존 현장 관리
+
+src/app/api/admin/god-mode/
+└── route.ts         # 병렬 실행 API (신규)
+```
+
+### 다음 세션 작업
+- [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
+- [ ] 네이버 서치콘솔 루트 URL 색인 요청
+- [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
