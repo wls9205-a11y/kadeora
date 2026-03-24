@@ -5,9 +5,20 @@ export const metadata: Metadata = {
   description: '주식, 부동산, 청약 관련 소문과 정보를 나누는 카더라 커뮤니티 피드',
   alternates: { canonical: SITE_URL + '/feed' },
   openGraph: {
-    title: '피드',
+    title: '카더라 커뮤니티 피드',
     description: '주식, 부동산, 청약 정보 커뮤니티',
+    url: SITE_URL + '/feed',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
     images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 피드' }],
+  },
+  other: {
+    'naver:written_time': new Date().toISOString(),
+    'naver:updated_time': new Date().toISOString(),
+    'dg:plink': SITE_URL + '/feed',
+    'article:section': '커뮤니티',
+    'article:tag': '커뮤니티,주식,부동산,청약,토론,카더라',
   },
 };
 import { Suspense } from 'react';

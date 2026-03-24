@@ -34,8 +34,15 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     title: `${meta.title}${suffix}${qSuffix}`,
     description: meta.desc,
     alternates: { canonical },
-    openGraph: { title: meta.title, description: meta.desc, url: canonical },
+    openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website' },
     ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
+    other: {
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
+      'dg:plink': `${SITE}/blog`,
+      'article:section': category === 'all' ? '블로그' : (CAT_META[category]?.title?.split('—')[0]?.trim() || '블로그'),
+      'article:tag': '블로그,주식,청약,부동산,미분양,재테크',
+    },
   };
 }
 

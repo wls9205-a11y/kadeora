@@ -6,9 +6,20 @@ export const metadata: Metadata = {
   description: '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.',
   alternates: { canonical: SITE_URL + '/stock' },
   openGraph: {
-    title: '실시간 주식 시세',
-    description: '국내외 주요 종목 실시간 시세와 등락률',
+    title: '실시간 주식 시세 | 카더라',
+    description: '국내외 주요 종목 실시간 시세와 등락률. KOSPI, KOSDAQ, NYSE, NASDAQ.',
+    url: SITE_URL + '/stock',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
     images: [{ url: SITE_URL + '/images/brand/kadeora-wide.png', alt: '카더라 주식' }],
+  },
+  other: {
+    'naver:written_time': new Date().toISOString(),
+    'naver:updated_time': new Date().toISOString(),
+    'dg:plink': SITE_URL + '/stock',
+    'article:section': '주식',
+    'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',
   },
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
