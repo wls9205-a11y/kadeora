@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-24 세션 31
+> **마지막 업데이트:** 2026-03-24 세션 32
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -18,35 +18,38 @@
 
 ---
 
-## DB 현황 (2026-03-23 세션 28 기준)
+## DB 현황 (2026-03-24 세션 32 기준)
 
 | 테이블 | 건수 | 비고 |
 |--------|------|------|
 | blog_posts (발행) | 14,578 | 세션23: +905건 시드 + 스팸전수조사 완료 |
 | blog_series | 신규 | 세션24: 시리즈 시스템 |
-| apt_transactions | 3,885+ | 올해 1~3월, 전국 231개 시군구 |
+| **apt_sites** | **3,116** | **세션32: 현장 허브 통합 (청약2626+재개발202+미분양168+랜드마크120)** |
+| **apt_site_interests** | **신규** | **세션32: 관심고객 등록 (회원/비회원)** |
+| **privacy_consents** | **신규** | **세션32: 개인정보 동의 이력 (법적 증빙)** |
+| apt_transactions | 5,408 | 올해 1~3월, 전국 |
 | apt_reviews | 신규 | 세션24: UGC 아파트 리뷰 |
 | apt_review_likes | 신규 | 세션28: 리뷰 좋아요 |
-| posts | 3,764+ | 커뮤니티 게시글 |
-| apt_subscriptions | 2,500+ | 매일 06시 자동 수집 |
-| redevelopment_projects (활성) | 217 | 11개 지역 (서울114/부산35/경기24/인천18+) |
-| unsold_apts (활성) | 180 | 활성 (수동입력23건 비활성화) |
+| posts | 3,844+ | 커뮤니티 게시글 |
+| apt_subscriptions | 2,683 | 매일 06시 자동 수집 |
+| redevelopment_projects (활성) | 202 | 11개 지역 |
+| unsold_apts (활성) | 180 | 활성 |
 | price_alerts | 신규 | 세션24: 주식+부동산 가격 알림 |
 | portfolio_holdings | 신규 | 세션24: 포트폴리오 시뮬레이터 |
 | portfolio_snapshots | 신규 | 세션28: 일일 수익률 스냅샷 |
-| stock_quotes (활성) | 150 | 공공데이터 API |
+| stock_quotes (활성) | 249 | 공공데이터 API |
 | profiles | 111 | |
 | apt_trade_monthly | 44 | RPC 수정 완료, 정상 집계 |
 | daily_stats | 7+ | 매일 자동 수집 |
 
 ---
 
-## 크론 현황 (53개 등록, vercel.json — 세션 28에서 +7개)
+## 크론 현황 (54개 등록, vercel.json — 세션 32에서 +1개)
 
 ### 부동산
 | 크론 | 주기 | 상태 |
 |------|------|------|
-| crawl-apt-subscription | 매일 06시 | ✅ 2,500건 |
+| crawl-apt-subscription | 매일 06시 | ✅ 2,683건 |
 | apt-backfill-details | 매주 수요일 | ✅ 청약 상세 NULL 자동 백필(세션28) |
 | crawl-apt-trade | 평일 08시 | ✅ 올해 전체, 231개 시군구 |
 | crawl-apt-resale | 주 1회 | ✅ 35개 시군구 확대 |
@@ -58,6 +61,7 @@
 | crawl-nationwide-redev | 매주 월요일 | ✅ withCronAuth 전환+timeout(세션28) |
 | redev-verify-households | 매주 화요일 | ✅ 세대수 NULL 자동 검증(세션28) |
 | redev-geocode | 매주 목요일 | ✅ 좌표 NULL 카카오 API 수집(세션28) |
+| **sync-apt-sites** | **매일 04시** | **✅ 5개 소스→apt_sites 통합 싱크+score 재계산(세션32)** |
 | aggregate-trade-stats | 매일 | ✅ |
 
 ### 주식
