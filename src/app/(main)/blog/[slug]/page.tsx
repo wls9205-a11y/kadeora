@@ -173,7 +173,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const catSection: Record<string, string> = { stock: '주식', apt: '부동산', unsold: '미분양', finance: '재테크', general: '생활' };
 
   const jsonLd = {
-    '@context': 'https://schema.org', '@type': 'Article',
+    '@context': 'https://schema.org', '@type': 'BlogPosting',
     headline: post.title, description: post.meta_description || post.excerpt || '',
     datePublished: post.published_at || post.created_at,
     dateModified: post.updated_at || post.published_at || post.created_at,
@@ -197,6 +197,10 @@ export default async function BlogDetailPage({ params }: Props) {
     inLanguage: 'ko-KR',
     isAccessibleForFree: true,
     articleSection: catSection[post.category] || '정보',
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', '.blog-excerpt', '.blog-content p:first-of-type'],
+    },
     ...(comments.length > 0 ? {
       commentCount: comments.length,
       comment: comments.slice(0, 3).map((c: any) => ({

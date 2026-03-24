@@ -12,15 +12,15 @@ export async function GET() {
     if (!data || data.length === 0) {
       const defaults = [
         { keyword: '삼성전자', heat_score: 100 },
-        { keyword: '청약', heat_score: 95 },
-        { keyword: '코스피', heat_score: 90 },
-        { keyword: '아파트 실거래가', heat_score: 85 },
-        { keyword: '배당주', heat_score: 80 },
-        { keyword: '미분양', heat_score: 75 },
-        { keyword: '재개발', heat_score: 70 },
-        { keyword: 'ETF', heat_score: 65 },
-        { keyword: '금리', heat_score: 60 },
-        { keyword: '부동산 세금', heat_score: 55 },
+        { keyword: 'SK하이닉스', heat_score: 95 },
+        { keyword: 'AI 반도체', heat_score: 90 },
+        { keyword: '청약 경쟁률', heat_score: 85 },
+        { keyword: '엔비디아', heat_score: 80 },
+        { keyword: '기준금리 인하', heat_score: 75 },
+        { keyword: '미분양 현황', heat_score: 70 },
+        { keyword: 'ETF 추천', heat_score: 65 },
+        { keyword: '재개발 투자', heat_score: 60 },
+        { keyword: '배당주 TOP', heat_score: 55 },
       ];
       return NextResponse.json(defaults);
     }

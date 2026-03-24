@@ -73,15 +73,15 @@ export const DEMO_POSTS: any[] = [
 
 export const DEMO_TRENDING: any[] = [
   { id: 1, keyword: '삼성전자', rank: 1, count: 2341, created_at: new Date().toISOString() },
-  { id: 2, keyword: '청약 경쟁률', rank: 2, count: 1876, created_at: new Date().toISOString() },
-  { id: 3, keyword: '코스피 3000', rank: 3, count: 1543, created_at: new Date().toISOString() },
-  { id: 4, keyword: 'HBM 반도체', rank: 4, count: 1201, created_at: new Date().toISOString() },
-  { id: 5, keyword: '토스뱅크', rank: 5, count: 987, created_at: new Date().toISOString() },
-  { id: 6, keyword: '파킹통장', rank: 6, count: 876, created_at: new Date().toISOString() },
-  { id: 7, keyword: 'SK하이닉스', rank: 7, count: 754, created_at: new Date().toISOString() },
-  { id: 8, keyword: '분양가상한제', rank: 8, count: 632, created_at: new Date().toISOString() },
-  { id: 9, keyword: '기준금리', rank: 9, count: 521, created_at: new Date().toISOString() },
-  { id: 10, keyword: '리츠 배당', rank: 10, count: 456, created_at: new Date().toISOString() },
+  { id: 2, keyword: 'SK하이닉스', rank: 2, count: 1876, created_at: new Date().toISOString() },
+  { id: 3, keyword: 'AI 반도체', rank: 3, count: 1543, created_at: new Date().toISOString() },
+  { id: 4, keyword: '청약 경쟁률', rank: 4, count: 1201, created_at: new Date().toISOString() },
+  { id: 5, keyword: '엔비디아', rank: 5, count: 987, created_at: new Date().toISOString() },
+  { id: 6, keyword: '기준금리 인하', rank: 6, count: 876, created_at: new Date().toISOString() },
+  { id: 7, keyword: '미분양 현황', rank: 7, count: 754, created_at: new Date().toISOString() },
+  { id: 8, keyword: 'ETF 추천', rank: 8, count: 632, created_at: new Date().toISOString() },
+  { id: 9, keyword: '재개발 투자', rank: 9, count: 521, created_at: new Date().toISOString() },
+  { id: 10, keyword: '배당주 TOP', rank: 10, count: 456, created_at: new Date().toISOString() },
 ];
 
 export const DEMO_STOCKS: any[] = [

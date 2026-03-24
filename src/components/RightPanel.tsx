@@ -13,7 +13,7 @@ const GRADES = [
   { emoji: '👑', title: '신의경지', pts: '60K' }, { emoji: '🚀', title: '카더라신', pts: '∞' },
 ];
 
-const FALLBACK = ['삼성전자', '아파트 청약', '코스피', '엔비디아', '테슬라'];
+const FALLBACK = ['삼성전자', 'AI 반도체', '청약 경쟁률', '엔비디아', '기준금리'];
 
 interface UserProfile {
   id: string;

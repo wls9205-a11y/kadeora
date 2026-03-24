@@ -44,9 +44,9 @@ export default function AdminPopularContent() {
   const fmtDate = (d: string) => new Date(d).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, marginTop: 20 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: 20 }}>
       {/* 기간 필터 */}
-      <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 6, marginBottom: 4 }}>
+      <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginRight: 8 }}>📊 인기 콘텐츠</span>
         {(['7d', '30d', 'all'] as const).map(p => (
           <button key={p} onClick={() => setPeriod(p)} style={{
@@ -58,7 +58,7 @@ export default function AdminPopularContent() {
 
       {/* 커뮤니티 인기글 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>💬 커뮤니티 TOP 10</span>
           <div style={{ display: 'flex', gap: 4 }}>
             {Object.entries(CAT_LABELS).map(([k, v]) => (
@@ -87,7 +87,7 @@ export default function AdminPopularContent() {
 
       {/* 블로그 인기글 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>📰 블로그 TOP 10</span>
           <div style={{ display: 'flex', gap: 4 }}>
             {Object.entries(BLOG_CAT).map(([k, v]) => (
