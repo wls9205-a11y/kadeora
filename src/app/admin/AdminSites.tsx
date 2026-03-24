@@ -16,6 +16,8 @@ export default function AdminSites() {
   const [interests, setInterests] = useState<InterestRow[]>([]);
   const [consents, setConsents] = useState<ConsentRow[]>([]);
   const [kpi, setKpi] = useState({ total: 0, published: 0, interests: 0, todayInterests: 0, views: 0, consentsTotal: 0, withdrawals: 0 });
+  const [flags, setFlags] = useState<Record<string, boolean>>({});
+  const [leads, setLeads] = useState({ total: 0, forwarded: 0, contacted: 0, converted: 0 });
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState({ region: '', type: '', q: '' });
   const [actionResult, setActionResult] = useState('');
@@ -40,6 +42,31 @@ export default function AdminSites() {
       setKpi({ total: allSites.length, published, interests: totalInterests, todayInterests: todayI, views: totalViews, consentsTotal: consentsR.count || 0, withdrawals });
     } catch {}
   }, []);
+
+  const loadFlags = useCallback(async () => {
+    try {
+      const { data } = await (sb as any).from('feature_flags').select('key, enabled');
+      const map: Record<string, boolean> = {};
+      (data || []).forEach((f: any) => { map[f.key] = f.enabled; });
+      setFlags(map);
+    } catch {}
+    try {
+      const { data } = await (sb as any).from('consultant_leads').select('status');
+      const all = data || [];
+      setLeads({
+        total: all.length,
+        forwarded: all.filter((l: any) => l.status === 'forwarded').length,
+        contacted: all.filter((l: any) => l.status === 'contacted').length,
+        converted: all.filter((l: any) => l.status === 'converted').length,
+      });
+    } catch {}
+  }, []);
+
+  const toggleFlag = async (key: string) => {
+    const newVal = !flags[key];
+    await (sb as any).from('feature_flags').update({ enabled: newVal, updated_at: new Date().toISOString() }).eq('key', key);
+    setFlags(prev => ({ ...prev, [key]: newVal }));
+  };
 
   const loadSites = useCallback(async () => {
     setLoading(true);
@@ -78,7 +105,7 @@ export default function AdminSites() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadKPI(); }, []);
+  useEffect(() => { loadKPI(); loadFlags(); }, []);
   useEffect(() => {
     if (tab === 'sites') loadSites();
     if (tab === 'interests') loadInterests();
@@ -220,6 +247,43 @@ export default function AdminSites() {
                 </div>
               );
             })}
+          </div>
+
+          {/* 프리미엄 상담사 연결 */}
+          <div style={{ background: '#0F1A32', borderRadius: 10, padding: 14, marginTop: 14, border: '1px solid #152240' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#E8EDF5' }}>🤝 프리미엄 상담사 연결</div>
+              <button onClick={() => toggleFlag('premium_consultant_forwarding')} style={{
+                padding: '5px 14px', borderRadius: 20, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none',
+                background: flags.premium_consultant_forwarding ? '#2EE8A5' : '#FF6B6B',
+                color: flags.premium_consultant_forwarding ? '#0A1225' : '#fff',
+                transition: 'all 0.2s',
+              }}>
+                {flags.premium_consultant_forwarding ? '🟢 활성화' : '🔴 비활성'}
+              </button>
+            </div>
+            <div style={{ fontSize: 11, color: '#94A8C4', lineHeight: 1.7, marginBottom: 10 }}>
+              {flags.premium_consultant_forwarding
+                ? '관심고객이 제3자 제공에 동의하면 → 해당 지역 상담사에게 자동 전달됩니다.'
+                : '비활성 상태입니다. 활성화하면 제3자 동의 관심고객이 상담사에게 자동 연결됩니다.'}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+              {[
+                { label: '총 전달', value: leads.total, color: '#E8EDF5' },
+                { label: '전달 완료', value: leads.forwarded, color: '#3B7BF6' },
+                { label: '상담 중', value: leads.contacted, color: '#FFD43B' },
+                { label: '계약 전환', value: leads.converted, color: '#2EE8A5' },
+              ].map(k => (
+                <div key={k.label} style={{ background: '#0A1225', borderRadius: 8, padding: 8, textAlign: 'center' }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: k.color }}>{k.value}</div>
+                  <div style={{ fontSize: 9, color: '#6B82A0' }}>{k.label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 10, color: '#6B82A0', lineHeight: 1.6 }}>
+              흐름: 관심고객 등록 → 제3자 동의 ✅ → 서버 자동 복호화 → 상담사 알림톡 발송 → 감사 로그 기록<br/>
+              ⚠️ 어드민 화면에는 ****5678만 표시. 전화번호 원본은 서버→상담사 직접 전달.
+            </div>
           </div>
         </>
       )}

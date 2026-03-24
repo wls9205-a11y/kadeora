@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { encrypt, hasEncryptionKey } from '@/lib/encryption';
+import { autoForwardLead } from '@/app/api/apt/sites/forward-lead/route';
 import { z } from 'zod';
 
 const phoneRegex = /^01[016789]-?\d{3,4}-?\d{4}$/;
@@ -155,7 +156,7 @@ export async function POST(req: NextRequest) {
       }
 
       // 관심고객 등록 (전화번호 암호화 저장)
-      const { error: insertErr } = await (admin as any).from('apt_site_interests').insert({
+      const { data: inserted, error: insertErr } = await (admin as any).from('apt_site_interests').insert({
         site_id: parsed.data.site_id,
         guest_name: parsed.data.name,
         guest_phone: encryptedPhone,
@@ -167,11 +168,18 @@ export async function POST(req: NextRequest) {
         source: 'site_page',
         consent_id: consents[0] || null,
         is_member: false,
-      });
+      }).select('id').single();
       if (insertErr) throw insertErr;
 
       // 관심 수 증가
       await admin.rpc('increment_site_interest' as any, { p_site_id: parsed.data.site_id });
+
+      // 제3자 제공 동의 시 → 상담사 자동 전달 (비활성 상태면 no-op)
+      if (parsed.data.consent_third_party && inserted?.id) {
+        try {
+          await autoForwardLead(inserted.id, parsed.data.site_id);
+        } catch {} // 전달 실패해도 등록 자체는 성공
+      }
 
       return NextResponse.json({ success: true, message: '관심고객 등록이 완료되었습니다' });
     }
