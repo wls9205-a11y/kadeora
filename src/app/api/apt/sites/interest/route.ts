@@ -160,6 +160,7 @@ export async function POST(req: NextRequest) {
         guest_name: parsed.data.name,
         guest_phone: encryptedPhone,
         guest_phone_hash: phoneHash,
+        guest_phone_last4: cleanPhone.slice(-4),
         guest_birth_date: parsed.data.birth_date,
         guest_city: parsed.data.city || null,
         guest_district: parsed.data.district || null,

@@ -51,6 +51,7 @@ export interface AptSiteInterest {
   guest_name: string | null;
   guest_phone: string | null;
   guest_phone_hash: string | null;
+  guest_phone_last4: string | null;
   guest_birth_date: string | null;
   guest_city: string | null;
   guest_district: string | null;

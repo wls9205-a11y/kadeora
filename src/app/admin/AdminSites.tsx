@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface SiteRow { id: string; slug: string; name: string; site_type: string; region: string; sigungu: string; content_score: number; interest_count: number; page_views: number; is_active: boolean; sitemap_wave: number; created_at: string; }
-interface InterestRow { id: number; site_id: string; user_id: string | null; guest_name: string | null; guest_phone: string | null; guest_city: string | null; guest_district: string | null; is_member: boolean; created_at: string; site_name?: string; }
+interface InterestRow { id: number; site_id: string; user_id: string | null; guest_name: string | null; guest_phone_last4: string | null; guest_city: string | null; guest_district: string | null; is_member: boolean; created_at: string; site_name?: string; }
 interface ConsentRow { id: number; consent_type: string; is_agreed: boolean; guest_identifier: string | null; consented_at: string; withdrawn_at: string | null; }
 
 const card = { background: '#0A1225', borderRadius: 12, padding: '14px 16px', border: '1px solid #152240', marginBottom: 14 };
@@ -56,7 +56,7 @@ export default function AdminSites() {
   const loadInterests = useCallback(async () => {
     setLoading(true);
     const { data } = await (sb as any).from('apt_site_interests')
-      .select('id, site_id, user_id, guest_name, guest_phone, guest_city, guest_district, is_member, created_at')
+      .select('id, site_id, user_id, guest_name, guest_phone_last4, guest_city, guest_district, is_member, created_at')
       .order('created_at', { ascending: false }).limit(100);
     // 현장명 매칭
     if (data?.length) {
@@ -105,7 +105,7 @@ export default function AdminSites() {
   const exportCSV = () => {
     const rows = interests.map(i => [
       i.site_name || '', i.is_member ? '회원' : '비회원', i.guest_name || '(회원)', 
-      i.guest_phone ? `****${i.guest_phone.slice(-4)}` : '-',
+      i.guest_phone_last4 ? `****${i.guest_phone_last4}` : '-',
       i.guest_city || '', i.guest_district || '', i.created_at?.slice(0, 10) || ''
     ]);
     const csv = '\uFEFF현장,유형,이름,전화번호(마스킹),시도,시군구,등록일\n' + rows.map(r => r.join(',')).join('\n');
@@ -301,7 +301,7 @@ export default function AdminSites() {
                         </span>
                       </td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4' }}>{i.guest_name || '(회원)'}</td>
-                      <td style={{ padding: '6px 4px', color: '#94A8C4' }}>{i.guest_phone ? `****${i.guest_phone.slice(-4)}` : '-'}</td>
+                      <td style={{ padding: '6px 4px', color: '#94A8C4' }}>{i.guest_phone_last4 ? `****${i.guest_phone_last4}` : '-'}</td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4', whiteSpace: 'nowrap' }}>{[i.guest_city, i.guest_district].filter(Boolean).join(' ') || '-'}</td>
                       <td style={{ padding: '6px 4px', color: '#6B82A0', whiteSpace: 'nowrap' }}>{i.created_at?.slice(0, 10)}</td>
                     </tr>
