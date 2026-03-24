@@ -1,5 +1,4 @@
 'use client';
-import ComingSoonBanner from '@/components/ComingSoonBanner';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { ConfirmModal } from '@/components/ConfirmModal';
@@ -17,22 +16,18 @@ interface ShopProduct {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  exposure: '노출 상품',
-  premium: '프리미엄',
-  event: '이벤트',
+  megaphone: '전광판 확성기',
+  etc: '기타',
 };
 
-const DEMO_PRODUCTS: ShopProduct[] = [
-  { id: 'megaphone-1d', name: '확성기 1일', description: '내 게시글을 24시간 피드 상단에 고정 노출합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 500, icon: '📢', is_active: true },
-  { id: 'megaphone-3d', name: '확성기 3일', description: '내 게시글을 72시간 피드 상단에 고정 노출합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 1200, icon: '🔊', is_active: true },
-  { id: 'megaphone-7d', name: '확성기 7일', description: '내 게시글을 7일간 피드 상단에 고정 노출합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 2500, icon: '📣', is_active: true },
-  { id: 'badge-gold', name: '골드 뱃지', description: '프로필 닉네임 옆에 골드 뱃지를 30일간 표시합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 1000, icon: '🥇', is_active: true },
-  { id: 'badge-vip', name: 'VIP 뱃지', description: '프로필 닉네임 옆에 VIP 뱃지를 30일간 표시합니다. 결제 즉시 적용되며, 적용 후 환불 불가.', price_krw: 3000, icon: '👑', is_active: true },
-];
+function getCategory(id: string): string {
+  if (id.startsWith('megaphone')) return 'megaphone';
+  return 'etc';
+}
 
 export default function ShopClient() {
   const [products, setProducts] = useState<ShopProduct[]>([]);
-  const [isDemo, setIsDemo] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [confirmProduct, setConfirmProduct] = useState<ShopProduct | null>(null);
   const { error } = useToast();
@@ -40,49 +35,41 @@ export default function ShopClient() {
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
-    sb.from('shop_products').select('*').eq('is_active', true).order('price_krw')
-      .then(({ data, error: err }) => {
-        if (err || !data || data.length === 0) {
-          setProducts(DEMO_PRODUCTS);
-          setIsDemo(true);
-        } else {
-          setProducts(data as ShopProduct[]);
-        }
+    sb.from('shop_products').select('*')
+      .eq('is_active', true)
+      .eq('purchase_type', 'cash')
+      .order('price_krw')
+      .then(({ data }) => {
+        if (data) setProducts(data as ShopProduct[]);
+        setLoading(false);
       });
   }, []);
 
-  const categories = ['all', ...Array.from(new Set(products.map(p => {
-    if (p.id.startsWith('megaphone')) return 'exposure';
-    if (p.id.startsWith('badge')) return 'premium';
-    return 'event';
-  })))];
+  const categories = ['all', ...Array.from(new Set(products.map(p => getCategory(p.id))))];
 
-  const filtered = selectedCategory === 'all' ? products : products.filter(p => {
-    if (selectedCategory === 'exposure') return p.id.startsWith('megaphone');
-    if (selectedCategory === 'premium') return p.id.startsWith('badge');
-    return true;
-  });
+  const filtered = selectedCategory === 'all' ? products : products.filter(p => getCategory(p.id) === selectedCategory);
 
   const handleBuy = async () => {
     if (!confirmProduct) return;
     const sb = createSupabaseBrowser();
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { error('로그인이 필요합니다'); router.push('/login'); return; }
-    if (isDemo) { error('현재 결제 기능은 준비 중입니다'); setConfirmProduct(null); return; }
     router.push(`/payment?product=${confirmProduct.id}&amount=${confirmProduct.price_krw}`);
     setConfirmProduct(null);
   };
 
+  if (loading) return (
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
+      <div className="skeleton-shimmer" style={{ height: 200, borderRadius: 14 }} />
+    </div>
+  );
+
   return (
     <PullToRefresh>
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
-      <ComingSoonBanner feature="토스페이먼츠 결제" description="사업자 등록 심사 완료 후 즉시 활성화됩니다." eta="2026년 4월 예정" />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🛒 커뮤니티 상점</h1>
-          <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>게시글 노출 및 특별 기능을 구매하세요</p>
-        </div>
-        {isDemo && <span style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px', borderRadius: 999, background: 'rgba(96,165,250,0.1)', color: 'var(--brand)', border: '1px solid rgba(96,165,250,0.3)' }}>💡 미리보기</span>}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>커뮤니티 상점</h1>
+        <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>게시글 홍보 및 프리미엄 기능을 이용하세요</p>
       </div>
 
       {/* 카테고리 탭 */}
@@ -104,20 +91,11 @@ export default function ShopClient() {
       {/* 상품 목록 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 12 }}>
         {filtered.map(p => (
-          <div key={p.id} style={{
+          <div key={p.id} className="kd-card-hover" style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
             borderRadius: 14, padding: '20px 20px 16px',
             transition: 'all 0.15s', position: 'relative',
-          }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)';
-              (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-              (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-            }}
-          >
+          }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>{p.icon ?? '🎁'}</div>
             <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</h3>
             <p style={{ margin: '0 0 16px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.description}</p>
@@ -139,6 +117,12 @@ export default function ShopClient() {
           </div>
         ))}
       </div>
+
+      {products.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+          현재 판매 중인 상품이 없습니다.
+        </div>
+      )}
 
       <p style={{ marginTop: 20, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'right' }}>
         ※ 결제는 토스페이먼츠로 진행됩니다. 구매 전 <a href="/terms" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>이용약관</a> 및 <a href="/refund" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>환불정책</a>을 확인해주세요.
