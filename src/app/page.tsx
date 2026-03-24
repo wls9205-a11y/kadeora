@@ -237,7 +237,7 @@ export default async function HomePage() {
           <h1 style={{
             fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.03em',
             margin: '0 0 16px',
-            background: 'linear-gradient(135deg, #E2E8F0 0%, #93C5FD 50%, #3B82F6 100%)',
+            background: 'linear-gradient(135deg, #E8EDF5 0%, #93C5FD 50%, #3B82F6 100%)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>

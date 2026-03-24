@@ -77,7 +77,7 @@ export default function AdminUsers() {
     gradeMap[g] = (gradeMap[g] || 0) + 1;
   }
   const gradeColors: Record<string, string> = {
-    '뉴비': '#9DB0C7', '초보자': 'var(--accent-blue)', '주민': 'var(--accent-green)', '터줏대감': 'var(--accent-yellow)',
+    '뉴비': '#94A8C4', '초보자': 'var(--accent-blue)', '주민': 'var(--accent-green)', '터줏대감': 'var(--accent-yellow)',
     '인싸': 'var(--accent-purple)', '핵인싸': 'var(--accent-red)', '미설정': '#CBD5E1',
   };
 
@@ -111,7 +111,7 @@ export default function AdminUsers() {
                 title={`${grade}: ${count}명 (${pct.toFixed(1)}%)`}
                 style={{
                   width: `${pct}%`,
-                  background: gradeColors[grade] || '#9DB0C7',
+                  background: gradeColors[grade] || '#94A8C4',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -130,7 +130,7 @@ export default function AdminUsers() {
         <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
           {Object.entries(gradeMap).map(([grade, count]) => (
             <div key={grade} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: gradeColors[grade] || '#9DB0C7' }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: gradeColors[grade] || '#94A8C4' }} />
               {grade} ({count})
             </div>
           ))}

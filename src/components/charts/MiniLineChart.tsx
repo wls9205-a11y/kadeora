@@ -82,7 +82,7 @@ export default function MiniLineChart({
         {showLabels && data.map((d, i) => {
           if (data.length > 8 && i % 2 !== 0 && i !== data.length - 1) return null;
           return (
-            <text key={i} x={points[i].x} y={H - 2} textAnchor="middle" fontSize="9" fill="#9DB0C7">
+            <text key={i} x={points[i].x} y={H - 2} textAnchor="middle" fontSize="9" fill="#94A8C4">
               {d.label}
             </text>
           );

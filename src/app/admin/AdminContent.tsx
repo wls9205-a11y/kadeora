@@ -132,7 +132,7 @@ export default function AdminContent() {
                 {r.status === 'pending' && (
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                     <button onClick={() => handleReport(r.id, 'resolve')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #2EE8A5', background: 'transparent', color: 'var(--accent-green)', cursor: 'pointer', fontWeight: 700 }}>처리완료</button>
-                    <button onClick={() => handleReport(r.id, 'dismiss')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #9DB0C7', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 700 }}>기각</button>
+                    <button onClick={() => handleReport(r.id, 'dismiss')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #94A8C4', background: 'transparent', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 700 }}>기각</button>
                     {(r.post_id || r.comment_id) && (
                       <button onClick={() => handleReport(r.id, 'hide_content')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: 'none', background: 'var(--accent-red)', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>숨기기</button>
                     )}

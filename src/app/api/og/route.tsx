@@ -66,11 +66,11 @@ export async function GET(req: NextRequest) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 28, fontWeight: 900, color: '#fff',
             }}>K</div>
-            <span style={{ fontSize: 48, fontWeight: 900, color: '#E2E8F0', letterSpacing: '-1px' }}>
+            <span style={{ fontSize: 48, fontWeight: 900, color: '#E8EDF5', letterSpacing: '-1px' }}>
               카더라
             </span>
           </div>
-          <div style={{ fontSize: 24, color: '#9DB0C7', fontWeight: 500, marginBottom: 16 }}>
+          <div style={{ fontSize: 24, color: '#94A8C4', fontWeight: 500, marginBottom: 16 }}>
             아는 사람만 아는 그 정보
           </div>
           <div style={{ fontSize: 16, color: '#7D8DA3', fontWeight: 400 }}>
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 20, fontWeight: 900, color: '#fff',
           }}>K</div>
-          <span style={{ fontSize: 24, fontWeight: 900, color: '#E2E8F0', letterSpacing: '-0.5px' }}>
+          <span style={{ fontSize: 24, fontWeight: 900, color: '#E8EDF5', letterSpacing: '-0.5px' }}>
             카더라
           </span>
           {catLabel && (
@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
         <div style={{
           fontSize: title.length > 50 ? 34 : title.length > 30 ? 40 : 48,
           fontWeight: 800,
-          color: '#E2E8F0',
+          color: '#E8EDF5',
           lineHeight: 1.35,
           maxWidth: 1000,
           overflow: 'hidden',
@@ -149,7 +149,7 @@ export async function GET(req: NextRequest) {
                 }}>
                   {author[0].toUpperCase()}
                 </div>
-                <span style={{ fontSize: 16, color: '#9DB0C7', fontWeight: 500 }}>{author}</span>
+                <span style={{ fontSize: 16, color: '#94A8C4', fontWeight: 500 }}>{author}</span>
               </>
             )}
           </div>

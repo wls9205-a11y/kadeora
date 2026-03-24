@@ -397,7 +397,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         .cc-progress{height:4px;border-radius:2px;background:#152240;overflow:hidden}
         .cc-progress-bar{height:100%;border-radius:2px;transition:width .5s ease}
         .cc-scrollbar::-webkit-scrollbar{width:4px}
-        .cc-scrollbar::-webkit-scrollbar-thumb{background:#2A4060;border-radius:2px}
+        .cc-scrollbar::-webkit-scrollbar-thumb{background:#1E2E52;border-radius:2px}
       `}</style>
 
       {/* ═══ HEADER ═══ */}
@@ -425,7 +425,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           <button className="cc-btn" onClick={handleRefreshAll} disabled={refresh.running} style={{ background: refresh.running ? '#152240' : 'var(--brand)', color: '#fff', padding: '8px 16px' }}>
             {refresh.running ? (<><span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />{((refresh.elapsed/1000)|0)}초</>) : '⚡ 전체 갱신'}
           </button>
-          <button className="cc-btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#152240', color: '#9DB0C7', fontSize: 11, padding: '6px 12px' }}>🔄</button>
+          <button className="cc-btn" onClick={() => { setLoading(true); loadAll(); }} style={{ background: '#152240', color: '#94A8C4', fontSize: 11, padding: '6px 12px' }}>🔄</button>
         </div>
         {refresh.results.length > 0 && !refresh.running && (
           <div style={{ maxWidth: 1300, margin: '10px auto 0', padding: '8px 14px', borderRadius: 8, background: '#0A1225', border: '1px solid #152240', display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
@@ -453,7 +453,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <span style={{ fontSize: 20 }}>{k.icon}</span>
                 <div>
                   <div style={{ fontSize: 10, color: '#7D8DA3', fontWeight: 600, letterSpacing: 0.5 }}>{k.label}</div>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: '#E2E8F0', lineHeight: 1.1 }}>{k.value.toLocaleString()}</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: '#E8EDF5', lineHeight: 1.1 }}>{k.value.toLocaleString()}</div>
                 </div>
               </div>
             </div>
@@ -468,7 +468,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               {dataCounts.map(d => (
                 <div key={d.label} style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: '#15224040' }}>
                   <div style={{ fontSize: 14 }}>{d.icon}</div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: '#E2E8F0' }}>{d.value.toLocaleString()}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: '#E8EDF5' }}>{d.value.toLocaleString()}</div>
                   <div style={{ fontSize: 10, color: '#7D8DA3', fontWeight: 600 }}>{d.label}</div>
                 </div>
               ))}
@@ -507,7 +507,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               const result = actionResults[a.id];
               return (
                 <button key={a.id} className="cc-btn" onClick={() => runQuickAction(a)} disabled={!!actionRunning}
-                  style={{ background: result ? (result.ok ? 'rgba(5,150,105,0.12)' : 'rgba(248,113,113,0.12)') : '#152240', color: result ? (result.ok ? 'var(--accent-green)' : '#f87171') : '#9DB0C7', border: `1px solid ${result ? (result.ok ? 'rgba(5,150,105,0.25)' : 'rgba(248,113,113,0.25)') : '#2A4060'}` }}>
+                  style={{ background: result ? (result.ok ? 'rgba(5,150,105,0.12)' : 'rgba(248,113,113,0.12)') : '#152240', color: result ? (result.ok ? 'var(--accent-green)' : '#FF6B6B') : '#94A8C4', border: `1px solid ${result ? (result.ok ? 'rgba(5,150,105,0.25)' : 'rgba(248,113,113,0.25)') : '#1E2E52'}` }}>
                   {actionRunning === a.id ? <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <span style={{ fontSize: 13 }}>{a.icon}</span>}
                   {result?.msg || a.label}
                 </button>
@@ -612,7 +612,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#9DB0C7', marginBottom: 6 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#94A8C4', marginBottom: 6 }}>
                       <input type="checkbox" checked={blogConfig.auto_publish_enabled} onChange={e => setBlogConfig({...blogConfig,auto_publish_enabled:e.target.checked})} /> 자동 발행
                     </label>
                     {[
@@ -636,8 +636,8 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                     <div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                         {[
-                          { v: queueStatus.published_today??0, l: '오늘 발행', c: '#E2E8F0' },
-                          { v: queueStatus.remaining_today??0, l: '남은 쿼터', c: '#E2E8F0' },
+                          { v: queueStatus.published_today??0, l: '오늘 발행', c: '#E8EDF5' },
+                          { v: queueStatus.remaining_today??0, l: '남은 쿼터', c: '#E8EDF5' },
                           { v: queueStatus.queue_ready??0, l: '대기(가능)', c: 'var(--accent-green)' },
                           { v: queueStatus.queue_too_short??0, l: '대기(미달)', c: (queueStatus.queue_too_short??0)>0?'var(--accent-red)':'#7D8DA3' },
                         ].map(q => (
@@ -680,7 +680,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
             {expandedPanel === 'users' && (
               <div style={{ padding: '0 16px 16px', animation: 'fadein .2s ease' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
-                  {[{l:'전체',v:users.length,c:'#E2E8F0'},{l:'실제',v:realUsers.length,c:'var(--accent-green)'},{l:'시드',v:users.length-realUsers.length,c:'#7D8DA3'},{l:'정지',v:users.filter(u=>u.is_deleted).length,c:'var(--accent-red)'}].map(s=>(
+                  {[{l:'전체',v:users.length,c:'#E8EDF5'},{l:'실제',v:realUsers.length,c:'var(--accent-green)'},{l:'시드',v:users.length-realUsers.length,c:'#7D8DA3'},{l:'정지',v:users.filter(u=>u.is_deleted).length,c:'var(--accent-red)'}].map(s=>(
                     <div key={s.l} style={{ textAlign: 'center', padding: 6, borderRadius: 6, background: '#15224040' }}>
                       <div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div>
                       <div style={{ fontSize: 8, color: '#7D8DA3' }}>{s.l}</div>
@@ -758,7 +758,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>관리 페이지</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10 }}>
                   {[{h:'/admin/content',l:'콘텐츠'},{h:'/admin/users',l:'유저'},{h:'/admin/reports',l:'신고'},{h:'/admin/comments',l:'댓글'},{h:'/admin/blog',l:'블로그'},{h:'/admin/infra',l:'인프라'},{h:'/admin/realestate',l:'부동산'},{h:'/admin/payments',l:'결제'},{h:'/admin/notifications',l:'알림'},{h:'/admin/system',l:'시스템'}].map(l=>(
-                    <a key={l.h} href={l.h} style={{ color: '#9DB0C7', padding: '3px 8px', borderRadius: 6, background: '#15224040', textDecoration: 'none' }}>{l.l}</a>
+                    <a key={l.h} href={l.h} style={{ color: '#94A8C4', padding: '3px 8px', borderRadius: 6, background: '#15224040', textDecoration: 'none' }}>{l.l}</a>
                   ))}
                 </div>
               </div>
@@ -800,7 +800,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                   <tr key={log.id||i} style={{ borderBottom: '1px solid #15224020' }}>
                     <td style={{ padding:'5px 8px',color:'#7D8DA3',whiteSpace:'nowrap' }}>{log.started_at ? new Date(log.started_at).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</td>
                     <td style={{ padding:'5px 8px',color:'var(--text-primary)',fontWeight:600 }}>{CRON_MAP[log.cron_name]?.display||log.cron_name}</td>
-                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:10,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'rgba(5,150,105,0.12)':log.status==='running'?'rgba(96,165,250,0.12)':'rgba(248,113,113,0.12)',color:log.status==='success'?'var(--accent-green)':log.status==='running'?'#60a5fa':'#f87171' }}>{log.status}</span></td>
+                    <td style={{ padding:'5px 8px' }}><span style={{ fontSize:10,padding:'1px 6px',borderRadius:8,fontWeight:700,background:log.status==='success'?'rgba(5,150,105,0.12)':log.status==='running'?'rgba(96,165,250,0.12)':'rgba(248,113,113,0.12)',color:log.status==='success'?'var(--accent-green)':log.status==='running'?'#60a5fa':'#FF6B6B' }}>{log.status}</span></td>
                     <td style={{ padding:'5px 8px',color:'#7D8DA3' }}>{log.duration_ms?`${(log.duration_ms/1000).toFixed(1)}s`:'-'}</td>
                     <td style={{ padding:'5px 8px',color:'#7D8DA3' }}>{log.records_processed||0}</td>
                     <td style={{ padding:'5px 8px',color:'var(--accent-red)',maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{log.error_message||''}</td>
