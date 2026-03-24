@@ -3,6 +3,9 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     },
+    "src/app/api/admin/god-mode/*.ts": {
+      "maxDuration": 300
+    },
     "src/app/api/stock-refresh/*.ts": {
       "maxDuration": 120
     },
