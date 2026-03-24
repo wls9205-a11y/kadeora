@@ -1,13 +1,13 @@
-<svg width="280" height="72" viewBox="0 0 280 72" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="48" viewBox="0 0 200 48" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E40AF"/>
-      <stop offset="100%" stop-color="#3B82F6"/>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2556C4"/>
+      <stop offset="100%" stop-color="#5B93FF"/>
     </linearGradient>
   </defs>
-  <rect x="0" y="0" width="72" height="72" rx="18" fill="url(#ng)"/>
-  <circle cx="18" cy="36" r="7" fill="white"/>
-  <circle cx="36" cy="36" r="7" fill="white"/>
-  <circle cx="54" cy="36" r="7" fill="white"/>
-  <text x="88" y="50" font-family="'Pretendard Variable', -apple-system, sans-serif" font-size="38" font-weight="700" fill="#1E40AF" letter-spacing="-1">카더라</text>
+  <rect width="48" height="48" rx="12" fill="url(#lg)"/>
+  <circle cx="14" cy="24" r="4.5" fill="white" opacity="0.95"/>
+  <circle cx="24" cy="24" r="4.5" fill="white" opacity="0.95"/>
+  <circle cx="34" cy="24" r="4.5" fill="white" opacity="0.95"/>
+  <text x="58" y="33" font-family="system-ui,-apple-system,sans-serif" font-weight="900" font-size="26" fill="#E8EDF5" letter-spacing="-0.5">카더라</text>
 </svg>

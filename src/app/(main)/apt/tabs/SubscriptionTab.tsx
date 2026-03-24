@@ -73,30 +73,20 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {apts.length}건</span>
             </div>
             <div className="apt-region-grid">
-              <button onClick={() => setRegion('전체')} style={{
-                padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                border: region === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-                background: region === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-              }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{apts.length}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
+              <button onClick={() => setRegion('전체')} className={`apt-region-card${region === '전체' ? ' active' : ''}`}>
+                <span className="region-count">{apts.length}</span>
+                <span className="region-name">전체</span>
               </button>
               {regionStats.map(r => (
-                <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
-                  padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                  border: region === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-                  background: region === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.total}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-                  <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2, color: region === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                    {r.open > 0 && <span style={{ color: region === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>접수{r.open}</span>}
-                    {r.upcoming > 0 && <span style={{ color: region === r.name ? 'var(--text-inverse)' : 'var(--accent-yellow)' }}>예정{r.upcoming}</span>}
+                <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} className={`apt-region-card${region === r.name ? ' active' : ''}`}>
+                  <span className="region-count">{r.total}</span>
+                  <span className="region-name">{r.name}</span>
+                  <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2 }}>
+                    {r.open > 0 && <span style={{ color: 'var(--accent-green)' }}>접수{r.open}</span>}
+                    {r.upcoming > 0 && <span style={{ color: 'var(--accent-yellow)' }}>예정{r.upcoming}</span>}
                   </div>
                   {r.total > 0 && (
-                    <div style={{ width: '100%', height: 3, background: region === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
+                    <div className="region-bar">
                       <div style={{ height: '100%', background: 'var(--accent-green)', width: `${(r.open / r.total) * 100}%` }} />
                       <div style={{ height: '100%', background: 'var(--accent-yellow)', width: `${(r.upcoming / r.total) * 100}%` }} />
                     </div>

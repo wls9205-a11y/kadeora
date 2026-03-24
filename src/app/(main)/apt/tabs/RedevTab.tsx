@@ -84,30 +84,20 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>총 {redevelopment.length}건</span>
               </div>
               <div className="apt-region-grid">
-                <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
-                  padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                  border: redevRegion === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-                  background: redevRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                }}>
-                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{redevelopment.length}</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
+                <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} className={`apt-region-card${redevRegion === '전체' ? ' active' : ''}`}>
+                  <span className="region-count">{redevelopment.length}</span>
+                  <span className="region-name">전체</span>
                 </button>
                 {redevRegionStats.map(r => (
-                  <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
-                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                    border: redevRegion === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-                    background: redevRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                  }}>
-                    <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.total}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-                    <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2, color: redevRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                      {r.redev > 0 && <span style={{ color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-blue)' }}>개발{r.redev}</span>}
-                      {r.rebuild > 0 && <span style={{ color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>건축{r.rebuild}</span>}
+                  <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} className={`apt-region-card${redevRegion === r.name ? ' active' : ''}`}>
+                    <span className="region-count">{r.total}</span>
+                    <span className="region-name">{r.name}</span>
+                    <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2 }}>
+                      {r.redev > 0 && <span style={{ color: 'var(--accent-blue)' }}>개발{r.redev}</span>}
+                      {r.rebuild > 0 && <span style={{ color: 'var(--accent-green)' }}>건축{r.rebuild}</span>}
                     </div>
                     {r.total > 0 && (
-                      <div style={{ width: '100%', height: 3, background: redevRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
+                      <div className="region-bar">
                         <div style={{ height: '100%', background: 'var(--accent-blue)', width: `${(r.redev / r.total) * 100}%` }} />
                         <div style={{ height: '100%', background: 'var(--accent-green)', width: `${(r.rebuild / r.total) * 100}%` }} />
                       </div>

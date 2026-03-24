@@ -1,17 +1,20 @@
-<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-  <rect width="800" height="400" fill="#0B1426"/>
-  <rect x="0" y="0" width="800" height="5" fill="#2563EB"/>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E40AF"/>
-      <stop offset="100%" stop-color="#3B82F6"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050A18"/>
+      <stop offset="100%" stop-color="#0A1225"/>
+    </linearGradient>
+    <linearGradient id="logo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2556C4"/>
+      <stop offset="100%" stop-color="#5B93FF"/>
     </linearGradient>
   </defs>
-  <rect x="44" y="36" width="40" height="40" rx="10" fill="url(#ng)"/>
-  <circle cx="54" cy="56" r="4" fill="white"/><circle cx="63" cy="56" r="4" fill="white"/><circle cx="72" cy="56" r="4" fill="white"/>
-  <text x="92" y="63" font-family="'Pretendard Variable', -apple-system, sans-serif" font-size="20" font-weight="700" fill="white">카더라</text>
-  <text x="44" y="155" font-family="'Pretendard Variable', -apple-system, sans-serif" font-size="46" font-weight="700" fill="white" letter-spacing="-1.5">아는 사람만</text>
-  <text x="44" y="210" font-family="'Pretendard Variable', -apple-system, sans-serif" font-size="46" font-weight="700" fill="#60A5FA" letter-spacing="-1.5">아는 그 정보</text>
-  <text x="44" y="254" font-family="'Pretendard Variable', -apple-system, sans-serif" font-size="18" fill="#94A3B8">주식 · 부동산 · 청약 · 우리동네 소식</text>
-  <text x="44" y="360" font-family="'Pretendard Variable', -apple-system, sans-serif" font-size="13" fill="#64748B">kadeora.app</text>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="480" y="220" width="80" height="80" rx="20" fill="url(#logo)"/>
+  <circle cx="500" cy="260" r="8" fill="white" opacity="0.95"/>
+  <circle cx="520" cy="260" r="8" fill="white" opacity="0.95"/>
+  <circle cx="540" cy="260" r="8" fill="white" opacity="0.95"/>
+  <text x="580" y="275" font-family="system-ui" font-weight="900" font-size="48" fill="#E8EDF5">카더라</text>
+  <text x="600" y="360" font-family="system-ui" font-weight="600" font-size="24" fill="#94A8C4" text-anchor="middle">대한민국 소리소문 정보 커뮤니티</text>
+  <text x="600" y="410" font-family="system-ui" font-weight="500" font-size="20" fill="#6B82A0" text-anchor="middle">주식 · 부동산 · 청약 · 커뮤니티</text>
 </svg>

@@ -1386,6 +1386,14 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 .apt-region-card.active .region-count {
   color: var(--accent-blue);
 }
+.apt-region-card.active.danger {
+  border-color: var(--accent-red);
+  background: var(--accent-red-bg);
+  box-shadow: 0 0 12px rgba(255,107,107,0.15);
+}
+.apt-region-card.active.danger .region-count {
+  color: var(--accent-red);
+}
 .apt-region-card .region-bar {
   height: 3px;
   border-radius: 2px;

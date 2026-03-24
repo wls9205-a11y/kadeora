@@ -1,13 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E40AF"/>
-      <stop offset="100%" stop-color="#3B82F6"/>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2556C4"/>
+      <stop offset="100%" stop-color="#5B93FF"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#ng)"/>
-  <circle cx="160" cy="256" r="48" fill="white"/>
-  <circle cx="256" cy="256" r="48" fill="white"/>
-  <circle cx="352" cy="256" r="48" fill="white"/>
-  <text x="256" y="440" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="72" font-weight="900" fill="white" letter-spacing="-2">KADEORA</text>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <circle cx="128" cy="256" r="46" fill="white" opacity="0.95"/>
+  <circle cx="256" cy="256" r="46" fill="white" opacity="0.95"/>
+  <circle cx="384" cy="256" r="46" fill="white" opacity="0.95"/>
 </svg>

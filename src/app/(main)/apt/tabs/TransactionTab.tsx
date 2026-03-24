@@ -83,24 +83,14 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
         </div>
         <div className="apt-region-grid">
-          <button onClick={() => { setRegion('전체'); setPage(1); }} style={{
-            padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-            border: region === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-            background: region === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-          }}>
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{transactions.length}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
+          <button onClick={() => { setRegion('전체'); setPage(1); }} className={`apt-region-card${region === '전체' ? ' active' : ''}`}>
+            <span className="region-count">{transactions.length}</span>
+            <span className="region-name">전체</span>
           </button>
           {regStats.map(r => (
-            <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} style={{
-              padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-              border: region === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-              background: region === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-            }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.count}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
+            <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} className={`apt-region-card${region === r.name ? ' active' : ''}`}>
+              <span className="region-count">{r.count}</span>
+              <span className="region-name">{r.name}</span>
             </button>
           ))}
         </div>

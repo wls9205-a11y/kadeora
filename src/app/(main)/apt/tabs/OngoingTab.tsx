@@ -110,30 +110,20 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {ongoingApts.length}건</span>
         </div>
         <div className="apt-region-grid">
-          <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
-            padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-            border: ongoingRegion === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-            background: ongoingRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-          }}>
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{ongoingApts.length}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>전체</span>
+          <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} className={`apt-region-card${ongoingRegion === '전체' ? ' active' : ''}`}>
+            <span className="region-count">{ongoingApts.length}</span>
+            <span className="region-name">전체</span>
           </button>
           {regionCounts.map(r => (
-            <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
-              padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-              border: ongoingRegion === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
-              background: ongoingRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-            }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-primary)' }}>{r.count}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>{r.name}</span>
-              <div style={{ display: 'flex', gap: 2, fontSize: 'var(--fs-xs)', color: ongoingRegion === r.name ? 'rgba(255,255,255,0.8)' : 'var(--text-tertiary)' }}>
-                {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-green)' }}>분양{r.subCount}</span>}
-                {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--accent-red)' }}>미분양{r.unsoldCount}</span>}
+            <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} className={`apt-region-card${ongoingRegion === r.name ? ' active' : ''}`}>
+              <span className="region-count">{r.count}</span>
+              <span className="region-name">{r.name}</span>
+              <div style={{ display: 'flex', gap: 2, fontSize: 'var(--fs-xs)' }}>
+                {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--accent-blue)' : 'var(--accent-green)' }}>분양{r.subCount}</span>}
+                {r.unsoldCount > 0 && <span style={{ color: 'var(--accent-red)' }}>미분양{r.unsoldCount}</span>}
               </div>
               {r.count > 0 && (
-                <div style={{ width: '100%', height: 3, background: ongoingRegion === r.name ? 'rgba(255,255,255,0.3)' : 'var(--border)', borderRadius: 2, overflow: 'hidden', display: 'flex', marginTop: 2 }}>
+                <div className="region-bar">
                   <div style={{ height: '100%', background: 'var(--accent-blue)', width: `${(r.subCount / r.count) * 100}%` }} />
                   <div style={{ height: '100%', background: 'var(--accent-red)', width: `${(r.unsoldCount / r.count) * 100}%` }} />
                 </div>
