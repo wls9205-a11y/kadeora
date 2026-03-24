@@ -105,6 +105,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
+          <Link href="/apt/sites" className="kd-action-link">🏗️ 현장</Link>
           <Link href="/apt/map" className="kd-action-link">🗺️ 지도</Link>
           <Link href="/apt/search" className="kd-action-link">🔍 검색</Link>
         </div>

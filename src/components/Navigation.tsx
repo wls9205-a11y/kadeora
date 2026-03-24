@@ -213,9 +213,8 @@ export function Navigation() {
           {/* 우측 액션 */}
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
 
-            {/* 더보기 (모바일 헤더) */}
+            {/* 더보기 */}
             <button
-              className="md:hidden"
               onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); setMenuOpen(false); }}
               aria-label="더보기"
               style={{
@@ -417,12 +416,13 @@ export function Navigation() {
         })}
       </nav>
 
-      {/* 더보기 시트 (모바일) */}
+      {/* 더보기 시트 */}
       {moreOpen && (
-        <div className="md:hidden" style={{ position:'fixed', inset:0, zIndex:201 }}>
+        <div style={{ position:'fixed', inset:0, zIndex:201 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
           <div style={{
             position:'absolute', bottom:72, left:12, right:12,
+            maxWidth: 400, marginLeft: 'auto', marginRight: 'auto',
             background:'var(--bg-surface)', border:'1px solid var(--border)',
             borderRadius:16, padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
           }}>
