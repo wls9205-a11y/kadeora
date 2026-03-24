@@ -27,9 +27,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${decoded} 부동산 정보 — 청약·실거래·재개발·미분양`,
     description: `${decoded} 지역 아파트 청약 일정, 실거래가, 재개발 현황, 미분양 정보를 한눈에. 카더라에서 ${decoded} 부동산 정보를 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}` },
+    robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: {
       title: `${decoded} 부동산 종합 정보`,
       description: `${decoded} 청약·실거래·재개발·미분양 한눈에`,
+      url: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,
+      siteName: '카더라',
+      locale: 'ko_KR',
+      type: 'website',
+    },
+    other: {
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
+      'dg:plink': `${SITE_URL}/apt/region/${decoded}`,
+      'article:section': '부동산',
+      'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양`,
     },
   };
 }
@@ -83,6 +95,10 @@ export default async function RegionLandingPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      {/* JSON-LD: BreadcrumbList */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}) }} />
+      {/* JSON-LD: CollectionPage */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
         <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>

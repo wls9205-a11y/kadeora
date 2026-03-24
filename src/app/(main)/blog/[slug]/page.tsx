@@ -89,7 +89,18 @@ export async function generateMetadata({ params }: Props) {
     other: (() => {
       const allText = `${post.title} ${(post.tags ?? []).join(' ')}`;
       const geo = Object.entries(GEO_CODES).find(([k]) => allText.includes(k));
-      return geo ? { 'geo.region': geo[1], 'geo.placename': geo[0] } : {};
+      const section = post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크';
+      return {
+        ...(geo ? { 'geo.region': geo[1], 'geo.placename': geo[0] } : {}),
+        'naver:written_time': post.published_at || post.created_at,
+        'naver:updated_time': post.published_at || post.created_at,
+        'dg:plink': `${SITE}/blog/${slug}`,
+        'article:section': section,
+        'article:tag': (post.tags ?? []).slice(0, 5).join(',') || section,
+        'article:published_time': post.published_at || post.created_at,
+        'article:modified_time': post.published_at || post.created_at,
+        'article:author': post.author_name || '카더라 데이터팀',
+      };
     })(),
   };
 }

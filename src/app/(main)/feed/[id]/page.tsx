@@ -78,6 +78,15 @@ export async function generateMetadata({ params }: Props) {
         description,
         images: [ogImageUrl],
       },
+      other: {
+        'naver:written_time': post.created_at,
+        'naver:updated_time': post.created_at,
+        'dg:plink': `${SITE_URL}/feed/${post.slug || numId}`,
+        'article:section': CATEGORY_MAP[post.category]?.label ?? '자유',
+        'article:tag': `${CATEGORY_MAP[post.category]?.label ?? '커뮤니티'},카더라`,
+        'article:published_time': post.created_at,
+        'article:author': author,
+      },
     };
   } catch {
     return {
