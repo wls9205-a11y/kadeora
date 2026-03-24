@@ -1351,3 +1351,36 @@ guest_phone_last4 = 뒤 4자리 평문 → 어드민 표시용 (****5678)
 - `upsert/insert` DB 타입 미세 불일치: ~11건 (스키마 변경 시 제거)
 - `(data as any[])` 동적 쿼리 결과: ~30건 (타입 추론 한계)
 - 기타 로직: ~42건
+
+## 세션 34 추가 — 코드 품질 전면 개선 (3커밋)
+
+### 1. Supabase select('*') 최적화
+| 항목 | Before | After |
+|------|--------|-------|
+| select('*') 총 건수 | 67건 | **35건** |
+| 제거 건수 | — | **-32건** |
+
+주요 최적화:
+- blog/[slug]: blog_posts 22→24개 컬럼 명시
+- profile, grades, discuss, shop, payment, portfolio 등 15개 페이지
+- cron: stock-theme-daily, health-check, aggregate-trade-stats 등 6개
+- AdminCommandCenter/Dashboard/Automation: cron_logs/daily_stats 컬럼 최소화
+
+### 2. SITE_URL 중복 제거
+- 14개 파일 로컬 `const SITE_URL` 선언 → `@/lib/constants` 단일 소스
+- 중앙 관리로 URL 변경 시 한 곳만 수정
+
+### 3. FAQ SEO 개선
+- `'use client'` → 서버 컴포넌트 래퍼 + Metadata 추가
+- title/description/OG/canonical 설정
+
+### 4. : any 타입 제거
+- PWA beforeinstallprompt: `(e: any)` → `(e: Event)` — 3파일
+- NoticeBanner: NoticeData 인터페이스 정의
+- indexnow/attendance/watchlist/sparkline map 콜백 any 제거
+- 총: 472건 → 437건 (-35건)
+
+### 5. 에러 로깅 개선
+- payment/route.ts: 빈 `catch {}` → `console.error`
+- analytics/pageview: fire-and-forget 주석 명시
+- rate-limit.ts: 프로덕션 console.log 제거
