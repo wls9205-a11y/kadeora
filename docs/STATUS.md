@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-24 세션 32
+> **마지막 업데이트:** 2026-03-25 세션 32 (최종)
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ---
@@ -24,9 +24,12 @@
 |--------|------|------|
 | blog_posts (발행) | 14,578 | 세션23: +905건 시드 + 스팸전수조사 완료 |
 | blog_series | 신규 | 세션24: 시리즈 시스템 |
-| **apt_sites** | **3,116** | **세션32: 현장 허브 통합 (청약2626+재개발202+미분양168+랜드마크120)** |
-| **apt_site_interests** | **신규** | **세션32: 관심고객 등록 (회원/비회원)** |
-| **privacy_consents** | **신규** | **세션32: 개인정보 동의 이력 (법적 증빙)** |
+| **apt_sites** | **3,116** | **세션32: 2,948개 공개(sitemap), 168개 noindex** |
+| **apt_site_interests** | **신규** | **세션32: 관심고객 등록 (회원/비회원, AES-256 암호화)** |
+| **privacy_consents** | **신규** | **세션32: 개인정보 동의 이력 (3종 분리, 법적 증빙)** |
+| **consultant_leads** | **신규** | **세션32: 상담사 전달 추적 (비활성 상태)** |
+| **privacy_audit_log** | **신규** | **세션32: 개인정보 접근 감사 로그** |
+| **feature_flags** | **신규** | **세션32: premium_consultant_forwarding=false** |
 | apt_transactions | 5,408 | 올해 1~3월, 전국 |
 | apt_reviews | 신규 | 세션24: UGC 아파트 리뷰 |
 | apt_review_likes | 신규 | 세션28: 리뷰 좋아요 |
@@ -62,6 +65,10 @@
 | redev-verify-households | 매주 화요일 | ✅ 세대수 NULL 자동 검증(세션28) |
 | redev-geocode | 매주 목요일 | ✅ 좌표 NULL 카카오 API 수집(세션28) |
 | **sync-apt-sites** | **매일 04시** | **✅ 5개 소스→apt_sites 통합 싱크+score 재계산(세션32)** |
+| **collect-site-images** | **매일 04:30** | **✅ 네이버 이미지 검색 30개/일 배치(세션32)** |
+| **collect-site-trends** | **매주 월 05시** | **✅ 네이버 Datalab 검색 트렌드 25개/주(세션32)** |
+| **collect-site-facilities** | **매주 월 05:30** | **✅ 주변 인프라(지하철/학교/병원/마트/공원) 20개/주(세션32)** |
+| **purge-withdrawn-consents** | **매일 06시** | **✅ 동의 철회 5일 후 자동 파기(세션32)** |
 | aggregate-trade-stats | 매일 | ✅ |
 
 ### 주식
@@ -1082,3 +1089,68 @@
 | 어드민 API 보안 | 6/27 | **27/27** |
 | dynamic import | 5개 | **13개** |
 | 총 커밋 | — | **21건** |
+
+## 세션 32 — 아파트 현장 SEO 허브 + 관심고객 + 프리미엄 상담사 파이프라인
+
+### 핵심 성과
+| 항목 | 수치 |
+|------|------|
+| SEO 페이지 | 2,948개 라이브 (sitemap 등록) |
+| JSON-LD 스키마 | 7종 (ApartmentComplex, FAQPage, BreadcrumbList, Event, Article, ItemList, CollectionPage) |
+| 크론 추가 | +5개 → 총 62+개 |
+| 어드민 패널 | 현장 관리 4탭 + 원클릭 6개 |
+| 보안 | AES-256 암호화 + SHA-256 해시 + 감사 로그 |
+| 빌드 에러 수정 | 9건 |
+
+### 완성된 시스템
+
+**프로그래매틱 SEO (2,948 페이지)**
+- `/apt/sites/[slug]` — ISR 1h, JSON-LD 7종, OG 이미지 자동 생성
+- `/apt/sites` — 지역/타입 필터, 검색, ItemList 캐러셀
+- content_score 40+ → sitemap 등록, 미만 → noindex
+
+**관심고객 등록 시스템**
+- 회원: 원클릭 등록 (+50P), 토글 해제
+- 비회원: 이름/전화/생년/거주지 + 동의 3종 분리
+- AES-256-GCM 암호화 (guest_phone) + SHA-256 해시 (dedup) + 뒤4자리 평문 (표시)
+- 만 14세 미만 차단 (프론트+백엔드)
+- InterestRegistration.tsx 클라이언트 컴포넌트
+
+**개인정보보호법 컴플라이언스**
+- privacy_consents: 수집이용/마케팅/제3자 분리 저장 + 약관 스냅샷
+- privacy_audit_log: 복호화/전달/열람 감사 로그
+- purge-withdrawn-consents: 철회 5일 후 자동 파기
+- 어드민 열람 시 confirm 경고 + 감사 로그 필수 기록
+
+**프리미엄 상담사 전달 파이프라인 (비활성 — 원클릭 활성화)**
+- feature_flags.premium_consultant_forwarding = false
+- 활성화 시: 제3자 동의 → 지역 매칭 상담사 → 복호화 → 알림 → 감사 로그
+- consultant_leads 테이블 status 추적 (pending→forwarded→contacted→converted)
+- 어드민 토글 버튼 (🟢활성/🔴비활성)
+
+**어드민 현장 관리 센터 (AdminSites.tsx)**
+- 대시보드: KPI 4개 + 등록 플로우 설명 + 원클릭 6개 + 타입별 현장 수 + 프리미엄 토글
+- 현장 목록: 필터/검색 + 활성/비활성 토글
+- 관심고객: 목록 + 전화번호 보기(감사로그) + CSV 다운로드
+- 동의 관리: 수집이용/마케팅/제3자 현황 + 철회 건수
+
+**데이터 수집 크론 5개**
+- sync-apt-sites (04:00 매일) — 5개 소스 통합
+- collect-site-images (04:30 매일) — 네이버 이미지 30개/일
+- collect-site-trends (05:00 매주 월) — Datalab 트렌드 25개/주
+- collect-site-facilities (05:30 매주 월) — 주변 인프라 20개/주
+- purge-withdrawn-consents (06:00 매일) — 동의 파기
+
+### 전화번호 보안 구조
+```
+guest_phone       = AES-256-GCM 암호화 → 복호화 가능 (ENCRYPTION_KEY 필요)
+guest_phone_hash  = SHA-256 해시 → 중복 체크용 (복호화 불가)
+guest_phone_last4 = 뒤 4자리 평문 → 어드민 표시용 (****5678)
+```
+
+### 주의사항 (세션32)
+- ENCRYPTION_KEY 환경변수: Vercel에 등록 완료
+- 네이버 서치콘솔: sitemap 제출 완료
+- `as any` 캐스트 27곳 — supabase gen types 실행 시 제거 가능
+- 프리미엄 상담사 활성화 전 카카오 알림톡 비즈 채널 개설 필요
+- InterestRegistration 컴포넌트: dynamic import (ssr:false 불가 — Server Component이므로)
