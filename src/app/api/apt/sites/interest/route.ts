@@ -221,7 +221,7 @@ export async function DELETE(req: NextRequest) {
     await (admin as any).from('apt_site_interests').delete().eq('site_id', site_id).eq('user_id', user.id);
 
     // 관심 수 감소 (0 이하로 내려가지 않게)
-    await (admin as any).rpc('decrement_site_interest' as any, { p_site_id: site_id }).catch(() => {});
+    try { await (admin as any).rpc('decrement_site_interest', { p_site_id: site_id }); } catch {}
 
     return NextResponse.json({ success: true });
   } catch {

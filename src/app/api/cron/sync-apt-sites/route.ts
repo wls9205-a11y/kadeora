@@ -97,10 +97,7 @@ async function handler(req: NextRequest) {
 
   // ━━━ Step 3: content_score 재계산 (전체) ━━━
   try {
-    await sb.rpc('refresh_all_site_scores' as any as any).catch(() => {
-      // RPC 없으면 직접 UPDATE
-      return (sb as any).from('apt_sites').update({}).gte('id', '00000000-0000-0000-0000-000000000000'); // no-op, score는 아래서
-    });
+    try { await (sb as any).rpc('refresh_all_site_scores'); } catch {}
 
     // 직접 점수 계산
     const { data: allSites } = await (sb as any).from('apt_sites')
