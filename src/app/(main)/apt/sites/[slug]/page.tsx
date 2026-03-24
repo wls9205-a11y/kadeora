@@ -9,7 +9,7 @@ import Disclaimer from '@/components/Disclaimer';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
-const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'), { ssr: false });
+const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 
 export const revalidate = 3600;
 
