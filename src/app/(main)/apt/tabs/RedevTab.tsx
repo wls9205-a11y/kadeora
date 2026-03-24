@@ -87,8 +87,12 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} className={`apt-region-card${redevRegion === '전체' ? ' active' : ''}`}>
                   <span className="region-count">{redevelopment.length}</span>
                   <span className="region-name">전체</span>
+                  <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2 }}>
+                    <span style={{ color: 'var(--accent-blue)' }}>개발{redevRegionStats.reduce((s, r) => s + r.redev, 0)}</span>
+                    <span style={{ color: 'var(--accent-green)' }}>건축{redevRegionStats.reduce((s, r) => s + r.rebuild, 0)}</span>
+                  </div>
                 </button>
-                {redevRegionStats.map(r => (
+                {redevRegionStats.filter(r => r.total > 0).map(r => (
                   <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} className={`apt-region-card${redevRegion === r.name ? ' active' : ''}`}>
                     <span className="region-count">{r.total}</span>
                     <span className="region-name">{r.name}</span>

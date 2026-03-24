@@ -86,11 +86,13 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           <button onClick={() => { setRegion('전체'); setPage(1); }} className={`apt-region-card${region === '전체' ? ' active' : ''}`}>
             <span className="region-count">{transactions.length}</span>
             <span className="region-name">전체</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{regStats.length}개 지역</span>
           </button>
-          {regStats.map(r => (
+          {regStats.filter(r => r.count > 0).map(r => (
             <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} className={`apt-region-card${region === r.name ? ' active' : ''}`}>
               <span className="region-count">{r.count}</span>
               <span className="region-name">{r.name}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.count}건</span>
             </button>
           ))}
         </div>

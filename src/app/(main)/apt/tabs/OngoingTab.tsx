@@ -113,8 +113,12 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} className={`apt-region-card${ongoingRegion === '전체' ? ' active' : ''}`}>
             <span className="region-count">{ongoingApts.length}</span>
             <span className="region-name">전체</span>
+            <div style={{ display: 'flex', gap: 2, fontSize: 'var(--fs-xs)' }}>
+              <span style={{ color: 'var(--accent-green)' }}>분양{regionCounts.reduce((s, r) => s + r.subCount, 0)}</span>
+              {regionCounts.reduce((s, r) => s + r.unsoldCount, 0) > 0 && <span style={{ color: 'var(--accent-red)' }}>미분양{regionCounts.reduce((s, r) => s + r.unsoldCount, 0)}</span>}
+            </div>
           </button>
-          {regionCounts.map(r => (
+          {regionCounts.filter(r => r.count > 0).map(r => (
             <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} className={`apt-region-card${ongoingRegion === r.name ? ' active' : ''}`}>
               <span className="region-count">{r.count}</span>
               <span className="region-name">{r.name}</span>
