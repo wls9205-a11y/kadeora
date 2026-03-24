@@ -392,7 +392,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
         .cc-btn:active{transform:translateY(0)}
         .cc-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;filter:none}
         .cc-input{padding:5px 10px;border-radius:6px;border:1px solid #152240;background:#0A1225;color:#e2e8f0;font-size:13px;width:55px;outline:none;transition:border-color .2s}
-        .cc-input:focus{border-color:#2563EB}
+        .cc-input:focus{border-color:#3B7BF6}
         .cc-section{animation:fadein .3s ease}
         .cc-progress{height:4px;border-radius:2px;background:#152240;overflow:hidden}
         .cc-progress-bar{height:100%;border-radius:2px;transition:width .5s ease}
@@ -584,7 +584,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                     const isRun = c.latest?.status === 'running';
                     const isFail = !isOk && !isRun;
                     return (
-                      <div key={c.name} style={{ padding: '6px 10px', borderRadius: 8, background: isOk ? '#05966910' : isFail ? '#F8717110' : '#60A5FA10', border: `1px solid ${isOk ? '#05966925' : isFail ? '#F8717125' : '#60A5FA25'}`, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
+                      <div key={c.name} style={{ padding: '6px 10px', borderRadius: 8, background: isOk ? '#05966910' : isFail ? '#FF6B6B10' : '#6CB4FF10', border: `1px solid ${isOk ? '#05966925' : isFail ? '#FF6B6B25' : '#6CB4FF25'}`, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOk ? 'var(--accent-green)' : isFail ? 'var(--accent-red)' : 'var(--accent-blue)', animation: isRun ? 'pulse-dot 1s infinite' : 'none' }} />
                         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{c.display}</span>
                         <span style={{ color: '#7D8DA3', fontSize: 10 }}>{c.latest?.started_at ? timeAgo(c.latest.started_at) : '-'}</span>
@@ -752,7 +752,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>SEO</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 10, marginBottom: 10 }}>
                   {[{h:'/sitemap.xml',l:'sitemap.xml'},{h:'/robots.txt',l:'robots.txt'},{h:'/api/og?title=테스트',l:'OG 미리보기'},{h:'/api/search?q=부동산&limit=3',l:'FTS 검색 테스트'}].map(lk=>(
-                    <a key={lk.h} href={lk.h} target="_blank" style={{ color: 'var(--accent-blue)', padding: '3px 8px', borderRadius: 6, background: '#60A5FA10' }}>{lk.l}</a>
+                    <a key={lk.h} href={lk.h} target="_blank" style={{ color: 'var(--accent-blue)', padding: '3px 8px', borderRadius: 6, background: '#6CB4FF10' }}>{lk.l}</a>
                   ))}
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#7D8DA3', marginBottom: 4 }}>관리 페이지</div>

@@ -204,11 +204,11 @@ export default function AdminUsers() {
                   <td style={{ padding: '10px 14px' }}>
                     <div style={{ display: 'flex', gap: 4 }}>
                       {u.is_deleted ? (
-                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #34D399', background: 'transparent', color: 'var(--accent-green)', cursor: 'pointer', fontWeight: 600 }}>복구</button>
+                        <button onClick={() => action(u.id, 'restore')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #2EE8A5', background: 'transparent', color: 'var(--accent-green)', cursor: 'pointer', fontWeight: 600 }}>복구</button>
                       ) : (
-                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #F87171', background: 'transparent', color: 'var(--accent-red)', cursor: 'pointer', fontWeight: 600 }}>정지</button>
+                        <button onClick={() => action(u.id, 'suspend')} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #FF6B6B', background: 'transparent', color: 'var(--accent-red)', cursor: 'pointer', fontWeight: 600 }}>정지</button>
                       )}
-                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #60A5FA', background: 'transparent', color: 'var(--accent-blue)', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
+                      <button onClick={() => setPoints(u.id, u.points)} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 6, border: '1px solid #6CB4FF', background: 'transparent', color: 'var(--accent-blue)', cursor: 'pointer', fontWeight: 600 }}>포인트</button>
                     </div>
                   </td>
                 </tr>

@@ -86,7 +86,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               <div className="apt-region-grid">
                 <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
                   padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                  border: redevRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+                  border: redevRegion === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
                   background: redevRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                 }}>
@@ -96,7 +96,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 {redevRegionStats.map(r => (
                   <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
                     padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                    border: redevRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+                    border: redevRegion === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
                     background: redevRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}>
@@ -285,7 +285,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>{progress}%</span>
               </div>
               <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
-                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg, #60A5FA, #34D399, var(--brand))', borderRadius: 4, transition: 'width 0.5s' }} />
+                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-green), var(--brand))', borderRadius: 4, transition: 'width 0.5s' }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 {STAGE_ORDER.map((stage, i) => {

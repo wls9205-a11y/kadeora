@@ -46,7 +46,7 @@ export default function PushBroadcast() {
   ];
 
   const LogoSvg = ({ size = 20 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2563EB"/><circle cx="10" cy="16" r="4" fill="white"/><circle cx="16" cy="16" r="4" fill="white"/><circle cx="22" cy="16" r="4" fill="white"/></svg>
+    <svg width={size} height={size} viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#3B7BF6"/><circle cx="10" cy="16" r="4" fill="white"/><circle cx="16" cy="16" r="4" fill="white"/><circle cx="22" cy="16" r="4" fill="white"/></svg>
   );
 
   return (

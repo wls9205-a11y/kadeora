@@ -75,7 +75,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             <div className="apt-region-grid">
               <button onClick={() => setRegion('전체')} style={{
                 padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-                border: region === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+                border: region === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
                 background: region === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               }}>
@@ -85,7 +85,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               {regionStats.map(r => (
                 <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
                   padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                  border: region === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+                  border: region === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
                   background: region === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>

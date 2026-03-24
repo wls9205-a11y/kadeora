@@ -36,10 +36,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
           <div style={{ display: 'flex', gap: 5 }}>
             {[0, 1, 2].map(i => (
-              <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: '#2563EB' }} />
+              <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: '#3B7BF6' }} />
             ))}
           </div>
-          <span style={{ fontSize: '30px', fontWeight: 800, color: '#2563EB' }}>카더라</span>
+          <span style={{ fontSize: '30px', fontWeight: 800, color: '#3B7BF6' }}>카더라</span>
         </div>
 
         <div style={{

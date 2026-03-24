@@ -112,7 +112,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         <div className="apt-region-grid">
           <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
             padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-            border: ongoingRegion === '전체' ? '2px solid #60A5FA' : '1px solid var(--border)',
+            border: ongoingRegion === '전체' ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
             background: ongoingRegion === '전체' ? 'var(--brand-light)' : 'var(--bg-surface)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
           }}>
@@ -122,7 +122,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           {regionCounts.map(r => (
             <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
               padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-              border: ongoingRegion === r.name ? '2px solid #60A5FA' : '1px solid var(--border)',
+              border: ongoingRegion === r.name ? '2px solid var(--accent-blue)' : '1px solid var(--border)',
               background: ongoingRegion === r.name ? 'var(--brand-light)' : 'var(--bg-surface)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
@@ -273,7 +273,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                  {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FBBF24,#F59E0B)', color: 'var(--bg-base)', marginRight: 4 }}>PREMIUM</span>}
+                  {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: 'var(--bg-base)', marginRight: 4 }}>PREMIUM</span>}
                   {isNew(o, 'ongoing') && <NewBadge />}
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
                     {isUnsold ? '미분양' : '분양중'}

@@ -283,7 +283,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           const isLiked = likedPosts.has(post.id as number);
           const postHref = `/feed/${(post as any).slug || post.id}`;
-          const cat = { apt: { label: '부동산', color: '#34D399', bg: 'rgba(52,211,153,0.1)' }, stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.1)' }, local: { label: '우리동네', color: '#FBBF24', bg: 'rgba(251,191,36,0.1)' }, free: { label: '자유', color: '#A78BFA', bg: 'rgba(167,139,250,0.1)' } }[post.category] || { label: '자유', color: '#A78BFA', bg: 'rgba(167,139,250,0.1)' };
+          const cat = { apt: { label: '부동산', color: '#2EE8A5', bg: 'rgba(52,211,153,0.1)' }, stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.1)' }, local: { label: '우리동네', color: '#FFD43B', bg: 'rgba(251,191,36,0.1)' }, free: { label: '자유', color: '#B794FF', bg: 'rgba(167,139,250,0.1)' } }[post.category] || { label: '자유', color: '#B794FF', bg: 'rgba(167,139,250,0.1)' };
           const commentCount = post.comments_count ?? 0;
           return (
             <div key={post.id} className="animate-fadeIn kd-feed-card"

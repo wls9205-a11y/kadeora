@@ -52,7 +52,7 @@ function TableBar({ name, sizeBytes, maxBytes, size, rows }: { name: string; siz
       <div style={{ height: 6, background: '#162544', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{
           height: '100%', borderRadius: 3,
-          background: 'linear-gradient(90deg, #34D399, #34D399)',
+          background: 'linear-gradient(90deg, #2EE8A5, #2EE8A5)',
           width: `${Math.max(percent, 2)}%`,
           transition: 'width 0.7s ease',
         }} />
@@ -113,7 +113,7 @@ export default function InfraPage() {
             {/* 도넛 게이지 + KPI */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 24 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 24 }}>
-                <DonutGauge value={db.db_size_bytes} max={DB_LIMIT} label={`${db.db_size_pretty} / 8GB`} color="#34D399" />
+                <DonutGauge value={db.db_size_bytes} max={DB_LIMIT} label={`${db.db_size_pretty} / 8GB`} color="#2EE8A5" />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, flex: 1, minWidth: 200 }}>
                   <StatCard icon="🔌" value={db.active_connections ?? 0} label="활성 커넥션" bg="rgba(96,165,250,0.08)" />
                   <StatCard icon="⚡" value={`${db.cache_hit_ratio ?? 0}%`} label="캐시 히트율" bg="rgba(52,211,153,0.08)" />

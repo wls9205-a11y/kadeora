@@ -31,7 +31,7 @@ interface NoticeData {
 const TIER_STYLES: Record<string, { color: string; bg: string; glow: string; icon: string; speed: number }> = {
   free:     { color: 'var(--accent-green)', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 35 },
   standard: { color: 'var(--accent-green)', bg: 'var(--bg-sunken)', glow: 'none', icon: '📡', speed: 30 },
-  premium:  { color: 'var(--accent-yellow)', bg: 'linear-gradient(90deg, #0B1426 0%, #0F1520 50%, #0B1426 100%)', glow: '0 0 8px rgba(251,191,36,0.3)', icon: '⭐', speed: 28 },
+  premium:  { color: 'var(--accent-yellow)', bg: 'linear-gradient(90deg, #050A18 0%, #080E1A 50%, #050A18 100%)', glow: '0 0 8px rgba(251,191,36,0.3)', icon: '⭐', speed: 28 },
   urgent:   { color: 'var(--accent-red)', bg: 'linear-gradient(90deg, #120E16 0%, #150D12 50%, #120E16 100%)', glow: '0 0 12px rgba(248,113,113,0.4)', icon: '🚨', speed: 22 },
 };
 
@@ -135,8 +135,8 @@ export default function NoticeBanner() {
         onClick={handleClick}
       >
         {/* 좌/우 페이드 그라데이션 */}
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to right, ${notice.bg_color || (tier === 'urgent' ? '#120E16' : tier === 'premium' ? '#0B1426' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', right: notices.length > 1 ? 44 : 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to left, ${notice.bg_color || (tier === 'urgent' ? '#120E16' : tier === 'premium' ? '#0B1426' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to right, ${notice.bg_color || (tier === 'urgent' ? '#120E16' : tier === 'premium' ? '#050A18' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', right: notices.length > 1 ? 44 : 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to left, ${notice.bg_color || (tier === 'urgent' ? '#120E16' : tier === 'premium' ? '#050A18' : 'var(--bg-sunken)')}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
 
         {/* 스크롤 텍스트 */}
         <div

@@ -154,7 +154,7 @@ export default function AdminAutomation() {
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📰 블로그 발행 설정</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, marginBottom: 24 }}>
             {/* 설정 카드 */}
-            <div style={{ ...cardStyle, borderLeft: '3px solid #60A5FA' }}>
+            <div style={{ ...cardStyle, borderLeft: '3px solid #6CB4FF' }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>발행 제어</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
@@ -197,7 +197,7 @@ export default function AdminAutomation() {
 
             {/* 큐 상태 카드 */}
             {queueStatus && (
-              <div style={{ ...cardStyle, borderLeft: '3px solid #34D399' }}>
+              <div style={{ ...cardStyle, borderLeft: '3px solid #2EE8A5' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>발행 큐 현황</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   <div style={{ textAlign: 'center', padding: 10, background: 'var(--bg-hover)', borderRadius: 8 }}>
@@ -231,7 +231,7 @@ export default function AdminAutomation() {
       {/* 블로그 리라이팅 */}
       <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>✍️ AI 리라이팅</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div style={{ ...cardStyle, borderLeft: '3px solid #A78BFA' }}>
+        <div style={{ ...cardStyle, borderLeft: '3px solid #B794FF' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Claude API 리라이팅</div>
           {rewriteStats && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>

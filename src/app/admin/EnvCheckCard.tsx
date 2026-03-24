@@ -51,7 +51,7 @@ export default function EnvCheckCard() {
       {error && <div style={{ color: 'var(--error)', fontSize: 'var(--fs-sm)', marginBottom: 8 }}>{error}</div>}
 
       {data && missingCount > 0 && (
-        <div style={{ padding: '10px 14px', borderRadius: 8, background: 'var(--error-bg, rgba(248,113,113,0.08))', border: '1px solid var(--error, #F87171)', marginBottom: 12, fontSize: 'var(--fs-sm)', color: 'var(--error, #F87171)', fontWeight: 600 }}>
+        <div style={{ padding: '10px 14px', borderRadius: 8, background: 'var(--error-bg, rgba(248,113,113,0.08))', border: '1px solid var(--error, #FF6B6B)', marginBottom: 12, fontSize: 'var(--fs-sm)', color: 'var(--error, #FF6B6B)', fontWeight: 600 }}>
           ⚠️ 미설정 환경변수 {missingCount}개 — 일부 기능이 동작하지 않을 수 있습니다
         </div>
       )}

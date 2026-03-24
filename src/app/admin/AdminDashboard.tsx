@@ -187,8 +187,8 @@ export default function AdminDashboard() {
               return (
                 <div>
                   <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 60 }}>
-                    <polyline points={points} fill="none" stroke="#60A5FA" strokeWidth="2" />
-                    {data.map((d, i) => <circle key={i} cx={P + (i / (data.length - 1)) * (W - P * 2)} cy={H - P - ((d.value / max) * (H - P * 2))} r="3" fill="#60A5FA" />)}
+                    <polyline points={points} fill="none" stroke="#6CB4FF" strokeWidth="2" />
+                    {data.map((d, i) => <circle key={i} cx={P + (i / (data.length - 1)) * (W - P * 2)} cy={H - P - ((d.value / max) * (H - P * 2))} r="3" fill="#6CB4FF" />)}
                   </svg>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                     {data.map(d => <span key={d.label}>{d.label}</span>)}

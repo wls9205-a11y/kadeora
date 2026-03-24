@@ -496,7 +496,7 @@ button:active,
 .feed-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
 
 .badge-hot {
-  background: linear-gradient(135deg, #2563EB, #60A5FA);
+  background: linear-gradient(135deg, #3B7BF6, #6CB4FF);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;

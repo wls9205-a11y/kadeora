@@ -128,7 +128,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
           return (
             <g key={pct}>
               <line x1={P} x2={width - P} y1={y} y2={y}
-                stroke="var(--border, #1E3050)" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.5" />
+                stroke="var(--border, #152240)" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.5" />
               {(pct === 0 || pct === 0.5 || pct === 1) && (
                 <text x={width - P + 2} y={y + 3} textAnchor="start" fontSize="8" fill="var(--text-tertiary, #7D8DA3)">
                   {price >= 10000 ? `${(price / 10000).toFixed(0)}만` : price.toLocaleString(undefined, { maximumFractionDigits: 0 })}
