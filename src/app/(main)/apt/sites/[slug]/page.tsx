@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import ShareButtons from '@/components/ShareButtons';
 import Disclaimer from '@/components/Disclaimer';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
@@ -424,9 +423,6 @@ export default async function SiteDetailPage({ params }: Props) {
           ))}
         </div>
       )}
-
-      {/* 공유 */}
-      <ShareButtons title={site.name} />
 
       {/* 면책 */}
       <Disclaimer />
