@@ -1,8 +1,12 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="112" fill="#08102A"/>
-  <rect x="61" y="82" width="390" height="256" rx="56" fill="#3B7BF6"/>
-  <polygon points="110,338 222,338 135,430" fill="#3B7BF6"/>
-  <circle cx="163" cy="210" r="40" fill="white"/>
-  <circle cx="256" cy="210" r="40" fill="white"/>
-  <circle cx="349" cy="210" r="40" fill="white"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A1838"/>
+      <stop offset="100%" stop-color="#1E3A6E"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="128" cy="256" r="46" fill="#5B93FF" opacity="0.9"/>
+  <circle cx="256" cy="256" r="46" fill="#5B93FF" opacity="0.9"/>
+  <circle cx="384" cy="256" r="46" fill="#5B93FF" opacity="0.9"/>
 </svg>

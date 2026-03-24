@@ -2,19 +2,22 @@
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#050A18"/>
-      <stop offset="100%" stop-color="#0A1225"/>
+      <stop offset="100%" stop-color="#0D1F4A"/>
     </linearGradient>
-    <linearGradient id="logo" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="icon" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0A1838"/>
       <stop offset="100%" stop-color="#1E3A6E"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="480" y="220" width="80" height="80" rx="20" fill="url(#logo)"/>
-  <circle cx="500" cy="260" r="8" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="520" cy="260" r="8" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="540" cy="260" r="8" fill="#5B93FF" opacity="0.9"/>
-  <text x="580" y="275" font-family="system-ui" font-weight="900" font-size="48" fill="#E8EDF5">카더라</text>
-  <text x="600" y="360" font-family="system-ui" font-weight="600" font-size="24" fill="#94A8C4" text-anchor="middle">대한민국 소리소문 정보 커뮤니티</text>
-  <text x="600" y="410" font-family="system-ui" font-weight="500" font-size="20" fill="#6B82A0" text-anchor="middle">주식 · 부동산 · 청약 · 커뮤니티</text>
+  <!-- 로고 아이콘 -->
+  <rect x="60" y="60" width="80" height="80" rx="18" fill="url(#icon)"/>
+  <circle cx="94" cy="100" r="9" fill="#5B93FF" opacity="0.9"/>
+  <circle cx="116" cy="100" r="9" fill="#5B93FF" opacity="0.9"/>
+  <circle cx="138" cy="100" r="9" fill="#5B93FF" opacity="0.9"/>
+  <!-- 로고 텍스트 -->
+  <text x="160" y="112" font-family="system-ui,sans-serif" font-weight="900" font-size="42" fill="#E8EDF5">카더라</text>
+  <!-- 슬로건 -->
+  <text x="60" y="320" font-family="system-ui,sans-serif" font-weight="800" font-size="64" fill="#E8EDF5">소리소문 정보 커뮤니티</text>
+  <text x="60" y="400" font-family="system-ui,sans-serif" font-size="32" fill="#5B93FF" opacity="0.8">kadeora.app</text>
 </svg>

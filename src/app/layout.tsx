@@ -76,11 +76,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <meta name="google-adsense-account" content="ca-pub-2356113563328542" />
         {/* iOS PWA 아이콘 — v3 캐시 갱신 */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=4" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=4" />
-        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png?v=4" />
-        <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128.png?v=4" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=5" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=5" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png?v=5" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128.png?v=5" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="카더라" />

@@ -1,12 +1,12 @@
 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <!-- 배경 -->
-  <rect width="32" height="32" rx="7" fill="#08102A"/>
-  <!-- 말풍선 본체 -->
-  <rect x="4" y="5" width="24" height="16" rx="4" fill="#3B7BF6"/>
-  <!-- 꼬리 -->
-  <polygon points="7,21 14,21 9,28" fill="#3B7BF6"/>
-  <!-- 흰 점 3개 -->
-  <circle cx="11" cy="13" r="2.2" fill="white"/>
-  <circle cx="16" cy="13" r="2.2" fill="white"/>
-  <circle cx="21" cy="13" r="2.2" fill="white"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A1838"/>
+      <stop offset="100%" stop-color="#1E3A6E"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="url(#bg)"/>
+  <circle cx="8" cy="16" r="2.9" fill="#5B93FF" opacity="0.9"/>
+  <circle cx="16" cy="16" r="2.9" fill="#5B93FF" opacity="0.9"/>
+  <circle cx="24" cy="16" r="2.9" fill="#5B93FF" opacity="0.9"/>
 </svg>
