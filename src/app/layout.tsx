@@ -5,6 +5,7 @@ import './globals.css';
 import OfflineBanner from '@/components/OfflineBanner';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import CookieBanner from '@/components/CookieBanner';
+import GuestWelcome from '@/components/GuestWelcome';
 import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
 
@@ -123,11 +124,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         }) }} />
       </head>
       <body className={inter.className}>
+        {/* 글로벌 PWA 설치 프롬프트 캡처 — 어디서든 window.__pwaPrompt 로 접근 */}
+        <script dangerouslySetInnerHTML={{ __html: `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;});` }} />
         <ThemeProvider>
         <OfflineBanner />
         <KakaoInit />
         {children}
         <CookieBanner />
+        <GuestWelcome />
         </ThemeProvider>
         {/* GA4 */}
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-VP4F6TH2GD" strategy="afterInteractive" />

@@ -19,7 +19,14 @@ export default function GuideInstallButton() {
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    // Android/Chrome/Edge — beforeinstallprompt 이벤트 대기
+    // 글로벌 캡처된 프롬프트 확인
+    if ((window as any).__pwaPrompt) {
+      setDeferredPrompt((window as any).__pwaPrompt);
+      setState('can-install');
+      return;
+    }
+
+    // 새로 발생할 수도 있으므로 리스너도 등록
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -31,10 +38,10 @@ export default function GuideInstallButton() {
     if (isIOS) {
       setState('ios-safari');
     } else {
-      // 2초 기다려도 beforeinstallprompt 안 오면 unsupported
+      // 3초 기다려도 안 오면 unsupported
       const timer = setTimeout(() => {
         setState(prev => prev === 'loading' ? 'unsupported' : prev);
-      }, 2000);
+      }, 3000);
       return () => { clearTimeout(timer); window.removeEventListener('beforeinstallprompt', handler); };
     }
 
