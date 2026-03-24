@@ -195,7 +195,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 인기글 하이라이트 (첫 페이지, 검색 아닐 때) */}
       {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, marginBottom: 12 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 인기 글</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {(popularPosts ?? []).map((p: any, i: number) => (

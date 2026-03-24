@@ -7,7 +7,24 @@ export async function GET() {
   try {
     const sb = getSupabaseAdmin();
     const { data } = await sb.from('trending_keywords').select('keyword, heat_score').order('heat_score', { ascending: false }).limit(10);
-    return NextResponse.json(data ?? []);
+    
+    // 데이터가 없을 때 기본 인기 검색어
+    if (!data || data.length === 0) {
+      const defaults = [
+        { keyword: '삼성전자', heat_score: 100 },
+        { keyword: '청약', heat_score: 95 },
+        { keyword: '코스피', heat_score: 90 },
+        { keyword: '아파트 실거래가', heat_score: 85 },
+        { keyword: '배당주', heat_score: 80 },
+        { keyword: '미분양', heat_score: 75 },
+        { keyword: '재개발', heat_score: 70 },
+        { keyword: 'ETF', heat_score: 65 },
+        { keyword: '금리', heat_score: 60 },
+        { keyword: '부동산 세금', heat_score: 55 },
+      ];
+      return NextResponse.json(defaults);
+    }
+    return NextResponse.json(data);
   } catch {
     return NextResponse.json([]);
   }

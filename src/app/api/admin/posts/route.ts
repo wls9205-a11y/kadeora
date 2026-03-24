@@ -12,16 +12,20 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search') || '';
   const filter = searchParams.get('filter') || 'all';
   const category = searchParams.get('category') || 'all';
+  const sort = searchParams.get('sort') || 'date';
+  const period = searchParams.get('period') || '';
   const offset = (page - 1) * limit;
 
   let query = supabase.from('posts')
     .select('id, title, category, is_deleted, created_at, likes_count, comments_count, view_count, profiles!posts_author_id_fkey(nickname)', { count: 'exact' })
-    .order('created_at', { ascending: false });
+    .order(sort === 'views' ? 'view_count' : 'created_at', { ascending: false });
 
   if (filter === 'active') query = query.eq('is_deleted', false);
   else if (filter === 'hidden') query = query.eq('is_deleted', true);
   if (category !== 'all') query = query.eq('category', category);
   if (search) query = query.ilike('title', `%${search}%`);
+  if (period === '7d') query = query.gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString());
+  else if (period === '30d') query = query.gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString());
 
   query = query.range(offset, offset + limit - 1);
   const { data, count, error } = await query;

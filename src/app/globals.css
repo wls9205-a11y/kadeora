@@ -1397,3 +1397,20 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
     padding-top: var(--space-lg);
   }
 }
+
+/* ═══ 면적 최적화 — 과다 영역 축소 ═══ */
+/* 블로그 카드 높이 축소 */
+.blog-card { padding: 12px !important; margin-bottom: 10px !important; }
+.blog-card .blog-card-body { gap: 4px; }
+
+/* 미분양/분양 카드 — 즐겨찾기(★) 영역 축소 */
+@media (max-width: 480px) {
+  .kd-card { margin-bottom: 10px !important; }
+  .section-gap { margin-bottom: 10px; }
+  .section-gap-lg { margin-bottom: 14px; }
+}
+
+/* 부동산 지역 그리드 — 전체 카드 숫자 크기 축소 */
+@media (max-width: 480px) {
+  .apt-region-card .region-count { font-size: var(--fs-base) !important; }
+}

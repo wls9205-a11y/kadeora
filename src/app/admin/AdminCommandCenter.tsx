@@ -4,6 +4,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import dynamic from 'next/dynamic';
 
 const OneClickPanel = dynamic(() => import('./OneClickPanel'), { ssr: false });
+const AdminPopularContent = dynamic(() => import('./AdminPopularContent'), { ssr: false });
 
 /* ─────────────────────── Types ─────────────────────── */
 interface KPI { label: string; value: number; icon: string; color: string }
@@ -811,6 +812,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           </div>
         </div>
       </div>
+      <AdminPopularContent />
     </div>
   );
 }
