@@ -1041,3 +1041,14 @@
 - 부동산 탭 lazy fetch: 미분양/재개발/실거래는 SSR이 아닌 클라이언트 fetch, tab-data API 의존 (세션28)
 - API routes에서 createClient 직접 사용 0건 — 반드시 getSupabaseAdmin() 사용 (세션28 통일)
 - redev-geocode 크론: NEXT_PUBLIC_KAKAO_JS_KEY가 REST API 키로도 사용됨 (세션28)
+
+## 세션 31E — 주식 종목명 근본 수정 + 어드민 보안 완료
+
+### 주식 종목명 잘림 근본 수정
+- 모바일 480px 이하: 종목코드, 상세 버튼, 스파크라인, 퍼센트 막대, 원화 환산 숨김
+- 이름 공간: ~50px → ~160px (한글 6~8글자 표시 가능)
+
+### 어드민 API 보안 완료 (27/27)
+- `requireAdmin()` 헬퍼로 `is_admin` 권한 검증 통일
+- blog-rewrite, cron-summary, seed-finance-blogs 3개 추가 보호
+- supabase alias 추가로 기존 코드 호환
