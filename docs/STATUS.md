@@ -1313,3 +1313,41 @@ guest_phone_last4 = 뒤 4자리 평문 → 어드민 표시용 (****5678)
 - IndexNow 키 파일: `public/3a23def313e1b1283822c54a0f9a5675.txt`
 - indexnow 크론: vercel.json + CRON_MAP 등록 완료
 - OG API subtitle 파라미터 지원 (`/api/og?title=현장명&subtitle=지역+시공사`)
+
+## 세션 34 — Supabase 타입 재생성 + as any 전면 정리
+
+### 핵심 성과
+| 항목 | Before | After |
+|------|--------|-------|
+| as any 총 건수 | 184건 | 97건 |
+| 제거 건수 | — | **87건** |
+| TS 에러 | 0 | **0** ✅ |
+| database.ts | 구버전 | **최신화 (6,567줄)** |
+
+### 1. database.ts 최신화 [COMPLETED]
+- Supabase MCP `generate_typescript_types` 재실행
+- 세션32 신규 테이블 7개 타입 추가:
+  - `apt_sites`, `apt_site_interests`, `privacy_consents`
+  - `privacy_audit_log`, `consultant_leads`, `consultant_profiles`, `feature_flags`
+- RPC 130+개 타입 추론 정상화
+
+### 2. as any 카테고리별 제거 [COMPLETED]
+- `(sb as any)` / `(admin as any)` supabase 캐스트: **63건** → 0건
+- CSS 벤더 prefix (WebkitBoxOrient 등): **4건** → `as const`
+- `(profiles as any)?.field` join 타입: **6건** → 직접 접근
+- rpc 함수명 캐스트: **5건** → 타입 추론
+- AdminContent/AdminCommandCenter 기타: **6건**
+- `eslint-disable` 처리 (미등록 RPC 1건): refresh_all_site_scores
+
+### 3. 연쇄 타입 에러 수정 [COMPLETED]
+- AdminSites 로컬 인터페이스 nullable 수정 (SiteRow/InterestRow/ConsentRow)
+- AdminContent Report 인터페이스 nullable 수정
+- forward-lead.ts notifications: `title/message/data` → `content` 단일 컬럼
+- apt/sites/[slug]: `content_score ?? 0`, `interest_count ?? 0` null 안전성
+- UnsoldTab: `detect_unsold_surge` 반환 타입 명시
+
+### 남은 as any 97건 분류
+- `window/navigator/globalThis` 벤더 확장: ~14건 (불가피)
+- `upsert/insert` DB 타입 미세 불일치: ~11건 (스키마 변경 시 제거)
+- `(data as any[])` 동적 쿼리 결과: ~30건 (타입 추론 한계)
+- 기타 로직: ~42건
