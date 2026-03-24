@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 
 const OneClickPanel = dynamic(() => import('./OneClickPanel'), { ssr: false });
 const AdminPopularContent = dynamic(() => import('./AdminPopularContent'), { ssr: false });
+const AdminSites = dynamic(() => import('./AdminSites'), { ssr: false });
 
 /* ─────────────────────── Types ─────────────────────── */
 interface KPI { label: string; value: number; icon: string; color: string }
@@ -46,6 +47,7 @@ const CRON_MAP: Record<string, { display: string; group: string }> = {
   'redev-verify-households': { display: '세대수 검증',   group: '부동산' },
   'redev-geocode':           { display: '재개발 좌표수집', group: '부동산' },
   'aggregate-trade-stats': { display: '거래 집계',        group: '부동산' },
+  'sync-apt-sites':        { display: '현장 허브 싱크',    group: '부동산' },
   'apt-ai-summary':        { display: 'AI 한줄 분석',     group: '부동산' },
   'push-apt-deadline':     { display: '청약 마감 알림',    group: '부동산' },
   'check-price-alerts':    { display: '가격 알림 체크',    group: '주식' },
@@ -89,6 +91,7 @@ const QUICK_ACTIONS = [
   { id: 'aggregate',     label: '거래 집계',    path: '/api/cron/aggregate-trade-stats', icon: '📋' },
   { id: 'redev-verify',  label: '세대수 검증',  path: '/api/cron/redev-verify-households', icon: '🏘️' },
   { id: 'redev-geocode', label: '좌표 수집',   path: '/api/cron/redev-geocode', icon: '📍' },
+  { id: 'sync-sites',   label: '현장 싱크',   path: '/api/cron/sync-apt-sites', icon: '🏗️' },
   { id: 'apt-backfill',  label: '청약 상세 백필', path: '/api/cron/apt-backfill-details', icon: '🔄' },
   { id: 'series-assign', label: '시리즈 묶기',  path: '/api/cron/blog-series-assign', icon: '📚' },
   { id: 'pf-snapshot',   label: '포트폴리오 스냅샷', path: '/api/cron/portfolio-snapshot', icon: '📸' },
@@ -812,6 +815,7 @@ export default function AdminCommandCenter({ healthChecks }: { healthChecks: { s
           </div>
         </div>
       </div>
+      <AdminSites />
       <AdminPopularContent />
     </div>
   );
