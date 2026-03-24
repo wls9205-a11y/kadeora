@@ -11,7 +11,7 @@ const RedevTab = dynamic(() => import('./tabs/RedevTab'), { ssr: false });
 const OngoingTab = dynamic(() => import('./tabs/OngoingTab'), { ssr: false });
 const UnsoldTab = dynamic(() => import('./tabs/UnsoldTab'), { ssr: false });
 import { SkeletonList } from '@/components/Skeleton';
-import { isNew } from './tabs/apt-utils';
+import { isNew, generateAptSlug } from './tabs/apt-utils';
 
 export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [] }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[] }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade'>('sub');
@@ -100,9 +100,29 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[Apt.toggleWatchlist]', e); }
   };
 
+  // Compute KPI metrics
+  const openCount = apts.filter(a => {
+    const now = new Date().toISOString().slice(0, 10);
+    return a.rcept_bgnde && a.rcept_endde && now >= String(a.rcept_bgnde).slice(0, 10) && now <= String(a.rcept_endde).slice(0, 10);
+  }).length;
+  const upcomingCount = apts.filter(a => {
+    const now = new Date().toISOString().slice(0, 10);
+    return a.rcept_bgnde && now < String(a.rcept_bgnde).slice(0, 10);
+  }).length;
+  const unsoldTotal = (lazyUnsold || unsold).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+
+  // Urgent: D-3 이내 접수중 마감 임박
+  const urgentApts = apts.filter(a => {
+    const now = new Date().toISOString().slice(0, 10);
+    if (!a.rcept_bgnde || !a.rcept_endde) return false;
+    if (now < String(a.rcept_bgnde).slice(0, 10) || now > String(a.rcept_endde).slice(0, 10)) return false;
+    const daysLeft = Math.ceil((new Date(String(a.rcept_endde).slice(0, 10)).getTime() - Date.now()) / 86400000);
+    return daysLeft >= 0 && daysLeft <= 3;
+  });
+
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
           <Link href="/apt/map" className="kd-action-link">🗺️ 지도</Link>
@@ -110,6 +130,42 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           <Link href="/apt/diagnose" className="kd-action-link">📊 진단</Link>
         </div>
       </div>
+
+      {/* KPI 요약 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
+        {[
+          { label: '접수중', value: openCount, color: 'var(--accent-green)', icon: '🟢' },
+          { label: '예정', value: upcomingCount, color: 'var(--accent-blue)', icon: '🔵' },
+          { label: '분양중', value: ongoingApts.length, color: 'var(--accent-purple)', icon: '🏢' },
+          { label: '미분양', value: unsoldTotal > 999 ? `${(unsoldTotal/1000).toFixed(1)}k` : unsoldTotal, color: 'var(--accent-red)', icon: '🏚️' },
+        ].map(({ label, value, color, icon }) => (
+          <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 2 }}>{icon} {label}</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* 마감 임박 긴급 배너 */}
+      {urgentApts.length > 0 && (
+        <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 10, padding: '10px 12px', marginBottom: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-red)', marginBottom: 6 }}>🔴 마감 임박 — {urgentApts.length}건 D-3 이내</div>
+          {urgentApts.slice(0, 3).map(a => {
+            const daysLeft = Math.ceil((new Date(String(a.rcept_endde).slice(0, 10)).getTime() - Date.now()) / 86400000);
+            return (
+              <Link key={a.id} href={`/apt/${encodeURIComponent(generateAptSlug(a.house_nm) || a.house_manage_no || String(a.id))}`} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0',
+                fontSize: 13, textDecoration: 'none', color: 'inherit',
+              }}>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{a.house_nm}</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: daysLeft === 0 ? 'var(--accent-red)' : 'var(--accent-orange)', flexShrink: 0, marginLeft: 8 }}>
+                  {daysLeft === 0 ? '오늘 마감' : `D-${daysLeft}`} · {a.region_nm}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>
