@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
 
     const { data } = await sb.from('notification_settings').select('*').eq('user_id', user.id).maybeSingle();
     if (!data) {
-      // 기본값으로 생성
-      const defaults = { user_id: user.id, push_comments: true, push_likes: true, push_follows: true, push_apt_deadline: true, push_hot_posts: true, push_stock_alert: false, push_attendance: true, push_marketing: false };
+      // 기본값으로 생성 (전부 ON — 유저가 개별적으로 끌 수 있음)
+      const defaults = { user_id: user.id, push_comments: true, push_likes: true, push_follows: true, push_apt_deadline: true, push_hot_posts: true, push_stock_alert: true, push_attendance: true, push_marketing: true };
       await sb.from('notification_settings').insert(defaults);
       return NextResponse.json(defaults);
     }

@@ -8,3 +8,4 @@ export const PWAInstallTracker = dynamic(() => import('@/components/PWAInstallTr
 export const NoticeBanner = dynamic(() => import('@/components/NoticeBanner'), { ssr: false });
 export const GuestCTA = dynamic(() => import('@/components/GuestCTA'), { ssr: false });
 export const PageViewTracker = dynamic(() => import('@/components/PageViewTracker'), { ssr: false });
+export const AutoPushPrompt = dynamic(() => import('@/components/AutoPushPrompt'), { ssr: false });
