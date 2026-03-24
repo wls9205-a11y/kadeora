@@ -3,6 +3,21 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     },
+    "src/app/api/stock-refresh/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/stock-price/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/apt-ai-summary/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/cron/stock-daily-briefing/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/stock-news-crawl/*.ts": {
+      "maxDuration": 120
+    },
     "src/app/api/admin/blog-rewrite/*.ts": {
       "maxDuration": 300
     },

@@ -30,7 +30,9 @@ export default function ShareButtons({ title, postId, content }: Props) {
             buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
           });
         } else {
-          window.open(`https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`, '_blank');
+          // 카카오 SDK 미초기화 시 — 링크 복사 후 안내
+          await navigator.clipboard.writeText(shareUrl);
+          alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요.');
         }
         break;
       case 'twitter':

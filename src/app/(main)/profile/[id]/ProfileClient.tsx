@@ -281,7 +281,7 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* 프로필 카드 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(16px, 4vw, 28px) clamp(16px, 4vw, 28px) clamp(14px, 3vw, 24px)', marginBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
 
           {/* 아바타 */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -328,15 +328,40 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                     ))}
                   </select>
                 </div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button onClick={() => setEditing(false)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)' }}>취소</button>
+                  <button onClick={handleSave} disabled={saving} className="kd-btn kd-btn-primary" style={{ fontSize: 'var(--fs-sm)' }}>{saving ? '저장 중...' : '저장'}</button>
+                </div>
               </div>
             ) : (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                  <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{displayName}</h1>
-                  <span style={{ fontSize: 'var(--fs-sm)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor }}>
-                    {gradeEmoji} {gradeTitle} Lv.{gradeNum}
-                  </span>
-                  {profile.is_premium && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700 }}>👑 PREMIUM</span>}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{displayName}</h1>
+                      <span style={{ fontSize: 'var(--fs-sm)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: `${gradeColor}20`, color: gradeColor }}>
+                        {gradeEmoji} {gradeTitle} Lv.{gradeNum}
+                      </span>
+                      {profile.is_premium && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 700 }}>👑 PREMIUM</span>}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    {isOwner ? (
+                      <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)', padding: '4px 10px' }}>✏️ 수정</button>
+                    ) : (
+                      <button onClick={handleFollow} disabled={followLoading} aria-pressed={following}
+                        className={following ? 'kd-btn kd-btn-ghost' : 'kd-btn kd-btn-primary'}
+                        style={{ fontSize: 'var(--fs-sm)', padding: '4px 12px' }}>
+                        {followLoading ? '...' : following ? '✓ 팔로잉' : '+ 팔로우'}
+                      </button>
+                    )}
+                    <button onClick={() => {
+                      const url = `${SITE_URL}/profile/${profile.id}`;
+                      navigator.clipboard.writeText(url).then(() => success('프로필 링크가 복사됐어요!'));
+                    }} style={{ padding: '4px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', fontWeight: 600 }}>
+                      공유
+                    </button>
+                  </div>
                 </div>
                 <p style={{ margin: '0 0 6px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
@@ -358,41 +383,6 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
                 </div>
               </>
             )}
-          </div>
-
-          {/* 버튼 영역 */}
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            {isOwner ? (
-              editing ? (
-                <>
-                  <button onClick={() => setEditing(false)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)' }}>취소</button>
-                  <button onClick={handleSave} disabled={saving} className="kd-btn kd-btn-primary" style={{ fontSize: 'var(--fs-sm)' }}>{saving ? '저장 중...' : '저장'}</button>
-                </>
-              ) : (
-                <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)' }}>✏️ 프로필 수정</button>
-              )
-            ) : (
-              <button onClick={handleFollow} disabled={followLoading} aria-pressed={following}
-                className={following ? 'kd-btn kd-btn-ghost' : 'kd-btn kd-btn-primary'}
-                style={{ fontSize: 'var(--fs-sm)', minWidth: 90 }}>
-                {followLoading ? '...' : following ? '✓ 팔로잉' : '+ 팔로우'}
-              </button>
-            )}
-            {/* 프로필 공유 버튼 */}
-            <button onClick={() => {
-              const url = `${SITE_URL}/profile/${profile.id}`;
-              if (typeof window !== 'undefined' && (window as any).Kakao?.isInitialized?.()) {
-                (window as any).Kakao.Share.sendDefault({
-                  objectType: 'feed',
-                  content: { title: `${displayName}님의 카더라 프로필`, description: `${gradeEmoji} ${gradeTitle} · ${currentPoints}P · 게시글 ${profile.posts_count ?? 0}개`, imageUrl: SITE_URL + '/og-image.png', link: { mobileWebUrl: url, webUrl: url } },
-                  buttons: [{ title: '프로필 보기', link: { mobileWebUrl: url, webUrl: url } }],
-                });
-              } else {
-                navigator.clipboard.writeText(url).then(() => success('프로필 링크가 복사됐어요!'));
-              }
-            }} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', fontWeight: 600 }}>
-              공유
-            </button>
           </div>
         </div>
 

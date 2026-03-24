@@ -163,7 +163,9 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         </div>
         {/* 미니 스파크라인 (관심종목에 히스토리 있을 때) */}
         {sparklines[s.symbol]?.length >= 2 && (
-          <MiniSparkline data={sparklines[s.symbol]} width={48} height={20} />
+          <span className="stock-sparkline">
+            <MiniSparkline data={sparklines[s.symbol]} width={48} height={20} />
+          </span>
         )}
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           {s.price === 0 ? (
@@ -185,7 +187,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             </>
           )}
         </div>
-        <Link href={`/stock/${encodeURIComponent(s.symbol)}`} onClick={e => e.stopPropagation()} style={{ fontSize: 'var(--fs-xs)', padding: '6px 12px', borderRadius: 999, background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)', textDecoration: 'none', flexShrink: 0, minHeight: 32, display: 'flex', alignItems: 'center' }}>상세</Link>
+        <Link href={`/stock/${encodeURIComponent(s.symbol)}`} onClick={e => e.stopPropagation()} className="stock-detail-btn" style={{ fontSize: 'var(--fs-xs)', padding: '6px 12px', borderRadius: 999, background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)', textDecoration: 'none', flexShrink: 0, minHeight: 32, display: 'flex', alignItems: 'center' }}>상세</Link>
       </div>
     );
   }

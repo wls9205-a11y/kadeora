@@ -242,18 +242,11 @@ export default async function BlogPage({ searchParams }: Props) {
                 {/* 썸네일 (이미지 없으면 카테고리 이모지) */}
                 <div style={{
                   width: 80, height: 80, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
-                  background: p.cover_image ? 'var(--bg-hover)' : `${catColor}15`,
+                  background: `${catColor}15`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   position: 'relative',
                 }}>
-                  {p.cover_image ? (
-                    <Image src={p.cover_image} alt={p.image_alt || p.title}
-                      width={80} height={80}
-                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                      loading="lazy" />
-                  ) : (
-                    <span style={{ fontSize: 32 }}>{catEmoji[p.category] || '📝'}</span>
-                  )}
+                  <span style={{ fontSize: 32 }}>{catEmoji[p.category] || '📝'}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {/* 카테고리 뱃지 */}
