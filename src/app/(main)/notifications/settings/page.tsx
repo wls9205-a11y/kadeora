@@ -2,95 +2,201 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
-import PushSubscribeButton from '@/components/PushSubscribeButton';
 
-interface Settings {
-  push_comments: boolean;
-  push_likes: boolean;
-  push_follows: boolean;
-  push_apt_deadline: boolean;
-  push_hot_posts: boolean;
-  push_stock_alert: boolean;
-  push_attendance: boolean;
-  push_marketing: boolean;
-}
-
-const ITEMS: { key: keyof Settings; label: string; desc: string }[] = [
-  { key: 'push_comments', label: '댓글 알림', desc: '내 글에 댓글이 달리면 알려드려요' },
-  { key: 'push_likes', label: '좋아요 알림', desc: '내 글에 좋아요가 달리면 알려드려요' },
-  { key: 'push_follows', label: '팔로우 알림', desc: '누군가 팔로우하면 알려드려요' },
-  { key: 'push_apt_deadline', label: '청약 마감 알림', desc: 'D-1, D-0 청약 마감을 알려드려요' },
-  { key: 'push_hot_posts', label: 'HOT 게시글', desc: '이번 주 인기 글을 알려드려요' },
-  { key: 'push_stock_alert', label: '주식 급등/급락', desc: '등락률 5% 이상 종목을 알려드려요' },
-  { key: 'push_attendance', label: '출석 리마인더', desc: '출석체크를 잊지 않도록 알려드려요' },
-  { key: 'push_marketing', label: '마케팅 알림', desc: '이벤트, 혜택 소식을 받아보세요' },
-];
+type PushState = 'loading' | 'unsupported' | 'not-pwa' | 'denied' | 'off' | 'on';
 
 export default function NotificationSettingsPage() {
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { success } = useToast();
+  const [pushState, setPushState] = useState<PushState>('loading');
+  const [loading, setLoading] = useState(false);
+  const { success, error } = useToast();
 
   useEffect(() => {
-    fetch('/api/notifications/settings')
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d && !d.error) setSettings(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    if (typeof window === 'undefined') { setPushState('unsupported'); return; }
+    if (!('PushManager' in window) || !('serviceWorker' in navigator)) {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+      setPushState(isIOS && !isStandalone ? 'not-pwa' : 'unsupported');
+      return;
+    }
+    if ('Notification' in window && Notification.permission === 'denied') {
+      setPushState('denied');
+      return;
+    }
+
+    navigator.serviceWorker?.ready?.then(reg =>
+      reg.pushManager.getSubscription().then(sub => setPushState(sub ? 'on' : 'off'))
+    ).catch(() => setPushState('off'));
   }, []);
 
-  const toggle = async (key: keyof Settings) => {
-    if (!settings) return;
-    const newVal = !settings[key];
-    setSettings({ ...settings, [key]: newVal });
-    await fetch('/api/notifications/settings', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [key]: newVal }),
-    });
-    success(newVal ? '알림을 켰어요' : '알림을 껐어요');
+  const handleEnable = async () => {
+    setLoading(true);
+    try {
+      // 1. 권한 요청
+      if ('Notification' in window && Notification.permission === 'default') {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') { setPushState('denied'); setLoading(false); return; }
+      }
+
+      // 2. 서비스 워커 구독
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+
+      // 3. 서버 저장
+      await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON() }),
+      });
+
+      // 4. 알림 설정 전부 ON
+      await fetch('/api/notifications/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          push_comments: true, push_likes: true, push_follows: true,
+          push_apt_deadline: true, push_hot_posts: true, push_stock_alert: true,
+          push_attendance: true, push_marketing: true,
+        }),
+      });
+
+      setPushState('on');
+      success('알림이 활성화되었습니다!');
+    } catch {
+      error('알림 설정에 실패했습니다');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>로딩 중...</div>;
-  if (!settings) return <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>로그인이 필요합니다. <Link href="/login" style={{ color: 'var(--brand)' }}>로그인</Link></div>;
+  const handleDisable = async () => {
+    setLoading(true);
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+
+      await fetch('/api/push/subscribe', { method: 'DELETE' });
+
+      await fetch('/api/notifications/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          push_comments: false, push_likes: false, push_follows: false,
+          push_apt_deadline: false, push_hot_posts: false, push_stock_alert: false,
+          push_attendance: false, push_marketing: false,
+        }),
+      });
+
+      setPushState('off');
+      success('알림이 해제되었습니다');
+    } catch {
+      error('알림 해제에 실패했습니다');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const boxStyle = {
+    background: 'var(--bg-surface)', border: '1px solid var(--border)',
+    borderRadius: 14, padding: '24px 20px', textAlign: 'center' as const,
+  };
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
         <Link href="/notifications" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)' }}>← 알림</Link>
         <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>알림 설정</h1>
       </div>
 
-      {/* 푸시 알림 구독 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>푸시 알림</div>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12, lineHeight: 1.5 }}>
-          청약 마감, 종목 알림, 출석 리마인더를 실시간으로 받으려면 아래 버튼을 눌러 알림을 허용해주세요.
+      {pushState === 'loading' && (
+        <div style={boxStyle}>
+          <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>확인 중...</div>
         </div>
-        <PushSubscribeButton />
-      </div>
+      )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {ITEMS.map(item => (
-          <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
-            <div>
-              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{item.label}</div>
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>{item.desc}</div>
-            </div>
-            <button onClick={() => toggle(item.key)} style={{
-              width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
-              background: settings[item.key] ? 'var(--brand)' : 'var(--border)',
-              position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-            }}>
-              <div style={{
-                width: 20, height: 20, borderRadius: '50%', background: 'white',
-                position: 'absolute', top: 2,
-                left: settings[item.key] ? 22 : 2,
-                transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-              }} />
-            </button>
+      {pushState === 'on' && (
+        <div style={boxStyle}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🔔</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 6 }}>알림 활성화됨</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 20 }}>
+            댓글 · 좋아요 · 팔로우 · 청약 마감 · HOT 게시글<br />
+            주식 급등/급락 · 출석 리마인더 · 이벤트 소식<br />
+            모든 알림을 받고 있습니다.
           </div>
-        ))}
-      </div>
+          <button
+            onClick={handleDisable}
+            disabled={loading}
+            style={{
+              padding: '12px 24px', borderRadius: 10, border: '1px solid var(--border)',
+              background: 'var(--bg-hover)', color: 'var(--text-secondary)',
+              fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? '처리 중...' : '알림 끄기'}
+          </button>
+        </div>
+      )}
+
+      {pushState === 'off' && (
+        <div style={boxStyle}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🔕</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>알림이 꺼져 있어요</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 20 }}>
+            청약 마감, 종목 알림, 댓글 알림 등을<br />
+            실시간으로 받아보세요.
+          </div>
+          <button
+            onClick={handleEnable}
+            disabled={loading}
+            style={{
+              padding: '14px 32px', borderRadius: 12, border: 'none',
+              background: 'var(--brand)', color: 'white',
+              fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer',
+              width: '100%', opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? '설정 중...' : '🔔 알림 받기'}
+          </button>
+        </div>
+      )}
+
+      {pushState === 'denied' && (
+        <div style={boxStyle}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🚫</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--accent-red)', marginBottom: 6 }}>알림이 차단됨</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+            기기 설정에서 카더라 알림을 허용해주세요.<br /><br />
+            <strong>iPhone:</strong> 설정 → 카더라 → 알림 → 허용<br />
+            <strong>Android:</strong> 설정 → 앱 → 카더라 → 알림 → 허용
+          </div>
+        </div>
+      )}
+
+      {pushState === 'not-pwa' && (
+        <div style={boxStyle}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📱</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>앱 설치가 필요해요</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+            푸시 알림은 홈 화면에 추가한 앱에서만 사용 가능합니다.<br /><br />
+            Safari 하단 <strong>공유 버튼(↑)</strong> → <strong>&quot;홈 화면에 추가&quot;</strong>를 눌러주세요.
+          </div>
+        </div>
+      )}
+
+      {pushState === 'unsupported' && (
+        <div style={boxStyle}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>지원하지 않는 브라우저</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+            이 브라우저에서는 푸시 알림을 지원하지 않습니다.<br />
+            Chrome, Edge 또는 iPhone 홈 화면 앱을 이용해주세요.
+          </div>
+        </div>
+      )}
     </div>
   );
 }
