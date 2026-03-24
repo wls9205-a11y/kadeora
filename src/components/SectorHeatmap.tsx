@@ -45,6 +45,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
     });
     return Array.from(map.entries())
       .map(([name, data]) => ({ name, ...data }))
+      .filter(sec => sec.stocks.some(s => s.change_pct !== 0))
       .sort((a, b) => b.totalCap - a.totalCap);
   }, [stocks]);
 
