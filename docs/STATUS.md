@@ -1271,3 +1271,45 @@ guest_phone_last4 = 뒤 4자리 평문 → 어드민 표시용 (****5678)
 - 블로그: 14,578건 (min 2000자 적용, 리라이트 30건/일)
 - RSS: 700건 (블로그 500 + 피드 200)
 - 배포: Vercel 자동 배포 정상
+
+## 세션 32 추가 작업 — 포털별 SEO 노출 최대화 + 비회원 등록 폼
+
+### 비회원 관심고객 등록 폼 [COMPLETED]
+- InterestRegistration.tsx 클라이언트 컴포넌트 → 현장 페이지에 인라인
+- 회원: 원클릭 등록 (+50P) → "✅ 등록 완료 (탭하여 해제)" 토글
+- 비회원: 이름/전화/생년/거주지 + 동의 3종 체크박스 (필수1+선택2)
+- 만 14세 미만 프론트엔드 차단 + 개인정보처리방침 링크
+- 전체 파이프라인 엔드투엔드 연결: SEO 유입 → 폼 → 암호화 → 어드민
+
+### 포털별 SEO 노출 확대 [COMPLETED]
+
+**Google (3가지)**
+- `max-snippet:-1` 스니펫 길이 무제한
+- `max-image-preview:large` OG 이미지 대형 프리뷰
+- Googlebot-Image `/api/og` 명시 허용
+
+**Naver (2가지)**
+- Yeti `/apt/sites/` 명시적 Allow + RSS feed.xml 허용
+- Crawl-delay:1
+
+**Daum/Kakao (2가지)**
+- OG type `website`→`article` (카카오톡 대형 기사 카드)
+- `article:tag` 메타태그 (다음 키워드 매칭)
+
+**Bing (2가지)**
+- IndexNow API (`/api/indexnow`) 매일 07시 자동 제출 → 수시간 내 색인
+- IndexNow 인증키: `3a23def313e1b1283822c54a0f9a5675`
+
+**AI 검색엔진 (3가지)**
+- GPTBot (ChatGPT) / Claude-Web / PerplexityBot 허용
+- `/apt/sites/` + `/blog/` 크롤링 허용
+
+**공통**
+- OpenSearch Description (`opensearch.xml`) → 브라우저 주소창 검색
+- robots.txt 전면 재작성 (7개 크롤러 개별 지시)
+- 목록 페이지 OG 이미지 + max-snippet 추가
+
+### 주의사항 추가
+- IndexNow 키 파일: `public/3a23def313e1b1283822c54a0f9a5675.txt`
+- indexnow 크론: vercel.json + CRON_MAP 등록 완료
+- OG API subtitle 파라미터 지원 (`/api/og?title=현장명&subtitle=지역+시공사`)
