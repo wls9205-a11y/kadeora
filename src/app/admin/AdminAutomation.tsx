@@ -46,7 +46,7 @@ export default function AdminAutomation() {
   useEffect(() => {
     const sb = createSupabaseBrowser();
     Promise.all([
-      sb.from('cron_logs').select('*').order('started_at', { ascending: false }).limit(200),
+      sb.from('cron_logs').select('id,cron_name,status,started_at,finished_at,duration_ms,records_processed,records_created,records_updated,records_failed,error_message').order('started_at', { ascending: false }).limit(200),
       sb.from('api_quotas').select('*'),
       sb.from('blog_publish_config').select('*').eq('id', 1).single(),
       sb.rpc('blog_queue_status'),

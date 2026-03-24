@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StockDetailPage({ params }: Props) {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
-  const { data: s } = await sb.from('stock_quotes').select('*').eq('symbol', symbol).single();
+  const { data: s } = await sb.from('stock_quotes').select('symbol,name,market,price,change_amt,change_pct,volume,market_cap,sector,currency,description,website,ticker,updated_at').eq('symbol', symbol).single();
   if (!s) notFound();
 
   const changePct = Number(s.change_pct);

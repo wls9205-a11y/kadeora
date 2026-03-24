@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { withCronLogging } from '@/lib/cron-logger';
+import { SITE_URL } from '@/lib/constants';
 
 export const maxDuration = 60;
 

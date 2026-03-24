@@ -106,7 +106,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
 
-  const { data: post } = await sb.from('blog_posts').select('*').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return notFound();
 
   sb.from('blog_posts').update({ view_count: (post.view_count ?? 0) + 1 }).eq('id', post.id).then(() => {});
@@ -146,7 +146,7 @@ export default async function BlogDetailPage({ params }: Props) {
   let seriesInfo: { series: any; posts: any[] } | null = null;
   if (post.series_id) {
     try {
-      const { data: series } = await sb.from('blog_series').select('*').eq('id', post.series_id).single();
+      const { data: series } = await sb.from('blog_series').select('id,title,slug,description,cover_image,post_count').eq('id', post.series_id).single();
       if (series) {
         const { data: seriesPosts } = await sb.from('blog_posts')
           .select('id,title,slug,series_order')

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { submitIndexNow } from "@/lib/indexnow";
+import { SITE_URL } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 

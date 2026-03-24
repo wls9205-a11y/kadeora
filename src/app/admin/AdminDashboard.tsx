@@ -34,9 +34,9 @@ export default function AdminDashboard() {
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }),
       sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', today),
       // Other data
-      sb.from('admin_alerts').select('*').order('created_at', { ascending: false }).limit(20),
+      sb.from('admin_alerts').select('id,title,type,severity,message,is_read,created_at').order('created_at', { ascending: false }).limit(20),
       sb.from('health_checks').select('*'),
-      sb.from('daily_stats').select('*').order('stat_date', { ascending: false }).limit(7),
+      sb.from('daily_stats').select('stat_date,dau,new_users,new_posts,new_blogs,new_comments,total_page_views').order('stat_date', { ascending: false }).limit(7),
       sb.from('unsold_monthly_stats').select('stat_month, total_unsold').order('stat_month', { ascending: true }),
       sb.from('stock_daily_briefing').select('*').eq('market', 'KR').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
     ]).then(([usersR, todayUsersR, postsR, todayPostsR, todayCommentsR, blogsR, stocksR, redevR, dauR, alertsRes, healthRes, statsRes, unsoldRes, briefingRes]) => {

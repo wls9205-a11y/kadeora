@@ -42,7 +42,7 @@ async function getPosts(category: string, region: string = 'all') {
 async function getTrending() {
   const sb = await createSupabaseServer();
   const result = await withTimeout(
-    sb.from('trending_keywords').select('*').order('heat_score', { ascending: false }).limit(10)
+    sb.from('trending_keywords').select('id,keyword,category,heat_score,rank,updated_at').order('heat_score', { ascending: false }).limit(10)
   );
   return (result as any)?.data as TrendingKeyword[] | null;
 }

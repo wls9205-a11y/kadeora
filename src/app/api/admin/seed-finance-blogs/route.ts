@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/admin-auth';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
+import { SITE_URL } from '@/lib/constants';
 
 const TOPICS = [
   { slug: 'emergency-fund-top5', title: '비상금 통장 추천 TOP 5 — 2026년 기준', tags: ['비상금', '통장', '저축'] },
