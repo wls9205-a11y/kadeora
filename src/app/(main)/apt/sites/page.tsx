@@ -69,7 +69,7 @@ export default async function SitesListPage({ searchParams }: { searchParams: Pr
       </div>
 
       {/* 현장 목록 */}
-      {(sites || []).map(s => (
+      {(sites || []).map((s: any) => (
         <Link key={s.slug} href={`/apt/sites/${s.slug}`} className="kd-card" style={{ display: 'block', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px', marginBottom: 8, textDecoration: 'none', color: 'inherit' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
