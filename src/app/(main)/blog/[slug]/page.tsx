@@ -276,7 +276,7 @@ export default async function BlogDetailPage({ params }: Props) {
           <div className="blog-content" dangerouslySetInnerHTML={{ __html: htmlFull }} />
         ) : (
           <div style={{ position: 'relative' }}>
-            <div className="blog-content" style={{ maxHeight: 500, overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
+            <div className="blog-content" style={{ maxHeight: 'clamp(280px, 40vh, 500px)', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(transparent, var(--bg-base))' }} />
             <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
               <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>전체 글을 보려면 로그인하세요</div>
