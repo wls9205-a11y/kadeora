@@ -9,6 +9,7 @@ import Disclaimer from '@/components/Disclaimer';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
+const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'), { ssr: false });
 
 export const revalidate = 3600;
 
@@ -454,16 +455,7 @@ export default async function SiteDetailPage({ params }: Props) {
       </div>
 
       {/* ━━━ 관심고객 등록 CTA ━━━ */}
-      <div style={{ background: 'var(--bg-surface)', border: '2px solid var(--brand)', borderRadius: 14, padding: 16, marginBottom: 12, textAlign: 'center' }}>
-        <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>관심고객 등록</div>
-        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 14 }}>이 현장의 분양 소식을 가장 먼저 받아보세요</p>
-        <Link href={`/login?redirect=/apt/sites/${slug}`} style={{ display: 'block', padding: '14px', background: 'var(--brand)', color: '#fff', borderRadius: 10, fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none' }}>
-          로그인하고 등록하기
-        </Link>
-        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 10 }}>
-          👥 현재 <span style={{ color: 'var(--brand)', fontWeight: 800 }}>{site.interest_count || 0}</span>명이 관심을 보이고 있어요
-        </p>
-      </div>
+      <InterestRegistration siteId={site.id} siteName={site.name} interestCount={site.interest_count || 0} slug={slug} />
 
       {/* ━━━ 커뮤니티 리뷰 ━━━ */}
       <AptReviewSection aptName={site.name} region={site.region || ''} />
