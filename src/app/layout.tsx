@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     other: { 'naver-site-verification': '0d8703ac50ef51c3c2feb0ee48784069936492f5' },
   },
   manifest: '/manifest.json',
-  appleWebApp: { capable: true, statusBarStyle: 'default', title: '카더라' },
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: '카더라' },
   category: '금융, 부동산, 커뮤니티',
   alternates: { languages: { 'ko-KR': SITE_URL } },
   other: {
@@ -67,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" className="dark" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
         <link rel="alternate" type="application/rss+xml" title="카더라 RSS" href="/feed.xml" />
         <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/feed.xml?category=stock" />
         <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/feed.xml?category=apt" />
@@ -74,11 +75,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="search" type="application/opensearchdescription+xml" title="카더라 검색" href="/opensearch.xml" />
         <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <meta name="google-adsense-account" content="ca-pub-2356113563328542" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png?v=2" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=2" />
-        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png?v=2" />
+        {/* iOS PWA 아이콘 — v3 캐시 갱신 */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=3" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=3" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png?v=3" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128.png?v=3" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="카더라" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="geo.region" content="KR" />
         <meta name="geo.placename" content="대한민국" />

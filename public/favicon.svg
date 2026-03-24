@@ -1,12 +1,8 @@
-<svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0A1838"/>
-      <stop offset="100%" stop-color="#1E3A6E"/>
-    </linearGradient>
-  </defs>
-  <rect width="72" height="72" rx="16" fill="url(#ng)"/>
-  <circle cx="18" cy="36" r="6.5" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="36" cy="36" r="6.5" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="54" cy="36" r="6.5" fill="#5B93FF" opacity="0.9"/>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="7" fill="#08102A"/>
+  <rect x="5" y="5" width="22" height="16" rx="4" fill="#3B7BF6"/>
+  <polygon points="9,21 14,21 11,26" fill="#3B7BF6"/>
+  <circle cx="11" cy="13" r="2.2" fill="white"/>
+  <circle cx="16" cy="13" r="2.2" fill="white"/>
+  <circle cx="21" cy="13" r="2.2" fill="white"/>
 </svg>

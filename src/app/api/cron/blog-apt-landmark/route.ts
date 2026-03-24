@@ -134,7 +134,7 @@ export async function GET(req: NextRequest) {
 
     const { data: apts, error: fetchErr } = await admin
       .from('landmark_apts')
-      .select('*')
+      .select('id,name,district,region,blog_slug,blog_generated,nearby_station,school_district,total_units,built_year,tags')
       .eq('blog_generated', false);
 
     if (fetchErr) { console.error('[blog-apt-landmark] fetch error:', fetchErr); throw new Error(fetchErr.message); }

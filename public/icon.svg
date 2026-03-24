@@ -1,12 +1,9 @@
-<svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0A1838"/>
-      <stop offset="100%" stop-color="#1E3A6E"/>
-    </linearGradient>
-  </defs>
-  <rect width="72" height="72" rx="16" fill="url(#ng)"/>
-  <circle cx="18" cy="36" r="6.5" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="36" cy="36" r="6.5" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="54" cy="36" r="6.5" fill="#5B93FF" opacity="0.9"/>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#08102A"/>
+  <rect x="77" y="77" width="358" height="262" rx="56" fill="#3B7BF6"/>
+  <polygon points="140,339 224,339 172,410" fill="#3B7BF6"/>
+  <circle cx="177" cy="208" r="34" fill="white"/>
+  <circle cx="256" cy="208" r="34" fill="white"/>
+  <circle cx="335" cy="208" r="34" fill="white"/>
+  <line x1="128" y1="426" x2="384" y2="426" stroke="#6499FF" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
 </svg>
