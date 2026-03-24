@@ -146,15 +146,15 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     const isGlobal = s.currency === 'USD';
     const isWatched = watchlistSymbols.includes(s.symbol);
     return (
-      <div onClick={() => setSelectedStock(s)} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 4px', borderBottom: '1px solid var(--border)', cursor: 'pointer', borderRadius: 8, transition: 'background var(--transition-fast)' }}>
-        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 22, textAlign: 'center' }}>{rank}</span>
+      <div onClick={() => setSelectedStock(s)} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 4px', borderBottom: '1px solid var(--border)', cursor: 'pointer', borderRadius: 8, transition: 'background var(--transition-fast)' }}>
+        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 20, textAlign: 'center' }}>{rank}</span>
         <button onClick={e => { e.stopPropagation(); toggleWatchlist(s.symbol); }} className={isWatched ? 'animate-like' : ''} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 'var(--fs-lg)', lineHeight: 1, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, transition: 'color var(--transition-fast)' }} title={isWatched ? '관심 해제' : '관심 추가'}>
           {isWatched ? '★' : '☆'}
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.symbol}</span>
+            <span className="stock-symbol-code" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.symbol}</span>
           </div>
           <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
             {s.sector && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{s.sector}</span>}
@@ -172,11 +172,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>시세 미제공</span>
           ) : (
             <>
-              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <div className="stock-price-text" style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
               </div>
-              {isGlobal && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+              {isGlobal && <div className="stock-krw-text" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
+              <div className="stock-pct-bar" style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
                 <div style={{ width: 32, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
                   <div style={{ width: `${Math.min(Math.abs(pct) * 10, 100)}%`, height: '100%', background: stockColor(pct, !isGlobal), borderRadius: 2 }} />
                 </div>

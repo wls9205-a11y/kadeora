@@ -1259,6 +1259,14 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 @media screen and (max-width: 480px) {
   /* 미니 스파크라인 숨김 — 공간 확보 */
   .stock-sparkline { display: none !important; }
-  /* 상세 버튼 축소 */
-  .stock-detail-btn { padding: 4px 8px !important; font-size: 11px !important; }
+  /* 종목코드(005930) 숨김 — 이름 공간 확보 */
+  .stock-symbol-code { display: none !important; }
+  /* 상세 버튼 숨김 — 행 전체가 클릭 가능하므로 불필요 */
+  .stock-detail-btn { display: none !important; }
+  /* 퍼센트 막대 그래프 숨김 */
+  .stock-pct-bar > div:first-child { display: none !important; }
+  /* 가격 폰트 축소 */
+  .stock-price-text { font-size: var(--fs-sm) !important; }
+  /* 원화 환산 숨김 */
+  .stock-krw-text { display: none !important; }
 }
