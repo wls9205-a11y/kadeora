@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
     '/guide', '/search', '/faq', '/terms', '/privacy',
-    '/apt/map', '/apt/diagnose', '/apt/search', '/stock/compare', '/blog/series',
+    '/apt/map', '/apt/diagnose', '/apt/search', '/apt/sites', '/stock/compare', '/blog/series',
   ].map(path => ({
     url: `${BASE}${path}`,
     lastModified: now,
@@ -31,11 +31,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let stockPages: MetadataRoute.Sitemap = [];
   let aptPages: MetadataRoute.Sitemap = [];
   let feedPages: MetadataRoute.Sitemap = [];
+  let sitePages: MetadataRoute.Sitemap = [];
 
   try {
     const supabase = getSupabaseAdmin();
 
-    const [blogsR, stocksR, aptsR, seriesR, postsR] = await Promise.all([
+    const [blogsR, stocksR, aptsR, seriesR, postsR, sitesR] = await Promise.all([
       supabase.from('blog_posts').select('slug, updated_at, published_at')
         .eq('is_published', true).not('published_at', 'is', null)
         .lte('published_at', now.toISOString())
@@ -44,6 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       supabase.from('apt_subscriptions').select('house_manage_no, updated_at').order('rcept_bgnde', { ascending: false }).limit(5000),
       supabase.from('blog_series').select('slug, created_at').eq('is_active', true),
       supabase.from('posts').select('id, slug, created_at, updated_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5000),
+      supabase.from('apt_sites').select('slug, updated_at, site_type, content_score, sitemap_wave')
+        .eq('is_active', true).gte('content_score', 40).gt('sitemap_wave', 0)
+        .order('interest_count', { ascending: false }).limit(10000),
     ]);
 
     blogPages = (blogsR.data || []).map(b => {
@@ -85,7 +89,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.5,
     }));
+
+    sitePages = (sitesR.data || []).map((s: any) => ({
+      url: `${BASE}/apt/sites/${s.slug}`,
+      lastModified: new Date(s.updated_at || Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: s.site_type === 'subscription' ? 0.8 : 0.7,
+    }));
   } catch {}
 
-  return [...staticPages, ...regionPages, ...blogPages, ...stockPages, ...aptPages, ...feedPages];
+  return [...staticPages, ...regionPages, ...blogPages, ...stockPages, ...aptPages, ...feedPages, ...sitePages];
 }

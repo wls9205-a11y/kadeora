@@ -292,6 +292,15 @@ export default async function AptDetailPage({ params }: Props) {
       )}
 
       <div style={{ height: 24 }} />
+
+      {/* 현장 허브 페이지 링크 */}
+      <Link href={`/apt/sites?q=${encodeURIComponent(apt.house_nm || '')}`} style={{
+        display: 'block', textAlign: 'center', padding: '14px', marginBottom: 16,
+        borderRadius: 12, background: 'var(--brand-bg)', border: '1px solid var(--brand-border)',
+        color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none',
+      }}>
+        🏗️ 이 현장의 전체 정보 보기 (실거래가 · 리뷰 · 블로그) →
+      </Link>
     </div>
   );
 }

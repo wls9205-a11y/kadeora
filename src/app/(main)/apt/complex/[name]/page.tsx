@@ -185,9 +185,18 @@ export default async function ComplexDetailPage({ params }: Props) {
         </div>
       )}
 
-      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 40px' }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 8px' }}>
         📊 국토교통부 실거래가 공개시스템 기준
       </p>
+
+      {/* 현장 허브 페이지 링크 */}
+      <Link href={`/apt/sites?q=${encodeURIComponent(decoded)}`} style={{
+        display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40,
+        borderRadius: 12, background: 'var(--brand-bg)', border: '1px solid var(--brand-border)',
+        color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none',
+      }}>
+        🏗️ 이 현장의 전체 정보 보기 (청약 · 재개발 · 리뷰) →
+      </Link>
     </div>
   );
 }
