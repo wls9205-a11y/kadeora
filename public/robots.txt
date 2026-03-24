@@ -5,6 +5,10 @@ Allow: /stock/
 Allow: /apt/
 Allow: /blog/
 Allow: /discuss
+Allow: /hot
+Allow: /guide
+Allow: /faq
+Allow: /grades
 Disallow: /admin/
 Disallow: /payment/
 Disallow: /api/
@@ -12,24 +16,24 @@ Disallow: /profile/
 Disallow: /write
 Disallow: /onboarding
 Disallow: /shop/
+Disallow: /notifications/
 
 User-Agent: Googlebot
 Allow: /
-Allow: /feed/
-Allow: /stock/
-Allow: /apt/
-Allow: /blog/
-Disallow: /admin/
-Disallow: /api/
+Crawl-delay: 1
 
 User-Agent: Yeti
 Allow: /
-Allow: /feed/
-Allow: /stock/
-Allow: /apt/
-Allow: /blog/
-Disallow: /admin/
-Disallow: /api/
+Crawl-delay: 2
+
+User-Agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-Agent: DaumCrawler
+Allow: /
+Crawl-delay: 2
 
 Host: https://kadeora.app
 Sitemap: https://kadeora.app/sitemap.xml
+Sitemap: https://kadeora.app/feed.xml

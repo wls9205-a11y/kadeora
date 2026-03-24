@@ -4,6 +4,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateImageAlt, generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { submitIndexNow } from "@/lib/indexnow";
 
 export const dynamic = 'force-dynamic';
 
@@ -129,6 +130,8 @@ ${(s.change_pct ?? 0) > 0 ? `이번 상승은 실적 개선 기대감, 업종 �
       if (result.success) created++;
     }
 
+    // IndexNow — 포털 즉시 색인 요청
+    if (created > 0) { submitIndexNow([`/blog`]).catch(() => {}); }
     return NextResponse.json({ ok: true, created });
   } catch (err) {
     console.error('[blog-daily]', err);

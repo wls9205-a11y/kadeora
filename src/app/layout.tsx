@@ -67,6 +67,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="alternate" type="application/rss+xml" title="카더라 RSS" href="/feed.xml" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/feed.xml?category=stock" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/feed.xml?category=apt" />
+        <link rel="alternate" type="application/rss+xml" title="카더라 재테크 RSS" href="/feed.xml?category=finance" />
         <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <meta name="google-adsense-account" content="ca-pub-2356113563328542" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png?v=2" />
