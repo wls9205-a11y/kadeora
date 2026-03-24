@@ -44,7 +44,10 @@ export async function GET(req: NextRequest) {
     postQuery = postQuery.eq('category', category);
   }
 
-  const [blogsR, postsR] = await Promise.all([blogQuery, postQuery]);
+  const [blogsR, postsR, sitesR] = await Promise.all([blogQuery, postQuery,
+    supabase.from('apt_sites').select('slug, name, description, region, sigungu, builder, site_type, total_units, updated_at, created_at')
+      .eq('is_active', true).gte('content_score', 25).order('updated_at', { ascending: false }).limit(200),
+  ]);
 
   const blogItems = (blogsR.data || []).map((b: any) => ({
     title: b.title,
@@ -66,7 +69,17 @@ export async function GET(req: NextRequest) {
     guid: p.slug ? `${SITE}/feed/${p.slug}` : `${SITE}/feed/${p.id}`,
   }));
 
-  const allItems = [...blogItems, ...postItems].sort(
+  const aptSiteItems = (sitesR.data || []).map((s: any) => ({
+    title: `${s.name} ${s.site_type === 'redevelopment' ? '재개발 현황' : '분양 정보'} — ${s.region} ${s.sigungu || ''}`,
+    link: `${SITE}/apt/${s.slug}`,
+    description: s.description || `${s.region} ${s.sigungu || ''} ${s.name}. ${s.builder ? `${s.builder} 시공.` : ''} ${s.total_units ? `총 ${s.total_units}세대.` : ''} 청약 일정, 분양가, 실거래가 정보를 카더라에서 확인하세요.`,
+    pubDate: new Date(s.updated_at || s.created_at).toUTCString(),
+    category: '부동산',
+    tags: [s.name, s.region, s.site_type === 'redevelopment' ? '재개발' : '분양', s.builder].filter(Boolean),
+    guid: `${SITE}/apt/${s.slug}`,
+  }));
+
+  const allItems = [...blogItems, ...postItems, ...aptSiteItems].sort(
     (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
   );
 
