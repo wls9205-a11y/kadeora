@@ -110,9 +110,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const d = await fetchUnifiedData(resolved.slug);
     if (!d) return {};
 
-    const tl: Record<string, string> = { subscription: '분양정보 · 청약일정', redevelopment: '재개발 · 진행현황', unsold: '미분양 현황' };
-    const st = d.site?.site_type || (d.sub ? 'subscription' : d.unsold ? 'unsold' : 'redevelopment');
-    const title = d.site?.seo_title || `${d.name} ${tl[st] || '분양정보'} | 카더라`;
+    const tl: Record<string, string> = { subscription: '분양정보 · 청약일정', redevelopment: '재개발 · 진행현황', unsold: '미분양 현황', trade: '실거래가 · 시세', landmark: '시세 · 분석' };
+    const st = d.site?.site_type || (d.sub ? 'subscription' : d.unsold ? 'unsold' : d.trades?.length ? 'trade' : 'redevelopment');
+    const title = d.site?.seo_title || `${d.name} ${tl[st] || '부동산 정보'} | 카더라`;
     const units = d.site?.total_units || d.sub?.tot_supply_hshld_co;
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
@@ -150,9 +150,9 @@ const ct: React.CSSProperties = { fontSize: 'var(--fs-base)', fontWeight: 700, c
 const rw: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' };
 const rl: React.CSSProperties = { color: 'var(--text-tertiary)' };
 const rv: React.CSSProperties = { color: 'var(--text-primary)', fontWeight: 600 };
-const tLabel: Record<string, string> = { subscription: '분양', redevelopment: '재개발', unsold: '미분양', landmark: '랜드마크', complex: '기존단지' };
-const tBg: Record<string, string> = { subscription: 'rgba(52,211,153,0.2)', redevelopment: 'rgba(183,148,255,0.15)', unsold: 'rgba(255,107,107,0.15)', landmark: 'rgba(56,189,248,0.15)', complex: 'rgba(56,189,248,0.15)' };
-const tClr: Record<string, string> = { subscription: '#2EE8A5', redevelopment: '#B794FF', unsold: '#FF6B6B', landmark: '#38BDF8', complex: '#38BDF8' };
+const tLabel: Record<string, string> = { subscription: '분양', redevelopment: '재개발', unsold: '미분양', landmark: '랜드마크', complex: '기존단지', trade: '실거래' };
+const tBg: Record<string, string> = { subscription: 'rgba(52,211,153,0.2)', redevelopment: 'rgba(183,148,255,0.15)', unsold: 'rgba(255,107,107,0.15)', landmark: 'rgba(56,189,248,0.15)', complex: 'rgba(56,189,248,0.15)', trade: 'rgba(251,191,36,0.15)' };
+const tClr: Record<string, string> = { subscription: '#2EE8A5', redevelopment: '#B794FF', unsold: '#FF6B6B', landmark: '#38BDF8', complex: '#38BDF8', trade: '#FBBF24' };
 const STAGES = ['정비구역지정', '조합설립', '사업시행인가', '관리처분', '착공', '준공'];
 
 export default async function AptUnifiedPage({ params }: Props) {
@@ -164,7 +164,7 @@ export default async function AptUnifiedPage({ params }: Props) {
   const d = await fetchUnifiedData(resolved.slug);
   if (!d) notFound();
   const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, name, region, slug } = d;
-  const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : 'subscription');
+  const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
   const faq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
   const redevStage = (site?.source_ids as any)?.redev_stage || redev?.stage;
