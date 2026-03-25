@@ -71,15 +71,19 @@ export async function GET(req: NextRequest) {
     guid: p.slug ? `${SITE}/feed/${p.slug}` : `${SITE}/feed/${p.id}`,
   }));
 
-  const aptSiteItems = (sitesR.data || []).map((s: any) => ({
-    title: `${s.name} ${s.site_type === 'redevelopment' ? '재개발 현황' : '분양 정보'} — ${s.region} ${s.sigungu || ''}`,
-    link: `${SITE}/apt/${s.slug}`,
-    description: s.description || `${s.region} ${s.sigungu || ''} ${s.name}. ${s.builder ? `${s.builder} 시공.` : ''} ${s.total_units ? `총 ${s.total_units}세대.` : ''} 청약 일정, 분양가, 실거래가 정보를 카더라에서 확인하세요.`,
-    pubDate: new Date(s.updated_at || s.created_at).toUTCString(),
-    category: '부동산',
-    tags: [s.name, s.region, s.site_type === 'redevelopment' ? '재개발' : '분양', s.builder].filter(Boolean),
-    guid: `${SITE}/apt/${s.slug}`,
-  }));
+  const aptSiteItems = (sitesR.data || []).map((s: any) => {
+    const typeLabel: Record<string, string> = { subscription: '분양 정보', redevelopment: '재개발 현황', trade: '실거래가·시세', unsold: '미분양 현황', landmark: '시세·분석' };
+    const typeCat: Record<string, string> = { subscription: '분양', redevelopment: '재개발', trade: '실거래', unsold: '미분양', landmark: '시세' };
+    return {
+      title: `${s.name} ${typeLabel[s.site_type] || '부동산 정보'} — ${s.region} ${s.sigungu || ''}`,
+      link: `${SITE}/apt/${s.slug}`,
+      description: s.description || `${s.region} ${s.sigungu || ''} ${s.name}. ${s.builder ? `${s.builder} 시공.` : ''} ${s.total_units ? `총 ${s.total_units}세대.` : ''} 청약 일정, 분양가, 실거래가 정보를 카더라에서 확인하세요.`,
+      pubDate: new Date(s.updated_at || s.created_at).toUTCString(),
+      category: typeCat[s.site_type] || '부동산',
+      tags: [s.name, s.region, typeCat[s.site_type] || '부동산', s.builder].filter(Boolean),
+      guid: `${SITE}/apt/${s.slug}`,
+    };
+  });
 
   const discussItems = (discussR.data || []).map((d: any) => {
     const total = (d.vote_a || 0) + (d.vote_b || 0);

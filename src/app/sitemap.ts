@@ -93,12 +93,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
-    sitePages = (sitesR.data || []).map((s: any) => ({
-      url: `${BASE}/apt/${s.slug}`,
-      lastModified: new Date(s.updated_at || Date.now()),
-      changeFrequency: s.site_type === 'subscription' ? 'daily' as const : 'weekly' as const,
-      priority: s.site_type === 'subscription' ? 0.85 : (s.interest_count > 0 ? 0.8 : 0.7),
-    }));
+    sitePages = (sitesR.data || []).map((s: any) => {
+      const typePriority: Record<string, number> = { subscription: 0.85, trade: 0.8, redevelopment: 0.75, unsold: 0.7, landmark: 0.8 };
+      const typeFreq: Record<string, 'daily' | 'weekly' | 'monthly'> = { subscription: 'daily', trade: 'weekly', redevelopment: 'weekly', unsold: 'weekly', landmark: 'monthly' };
+      return {
+        url: `${BASE}/apt/${s.slug}`,
+        lastModified: new Date(s.updated_at || Date.now()),
+        changeFrequency: typeFreq[s.site_type] || 'weekly',
+        priority: s.interest_count > 0 ? Math.min(typePriority[s.site_type] || 0.7, 0.9) + 0.05 : typePriority[s.site_type] || 0.7,
+      };
+    });
 
     discussPages = (discussR.data || []).map((d: any) => {
       const engagement = (d.vote_a || 0) + (d.vote_b || 0) + (d.comment_count || 0);
