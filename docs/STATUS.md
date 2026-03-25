@@ -3,7 +3,7 @@
 > **마지막 업데이트:** 2026-03-26 세션 38 (최종)
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 18건+
+## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 32건+
 
 ### 카카오톡 공유 완전 수정 (커밋 4건)
 - SDK 로드 후 초기화 실패 → ensureKakaoReady() 클릭 시 재시도
@@ -197,11 +197,41 @@
 - 주식 description 누락 229건 → 종목/마켓/섹터 기반 자동 생성
 - 재개발 key_features 205건 생성
 
-### 17. SEO 노출면적 극대화 (커밋 23-25, 20페이지+)
+### 17. SEO 노출면적 극대화 Phase 1 (커밋 23-25)
 - 주식 상세: description 확장, twitter card, naver 메타, article:tag, BreadcrumbList JSON-LD
 - 14개 공개 페이지 OG image + twitter card 일괄 추가
-- 6개 페이지 naver:written_time + article:section 추가
 - **결과: 모든 공개 페이지 OG image + twitter card 100%**
+
+### 18. SEO 노출면적 극대화 Phase 2 (커밋 26-28)
+- IndexNow 확장: stock URL 추가, 임계치 40→25, 정적 페이지 5개 추가
+- opensearch.xml 수정: /apt/sites?q= (리다이렉트) → /search?q= (정상)
+- 부동산 상세 GEO 메타: 17개 광역시도 geo.region 자동 매핑
+- WebApplication JSON-LD: 사업장 주소, 전화번호, SearchAction URL 변수화
+- 블로그→부동산/주식 양방향 내부 링크 (14,000편↔5,700 페이지)
+
+### 19. 포털 리치 결과 강화 (커밋 29-30)
+- FAQPage JSON-LD: guide + grades 추가 (총 10페이지)
+- Article+Speakable: stock/[symbol] + discuss/[id] 추가 (총 5페이지)
+- robots max-snippet:-1 오버라이드 수정 (2페이지)
+- dg:plink 21페이지 100% (12페이지 일괄 추가)
+
+### 20. BreadcrumbList + ItemList 완성 (커밋 31-32)
+- BreadcrumbList 7페이지 추가 → 총 24페이지 (전체 공개 페이지 100%)
+- stock 목록 ItemList 캐러셀 JSON-LD 추가 (상위 10종목)
+
+### 최종 포털 SERP 면적 성적표
+| 항목 | 수 |
+|---|---|
+| BreadcrumbList | **24페이지** (100%) |
+| FAQPage | **10페이지** |
+| Article+Speakable | **5페이지** |
+| ItemList 캐러셀 | **5페이지** |
+| OG image | **23페이지** (100%) |
+| twitter card | **23페이지** (100%) |
+| dg:plink (Daum) | **21페이지** (100%) |
+| naver:written_time | **19페이지** |
+| geo.region | **4페이지** |
+| max-snippet:-1 | **전역 100%** |
 
 ### PENDING 작업
 - [ ] 이미지 수집 크론 자동 진행 중 (200건/일, ~27일 소요)
