@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     // 2. 모드 파싱
-    const { mode = 'full', failedOnly = [] } = await req.json();
+    const { mode = 'full', failedOnly = [], endpoint = '' } = await req.json();
     
     const requestUrl = new URL(req.url);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${requestUrl.protocol}//${requestUrl.host}`;
@@ -173,6 +173,10 @@ export async function POST(req: NextRequest) {
     let endpoints: string[] = [];
     
     switch (mode) {
+      case 'single':
+        // 단일 크론 실행
+        if (endpoint && typeof endpoint === 'string') endpoints = [endpoint];
+        break;
       case 'data':
         endpoints = CRON_GROUPS.data;
         break;
