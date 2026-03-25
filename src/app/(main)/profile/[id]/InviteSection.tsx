@@ -11,21 +11,30 @@ export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props
   const inviteUrl = `${SITE_URL}/login?invite=${inviteCode}`;
 
   const handleKakaoShare = () => {
-    if (typeof window !== 'undefined' && window.Kakao?.isInitialized?.()) {
-      window.Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: '카더라에서 동네/주식/부동산 소식 같이 봐요! 🏘',
-          description: `초대코드: ${inviteCode}`,
-          imageUrl: SITE_URL + '/og-image.png',
-          link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl },
-        },
-        buttons: [{ title: '카더라 가입하기', link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl } }],
-      });
-    } else {
-      navigator.clipboard.writeText(inviteUrl);
-      onCopy('초대 링크가 복사됐어요!');
-    }
+    try {
+      const kakao = typeof window !== 'undefined' ? (window as any).Kakao : null;
+      if (kakao) {
+        if (!kakao.isInitialized()) {
+          const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+          if (key) kakao.init(key);
+        }
+        if (kakao.isInitialized() && kakao.Share) {
+          kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+              title: '카더라에서 동네/주식/부동산 소식 같이 봐요! 🏘',
+              description: `초대코드: ${inviteCode}`,
+              imageUrl: SITE_URL + '/og-image.png',
+              link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl },
+            },
+            buttons: [{ title: '카더라 가입하기', link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl } }],
+          });
+          return;
+        }
+      }
+    } catch { /* fallback below */ }
+    navigator.clipboard.writeText(inviteUrl);
+    onCopy('초대 링크가 복사됐어요!');
   };
 
   return (

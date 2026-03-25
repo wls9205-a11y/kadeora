@@ -18,19 +18,35 @@ export default function ShareButtons({ title, postId, content }: Props) {
 
   useEffect(() => { setUrl(`${window.location.origin}/feed/${postId}`); }, [postId]);
 
+  const ensureKakaoReady = (): boolean => {
+    try {
+      const kakao = (window as any).Kakao;
+      if (!kakao) return false;
+      if (!kakao.isInitialized()) {
+        const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+        if (key) kakao.init(key);
+      }
+      return kakao.isInitialized() && !!kakao.Share;
+    } catch { return false; }
+  };
+
   const share = async (platform: string) => {
     const shareUrl = url;
     const shareTitle = title;
     switch (platform) {
       case 'kakao':
-        if (typeof window !== 'undefined' && (window as any).Kakao?.Share) {
-          (window as any).Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: { title: shareTitle, description: content?.slice(0, 100) || '', imageUrl: `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}`, link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
-            buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
-          });
+        if (typeof window !== 'undefined' && ensureKakaoReady()) {
+          try {
+            (window as any).Kakao.Share.sendDefault({
+              objectType: 'feed',
+              content: { title: shareTitle, description: content?.slice(0, 100) || '', imageUrl: `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}`, link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
+              buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
+            });
+          } catch {
+            await navigator.clipboard.writeText(shareUrl);
+            alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요.');
+          }
         } else {
-          // 카카오 SDK 미초기화 시 — 링크 복사 후 안내
           await navigator.clipboard.writeText(shareUrl);
           alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요.');
         }
