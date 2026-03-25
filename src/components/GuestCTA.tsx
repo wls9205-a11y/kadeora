@@ -10,24 +10,37 @@ export default function GuestCTA() {
     // 이미 닫은 경우 24시간 숨김
     const exp = localStorage.getItem('kd_guest_cta');
     if (exp && Date.now() < parseInt(exp)) return;
-    // 쿠키 동의 아직 안 했으면 대기
+
+    // GuestWelcome이 아직 닫히지 않았으면 대기
     const consent = localStorage.getItem('kd_cookie_consent');
     if (consent !== 'accepted' && consent !== 'declined') return;
-    // 설치 배너가 이미 표시 중이면 양보
-    const installDismissed = localStorage.getItem('kd_install_dismissed');
-    const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
-    const installBannerGone = isPWA || (installDismissed && Date.now() - Number(installDismissed) < 7 * 24 * 60 * 60 * 1000);
 
-    createSupabaseBrowser().auth.getUser().then(({ data }) => {
-      if (!data.user) {
-        // InstallBanner가 아직 활성 상태면 3초 뒤에 표시 (InstallBanner가 먼저)
-        if (!installBannerGone) {
-          setTimeout(() => setShow(true), 5000);
-        } else {
-          setShow(true);
+    // GuestWelcome 닫은 직후면 30초 유예
+    const welcomeDismissed = localStorage.getItem('kd-welcome-dismissed');
+    if (welcomeDismissed && Date.now() - Number(welcomeDismissed) < 30000) {
+      const delay = 30000 - (Date.now() - Number(welcomeDismissed));
+      const timer = setTimeout(() => checkAndShow(), delay);
+      return () => clearTimeout(timer);
+    }
+
+    checkAndShow();
+
+    function checkAndShow() {
+      // InstallBanner가 활성 상태면 양보
+      const installDismissed = localStorage.getItem('kd_install_dismissed');
+      const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
+      const installBannerGone = isPWA || (installDismissed && Date.now() - Number(installDismissed) < 7 * 24 * 60 * 60 * 1000);
+
+      createSupabaseBrowser().auth.getUser().then(({ data }) => {
+        if (!data.user) {
+          if (!installBannerGone) {
+            setTimeout(() => setShow(true), 8000);
+          } else {
+            setShow(true);
+          }
         }
-      }
-    });
+      });
+    }
   }, []);
 
   if (!show) return null;

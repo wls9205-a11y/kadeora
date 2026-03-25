@@ -12,21 +12,37 @@ export default function InstallBanner() {
     if (window.matchMedia('(display-mode: standalone)').matches) return;
     const dismissed = localStorage.getItem('kd_install_dismissed');
     if (dismissed && Date.now() - Number(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
-    // 쿠키 동의 배너가 아직 처리 안 됐으면 대기
+
+    // GuestWelcome이 처리될 때까지 대기
     const cookieConsent = localStorage.getItem('kd_cookie_consent');
     if (cookieConsent !== 'accepted' && cookieConsent !== 'declined') {
       const interval = setInterval(() => {
         const c = localStorage.getItem('kd_cookie_consent');
-        if (c === 'accepted' || c === 'declined') { clearInterval(interval); setShow(true); }
+        if (c === 'accepted' || c === 'declined') {
+          clearInterval(interval);
+          // GuestWelcome 닫은 직후라면 10초 유예
+          setTimeout(() => showBanner(), 10000);
+        }
       }, 2000);
       return () => clearInterval(interval);
     }
-    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    setIsIOS(ios);
-    const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); setShow(true); };
-    window.addEventListener('beforeinstallprompt', handler);
-    if (ios) setTimeout(() => setShow(true), 4000);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+
+    // 이미 쿠키 동의된 상태면 바로 (단, GuestWelcome 닫은 직후면 유예)
+    const welcomeDismissed = localStorage.getItem('kd-welcome-dismissed');
+    if (welcomeDismissed && Date.now() - Number(welcomeDismissed) < 10000) {
+      setTimeout(() => showBanner(), 10000 - (Date.now() - Number(welcomeDismissed)));
+      return;
+    }
+
+    showBanner();
+
+    function showBanner() {
+      const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      setIsIOS(ios);
+      const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); setShow(true); };
+      window.addEventListener('beforeinstallprompt', handler);
+      if (ios) setTimeout(() => setShow(true), 4000);
+    }
   }, []);
 
   const hap = (s: 'light' | 'medium' | 'heavy' = 'light') => { try { if ('vibrate' in navigator) navigator.vibrate(s === 'heavy' ? [15, 5, 15] : s === 'medium' ? 12 : 6); } catch {} };

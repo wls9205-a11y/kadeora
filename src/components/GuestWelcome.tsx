@@ -43,7 +43,7 @@ export default function GuestWelcome() {
       const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
       window.addEventListener('beforeinstallprompt', handler);
 
-      setTimeout(() => setShow(true), 1000);
+      setTimeout(() => setShow(true), 2500);
 
       return () => window.removeEventListener('beforeinstallprompt', handler);
     });

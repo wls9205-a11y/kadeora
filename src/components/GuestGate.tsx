@@ -7,22 +7,26 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
   const [showGate, setShowGate] = useState(false);
 
   useEffect(() => {
-    // 서버에서 로그인 확인됐으면 즉시 리턴
     if (isLoggedIn) return;
-    // 세션당 한 번만
     if (sessionStorage.getItem('kd_gate_shown')) return;
 
-    // 클라이언트에서도 한번 더 확인 (chunked cookie 미인식 방어)
+    // 방문 횟수 카운터 — 3회차부터 게이트 표시
+    const visitCount = parseInt(localStorage.getItem('kd_visit_count') || '0') + 1;
+    localStorage.setItem('kd_visit_count', String(visitCount));
+
+    if (visitCount < 3) return; // 1~2회차는 자유 탐색
+
     const checkAuth = async () => {
       try {
         const { data } = await createSupabaseBrowser().auth.getSession();
-        if (data.session) return; // 로그인 상태 → 게이트 안 띄움
+        if (data.session) return;
       } catch { }
 
+      // 3회차부터: 15초 후 표시 (충분히 탐색한 뒤)
       const timer = setTimeout(() => {
         setShowGate(true);
         sessionStorage.setItem('kd_gate_shown', '1');
-      }, 5000);
+      }, 15000);
       return () => clearTimeout(timer);
     };
 

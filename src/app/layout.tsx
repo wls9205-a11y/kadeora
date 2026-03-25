@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import OfflineBanner from '@/components/OfflineBanner';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import CookieBanner from '@/components/CookieBanner';
 import GuestWelcome from '@/components/GuestWelcome';
 import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
@@ -136,7 +135,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OfflineBanner />
         <KakaoInit />
         {children}
-        <CookieBanner />
         <GuestWelcome />
         </ThemeProvider>
         {/* GA4 */}

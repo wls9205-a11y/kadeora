@@ -21,9 +21,9 @@ export default function AutoPushPrompt() {
     // 이미 허용됨 or 이미 거부됨 → 안 보여줌
     if (Notification.permission === 'granted' || Notification.permission === 'denied') return;
 
-    // 이미 닫은 적 있으면 24시간 동안 안 보여줌
+    // 이미 닫은 적 있으면 7일 동안 안 보여줌 (기존 24시간 → 7일)
     const dismissed = localStorage.getItem('kd-push-dismissed');
-    if (dismissed && Date.now() - Number(dismissed) < 24 * 60 * 60 * 1000) return;
+    if (dismissed && Date.now() - Number(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
 
     // 로그인 상태 확인
     const sb = createSupabaseBrowser();
@@ -34,8 +34,8 @@ export default function AutoPushPrompt() {
       navigator.serviceWorker.ready.then(reg =>
         reg.pushManager.getSubscription().then(sub => {
           if (!sub) {
-            // 구독 안 되어있으면 프롬프트 표시 (500ms 딜레이로 자연스럽게)
-            setTimeout(() => setShow(true), 1500);
+            // 다른 배너가 안 보일 때만, 5초 후 표시
+            setTimeout(() => setShow(true), 5000);
           }
         })
       ).catch(() => {});
