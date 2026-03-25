@@ -228,7 +228,7 @@ export default function ControlTower() {
   // ═══ 로딩 ═══
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#050A18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ padding: '60px 20px', background: '#050A18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 50, height: 50, border: '3px solid #1E2D4520', borderTopColor: '#2563EB', borderRadius: '50%', animation: 'spin .6s linear infinite', margin: '0 auto 16px' }} />
           <div style={{ color: '#7D8DA3', fontSize: 14, fontWeight: 600 }}>컨트롤 타워 초기화...</div>
@@ -239,7 +239,7 @@ export default function ControlTower() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050A18', padding: '20px', color: '#E2E8F0' }}>
+    <div style={{ background: '#050A18', padding: '20px', color: '#E2E8F0' }}>
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}

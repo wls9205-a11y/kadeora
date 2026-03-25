@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const NAV = [
-  { href: '/admin', label: '🎯 커맨드센터', exact: true },
+  { href: '/admin', label: '⚡ 컨트롤 타워', exact: true },
   { href: '/admin/system', label: '⚙️ 시스템' },
   { href: '/admin/blog', label: '📰 블로그' },
   { href: '/admin/realestate', label: '🏢 부동산' },
