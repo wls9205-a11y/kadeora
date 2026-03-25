@@ -86,7 +86,7 @@ export default async function StockDetailPage({ params }: Props) {
       })}} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
+        <Link href="/stock" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식</Link>
         <div style={{ display: 'flex', gap: 6 }}>
           <StockAlertButton symbol={symbol} stockName={s.name} currentPrice={Number(s.price)} currency={s.currency ?? 'KRW'} />
           <StockWatchlistButton symbol={symbol} />
@@ -94,34 +94,37 @@ export default async function StockDetailPage({ params }: Props) {
       </div>
 
       {/* 가격 헤더 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 20, marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
-          <span style={{ fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 10px', borderRadius: 6 }}>{symbol}</span>
-          <span style={{ fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 10px', borderRadius: 6 }}>{s.market}</span>
+      <div style={{
+        background: isUp ? 'linear-gradient(135deg, rgba(248,113,113,0.06), var(--bg-surface))' : isDown ? 'linear-gradient(135deg, rgba(96,165,250,0.06), var(--bg-surface))' : 'var(--bg-surface)',
+        border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 12,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
+          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{symbol}</span>
+          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{s.market}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 'clamp(24px, 7vw, 36px)', fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 'clamp(22px, 6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
           {!isStale && (
-            <span style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
           )}
         </div>
-        {isStale && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 8 }}>⏳ 시세 정보 준비 중입니다</div>}
+        {isStale && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6 }}>시세 정보 준비 중</div>}
         {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>
             {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준
           </div>
         )}
       </div>
 
       {/* 기본 정보 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 12 }}>
         {items.map(({ label, value }) => (
-          <div key={label} style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>{label}</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
+          <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
           </div>
         ))}
       </div>
@@ -196,12 +199,12 @@ export default async function StockDetailPage({ params }: Props) {
         <ShareButtons title={`${s.name} (${symbol}) 주가`} postId={symbol} />
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
-          ⚔️ 종목 비교
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+        <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+          종목 비교
         </Link>
-        <Link href="/discuss" style={{ flex: 1, textAlign: 'center', padding: 14, background: 'var(--brand)', borderRadius: 12, textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-inverse)' }}>
-          💬 라운지 입장
+        <Link href="/discuss" style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 700, color: '#fff' }}>
+          라운지 입장
         </Link>
       </div>
     </div>

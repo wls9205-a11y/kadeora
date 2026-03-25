@@ -92,35 +92,30 @@ function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: s
   }
 
   return (
-    <div className="kd-card">
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, marginBottom: 10 }}>
       {/* 컨트롤 바: 차트 타입 토글 + 기간 선택 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-        {/* 차트 타입 토글 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
         {hasOHLC && (
-          <div style={{ display: 'flex', background: 'var(--bg-hover)', borderRadius: 8, padding: 2 }}>
+          <div style={{ display: 'flex', background: 'var(--bg-hover)', borderRadius: 6, padding: 2 }}>
             {(['candle', 'line'] as const).map(t => (
               <button key={t} onClick={() => setChartType(t)} style={{
-                padding: '5px 12px', border: 'none', borderRadius: 6, cursor: 'pointer',
-                fontSize: 'var(--fs-xs)', fontWeight: 600,
+                padding: '4px 10px', border: 'none', borderRadius: 5, cursor: 'pointer',
+                fontSize: 11, fontWeight: 600,
                 background: chartType === t ? 'var(--brand)' : 'transparent',
-                color: chartType === t ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-                transition: 'all 0.15s',
+                color: chartType === t ? '#fff' : 'var(--text-tertiary)',
               }}>
-                {t === 'candle' ? '🕯️ 캔들' : '📈 라인'}
+                {t === 'candle' ? '캔들' : '라인'}
               </button>
             ))}
           </div>
         )}
-
-        {/* 기간 선택 */}
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 3 }}>
           {PERIODS.map(p => (
             <button key={p.key} onClick={() => setPeriod(p.key)} style={{
-              padding: '4px 10px', border: 'none', borderRadius: 6, cursor: 'pointer',
-              fontSize: 'var(--fs-xs)', fontWeight: 600,
+              padding: '3px 9px', border: 'none', borderRadius: 5, cursor: 'pointer',
+              fontSize: 11, fontWeight: 600,
               background: period === p.key ? 'var(--brand)' : 'var(--bg-hover)',
-              color: period === p.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-              transition: 'all 0.15s',
+              color: period === p.key ? '#fff' : 'var(--text-tertiary)',
             }}>
               {p.label}
             </button>
@@ -198,13 +193,12 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
   return (
     <div>
       {/* 탭 */}
-      <div style={{ display: 'flex', gap: 2, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none', borderBottom: '1px solid var(--border)', paddingBottom: 0 }}>
+      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
-            padding: '8px 14px', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600, background: 'transparent',
-            color: tab === t.key ? 'var(--brand)' : 'var(--text-tertiary)',
-            borderBottom: tab === t.key ? '2px solid var(--brand)' : '2px solid transparent',
-            flexShrink: 0,
+            padding: '7px 14px', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 6, flexShrink: 0,
+            background: tab === t.key ? 'var(--brand)' : 'transparent',
+            color: tab === t.key ? '#fff' : 'var(--text-tertiary)',
           }}>{t.label}</button>
         ))}
       </div>
