@@ -73,6 +73,19 @@ export default async function DiscussDetailPage({ params }: Props) {
   const topic = topicR.data;
   const comments = (commentsR.data || []) as any[];
   const total = (topic.vote_a || 0) + (topic.vote_b || 0);
+
+  // 관련 블로그 (카테고리 기반)
+  let relatedBlogs: any[] = [];
+  try {
+    const catMap: Record<string, string> = { stock: 'stock', apt: 'apt', economy: 'finance' };
+    const blogCat = catMap[topic.category];
+    if (blogCat) {
+      const { data } = await sb.from('blog_posts').select('slug, title, category, view_count')
+        .eq('is_published', true).eq('category', blogCat)
+        .order('view_count', { ascending: false }).limit(3);
+      relatedBlogs = data || [];
+    }
+  } catch {}
   const catLabel = CAT_SEO[topic.category] || '토론';
 
   // JSON-LD: DiscussionForumPosting
@@ -147,6 +160,19 @@ export default async function DiscussDetailPage({ params }: Props) {
 
       {/* Client interactive part (투표 + 댓글) */}
       <DiscussDetailClient initialTopic={topic as any} initialComments={comments} />
+
+      {/* 관련 블로그 (내부 링크 SEO) */}
+      {relatedBlogs.length > 0 && (
+        <div style={{ marginTop: 20, marginBottom: 16 }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📰 관련 분석 글</h3>
+          {relatedBlogs.map((b: any) => (
+            <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}>
+              <span style={{ color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span>
+              <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, fontSize: 'var(--fs-xs)' }}>👀 {(b.view_count || 0).toLocaleString()}</span>
+            </Link>
+          ))}
+        </div>
+      )}
     </article>
   );
 }

@@ -144,6 +144,33 @@ export default async function FeedDetailPage({ params }: Props) {
       ]);
       if (commentsData) comments = commentsData as CommentWithProfile[];
       if (relatedData) related = relatedData;
+
+      // 관련 부동산 현장 (apt 카테고리)
+      if (postData.category === 'apt') {
+        try {
+          const keywords = (postData.title || '').split(/\s+/).filter((w: string) => w.length >= 2).slice(0, 2);
+          if (keywords.length > 0) {
+            const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
+            const { data: sitesData } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu')
+              .eq('is_active', true).or(orQuery).gte('content_score', 25)
+              .order('interest_count', { ascending: false }).limit(3);
+            if (sitesData?.length) related = [...related, ...sitesData.map((s: any) => ({ ...s, _type: 'site' }))];
+          }
+        } catch {}
+      }
+
+      // 관련 종목 (stock 카테고리)
+      if (postData.category === 'stock') {
+        try {
+          const keywords = (postData.title || '').split(/\s+/).filter((w: string) => w.length >= 2).slice(0, 2);
+          if (keywords.length > 0) {
+            const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
+            const { data: stocksData } = await sb.from('stock_quotes').select('symbol, name, market, price, change_pct, currency')
+              .eq('is_active', true).or(orQuery).gt('price', 0).limit(3);
+            if (stocksData?.length) related = [...related, ...stocksData.map((s: any) => ({ ...s, _type: 'stock' }))];
+          }
+        } catch {}
+      }
     }
   } catch {
     // fallback to demo
@@ -345,15 +372,47 @@ export default async function FeedDetailPage({ params }: Props) {
       </div>
 
       {/* Related posts */}
-      {related.length > 0 && (
+      {related.filter((r: any) => !r._type).length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
-          {related.map((r: any, i: number) => (
+          {related.filter((r: any) => !r._type).map((r: any) => (
             <Link key={r.id} href={`/feed/${r.slug || r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
               <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>🤍 {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* 관련 부동산 현장 (내부 링크 SEO) */}
+      {related.filter((r: any) => r._type === 'site').length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🏢 관련 현장</h3>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {related.filter((r: any) => r._type === 'site').map((s: any) => (
+              <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 130, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu || ''}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 관련 종목 (내부 링크 SEO) */}
+      {related.filter((r: any) => r._type === 'stock').length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📈 관련 종목</h3>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {related.filter((r: any) => r._type === 'stock').map((s: any) => (
+              <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 130, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: Number(s.change_pct) >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)', marginTop: 2 }}>
+                  {s.currency === 'USD' ? '$' : '₩'}{Number(s.price).toLocaleString()} {Number(s.change_pct) >= 0 ? '▲' : '▼'}{Math.abs(Number(s.change_pct)).toFixed(2)}%
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>
