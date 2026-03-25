@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['@supabase/supabase-js', 'lucide-react', 'marked'],
   },
 
+  env: {
+    NEXT_PUBLIC_KAKAO_JS_KEY: process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '30cf0c6a2454b191fd4fd3ca5febea01',
+  },
+
   async headers() {
     return [
       {
