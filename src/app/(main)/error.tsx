@@ -5,6 +5,15 @@ import * as Sentry from '@sentry/nextjs';
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => { Sentry.captureException(error); }, [error]);
+
+  // 일시적 네트워크 에러 자동 재시도 (3초 후 1회)
+  useEffect(() => {
+    const isTransient = error.message?.includes('fetch') || error.message?.includes('network') || error.message?.includes('timeout') || error.digest;
+    if (isTransient) {
+      const timer = setTimeout(() => reset(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, reset]);
   return (
     <div style={{ textAlign: 'center', padding: '80px 20px', maxWidth: 480, margin: '0 auto' }}>
       <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 16 }}>😵</div>

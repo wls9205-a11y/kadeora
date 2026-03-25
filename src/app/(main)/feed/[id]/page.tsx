@@ -17,6 +17,7 @@ import PostActions from '@/components/PostActions';
 import FontSizeControl from '@/components/FontSizeControl';
 import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
+import ReadingProgress from '@/components/ReadingProgress';
 
 
 function parsePostId(param: string): { numId: number; isSlug: boolean } {
@@ -209,6 +210,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <ReadingProgress />
       {/* JSON-LD SEO */}
       <script
         type="application/ld+json"

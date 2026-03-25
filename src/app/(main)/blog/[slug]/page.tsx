@@ -15,6 +15,7 @@ import { timeAgo } from '@/lib/format';
 
 export const revalidate = 300;
 import { SITE_URL as SITE } from '@/lib/constants';
+import ReadingProgress from '@/components/ReadingProgress';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -290,6 +291,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <ReadingProgress />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
