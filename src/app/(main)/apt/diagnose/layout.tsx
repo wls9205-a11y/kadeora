@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: '청약 가점 진단',
   description: '나의 청약 가점을 계산하고 당첨 가능성을 진단해보세요. 무주택 기간, 부양가족, 청약통장 기간별 점수 자동 계산.',
   alternates: { canonical: SITE_URL + '/apt/diagnose' },
-  robots: { index: true, follow: true },
+  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
   openGraph: {
     title: '청약 가점 진단기',
     description: '무주택 기간·부양가족·청약통장 기간별 점수 자동 계산',
@@ -19,5 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default function DiagnoseLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '가점 진단' }] }) }} />{children}</>;
 }

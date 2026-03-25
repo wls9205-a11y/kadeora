@@ -35,6 +35,16 @@ export default async function GradesPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '등급 안내' }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: '카더라 등급은 어떻게 결정되나요?', acceptedAnswer: { '@type': 'Answer', text: '활동 포인트(글 작성 +10P, 댓글 +5P, 출석 +10P 등)를 기준으로 자동 등급이 부여됩니다. 매일 새벽 자동 갱신됩니다.' } },
+          { '@type': 'Question', name: '최고 등급은 무엇인가요?', acceptedAnswer: { '@type': 'Answer', text: '카더라신(10단계)이 최고 등급입니다. 새싹→풀잎→클로버→벚꽃→해바라기→스타→파이어→다이아→왕관→카더라신 순서입니다.' } },
+          { '@type': 'Question', name: '등급별 혜택이 있나요?', acceptedAnswer: { '@type': 'Answer', text: '높은 등급일수록 프로필 뱃지, 커뮤니티 신뢰도 표시, 향후 프리미엄 기능 우선 접근 등의 혜택이 제공됩니다.' } },
+          { '@type': 'Question', name: '포인트는 어떻게 획득하나요?', acceptedAnswer: { '@type': 'Answer', text: '글 작성(+10P), 댓글(+5P), 출석체크(+10P), 좋아요 받기(+2P), 초대(+50P) 등 다양한 활동으로 포인트를 적립할 수 있습니다.' } },
+        ],
+      }) }} />
       {/* 헤더 */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>

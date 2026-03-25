@@ -40,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'naver:updated_time': new Date().toISOString(),
       'article:section': '주식',
       'article:tag': `${s.name},${symbol},${s.market},주식,시세,차트`,
+      'dg:plink': `${SITE_URL}/stock/${symbol}`,
     },
   };
 }
@@ -108,6 +109,27 @@ export default async function StockDetailPage({ params }: Props) {
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` },
           { '@type': 'ListItem', position: 3, name: s.name },
+        ],
+      })}} />
+      {/* JSON-LD 3: Article + Speakable (Google Discover + 음성 검색) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'Article',
+        headline: `${s.name} (${symbol}) 주가 시세 분석`,
+        description: s.description || `${s.name} ${s.market} 상장 종목 실시간 시세`,
+        url: `${SITE_URL}/stock/${symbol}`,
+        dateModified: s.updated_at || new Date().toISOString(),
+        author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+        publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png` } },
+        image: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`,
+        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.stock-price-header'] },
+      })}} />
+      {/* JSON-LD 4: FAQ (검색결과 아코디언) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: `${s.name} 현재 주가는?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` } },
+          { '@type': 'Question', name: `${s.name} 어떤 섹터인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}은(는) ${s.sector || s.market} 섹터에 속하며, ${s.description || `${s.market}에 상장된 종목입니다.`}` } },
+          { '@type': 'Question', name: `${s.name} 시세를 어디서 확인하나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 차트, 수급 분석, AI 한줄평, 관련 뉴스를 무료로 확인할 수 있습니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 설정 가능합니다.` } },
         ],
       })}} />
 

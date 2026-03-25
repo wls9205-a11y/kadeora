@@ -117,6 +117,15 @@ export default async function StockPage() {
           { "@type": "ListItem", "position": 2, "name": "주식 시세", "item": SITE_URL + "/stock" },
         ]
       }) }} />
+      {/* FAQ JSON-LD (검색결과 아코디언) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org", "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "카더라에서 어떤 주식을 볼 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "KOSPI, KOSDAQ, NYSE, NASDAQ 등 국내외 주요 종목의 실시간 시세를 제공합니다. 테마별 동향, 섹터 히트맵, AI 종목 분석, 투자자 매매동향까지 확인 가능합니다." } },
+          { "@type": "Question", "name": "주식 시세는 얼마나 자주 업데이트되나요?", "acceptedAnswer": { "@type": "Answer", "text": "장중에는 15분 간격으로 실시간 시세가 업데이트됩니다. 장 마감 후에도 종가 기준 데이터를 제공합니다." } },
+          { "@type": "Question", "name": "카더라 주식 서비스는 무료인가요?", "acceptedAnswer": { "@type": "Answer", "text": "네, 카더라의 모든 주식 시세 조회, 차트, 수급 분석, AI 한줄평, 종목 토론 기능은 완전 무료입니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 무료로 사용할 수 있습니다." } },
+        ],
+      }) }} />
       <StockClient initialStocks={stocks as any} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
     </Suspense>

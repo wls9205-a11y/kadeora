@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('통합 검색')}&category=general`, width: 1200, height: 630, alt: '카더라 통합 검색' }],
   },
   twitter: { card: 'summary_large_image' },
-  robots: { index: true, follow: true },
+  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
 };
 
 export default function SearchPage() {

@@ -119,6 +119,14 @@ export default async function ComplexDetailPage({ params }: Props) {
           { '@type': 'ListItem', position: 3, name: decoded },
         ],
       })}} />
+      {/* FAQ JSON-LD (SERP 아코디언) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: `${decoded} 최근 실거래가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 ${trades.length}건 실거래 내역을 카더라에서 확인할 수 있습니다. ${region} ${sigungu} ${dong} 소재입니다.` } },
+          { '@type': 'Question', name: `${decoded} 시세 조회 방법은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${decoded}의 면적별, 기간별 실거래 내역과 평당가 추이를 무료로 조회할 수 있습니다.` } },
+        ],
+      })}} />
 
       <Link href="/apt/search" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 실거래 검색</Link>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '8px 0 4px' }}>{decoded}</h1>

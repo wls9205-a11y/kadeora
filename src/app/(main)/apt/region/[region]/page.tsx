@@ -107,6 +107,13 @@ export default async function RegionLandingPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}) }} />
       {/* JSON-LD: CollectionPage */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
+      {/* JSON-LD: FAQ (지역 검색 SERP 아코디언) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+        {"@type":"Question","name":`${decoded} 아파트 청약 일정은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에는 현재 ${data.subscriptions.length}건의 청약이 진행 중입니다. 카더라에서 접수 일정, 경쟁률, 분양가를 실시간으로 확인하세요.`}},
+        {"@type":"Question","name":`${decoded} 미분양 아파트 현황은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에는 ${data.unsolds.length}건의 미분양 현장이 있습니다. 할인 분양, 중도금 혜택 등을 비교해보세요.`}},
+        {"@type":"Question","name":`${decoded} 재개발 진행 현황은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에서 ${data.redevelopments.length}건의 재개발·재건축 사업이 진행 중입니다. 사업 단계, 조합 현황, 예상 분양 시기를 확인하세요.`}},
+        {"@type":"Question","name":`${decoded} 실거래가 조회 방법은?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 ${data.transactions.length}건의 아파트 실거래가를 조회할 수 있습니다. 단지별, 면적별, 기간별 필터로 원하는 정보를 찾아보세요.`}},
+      ]}) }} />
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
         <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>

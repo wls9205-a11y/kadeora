@@ -91,6 +91,7 @@ export default async function DiscussDetailPage({ params }: Props) {
     author: { '@type': 'Organization', name: '카더라', url: SITE },
     publisher: { '@type': 'Organization', name: '카더라', url: SITE },
     isPartOf: { '@type': 'DiscussionForum', name: `카더라 ${catLabel} 토론`, url: `${SITE}/discuss` },
+    speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '[itemprop="description"]'] },
     ...(comments.length > 0 ? {
       comment: comments.slice(0, 5).map((c: any) => ({
         '@type': 'Comment',
