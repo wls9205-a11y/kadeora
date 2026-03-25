@@ -3,7 +3,7 @@
 > **마지막 업데이트:** 2026-03-26 세션 38
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 38 작업 내역 (2026-03-26) — 커밋 3건, 34파일
+## 세션 38 작업 내역 (2026-03-26) — 커밋 10건+, 50파일+
 
 ### 1. 이미지 사이트맵 (커밋 1)
 - `/image-sitemap.xml` 신규 — apt_sites 이미지 + blog_posts 커버 이미지
@@ -14,20 +14,49 @@
 - `'use client'` 제거 → 서버 컴포넌트 + DiscussDetailClient 분리
 - generateMetadata: 동적 타이틀/OG/네이버 메타/robots
 - JSON-LD 2종: DiscussionForumPosting + BreadcrumbList
-- 시맨틱 HTML: `<article>` + `<h1 itemProp>` + `<time dateTime>`
-- sitemap.ts에 discussion_topics 추가 (engagement 기반 priority)
-- RSS feed.xml에 토론 100건 추가
-- IndexNow에 discuss + blog URL 추가 (기존 apt만 → 3종)
 
-### 3. sync-apt-sites 크론 경량화 (커밋 1)
-- Step3 content_score: 5,000건 row-by-row UPDATE → score별 그룹핑 배치
-- ~5,000쿼리 → ~20쿼리 (99.6% 감소)
+### 3. sync-apt-sites 크론 전면 확장 (커밋 6)
+- 6단계로 확장: 청약→재개발→실거래(NEW)→미분양(NEW)→score→sitemap
+- 실거래 고유 단지 집계 → 가격범위/면적/거래수 자동 계산
+- 미분양 개별 단지 신규 생성 + 기존 현장 보강
 
-### 4. 블로그 h2 시맨틱 강화 (커밋 1)
-- `normalizeMarkdownHeadings()`: `**볼드만 줄**` → `## h2` 전처리
-- marked() 호출 전 적용 → TOC/SEO 모두 h2 인식
+### 4. apt_sites 대규모 확장 (DB 직접)
+- 실거래 2,126개 단지 일괄 삽입 (trade 타입)
+- 미분양 22개 개별 단지 신규 삽입
+- site_type 체크 제약조건에 'trade' 추가
+- 교차 매칭: 청약/대장 현장에 실거래 데이터 16건 보강
+- **총: 3,272건 → 5,420건 (66% 증가)**
 
-### 5. Mission Control 올인원 어드민 대시보드 (커밋 2)
+### 5. content_score 전면 보강 (DB 직접 + 커밋 7-8)
+- 설명 200자+ 전체 확장: 5,420건
+- FAQ 5~6개 증량: 5,420건
+- key_features jsonb 배열 생성: 5,215건
+- 점수 공식 확장 (신규 7개 항목): 설명200+(3), FAQ5+(3), key_features(2), 주소(3), 시행사(2), 입주예정(3), 준공년도(3)
+- **최대 ~103점, 청약 평균 79, 최고 97점**
+
+### 6. 전체 앱 감사 + 긴급 수정 (커밋 9-10)
+- 🔴 stock-price maxDuration:120 추가 (24h 내 28건 연속 504 해결)
+- 🔴 sync-apt-sites maxDuration:120 추가
+- 🔴 OG route 하드코딩 URL → env 변수
+- 🟡 canonical URL 5페이지 추가 (diagnose, map, compare, profile, megaphone)
+- 🟡 meta description 보강 5페이지
+- 🟡 어드민 알림 509건 읽음 처리
+
+### 7. 코드 정리 (커밋 10)
+- 레거시 어드민 4파일 삭제: AdminHub/AdminNav/AdminSites/ControlTower (-1,106줄)
+- 빈 import 4건 제거
+- onboarding noindex 추가
+
+### 8. SEO 추가 강화 (커밋 11)
+- feed.xml 타입별 RSS 라벨 (trade→실거래가·시세, unsold→미분양 현황 등)
+- sitemap priority 타입별 세분화 (subscription 0.85, trade 0.8 등)
+
+### 9. 크론 스케줄 최적화 (커밋 12)
+- redev-geocode: 주1회(목) → 매일 05:00 (36일→36일로 전체 커버)
+- collect-site-facilities: 주1회(월) → 매일 05:30
+- collect-site-trends: 주1회(월) → 매일 06:00
+- collect-site-images: 매일 04:30 유지 (200건/일)
+- 04:30 충돌 해소 (geocode + images 동시 실행 방지)
 - **통합 대시보드 API** (`/api/admin/dashboard`): 6개 섹션, 병렬 쿼리
 - **MissionControl.tsx**: 기존 10개 분산 → 단일 페이지 + 사이드바 8탭
   - 📊 대시보드: KPI 12개 + 크론 헬스바 + 일일차트 + 최근가입
@@ -72,10 +101,13 @@
 - **Apt detail**: crd/ct/rw 상수 전반 2~4px 축소, key metrics gap 6→4
 
 ### PENDING 작업
+- [ ] 이미지 수집 크론 자동 진행 중 (200건/일, ~27일 소요)
+- [ ] 좌표 수집 크론 자동 진행 중 (150건/일, ~36일 소요)
+- [ ] 지하철역 매칭 크론 자동 진행 중 (좌표 수집 후 자동)
 - [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출 + 루트 URL 수집)
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 - [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
-- [ ] 기존 어드민 서브페이지 10개 → MissionControl로 리다이렉트 정리
+- [x] 기존 어드민 파일 정리 (AdminHub/Nav/Sites/ControlTower 삭제 완료)
 
 ## 세션 37 작업 내역 (2026-03-25)
 

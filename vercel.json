@@ -116,7 +116,7 @@
     },
     {
       "path": "/api/cron/redev-geocode",
-      "schedule": "30 4 * * 4"
+      "schedule": "0 5 * * *"
     },
     {
       "path": "/api/cron/crawl-unsold-molit",
@@ -260,11 +260,11 @@
     },
     {
       "path": "/api/cron/collect-site-trends",
-      "schedule": "0 5 * * 1"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/collect-site-facilities",
-      "schedule": "30 5 * * 1"
+      "schedule": "30 5 * * *"
     },
     {
       "path": "/api/cron/purge-withdrawn-consents",
