@@ -1,9 +1,47 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 38
+> **마지막 업데이트:** 2026-03-26 세션 38 (후반)
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 38 작업 내역 (2026-03-26) — 커밋 20건+, 100파일+
+## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 13건+
+
+### 카카오톡 공유 완전 수정 (커밋 4건)
+- SDK 로드 후 초기화 실패 → ensureKakaoReady() 클릭 시 재시도
+- NEXT_PUBLIC_KAKAO_JS_KEY 빌드 타임 인라인: next.config.ts env 섹션 추가 (fallback 30cf0c6a...)
+- CSP form-action: sharer.kakao.com 추가 (공개+보호 양쪽)
+- 디버그 로그 추가 → 원인 확인 → 제거
+
+### 카카오 공유 카드 브랜딩 (커밋 1건)
+- /api/og: 주황 K → ●●● 네이비 그라데이션 로고 (앱 아이콘 일치)
+- 배경 3톤 Refined Navy, 태그라인 #93C5FD, 서비스 키워드 이모지
+- 초대 카드: imageUrl /og-image.png → /api/og, description "+50P!" 추가
+
+### 주식 페이지 전면 디자인 (커밋 2건, 4파일)
+1. AI 시황 카드: 센티먼트별 그라데이션 배경
+2. 지수 바: 변동액 제거, 등락 바 3px 통합
+3. 종목 행: 전체 Link 감싸기(상세 버튼 제거), 등락 바 40x5px
+4. M7 카드: 등락별 색상 배경+보더
+5. 상세 가격 헤더: 등락별 그라데이션
+6. 차트/탭: 캔들/라인 이모지 제거, 필 스타일 통일
+7. 비교 페이지: WIN 라벨 + 파란 하이라이트
+- 0% → "장 마감" 텍스트 표시 (등락 바 숨김)
+
+### 주식 시세 수집 전종목 확장 (커밋 1건)
+- numOfRows 200→1000 + 페이지네이션 (KOSPI ~950 + KOSDAQ ~1,700)
+- 배치 upsert 100개씩, maxDuration 60→120초
+- guessSector 11→18섹터 (철강/유틸/소비재/운송/조선 추가)
+- STOCK_DATA_API_KEY: Vercel Project에 추가 완료 (data.go.kr 발급)
+- ⏳ API 키 활성화 대기 중 (발급 후 1~2시간 소요)
+
+### PENDING
+- [ ] STOCK_DATA_API_KEY 활성화 후 stock-crawl 수동 실행 → 전종목 시세 갱신
+- [ ] KIS_APP_KEY 발급 (한국투자증권 실시간 시세)
+- [ ] 카카오 OG 캐시 초기화 (https://developers.kakao.com/tool/clear/og)
+- [ ] 토스 라이브키 교체
+
+---
+
+## 세션 38 전반 작업 (2026-03-25~26) — 커밋 20건+, 100파일+
 
 ### 1. 이미지 사이트맵 (커밋 1)
 - `/image-sitemap.xml` 신규 — apt_sites 이미지 + blog_posts 커버 이미지
