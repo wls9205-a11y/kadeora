@@ -1,3 +1,4 @@
+export const maxDuration = 15;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { sendPushToUsers } from '@/lib/push-utils';
