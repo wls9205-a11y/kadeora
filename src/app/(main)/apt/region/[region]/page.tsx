@@ -44,6 +44,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'dg:plink': `${SITE_URL}/apt/region/${decoded}`,
       'article:section': '부동산',
       'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양`,
+      ...((() => {
+        const GEO: Record<string, string> = { '서울': 'KR-11', '부산': 'KR-26', '대구': 'KR-27', '인천': 'KR-28', '광주': 'KR-29', '대전': 'KR-30', '울산': 'KR-31', '세종': 'KR-36', '경기': 'KR-41', '강원': 'KR-42', '충북': 'KR-43', '충남': 'KR-44', '전북': 'KR-45', '전남': 'KR-46', '경북': 'KR-47', '경남': 'KR-48', '제주': 'KR-50' };
+        const g = Object.entries(GEO).find(([k]) => decoded.includes(k));
+        if (g) return { 'geo.region': g[1], 'geo.placename': decoded } as Record<string, string>;
+        return {} as Record<string, string>;
+      })()),
     },
   };
 }

@@ -109,7 +109,15 @@ export default async function ComplexDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Place',
         name: `${decoded} 아파트`,
-        address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: `${sigungu} ${dong}` },
+        address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: `${sigungu} ${dong}`, addressCountry: 'KR' },
+      })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '실거래 검색', item: `${SITE_URL}/apt/search` },
+          { '@type': 'ListItem', position: 3, name: decoded },
+        ],
       })}} />
 
       <Link href="/apt/search" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 실거래 검색</Link>

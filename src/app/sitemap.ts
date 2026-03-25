@@ -68,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE}/stock/${s.symbol}`,
       lastModified: new Date(s.updated_at || Date.now()),
       changeFrequency: 'daily' as const,
-      priority: 0.7,
+      priority: 0.8,
     }));
 
     aptPages = (aptsR.data || []).map(a => ({

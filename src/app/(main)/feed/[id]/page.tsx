@@ -214,6 +214,14 @@ export default async function FeedDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '피드', item: `${SITE_URL}/feed` },
+          { '@type': 'ListItem', position: 3, name: post.title },
+        ],
+      }) }} />
 
       {/* Back link */}
       <div style={{ marginBottom: 20 }}>
