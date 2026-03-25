@@ -121,7 +121,7 @@ export default function ControlTower() {
         // 품질 이슈
         sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true).is('total_households', null),
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).is('ai_summary', null),
-        sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true).is('image_url', null),
+        sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true).is('images', null),
       ]);
 
       // 건강 상태 설정

@@ -166,8 +166,8 @@ export async function POST(req: NextRequest) {
     // 2. 모드 파싱
     const { mode = 'full', failedOnly = [] } = await req.json();
     
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+    const requestUrl = new URL(req.url);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${requestUrl.protocol}//${requestUrl.host}`;
     const cronSecret = process.env.CRON_SECRET;
 
     let endpoints: string[] = [];
