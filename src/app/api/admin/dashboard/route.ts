@@ -60,6 +60,33 @@ export async function GET(req: Request) {
         .select('id, nickname, provider, created_at, grade, is_seed, region_text')
         .order('created_at', { ascending: false }).limit(5);
 
+      // 방문자 요약 (관리자 제외)
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const adminIds = ['265d8c3b-bd40-40c1-b7d2-bdde16a88204', 'b7b4dd42-4685-4ca6-9ee3-dfedf82e86f2'];
+      const [pvTodayR, pvWeekR] = await Promise.all([
+        sb.from('page_views').select('visitor_id').gte('created_at', todayStart),
+        sb.from('page_views').select('visitor_id, path, referrer').gte('created_at', weekAgo),
+      ]);
+      const pvTodayFiltered = (pvTodayR.data || []);
+      const pvWeekFiltered = (pvWeekR.data || []);
+      const todayPV = pvTodayFiltered.length;
+      const todayUV = new Set(pvTodayFiltered.map((v: any) => v.visitor_id)).size;
+      const weekPV = pvWeekFiltered.length;
+      const weekUV = new Set(pvWeekFiltered.map((v: any) => v.visitor_id)).size;
+      // Top referrer
+      const extRef: Record<string, number> = {};
+      pvWeekFiltered.forEach((v: any) => {
+        if (!v.referrer) return;
+        try { const h = new URL(v.referrer).hostname; if (!h.includes('kadeora')) extRef[h.replace('www.','')] = (extRef[h.replace('www.','')] || 0) + 1; } catch {}
+      });
+      const topReferrer = Object.entries(extRef).sort((a,b) => b[1]-a[1])[0] || ['없음', 0];
+
+      // 최근 게시글 5건
+      const { data: recentPosts } = await sb.from('posts')
+        .select('id, title, category, likes_count, comments_count, created_at, profiles!inner(nickname)')
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false }).limit(5);
+
       // 크론 요약
       const cronData = cronR.data || [];
       const cronSuccess = cronData.filter(c => c.status === 'success').length;
@@ -111,7 +138,9 @@ export async function GET(req: Request) {
           newUsersWeek: newUsersWeekR.count ?? 0,
           activeUsersWeek: activeUsersR.count ?? 0,
         },
+        visitors: { todayPV, todayUV, weekPV, weekUV, topReferrer: { source: topReferrer[0], count: topReferrer[1] } },
         recentUsers: recentUsers ?? [],
+        recentPosts: recentPosts ?? [],
         payments: paymentsR.data ?? [],
         dailyStats: dailyR.data ?? [],
         cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames },
