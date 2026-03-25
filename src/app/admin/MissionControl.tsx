@@ -207,7 +207,7 @@ function DashboardSection() {
         <KPICard icon="✍️" label="블로그" value={kpi.blogs} color={C.purple} />
         <KPICard icon="📈" label="주식 종목" value={kpi.stocks} color={C.green} />
         <KPICard icon="🏠" label="청약 현장" value={kpi.subscriptions} color={C.yellow} />
-        <KPICard icon="🏢" label="SEO 현장" value={kpi.sites} sub={`관심 ${kpi.interests}건`} color={C.brand} />
+        <KPICard icon="🏢" label="통합 현장" value={kpi.sites} sub={`관심 ${kpi.interests}건`} color={C.brand} />
         <KPICard icon="🏗️" label="재개발" value={kpi.redev} color={C.cyan} />
         <KPICard icon="📉" label="미분양" value={kpi.unsold} color={C.red} />
         <KPICard icon="💰" label="실거래" value={kpi.trades} color={C.green} />
@@ -761,7 +761,7 @@ function RealEstateSection() {
   if (loading) return <Spinner />;
 
   const tabs = [
-    { key: 'sites' as const, label: `SEO 현장 (${data?.sites?.length || 0})`, icon: '🏢' },
+    { key: 'sites' as const, label: `통합 현장 (${data?.sites?.length || 0})`, icon: '🏢' },
     { key: 'subscriptions' as const, label: `청약 (${data?.subscriptions?.length || 0})`, icon: '📋' },
     { key: 'unsold' as const, label: `미분양 (${data?.unsold?.length || 0})`, icon: '📉' },
     { key: 'redev' as const, label: `재개발 (${data?.redevelopment?.length || 0})`, icon: '🏗️' },
@@ -951,10 +951,15 @@ function GodModeSection() {
     timerRef.current = setInterval(() => setElapsed(Date.now() - start), 100);
 
     try {
+      const body: any = { mode: m };
+      // 실패 재시도 시 이전 실패 목록 전달
+      if (m === 'failed' && results.length > 0) {
+        body.failedOnly = results.filter(r => !r.ok).map(r => r.endpoint).filter(Boolean);
+      }
       const res = await fetch('/api/admin/god-mode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: m }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       setResults(data.results || []);
@@ -968,12 +973,12 @@ function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: '33개 전 크론', color: C.brand },
-    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식', color: C.green },
-    { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/테마', color: C.cyan },
-    { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드', color: C.purple },
-    { key: 'content', label: '📝 콘텐츠', desc: '시드/블로그/채팅', color: C.yellow },
-    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/정리', color: C.textSec },
+    { key: 'full', label: '⚡ 전체 실행', desc: '42개 전 크론', color: C.brand },
+    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식/재개발 15개', color: C.green },
+    { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/테마/검증 6개', color: C.cyan },
+    { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드/리라이트 6개', color: C.purple },
+    { key: 'content', label: '📝 콘텐츠', desc: '시드/블로그/채팅 6개', color: C.yellow },
+    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/정리 10개', color: C.textSec },
     { key: 'failed', label: '🔴 실패 재시도', desc: '실패한 것만', color: C.red },
   ];
 
@@ -1019,12 +1024,13 @@ function GodModeSection() {
             <KPICard icon="⏱" label="소요시간" value={`${(elapsed / 1000).toFixed(1)}s`} color={C.brand} />
           </div>
           <DataTable
-            headers={['크론', '상태', '소요시간', '에러']}
+            headers={['크론', '상태', 'HTTP', '소요시간', '에러']}
             rows={results.map(r => [
               <span key="n" style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{r.name}</span>,
               r.ok ? <Badge key="s" color={C.green}>✓ OK</Badge> : <Badge key="s" color={C.red}>✗ FAIL</Badge>,
+              r.status ? <span key="h" style={{ color: r.status >= 400 ? C.red : r.status >= 200 ? C.green : C.textDim, fontFamily: 'monospace', fontSize: 12 }}>{r.status}</span> : '—',
               r.duration ? `${(r.duration / 1000).toFixed(1)}s` : '—',
-              r.error || '—',
+              r.error ? <span key="e" style={{ color: C.red, fontSize: 11, maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{r.error}</span> : '—',
             ])}
           />
         </>

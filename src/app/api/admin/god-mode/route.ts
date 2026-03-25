@@ -22,10 +22,12 @@ const CRON_GROUPS = {
     '/api/cron/crawl-busan-redev',
     '/api/cron/crawl-gyeonggi-redev',
     '/api/cron/crawl-nationwide-redev',
-    '/api/cron/stock-refresh',
+    '/api/stock-refresh',           // ⚠️ /api/cron 아님
     '/api/cron/exchange-rate',
     '/api/cron/stock-news-crawl',
     '/api/cron/stock-flow-crawl',
+    '/api/cron/stock-price',
+    '/api/cron/invest-calendar-refresh',
   ],
   // Phase 2: 데이터 가공 (수집 후)
   process: [
@@ -34,6 +36,7 @@ const CRON_GROUPS = {
     '/api/cron/stock-theme-daily',
     '/api/cron/redev-verify-households',
     '/api/cron/redev-geocode',
+    '/api/cron/apt-backfill-details',
   ],
   // Phase 3: AI 생성 (가공 후)
   ai: [
@@ -42,6 +45,7 @@ const CRON_GROUPS = {
     '/api/cron/collect-site-images',
     '/api/cron/collect-site-trends',
     '/api/cron/collect-site-facilities',
+    '/api/cron/blog-rewrite',
   ],
   // Phase 4: 콘텐츠 생성
   content: [
@@ -59,8 +63,11 @@ const CRON_GROUPS = {
     '/api/cron/auto-grade',
     '/api/cron/cleanup',
     '/api/cron/purge-withdrawn-consents',
-    '/api/cron/indexnow',
+    '/api/indexnow',                // ⚠️ /api/cron 아님
     '/api/cron/expire-listings',
+    '/api/cron/check-price-alerts',
+    '/api/cron/portfolio-snapshot',
+    '/api/cron/push-apt-deadline',
   ],
 };
 
@@ -132,13 +139,14 @@ async function runBatch(
       batch.map(ep => runCron(ep, baseUrl, cronSecret))
     );
     
-    for (const r of batchResults) {
+    for (let j = 0; j < batchResults.length; j++) {
+      const r = batchResults[j];
       if (r.status === 'fulfilled') {
         results.push(r.value);
       } else {
         results.push({
-          endpoint: batch[results.length % batch.length] || '',
-          name: 'unknown',
+          endpoint: batch[j] || '',
+          name: getName(batch[j] || ''),
           ok: false,
           status: 0,
           duration: 0,
