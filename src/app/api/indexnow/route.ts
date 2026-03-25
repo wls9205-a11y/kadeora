@@ -16,25 +16,31 @@ const INDEXNOW_KEY = '3a23def313e1b1283822c54a0f9a5675';
 async function handler(_req: NextRequest) {
   const sb = getSupabaseAdmin();
 
-  // 최근 24시간 내 업데이트된 현장 URL 수집
+  // 최근 24시간 내 업데이트된 URL 수집 (4종)
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const [sitesR, blogsR, discussR] = await Promise.all([
+  const [sitesR, blogsR, discussR, stocksR] = await Promise.all([
     sb.from('apt_sites').select('slug')
-      .eq('is_active', true).gte('content_score', 40).gte('updated_at', since).limit(50),
+      .eq('is_active', true).gte('content_score', 25).gte('updated_at', since).limit(100),
     sb.from('blog_posts').select('slug')
-      .eq('is_published', true).gte('updated_at', since).limit(30),
+      .eq('is_published', true).gte('updated_at', since).limit(50),
     sb.from('discussion_topics').select('id')
       .gte('created_at', since).limit(20),
+    sb.from('stock_quotes').select('symbol')
+      .eq('is_active', true).gte('updated_at', since).limit(50),
   ]);
 
   const urls: string[] = [];
   for (const s of sitesR.data || []) urls.push(`${SITE_URL}/apt/${s.slug}`);
   for (const b of blogsR.data || []) urls.push(`${SITE_URL}/blog/${b.slug}`);
   for (const d of discussR.data || []) urls.push(`${SITE_URL}/discuss/${d.id}`);
+  for (const s of stocksR.data || []) urls.push(`${SITE_URL}/stock/${s.symbol}`);
 
   // 정적 중요 페이지도 포함
   urls.push(`${SITE_URL}/apt`);
   urls.push(`${SITE_URL}/blog`);
+  urls.push(`${SITE_URL}/stock`);
+  urls.push(`${SITE_URL}/feed`);
+  urls.push(`${SITE_URL}/discuss`);
 
   if (urls.length === 0) {
     return NextResponse.json({ submitted: 0, message: 'no updated URLs' });

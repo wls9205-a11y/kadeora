@@ -112,7 +112,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '@type': 'ImageObject',
               url: SITE_URL + '/images/brand/kadeora-hero.png',
             },
-            contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', availableLanguage: '한국어' },
+            contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', telephone: '+82-10-5001-1382', availableLanguage: '한국어' },
+            address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호' },
           },
         }) }} />
         {/* WebSite schema — Google Sitelinks 검색 박스 */}
@@ -123,7 +124,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           url: SITE_URL,
           potentialAction: {
             '@type': 'SearchAction',
-            target: { '@type': 'EntryPoint', urlTemplate: 'https://kadeora.app/search?q={search_term_string}' },
+            target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
             'query-input': 'required name=search_term_string',
           },
         }) }} />
