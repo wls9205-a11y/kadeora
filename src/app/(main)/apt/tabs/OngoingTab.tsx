@@ -109,7 +109,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
     return (
     <div>
       {/* 지역 필터 — 컴팩트 필 */}
-      <div className="apt-pill-row">
+      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
           padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: ongoingRegion === '전체' ? 700 : 500,
           background: ongoingRegion === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
@@ -129,6 +129,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'rgba(255,255,255,0.7)' : 'var(--accent-red)', marginLeft: 3, fontSize: 'var(--fs-xs)' }}>●</span>}
           </button>
         ))}
+        <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
 
       {/* ① 입주 임박 배너 */}

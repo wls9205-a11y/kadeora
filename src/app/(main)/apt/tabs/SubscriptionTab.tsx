@@ -72,7 +72,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   return (
         <div>
           {/* 지역 필터 — 컴팩트 필 */}
-          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2, paddingRight: 8, WebkitOverflowScrolling: 'touch' }}>
+          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2, WebkitOverflowScrolling: 'touch' }}>
             <button onClick={() => setRegion('전체')} style={{
               padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === '전체' ? 700 : 500,
               background: region === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
@@ -92,6 +92,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 {r.open > 0 && <span style={{ color: region === r.name ? 'rgba(255,255,255,0.7)' : 'var(--accent-green)', marginLeft: 3, fontSize: 'var(--fs-xs)' }}>●</span>}
               </button>
             ))}
+            <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
           </div>
 
           {/* 검색 + 정렬 + 통계 요약 */}

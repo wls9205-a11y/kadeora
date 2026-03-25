@@ -68,7 +68,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>미분양 현황</span>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
       </div>
-      <div className="apt-pill-row">
+      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         <button onClick={() => setUnsoldRegion('전체')} style={{
           padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: unsoldRegion === '전체' ? 700 : 500,
           background: unsoldRegion === '전체' ? 'var(--accent-red)' : 'var(--bg-hover)',
@@ -87,6 +87,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             {r.name} {r.unitCount.toLocaleString()}
           </button>
         ))}
+        <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
 
       {/* 미분양 급증 경고 배너 — 지역별 현황 아래 */}
@@ -199,8 +200,9 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
       {/* 안내 + 검색 + 필터 */}
       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
       <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" />
-      <div style={{ display: 'flex', gap: 5, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 8, paddingBottom: 2 }}>
+      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 8, paddingBottom: 2 }}>
         {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
+        <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
         총 <strong style={{ color: 'var(--accent-red)' }}>{fu.length}</strong>건 · {fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0).toLocaleString()}세대

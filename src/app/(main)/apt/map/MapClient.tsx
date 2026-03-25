@@ -181,13 +181,15 @@ export default function MapClient() {
   };
 
   const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+  const [sdkError, setSdkError] = useState(false);
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
       <Script
-        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services,clusterer&autoload=false`}
+        src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services,clusterer&autoload=false`}
         strategy="afterInteractive"
         onLoad={() => setSdkReady(true)}
+        onError={() => setSdkError(true)}
       />
 
       {/* 헤더 */}
@@ -220,11 +222,20 @@ export default function MapClient() {
       {/* 지도 */}
       <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
         <div ref={mapRef} style={{ width: '100%', height: 500, background: 'var(--bg-hover)' }}>
-          {!sdkReady && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+          {sdkError ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', fontSize: 14, gap: 8 }}>
+              <span style={{ fontSize: 32 }}>🗺️</span>
+              <span>지도를 불러올 수 없습니다</span>
+              <button onClick={() => window.location.reload()} style={{
+                padding: '6px 16px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
+                border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 4,
+              }}>새로고침</button>
+            </div>
+          ) : !sdkReady ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', fontSize: 13 }}>
               지도 로딩 중...
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* 선택된 핀 정보 */}

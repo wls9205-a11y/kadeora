@@ -86,7 +86,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>실거래 현황</span>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
       </div>
-      <div className="apt-pill-row">
+      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         <button onClick={() => { setRegion('전체'); setPage(1); }} style={{
           padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === '전체' ? 700 : 500,
           background: region === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
@@ -105,6 +105,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             {r.name} {r.count}
           </button>
         ))}
+        <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
 
       {/* 대시보드 */}

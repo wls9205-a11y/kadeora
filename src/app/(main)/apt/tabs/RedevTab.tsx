@@ -87,7 +87,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>재개발 현황</span>
               <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {redevelopment.length}건</span>
             </div>
-            <div className="apt-pill-row">
+            <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
               <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
                 padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: redevRegion === '전체' ? 700 : 500,
                 background: redevRegion === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
@@ -106,6 +106,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   {r.name} {r.total}
                 </button>
               ))}
+              <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
             </div>
 
             {/* 현황 요약 */}
