@@ -108,7 +108,7 @@ export async function middleware(request: NextRequest) {
       "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://kauth.kakao.com https://accounts.google.com",
+      "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
     ].join('; ');
     response.headers.set('Content-Security-Policy', csp);
     response.headers.set('x-nonce', nonce);
@@ -201,7 +201,7 @@ export async function middleware(request: NextRequest) {
     "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
-    "form-action 'self' https://kauth.kakao.com https://accounts.google.com",
+    "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
   ].join('; ');
 
   response.headers.set('Content-Security-Policy', csp);
