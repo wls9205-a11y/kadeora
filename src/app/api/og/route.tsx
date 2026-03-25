@@ -23,13 +23,15 @@ const CATEGORY_LABELS: Record<string, string> = {
   general: '정보',
 };
 
+const SITE = process.env.NEXT_PUBLIC_BASE_URL || 'https://kadeora.app';
+
 const FALLBACK_IMAGES: Record<string, string> = {
-  stock: 'https://kadeora.app/images/brand/kadeora-wide.png',
-  finance: 'https://kadeora.app/images/brand/kadeora-hero.png',
-  apt: 'https://kadeora.app/images/brand/kadeora-full.png',
-  unsold: 'https://kadeora.app/images/brand/kadeora-full.png',
-  blog: 'https://kadeora.app/images/brand/kadeora-wide.png',
-  default: 'https://kadeora.app/images/brand/kadeora-hero.png',
+  stock: `${SITE}/images/brand/kadeora-wide.png`,
+  finance: `${SITE}/images/brand/kadeora-hero.png`,
+  apt: `${SITE}/images/brand/kadeora-full.png`,
+  unsold: `${SITE}/images/brand/kadeora-full.png`,
+  blog: `${SITE}/images/brand/kadeora-wide.png`,
+  default: `${SITE}/images/brand/kadeora-hero.png`,
 };
 
 export async function GET(req: NextRequest) {

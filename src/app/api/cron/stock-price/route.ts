@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
+export const maxDuration = 120;
+
 function guessSector(name: string): string {
   if (/반도체|하이닉스|삼성전자|마이크론|엔비디아/.test(name)) return '반도체';
   if (/바이오|셀트리온|삼성바이오|유한양행|녹십자|한미약품/.test(name)) return '바이오';
