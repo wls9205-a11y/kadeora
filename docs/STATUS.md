@@ -3,7 +3,7 @@
 > **마지막 업데이트:** 2026-03-26 세션 38
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 38 작업 내역 (2026-03-26) — 커밋 2건, 15파일, +1,674줄 -262줄
+## 세션 38 작업 내역 (2026-03-26) — 커밋 3건, 34파일
 
 ### 1. 이미지 사이트맵 (커밋 1)
 - `/image-sitemap.xml` 신규 — apt_sites 이미지 + blog_posts 커버 이미지
@@ -40,6 +40,36 @@
   - ⚡ GOD MODE: 7모드 병렬 실행 + 실시간 타이머
 - god-mode API `single` 모드 추가 (개별 크론 단건 실행)
 - 디자인: 다크 테마 (#050A18), 접이식 사이드바, fadeIn, 호버 인터랙션
+
+### 6. 디자인 전면 개편 — Refined Navy + Stacked Bar (커밋 3, 19파일)
+
+#### 디자인 토큰 정비 (globals.css 1416→1387줄)
+- `--bg-surface` #0A1225→#0C1528 (카드-배경 대비 +40%)
+- `--border` #152240→#1A2A4A (경계선 가시성 향상)
+- border 2px→1px 전역 (nav-bar, tab-bar, header)
+- 중복 제거: kd-card 3곳→1곳, kd-pill 2곳→1곳, shadow-sm 2곳→1곳
+
+#### 부동산 지역 시각화 강화
+- **RegionStackedBar.tsx 신규 (231줄)**: 지역별 5색 수평 스택바 (청약/분양/미분양/재개발/실거래)
+  - 클릭 → 지역 필터, 호버 하이라이트, 선택 시 비선택 fade, 범례 포함
+- KPI 4칸→5칸 (재개발 추가) + 카테고리별 accent background
+- SubscriptionTab 4열 지역 그리드(35줄) → 수평 필 필터(15줄), 면적 60% 절약
+
+#### 네비게이션 컴팩트화
+- 헤더 48→44px, 로고 30→26px, 검색바 34→30px
+- 하단 탭바 56→48px + active dot indicator 추가
+- TrendingTicker 32→26px (padding 5→3, height 22→20)
+- GuestCTA 2줄→1줄, border-radius 16→12
+- InstallBanner/Toast/More메뉴 bottom offset 전부 동기화
+- **모바일 상단 18px 콘텐츠 영역 확보** (헤더-4 + 트렌딩-6 + 탭바-8)
+
+#### 핵심 페이지 개선
+- **Feed**: 카드 padding 14→12, avatar 36→32, 인터랙션바 borderRadius 20→16, 아이콘 15→14px
+- **Blog**: 카드 gap 12→8, 썸네일 80→56px, excerpt 제거, 카테고리 이모지→텍스트만
+- **Stock**: 헤더 fs-xl→20px, 환율 표시 축소, 토글 12→10px, 지수바 gap 10→8
+- **Discuss**: SSR 헤더 컴팩트(radius 12→10, padding 20→16), 투표바 accent glow, 댓글 avatar 32→28
+- **Homepage**: 섹션 카드 ratio 8:5→16:9, minWidth 340→320, radius 16→12, 통계 grid gap 12→8
+- **Apt detail**: crd/ct/rw 상수 전반 2~4px 축소, key metrics gap 6→4
 
 ### PENDING 작업
 - [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출 + 루트 URL 수집)
