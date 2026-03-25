@@ -23,9 +23,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ch = `${Number(s.change_pct) >= 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
   return {
     title: `${s.name} (${symbol}) 주가`,
-    description: `${s.name} 현재가 ${p} ${ch}. ${s.market} 상장.`,
+    description: `${s.name} 현재가 ${p} ${ch}. ${s.market} 상장. 실시간 시세, 차트, 수급, 뉴스, AI 한줄평을 카더라에서 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/stock/${symbol}` },
-    openGraph: { title: `${s.name} 주가`, description: `${s.market} · ${p} · ${ch}`, images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock` }] },
+    openGraph: {
+      title: `${s.name} (${symbol}) ${p} ${ch}`,
+      description: `${s.market} 상장 · 실시간 시세 · 차트 · 수급 분석 · 종목 토론`,
+      url: `${SITE_URL}/stock/${symbol}`,
+      siteName: '카더라',
+      locale: 'ko_KR',
+      type: 'article',
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` }],
+    },
+    twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 실시간 시세 · 차트 · 수급 분석` },
+    other: {
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
+      'article:section': '주식',
+      'article:tag': `${s.name},${symbol},${s.market},주식,시세,차트`,
+    },
   };
 }
 
@@ -68,21 +83,32 @@ export default async function StockDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      {/* JSON-LD 구조화 데이터 */}
+      {/* JSON-LD 1: FinancialProduct + ExchangeRateSpecification */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         name: `${s.name} (${symbol}) 주가 정보`,
-        description: `${s.name} ${s.market} 상장. 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}.`,
+        description: s.description || `${s.name} ${s.market} 상장. 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}.`,
         url: `${SITE_URL}/stock/${symbol}`,
+        dateModified: s.updated_at || new Date().toISOString(),
         mainEntity: {
           '@type': 'FinancialProduct',
           name: s.name,
           identifier: symbol,
           category: s.sector || s.market,
           provider: { '@type': 'Organization', name: s.market || 'Exchange' },
+          ...(s.price ? { offers: { '@type': 'Offer', price: Number(s.price), priceCurrency: s.currency || 'KRW', availability: 'https://schema.org/InStock' } } : {}),
         },
         isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
+      })}} />
+      {/* JSON-LD 2: BreadcrumbList */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` },
+          { '@type': 'ListItem', position: 3, name: s.name },
+        ],
       })}} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
