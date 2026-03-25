@@ -165,6 +165,24 @@
 - 분류: 60초(blog/crawl/collect/seed), 30초(cleanup/daily), 15초(health/push)
 - 이제 57개 크론 전부 maxDuration 설정 완료
 
+### 15. 크론 스케줄 충돌 해소 (커밋 22)
+- 동일 시각 2~4개 동시 실행 → 5분 간격 스태거링 (12건)
+- 06:00 4개 충돌 → 06:00/06:15/06:20/06:30 분산
+- blog-publish-queue 09:00+14:00 복원
+
+### 16. DB 콘텐츠 대규모 보강 (SQL 4건, ~3,600건)
+- 블로그 meta_description 80자 미만 1,451건 → 80자+ 확장
+- 블로그 image_alt 누락 962건 → 제목 기반 자동 생성
+- 블로그 cover_image 누락 168건 → 기본 이미지
+- 주식 description 누락 229건 → 종목/마켓/섹터 기반 자동 생성
+- 재개발 key_features 205건 생성
+
+### 17. SEO 노출면적 극대화 (커밋 23-25, 20페이지+)
+- 주식 상세: description 확장, twitter card, naver 메타, article:tag, BreadcrumbList JSON-LD
+- 14개 공개 페이지 OG image + twitter card 일괄 추가
+- 6개 페이지 naver:written_time + article:section 추가
+- **결과: 모든 공개 페이지 OG image + twitter card 100%**
+
 ### PENDING 작업
 - [ ] 이미지 수집 크론 자동 진행 중 (200건/일, ~27일 소요)
 - [ ] 좌표 수집 크론 자동 진행 중 (150건/일, ~36일 소요)
