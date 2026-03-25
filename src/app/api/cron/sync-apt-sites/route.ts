@@ -237,40 +237,53 @@ async function handler(_req: NextRequest) {
     try { await (sb as any).rpc('refresh_all_site_scores'); } catch {}
 
     const { data: allSites } = await sb.from('apt_sites')
-      .select('id, name, site_type, region, sigungu, total_units, price_min, price_max, source_ids, description, faq_items, images, latitude, longitude, nearby_station, builder')
+      .select('id, name, site_type, region, sigungu, total_units, price_min, price_max, source_ids, description, faq_items, images, latitude, longitude, nearby_station, builder, developer, move_in_date, address, key_features')
       .limit(10000);
 
     const scoreGroups = new Map<number, string[]>();
     for (const s of (allSites || [])) {
       let score = 0;
+      // 기본 정보 (최대 30)
       if (s.name && s.name.length >= 3) score += 10;
       if (s.region && s.sigungu) score += 10;
       else if (s.region) score += 5;
       if (s.total_units && s.total_units > 0) score += 10;
+
+      // 가격 (최대 5)
       if (s.price_min || s.price_max) score += 5;
 
+      // 데이터 소스 (최대 31)
       const src = (s.source_ids || {}) as Record<string, string>;
       if (src.subscription_id) score += 10;
       if (src.redev_id) score += 15;
-      // 실거래 데이터 보너스
       if (src.trade_count) {
         const tc = parseInt(src.trade_count) || 0;
-        score += 10; // 실거래 존재 기본
-        if (tc >= 10) score += 5; // 거래 10건+
-        if (tc >= 30) score += 3; // 거래 30건+
+        score += 10;
+        if (tc >= 10) score += 5;
+        if (tc >= 30) score += 3;
       }
-      // 미분양 데이터 보너스
       if (src.unsold_id) score += 8;
 
+      // 콘텐츠 풍부도 (최대 28)
       if (s.description && s.description.length >= 100) score += 10;
+      if (s.description && s.description.length >= 200) score += 3;
       if (s.faq_items && Array.isArray(s.faq_items) && s.faq_items.length >= 3) score += 10;
+      if (s.faq_items && Array.isArray(s.faq_items) && s.faq_items.length >= 5) score += 3;
+      if (s.key_features && Array.isArray(s.key_features) && s.key_features.length >= 2) score += 2;
+
+      // 미디어 (최대 5)
       if (s.images && Array.isArray(s.images) && s.images.length >= 1) score += 5;
+
+      // 위치 (최대 13)
       if (s.latitude && s.longitude) score += 5;
       if (s.nearby_station) score += 5;
-      if (s.builder) score += 3;
+      if (s.address && s.address.length > 5) score += 3;
 
-      // 준공년도 보너스 (source_ids에 built_year 있으면)
+      // 부가 정보 (최대 11)
+      if (s.builder) score += 3;
       if (src.built_year) score += 3;
+      if (s.developer) score += 2;
+      if (s.move_in_date) score += 3;
 
       const ids = scoreGroups.get(score) || [];
       ids.push(s.id);
