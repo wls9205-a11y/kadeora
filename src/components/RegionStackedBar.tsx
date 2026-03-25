@@ -100,8 +100,95 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   }, [apts, ongoingApts, unsold, redevelopment, transactions]);
 
   const maxTotal = Math.max(...regions.map(r => r.total), 1);
+  const grandTotal = regions.reduce((s, r) => s + r.total, 0);
+  const grandCats = {
+    sub: regions.reduce((s, r) => s + r.sub, 0),
+    ongoing: regions.reduce((s, r) => s + r.ongoing, 0),
+    unsold: regions.reduce((s, r) => s + r.unsold, 0),
+    redev: regions.reduce((s, r) => s + r.redev, 0),
+    trade: regions.reduce((s, r) => s + r.trade, 0),
+  };
 
   if (regions.length === 0) return null;
+
+  const renderRow = (r: RegionData, isAll: boolean = false) => {
+    const isActive = isAll ? !activeRegion : activeRegion === r.name;
+    const isHover = hoveredRegion === (isAll ? '__all__' : r.name);
+    const isDimmed = activeRegion && !isActive;
+    const cats = [
+      { key: 'sub', val: r.sub, color: COLORS.sub },
+      { key: 'ongoing', val: r.ongoing, color: COLORS.ongoing },
+      { key: 'unsold', val: r.unsold, color: COLORS.unsold },
+      { key: 'redev', val: r.redev, color: COLORS.redev },
+      { key: 'trade', val: r.trade, color: COLORS.trade },
+    ].filter(c => c.val > 0);
+
+    return (
+      <div
+        key={isAll ? '__all__' : r.name}
+        onClick={() => onRegionClick?.(isAll ? '전체' : (r.name === activeRegion ? '전체' : r.name))}
+        onMouseEnter={() => setHoveredRegion(isAll ? '__all__' : r.name)}
+        onMouseLeave={() => setHoveredRegion(null)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '5px 0',
+          cursor: onRegionClick ? 'pointer' : 'default',
+          opacity: isDimmed ? 0.35 : 1,
+          transition: 'opacity 0.15s',
+          ...(isAll ? { borderBottom: '1px solid var(--border)', marginBottom: 4, paddingBottom: 7 } : {}),
+        }}
+      >
+        <div style={{
+          width: 32,
+          fontSize: 'var(--fs-xs)',
+          fontWeight: isActive ? 800 : 600,
+          color: isActive ? 'var(--brand)' : 'var(--text-primary)',
+          textAlign: 'right',
+          flexShrink: 0,
+        }}>
+          {isAll ? '전체' : r.name}
+        </div>
+
+        <div style={{
+          flex: 1,
+          height: isAll ? 22 : 20,
+          borderRadius: 4,
+          background: 'var(--bg-elevated)',
+          overflow: 'hidden',
+          display: 'flex',
+          border: isActive ? '1px solid var(--brand-border)' : (isHover ? '1px solid var(--border-strong)' : '1px solid transparent'),
+          transition: 'border-color 0.12s',
+        }}>
+          {cats.map((cat) => (
+            <div
+              key={cat.key}
+              style={{
+                width: `${(cat.val / (isAll ? grandTotal : maxTotal)) * 100}%`,
+                height: '100%',
+                background: cat.color,
+                opacity: isHover ? 1 : 0.85,
+                transition: 'opacity 0.12s',
+                minWidth: cat.val > 0 ? 3 : 0,
+              }}
+            />
+          ))}
+        </div>
+
+        <div style={{
+          width: 26,
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 700,
+          color: isActive ? 'var(--brand)' : 'var(--text-secondary)',
+          textAlign: 'right',
+          flexShrink: 0,
+        }}>
+          {r.total}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={{ marginBottom: 12 }}>
@@ -120,85 +207,11 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         borderRadius: 'var(--radius-md)',
         padding: '10px 12px',
       }}>
-        {regions.map((r) => {
-          const isActive = activeRegion === r.name;
-          const isHover = hoveredRegion === r.name;
-          const cats = [
-            { key: 'sub', val: r.sub, color: COLORS.sub },
-            { key: 'ongoing', val: r.ongoing, color: COLORS.ongoing },
-            { key: 'unsold', val: r.unsold, color: COLORS.unsold },
-            { key: 'redev', val: r.redev, color: COLORS.redev },
-            { key: 'trade', val: r.trade, color: COLORS.trade },
-          ].filter(c => c.val > 0);
+        {/* 전체 행 */}
+        {renderRow({ name: '전체', ...grandCats, total: grandTotal }, true)}
 
-          return (
-            <div
-              key={r.name}
-              onClick={() => onRegionClick?.(r.name === activeRegion ? '전체' : r.name)}
-              onMouseEnter={() => setHoveredRegion(r.name)}
-              onMouseLeave={() => setHoveredRegion(null)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '5px 0',
-                cursor: onRegionClick ? 'pointer' : 'default',
-                opacity: activeRegion && !isActive ? 0.45 : 1,
-                transition: 'opacity 0.15s',
-              }}
-            >
-              {/* 지역명 */}
-              <div style={{
-                width: 32,
-                fontSize: 'var(--fs-xs)',
-                fontWeight: isActive ? 800 : 600,
-                color: isActive ? 'var(--brand)' : 'var(--text-primary)',
-                textAlign: 'right',
-                flexShrink: 0,
-              }}>
-                {r.name}
-              </div>
-
-              {/* 스택바 */}
-              <div style={{
-                flex: 1,
-                height: 20,
-                borderRadius: 4,
-                background: 'var(--bg-elevated)',
-                overflow: 'hidden',
-                display: 'flex',
-                border: isActive ? '1px solid var(--brand-border)' : (isHover ? '1px solid var(--border-strong)' : '1px solid transparent'),
-                transition: 'border-color 0.12s',
-              }}>
-                {cats.map((cat) => (
-                  <div
-                    key={cat.key}
-                    style={{
-                      width: `${(cat.val / maxTotal) * 100}%`,
-                      height: '100%',
-                      background: cat.color,
-                      opacity: isHover ? 1 : 0.85,
-                      transition: 'opacity 0.12s',
-                      minWidth: cat.val > 0 ? 3 : 0,
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* 건수 */}
-              <div style={{
-                width: 26,
-                fontSize: 'var(--fs-xs)',
-                fontWeight: 700,
-                color: isActive ? 'var(--brand)' : 'var(--text-secondary)',
-                textAlign: 'right',
-                flexShrink: 0,
-              }}>
-                {r.total}
-              </div>
-            </div>
-          );
-        })}
+        {/* 지역별 행 */}
+        {regions.map((r) => renderRow(r))}
 
         {/* 범례 */}
         <div style={{

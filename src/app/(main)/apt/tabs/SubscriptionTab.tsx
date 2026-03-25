@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { haptic } from '@/lib/haptic';
@@ -13,14 +13,19 @@ interface Props extends SharedTabProps {
 
 const SB = STATUS_BADGE;
 
-export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast }: Props) {
-  const [region, setRegion] = useState('전체');
+export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion }: Props) {
+  const [region, setRegion] = useState(globalRegion || '전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'>('date');
   const [subSearch, setSubSearch] = useState('');
   const [calOffset, setCalOffset] = useState(0);
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
+
+  // globalRegion 변경 시 내부 필터 동기화
+  useEffect(() => {
+    setRegion(globalRegion || '전체');
+  }, [globalRegion]);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { isNew, NewBadge, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
 import BottomSheet from '@/components/BottomSheet';
 
@@ -8,13 +8,18 @@ interface Props extends SharedTabProps {
   premiumListings: any[];
 }
 
-export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget }: Props) {
-  const [ongoingRegion, setOngoingRegion] = useState('전체');
+export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion }: Props) {
+  const [ongoingRegion, setOngoingRegion] = useState(globalRegion || '전체');
   const [ongoingPage, setOngoingPage] = useState(1);
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
   const [ongoingSearch, setOngoingSearch] = useState('');
   const [ongoingStatus, setOngoingStatus] = useState('전체');
   const [selectedOngoing, setSelectedOngoing] = useState<any | null>(null);
+
+  useEffect(() => {
+    setOngoingRegion(globalRegion || '전체');
+    setOngoingPage(1);
+  }, [globalRegion]);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{

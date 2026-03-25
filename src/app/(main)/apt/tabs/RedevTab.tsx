@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import RedevTimeline from '@/components/RedevTimeline';
 import BottomSheet from '@/components/BottomSheet';
@@ -8,13 +8,18 @@ interface Props extends SharedTabProps {
   redevelopment: any[];
 }
 
-export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast }: Props) {
+export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion }: Props) {
   const [redevType, setRedevType] = useState('전체');
-  const [redevRegion, setRedevRegion] = useState('전체');
+  const [redevRegion, setRedevRegion] = useState(globalRegion || '전체');
   const [redevPage, setRedevPage] = useState(1);
   const [redevStage, setRedevStage] = useState('전체');
   const [redevSearch, setRedevSearch] = useState('');
   const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
+
+  useEffect(() => {
+    setRedevRegion(globalRegion || '전체');
+    setRedevPage(1);
+  }, [globalRegion]);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{

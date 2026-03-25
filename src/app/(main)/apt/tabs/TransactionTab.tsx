@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { isNew, NewBadge, fmtAmount, type SharedTabProps } from './apt-utils';
 import BottomSheet from '@/components/BottomSheet';
 import MiniLineChart from '@/components/charts/MiniLineChart';
@@ -13,14 +13,19 @@ interface Props extends SharedTabProps {
   tradeMonthly: any[];
 }
 
-export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist }: Props) {
-  const [region, setRegion] = useState('전체');
+export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion }: Props) {
+  const [region, setRegion] = useState(globalRegion || '전체');
   const [page, setPage] = useState(1);
   const [areaFilter, setAreaFilter] = useState('전체');
   const [sort, setSort] = useState<'date'|'price_desc'|'price_asc'|'area'>('date');
   const [search, setSearch] = useState('');
   const [chartRegion, setChartRegion] = useState('');
   const [selected, setSelected] = useState<any>(null);
+
+  useEffect(() => {
+    setRegion(globalRegion || '전체');
+    setPage(1);
+  }, [globalRegion]);
 
   if (!transactions.length) {
     return (

@@ -185,6 +185,21 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
       />
 
+      {/* 지역 필터 활성 배지 */}
+      {selectedRegion !== '전체' && (
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10,
+          padding: '5px 12px', borderRadius: 20, background: 'var(--brand-bg)',
+          border: '1px solid var(--brand-border)', fontSize: 12, fontWeight: 600, color: 'var(--brand)',
+        }}>
+          📍 {selectedRegion} 필터 적용 중
+          <button onClick={() => setSelectedRegion('전체')} style={{
+            background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)',
+            fontSize: 14, padding: 0, lineHeight: 1, marginLeft: 2,
+          }} aria-label="필터 해제">✕</button>
+        </div>
+      )}
+
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
@@ -225,6 +240,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           toggleWatchlist={toggleWatchlist}
           setCommentTarget={setCommentTarget}
           showToast={showToast}
+          globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         />
       )}
 
@@ -237,6 +253,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           toggleWatchlist={toggleWatchlist}
           setCommentTarget={setCommentTarget}
           showToast={showToast}
+          globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         />
       )}
 
@@ -252,6 +269,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           toggleWatchlist={toggleWatchlist}
           setCommentTarget={setCommentTarget}
           showToast={showToast}
+          globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         />
       )}
 
@@ -264,6 +282,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           toggleWatchlist={toggleWatchlist}
           setCommentTarget={setCommentTarget}
           showToast={showToast}
+          globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         />
       )}
 
@@ -278,6 +297,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           toggleWatchlist={toggleWatchlist}
           setCommentTarget={setCommentTarget}
           showToast={showToast}
+          globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         />
       )}
 

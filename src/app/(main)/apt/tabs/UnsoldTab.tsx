@@ -12,10 +12,14 @@ interface Props extends SharedTabProps {
   unsoldSummary: any;
 }
 
-export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast }: Props) {
-  const [unsoldRegion, setUnsoldRegion] = useState('전체');
+export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion }: Props) {
+  const [unsoldRegion, setUnsoldRegion] = useState(globalRegion || '전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
   const [surgeAlerts, setSurgeAlerts] = useState<{ region_nm: string; current_count: number; change_pct: number }[]>([]);
+
+  useEffect(() => {
+    setUnsoldRegion(globalRegion || '전체');
+  }, [globalRegion]);
 
   // 미분양 급증 감지
   useEffect(() => {

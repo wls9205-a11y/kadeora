@@ -105,4 +105,5 @@ export interface SharedTabProps {
   toggleWatchlist: (type: string, id: string) => void;
   setCommentTarget: (t: { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null) => void;
   showToast: (msg: string) => void;
+  globalRegion?: string;
 }
