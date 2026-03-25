@@ -111,6 +111,62 @@ export async function GET(req: Request) {
       return NextResponse.json({ users: data ?? [], total: count ?? 0, page, limit });
     }
 
+    if (section === 'user-detail') {
+      const userId = searchParams.get('id');
+      if (!userId) return NextResponse.json({ error: 'id required' }, { status: 400 });
+
+      const [profileR, notiR, pushR, pwaR, attendR, watchlistR, bookmarkR, alertsR] = await Promise.all([
+        sb.from('profiles')
+          .select('id, nickname, full_name, grade, grade_title, provider, created_at, last_active_at, posts_count, likes_count, points, is_admin, is_banned, is_deleted, is_seed, is_premium, premium_expires_at, region_text, residence_city, bio, interests, influence_score, streak_days, followers_count, following_count, kakao_id, google_email, phone, age_group, gender, onboarded, profile_completed, marketing_agreed, consent_analytics, nickname_change_count')
+          .eq('id', userId).single(),
+        sb.from('notification_settings')
+          .select('push_comments, push_likes, push_follows, push_hot_post, push_news, push_stock_alert, push_apt_deadline, push_daily_digest, push_attendance, quiet_start, quiet_end')
+          .eq('user_id', userId).maybeSingle(),
+        sb.from('push_subscriptions')
+          .select('id, created_at, endpoint')
+          .eq('user_id', userId),
+        sb.from('pwa_installs')
+          .select('platform, installed_at, user_agent')
+          .eq('user_id', userId),
+        sb.from('attendance')
+          .select('total_days, streak, last_date')
+          .eq('user_id', userId).maybeSingle(),
+        sb.from('stock_watchlist')
+          .select('symbol', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        sb.from('apt_bookmarks')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        sb.from('price_alerts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId),
+      ]);
+
+      if (!profileR.data) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+      return NextResponse.json({
+        profile: profileR.data,
+        notifications: notiR.data ?? null,
+        pushSubscriptions: (pushR.data ?? []).length,
+        pushDevices: (pushR.data ?? []).map((p: any) => ({
+          id: p.id,
+          created_at: p.created_at,
+          browser: p.endpoint?.includes('fcm') ? 'Chrome/Android' : p.endpoint?.includes('mozilla') ? 'Firefox' : p.endpoint?.includes('apple') ? 'Safari/iOS' : 'Unknown',
+        })),
+        pwaInstalls: (pwaR.data ?? []).map((p: any) => ({
+          platform: p.platform,
+          installed_at: p.installed_at,
+          browser: extractBrowser(p.user_agent),
+        })),
+        attendance: attendR.data ?? null,
+        counts: {
+          watchlist: watchlistR.count ?? 0,
+          bookmarks: bookmarkR.count ?? 0,
+          priceAlerts: alertsR.count ?? 0,
+        },
+      });
+    }
+
     if (section === 'content') {
       const page = parseInt(searchParams.get('page') || '1');
       const limit = 30;
@@ -240,4 +296,15 @@ export async function GET(req: Request) {
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
+}
+
+function extractBrowser(ua: string | null): string {
+  if (!ua) return 'Unknown';
+  if (ua.includes('Samsung')) return 'Samsung Browser';
+  if (ua.includes('CriOS')) return 'Chrome iOS';
+  if (ua.includes('Chrome')) return 'Chrome';
+  if (ua.includes('Safari')) return 'Safari';
+  if (ua.includes('Firefox')) return 'Firefox';
+  if (ua.includes('Edge')) return 'Edge';
+  return 'Other';
 }

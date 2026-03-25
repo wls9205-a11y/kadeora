@@ -94,6 +94,26 @@ function DataTable({ headers, rows, onRowClick }: { headers: string[]; rows: any
   );
 }
 function Spinner() { return <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div style={{ width: 28, height: 28, border: `3px solid ${C.border}`, borderTopColor: C.brand, borderRadius: '50%', animation: 'spin .6s linear infinite' }} /></div>; }
+function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, marginBottom: 6, letterSpacing: '0.02em' }}>{title}</div>
+      {children}
+    </div>
+  );
+}
+function DetailGrid({ items }: { items: [string, string][] }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 12 }}>
+      {items.map(([l, v]) => (
+        <div key={l}>
+          <div style={{ color: C.textDim, marginBottom: 1 }}>{l}</div>
+          <div style={{ color: C.text, fontWeight: 500 }}>{v}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // ══════════════════════════════════════
 // MAIN COMPONENT
@@ -267,6 +287,8 @@ function UsersSection() {
   const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<UserRow | null>(null);
+  const [userDetail, setUserDetail] = useState<any>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const searchTimeout = useRef<any>(null);
 
   const load = useCallback((p = 1, s = search, f = filter) => {
@@ -282,6 +304,14 @@ function UsersSection() {
     setSearch(val);
     clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => { setPage(1); load(1, val, filter); }, 400);
+  };
+
+  const selectUser = (user: UserRow) => {
+    setSelected(user);
+    setDetailLoading(true);
+    setUserDetail(null);
+    fetch(`/api/admin/dashboard?section=user-detail&id=${user.id}`)
+      .then(r => r.json()).then(setUserDetail).finally(() => setDetailLoading(false));
   };
 
   const userAction = async (id: string, action: string) => {
@@ -322,12 +352,13 @@ function UsersSection() {
           {/* User List */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <DataTable
-              headers={['', '닉네임', '등급', '가입경로', '지역', '포인트', '게시글', '가입일', '최근활동', '상태']}
+              headers={['', '닉네임', '등급', '가입경로', '연령대', '지역', '포인트', '게시글', '가입일', '최근활동', '상태']}
               rows={users.map(u => [
                 GRADE_EMOJI[u.grade] || '🌱',
                 <span key="n" style={{ fontWeight: 600 }}>{u.nickname}</span>,
                 u.grade_title,
-                <Badge key="p" color={C.brand}>{PROVIDER_LABEL[u.provider || ''] || u.provider || '—'}</Badge>,
+                <Badge key="p" color={u.provider === 'kakao' ? C.yellow : u.provider === 'google' ? C.green : C.brand}>{PROVIDER_LABEL[u.provider || ''] || u.provider || '—'}</Badge>,
+                u.age_group ? <Badge key="ag" color={C.cyan}>{u.age_group}</Badge> : <span key="ag" style={{ color: C.textDim }}>—</span>,
                 u.region_text || u.residence_city || '—',
                 <span key="pt" style={{ color: C.yellow, fontWeight: 600 }}>{fmt(u.points)}</span>,
                 u.posts_count,
@@ -335,7 +366,7 @@ function UsersSection() {
                 ago(u.last_active_at),
                 u.is_banned ? <Badge key="b" color={C.red}>정지</Badge> : u.is_seed ? <Badge key="s" color={C.textDim}>시드</Badge> : u.is_premium ? <Badge key="pr" color={C.purple}>프리미엄</Badge> : <Badge key="a" color={C.green}>활성</Badge>,
               ])}
-              onRowClick={(i) => setSelected(users[i])}
+              onRowClick={(i) => selectUser(users[i])}
             />
             {/* Pagination */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
@@ -349,14 +380,15 @@ function UsersSection() {
 
           {/* User Detail Panel */}
           {selected && (
-            <div style={{ width: 340, flexShrink: 0, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, alignSelf: 'flex-start', position: 'sticky', top: 20 }}>
+            <div style={{ width: 370, flexShrink: 0, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, alignSelf: 'flex-start', position: 'sticky', top: 20, maxHeight: '90vh', overflowY: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: C.text, margin: 0 }}>{GRADE_EMOJI[selected.grade]} {selected.nickname}</h3>
-                <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: C.textDim, cursor: 'pointer', fontSize: 18 }}>✕</button>
+                <button onClick={() => { setSelected(null); setUserDetail(null); }} style={{ background: 'none', border: 'none', color: C.textDim, cursor: 'pointer', fontSize: 18 }}>✕</button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12 }}>
-                {[
+              {/* ── 기본 정보 ── */}
+              <DetailSection title="🪪 기본 정보">
+                <DetailGrid items={[
                   ['ID', selected.id.slice(0, 8) + '...'],
                   ['실명', selected.full_name || '—'],
                   ['등급', `${selected.grade_title} (Lv.${selected.grade})`],
@@ -365,29 +397,122 @@ function UsersSection() {
                   ['구글', selected.google_email || '—'],
                   ['전화번호', selected.phone || '—'],
                   ['지역', selected.region_text || selected.residence_city || '—'],
-                  ['성별', selected.gender || '—'],
+                  ['성별', selected.gender === 'male' ? '👨 남성' : selected.gender === 'female' ? '👩 여성' : '—'],
                   ['연령대', selected.age_group || '—'],
-                  ['포인트', `${fmt(selected.points)}P`],
-                  ['영향력', String(selected.influence_score)],
-                  ['연속출석', `${selected.streak_days}일`],
-                  ['팔로워/잉', `${selected.followers_count}/${selected.following_count}`],
-                  ['게시글', String(selected.posts_count)],
-                  ['좋아요', String(selected.likes_count)],
-                  ['닉변횟수', String(selected.nickname_change_count)],
-                  ['프로필완성', selected.profile_completed ? '✅' : '❌'],
-                  ['온보딩', selected.onboarded ? '✅' : '❌'],
-                  ['마케팅동의', selected.marketing_agreed ? '✅' : '❌'],
-                  ['분석동의', selected.consent_analytics ? '✅' : '❌'],
-                  ['프리미엄', selected.is_premium ? `✅ (~${dateStr(selected.premium_expires_at)})` : '❌'],
                   ['가입일', dateStr(selected.created_at)],
                   ['최근활동', ago(selected.last_active_at)],
-                ].map(([l, v]) => (
-                  <div key={l as string}>
-                    <div style={{ color: C.textDim, marginBottom: 2 }}>{l}</div>
-                    <div style={{ color: C.text, fontWeight: 500 }}>{v}</div>
-                  </div>
-                ))}
-              </div>
+                ]} />
+              </DetailSection>
+
+              {/* ── 활동 지표 ── */}
+              <DetailSection title="📊 활동 지표">
+                <DetailGrid items={[
+                  ['포인트', `${fmt(selected.points)}P`],
+                  ['영향력', String(selected.influence_score)],
+                  ['게시글', String(selected.posts_count)],
+                  ['좋아요', String(selected.likes_count)],
+                  ['팔로워', String(selected.followers_count)],
+                  ['팔로잉', String(selected.following_count)],
+                  ['연속출석', `${selected.streak_days}일`],
+                  ['닉변횟수', String(selected.nickname_change_count)],
+                ]} />
+              </DetailSection>
+
+              {/* ── 확장 정보 (API에서 로드) ── */}
+              {detailLoading ? (
+                <div style={{ padding: 16, textAlign: 'center' }}><Spinner /></div>
+              ) : userDetail ? (
+                <>
+                  {/* 출석 */}
+                  {userDetail.attendance && (
+                    <DetailSection title="📅 출석">
+                      <DetailGrid items={[
+                        ['총 출석', `${userDetail.attendance.total_days}일`],
+                        ['연속', `${userDetail.attendance.streak}일`],
+                        ['마지막', dateStr(userDetail.attendance.last_date)],
+                      ]} />
+                    </DetailSection>
+                  )}
+
+                  {/* 관심 활동 */}
+                  <DetailSection title="❤️ 관심 활동">
+                    <DetailGrid items={[
+                      ['관심종목', `${userDetail.counts?.watchlist ?? 0}개`],
+                      ['청약북마크', `${userDetail.counts?.bookmarks ?? 0}개`],
+                      ['가격알림', `${userDetail.counts?.priceAlerts ?? 0}개`],
+                    ]} />
+                  </DetailSection>
+
+                  {/* 알림 설정 */}
+                  <DetailSection title="🔔 알림 설정">
+                    {userDetail.notifications ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {[
+                          ['댓글', userDetail.notifications.push_comments],
+                          ['좋아요', userDetail.notifications.push_likes],
+                          ['팔로우', userDetail.notifications.push_follows],
+                          ['인기글', userDetail.notifications.push_hot_post],
+                          ['뉴스', userDetail.notifications.push_news],
+                          ['주식알림', userDetail.notifications.push_stock_alert],
+                          ['청약마감', userDetail.notifications.push_apt_deadline],
+                          ['일일요약', userDetail.notifications.push_daily_digest],
+                          ['출석', userDetail.notifications.push_attendance],
+                        ].map(([label, on]) => (
+                          <Badge key={label as string} color={on ? C.green : C.textDim}>
+                            {on ? '✓' : '✗'} {label}
+                          </Badge>
+                        ))}
+                        {userDetail.notifications.quiet_start && (
+                          <div style={{ width: '100%', fontSize: 11, color: C.textDim, marginTop: 4 }}>
+                            🌙 방해금지: {userDetail.notifications.quiet_start} ~ {userDetail.notifications.quiet_end}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: C.textDim }}>알림 설정 없음 (기본값)</div>
+                    )}
+                  </DetailSection>
+
+                  {/* 푸시 & 앱 설치 */}
+                  <DetailSection title="📱 푸시 & 앱">
+                    <DetailGrid items={[
+                      ['푸시 등록', userDetail.pushSubscriptions > 0 ? `✅ ${userDetail.pushSubscriptions}대` : '❌ 미등록'],
+                      ['PWA 설치', userDetail.pwaInstalls?.length > 0 ? '✅ 설치됨' : '❌ 미설치'],
+                    ]} />
+                    {userDetail.pushDevices?.length > 0 && (
+                      <div style={{ marginTop: 6 }}>
+                        {userDetail.pushDevices.map((d: any) => (
+                          <div key={d.id} style={{ fontSize: 11, color: C.textSec, padding: '2px 0' }}>
+                            📍 {d.browser} · {ago(d.created_at)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {userDetail.pwaInstalls?.length > 0 && (
+                      <div style={{ marginTop: 4 }}>
+                        {userDetail.pwaInstalls.map((p: any, i: number) => (
+                          <div key={i} style={{ fontSize: 11, color: C.textSec, padding: '2px 0' }}>
+                            📱 {p.platform || 'unknown'} · {p.browser} · {ago(p.installed_at)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </DetailSection>
+
+                  {/* 동의 현황 */}
+                  <DetailSection title="📋 동의 현황">
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      <Badge color={selected.profile_completed ? C.green : C.textDim}>{selected.profile_completed ? '✓' : '✗'} 프로필완성</Badge>
+                      <Badge color={selected.onboarded ? C.green : C.textDim}>{selected.onboarded ? '✓' : '✗'} 온보딩</Badge>
+                      <Badge color={selected.marketing_agreed ? C.green : C.textDim}>{selected.marketing_agreed ? '✓' : '✗'} 마케팅</Badge>
+                      <Badge color={selected.consent_analytics ? C.green : C.textDim}>{selected.consent_analytics ? '✓' : '✗'} 분석</Badge>
+                      <Badge color={selected.is_premium ? C.purple : C.textDim}>
+                        {selected.is_premium ? `✓ 프리미엄 (~${dateStr(selected.premium_expires_at)})` : '✗ 프리미엄'}
+                      </Badge>
+                    </div>
+                  </DetailSection>
+                </>
+              ) : null}
 
               {selected.bio && <div style={{ marginTop: 12, padding: 10, background: C.surface, borderRadius: 8, fontSize: 12, color: C.textSec }}>{selected.bio}</div>}
               {selected.interests && selected.interests.length > 0 && (
