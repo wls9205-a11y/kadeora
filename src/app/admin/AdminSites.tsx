@@ -16,6 +16,7 @@ export default function AdminSites() {
   const [interests, setInterests] = useState<InterestRow[]>([]);
   const [consents, setConsents] = useState<ConsentRow[]>([]);
   const [kpi, setKpi] = useState({ total: 0, published: 0, interests: 0, todayInterests: 0, views: 0, consentsTotal: 0, withdrawals: 0 });
+  const [typeCounts, setTypeCounts] = useState<Record<string, number>>({});
   const [flags, setFlags] = useState<Record<string, boolean>>({});
   const [leads, setLeads] = useState({ total: 0, forwarded: 0, contacted: 0, converted: 0 });
   const [loading, setLoading] = useState(false);
@@ -29,18 +30,22 @@ export default function AdminSites() {
   const loadKPI = useCallback(async () => {
     try {
       const [sitesR, interestsR, consentsR] = await Promise.all([
-        sb.from('apt_sites').select('id, content_score, interest_count, page_views, is_active', { count: 'exact' }),
+        sb.from('apt_sites').select('id, site_type, content_score, interest_count, page_views, is_active', { count: 'exact' }),
         sb.from('apt_site_interests').select('id, created_at', { count: 'exact' }),
         sb.from('privacy_consents').select('id, withdrawn_at', { count: 'exact' }),
       ]);
       const allSites = sitesR.data || [];
-      const published = allSites.filter((s: any) => s.content_score >= 40 && s.is_active).length;
+      const published = allSites.filter((s: any) => s.content_score >= 25 && s.is_active).length;
       const totalInterests = interestsR.count || 0;
       const today = new Date().toISOString().slice(0, 10);
       const todayI = (interestsR.data || []).filter((i: any) => i.created_at?.startsWith(today)).length;
       const totalViews = allSites.reduce((sum: number, s: any) => sum + (s.page_views || 0), 0);
       const withdrawals = (consentsR.data || []).filter((c: any) => c.withdrawn_at).length;
       setKpi({ total: allSites.length, published, interests: totalInterests, todayInterests: todayI, views: totalViews, consentsTotal: consentsR.count || 0, withdrawals });
+      // 타입별 카운트
+      const tc: Record<string, number> = {};
+      allSites.forEach((s: any) => { tc[s.site_type] = (tc[s.site_type] || 0) + 1; });
+      setTypeCounts(tc);
     } catch {}
   }, []);
 
@@ -123,9 +128,14 @@ export default function AdminSites() {
     setRunning(name);
     setActionResult('');
     try {
-      const res = await fetch(path, { headers: { authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ''}` } });
+      const res = await fetch('/api/admin/god-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'failed', failedOnly: [path] }),
+      });
       const data = await res.json();
-      setActionResult(`${name}: ${JSON.stringify(data).slice(0, 200)}`);
+      const result = data.results?.[0];
+      setActionResult(`${name}: ${result?.ok ? '✅ 성공' : `❌ 실패 (${result?.error || result?.status})`} ${result?.duration ? `${result.duration}ms` : ''}`);
     } catch (e: any) { setActionResult(`${name}: 에러 - ${e.message}`); }
     setRunning('');
     loadKPI();
@@ -269,7 +279,7 @@ export default function AdminSites() {
           <div style={{ fontSize: 12, fontWeight: 700, color: '#E8EDF5', marginBottom: 8 }}>📊 타입별 현장 수</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
             {['subscription', 'redevelopment', 'unsold', 'landmark'].map(t => {
-              const cnt = sites.length ? sites.filter(s => s.site_type === t).length : '—';
+              const cnt = typeCounts[t] ?? 0;
               return (
                 <div key={t} onClick={() => { setFilter({ ...filter, type: t }); setTab('sites'); }} style={{ background: '#0F1A32', borderRadius: 8, padding: '8px 6px', textAlign: 'center', cursor: 'pointer', border: '1px solid #152240' }}>
                   <div style={{ fontSize: 14, fontWeight: 800, color: typeClr[t] || '#E8EDF5' }}>{cnt}</div>
@@ -349,7 +359,7 @@ export default function AdminSites() {
                       </td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4', whiteSpace: 'nowrap' }}>{s.region} {s.sigungu || ''}</td>
                       <td style={{ padding: '6px 4px' }}><span style={badge(typeClr[s.site_type] ? `${typeClr[s.site_type]}22` : '#15224050', typeClr[s.site_type] || '#94A8C4')}>{typeLbl[s.site_type] || s.site_type}</span></td>
-                      <td style={{ padding: '6px 4px', color: (s.content_score ?? 0) >= 40 ? '#2EE8A5' : '#FFD43B', fontWeight: 700 }}>{s.content_score}</td>
+                      <td style={{ padding: '6px 4px', color: (s.content_score ?? 0) >= 25 ? '#2EE8A5' : '#FFD43B', fontWeight: 700 }}>{s.content_score}</td>
                       <td style={{ padding: '6px 4px', color: '#3B7BF6', fontWeight: 700 }}>{s.interest_count}</td>
                       <td style={{ padding: '6px 4px', color: '#94A8C4' }}>{s.page_views}</td>
                       <td style={{ padding: '6px 4px' }}>
