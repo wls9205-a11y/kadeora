@@ -124,6 +124,8 @@ export default function MissionControl() {
   const [section, setSection] = useState<Section>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  useEffect(() => { if (window.innerWidth < 769) setSidebarOpen(false); }, []);
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, fontFamily: "'Pretendard', -apple-system, sans-serif" }}>
       <style>{`
@@ -136,10 +138,32 @@ export default function MissionControl() {
         *::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 3px; }
         input, select { outline: none; }
         input:focus, select:focus { border-color: ${C.brand} !important; }
+        .mc-mob-hdr { display: none; }
+        @media (max-width: 768px) {
+          .mc-sb { position: fixed !important; left: 0; top: 0; z-index: 200 !important; height: 100dvh !important; }
+          .mc-sb.mc-closed { width: 0 !important; padding: 0 !important; border: none !important; overflow: hidden !important; }
+          .mc-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; }
+          .mc-mob-hdr { display: flex !important; }
+          .mc-main { padding: 12px !important; padding-top: 52px !important; }
+          .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
+          .mc-g2 { grid-template-columns: 1fr !important; }
+          .mc-g6 { grid-template-columns: repeat(3, 1fr) !important; }
+          .mc-hour-grid { grid-template-columns: repeat(8, 1fr) !important; }
+        }
+        @media (min-width: 769px) { .mc-overlay { display: none !important; } }
       `}</style>
 
+      {/* ── Mobile overlay ── */}
+      {sidebarOpen && <div className="mc-overlay" onClick={() => setSidebarOpen(false)} />}
+
+      {/* ── Mobile top bar ── */}
+      <div className="mc-mob-hdr" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 198, background: C.surface, borderBottom: `1px solid ${C.border}`, padding: '10px 14px', alignItems: 'center', gap: 10 }}>
+        <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: C.text, cursor: 'pointer', fontSize: 20, padding: 4 }}>☰</button>
+        <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{SECTIONS.find(s => s.key === section)?.icon} {SECTIONS.find(s => s.key === section)?.label}</span>
+      </div>
+
       {/* ── Sidebar ── */}
-      <aside style={{
+      <aside className={`mc-sb ${sidebarOpen ? '' : 'mc-closed'}`} style={{
         width: sidebarOpen ? 220 : 60, minHeight: '100vh', background: C.surface, borderRight: `1px solid ${C.border}`,
         transition: 'width .2s', overflow: 'hidden', flexShrink: 0, position: 'sticky', top: 0, zIndex: 10,
       }}>
@@ -151,7 +175,7 @@ export default function MissionControl() {
         </div>
         <nav style={{ padding: sidebarOpen ? '4px 8px' : '4px' }}>
           {SECTIONS.map(s => (
-            <button key={s.key} onClick={() => setSection(s.key)} style={{
+            <button key={s.key} onClick={() => { setSection(s.key); if (typeof window !== 'undefined' && window.innerWidth < 769) setSidebarOpen(false); }} style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: sidebarOpen ? '10px 12px' : '10px 0',
               justifyContent: sidebarOpen ? 'flex-start' : 'center',
               borderRadius: 8, border: 'none', cursor: 'pointer', marginBottom: 2, fontSize: 13, fontWeight: 600,
@@ -167,7 +191,7 @@ export default function MissionControl() {
       </aside>
 
       {/* ── Main Content ── */}
-      <main style={{ flex: 1, padding: 'clamp(16px, 2vw, 28px)', overflow: 'auto', animation: 'fadeIn .3s ease' }}>
+      <main className="mc-main" style={{ flex: 1, padding: 'clamp(16px, 2vw, 28px)', overflow: 'auto', animation: 'fadeIn .3s ease' }}>
         {section === 'dashboard' && <DashboardSection />}
         {section === 'analytics' && <AnalyticsSection />}
         {section === 'seo' && <SEOSection />}
@@ -246,7 +270,7 @@ function DashboardSection() {
       </div>
 
       {/* ── Hero KPI Row (4 big cards) ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+      <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
         <StatBox icon="📄" label="전체 페이지" value={totalSites} sub={`사이트맵 ${seo?.totalSitemap || 0}건 (${seo?.sitemapPct || 0}%)`} color={C.brand} accent />
         <StatBox icon="👤" label="전체 유저" value={kpi.users} sub={`이번주 +${kpi.newUsersWeek} · 활성 ${kpi.activeUsersWeek}`} color={C.green} accent />
         <StatBox icon="⚡" label="크론 (24h)" value={`${cron.success}/${cron.total}`} sub={cron.fail > 0 ? `❌ ${cron.fail}건 실패` : '✅ 전체 성공'} color={cron.fail > 0 ? C.red : C.green} accent />
@@ -254,7 +278,7 @@ function DashboardSection() {
       </div>
 
       {/* ── KPI Grid (3x4 compact) ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10, marginBottom: 16 }}>
+      <div className="mc-g6" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10, marginBottom: 16 }}>
         <KPICard icon="📝" label="게시글" value={kpi.posts} color={C.cyan} />
         <KPICard icon="💬" label="토론" value={kpi.discussions} color={C.purple} />
         <KPICard icon="📈" label="주식 종목" value={kpi.stocks} color={C.green} />
@@ -264,7 +288,7 @@ function DashboardSection() {
       </div>
 
       {/* ── Site Type Distribution + Content Score (side by side) ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
         {/* Site Type Distribution */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
           <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 14px', display: 'flex', justifyContent: 'space-between' }}>
@@ -326,7 +350,7 @@ function DashboardSection() {
       </div>
 
       {/* ── Recent Users + Daily Stats ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
           <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>👤 최근 가입</h3>
           {(recentUsers || []).map((u: any) => (
@@ -413,7 +437,7 @@ function AnalyticsSection() {
       </div>
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
+      <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
         {[
           { label: '총 조회수', value: kpi.totalViews.toLocaleString(), color: C.brand, icon: '👁️' },
           { label: '순 방문자', value: kpi.uniqueVisitors.toLocaleString(), color: C.green, icon: '👤' },
@@ -447,7 +471,7 @@ function AnalyticsSection() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         {/* Top pages */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>인기 페이지</div>
@@ -478,11 +502,11 @@ function AnalyticsSection() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         {/* Hourly heatmap */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>시간대별 분포 (KST)</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 3 }}>
+          <div className="mc-hour-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 3 }}>
             {(hourly || []).map((h: any) => {
               const intensity = maxHour > 0 ? h.count / maxHour : 0;
               return (
@@ -596,7 +620,7 @@ function SEOSection() {
       <p style={{ fontSize: 12, color: C.textDim, margin: '0 0 24px' }}>5,420개 현장 페이지의 데이터 풍부도 현황</p>
 
       {/* ── Hero Stats ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
         <StatBox icon="📄" label="전체 페이지" value={seo?.totalSites || 0} color={C.brand} accent />
         <StatBox icon="🗺️" label="사이트맵" value={seo?.totalSitemap || 0} sub={`${seo?.sitemapPct || 0}% 커버리지`} color={C.green} accent />
         <StatBox icon="✍️" label="블로그 리라이트" value={`${seo?.blogRewrittenPct || 0}%`} sub={`${fmt(kpi.blogs)}건 중`} color={C.purple} accent />
