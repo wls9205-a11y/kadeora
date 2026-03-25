@@ -3,7 +3,7 @@
 > **마지막 업데이트:** 2026-03-26 세션 38
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 38 작업 내역 (2026-03-26) — 커밋 15건+, 60파일+
+## 세션 38 작업 내역 (2026-03-26) — 커밋 20건+, 100파일+
 
 ### 1. 이미지 사이트맵 (커밋 1)
 - `/image-sitemap.xml` 신규 — apt_sites 이미지 + blog_posts 커버 이미지
@@ -109,6 +109,24 @@
 - 주요 페이지 SEO 메타 보강 (blog/discuss/feed OG 이미지 + description)
 - SW 캐시 버전 20260324→20260326
 
+### 11. 전체 앱 감사 + 긴급 수정 (커밋 16-17)
+- CRON_SECRETT 오타 수정 (9파일): `process.env.CRON_SECRET || process.env.CRON_SECRETT` → `process.env.CRON_SECRET`
+- Sentry 누락 에러페이지 5건 추가: blog/[slug], blog, grades, hot, profile/[id] → 22개 전부 Sentry 추적
+
+### 12. SEO 타이틀 이중 서픽스 수정 (커밋 18)
+- layout.tsx에 `template: '%s | 카더라'` 있는데 페이지에서 `title: 'X | 카더라'` → "X | 카더라 | 카더라" 중복
+- 13페이지 수정: apt 5곳, discuss 2곳, feed, stock 2곳, profile, onboarding
+
+### 13. 코드 품질 정리 (커밋 19-20)
+- 하드코딩 canonical URL → SITE_URL 상수 전환 (4페이지)
+- 미사용 컴포넌트 삭제: BackButton.tsx
+- shop/megaphone 타이틀 이중 서픽스 수정
+
+### 14. 크론 504 방지 완성 (커밋 21)
+- 57개 크론 중 41개에 maxDuration 미설정 → 전부 추가
+- 분류: 60초(blog/crawl/collect/seed), 30초(cleanup/daily), 15초(health/push)
+- 이제 57개 크론 전부 maxDuration 설정 완료
+
 ### PENDING 작업
 - [ ] 이미지 수집 크론 자동 진행 중 (200건/일, ~27일 소요)
 - [ ] 좌표 수집 크론 자동 진행 중 (150건/일, ~36일 소요)
@@ -116,9 +134,13 @@
 - [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출 + 루트 URL 수집)
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 - [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
+- [ ] 미사용 컴포넌트 삭제: BackButton.tsx, PushSubscribeButton.tsx
 - [x] 기존 어드민 파일 정리 (AdminHub/Nav/Sites/ControlTower 삭제 완료)
 - [x] CookieBanner/ConsentBanner 제거 (미사용 코드 -178줄)
 - [x] 첫 방문자 배너 피로도 해결
+- [x] SEO 타이틀 이중 서픽스 수정
+- [x] CRON_SECRETT 오타 수정
+- [x] Sentry 에러 추적 22개 전체 완성
 
 ## 세션 37 작업 내역 (2026-03-25)
 
