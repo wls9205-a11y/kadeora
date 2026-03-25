@@ -27,6 +27,19 @@
 - AdminHub: 3탭 → 단일 스크롤 (ControlTower + AdminSites)
 - CommandCenter → ControlTower 갓버튼으로 통합
 
+### 어드민 오류 수정 (세션 37 후반)
+- GOD MODE 0/36 → 33/36 성공 (baseUrl 도메인 불일치 수정)
+- Supabase 400 에러 수정 (image_url → images 컬럼명)
+- ControlTower minHeight:100vh 제거 (단일 스크롤 레이아웃)
+- AdminNav 라벨 통일 (커맨드센터 → 컨트롤 타워)
+- AdminSites 타입별 현장 수 '—' → 실제 카운트 표시
+- AdminSites 원클릭 운영 버튼 인증 수정 (god-mode API 경유)
+- content_score 기준 40 → 25 통일
+
+### 리스팅 메인 3페이지 네이버 메타 추가
+- /stock, /blog, /feed에 naver:written_time, dg:plink, article:tag 추가
+- 총 21,400+ 페이지 포털 메타 풀스펙 완료
+
 ---
 
 ## 기본 정보
