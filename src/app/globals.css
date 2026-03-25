@@ -1384,3 +1384,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 @media (max-width: 480px) {
   .apt-region-card .region-count { font-size: var(--fs-base) !important; }
 }
+
+/* 부동산 지역 필 스크롤 — 스크롤바 숨김 */
+.apt-pill-scroll::-webkit-scrollbar { display: none; }

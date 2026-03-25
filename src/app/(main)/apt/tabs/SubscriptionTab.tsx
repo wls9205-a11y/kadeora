@@ -72,7 +72,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   return (
         <div>
           {/* 지역 필터 — 컴팩트 필 */}
-          <div style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2, paddingRight: 8, WebkitOverflowScrolling: 'touch' }}>
             <button onClick={() => setRegion('전체')} style={{
               padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === '전체' ? 700 : 500,
               background: region === '전체' ? 'var(--brand)' : 'var(--bg-hover)',

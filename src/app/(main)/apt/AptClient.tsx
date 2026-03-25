@@ -12,9 +12,9 @@ const RedevTab = dynamic(() => import('./tabs/RedevTab'), { ssr: false });
 const OngoingTab = dynamic(() => import('./tabs/OngoingTab'), { ssr: false });
 const UnsoldTab = dynamic(() => import('./tabs/UnsoldTab'), { ssr: false });
 import { SkeletonList } from '@/components/Skeleton';
-import { isNew, generateAptSlug } from './tabs/apt-utils';
+import { isNew } from './tabs/apt-utils';
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [] }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[] }) {
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade'>('sub');
   const [aptUser, setAptUser] = useState<any>(null);
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
@@ -112,16 +112,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     return a.rcept_bgnde && now < String(a.rcept_bgnde).slice(0, 10);
   }).length;
   const unsoldTotal = (lazyUnsold || unsold).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
-  const redevCount = (lazyRedev || []).length;
-
-  // Urgent: D-3 이내 접수중 마감 임박
-  const urgentApts = apts.filter(a => {
-    const now = new Date().toISOString().slice(0, 10);
-    if (!a.rcept_bgnde || !a.rcept_endde) return false;
-    if (now < String(a.rcept_bgnde).slice(0, 10) || now > String(a.rcept_endde).slice(0, 10)) return false;
-    const daysLeft = Math.ceil((new Date(String(a.rcept_endde).slice(0, 10)).getTime() - Date.now()) / 86400000);
-    return daysLeft >= 0 && daysLeft <= 3;
-  });
+  const redevCount = (lazyRedev || []).length || redevTotalCount;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -141,7 +132,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           { label: '예정', value: upcomingCount, color: 'var(--accent-blue)', bg: 'rgba(91,164,245,0.08)' },
           { label: '분양중', value: ongoingApts.length, color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)' },
           { label: '미분양', value: unsoldTotal > 999 ? `${(unsoldTotal/1000).toFixed(1)}k` : unsoldTotal, color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)' },
-          { label: '재개발', value: redevCount || '—', color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)' },
+          { label: '재개발', value: redevCount, color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)' },
         ].map(({ label, value, color, bg }) => (
           <div key={label} style={{
             flex: 1, textAlign: 'center', padding: '8px 2px', borderRadius: 8,
@@ -152,27 +143,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           </div>
         ))}
       </div>
-
-      {/* 마감 임박 긴급 배너 */}
-      {urgentApts.length > 0 && (
-        <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 10, padding: '10px 12px', marginBottom: 10 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-red)', marginBottom: 6 }}>🔴 마감 임박 — {urgentApts.length}건 D-3 이내</div>
-          {urgentApts.slice(0, 3).map(a => {
-            const daysLeft = Math.ceil((new Date(String(a.rcept_endde).slice(0, 10)).getTime() - Date.now()) / 86400000);
-            return (
-              <Link key={a.id} href={`/apt/${encodeURIComponent(generateAptSlug(a.house_nm) || a.house_manage_no || String(a.id))}`} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0',
-                fontSize: 13, textDecoration: 'none', color: 'inherit',
-              }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{a.house_nm}</span>
-                <span style={{ fontSize: 11, fontWeight: 800, color: daysLeft === 0 ? 'var(--accent-red)' : 'var(--accent-orange)', flexShrink: 0, marginLeft: 8 }}>
-                  {daysLeft === 0 ? '오늘 마감' : `D-${daysLeft}`} · {a.region_nm}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      )}
 
       {/* 지역별 스택바 현황 */}
       <RegionStackedBar
@@ -201,7 +171,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       )}
 
       {/* 탭 */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {[
           { k: 'sub' as const, l: '📅 청약', type: 'subscription', data: apts },
           { k: 'ongoing' as const, l: '🏢 분양중', type: 'ongoing', data: ongoingApts },
@@ -212,18 +182,19 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           const hasNew = (data as any[]).some((item: any) => isNew(item, type));
           return (
             <button key={k} onClick={() => handleTabChange(k)} aria-pressed={activeTab === k} style={{
-              flex: 1, padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative', minWidth: 'fit-content',
+              flex: '1 0 auto', padding: '8px 6px', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
+              whiteSpace: 'nowrap',
               background: activeTab === k ? 'var(--brand)' : 'transparent',
-              color: activeTab === k ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 'var(--fs-sm)',
+              color: activeTab === k ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 12,
               boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
             }}>
               {l}
-              {data.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 2, opacity: 0.7 }}>{
+              {data.length > 0 && <span style={{ fontSize: 10, marginLeft: 2, opacity: 0.7 }}>{
                 type === 'unsold'
                   ? (() => { const total = (data as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0); return total > 999 ? `${(total/1000).toFixed(0)}k` : total; })()
                   : data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length
               }</span>}
-              {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 8, width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-red)' }} />}
+              {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 4, width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-red)' }} />}
             </button>
           );
         })}
