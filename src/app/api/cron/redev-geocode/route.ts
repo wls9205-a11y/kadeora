@@ -12,7 +12,7 @@ export const maxDuration = 120;
  */
 
 async function geocodeKakao(address: string): Promise<{ lat: number; lng: number } | null> {
-  const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+  const key = process.env.KAKAO_REST_API_KEY || process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
   if (!key || !address) return null;
   try {
     const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`;
@@ -30,7 +30,7 @@ async function geocodeKakao(address: string): Promise<{ lat: number; lng: number
 
 // 키워드 검색 폴백 (주소 매칭 실패 시)
 async function geocodeKeyword(query: string): Promise<{ lat: number; lng: number } | null> {
-  const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+  const key = process.env.KAKAO_REST_API_KEY || process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
   if (!key || !query) return null;
   try {
     const url = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(query)}`;
