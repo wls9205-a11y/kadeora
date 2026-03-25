@@ -9,24 +9,13 @@ export default function KakaoInit() {
       onLoad={() => {
         try {
           const kakao = (window as any).Kakao;
-          console.log('[KakaoInit] SDK loaded, Kakao:', !!kakao);
           if (kakao && !kakao.isInitialized()) {
             const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
-            console.log('[KakaoInit] init key present:', !!key, 'key length:', key?.length);
-            if (key) {
-              kakao.init(key);
-              console.log('[KakaoInit] initialized:', kakao.isInitialized(), 'Share:', !!kakao.Share);
-            }
-          } else if (kakao) {
-            console.log('[KakaoInit] already initialized, Share:', !!kakao.Share);
+            if (key) kakao.init(key);
           }
-        } catch (e) {
-          console.warn('[KakaoInit] SDK init failed:', e);
-        }
+        } catch { /* silent */ }
       }}
-      onError={(e) => {
-        console.warn('[KakaoInit] SDK script load FAILED:', e);
-      }}
+      onError={() => {}}
     />
   );
 }

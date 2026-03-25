@@ -21,17 +21,13 @@ export default function ShareButtons({ title, postId, content }: Props) {
   const ensureKakaoReady = (): boolean => {
     try {
       const kakao = (window as any).Kakao;
-      console.log('[ShareButtons] Kakao:', !!kakao, 'initialized:', kakao?.isInitialized?.(), 'Share:', !!kakao?.Share);
       if (!kakao) return false;
       if (!kakao.isInitialized()) {
         const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
-        console.log('[ShareButtons] re-init attempt, key:', !!key);
         if (key) kakao.init(key);
       }
-      const ready = kakao.isInitialized() && !!kakao.Share;
-      console.log('[ShareButtons] ready:', ready);
-      return ready;
-    } catch (e) { console.warn('[ShareButtons] error:', e); return false; }
+      return kakao.isInitialized() && !!kakao.Share;
+    } catch { return false; }
   };
 
   const share = async (platform: string) => {
@@ -43,7 +39,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
           try {
             (window as any).Kakao.Share.sendDefault({
               objectType: 'feed',
-              content: { title: shareTitle, description: content?.slice(0, 100) || '', imageUrl: `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}`, link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
+              content: { title: shareTitle, description: content?.slice(0, 80) || '카더라에서 확인하세요', imageUrl: `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}`, link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
               buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
             });
           } catch {

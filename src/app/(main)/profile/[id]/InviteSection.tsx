@@ -22,9 +22,9 @@ export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props
           kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
-              title: '카더라에서 동네/주식/부동산 소식 같이 봐요! 🏘',
-              description: `초대코드: ${inviteCode}`,
-              imageUrl: SITE_URL + '/og-image.png',
+              title: '카더라 — 주식·부동산 소식 같이 봐요 🏘',
+              description: `가입하면 둘 다 +50P! 초대코드: ${inviteCode}`,
+              imageUrl: SITE_URL + '/api/og',
               link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl },
             },
             buttons: [{ title: '카더라 가입하기', link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl } }],

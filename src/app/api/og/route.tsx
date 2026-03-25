@@ -59,25 +59,28 @@ export async function GET(req: NextRequest) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #050A18 0%, #0A1225 100%)',
+            background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: 12, background: '#FF9F43',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 28, fontWeight: 900, color: '#fff',
-            }}>K</div>
-            <span style={{ fontSize: 48, fontWeight: 900, color: '#E8EDF5', letterSpacing: '-1px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+            <svg width="56" height="56" viewBox="0 0 72 72">
+              <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E" /><stop offset="100%" stopColor="#2563EB" /></linearGradient></defs>
+              <rect width="72" height="72" rx="18" fill="url(#lg)" />
+              <circle cx="18" cy="36" r="7" fill="white" /><circle cx="36" cy="36" r="7" fill="white" /><circle cx="54" cy="36" r="7" fill="white" />
+            </svg>
+            <span style={{ fontSize: 52, fontWeight: 900, color: '#E8EDF5', letterSpacing: '-1px' }}>
               카더라
             </span>
           </div>
-          <div style={{ fontSize: 24, color: '#94A8C4', fontWeight: 500, marginBottom: 16 }}>
+          <div style={{ fontSize: 26, color: '#93C5FD', fontWeight: 600, marginBottom: 14 }}>
             아는 사람만 아는 그 정보
           </div>
-          <div style={{ fontSize: 16, color: '#7D8DA3', fontWeight: 400 }}>
-            주식 · 부동산 · 청약 · 우리동네
+          <div style={{ fontSize: 18, color: '#64748B', fontWeight: 400, display: 'flex', gap: 16 }}>
+            <span>📊 주식</span><span>🏢 부동산</span><span>📝 커뮤니티</span><span>🗳️ 토론</span>
+          </div>
+          <div style={{ position: 'absolute', bottom: 32, fontSize: 14, color: '#475569' }}>
+            kadeora.app
           </div>
         </div>
       ),
@@ -101,18 +104,18 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #050A18 0%, #0A1225 100%)',
+          background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)',
           padding: '56px 64px',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}
       >
         {/* Top: logo + category */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 10, background: '#FF9F43',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, fontWeight: 900, color: '#fff',
-          }}>K</div>
+          <svg width="40" height="40" viewBox="0 0 72 72">
+            <defs><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E" /><stop offset="100%" stopColor="#2563EB" /></linearGradient></defs>
+            <rect width="72" height="72" rx="18" fill="url(#lg2)" />
+            <circle cx="18" cy="36" r="7" fill="white" /><circle cx="36" cy="36" r="7" fill="white" /><circle cx="54" cy="36" r="7" fill="white" />
+          </svg>
           <span style={{ fontSize: 24, fontWeight: 900, color: '#E8EDF5', letterSpacing: '-0.5px' }}>
             카더라
           </span>
@@ -158,7 +161,7 @@ export async function GET(req: NextRequest) {
               <>
                 <div style={{
                   width: 38, height: 38, borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${catColor}, #FF9F43)`,
+                  background: `linear-gradient(135deg, ${catColor}, #3B7BF6)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 16, fontWeight: 700, color: 'white',
                 }}>
