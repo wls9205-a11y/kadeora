@@ -33,7 +33,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         <main style={{
           flex: 1, minWidth: 0,
           paddingTop: 'clamp(12px,3vw,20px)',
-          paddingBottom: 90,
+          paddingBottom: 72,
           minHeight: 'calc(100vh - 48px)',
           backgroundColor: 'var(--bg-base)',
           color: 'var(--text-primary)',

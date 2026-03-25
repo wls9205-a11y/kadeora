@@ -31,19 +31,19 @@ export default function TrendingTicker() {
   const current = keywords[index];
 
   return (
-    <div style={{ background:'var(--bg-surface)', borderBottom:'1px solid var(--border)', padding:'5px 0', overflow:'hidden' }}>
-      <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight:800, color:'var(--text-inverse)', background:'var(--brand)', padding:'2px 8px', borderRadius:4, flexShrink:0 }}>🔥 실시간</span>
-        <div style={{ flex:1, overflow:'hidden', height:22, position:'relative' }}>
+    <div style={{ background:'var(--bg-surface)', borderBottom:'1px solid var(--border)', padding:'3px 0', overflow:'hidden' }}>
+      <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+        <span style={{ fontSize:10, fontWeight:800, color:'#fff', background:'var(--brand)', padding:'1px 6px', borderRadius:3, flexShrink:0 }}>실시간</span>
+        <div style={{ flex:1, overflow:'hidden', height:20, position:'relative' }}>
           <a href={`/search?q=${encodeURIComponent(current?.keyword ?? '')}`}
             style={{
               position:'absolute', left:0, right:0,
-              fontSize:13, fontWeight:600, color:'var(--text-primary)',
+              fontSize:12, fontWeight:600, color:'var(--text-primary)',
               textDecoration:'none', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
-              opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(-8px)',
-              transition: 'opacity 0.3s, transform 0.3s',
+              opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(-6px)',
+              transition: 'opacity 0.25s, transform 0.25s',
             }}>
-            <span style={{ color:'var(--brand)', marginRight:6, fontWeight:800 }}>{current?.rank ?? ''}</span>
+            <span style={{ color:'var(--brand)', marginRight:4, fontWeight:800 }}>{current?.rank ?? ''}</span>
             #{current?.keyword}
           </a>
         </div>

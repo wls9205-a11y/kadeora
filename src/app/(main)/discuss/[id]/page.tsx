@@ -117,30 +117,30 @@ export default async function DiscussDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       {/* Back */}
-      <Link href="/discuss" style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: '8px 0', marginBottom: 8, display: 'inline-block', textDecoration: 'none' }}>
+      <Link href="/discuss" style={{ color: 'var(--text-tertiary)', fontSize: 12, padding: '6px 0', marginBottom: 6, display: 'inline-block', textDecoration: 'none' }}>
         ← 돌아가기
       </Link>
 
       {/* Topic Header — SSR rendered for crawlers */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-          <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
+        <div style={{ display: 'flex', gap: 5, marginBottom: 6 }}>
+          <span style={{ fontSize: 11, padding: '2px 7px', borderRadius: 4, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
             {CAT_LABEL[topic.category] || topic.category}
           </span>
-          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
+          {topic.is_hot && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 700, background: 'var(--error)', color: '#fff' }}>HOT</span>}
         </div>
 
-        <h1 itemProp="headline" style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.4 }}>
+        <h1 itemProp="headline" style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.35 }}>
           {topic.title}
         </h1>
         {topic.description && (
-          <p itemProp="text" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+          <p itemProp="text" style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5 }}>
             {topic.description}
           </p>
         )}
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
+        <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
           <time itemProp="datePublished" dateTime={topic.created_at ?? undefined}>{timeAgo(topic.created_at)}</time>
-          {' · '}👁 {topic.view_count || 0}
+          {' · '}{topic.view_count || 0}뷰
         </div>
       </div>
 

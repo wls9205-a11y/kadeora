@@ -77,53 +77,45 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
   return (
     <>
           <div>
-            {/* 지역별 현황 */}
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>총 {redevelopment.length}건</span>
-              </div>
-              <div className="apt-region-grid">
-                <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} className={`apt-region-card${redevRegion === '전체' ? ' active' : ''}`}>
-                  <span className="region-count">{redevelopment.length}</span>
-                  <span className="region-name">전체</span>
-                  <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2 }}>
-                    <span style={{ color: 'var(--accent-blue)' }}>개발{redevRegionStats.reduce((s, r) => s + r.redev, 0)}</span>
-                    <span style={{ color: 'var(--accent-green)' }}>건축{redevRegionStats.reduce((s, r) => s + r.rebuild, 0)}</span>
-                  </div>
+            {/* 지역 필터 — 컴팩트 필 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>재개발 현황</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {redevelopment.length}건</span>
+            </div>
+            <div className="apt-pill-row">
+              <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
+                padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: redevRegion === '전체' ? 700 : 500,
+                background: redevRegion === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
+                color: redevRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+              }}>
+                전체 {redevelopment.length}
+              </button>
+              {redevRegionStats.filter(r => r.total > 0).map(r => (
+                <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
+                  padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: redevRegion === r.name ? 700 : 500,
+                  background: redevRegion === r.name ? 'var(--brand)' : 'var(--bg-hover)',
+                  color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                  border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+                }}>
+                  {r.name} {r.total}
                 </button>
-                {redevRegionStats.filter(r => r.total > 0).map(r => (
-                  <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} className={`apt-region-card${redevRegion === r.name ? ' active' : ''}`}>
-                    <span className="region-count">{r.total}</span>
-                    <span className="region-name">{r.name}</span>
-                    <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2 }}>
-                      {r.redev > 0 && <span style={{ color: 'var(--accent-blue)' }}>개발{r.redev}</span>}
-                      {r.rebuild > 0 && <span style={{ color: 'var(--accent-green)' }}>건축{r.rebuild}</span>}
-                    </div>
-                    {r.total > 0 && (
-                      <div className="region-bar">
-                        <div style={{ height: '100%', background: 'var(--accent-blue)', width: `${(r.redev / r.total) * 100}%` }} />
-                        <div style={{ height: '100%', background: 'var(--accent-green)', width: `${(r.rebuild / r.total) * 100}%` }} />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
 
             {/* 현황 요약 */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전체</div>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전체</div>
               </div>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-blue)' }}>{redevCount}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>재개발</div>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent-blue)' }}>{redevCount}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재개발</div>
               </div>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-orange)' }}>{rebuildCount}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>재건축</div>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent-orange)' }}>{rebuildCount}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재건축</div>
               </div>
             </div>
 

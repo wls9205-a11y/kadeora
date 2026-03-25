@@ -103,38 +103,27 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
     return (
     <div>
-      {/* 지역별 현황 */}
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {ongoingApts.length}건</span>
-        </div>
-        <div className="apt-region-grid">
-          <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} className={`apt-region-card${ongoingRegion === '전체' ? ' active' : ''}`}>
-            <span className="region-count">{ongoingApts.length}</span>
-            <span className="region-name">전체</span>
-            <div style={{ display: 'flex', gap: 2, fontSize: 'var(--fs-xs)' }}>
-              <span style={{ color: 'var(--accent-green)' }}>분양{regionCounts.reduce((s, r) => s + r.subCount, 0)}</span>
-              {regionCounts.reduce((s, r) => s + r.unsoldCount, 0) > 0 && <span style={{ color: 'var(--accent-red)' }}>미분양{regionCounts.reduce((s, r) => s + r.unsoldCount, 0)}</span>}
-            </div>
+      {/* 지역 필터 — 컴팩트 필 */}
+      <div className="apt-pill-row">
+        <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
+          padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: ongoingRegion === '전체' ? 700 : 500,
+          background: ongoingRegion === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
+          color: ongoingRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
+          border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+        }}>
+          전체 {ongoingApts.length}
+        </button>
+        {regionCounts.filter(r => r.count > 0).map(r => (
+          <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
+            padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: ongoingRegion === r.name ? 700 : 500,
+            background: ongoingRegion === r.name ? 'var(--brand)' : 'var(--bg-hover)',
+            color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
+            border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+          }}>
+            {r.name} {r.count}
+            {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'rgba(255,255,255,0.7)' : 'var(--accent-red)', marginLeft: 3, fontSize: 'var(--fs-xs)' }}>●</span>}
           </button>
-          {regionCounts.filter(r => r.count > 0).map(r => (
-            <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} className={`apt-region-card${ongoingRegion === r.name ? ' active' : ''}`}>
-              <span className="region-count">{r.count}</span>
-              <span className="region-name">{r.name}</span>
-              <div style={{ display: 'flex', gap: 2, fontSize: 'var(--fs-xs)' }}>
-                {r.subCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'var(--accent-blue)' : 'var(--accent-green)' }}>분양{r.subCount}</span>}
-                {r.unsoldCount > 0 && <span style={{ color: 'var(--accent-red)' }}>미분양{r.unsoldCount}</span>}
-              </div>
-              {r.count > 0 && (
-                <div className="region-bar">
-                  <div style={{ height: '100%', background: 'var(--accent-blue)', width: `${(r.subCount / r.count) * 100}%` }} />
-                  <div style={{ height: '100%', background: 'var(--accent-red)', width: `${(r.unsoldCount / r.count) * 100}%` }} />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* ① 입주 임박 배너 */}

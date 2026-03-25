@@ -146,15 +146,15 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     const isGlobal = s.currency === 'USD';
     const isWatched = watchlistSymbols.includes(s.symbol);
     return (
-      <div onClick={() => setSelectedStock(s)} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 4px', borderBottom: '1px solid var(--border)', cursor: 'pointer', borderRadius: 8, transition: 'background var(--transition-fast)' }}>
-        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 20, textAlign: 'center' }}>{rank}</span>
-        <button onClick={e => { e.stopPropagation(); toggleWatchlist(s.symbol); }} className={isWatched ? 'animate-like' : ''} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 'var(--fs-lg)', lineHeight: 1, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, transition: 'color var(--transition-fast)' }} title={isWatched ? '관심 해제' : '관심 추가'}>
+      <div onClick={() => setSelectedStock(s)} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 4px', borderBottom: '1px solid var(--border)', cursor: 'pointer', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 18, textAlign: 'center' }}>{rank}</span>
+        <button onClick={e => { e.stopPropagation(); toggleWatchlist(s.symbol); }} className={isWatched ? 'animate-like' : ''} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 16, lineHeight: 1, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, transition: 'color var(--transition-fast)' }} title={isWatched ? '관심 해제' : '관심 추가'}>
           {isWatched ? '★' : '☆'}
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-            <span className="stock-symbol-code" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.symbol}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+            <span className="stock-symbol-code" style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.symbol}</span>
           </div>
           <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
             {s.sector && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{s.sector}</span>}
@@ -198,13 +198,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <Link href="/stock/compare" className="kd-action-link">⚔️ 비교</Link>
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
-          <span style={{ color: 'var(--text-tertiary)' }}>원/달러</span>
-          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>₩{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 3, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px' }}>
+          <span style={{ color: 'var(--text-tertiary)' }}>$/₩</span>
+          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
           {exchangeHistory && exchangeHistory.length > 1 && (() => {
             const rates = exchangeHistory.map((h: any) => h.rate);
             const min = Math.min(...rates); const max = Math.max(...rates);
@@ -272,15 +272,15 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       )}
 
       {/* 국내/해외 메인 토글 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
         <button onClick={() => { setMode('domestic'); setSearch(''); setSectorFilter('all'); }} aria-pressed={isDomestic} style={{
-          flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
+          flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 15, fontWeight: 700,
           background: isDomestic ? 'var(--brand)' : 'var(--bg-surface)',
           color: isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           border: isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇰🇷 국내주식</button>
         <button onClick={() => { setMode('global'); setSearch(''); setSectorFilter('all'); }} aria-pressed={!isDomestic} style={{
-          flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700,
+          flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 15, fontWeight: 700,
           background: !isDomestic ? 'var(--accent-blue)' : 'var(--bg-surface)',
           color: !isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           border: !isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
@@ -288,11 +288,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       </div>
 
       {/* 지수 바 */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         {indexStocks.filter(s => isDomestic ? (s.market === 'KOSPI' || s.market === 'KOSDAQ') : (s.market === 'NYSE' || s.market === 'NASDAQ')).slice(0, 3).map(s => {
           const pct = s.change_pct ?? 0;
           return (
-            <div key={s.symbol} style={{ padding: '8px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, flexShrink: 0, minWidth: 140 }}>
+            <div key={s.symbol} style={{ padding: '7px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, flexShrink: 0, minWidth: 130 }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>{s.name}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>{s.currency === 'USD' ? `$${s.price?.toFixed(0)}` : fmt(s.price)}</span>

@@ -148,14 +148,14 @@ export function Navigation() {
   /* 공통 스타일 헬퍼 */
   const navItemStyle = (active: boolean) => ({
     padding: '0 10px',
-    height: 48,
+    height: 44,
     display: 'flex' as const,
     alignItems: 'center' as const,
     fontSize: 'var(--fs-base)',
     fontWeight: 700,
     color: active ? 'var(--brand)' : 'var(--nav-text)',
     textDecoration: 'none' as const,
-    borderBottom: active ? '2px solid var(--brand)' : '2px solid transparent',
+    borderBottom: active ? '1.5px solid var(--brand)' : '1.5px solid transparent',
     transition: 'color 0.1s',
   });
 
@@ -165,37 +165,37 @@ export function Navigation() {
       <header style={{
         position: 'sticky', top: 0, zIndex: 200,
         background: 'var(--nav-bg)',
-        borderBottom: '2px solid var(--border)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        borderBottom: '1px solid var(--border)',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
       }}>
         <div style={{
-          maxWidth: 1340, margin: '0 auto', padding: '0 16px',
-          height: 48, display: 'flex', alignItems: 'center', gap: 8,
+          maxWidth: 1340, margin: '0 auto', padding: '0 14px',
+          height: 44, display: 'flex', alignItems: 'center', gap: 8,
         }}>
           {/* 로고 */}
-          <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:7, textDecoration:'none', flexShrink:0, marginRight:4 }}>
-            <KadeoraLogo size={30} />
-            <span style={{ fontWeight:800, fontSize:17, color:'var(--brand)', letterSpacing:-0.5 }}>
+          <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:6, textDecoration:'none', flexShrink:0, marginRight:2 }}>
+            <KadeoraLogo size={26} />
+            <span style={{ fontWeight:800, fontSize:15, color:'var(--brand)', letterSpacing:-0.5 }}>
               카더라
             </span>
           </Link>
 
           {/* 검색바 (데스크탑) */}
           <Link href="/search" className="hidden md:flex" style={{
-            flex:1, maxWidth:360, minWidth:160, height:34,
+            flex:1, maxWidth:340, minWidth:140, height:30,
             background:'var(--bg-hover)',
             border:'1px solid var(--border)',
-            borderRadius:17, alignItems:'center', padding:'0 12px', gap:7,
+            borderRadius:15, alignItems:'center', padding:'0 10px', gap:6,
             textDecoration:'none', transition:'border-color 0.15s',
           }}
             onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
             onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
           >
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7" stroke="var(--text-tertiary)" strokeWidth="2"/>
               <path d="M16.5 16.5L21 21" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span style={{ fontSize:13, color:'var(--text-tertiary)' }}>카더라 검색...</span>
+            <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>검색...</span>
           </Link>
 
           {/* 데스크탑 네비 */}
@@ -371,32 +371,33 @@ export function Navigation() {
         background:'var(--nav-bg)',
         borderTop:'1px solid var(--nav-border)',
         display:'flex', alignItems:'flex-end', justifyContent:'space-around',
-        paddingBottom:'max(8px, env(safe-area-inset-bottom))',
+        paddingBottom:'max(6px, env(safe-area-inset-bottom))',
         paddingTop:0,
-        boxShadow:'0 -2px 8px rgba(0,0,0,0.08)',
+        boxShadow:'0 -1px 4px rgba(0,0,0,0.1)',
       }} className="md:hidden">
         {MOBILE_TABS.slice(0, 2).map(item => {
           const active = isActive(item.href);
           return (
             <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
-              display:'flex', flexDirection:'column', alignItems:'center', gap:3,
-              padding:'10px 4px', textDecoration:'none', minHeight:56,
+              display:'flex', flexDirection:'column', alignItems:'center', gap:2,
+              padding:'8px 4px 4px', textDecoration:'none', minHeight:48,
               justifyContent:'center', flex:1,
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
             }}>
-              <item.Icon size={20} />
-              <span style={{ fontSize:'var(--fs-xs)', fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              <item.Icon size={18} />
+              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              {active && <span style={{ width:4, height:4, borderRadius:'50%', background:'var(--brand)', marginTop:1 }} />}
             </Link>
           );
         })}
         {/* 글쓰기 */}
         <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
           display:'flex', alignItems:'center', justifyContent:'center',
-          width:48, height:48, borderRadius:14,
+          width:42, height:42, borderRadius:12,
           background:'var(--brand)', color:'var(--text-inverse)',
-          marginTop:-10, flexShrink:0, textDecoration:'none',
+          marginTop:-6, flexShrink:0, textDecoration:'none',
         }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
         </Link>
@@ -404,13 +405,14 @@ export function Navigation() {
           const active = isActive(item.href);
           return (
             <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
-              display:'flex', flexDirection:'column', alignItems:'center', gap:3,
-              padding:'10px 4px', textDecoration:'none', minHeight:56,
+              display:'flex', flexDirection:'column', alignItems:'center', gap:2,
+              padding:'8px 4px 4px', textDecoration:'none', minHeight:48,
               justifyContent:'center', flex:1,
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
             }}>
-              <item.Icon size={20} />
-              <span style={{ fontSize:'var(--fs-xs)', fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              <item.Icon size={18} />
+              <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
+              {active && <span style={{ width:4, height:4, borderRadius:'50%', background:'var(--brand)', marginTop:1 }} />}
             </Link>
           );
         })}
@@ -421,7 +423,7 @@ export function Navigation() {
         <div style={{ position:'fixed', inset:0, zIndex:201 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
           <div style={{
-            position:'absolute', bottom:72, left:12, right:12,
+            position:'absolute', bottom:60, left:12, right:12,
             maxWidth: 400, marginLeft: 'auto', marginRight: 'auto',
             background:'var(--bg-surface)', border:'1px solid var(--border)',
             borderRadius:16, padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',

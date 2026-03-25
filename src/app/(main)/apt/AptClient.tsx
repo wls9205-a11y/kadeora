@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
 import { haptic } from '@/lib/haptic';
+import RegionStackedBar from '@/components/RegionStackedBar';
 import SubscriptionTab from './tabs/SubscriptionTab';
 const TransactionTab = dynamic(() => import('./tabs/TransactionTab'), { ssr: false });
 const RedevTab = dynamic(() => import('./tabs/RedevTab'), { ssr: false });
@@ -28,6 +29,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [lazyUnsoldMonthly, setLazyUnsoldMonthly] = useState<any[]>(unsoldMonthly);
   const [lazyUnsoldSummary, setLazyUnsoldSummary] = useState<any>(unsoldSummary);
   const [tabLoading, setTabLoading] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState('전체');
 
   const fetchTabData = async (tab: string) => {
     setTabLoading(tab);
@@ -110,6 +112,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     return a.rcept_bgnde && now < String(a.rcept_bgnde).slice(0, 10);
   }).length;
   const unsoldTotal = (lazyUnsold || unsold).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+  const redevCount = (lazyRedev || []).length;
 
   // Urgent: D-3 이내 접수중 마감 임박
   const urgentApts = apts.filter(a => {
@@ -132,16 +135,20 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       </div>
 
       {/* KPI 요약 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
         {[
-          { label: '접수중', value: openCount, color: 'var(--accent-green)', icon: '🟢' },
-          { label: '예정', value: upcomingCount, color: 'var(--accent-blue)', icon: '🔵' },
-          { label: '분양중', value: ongoingApts.length, color: 'var(--accent-purple)', icon: '🏢' },
-          { label: '미분양', value: unsoldTotal > 999 ? `${(unsoldTotal/1000).toFixed(1)}k` : unsoldTotal, color: 'var(--accent-red)', icon: '🏚️' },
-        ].map(({ label, value, color, icon }) => (
-          <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 2 }}>{icon} {label}</div>
+          { label: '접수중', value: openCount, color: 'var(--accent-green)', bg: 'rgba(52,211,153,0.08)' },
+          { label: '예정', value: upcomingCount, color: 'var(--accent-blue)', bg: 'rgba(91,164,245,0.08)' },
+          { label: '분양중', value: ongoingApts.length, color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)' },
+          { label: '미분양', value: unsoldTotal > 999 ? `${(unsoldTotal/1000).toFixed(1)}k` : unsoldTotal, color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)' },
+          { label: '재개발', value: redevCount || '—', color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)' },
+        ].map(({ label, value, color, bg }) => (
+          <div key={label} style={{
+            flex: 1, textAlign: 'center', padding: '8px 2px', borderRadius: 8,
+            background: bg, border: `1px solid ${color}20`,
+          }}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color }}>{value}</div>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{label}</div>
           </div>
         ))}
       </div>
@@ -166,6 +173,17 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           })}
         </div>
       )}
+
+      {/* 지역별 스택바 현황 */}
+      <RegionStackedBar
+        apts={apts}
+        ongoingApts={ongoingApts}
+        unsold={lazyUnsold || unsold}
+        redevelopment={lazyRedev || []}
+        transactions={lazyTx || []}
+        onRegionClick={setSelectedRegion}
+        activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+      />
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>

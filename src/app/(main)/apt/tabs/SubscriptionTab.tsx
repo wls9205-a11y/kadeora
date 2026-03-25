@@ -66,39 +66,27 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
 
   return (
         <div>
-          {/* 지역별 현황판 */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {apts.length}건</span>
-            </div>
-            <div className="apt-region-grid">
-              <button onClick={() => setRegion('전체')} className={`apt-region-card${region === '전체' ? ' active' : ''}`}>
-                <span className="region-count">{apts.length}</span>
-                <span className="region-name">전체</span>
-                <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                  {(() => { const o = regionStats.reduce((s, r) => s + r.open, 0); return o > 0 ? <span style={{ color: 'var(--accent-green)' }}>접수{o}</span> : null; })()}
-                  {(() => { const u = regionStats.reduce((s, r) => s + r.upcoming, 0); return u > 0 ? <span style={{ color: 'var(--accent-yellow)' }}>예정{u}</span> : null; })()}
-                  {(() => { const c = regionStats.reduce((s, r) => s + r.closed, 0); return c > 0 ? <span style={{ flexBasis: '100%', color: 'var(--text-tertiary)' }}>마감{c}</span> : null; })()}
-                </div>
+          {/* 지역 필터 — 컴팩트 필 */}
+          <div style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+            <button onClick={() => setRegion('전체')} style={{
+              padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === '전체' ? 700 : 500,
+              background: region === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
+              color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
+              border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+            }}>
+              전체 {apts.length}
+            </button>
+            {regionStats.filter(r => r.total > 0).map(r => (
+              <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
+                padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === r.name ? 700 : 500,
+                background: region === r.name ? 'var(--brand)' : 'var(--bg-hover)',
+                color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+              }}>
+                {r.name} {r.total}
+                {r.open > 0 && <span style={{ color: region === r.name ? 'rgba(255,255,255,0.7)' : 'var(--accent-green)', marginLeft: 3, fontSize: 'var(--fs-xs)' }}>●</span>}
               </button>
-              {regionStats.filter(r => r.open > 0 || r.upcoming > 0).map(r => (
-                <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} className={`apt-region-card${region === r.name ? ' active' : ''}`}>
-                  <span className="region-count">{r.total}</span>
-                  <span className="region-name">{r.name}</span>
-                  <div style={{ fontSize: 'var(--fs-xs)', display: 'flex', gap: 2 }}>
-                    {r.open > 0 && <span style={{ color: 'var(--accent-green)' }}>접수{r.open}</span>}
-                    {r.upcoming > 0 && <span style={{ color: 'var(--accent-yellow)' }}>예정{r.upcoming}</span>}
-                  </div>
-                  {r.total > 0 && (
-                    <div className="region-bar">
-                      <div style={{ height: '100%', background: 'var(--accent-green)', width: `${(r.open / r.total) * 100}%` }} />
-                      <div style={{ height: '100%', background: 'var(--accent-yellow)', width: `${(r.upcoming / r.total) * 100}%` }} />
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
 
           {/* 검색 + 정렬 + 통계 요약 */}

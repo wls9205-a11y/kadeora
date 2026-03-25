@@ -278,22 +278,22 @@ export default async function HomePage() {
         </section>
 
         {/* ━━━ 실시간 통계 ━━━ */}
-        <section style={{ maxWidth: 1200, margin: '0 auto 48px', padding: '0 20px' }}>
+        <section style={{ maxWidth: 1200, margin: '0 auto 36px', padding: '0 20px' }}>
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12,
-            background: 'var(--bg-surface)', borderRadius: 16, padding: 'clamp(16px, 3vw, 24px)',
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8,
+            background: 'var(--bg-surface)', borderRadius: 12, padding: 'clamp(12px, 2vw, 18px)',
             border: '1px solid var(--border)',
           }}>
             {[
-              { label: '블로그 글', value: fmtNum(stats.blogs), suffix: '편' },
+              { label: '블로그', value: fmtNum(stats.blogs), suffix: '편' },
               { label: '종목 시세', value: String(stats.stocks), suffix: '종목' },
               { label: '청약 정보', value: fmtNum(stats.apts), suffix: '건' },
-              { label: '재개발 구역', value: String(stats.redev), suffix: '곳' },
-              { label: '커뮤니티 글', value: fmtNum(stats.posts), suffix: '건' },
-              { label: '가입 회원', value: String(stats.profiles), suffix: '명' },
+              { label: '재개발', value: String(stats.redev), suffix: '곳' },
+              { label: '커뮤니티', value: fmtNum(stats.posts), suffix: '건' },
+              { label: '회원', value: String(stats.profiles), suffix: '명' },
             ].map(s => (
-              <div key={s.label} style={{ textAlign: 'center', padding: '8px 0' }}>
-                <div style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, color: 'var(--brand-hover)', letterSpacing: '-0.02em' }}>
+              <div key={s.label} style={{ textAlign: 'center', padding: '6px 0' }}>
+                <div style={{ fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, color: 'var(--brand-hover)', letterSpacing: '-0.02em' }}>
                   {s.value}<span style={{ fontSize: '0.5em', fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: 2 }}>{s.suffix}</span>
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>{s.label}</div>
@@ -315,17 +315,17 @@ export default async function HomePage() {
           </p>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))',
-            gap: 16,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
+            gap: 12,
           }}>
             {SECTIONS.map(s => (
               <Link key={s.href} href={s.href} className="home-card" style={{
                 display: 'block', textDecoration: 'none',
-                background: 'var(--bg-surface)', borderRadius: 16,
+                background: 'var(--bg-surface)', borderRadius: 12,
                 border: '1px solid var(--border)', transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
                 overflow: 'hidden',
               }}>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '8/5', overflow: 'hidden' }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }}>
                   <Image
                     src={s.img}
                     alt={s.imgAlt}
@@ -335,16 +335,16 @@ export default async function HomePage() {
                     loading="eager"
                   />
                 </div>
-                <div style={{ padding: 'clamp(14px, 2vw, 20px)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <span style={{ fontSize: 22 }}>{s.emoji}</span>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{s.title}</h3>
+                <div style={{ padding: 'clamp(12px, 2vw, 16px)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <span style={{ fontSize: 18 }}>{s.emoji}</span>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{s.title}</h3>
                   </div>
-                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 10px' }}>{s.desc}</p>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 8px' }}>{s.desc}</p>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {s.tags.map(t => (
                       <span key={t} style={{
-                        fontSize: 11, padding: '3px 8px', borderRadius: 6,
+                        fontSize: 10, padding: '2px 7px', borderRadius: 4,
                         background: 'var(--brand-bg)', color: 'var(--info)', fontWeight: 500,
                       }}>{t}</span>
                     ))}

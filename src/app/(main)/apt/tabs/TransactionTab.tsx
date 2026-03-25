@@ -76,26 +76,30 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
   return (
     <div>
-      {/* 지역별 현황 */}
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-          <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
-        </div>
-        <div className="apt-region-grid">
-          <button onClick={() => { setRegion('전체'); setPage(1); }} className={`apt-region-card${region === '전체' ? ' active' : ''}`}>
-            <span className="region-count">{transactions.length}</span>
-            <span className="region-name">전체</span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{regStats.length}개 지역</span>
+      {/* 지역 필터 — 컴팩트 필 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>실거래 현황</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
+      </div>
+      <div className="apt-pill-row">
+        <button onClick={() => { setRegion('전체'); setPage(1); }} style={{
+          padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === '전체' ? 700 : 500,
+          background: region === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
+          color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
+          border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+        }}>
+          전체 {transactions.length}
+        </button>
+        {regStats.filter(r => r.count > 0).map(r => (
+          <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} style={{
+            padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === r.name ? 700 : 500,
+            background: region === r.name ? 'var(--brand)' : 'var(--bg-hover)',
+            color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
+            border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+          }}>
+            {r.name} {r.count}
           </button>
-          {regStats.filter(r => r.count > 0).map(r => (
-            <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} className={`apt-region-card${region === r.name ? ' active' : ''}`}>
-              <span className="region-count">{r.count}</span>
-              <span className="region-name">{r.name}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.count}건</span>
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* 대시보드 */}

@@ -11,7 +11,6 @@
 @media (min-width: 1200px) { .right-panel-wrapper { display: block; } }
 
 /* 카드 호버 효과 */
-.kd-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
 @media (hover: hover) {
   .kd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
 }
@@ -212,21 +211,16 @@ html.font-large {
   --radius-xl: 20px;
   --radius-full: 999px;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
-  --shadow-xl: 0 16px 48px rgba(0,0,0,0.5);
-
   --transition-fast: 0.12s ease;
   --transition-normal: 0.2s ease;
   --transition-slow: 0.35s ease;
-  --bg-surface:    #0A1225;
-  --bg-elevated:   #0F1A32;
+  --bg-surface:    #0C1528;
+  --bg-elevated:   #111D35;
   --bg-sunken:     #030710;
-  --bg-hover:      #0F1A32;
-  --bg-active:     #152240;
-  --border:        #152240;
-  --border-strong: #1E2E52;
+  --bg-hover:      #111D35;
+  --bg-active:     #162444;
+  --border:        #1A2A4A;
+  --border-strong: #243760;
   --border-focus:  #5B93FF;
   --text-primary:   #E8EDF5;
   --text-secondary: #94A8C4;
@@ -269,8 +263,8 @@ html.font-large {
   --accent-blue:    #6CB4FF;
   --accent-blue-bg: rgba(108,180,255,0.10);
   /* 네비게이션 */
-  --nav-bg:         #0A1225;
-  --nav-border:     #152240;
+  --nav-bg:         #0C1528;
+  --nav-border:     #1A2A4A;
   --nav-text:       #E8EDF5;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
   --shadow-md: 0 2px 8px rgba(0,0,0,0.6);
@@ -458,29 +452,29 @@ button:active,
    ======================================== */
 .nav-bar {
   background-color: var(--nav-bg);
-  border-bottom: 2px solid var(--border);
+  border-bottom: 1px solid var(--border);
   color: var(--nav-text);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 4px rgba(0,0,0,.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
 }
 .dark .nav-bar {
   background-color: var(--nav-bg);
-  border-bottom: 2px solid var(--border-strong);
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  border-bottom: 1px solid var(--border-strong);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
 }
 
 /* 탭바/푸터 — 상단 경계선 명확화 */
 .tab-bar {
   background-color: var(--bg-elevated);
-  border-top: 2px solid var(--border);
+  border-top: 1px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -2px 8px rgba(0,0,0,.06);
+  box-shadow: 0 -1px 4px rgba(0,0,0,.06);
 }
 .dark .tab-bar {
-  border-top: 2px solid var(--border-strong);
-  box-shadow: 0 -2px 12px rgba(0,0,0,.4);
+  border-top: 1px solid var(--border-strong);
+  box-shadow: 0 -1px 6px rgba(0,0,0,.3);
 }
 .tab-bar-item { color: var(--text-tertiary); transition: color 0.15s; }
 .tab-bar-item.active { color: var(--brand); }
@@ -812,6 +806,10 @@ input, textarea, select {
   border-radius: var(--radius-md);
   padding: var(--card-p);
   margin-bottom: var(--sp-md);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+@media (max-width: 480px) {
+  .kd-card { padding: var(--space-md) !important; }
 }
 
 /* 버튼 — 글씨 크기에 따라 높이/패딩 자동 조절 */
@@ -832,15 +830,6 @@ input, textarea, select {
 .kd-btn-secondary { background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border); }
 
 /* 필 (태그, 카테고리) */
-.kd-pill {
-  padding: var(--sp-xs) var(--sp-md);
-  border-radius: 999px;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 /* 입력 필드 */
 .kd-input {
   width: 100%;
@@ -946,6 +935,7 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   border: none;
   cursor: pointer;
   flex-shrink: 0;
+  white-space: nowrap;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 .kd-pill-active {
@@ -955,15 +945,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 .kd-pill-inactive {
   background: var(--bg-hover);
   color: var(--text-secondary);
-}
-
-/* 카드 공통 */
-.kd-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 16px;
 }
 
 /* 지역 필터 버튼 */
@@ -1120,7 +1101,7 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 /* 모바일: 토스트 위치 하단바 위 */
 @media (max-width: 899px) {
   .kd-toast {
-    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
@@ -1350,17 +1331,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   --page-padding: clamp(12px, 3vw, 24px);
 }
 
-/* ═══ 전역 카드 간격 ═══ */
-.kd-card {
-  padding: var(--space-lg);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-}
-@media (max-width: 480px) {
-  .kd-card { padding: var(--space-md) !important; }
-}
-
 /* ═══ 어드민 간격 ═══ */
 .admin-grid {
   display: grid;
@@ -1385,7 +1355,7 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 /* ═══ 하단 탭바 여백 보정 ═══ */
 @media (max-width: 767px) {
   main, [role="main"] {
-    padding-bottom: 72px !important;
+    padding-bottom: 60px !important;
   }
 }
 
@@ -1393,7 +1363,7 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 @media (min-width: 900px) {
   .sidebar-wrapper {
     position: sticky;
-    top: 60px;
+    top: 52px;
     padding-top: var(--space-lg);
   }
 }

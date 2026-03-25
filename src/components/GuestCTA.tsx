@@ -32,22 +32,21 @@ export default function GuestCTA() {
 
   if (!show) return null;
   return (
-    <div style={{ position: 'fixed', bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))', left: 0, right: 0, zIndex: 100, padding: '0 16px' }}>
+    <div style={{ position: 'fixed', bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))', left: 0, right: 0, zIndex: 100, padding: '0 12px' }}>
       <div style={{
-        background: 'var(--bg-surface)', border: '1px solid var(--brand)', borderRadius: 16,
-        padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10,
-        boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+        background: 'var(--bg-surface)', border: '1px solid var(--brand-border)', borderRadius: 12,
+        padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8,
+        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>댓글·좋아요·알림 받기</div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>3초면 가입 완료!</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>댓글·좋아요·알림 받기 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>3초 가입</span></div>
         </div>
         <Link href="/login" style={{
-          background: 'var(--brand)', color: 'var(--text-inverse)', padding: '7px 14px', borderRadius: 10,
-          fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
+          background: 'var(--brand)', color: '#fff', padding: '6px 14px', borderRadius: 8,
+          fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
         }}>가입</Link>
         <button onClick={() => { setShow(false); localStorage.setItem('kd_guest_cta', String(Date.now() + 24 * 60 * 60 * 1000)); }}
-          style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)', cursor: 'pointer', padding: 4 }} aria-label="닫기">×</button>
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 16, cursor: 'pointer', padding: 2, lineHeight: 1 }} aria-label="닫기">×</button>
       </div>
     </div>
   );
