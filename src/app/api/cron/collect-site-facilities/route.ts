@@ -4,7 +4,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 100;
 
 const FACILITY_TYPES = [
   { key: 'subway', query: '지하철역', label: '지하철' },

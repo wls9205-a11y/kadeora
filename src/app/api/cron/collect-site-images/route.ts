@@ -4,7 +4,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
-const BATCH_SIZE = 30; // 네이버 API 호출 제한 고려 (25,000/일)
+const BATCH_SIZE = 200; // 네이버 API 25,000/일 → 200건/배치로 확대 // 네이버 API 호출 제한 고려 (25,000/일)
 
 async function searchNaverImages(query: string, display = 3): Promise<{ title: string; link: string; thumbnail: string }[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];

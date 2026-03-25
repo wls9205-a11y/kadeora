@@ -86,6 +86,42 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     await new Promise(r => setTimeout(r, 200));
   }
 
-  console.info(`[redev-geocode] scanned=${projects.length} updated=${updated} failed=${failed}`);
-  return NextResponse.json({ ok: true, scanned: projects.length, updated, failed });
+  console.info(`[redev-geocode] redev: scanned=${projects.length} updated=${updated} failed=${failed}`);
+
+  // ━━━ Phase 2: apt_sites 좌표 수집 (좌표 없는 현장) ━━━
+  let siteUpdated = 0;
+  let siteFailed = 0;
+
+  const { data: sites } = await sb.from('apt_sites')
+    .select('id, name, region, sigungu, address')
+    .eq('is_active', true)
+    .is('latitude', null)
+    .order('content_score', { ascending: false })
+    .limit(150);
+
+  for (const s of (sites || [])) {
+    // 1차: 주소로 지오코딩
+    let coords = s.address ? await geocodeKakao(s.address) : null;
+
+    // 2차: 이름 + 지역으로 키워드 검색
+    if (!coords) {
+      const query = `${s.region || ''} ${s.sigungu || ''} ${s.name} 아파트`;
+      coords = await geocodeKeyword(query.trim());
+    }
+
+    if (coords && coords.lat > 33 && coords.lat < 39 && coords.lng > 124 && coords.lng < 132) {
+      const { error } = await sb.from('apt_sites')
+        .update({ latitude: coords.lat, longitude: coords.lng, updated_at: new Date().toISOString() })
+        .eq('id', s.id);
+      if (!error) siteUpdated++;
+      else siteFailed++;
+    } else {
+      siteFailed++;
+    }
+
+    await new Promise(r => setTimeout(r, 150));
+  }
+
+  console.info(`[redev-geocode] sites: scanned=${(sites || []).length} updated=${siteUpdated} failed=${siteFailed}`);
+  return NextResponse.json({ ok: true, redev: { scanned: projects.length, updated, failed }, sites: { scanned: (sites || []).length, updated: siteUpdated, failed: siteFailed } });
 });
