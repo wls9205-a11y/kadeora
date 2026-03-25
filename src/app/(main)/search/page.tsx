@@ -5,8 +5,17 @@ import SearchClient from './SearchClient';
 
 export const metadata: Metadata = {
   title: '검색',
-  description: '카더라 통합 검색 — 게시글, 종목, 토론방 검색',
+  description: '카더라 통합 검색 — 게시글, 종목, 아파트, 토론방을 한 번에 검색하세요.',
   alternates: { canonical: SITE_URL + '/search' },
+  openGraph: {
+    title: '카더라 통합 검색',
+    description: '게시글, 종목, 아파트, 토론방 통합 검색',
+    url: SITE_URL + '/search',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function SearchPage() {

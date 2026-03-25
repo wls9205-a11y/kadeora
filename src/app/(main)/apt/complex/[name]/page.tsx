@@ -18,8 +18,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const decoded = decodeURIComponent(name);
   return {
     title: `${decoded} 실거래가·시세 분석`,
-    description: `${decoded} 아파트 실거래가 이력, 평당가 추이, 면적별 비교, 주민 리뷰`,
+    description: `${decoded} 아파트 실거래가 이력, 평당가 추이, 면적별 비교. 최근 거래 내역과 시세 변동을 카더라에서 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
+    openGraph: {
+      title: `${decoded} 실거래가·시세`,
+      description: `실거래 이력, 평당가 추이, 면적별 비교 분석`,
+      url: `${SITE_URL}/apt/complex/${name}`,
+      siteName: '카더라',
+      locale: 'ko_KR',
+      type: 'article',
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&subtitle=${encodeURIComponent('실거래가·시세 분석')}`, width: 1200, height: 630, alt: `${decoded} 실거래가` }],
+    },
+    twitter: { card: 'summary_large_image' as const, title: `${decoded} 실거래가`, description: `실거래 이력·평당가 추이·면적별 비교` },
+    other: {
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
+      'article:section': '부동산',
+      'article:tag': `${decoded},실거래가,시세,아파트,부동산`,
+    },
   };
 }
 

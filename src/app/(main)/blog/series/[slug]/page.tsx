@@ -15,8 +15,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!s) return { title: '시리즈' };
   return {
     title: `${s.title} — 시리즈`,
-    description: s.description || `${s.title} 시리즈 전체 글 모아보기`,
+    description: s.description || `${s.title} 시리즈 전체 글 모아보기. 카더라 블로그에서 주제별 심층 분석을 읽어보세요.`,
     alternates: { canonical: `${SITE_URL}/blog/series/${slug}` },
+    openGraph: {
+      title: `📚 ${s.title} 시리즈`,
+      description: s.description || `${s.title} 시리즈 전체 글 모아보기`,
+      url: `${SITE_URL}/blog/series/${slug}`,
+      siteName: '카더라',
+      locale: 'ko_KR',
+      type: 'article',
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&category=blog`, width: 1200, height: 630, alt: s.title }],
+    },
+    twitter: { card: 'summary_large_image' as const },
+    other: {
+      'naver:written_time': new Date().toISOString(),
+      'article:section': '블로그',
+      'article:tag': `${s.title},시리즈,카더라`,
+    },
   };
 }
 
