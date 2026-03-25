@@ -145,6 +145,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     const pct = s.change_pct ?? 0;
     const isGlobal = s.currency === 'USD';
     const isWatched = watchlistSymbols.includes(s.symbol);
+    const isStale = pct === 0 && (s.change_amt ?? 0) === 0;
     return (
       <Link href={`/stock/${encodeURIComponent(s.symbol)}`} onClick={e => e.stopPropagation()} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 4px', borderBottom: '1px solid var(--border)', cursor: 'pointer', borderRadius: 6, transition: 'background var(--transition-fast)', textDecoration: 'none', color: 'inherit' }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 16, textAlign: 'center' }}>{rank}</span>
@@ -176,14 +177,18 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
               </div>
               {isGlobal && <div className="stock-krw-text" style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end', marginTop: 1 }}>
-                <div style={{ width: 40, height: 5, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
-                  <div style={{ width: `${Math.min(Math.abs(pct) * 10, 100)}%`, height: '100%', background: stockColor(pct, !isGlobal), borderRadius: 3 }} />
+              {isStale ? (
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>장 마감</div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end', marginTop: 1 }}>
+                  <div style={{ width: 40, height: 5, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min(Math.abs(pct) * 10, 100)}%`, height: '100%', background: stockColor(pct, !isGlobal), borderRadius: 3 }} />
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: stockColor(pct, !isGlobal) }}>
+                    {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                  </span>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: stockColor(pct, !isGlobal) }}>
-                  {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
-                </span>
-              </div>
+              )}
             </>
           )}
         </div>
@@ -308,9 +313,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.name}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                 <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{s.currency === 'USD' ? `$${s.price?.toFixed(0)}` : fmt(s.price)}</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: stockColor(pct, isDomestic) }}>
-                  {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
-                </span>
+                {pct !== 0 ? (
+                  <span style={{ fontSize: 11, fontWeight: 700, color: stockColor(pct, isDomestic) }}>
+                    {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>마감</span>
+                )}
               </div>
             </div>
           );
@@ -459,9 +468,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>${st.price?.toFixed(2)}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: stockColor(pct, false) }}>
-                        {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
-                      </span>
+                      {pct !== 0 ? (
+                        <span style={{ fontSize: 12, fontWeight: 700, color: stockColor(pct, false) }}>
+                          {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>마감</span>
+                      )}
                       <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtCap(st.market_cap, 'USD')}</span>
                     </div>
                   </div>
