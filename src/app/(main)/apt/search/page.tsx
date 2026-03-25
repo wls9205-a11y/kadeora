@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { fmtAmount } from '@/lib/format';
 
 export const metadata: Metadata = {
-  title: '아파트 실거래가 검색 | 카더라',
+  title: '아파트 실거래가 검색',
   description: '전국 아파트 실거래가를 검색하세요. 단지명, 지역, 면적별 실거래 조회.',
   openGraph: {
     title: '아파트 실거래가 검색',

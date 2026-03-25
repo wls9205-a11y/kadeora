@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props) {
     .select('title, description, category, option_a, option_b, vote_a, vote_b, comment_count, view_count')
     .eq('id', parseInt(id, 10)).maybeSingle();
 
-  if (!topic) return { title: '토론을 찾을 수 없습니다 | 카더라' };
+  if (!topic) return { title: '토론을 찾을 수 없습니다' };
 
   const total = (topic.vote_a || 0) + (topic.vote_b || 0);
   const catLabel = CAT_SEO[topic.category] || '토론';
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props) {
     || `${topic.option_a} vs ${topic.option_b} — ${total}명 참여, ${topic.comment_count || 0}개 의견`;
 
   return {
-    title: `${topic.title} | ${catLabel} 토론 | 카더라`,
+    title: `${topic.title} — ${catLabel} 토론`,
     description: desc,
     alternates: { canonical: `${SITE}/discuss/${id}` },
     openGraph: {

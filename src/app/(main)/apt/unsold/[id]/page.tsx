@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sb = getSupabaseAdmin();
   const { data } = await sb.from('unsold_apts').select('house_nm, region_nm').eq('id', Number(id)).maybeSingle();
   if (!data) return {};
-  return { title: `${data.house_nm} 미분양 | 카더라`, description: `${data.region_nm} 미분양 현황` };
+  return { title: `${data.house_nm} 미분양 `, description: `${data.region_nm} 미분양 현황` };
 }
 
 export default async function UnsoldRedirectPage({ params }: Props) {

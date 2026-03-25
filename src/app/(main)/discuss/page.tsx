@@ -7,7 +7,7 @@ import Disclaimer from '@/components/Disclaimer';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '토론 | 카더라',
+  title: '토론',
   description: '주식, 부동산, 경제 이슈 — 지금 뜨거운 토론과 실시간 라운지. A vs B 투표로 의견을 나누세요.',
   alternates: { canonical: SITE_URL + '/discuss' },
   openGraph: {

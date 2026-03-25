@@ -112,7 +112,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const tl: Record<string, string> = { subscription: '분양정보 · 청약일정', redevelopment: '재개발 · 진행현황', unsold: '미분양 현황', trade: '실거래가 · 시세', landmark: '시세 · 분석' };
     const st = d.site?.site_type || (d.sub ? 'subscription' : d.unsold ? 'unsold' : d.trades?.length ? 'trade' : 'redevelopment');
-    const title = d.site?.seo_title || `${d.name} ${tl[st] || '부동산 정보'} | 카더라`;
+    const title = d.site?.seo_title || `${d.name} ${tl[st] || '부동산 정보'}`;
     const units = d.site?.total_units || d.sub?.tot_supply_hshld_co;
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';

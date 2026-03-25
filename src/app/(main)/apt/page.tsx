@@ -2,12 +2,12 @@ import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발 | 카더라',
+  title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발',
   description: '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요. 실시간 경쟁률, 실거래가 분석까지.',
   alternates: { canonical: SITE_URL + '/apt' },
   robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
   openGraph: {
-    title: '전국 아파트 청약·분양·미분양·재개발 | 카더라',
+    title: '전국 아파트 청약·분양·미분양·재개발',
     description: '2026년 전국 청약 일정, 분양중 현장, 미분양 현황, 재개발·재건축, 실거래가 분석',
     url: SITE_URL + '/apt',
     siteName: '카더라',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: SITE_URL + '/api/og?title=' + encodeURIComponent('아파트 청약·분양·재개발') + '&subtitle=' + encodeURIComponent('전국 실시간 현황'), width: 1200, height: 630, alt: '카더라 부동산 청약 분양 미분양 재개발' }],
   },
-  twitter: { card: 'summary_large_image', title: '전국 아파트 청약·분양·미분양·재개발 | 카더라', description: '2026년 전국 청약 일정, 분양중 현장, 미분양 현황, 재개발 진행 현황' },
+  twitter: { card: 'summary_large_image', title: '전국 아파트 청약·분양·미분양·재개발', description: '2026년 전국 청약 일정, 분양중 현장, 미분양 현황, 재개발 진행 현황' },
   other: { 'article:section': '부동산', 'naver:written_time': new Date().toISOString() },
 };
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
