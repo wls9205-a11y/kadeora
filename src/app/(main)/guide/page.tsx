@@ -11,8 +11,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: '가이드북 — 카더라 100% 활용법',
     description: '카더라 앱 사용 가이드',
+    url: SITE_URL + '/guide',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
     images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 가이드' }],
   },
+  twitter: { card: 'summary_large_image' },
+  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '가이드' },
 };
 
 const FEATURES = [

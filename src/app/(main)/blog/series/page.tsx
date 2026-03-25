@@ -7,8 +7,18 @@ import { BookOpen } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: '블로그 시리즈',
-  description: '카더라 블로그 시리즈 — 주제별로 엮인 연재 콘텐츠',
+  description: '카더라 블로그 시리즈 — 주제별로 엮인 연재 콘텐츠. 주식, 부동산, 재테크 심층 분석을 시리즈로 읽어보세요.',
   alternates: { canonical: SITE_URL + '/blog/series' },
+  openGraph: {
+    title: '블로그 시리즈',
+    description: '주제별 연재 콘텐츠 — 심층 분석 시리즈',
+    url: SITE_URL + '/blog/series',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('블로그 시리즈')}&category=blog`, width: 1200, height: 630, alt: '카더라 블로그 시리즈' }],
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export const revalidate = 3600;

@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     'article:section': '커뮤니티',
     'article:tag': '커뮤니티,주식,부동산,청약,토론,카더라',
   },
+  twitter: { card: 'summary_large_image', title: '카더라 커뮤니티 피드', description: '주식·부동산·청약 실시간 소식' },
 };
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';

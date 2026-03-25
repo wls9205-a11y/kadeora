@@ -6,13 +6,19 @@ import HotClient from './HotClient';
 
 export const metadata: Metadata = {
   title: '오늘의 HOT',
-  description: '오늘 가장 인기있는 카더라 게시글',
+  description: '오늘 가장 인기있는 카더라 게시글. 실시간 추천수 기반 인기 글을 확인하세요.',
   alternates: { canonical: SITE_URL + '/hot' },
   openGraph: {
     title: '오늘의 HOT',
-    description: '오늘 가장 인기있는 카더라 게시글',
-    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 HOT' }],
+    description: '실시간 인기 게시글 TOP',
+    url: SITE_URL + '/hot',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('오늘의 HOT')}&category=general`, width: 1200, height: 630, alt: '카더라 HOT' }],
   },
+  twitter: { card: 'summary_large_image' },
+  other: { 'naver:written_time': new Date().toISOString() },
 };
 
 export const revalidate = 60;

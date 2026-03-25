@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     'article:section': '주식',
     'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',
   },
+  twitter: { card: 'summary_large_image', title: '실시간 주식 시세', description: 'KOSPI·KOSDAQ·NYSE·NASDAQ 시세·등락률' },
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';

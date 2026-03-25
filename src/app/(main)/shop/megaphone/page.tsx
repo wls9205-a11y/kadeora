@@ -4,7 +4,21 @@ import ShopClient from './ShopClient';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = { title: '확성기', description: '카더라 아이템 샵 — 확성기로 내 글을 돋보이게 하세요.', alternates: { canonical: SITE_URL + '/shop/megaphone' } };
+export const metadata: Metadata = {
+  title: '확성기',
+  description: '카더라 아이템 샵 — 확성기로 내 글을 돋보이게 하세요. 포인트로 구매 가능.',
+  alternates: { canonical: SITE_URL + '/shop/megaphone' },
+  openGraph: {
+    title: '확성기 아이템 샵',
+    description: '포인트로 확성기를 구매하여 내 글을 돋보이게',
+    url: SITE_URL + '/shop/megaphone',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('확성기 아이템')}&category=general`, width: 1200, height: 630, alt: '카더라 확성기' }],
+  },
+  twitter: { card: 'summary_large_image' },
+};
 
 export default function ShopPage() {
   return <ShopClient />;

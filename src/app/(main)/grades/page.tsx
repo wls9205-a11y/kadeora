@@ -17,6 +17,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: SITE_URL + '/api/og?title=' + encodeURIComponent('회원 등급 안내') + '&category=general', width: 1200, height: 630, alt: '카더라 등급 시스템' }],
   },
+  twitter: { card: 'summary_large_image' },
 };
 
 const GRADE_COLORS: Record<number, string> = {

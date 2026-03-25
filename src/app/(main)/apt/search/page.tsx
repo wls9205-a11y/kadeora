@@ -6,12 +6,19 @@ import { fmtAmount } from '@/lib/format';
 
 export const metadata: Metadata = {
   title: '아파트 실거래가 검색',
-  description: '전국 아파트 실거래가를 검색하세요. 단지명, 지역, 면적별 실거래 조회.',
+  description: '전국 아파트 실거래가를 검색하세요. 단지명, 지역, 면적별 실거래 조회. 카더라에서 최신 거래 내역을 확인하세요.',
   openGraph: {
     title: '아파트 실거래가 검색',
     description: '전국 아파트 실거래가 조회 — 단지명·지역·면적별 검색',
+    url: SITE_URL + '/apt/search',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('실거래가 검색')}&subtitle=${encodeURIComponent('전국 아파트 단지별 조회')}`, width: 1200, height: 630, alt: '카더라 실거래가 검색' }],
   },
+  twitter: { card: 'summary_large_image' },
   alternates: { canonical: SITE_URL + '/apt/search' },
+  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '부동산' },
 };
 
 export const revalidate = 300;
