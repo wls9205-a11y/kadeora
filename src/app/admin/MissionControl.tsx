@@ -25,9 +25,10 @@ const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸'
 const PROVIDER_LABEL: Record<string, string> = { kakao: '카카오', google: '구글', email: '이메일', apple: '애플' };
 
 // ── Sections ──
-type Section = 'dashboard' | 'users' | 'content' | 'blog' | 'realestate' | 'system' | 'reports' | 'godmode';
+type Section = 'dashboard' | 'users' | 'content' | 'blog' | 'realestate' | 'system' | 'reports' | 'godmode' | 'seo';
 const SECTIONS: { key: Section; icon: string; label: string }[] = [
   { key: 'dashboard', icon: '📊', label: '대시보드' },
+  { key: 'seo', icon: '🔍', label: 'SEO · 점수' },
   { key: 'users', icon: '👤', label: '유저 관리' },
   { key: 'content', icon: '📝', label: '콘텐츠' },
   { key: 'blog', icon: '✍️', label: '블로그' },
@@ -167,6 +168,7 @@ export default function MissionControl() {
       {/* ── Main Content ── */}
       <main style={{ flex: 1, padding: 'clamp(16px, 2vw, 28px)', overflow: 'auto', animation: 'fadeIn .3s ease' }}>
         {section === 'dashboard' && <DashboardSection />}
+        {section === 'seo' && <SEOSection />}
         {section === 'users' && <UsersSection />}
         {section === 'content' && <ContentSection />}
         {section === 'blog' && <BlogSection />}
@@ -182,6 +184,36 @@ export default function MissionControl() {
 // ══════════════════════════════════════
 // 📊 DASHBOARD
 // ══════════════════════════════════════
+function ProgressBar({ value, max, color, label, sub }: { value: number; max: number; color: string; label: string; sub?: string }) {
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+        <span style={{ fontSize: 12, color: C.textSec, fontWeight: 600 }}>{label}</span>
+        <span style={{ fontSize: 12, color: C.text, fontWeight: 700 }}>{value}{sub ? ` ${sub}` : ''}</span>
+      </div>
+      <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
+        <div style={{ height: '100%', borderRadius: 3, background: color, width: `${pct}%`, transition: 'width .6s ease' }} />
+      </div>
+    </div>
+  );
+}
+
+function StatBox({ icon, label, value, sub, color, accent }: { icon: string; label: string; value: string | number; sub?: string; color: string; accent?: boolean }) {
+  return (
+    <div style={{ background: accent ? `${color}10` : C.card, border: `1px solid ${accent ? color + '30' : C.border}`, borderRadius: 14, padding: '14px 16px', transition: 'border-color .15s' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <span style={{ fontSize: 15 }}>{icon}</span>
+        <span style={{ fontSize: 11, color: C.textDim, fontWeight: 600, letterSpacing: '.03em', textTransform: 'uppercase' }}>{label}</span>
+      </div>
+      <div style={{ fontSize: 26, fontWeight: 800, color: accent ? color : C.text, lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+        {typeof value === 'number' ? fmt(value) : value}
+      </div>
+      {sub && <div style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{sub}</div>}
+    </div>
+  );
+}
+
 function DashboardSection() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -193,63 +225,121 @@ function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, recentUsers, payments, dailyStats, cron } = data;
+  const { kpi, recentUsers, dailyStats, cron, seo } = data;
+  const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
+  const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
+  const totalSites = seo?.totalSites || 0;
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 24px' }}>📊 대시보드</h1>
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: 0 }}>📊 Mission Control</h1>
+          <p style={{ fontSize: 12, color: C.textDim, margin: '4px 0 0' }}>{new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 8, border: `1px solid ${C.border}`, background: C.card, color: C.textSec, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>🔄 새로고침</button>
+        </div>
+      </div>
 
-      {/* KPI Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <KPICard icon="👤" label="전체 유저" value={kpi.users} sub={`이번주 +${kpi.newUsersWeek}`} color={C.brand} />
-        <KPICard icon="🟢" label="주간 활성" value={kpi.activeUsersWeek} color={C.green} />
+      {/* ── Hero KPI Row (4 big cards) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+        <StatBox icon="📄" label="전체 페이지" value={totalSites} sub={`사이트맵 ${seo?.totalSitemap || 0}건 (${seo?.sitemapPct || 0}%)`} color={C.brand} accent />
+        <StatBox icon="👤" label="전체 유저" value={kpi.users} sub={`이번주 +${kpi.newUsersWeek} · 활성 ${kpi.activeUsersWeek}`} color={C.green} accent />
+        <StatBox icon="⚡" label="크론 (24h)" value={`${cron.success}/${cron.total}`} sub={cron.fail > 0 ? `❌ ${cron.fail}건 실패` : '✅ 전체 성공'} color={cron.fail > 0 ? C.red : C.green} accent />
+        <StatBox icon="✍️" label="블로그 리라이트" value={`${seo?.blogRewrittenPct || 0}%`} sub={`${fmt(kpi.blogs)}건 발행 중`} color={C.purple} accent />
+      </div>
+
+      {/* ── KPI Grid (3x4 compact) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10, marginBottom: 16 }}>
         <KPICard icon="📝" label="게시글" value={kpi.posts} color={C.cyan} />
-        <KPICard icon="✍️" label="블로그" value={kpi.blogs} color={C.purple} />
-        <KPICard icon="📈" label="주식 종목" value={kpi.stocks} color={C.green} />
-        <KPICard icon="🏠" label="청약 현장" value={kpi.subscriptions} color={C.yellow} />
-        <KPICard icon="🏢" label="통합 현장" value={kpi.sites} sub={`관심 ${kpi.interests}건`} color={C.brand} />
-        <KPICard icon="🏗️" label="재개발" value={kpi.redev} color={C.cyan} />
-        <KPICard icon="📉" label="미분양" value={kpi.unsold} color={C.red} />
-        <KPICard icon="💰" label="실거래" value={kpi.trades} color={C.green} />
         <KPICard icon="💬" label="토론" value={kpi.discussions} color={C.purple} />
+        <KPICard icon="📈" label="주식 종목" value={kpi.stocks} color={C.green} />
+        <KPICard icon="🏠" label="청약" value={kpi.subscriptions} color={C.yellow} />
+        <KPICard icon="💰" label="실거래" value={kpi.trades} color={C.green} />
         <KPICard icon="🚨" label="미처리 신고" value={kpi.pendingReports} color={kpi.pendingReports > 0 ? C.red : C.green} />
       </div>
 
-      {/* Cron Health Bar */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
-        <span style={{ fontSize: 15 }}>⚡</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, color: C.textDim, marginBottom: 4 }}>24시간 크론 실행</div>
-          <div style={{ height: 8, borderRadius: 4, background: C.border, overflow: 'hidden' }}>
-            <div style={{ height: '100%', borderRadius: 4, background: cron.fail > 0 ? `linear-gradient(90deg, ${C.green} ${(cron.success / (cron.total || 1)) * 100}%, ${C.red} 0)` : C.green, width: '100%', transition: 'width .5s' }} />
+      {/* ── Site Type Distribution + Content Score (side by side) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+        {/* Site Type Distribution */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 14px', display: 'flex', justifyContent: 'space-between' }}>
+            <span>📊 페이지 타입 분포</span>
+            <span style={{ fontSize: 12, color: C.textDim, fontWeight: 400 }}>{fmt(totalSites)}건</span>
+          </h3>
+          {/* Stacked Bar */}
+          <div style={{ display: 'flex', height: 24, borderRadius: 6, overflow: 'hidden', marginBottom: 14 }}>
+            {Object.entries(seo?.siteTypeBreakdown || {}).sort((a: any, b: any) => b[1].count - a[1].count).map(([type, info]: [string, any]) => (
+              <div key={type} style={{ width: `${(info.count / totalSites) * 100}%`, background: typeColors[type] || C.textDim, transition: 'width .5s' }}
+                title={`${typeLabels[type] || type}: ${info.count}건 (${Math.round(info.count / totalSites * 100)}%)`} />
+            ))}
+          </div>
+          {/* Legend */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {Object.entries(seo?.siteTypeBreakdown || {}).sort((a: any, b: any) => b[1].count - a[1].count).map(([type, info]: [string, any]) => (
+              <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: typeColors[type] || C.textDim }} />
+                <span style={{ color: C.textSec }}>{typeLabels[type] || type}</span>
+                <span style={{ color: C.text, fontWeight: 700 }}>{fmt(info.count)}</span>
+              </div>
+            ))}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <span style={{ fontSize: 13, color: C.green, fontWeight: 700 }}>✓ {cron.success}</span>
-          <span style={{ fontSize: 13, color: cron.fail > 0 ? C.red : C.textDim, fontWeight: 700 }}>✗ {cron.fail}</span>
+
+        {/* Content Score by Type */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 14px' }}>🎯 콘텐츠 점수 (타입별 평균)</h3>
+          {Object.entries(seo?.siteTypeBreakdown || {}).sort((a: any, b: any) => b[1].avgScore - a[1].avgScore).map(([type, info]: [string, any]) => (
+            <ProgressBar key={type} label={`${typeLabels[type] || type} (${info.count}건)`} value={info.avgScore} max={103} color={typeColors[type] || C.textDim} sub={`/ 103`} />
+          ))}
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, marginTop: 6, display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+            <span style={{ color: C.textDim }}>사이트맵 커버리지</span>
+            <span style={{ color: C.green, fontWeight: 700 }}>{seo?.sitemapPct || 0}%</span>
+          </div>
         </div>
       </div>
 
-      {/* Recent Users + Daily Stats side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {/* Recent Users */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>최근 가입</h3>
+      {/* ── Cron Health + Failure Alert ── */}
+      <div style={{ background: C.card, border: `1px solid ${cron.fail > 0 ? C.red + '40' : C.border}`, borderRadius: 14, padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ width: 40, height: 40, borderRadius: 10, background: cron.fail > 0 ? C.redBg : C.greenBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+          {cron.fail > 0 ? '⚠️' : '✅'}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12, color: C.textDim, marginBottom: 4 }}>24시간 크론 · {cron.total}건 실행</div>
+          <div style={{ height: 8, borderRadius: 4, background: C.border, overflow: 'hidden' }}>
+            <div style={{ height: '100%', borderRadius: 4, background: cron.fail > 0 ? `linear-gradient(90deg, ${C.green} ${(cron.success / (cron.total || 1)) * 100}%, ${C.red} 0)` : C.green, width: '100%' }} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{ fontSize: 13, color: C.green, fontWeight: 700 }}>✓ {cron.success}</span>
+          <span style={{ fontSize: 13, color: cron.fail > 0 ? C.red : C.textDim, fontWeight: 700 }}>✗ {cron.fail}</span>
+        </div>
+        {cron.failNames?.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {cron.failNames.map((n: string) => <Badge key={n} color={C.red}>{n}</Badge>)}
+          </div>
+        )}
+      </div>
+
+      {/* ── Recent Users + Daily Stats ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>👤 최근 가입</h3>
           {(recentUsers || []).map((u: any) => (
-            <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${C.border}08` }}>
-              <span style={{ fontSize: 16 }}>{GRADE_EMOJI[u.grade] || '🌱'}</span>
+            <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: `1px solid ${C.border}08` }}>
+              <span style={{ fontSize: 15 }}>{GRADE_EMOJI[u.grade] || '🌱'}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{u.nickname} {u.is_seed && <Badge color={C.textDim}>시드</Badge>}</div>
-                <div style={{ fontSize: 11, color: C.textDim }}>{PROVIDER_LABEL[u.provider] || u.provider || '—'} · {u.region_text || '미설정'}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{u.nickname} {u.is_seed && <Badge color={C.textDim}>시드</Badge>}</div>
+                <div style={{ fontSize: 10, color: C.textDim }}>{PROVIDER_LABEL[u.provider] || u.provider || '—'} · {u.region_text || '미설정'}</div>
               </div>
-              <div style={{ fontSize: 11, color: C.textDim }}>{ago(u.created_at)}</div>
+              <div style={{ fontSize: 10, color: C.textDim }}>{ago(u.created_at)}</div>
             </div>
           ))}
         </div>
-
-        {/* Daily Stats Chart (Mini) */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>일일 통계 (14일)</h3>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>📈 일일 통계 (14일)</h3>
           <MiniChart data={(dailyStats || []).reverse()} />
         </div>
       </div>
@@ -260,18 +350,122 @@ function DashboardSection() {
 function MiniChart({ data }: { data: DailyStat[] }) {
   if (!data.length) return <div style={{ color: C.textDim, fontSize: 12, textAlign: 'center', padding: 20 }}>데이터 없음</div>;
   const maxPV = Math.max(...data.map(d => d.page_views || 0), 1);
+  const maxUsers = Math.max(...data.map(d => d.new_users || 0), 1);
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 100 }}>
-      {data.map((d, i) => {
-        const h = Math.max(((d.page_views || 0) / maxPV) * 90, 4);
-        return (
-          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: '100%', height: h, borderRadius: 3, background: `linear-gradient(180deg, ${C.brand}, ${C.brandDim})`, transition: 'height .3s' }}
-              title={`${d.date}: PV ${d.page_views || 0}`} />
-            {i % 3 === 0 && <span style={{ fontSize: 9, color: C.textDim }}>{d.date?.slice(5)}</span>}
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80 }}>
+        {data.map((d, i) => {
+          const h = Math.max(((d.page_views || 0) / maxPV) * 70, 4);
+          const uh = Math.max(((d.new_users || 0) / maxUsers) * 70, 2);
+          return (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, position: 'relative' }}>
+              <div style={{ width: '100%', height: h, borderRadius: 2, background: C.brand, opacity: .7, transition: 'height .3s' }}
+                title={`${d.date}: PV ${d.page_views || 0} · 신규 ${d.new_users || 0}`} />
+              <div style={{ width: '60%', height: uh, borderRadius: 2, background: C.green, opacity: .8, position: 'absolute', bottom: 0 }} />
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+        <span style={{ fontSize: 9, color: C.textDim }}>{data[0]?.date?.slice(5)}</span>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <span style={{ fontSize: 9, color: C.brand }}>■ PV</span>
+          <span style={{ fontSize: 9, color: C.green }}>■ 신규유저</span>
+        </div>
+        <span style={{ fontSize: 9, color: C.textDim }}>{data[data.length - 1]?.date?.slice(5)}</span>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════
+// 🔍 SEO · 점수
+// ══════════════════════════════════════
+function SEOSection() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [scoreDetail, setScoreDetail] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/dashboard?section=overview').then(r => r.json()).then(d => { setData(d); setLoading(false); });
+  }, []);
+
+  // content_score 상세 분포 로드
+  useEffect(() => {
+    if (!data) return;
+    fetch('/api/admin/dashboard?section=seo-detail')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setScoreDetail(d))
+      .catch(() => {});
+  }, [data]);
+
+  if (loading) return <Spinner />;
+  if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
+
+  const { seo, kpi } = data;
+  const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
+  const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
+  const maxScore = 103;
+
+  return (
+    <div style={{ animation: 'fadeIn .4s ease' }}>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: '0 0 8px' }}>🔍 SEO · 콘텐츠 점수</h1>
+      <p style={{ fontSize: 12, color: C.textDim, margin: '0 0 24px' }}>5,420개 현장 페이지의 데이터 풍부도 현황</p>
+
+      {/* ── Hero Stats ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+        <StatBox icon="📄" label="전체 페이지" value={seo?.totalSites || 0} color={C.brand} accent />
+        <StatBox icon="🗺️" label="사이트맵" value={seo?.totalSitemap || 0} sub={`${seo?.sitemapPct || 0}% 커버리지`} color={C.green} accent />
+        <StatBox icon="✍️" label="블로그 리라이트" value={`${seo?.blogRewrittenPct || 0}%`} sub={`${fmt(kpi.blogs)}건 중`} color={C.purple} accent />
+        <StatBox icon="🏆" label="최대 점수" value="97" sub="/ 103점 만점" color={C.yellow} accent />
+      </div>
+
+      {/* ── Type Score Cards ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12, marginBottom: 20 }}>
+        {Object.entries(seo?.siteTypeBreakdown || {}).sort((a: any, b: any) => b[1].count - a[1].count).map(([type, info]: [string, any]) => (
+          <div key={type} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: typeColors[type] || C.text }}>{typeLabels[type] || type}</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: C.text }}>{fmt(info.count)}</span>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3 }}>
+                <span style={{ color: C.textDim }}>평균 점수</span>
+                <span style={{ color: typeColors[type], fontWeight: 700 }}>{info.avgScore} / {maxScore}</span>
+              </div>
+              <div style={{ height: 8, borderRadius: 4, background: C.border, overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 4, background: typeColors[type] || C.brand, width: `${(info.avgScore / maxScore) * 100}%`, transition: 'width .6s' }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+              <span style={{ color: C.textDim }}>사이트맵</span>
+              <span style={{ color: C.green, fontWeight: 600 }}>{info.sitemapCount}건 ({info.count > 0 ? Math.round(info.sitemapCount / info.count * 100) : 0}%)</span>
+            </div>
           </div>
-        );
-      })}
+        ))}
+      </div>
+
+      {/* ── Score Formula Reference ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 14px' }}>📐 점수 산정 공식 (최대 103점)</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          {[
+            { title: '기본 정보 (30)', items: ['이름 3자+ (+10)', '지역+시군구 (+10)', '세대수 (+10)'] },
+            { title: '데이터 소스 (36)', items: ['가격 정보 (+5)', '청약 연결 (+10)', '재개발 연결 (+15)', '실거래 존재 (+10/+5/+3)', '미분양 연결 (+8)'] },
+            { title: '콘텐츠 (28)', items: ['설명 100자+ (+10)', '설명 200자+ (+3)', 'FAQ 3개+ (+10)', 'FAQ 5개+ (+3)', 'key_features (+2)'] },
+            { title: '위치 (13)', items: ['좌표 (+5)', '지하철역 (+5)', '상세 주소 (+3)'] },
+            { title: '미디어 (5)', items: ['이미지 1장+ (+5)'] },
+            { title: '부가 정보 (11)', items: ['시공사 (+3)', '준공년도 (+3)', '시행사 (+2)', '입주예정 (+3)'] },
+          ].map(g => (
+            <div key={g.title}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, marginBottom: 6 }}>{g.title}</div>
+              {g.items.map(item => (
+                <div key={item} style={{ fontSize: 11, color: C.textSec, padding: '2px 0' }}>{item}</div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

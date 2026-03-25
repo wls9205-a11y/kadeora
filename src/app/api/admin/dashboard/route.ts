@@ -65,6 +65,35 @@ export async function GET(req: Request) {
       const cronSuccess = cronData.filter(c => c.status === 'success').length;
       const cronFail = cronData.filter(c => c.status === 'failed').length;
 
+      // content_score 분포 + SEO 현황
+      const { data: scoreStats } = await sb.from('apt_sites')
+        .select('site_type, content_score, sitemap_wave')
+        .eq('is_active', true);
+
+      const siteTypeBreakdown: Record<string, { count: number; avgScore: number; sitemapCount: number }> = {};
+      let totalSitemap = 0;
+      for (const s of (scoreStats || [])) {
+        const t = s.site_type || 'unknown';
+        if (!siteTypeBreakdown[t]) siteTypeBreakdown[t] = { count: 0, avgScore: 0, sitemapCount: 0 };
+        siteTypeBreakdown[t].count++;
+        siteTypeBreakdown[t].avgScore += s.content_score ?? 0;
+        if ((s.content_score ?? 0) >= 25) { siteTypeBreakdown[t].sitemapCount++; totalSitemap++; }
+      }
+      for (const t of Object.keys(siteTypeBreakdown)) {
+        siteTypeBreakdown[t].avgScore = Math.round(siteTypeBreakdown[t].avgScore / siteTypeBreakdown[t].count);
+      }
+
+      // 크론 실패 상세 (어떤 크론이 실패했는지)
+      const cronFails = cronData.filter(c => c.status === 'failed');
+      const cronFailNames = [...new Set(cronFails.map(c => c.cron_name))].slice(0, 5);
+
+      // 블로그 리라이팅 현황
+      const { data: blogStats } = await sb.from('blog_posts')
+        .select('rewritten_at', { count: 'exact' })
+        .eq('is_published', true)
+        .not('rewritten_at', 'is', null);
+      const blogRewrittenPct = blogR.count ? Math.round(((blogStats?.length || 0) / blogR.count) * 100) : 0;
+
       return NextResponse.json({
         kpi: {
           users: usersR.count ?? 0,
@@ -85,7 +114,14 @@ export async function GET(req: Request) {
         recentUsers: recentUsers ?? [],
         payments: paymentsR.data ?? [],
         dailyStats: dailyR.data ?? [],
-        cron: { total: cronData.length, success: cronSuccess, fail: cronFail },
+        cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames },
+        seo: {
+          siteTypeBreakdown,
+          totalSites: scoreStats?.length || 0,
+          totalSitemap,
+          sitemapPct: scoreStats?.length ? Math.round((totalSitemap / scoreStats.length) * 100) : 0,
+          blogRewrittenPct,
+        },
       });
     }
 
