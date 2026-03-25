@@ -179,6 +179,35 @@ export default async function BlogDetailPage({ params }: Props) {
     comments = data ?? [];
   } catch {}
 
+  // 관련 부동산 현장 (apt/unsold 카테고리일 때)
+  let relatedSites: any[] = [];
+  if (post.category === 'apt' || post.category === 'unsold') {
+    try {
+      const keywords = (post.tags || []).slice(0, 3).filter((t: string) => t.length >= 2);
+      if (keywords.length > 0) {
+        const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
+        const { data } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu')
+          .eq('is_active', true).or(orQuery).gte('content_score', 25)
+          .order('interest_count', { ascending: false }).limit(3);
+        relatedSites = data || [];
+      }
+    } catch {}
+  }
+
+  // 관련 종목 (stock 카테고리일 때)
+  let relatedStocks: any[] = [];
+  if (post.category === 'stock') {
+    try {
+      const keywords = (post.tags || []).slice(0, 3).filter((t: string) => t.length >= 2);
+      if (keywords.length > 0) {
+        const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
+        const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_pct, currency')
+          .eq('is_active', true).or(orQuery).gt('price', 0).limit(3);
+        relatedStocks = data || [];
+      }
+    } catch {}
+  }
+
   const wordCount = post.content.replace(/[#*|\-\n\r\[\]`>]/g, '').replace(/\s+/g, ' ').trim().length;
   const readingTimeMin = Math.max(1, Math.ceil(wordCount / 500));
 
@@ -417,6 +446,42 @@ export default async function BlogDetailPage({ params }: Props) {
               {r.view_count > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>👀 {r.view_count}</span>}
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* 관련 부동산 현장 (내부 링크 SEO) */}
+      {relatedSites.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🏢 관련 현장 정보</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {relatedSites.map((s: any) => (
+              <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu || ''}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 관련 종목 (내부 링크 SEO) */}
+      {relatedStocks.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📈 관련 종목</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {relatedStocks.map((s: any) => {
+              const pct = Number(s.change_pct);
+              const isUp = pct > 0;
+              return (
+                <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)', marginTop: 2 }}>
+                    {s.currency === 'USD' ? '$' : '₩'}{Number(s.price).toLocaleString()} {isUp ? '▲' : '▼'}{Math.abs(pct).toFixed(2)}%
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
