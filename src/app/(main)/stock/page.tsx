@@ -126,6 +126,18 @@ export default async function StockPage() {
           { "@type": "Question", "name": "카더라 주식 서비스는 무료인가요?", "acceptedAnswer": { "@type": "Answer", "text": "네, 카더라의 모든 주식 시세 조회, 차트, 수급 분석, AI 한줄평, 종목 토론 기능은 완전 무료입니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 무료로 사용할 수 있습니다." } },
         ],
       }) }} />
+      {/* ItemList JSON-LD (Google 캐러셀) — 상위 10 종목 */}
+      {stocks.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org", "@type": "ItemList",
+        "name": "실시간 인기 종목",
+        "numberOfItems": Math.min(stocks.length, 10),
+        "itemListElement": stocks.slice(0, 10).map((s: any, i: number) => ({
+          "@type": "ListItem",
+          "position": i + 1,
+          "name": `${s.name} (${s.symbol})`,
+          "url": `${SITE_URL}/stock/${s.symbol}`,
+        })),
+      }) }} />}
       <StockClient initialStocks={stocks as any} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
     </Suspense>
