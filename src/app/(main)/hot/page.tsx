@@ -1,4 +1,3 @@
-import { } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
