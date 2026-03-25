@@ -3,7 +3,7 @@
 > **마지막 업데이트:** 2026-03-26 세션 38
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 38 작업 내역 (2026-03-26) — 커밋 10건+, 50파일+
+## 세션 38 작업 내역 (2026-03-26) — 커밋 15건+, 60파일+
 
 ### 1. 이미지 사이트맵 (커밋 1)
 - `/image-sitemap.xml` 신규 — apt_sites 이미지 + blog_posts 커버 이미지
@@ -100,6 +100,15 @@
 - **Homepage**: 섹션 카드 ratio 8:5→16:9, minWidth 340→320, radius 16→12, 통계 grid gap 12→8
 - **Apt detail**: crd/ct/rw 상수 전반 2~4px 축소, key metrics gap 6→4
 
+### 10. 첫 방문자 UX 개선 (커밋 14-15)
+- CookieBanner 제거 (GuestWelcome이 쿠키 동의 자동 처리)
+- GuestGate: 첫 방문 5초 차단 → 3회차 방문 15초 후로 지연
+- 배너 큐 시스템: 동시 2개 배너 금지, 최소 10~30초 간격
+- AutoPushPrompt: 재노출 24시간→7일, 초기 딜레이 1.5→5초
+- 미사용 코드 삭제: CookieBanner.tsx + ConsentBanner.tsx (-178줄)
+- 주요 페이지 SEO 메타 보강 (blog/discuss/feed OG 이미지 + description)
+- SW 캐시 버전 20260324→20260326
+
 ### PENDING 작업
 - [ ] 이미지 수집 크론 자동 진행 중 (200건/일, ~27일 소요)
 - [ ] 좌표 수집 크론 자동 진행 중 (150건/일, ~36일 소요)
@@ -108,6 +117,8 @@
 - [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
 - [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
 - [x] 기존 어드민 파일 정리 (AdminHub/Nav/Sites/ControlTower 삭제 완료)
+- [x] CookieBanner/ConsentBanner 제거 (미사용 코드 -178줄)
+- [x] 첫 방문자 배너 피로도 해결
 
 ## 세션 37 작업 내역 (2026-03-25)
 
