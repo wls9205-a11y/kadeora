@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 export const metadata: Metadata = {
-  title: '피드',
-  description: '주식, 부동산, 청약 관련 소문과 정보를 나누는 카더라 커뮤니티 피드',
+  title: '커뮤니티 피드 | 카더라',
+  description: '주식, 부동산, 청약, 재테크 소문과 정보를 나누는 카더라 커뮤니티. 실시간 투자 이야기를 나누세요.',
   alternates: { canonical: SITE_URL + '/feed' },
   openGraph: {
     title: '카더라 커뮤니티 피드',

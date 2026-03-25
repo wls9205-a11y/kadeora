@@ -7,13 +7,17 @@ import Disclaimer from '@/components/Disclaimer';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '토론',
-  description: '지금 뜨거운 토론과 실시간 라운지',
+  title: '토론 | 카더라',
+  description: '주식, 부동산, 경제 이슈 — 지금 뜨거운 토론과 실시간 라운지. A vs B 투표로 의견을 나누세요.',
   alternates: { canonical: SITE_URL + '/discuss' },
   openGraph: {
-    title: '토론',
-    description: '실시간 라운지와 뜨거운 토론',
-    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 토론' }],
+    title: '카더라 토론',
+    description: '주식·부동산·경제 실시간 토론과 투표',
+    url: SITE_URL + '/discuss',
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: SITE_URL + '/api/og?title=' + encodeURIComponent('실시간 토론') + '&category=general', width: 1200, height: 630, alt: '카더라 토론' }],
   },
 };
 

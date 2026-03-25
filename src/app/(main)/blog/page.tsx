@@ -33,7 +33,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     title: `${meta.title}${suffix}${qSuffix}`,
     description: meta.desc,
     alternates: { canonical },
-    openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website' },
+    openGraph: { title: meta.title, description: meta.desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website', images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(meta.title)}&category=blog`, width: 1200, height: 630, alt: meta.title }] },
     ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
     other: {
       'naver:written_time': new Date().toISOString(),
