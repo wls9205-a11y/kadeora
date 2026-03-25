@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 /**
  * 주식 시세 수집 크론
@@ -20,32 +20,42 @@ export const maxDuration = 60;
 async function fetchKRXStocks(apiKey: string): Promise<any[]> {
   const stocks: any[] = [];
   
-  // 주식시세 정보 — KOSPI
   for (const marketCode of ['KOSPI', 'KOSDAQ']) {
-    try {
-      const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=200&resultType=json&mrktCls=${marketCode}`;
-      const res = await fetch(url);
-      if (!res.ok) continue;
-      const data = await res.json();
-      const items = data?.response?.body?.items?.item || [];
-      
-      for (const item of items) {
-        const price = parseInt(item.clpr) || 0; // 종가
-        if (price <= 0) continue;
+    let pageNo = 1;
+    const numOfRows = 1000;
+    
+    while (true) {
+      try {
+        const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&resultType=json&mrktCls=${marketCode}`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        if (!res.ok) break;
+        const data = await res.json();
+        const items = data?.response?.body?.items?.item || [];
+        if (items.length === 0) break;
         
-        stocks.push({
-          symbol: item.srtnCd || item.isinCd, // 단축코드
-          name: item.itmsNm, // 종목명
-          market: marketCode,
-          price,
-          change_amt: parseInt(item.vs) || 0, // 전일대비
-          change_pct: parseFloat(item.fltRt) || 0, // 등락률
-          volume: parseInt(item.trqu) || 0, // 거래량
-          market_cap: parseInt(item.mrktTotAmt) || 0, // 시가총액
-          currency: 'KRW',
-        });
-      }
-    } catch {}
+        for (const item of items) {
+          const price = parseInt(item.clpr) || 0;
+          if (price <= 0) continue;
+          
+          stocks.push({
+            symbol: item.srtnCd || item.isinCd,
+            name: item.itmsNm,
+            market: marketCode,
+            price,
+            change_amt: parseInt(item.vs) || 0,
+            change_pct: parseFloat(item.fltRt) || 0,
+            volume: parseInt(item.trqu) || 0,
+            market_cap: parseInt(item.mrktTotAmt) || 0,
+            currency: 'KRW',
+          });
+        }
+        
+        // 마지막 페이지면 종료
+        const totalCount = data?.response?.body?.totalCount || 0;
+        if (pageNo * numOfRows >= totalCount || items.length < numOfRows) break;
+        pageNo++;
+      } catch { break; }
+    }
   }
   
   return stocks;
@@ -82,17 +92,23 @@ async function fetchKISStocks(appKey: string, appSecret: string): Promise<any[]>
 }
 
 function guessSector(name: string): string | null {
-  if (/반도체|하이닉스|삼성전자/.test(name)) return '반도체';
-  if (/바이오|셀트리온|삼성바이오|유한양행|녹십자|한미약품/.test(name)) return '바이오';
-  if (/금융|은행|지주|보험|증권|KB|신한|하나|우리|NH/.test(name)) return '금융';
-  if (/자동차|현대차|기아|만도|한온/.test(name)) return '자동차';
-  if (/배터리|에너지|SDI|에코프로|포스코퓨처/.test(name)) return '2차전지';
-  if (/건설|대우|GS건설|현대건설|삼성물산/.test(name)) return '건설';
-  if (/통신|SKT|KT |LG유플러스/.test(name)) return '통신';
-  if (/카카오|네이버|플랫폼|엔씨소프트|크래프톤/.test(name)) return 'IT/소프트웨어';
-  if (/화학|LG화학|롯데케미칼|한화솔루션/.test(name)) return '화학';
-  if (/방산|한화에어|LIG넥스원|현대로템/.test(name)) return '방산';
-  if (/미디어|CJ ENM|스튜디오|하이브|SM|JYP|YG/.test(name)) return '미디어';
+  if (/반도체|하이닉스|삼성전자|DB하이텍|리노공업|원익IPS|한미반도체|이오테크닉스|테스|주성엔지니어링|피에스케이|솔브레인|동진쎄미켐|티씨케이|ISC/.test(name)) return '반도체';
+  if (/바이오|셀트리온|삼성바이오|유한양행|녹십자|한미약품|대웅|종근당|일양|JW|보령|동아에스티|SK바이오|에이비엘|메디톡스|오스코텍|헬릭스미스|제넥신|알테오젠|레고켐|씨젠|에스디바이오|파미셀|차바이오|코오롱생명|HK이노엔|CJ제일제당/.test(name)) return '바이오';
+  if (/금융|은행|지주|보험|증권|KB|신한|하나|우리|NH|메리츠|미래에셋|키움|삼성생명|삼성화재|한화생명|현대해상|DB손해|한국금융|카드|캐피탈|BNK|DGB|JB|iM/.test(name)) return '금융';
+  if (/자동차|현대차|기아|만도|한온|현대모비스|에스엘|화신|덴소|HL만도|계양전기/.test(name)) return '자동차';
+  if (/배터리|에너지솔루션|SDI|에코프로|포스코퓨처|엘앤에프|코스모신소재|일진머티리얼즈|천보|2차전지|SK이노베이션|SK온/.test(name)) return '2차전지';
+  if (/건설|대림|GS건설|현대건설|삼성물산|HDC|DL이앤씨|태영|한신공영|계룡|금호|대우건설|코오롱글로벌/.test(name)) return '건설';
+  if (/통신|SKT|SK텔레콤|KT |KT&G|LG유플러스|SK스퀘어/.test(name)) return '통신';
+  if (/카카오|네이버|엔씨소프트|크래프톤|넷마블|컴투스|위메이드|펄어비스|데브시스터즈|NHN|더존비즈온|한글과컴퓨터|카페24|두나무|토스|비바리퍼블리카/.test(name)) return 'IT/소프트웨어';
+  if (/화학|LG화학|롯데케미칼|한화솔루션|금호석유|OCI|SKC|효성|대한유화|SK케미칼|코오롱인더/.test(name)) return '화학';
+  if (/방산|한화에어|LIG넥스원|현대로템|한국항공|풍산|한화시스템|LIG/.test(name)) return '방산';
+  if (/미디어|CJ ENM|스튜디오|하이브|SM엔터|JYP|YG|위지윅|덱스터|카카오엔터|콘텐트리/.test(name)) return '미디어';
+  if (/철강|포스코|현대제철|동국제강|세아|고려아연|풍산홀딩스/.test(name)) return '철강';
+  if (/유틸리티|한국전력|한전KPS|한국가스|지역난방|서울가스|SK가스/.test(name)) return '유틸리티';
+  if (/식품|오리온|농심|CJ|롯데|풀무원|삼양|오뚜기|하이트진로|빙그레|매일|남양/.test(name)) return '소비재';
+  if (/호텔|신라|롯데관광|하나투어|모두투어|교원|이랜드|신세계|현대백화점|롯데쇼핑|GS리테일|BGF/.test(name)) return '소비재';
+  if (/해운|항공|대한항공|아시아나|HMM|팬오션|흥아해운|한진칼/.test(name)) return '운송';
+  if (/조선|한국조선|HD현대|삼성중공업|대우조선|HD한국조선해양/.test(name)) return '조선';
   return null;
 }
 
@@ -116,15 +132,16 @@ export async function GET(req: NextRequest) {
       const kisStocks = await fetchKISStocks(kisKey, kisSecret);
       if (kisStocks.length > 0) {
         source = 'kis';
-        for (const s of kisStocks) {
-          const sector = guessSector(s.name);
-          const { error } = await supabase.from('stock_quotes').upsert({
+        const now = new Date().toISOString();
+        for (let i = 0; i < kisStocks.length; i += 100) {
+          const batch = kisStocks.slice(i, i + 100).map(s => ({
             ...s,
-            ...(sector ? { sector } : {}),
+            sector: guessSector(s.name) || undefined,
             is_active: true,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'symbol' });
-          if (!error) totalCreated++;
+            updated_at: now,
+          }));
+          const { error } = await supabase.from('stock_quotes').upsert(batch, { onConflict: 'symbol' });
+          if (!error) totalCreated += batch.length;
         }
       }
     }
@@ -135,15 +152,17 @@ export async function GET(req: NextRequest) {
       const krxStocks = await fetchKRXStocks(stockApiKey);
       if (krxStocks.length > 0) {
         source = 'data_go_kr';
-        for (const s of krxStocks) {
-          const sector = guessSector(s.name);
-          const { error } = await supabase.from('stock_quotes').upsert({
+        const now = new Date().toISOString();
+        // 배치 upsert (100개씩)
+        for (let i = 0; i < krxStocks.length; i += 100) {
+          const batch = krxStocks.slice(i, i + 100).map(s => ({
             ...s,
-            ...(sector ? { sector } : {}),
+            sector: guessSector(s.name) || undefined,
             is_active: true,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'symbol' });
-          if (!error) totalCreated++;
+            updated_at: now,
+          }));
+          const { error, count } = await supabase.from('stock_quotes').upsert(batch, { onConflict: 'symbol' });
+          if (!error) totalCreated += batch.length;
         }
       }
     }
