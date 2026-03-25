@@ -38,8 +38,8 @@ const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 72 72" style={{ flexShrink:0, display:'block' }}>
     <defs>
       <linearGradient id="navyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#1E40AF"/>
-        <stop offset="100%" stopColor="#3B82F6"/>
+        <stop offset="0%" stopColor="#0F1B3E"/>
+        <stop offset="100%" stopColor="#2563EB"/>
       </linearGradient>
     </defs>
     <rect width="72" height="72" rx="18" fill="url(#navyGrad)"/>

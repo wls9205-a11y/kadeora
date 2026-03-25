@@ -1,23 +1,12 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#050A18"/>
-      <stop offset="100%" stop-color="#0D1F4A"/>
-    </linearGradient>
-    <linearGradient id="icon" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0A1838"/>
-      <stop offset="100%" stop-color="#1E3A6E"/>
+      <stop offset="0%" stop-color="#0F1B3E"/>
+      <stop offset="100%" stop-color="#2563EB"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <!-- 로고 아이콘 -->
-  <rect x="60" y="60" width="80" height="80" rx="18" fill="url(#icon)"/>
-  <circle cx="94" cy="100" r="9" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="116" cy="100" r="9" fill="#5B93FF" opacity="0.9"/>
-  <circle cx="138" cy="100" r="9" fill="#5B93FF" opacity="0.9"/>
-  <!-- 로고 텍스트 -->
-  <text x="160" y="112" font-family="system-ui,sans-serif" font-weight="900" font-size="42" fill="#E8EDF5">카더라</text>
-  <!-- 슬로건 -->
-  <text x="60" y="320" font-family="system-ui,sans-serif" font-weight="800" font-size="64" fill="#E8EDF5">소리소문 정보 커뮤니티</text>
-  <text x="60" y="400" font-family="system-ui,sans-serif" font-size="32" fill="#5B93FF" opacity="0.8">kadeora.app</text>
+  <circle cx="510" cy="315" r="42" fill="#fff"/>
+  <circle cx="600" cy="315" r="42" fill="#fff"/>
+  <circle cx="690" cy="315" r="42" fill="#fff"/>
 </svg>
