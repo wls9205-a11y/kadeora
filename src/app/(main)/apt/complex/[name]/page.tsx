@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
       'article:section': '부동산',
-      'article:tag': `${decoded},실거래가,시세,아파트,부동산`,
+      'article:tag': `${decoded},실거래가,시세,아파트,부동산`, 'dg:plink': `${SITE_URL}/apt/complex/${name}`,
     },
   };
 }

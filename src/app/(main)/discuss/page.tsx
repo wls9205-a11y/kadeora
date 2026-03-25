@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     images: [{ url: SITE_URL + '/api/og?title=' + encodeURIComponent('실시간 토론') + '&category=general', width: 1200, height: 630, alt: '카더라 토론' }],
   },
   twitter: { card: 'summary_large_image', title: '카더라 토론', description: '주식·부동산·경제 실시간 토론과 투표' },
-  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '토론' },
+  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '토론', 'dg:plink': SITE_URL + '/discuss' },
 };
 
 export default function DiscussPage() {

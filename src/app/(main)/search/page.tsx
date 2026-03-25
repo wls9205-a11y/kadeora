@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
+  other: { 'dg:plink': SITE_URL + '/search' },
 };
 
 export default function SearchPage() {

@@ -14,6 +14,6 @@ export const metadata: Metadata = {
     images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('종목 비교')}&category=stock`, width: 1200, height: 630, alt: '카더라 종목 비교' }],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'article:section': '주식' },
+  other: { 'article:section': '주식', 'dg:plink': SITE_URL + '/stock/compare' },
 };
 export default function Layout({ children }: { children: React.ReactNode }) { return children; }

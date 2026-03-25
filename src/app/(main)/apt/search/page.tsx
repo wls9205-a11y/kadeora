@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   alternates: { canonical: SITE_URL + '/apt/search' },
-  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '부동산' },
+  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/search' },
 };
 
 export const revalidate = 300;

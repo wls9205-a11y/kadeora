@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     other: {
       'naver:written_time': new Date().toISOString(),
       'article:section': '블로그',
-      'article:tag': `${s.title},시리즈,카더라`,
+      'article:tag': `${s.title},시리즈,카더라`, 'dg:plink': `${SITE_URL}/blog/series/${slug}`,
     },
   };
 }

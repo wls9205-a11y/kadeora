@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 가이드' }],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '가이드' },
+  other: { 'naver:written_time': new Date().toISOString(), 'article:section': '가이드', 'dg:plink': SITE_URL + '/guide' },
 };
 
 const FEATURES = [
