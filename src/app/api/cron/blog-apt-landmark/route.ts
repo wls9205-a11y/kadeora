@@ -124,7 +124,7 @@ ${name}는 ${district} 대장 아파트로 안정적 수요 기반을 갖추고 
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
+  const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

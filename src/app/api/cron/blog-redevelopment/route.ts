@@ -109,7 +109,7 @@ ${completion ? `### 입주 예정 시기는?\n현재 기준 예상 완공은 ${c
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
+  const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

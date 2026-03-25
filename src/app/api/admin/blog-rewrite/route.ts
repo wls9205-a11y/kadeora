@@ -27,7 +27,7 @@ const REWRITE_STYLES = [
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET || process.env.CRON_SECRETT;
+  const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     // 크론 시크릿 없으면 어드민 권한 체크
     const auth = await requireAdmin();

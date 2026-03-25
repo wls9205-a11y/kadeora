@@ -1,7 +1,10 @@
 'use client';
+import { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import Link from 'next/link';
 
-export default function BlogDetailError({ reset }: { error: Error; reset: () => void }) {
+export default function BlogDetailError({ error, reset }: { error: Error; reset: () => void }) {
+  useEffect(() => { Sentry.captureException(error); }, [error]);
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
       <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 12 }}>📝</div>
