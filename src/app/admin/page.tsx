@@ -1,3 +1,4 @@
+'use client';
 import dynamic from 'next/dynamic';
 
 const MissionControl = dynamic(() => import('./MissionControl'), { ssr: false });
