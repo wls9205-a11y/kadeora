@@ -32,11 +32,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let aptPages: MetadataRoute.Sitemap = [];
   let feedPages: MetadataRoute.Sitemap = [];
   let sitePages: MetadataRoute.Sitemap = [];
+  let discussPages: MetadataRoute.Sitemap = [];
 
   try {
     const supabase = getSupabaseAdmin();
 
-    const [blogsR, stocksR, aptsR, seriesR, postsR, sitesR] = await Promise.all([
+    const [blogsR, stocksR, aptsR, seriesR, postsR, sitesR, discussR] = await Promise.all([
       supabase.from('blog_posts').select('slug, updated_at, published_at')
         .eq('is_published', true).not('published_at', 'is', null)
         .lte('published_at', now.toISOString())
@@ -48,6 +49,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       supabase.from('apt_sites').select('slug, updated_at, site_type, content_score, sitemap_wave, interest_count')
         .eq('is_active', true).gte('content_score', 25)
         .order('interest_count', { ascending: false }).limit(10000),
+      supabase.from('discussion_topics').select('id, created_at, comment_count, vote_a, vote_b')
+        .order('created_at', { ascending: false }).limit(1000),
     ]);
 
     blogPages = (blogsR.data || []).map(b => {
@@ -96,7 +99,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: s.site_type === 'subscription' ? 'daily' as const : 'weekly' as const,
       priority: s.site_type === 'subscription' ? 0.85 : (s.interest_count > 0 ? 0.8 : 0.7),
     }));
+
+    discussPages = (discussR.data || []).map((d: any) => {
+      const engagement = (d.vote_a || 0) + (d.vote_b || 0) + (d.comment_count || 0);
+      return {
+        url: `${BASE}/discuss/${d.id}`,
+        lastModified: new Date(d.created_at || Date.now()),
+        changeFrequency: 'weekly' as const,
+        priority: engagement > 50 ? 0.7 : engagement > 10 ? 0.6 : 0.5,
+      };
+    });
   } catch {}
 
-  return [...staticPages, ...regionPages, ...blogPages, ...stockPages, ...aptPages, ...feedPages, ...sitePages];
+  return [...staticPages, ...regionPages, ...blogPages, ...stockPages, ...aptPages, ...feedPages, ...sitePages, ...discussPages];
 }

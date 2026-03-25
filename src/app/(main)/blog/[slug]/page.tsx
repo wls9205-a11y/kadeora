@@ -42,7 +42,15 @@ function extractToc(html: string): { level: number; text: string; id: string }[]
   return items;
 }
 
-// GEO 지역 코드 매핑
+// 마크다운 전처리: **볼드만 있는 줄** → ## h2 변환 (AI 생성 콘텐츠 시맨틱 강화)
+function normalizeMarkdownHeadings(md: string): string {
+  return md.replace(
+    /^(\*\*|__)([^*_\n]{2,60})\1\s*$/gm,
+    (_match, _marker, text) => `## ${text.trim()}`
+  );
+}
+
+
 const GEO_CODES: Record<string, string> = {
   '서울': 'KR-11', '부산': 'KR-26', '대구': 'KR-27', '인천': 'KR-28',
   '광주': 'KR-29', '대전': 'KR-30', '울산': 'KR-31', '세종': 'KR-36',
@@ -231,8 +239,8 @@ export default async function BlogDetailPage({ params }: Props) {
     ],
   };
 
-  // 마크다운 → HTML
-  const htmlFull = injectInternalLinks(sanitizeHtml(marked(post.content) as string));
+  // 마크다운 → HTML (볼드 소제목 → h2 정규화 포함)
+  const htmlFull = injectInternalLinks(sanitizeHtml(marked(normalizeMarkdownHeadings(post.content)) as string));
   const cutoff = Math.floor(htmlFull.length * 0.7);
   const htmlTruncated = htmlFull.slice(0, cutoff);
 

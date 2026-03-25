@@ -34,6 +34,7 @@ Disallow: /api/
 User-agent: Googlebot-Image
 Allow: /api/og
 Allow: /images/
+Allow: /image-sitemap.xml
 
 # ===== Naver (Yeti) =====
 User-agent: Yeti
@@ -93,6 +94,7 @@ Disallow: /api/
 
 # ===== Sitemaps =====
 Sitemap: https://kadeora.app/sitemap.xml
+Sitemap: https://kadeora.app/image-sitemap.xml
 Host: https://kadeora.app
 
 # ===== RSS Feeds =====

@@ -95,16 +95,20 @@ async function handler(_req: NextRequest) {
     }
   } catch (e: any) { errors.push(`redev: ${e.message}`); }
 
-  // ━━━ Step 3: content_score 재계산 (전체) ━━━
+  // ━━━ Step 3: content_score 재계산 (배치) ━━━
+  let scored = 0;
   try {
+    // RPC 시도 (DB 함수가 있으면 가장 빠름)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     try { await (sb as any).rpc('refresh_all_site_scores'); } catch {}
 
-    // 직접 점수 계산
+    // 직접 점수 계산 — 배치 업데이트
     const { data: allSites } = await sb.from('apt_sites')
       .select('id, name, region, sigungu, total_units, price_min, price_max, source_ids, description, faq_items, images, latitude, longitude, nearby_station, builder')
       .limit(5000);
 
+    // score별로 그룹핑
+    const scoreGroups = new Map<number, string[]>();
     for (const s of (allSites || [])) {
       let score = 0;
       if (s.name && s.name.length >= 3) score += 10;
@@ -122,7 +126,19 @@ async function handler(_req: NextRequest) {
       if (s.nearby_station) score += 5;
       if (s.builder) score += 3;
 
-      await sb.from('apt_sites').update({ content_score: score }).eq('id', s.id);
+      const ids = scoreGroups.get(score) || [];
+      ids.push(s.id);
+      scoreGroups.set(score, ids);
+    }
+
+    // 점수별 배치 UPDATE (5,000건 → ~20쿼리)
+    for (const [score, ids] of scoreGroups) {
+      // Supabase .in()은 최대 1000건, 청크 분할
+      for (let i = 0; i < ids.length; i += 500) {
+        const chunk = ids.slice(i, i + 500);
+        await sb.from('apt_sites').update({ content_score: score }).in('id', chunk);
+        scored += chunk.length;
+      }
     }
   } catch (e: any) { errors.push(`score: ${e.message}`); }
 
@@ -140,6 +156,7 @@ async function handler(_req: NextRequest) {
     success: true,
     inserted,
     updated,
+    scored,
     elapsed: `${elapsed}ms`,
     errors: errors.length ? errors : undefined,
   });

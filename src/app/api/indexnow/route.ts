@@ -18,18 +18,23 @@ async function handler(_req: NextRequest) {
 
   // 최근 24시간 내 업데이트된 현장 URL 수집
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { data: sites } = await sb.from('apt_sites')
-    .select('slug')
-    .eq('is_active', true)
-    .gte('content_score', 40)
-    .gte('updated_at', since)
-    .limit(100);
+  const [sitesR, blogsR, discussR] = await Promise.all([
+    sb.from('apt_sites').select('slug')
+      .eq('is_active', true).gte('content_score', 40).gte('updated_at', since).limit(50),
+    sb.from('blog_posts').select('slug')
+      .eq('is_published', true).gte('updated_at', since).limit(30),
+    sb.from('discussion_topics').select('id')
+      .gte('created_at', since).limit(20),
+  ]);
 
-  const urls = (sites || []).map((s) => `${SITE_URL}/apt/${s.slug}`);
+  const urls: string[] = [];
+  for (const s of sitesR.data || []) urls.push(`${SITE_URL}/apt/${s.slug}`);
+  for (const b of blogsR.data || []) urls.push(`${SITE_URL}/blog/${b.slug}`);
+  for (const d of discussR.data || []) urls.push(`${SITE_URL}/discuss/${d.id}`);
 
   // 정적 중요 페이지도 포함
   urls.push(`${SITE_URL}/apt`);
-  urls.push(`${SITE_URL}/apt`);
+  urls.push(`${SITE_URL}/blog`);
 
   if (urls.length === 0) {
     return NextResponse.json({ submitted: 0, message: 'no updated URLs' });

@@ -44,9 +44,11 @@ export async function GET(req: NextRequest) {
     postQuery = postQuery.eq('category', category);
   }
 
-  const [blogsR, postsR, sitesR] = await Promise.all([blogQuery, postQuery,
+  const [blogsR, postsR, sitesR, discussR] = await Promise.all([blogQuery, postQuery,
     supabase.from('apt_sites').select('slug, name, description, region, sigungu, builder, site_type, total_units, updated_at, created_at')
       .eq('is_active', true).gte('content_score', 25).order('updated_at', { ascending: false }).limit(200),
+    supabase.from('discussion_topics').select('id, title, description, category, option_a, option_b, vote_a, vote_b, comment_count, created_at')
+      .order('created_at', { ascending: false }).limit(100),
   ]);
 
   const blogItems = (blogsR.data || []).map((b: any) => ({
@@ -79,7 +81,21 @@ export async function GET(req: NextRequest) {
     guid: `${SITE}/apt/${s.slug}`,
   }));
 
-  const allItems = [...blogItems, ...postItems, ...aptSiteItems].sort(
+  const discussItems = (discussR.data || []).map((d: any) => {
+    const total = (d.vote_a || 0) + (d.vote_b || 0);
+    const catLabel = CATEGORY_MAP[d.category] || '토론';
+    return {
+      title: `[${catLabel} 토론] ${d.title}`,
+      link: `${SITE}/discuss/${d.id}`,
+      description: d.description || `${d.option_a} vs ${d.option_b} — ${total}명 투표, ${d.comment_count || 0}개 의견`,
+      pubDate: new Date(d.created_at).toUTCString(),
+      category: catLabel,
+      tags: [catLabel, '토론', d.option_a, d.option_b].filter(Boolean),
+      guid: `${SITE}/discuss/${d.id}`,
+    };
+  });
+
+  const allItems = [...blogItems, ...postItems, ...aptSiteItems, ...discussItems].sort(
     (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
   );
 

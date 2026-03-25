@@ -1,225 +1,151 @@
-'use client';
-import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
-import { useToast } from '@/components/Toast';
+import { createSupabaseServer } from '@/lib/supabase-server';
+import { notFound } from 'next/navigation';
 import { timeAgo } from '@/lib/format';
+import { SITE_URL as SITE } from '@/lib/constants';
+import DiscussDetailClient from './DiscussDetailClient';
+import Link from 'next/link';
 
-const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
+export const revalidate = 60; // ISR 1분
+
 const CAT_LABEL: Record<string, string> = { stock: '📊 주식', apt: '🏢 부동산', economy: '💹 경제', free: '✏️ 자유' };
+const CAT_SEO: Record<string, string> = { stock: '주식', apt: '부동산', economy: '경제', free: '자유' };
 
-interface Topic {
-  id: number; title: string; description: string | null; category: string; topic_type: string;
-  option_a: string; option_b: string; vote_a: number; vote_b: number;
-  comment_count: number; view_count: number; is_hot: boolean; created_at: string;
-}
-interface Comment {
-  id: number; content: string; created_at: string; likes: number;
-  profiles?: { nickname?: string; grade?: number } | null;
-}
+interface Props { params: Promise<{ id: string }> }
 
-export default function DiscussDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const topicId = params?.id as string;
-  const { error, success } = useToast();
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
+  const sb = await createSupabaseServer();
+  const { data: topic } = await sb.from('discussion_topics')
+    .select('title, description, category, option_a, option_b, vote_a, vote_b, comment_count, view_count')
+    .eq('id', parseInt(id, 10)).maybeSingle();
 
-  const [topic, setTopic] = useState<Topic | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [myVote, setMyVote] = useState<'a' | 'b' | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [input, setInput] = useState('');
-  const [sending, setSending] = useState(false);
-  const [voting, setVoting] = useState(false);
-
-  useEffect(() => {
-    const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-  }, []);
-
-  const loadTopic = useCallback(async () => {
-    const sb = createSupabaseBrowser();
-    const { data } = await sb.from('discussion_topics').select('id,title,description,category,topic_type,option_a,option_b,vote_a,vote_b,comment_count,view_count,is_hot,is_pinned,expires_at,created_at').eq('id', parseInt(topicId, 10)).single();
-    if (data) setTopic(data as Topic);
-    // Increment view
-    if (data) sb.from('discussion_topics').update({ view_count: (data.view_count || 0) + 1 }).eq('id', data.id).then(() => {});
-  }, [topicId]);
-
-  const loadComments = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/discuss/${topicId}/comments`);
-      if (res.ok) { const d = await res.json(); setComments(d.comments || []); }
-    } catch {}
-  }, [topicId]);
-
-  const loadMyVote = useCallback(async () => {
-    if (!user) return;
-    const sb = createSupabaseBrowser();
-    const { data } = await sb.from('discussion_votes').select('vote').eq('topic_id', parseInt(topicId, 10)).eq('author_id', user.id).maybeSingle();
-    if (data) setMyVote(data.vote as 'a' | 'b');
-  }, [topicId, user]);
-
-  useEffect(() => { loadTopic(); loadComments(); }, [loadTopic, loadComments]);
-  useEffect(() => { loadMyVote(); }, [loadMyVote]);
-
-  const handleVote = async (vote: 'a' | 'b') => {
-    if (!user) { router.push('/login'); return; }
-    if (voting) return;
-    setVoting(true);
-
-    // Optimistic update
-    if (topic) {
-      const prev = myVote;
-      setMyVote(vote);
-      setTopic(t => t ? {
-        ...t,
-        vote_a: t.vote_a + (vote === 'a' ? 1 : 0) + (prev === 'a' ? -1 : 0),
-        vote_b: t.vote_b + (vote === 'b' ? 1 : 0) + (prev === 'b' ? -1 : 0),
-      } : t);
-    }
-
-    try {
-      const res = await fetch(`/api/discuss/${topicId}/vote`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vote }),
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        if (res.status !== 409) error(d.error || '투표 실패');
-        loadTopic(); loadMyVote(); // revert
-      }
-    } catch { loadTopic(); loadMyVote(); }
-    finally { setVoting(false); }
-  };
-
-  const handleComment = async () => {
-    if (!user) { router.push('/login'); return; }
-    const t = input.trim();
-    if (!t) return;
-    setSending(true);
-    try {
-      const res = await fetch(`/api/discuss/${topicId}/comments`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: t }),
-      });
-      if (res.ok) {
-        const d = await res.json();
-        setComments(prev => [...prev, d.comment]);
-        setInput('');
-        setTopic(prev => prev ? { ...prev, comment_count: (prev.comment_count || 0) + 1 } : prev);
-      } else {
-        const d = await res.json();
-        error(d.error || '댓글 작성 실패');
-      }
-    } catch { error('오류가 발생했습니다.'); }
-    finally { setSending(false); }
-  };
-
-  if (!topic) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>로딩 중...</div>;
+  if (!topic) return { title: '토론을 찾을 수 없습니다 | 카더라' };
 
   const total = (topic.vote_a || 0) + (topic.vote_b || 0);
-  const pctA = total > 0 ? Math.round((topic.vote_a / total) * 100) : 50;
-  const pctB = 100 - pctA;
+  const catLabel = CAT_SEO[topic.category] || '토론';
+  const desc = topic.description
+    || `${topic.option_a} vs ${topic.option_b} — ${total}명 참여, ${topic.comment_count || 0}개 의견`;
+
+  return {
+    title: `${topic.title} | ${catLabel} 토론 | 카더라`,
+    description: desc,
+    alternates: { canonical: `${SITE}/discuss/${id}` },
+    openGraph: {
+      title: topic.title,
+      description: desc,
+      type: 'article',
+      siteName: '카더라',
+      locale: 'ko_KR',
+      url: `${SITE}/discuss/${id}`,
+      images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(topic.title)}&category=${topic.category}`, width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image' as const },
+    other: {
+      'naver:written_time': new Date().toISOString(),
+      'dg:plink': `${SITE}/discuss/${id}`,
+      'article:section': catLabel,
+      'article:tag': catLabel,
+    },
+    robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
+  };
+}
+
+export default async function DiscussDetailPage({ params }: Props) {
+  const { id } = await params;
+  const topicId = parseInt(id, 10);
+  if (isNaN(topicId)) notFound();
+
+  const sb = await createSupabaseServer();
+
+  const [topicR, commentsR] = await Promise.all([
+    sb.from('discussion_topics')
+      .select('id, title, description, category, topic_type, option_a, option_b, vote_a, vote_b, comment_count, view_count, is_hot, created_at')
+      .eq('id', topicId).single(),
+    sb.from('discussion_comments')
+      .select('id, content, created_at, likes, profiles!discussion_comments_author_id_fkey(nickname, grade)')
+      .eq('topic_id', topicId)
+      .order('created_at', { ascending: true })
+      .limit(100),
+  ]);
+
+  if (!topicR.data) notFound();
+
+  const topic = topicR.data;
+  const comments = (commentsR.data || []) as any[];
+  const total = (topic.vote_a || 0) + (topic.vote_b || 0);
+  const catLabel = CAT_SEO[topic.category] || '토론';
+
+  // JSON-LD: DiscussionForumPosting
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'DiscussionForumPosting',
+    headline: topic.title,
+    text: topic.description || `${topic.option_a} vs ${topic.option_b}`,
+    url: `${SITE}/discuss/${id}`,
+    datePublished: topic.created_at,
+    interactionStatistic: [
+      { '@type': 'InteractionCounter', interactionType: 'https://schema.org/VoteAction', userInteractionCount: total },
+      { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: topic.comment_count || 0 },
+      { '@type': 'InteractionCounter', interactionType: 'https://schema.org/ViewAction', userInteractionCount: topic.view_count || 0 },
+    ],
+    author: { '@type': 'Organization', name: '카더라', url: SITE },
+    publisher: { '@type': 'Organization', name: '카더라', url: SITE },
+    isPartOf: { '@type': 'DiscussionForum', name: `카더라 ${catLabel} 토론`, url: `${SITE}/discuss` },
+    ...(comments.length > 0 ? {
+      comment: comments.slice(0, 5).map((c: any) => ({
+        '@type': 'Comment',
+        text: c.content,
+        dateCreated: c.created_at,
+        author: { '@type': 'Person', name: c.profiles?.nickname || '사용자' },
+      })),
+    } : {}),
+  };
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '카더라', item: SITE },
+      { '@type': 'ListItem', position: 2, name: '토론', item: `${SITE}/discuss` },
+      { '@type': 'ListItem', position: 3, name: topic.title, item: `${SITE}/discuss/${id}` },
+    ],
+  };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      {/* Back */}
-      <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: '8px 0', marginBottom: 8 }}>
-        ← 돌아가기
-      </button>
+    <article itemScope itemType="https://schema.org/DiscussionForumPosting" style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      {/* Topic */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      {/* Back */}
+      <Link href="/discuss" style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: '8px 0', marginBottom: 8, display: 'inline-block', textDecoration: 'none' }}>
+        ← 돌아가기
+      </Link>
+
+      {/* Topic Header — SSR rendered for crawlers */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-          <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{CAT_LABEL[topic.category] || topic.category}</span>
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+            {CAT_LABEL[topic.category] || topic.category}
+          </span>
           {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
 
-        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.4 }}>{topic.title}</h1>
-        {topic.description && <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>{topic.description}</p>}
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>
-          {timeAgo(topic.created_at)} · 👁 {topic.view_count || 0} · 🗳 {total}명 참여
-        </div>
-
-        {/* Vote buttons */}
-        {[
-          { key: 'a' as const, label: topic.option_a, pct: pctA, count: topic.vote_a, winning: pctA >= pctB },
-          { key: 'b' as const, label: topic.option_b, pct: pctB, count: topic.vote_b, winning: pctB > pctA },
-        ].map(opt => (
-          <button key={opt.key} onClick={() => handleVote(opt.key)} disabled={voting}
-            style={{
-              width: '100%', padding: '14px 16px', marginBottom: 8, borderRadius: 12,
-              border: myVote === opt.key ? '2px solid var(--brand)' : '1px solid var(--border)',
-              background: 'var(--bg-base)', cursor: voting ? 'not-allowed' : 'pointer',
-              textAlign: 'left', position: 'relative', overflow: 'hidden',
-            }}>
-            <div style={{
-              position: 'absolute', left: 0, top: 0, height: '100%',
-              width: `${opt.pct}%`, background: opt.winning ? 'var(--brand-bg)' : 'rgba(128,128,128,0.05)',
-              borderRadius: 12, transition: 'width 0.3s',
-            }} />
-            <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 700 : 500, color: 'var(--text-primary)' }}>
-                {myVote === opt.key && '✓ '}{opt.label}
-              </span>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>
-                {opt.pct}% <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 400 }}>({opt.count}명)</span>
-              </span>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* Comments */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
-
-        {/* Input */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          {user ? (
-            <>
-              <input value={input} onChange={e => setInput(e.target.value)} placeholder="의견을 남겨보세요" maxLength={500}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleComment(); } }}
-                style={{ flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit' }} />
-              <button onClick={handleComment} disabled={!input.trim() || sending}
-                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 'var(--fs-base)', cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>
-                전송
-              </button>
-            </>
-          ) : (
-            <div style={{ flex: 1, textAlign: 'center', padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-              <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 의견을 남길 수 있습니다
-            </div>
-          )}
-        </div>
-
-        {/* Comment list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {comments.map(c => {
-            const nick = c.profiles?.nickname ?? '사용자';
-            const grade = c.profiles?.grade ?? 1;
-            return (
-              <div key={c.id} style={{ display: 'flex', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-base)' }}>
-                  {GRADE_EMOJI[grade] || '🌱'}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
-                  </div>
-                  <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
-                </div>
-              </div>
-            );
-          })}
-          {comments.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-              아직 의견이 없어요. 첫 의견을 남겨보세요!
-            </div>
-          )}
+        <h1 itemProp="headline" style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', lineHeight: 1.4 }}>
+          {topic.title}
+        </h1>
+        {topic.description && (
+          <p itemProp="text" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+            {topic.description}
+          </p>
+        )}
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
+          <time itemProp="datePublished" dateTime={topic.created_at ?? undefined}>{timeAgo(topic.created_at)}</time>
+          {' · '}👁 {topic.view_count || 0}
         </div>
       </div>
-    </div>
+
+      {/* Client interactive part (투표 + 댓글) */}
+      <DiscussDetailClient initialTopic={topic as any} initialComments={comments} />
+    </article>
   );
 }
