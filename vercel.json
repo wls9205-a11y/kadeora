@@ -68,7 +68,7 @@
     },
     {
       "path": "/api/cron/blog-apt-new",
-      "schedule": "0 6 * * *"
+      "schedule": "15 6 * * *"
     },
     {
       "path": "/api/cron/blog-publish-queue",
@@ -104,11 +104,11 @@
     },
     {
       "path": "/api/cron/crawl-gyeonggi-redev",
-      "schedule": "0 6 * * 1"
+      "schedule": "5 6 * * 1"
     },
     {
       "path": "/api/cron/crawl-busan-redev",
-      "schedule": "0 6 * * 1"
+      "schedule": "10 6 * * 1"
     },
     {
       "path": "/api/cron/redev-verify-households",
@@ -116,7 +116,7 @@
     },
     {
       "path": "/api/cron/redev-geocode",
-      "schedule": "0 5 * * *"
+      "schedule": "15 5 * * *"
     },
     {
       "path": "/api/cron/crawl-unsold-molit",
@@ -156,7 +156,7 @@
     },
     {
       "path": "/api/cron/stock-theme-daily",
-      "schedule": "40 6 * * 1-5"
+      "schedule": "50 6 * * 1-5"
     },
     {
       "path": "/api/cron/exchange-rate",
@@ -164,7 +164,7 @@
     },
     {
       "path": "/api/cron/aggregate-trade-stats",
-      "schedule": "0 0 * * *"
+      "schedule": "10 0 * * *"
     },
     {
       "path": "/api/cron/stock-price",
@@ -208,7 +208,7 @@
     },
     {
       "path": "/api/cron/blog-seed-comments",
-      "schedule": "0 14 * * *"
+      "schedule": "10 14 * * *"
     },
     {
       "path": "/api/cron/crawl-apt-subscription",
@@ -240,15 +240,15 @@
     },
     {
       "path": "/api/cron/stock-news-crawl",
-      "schedule": "0 8 * * 1-5"
+      "schedule": "15 8 * * 1-5"
     },
     {
       "path": "/api/cron/stock-flow-crawl",
-      "schedule": "30 7 * * 1-5"
+      "schedule": "45 7 * * 1-5"
     },
     {
       "path": "/api/cron/expire-listings",
-      "schedule": "0 3 * * *"
+      "schedule": "15 3 * * *"
     },
     {
       "path": "/api/cron/sync-apt-sites",
@@ -260,7 +260,7 @@
     },
     {
       "path": "/api/cron/collect-site-trends",
-      "schedule": "0 6 * * *"
+      "schedule": "20 6 * * *"
     },
     {
       "path": "/api/cron/collect-site-facilities",
@@ -268,7 +268,7 @@
     },
     {
       "path": "/api/cron/purge-withdrawn-consents",
-      "schedule": "0 6 * * *"
+      "schedule": "30 6 * * *"
     },
     {
       "path": "/api/indexnow",
