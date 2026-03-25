@@ -1,7 +1,51 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-25 세션 37
+> **마지막 업데이트:** 2026-03-26 세션 38
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
+
+## 세션 38 작업 내역 (2026-03-26) — 커밋 2건, 15파일, +1,674줄 -262줄
+
+### 1. 이미지 사이트맵 (커밋 1)
+- `/image-sitemap.xml` 신규 — apt_sites 이미지 + blog_posts 커버 이미지
+- robots.txt에 `Sitemap: .../image-sitemap.xml` 추가
+- Googlebot-Image `/image-sitemap.xml` Allow 추가
+
+### 2. /discuss/[id] SSR 전환 (커밋 1)
+- `'use client'` 제거 → 서버 컴포넌트 + DiscussDetailClient 분리
+- generateMetadata: 동적 타이틀/OG/네이버 메타/robots
+- JSON-LD 2종: DiscussionForumPosting + BreadcrumbList
+- 시맨틱 HTML: `<article>` + `<h1 itemProp>` + `<time dateTime>`
+- sitemap.ts에 discussion_topics 추가 (engagement 기반 priority)
+- RSS feed.xml에 토론 100건 추가
+- IndexNow에 discuss + blog URL 추가 (기존 apt만 → 3종)
+
+### 3. sync-apt-sites 크론 경량화 (커밋 1)
+- Step3 content_score: 5,000건 row-by-row UPDATE → score별 그룹핑 배치
+- ~5,000쿼리 → ~20쿼리 (99.6% 감소)
+
+### 4. 블로그 h2 시맨틱 강화 (커밋 1)
+- `normalizeMarkdownHeadings()`: `**볼드만 줄**` → `## h2` 전처리
+- marked() 호출 전 적용 → TOC/SEO 모두 h2 인식
+
+### 5. Mission Control 올인원 어드민 대시보드 (커밋 2)
+- **통합 대시보드 API** (`/api/admin/dashboard`): 6개 섹션, 병렬 쿼리
+- **MissionControl.tsx**: 기존 10개 분산 → 단일 페이지 + 사이드바 8탭
+  - 📊 대시보드: KPI 12개 + 크론 헬스바 + 일일차트 + 최근가입
+  - 👤 유저관리: 45필드 상세 패널 + 검색/필터 + 정지/복구/포인트/관리자
+  - 📝 콘텐츠: 게시글/댓글/토론/채팅 4탭 + 삭제
+  - ✍️ 블로그: 카테고리 분포 + 리라이팅 진행률 + 크론 8종 원클릭
+  - 🏢 부동산: 현장/청약/미분양/재개발/관심고객 5탭
+  - ⚙️ 시스템: 크론 상세 + 성공률 + 기간필터
+  - 🚨 신고: 처리/기각 원클릭
+  - ⚡ GOD MODE: 7모드 병렬 실행 + 실시간 타이머
+- god-mode API `single` 모드 추가 (개별 크론 단건 실행)
+- 디자인: 다크 테마 (#050A18), 접이식 사이드바, fadeIn, 호버 인터랙션
+
+### PENDING 작업
+- [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출 + 루트 URL 수집)
+- [ ] 토스 라이브키 교체 / KIS_APP_KEY 발급
+- [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
+- [ ] 기존 어드민 서브페이지 10개 → MissionControl로 리다이렉트 정리
 
 ## 세션 37 작업 내역 (2026-03-25)
 
