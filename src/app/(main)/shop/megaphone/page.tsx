@@ -22,5 +22,5 @@ export const metadata: Metadata = {
 };
 
 export default function ShopPage() {
-  return <ShopClient />;
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '아이템 샵' }] }) }} /><ShopClient /></>;
 }

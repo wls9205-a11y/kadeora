@@ -16,4 +16,6 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' },
   other: { 'article:section': '주식', 'dg:plink': SITE_URL + '/stock/compare' },
 };
-export default function Layout({ children }: { children: React.ReactNode }) { return children; }
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: SITE_URL + '/stock' }, { '@type': 'ListItem', position: 3, name: '종목 비교' }] }) }} />{children}</>;
+}
