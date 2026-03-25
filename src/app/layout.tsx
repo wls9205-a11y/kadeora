@@ -5,6 +5,7 @@ import './globals.css';
 import OfflineBanner from '@/components/OfflineBanner';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import GuestWelcome from '@/components/GuestWelcome';
+import { VercelAnalytics } from '@/components/common/Analytics';
 import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
 
@@ -141,6 +142,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* GA4 */}
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-VP4F6TH2GD" strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-VP4F6TH2GD');`}</Script>
+        <VercelAnalytics />
       </body>
     </html>
   );

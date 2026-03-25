@@ -5,4 +5,8 @@ Sentry.init({
   environment: process.env.NODE_ENV,
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.2 : 1.0,
   debug: false,
+  ignoreErrors: [
+    "NEXT_REDIRECT", "NEXT_NOT_FOUND",
+    "Network request failed", "Failed to fetch",
+  ],
 });
