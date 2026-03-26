@@ -8,7 +8,6 @@ function memoryRateLimit(id: string, max: number, windowMs: number) { const now 
 export type RateLimitTier = "api" | "auth" | "search";
 const TIER: Record<RateLimitTier, { max: number; windowMs: number }> = { api: { max: 30, windowMs: 60000 }, auth: { max: 5, windowMs: 60000 }, search: { max: 20, windowMs: 60000 } };
 export function getIp(req: NextRequest): string { return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"; }
-export const RATE_LIMITS = TIER;
 export function rateLimitResponse() { return NextResponse.json({ error: "요청이 너무 많습니다." }, { status: 429 }); }
 export async function rateLimit(req: NextRequest, tier: RateLimitTier = "api"): Promise<boolean> { await initUpstash(); const ip = getIp(req); const id = `${tier}:${ip}`; if (useUpstash && upstashLimiter) { try { const r = await upstashLimiter[tier].limit(id); return r.success; } catch { return true; } } const cfg = TIER[tier]; const r = memoryRateLimit(id, cfg.max, cfg.windowMs); return r.success; }
 export async function checkRateLimit(req: NextRequest, tier: RateLimitTier = "api"): Promise<{ success: true } | { success: false; response: NextResponse }> { const ok = await rateLimit(req, tier); if (!ok) return { success: false, response: rateLimitResponse() }; return { success: true }; }

@@ -18,16 +18,6 @@ export const CommentCreateSchema = z.object({
   post_id: z.number().int().positive('유효한 게시글 ID'),
 });
 
-// 팔로우
-export const FollowSchema = z.object({
-  targetId: z.string().uuid('유효한 사용자 ID'),
-});
-
-// 북마크
-export const BookmarkSchema = z.object({
-  postId: z.number().int().positive('유효한 게시글 ID'),
-});
-
 // 신고
 export const ReportSchema = z.object({
   reason: z.string().min(1, '신고 사유 필수'),

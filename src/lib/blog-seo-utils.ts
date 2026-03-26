@@ -1,11 +1,3 @@
-export const BRAND_COVERS: Record<string, string> = {
-  stock: 'https://kadeora.app/images/brand/kadeora-wide.png',
-  finance: 'https://kadeora.app/images/brand/kadeora-hero.png',
-  apt: 'https://kadeora.app/images/brand/kadeora-full.png',
-  unsold: 'https://kadeora.app/images/brand/kadeora-full.png',
-  general: 'https://kadeora.app/images/brand/kadeora-hero.png',
-};
-
 export function generateImageAlt(category: string, title: string): string {
   const prefixes: Record<string, string> = {
     stock: '카더라 주식 시황',

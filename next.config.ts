@@ -105,7 +105,9 @@ export default withSentryConfig(nextConfig, {
   project: process.env.SENTRY_PROJECT || "kadeora",
   silent: true,
   widenClientFileUpload: true,
-  disableLogger: true,
   sourcemaps: { disable: true },
-  automaticVercelMonitors: true,
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    automaticVercelMonitors: true,
+  },
 });

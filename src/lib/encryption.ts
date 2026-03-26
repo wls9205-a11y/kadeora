@@ -36,13 +36,6 @@ export function decrypt(encryptedText: string): string {
   return decrypted;
 }
 
-/** 전화번호 마스킹 (010-1234-5678 → ****5678) */
-export function maskPhone(phone: string): string {
-  const clean = phone.replace(/-/g, '');
-  if (clean.length < 4) return '****';
-  return `****${clean.slice(-4)}`;
-}
-
 /** 암호화 키 존재 여부 확인 */
 export function hasEncryptionKey(): boolean {
   return !!process.env.ENCRYPTION_KEY;

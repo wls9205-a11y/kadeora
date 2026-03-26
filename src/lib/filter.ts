@@ -35,11 +35,3 @@ export function filterContent(text: string): { isBlocked: boolean; reason?: stri
   }
   return { isBlocked: false, filtered: text };
 }
-
-export function softFilter(text: string): string {
-  let result = text;
-  for (const word of BLOCKED_WORDS) {
-    result = result.replace(new RegExp(word, 'gi'), '***');
-  }
-  return result;
-}

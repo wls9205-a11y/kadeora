@@ -70,64 +70,6 @@ export const DEMO_POSTS: any[] = [
   },
 ];
 
-export const DEMO_TRENDING: any[] = [
-  { id: 1, keyword: '삼성전자', rank: 1, count: 2341, created_at: new Date().toISOString() },
-  { id: 2, keyword: 'SK하이닉스', rank: 2, count: 1876, created_at: new Date().toISOString() },
-  { id: 3, keyword: 'AI 반도체', rank: 3, count: 1543, created_at: new Date().toISOString() },
-  { id: 4, keyword: '청약 경쟁률', rank: 4, count: 1201, created_at: new Date().toISOString() },
-  { id: 5, keyword: '엔비디아', rank: 5, count: 987, created_at: new Date().toISOString() },
-  { id: 6, keyword: '기준금리 인하', rank: 6, count: 876, created_at: new Date().toISOString() },
-  { id: 7, keyword: '미분양 현황', rank: 7, count: 754, created_at: new Date().toISOString() },
-  { id: 8, keyword: 'ETF 추천', rank: 8, count: 632, created_at: new Date().toISOString() },
-  { id: 9, keyword: '재개발 투자', rank: 9, count: 521, created_at: new Date().toISOString() },
-  { id: 10, keyword: '배당주 TOP', rank: 10, count: 456, created_at: new Date().toISOString() },
-];
-
-export const DEMO_STOCKS: any[] = [
-  { id: 1, symbol: '005930', name: '삼성전자', price: 58400, change_amount: 800, change_rate: 1.39, volume: 12847320, market_cap: 348700000000000, updated_at: new Date().toISOString() },
-  { id: 2, symbol: '000660', name: 'SK하이닉스', price: 183000, change_amount: -2500, change_rate: -1.35, volume: 4523156, market_cap: 133200000000000, updated_at: new Date().toISOString() },
-  { id: 3, symbol: '035420', name: 'NAVER', price: 178500, change_amount: 3200, change_rate: 1.82, volume: 1238946, market_cap: 29300000000000, updated_at: new Date().toISOString() },
-  { id: 4, symbol: '035720', name: '카카오', price: 37450, change_amount: -550, change_rate: -1.45, volume: 2891023, market_cap: 16700000000000, updated_at: new Date().toISOString() },
-  { id: 5, symbol: '051910', name: 'LG화학', price: 287000, change_amount: 5500, change_rate: 1.95, volume: 389123, market_cap: 20200000000000, updated_at: new Date().toISOString() },
-  { id: 6, symbol: '006400', name: '삼성SDI', price: 198500, change_amount: -1500, change_rate: -0.75, volume: 521456, market_cap: 14400000000000, updated_at: new Date().toISOString() },
-  { id: 7, symbol: '207940', name: '삼성바이오로직스', price: 832000, change_amount: 12000, change_rate: 1.46, volume: 145233, market_cap: 58900000000000, updated_at: new Date().toISOString() },
-  { id: 8, symbol: '068270', name: '셀트리온', price: 142500, change_amount: 2000, change_rate: 1.42, volume: 892341, market_cap: 19600000000000, updated_at: new Date().toISOString() },
-  { id: 9, symbol: '005380', name: '현대차', price: 198000, change_amount: -800, change_rate: -0.40, volume: 1023456, market_cap: 42200000000000, updated_at: new Date().toISOString() },
-  { id: 10, symbol: '003550', name: 'LG', price: 73200, change_amount: 600, change_rate: 0.83, volume: 678234, market_cap: 12800000000000, updated_at: new Date().toISOString() },
-];
-
-export const DEMO_DISCUSS: any[] = [
-  { id: 1, title: '삼성전자 6만원 복귀 가능할까? 🔥', description: '현재 주가 분석 및 전망 토론', category: 'stock', participants_count: 234, messages_count: 1847, is_active: true, created_at: new Date().toISOString() },
-  { id: 2, title: '2026 청약 전략 공유방', description: '청약 가점, 지역, 타이밍 등 전략 공유', category: 'apt', participants_count: 189, messages_count: 2341, is_active: true, created_at: new Date().toISOString() },
-  { id: 3, title: 'HBM 반도체 슈퍼사이클 얼마나 갈까', description: 'AI 반도체 시장 전망 토론', category: 'stock', participants_count: 312, messages_count: 3102, is_active: true, created_at: new Date().toISOString() },
-  { id: 4, title: '파킹통장 금리 비교 & 추천', description: '각 은행 파킹통장 실시간 금리 공유', category: 'free', participants_count: 156, messages_count: 891, is_active: true, created_at: new Date().toISOString() },
-  { id: 5, title: '코스피 3000 연내 돌파 가능?', description: '매크로 환경 분석 및 지수 전망', category: 'stock', participants_count: 421, messages_count: 4567, is_active: true, created_at: new Date().toISOString() },
-  { id: 6, title: '서울 외곽 vs 경기 핵심지 청약 전략', description: '무주택자 청약 지역 선택 전략', category: 'apt', participants_count: 98, messages_count: 543, is_active: true, created_at: new Date().toISOString() },
-  { id: 7, title: 'ETF 포트폴리오 구성 방법', description: '패시브 투자 전략 및 ETF 선택 가이드', category: 'free', participants_count: 267, messages_count: 1234, is_active: true, created_at: new Date().toISOString() },
-  { id: 8, title: 'NAVER vs 카카오 어디 담을까?', description: '국내 빅테크 2파전 비교 토론', category: 'stock', participants_count: 345, messages_count: 2891, is_active: true, created_at: new Date().toISOString() },
-  { id: 9, title: '강남 아파트 언제 반등할까', description: '강남권 부동산 시장 분석', category: 'apt', participants_count: 178, messages_count: 1567, is_active: true, created_at: new Date().toISOString() },
-  { id: 10, title: '금리 인하 시점과 투자 전략', description: '한은 금통위 전망 및 대응 전략', category: 'free', participants_count: 534, messages_count: 5678, is_active: true, created_at: new Date().toISOString() },
-];
-
-export const DEMO_APT: any[] = [
-  { id: 1, name: '래미안 원베일리', location: '서울 서초구', total_units: 2990, subscription_type: '민간분양', rcept_bgnde: '2026-03-20', application_end: '2026-03-22', move_in_date: '2027-12-01', min_price: 150000, max_price: 280000, status: 'upcoming', competition_rate: null, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
-  { id: 2, name: '힐스테이트 광교중앙역', location: '경기 수원시', total_units: 845, subscription_type: '민간분양', rcept_bgnde: '2026-03-15', application_end: '2026-03-17', move_in_date: '2027-06-01', min_price: 58000, max_price: 95000, status: 'open', competition_rate: 47.3, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
-  { id: 3, name: '검단 푸르지오 더 파크', location: '인천 서구', total_units: 1284, subscription_type: '공공분양', rcept_bgnde: '2026-03-10', application_end: '2026-03-12', move_in_date: '2027-03-01', min_price: 35000, max_price: 52000, status: 'closed', competition_rate: 23.1, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
-  { id: 4, name: '올림픽파크 포레온 2차', location: '서울 강동구', total_units: 4786, subscription_type: '민간분양', rcept_bgnde: '2026-04-08', application_end: '2026-04-10', move_in_date: '2028-06-01', min_price: 120000, max_price: 198000, status: 'upcoming', competition_rate: null, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
-  { id: 5, name: '평택 브레인시티 e편한세상', location: '경기 평택시', total_units: 2156, subscription_type: '공공분양', rcept_bgnde: '2026-03-25', application_end: '2026-03-27', move_in_date: '2027-09-01', min_price: 28000, max_price: 45000, status: 'upcoming', competition_rate: null, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
-  { id: 6, name: '위례 자이 더 시티', location: '경기 성남시', total_units: 698, subscription_type: '민간분양', rcept_bgnde: '2026-02-28', application_end: '2026-03-02', move_in_date: '2026-12-01', min_price: 75000, max_price: 125000, status: 'closed', competition_rate: 128.7, homepage_url: 'https://applyhome.co.kr', created_at: new Date().toISOString() },
-];
-
-export const DEMO_PRODUCTS: any[] = [
-  { id: 'megaphone-1d', name: '1일 메가폰', description: '24시간 동안 내 게시글을 피드 상단에 고정해드립니다', price_krw: 500, icon: '📢', is_active: true, created_at: new Date().toISOString() },
-  { id: 'megaphone-3d', name: '3일 메가폰', description: '72시간 상단 고정 + HOT 배지 부착', price_krw: 1200, icon: '🔥', is_active: true, created_at: new Date().toISOString() },
-  { id: 'megaphone-7d', name: '7일 메가폰', description: '7일 상단 고정 + 추천 섹션 등록', price_krw: 2500, icon: '🚀', is_active: true, created_at: new Date().toISOString() },
-  { id: 'badge-gold', name: '골드 등급 뱃지', description: '프로필에 골드 등급 뱃지를 30일간 표시합니다', price_krw: 3000, icon: '🥇', is_active: true, created_at: new Date().toISOString() },
-  { id: 'anonymous-post', name: '익명 게시글', description: '닉네임 없이 익명으로 게시글을 작성할 수 있습니다 (3회)', price_krw: 800, icon: '🕵️', is_active: true, created_at: new Date().toISOString() },
-  { id: 'premium-nickname', name: '프리미엄 닉네임 색상', description: '닉네임에 프리미엄 컬러 효과를 7일간 적용합니다', price_krw: 600, icon: '🎨', is_active: true, created_at: new Date().toISOString() },
-  { id: 'pin-comment', name: '댓글 고정권', description: '특정 게시글에서 내 댓글을 상단에 고정합니다 (1회)', price_krw: 300, icon: '📌', is_active: true, created_at: new Date().toISOString() },
-  { id: 'premium-membership', name: '30일 프리미엄 멤버십', description: '광고 없는 깔끔한 환경 + 전용 채널 접근', price_krw: 9900, icon: '💎', is_active: true, created_at: new Date().toISOString() },
-];
 
 // DB grade_definitions 테이블 기준
 export const GRADE_MAP: Record<number, { title: string; emoji: string; color: string }> = {
@@ -153,12 +95,6 @@ export function gradeEmoji(grade: number | null): string { return gradeInfo(grad
 export function gradeColor(grade: number | null): string { return gradeInfo(grade).color; }
 export function gradeTitle(grade: number | null): string { return gradeInfo(grade).title; }
 
-export const CATEGORY_STYLES: Record<string, { label: string; color: string; bg: string }> = {
-  stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.12)' },
-  apt: { label: '부동산', color: '#2EE8A5', bg: 'rgba(52,211,153,0.12)' },
-  local: { label: '우리동네', color: '#FFD43B', bg: 'rgba(251,191,36,0.12)' },
-  free: { label: '자유', color: '#B794FF', bg: 'rgba(167,139,250,0.12)' },
-};
 
 export const CATEGORY_MAP: Record<string, { label: string; color: string; bg: string }> = {
   apt: { label: '청약', color: '#2EE8A5', bg: 'rgba(52,211,153,0.12)' },
@@ -189,15 +125,6 @@ export const REGIONS = [
   { value: '제주', label: '제주' },
 ];
 
-export const GRADE_INFO: Record<string, { icon: string; color: string }> = {
-  '씨앗': { icon: '🌱', color: '#94A8C4' },
-  '새싹': { icon: '🌿', color: '#2EE8A5' },
-  '브론즈': { icon: '🥉', color: '#FFD43B' },
-  '실버': { icon: '🥈', color: '#94A8C4' },
-  '골드': { icon: '🥇', color: '#FCD34D' },
-  '플래티넘': { icon: '💎', color: '#B794FF' },
-  '다이아': { icon: '🔷', color: '#22D3EE' },
-};
 
 export const GRADE_COLORS: Record<number, string> = {
   1:'var(--accent-green)',2:'var(--accent-blue)',3:'var(--accent-purple)',4:'var(--accent-yellow)',5:'var(--accent-red)',

@@ -33,12 +33,6 @@ export const ReportSchema = z.object({
   reason: z.string().min(1).max(500),
 });
 
-export const PaymentCreateSchema = z.object({
-  productId: z.string().uuid(),
-  orderId: z.string().min(1),
-  amount: z.number().positive().int(),
-  orderName: z.string().min(1).max(200),
-});
 
 /** Helper: parse and return Result type */
 export function parseInput<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; errors: string[] } {
