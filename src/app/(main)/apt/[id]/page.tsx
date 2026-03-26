@@ -96,12 +96,8 @@ async function fetchUnifiedData(slug: string) {
   return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, name, region, slug };
 }
 
-export async function generateStaticParams() {
-  const sb = getSupabaseAdmin();
-  // 상위 200개만 사전 생성, 나머지는 ISR on-demand (revalidate=3600)
-  const { data } = await sb.from('apt_sites').select('slug').eq('is_active', true).gte('content_score', 50).order('page_views', { ascending: false }).limit(200);
-  return ((data || []) as any[]).map(s => ({ id: s.slug }));
-}
+// generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
+// 빌드 시 Supabase 연결 불필요, 첫 요청 시 생성+캐시
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
