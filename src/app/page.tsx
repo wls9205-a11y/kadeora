@@ -188,10 +188,10 @@ export default async function HomePage() {
         },
         address: {
           '@type': 'PostalAddress',
-          streetAddress: '전포대로 199번길 9, 1층 104호',
-          addressLocality: '부산진구',
+          streetAddress: '연동로 27, 405호',
+          addressLocality: '연제구',
           addressRegion: '부산광역시',
-          postalCode: '47290',
+          postalCode: '47545',
           addressCountry: 'KR',
         },
         sameAs: [],
@@ -318,7 +318,7 @@ export default async function HomePage() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
             gap: 12,
           }}>
-            {SECTIONS.map(s => (
+            {SECTIONS.map((s, i) => (
               <Link key={s.href} href={s.href} className="home-card" style={{
                 display: 'block', textDecoration: 'none',
                 background: 'var(--bg-surface)', borderRadius: 12,
@@ -332,7 +332,7 @@ export default async function HomePage() {
                     width={800}
                     height={500}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    loading="eager"
+                    loading={i < 3 ? 'eager' : 'lazy'}
                   />
                 </div>
                 <div style={{ padding: 'clamp(12px, 2vw, 16px)' }}>
@@ -465,9 +465,9 @@ export default async function HomePage() {
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>부동산</div>
               <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <Link href="/apt" className="home-flink">청약 일정</Link>
-                <Link href="/apt" className="home-flink">미분양 현황</Link>
-                <Link href="/apt" className="home-flink">재개발 정보</Link>
-                <Link href="/apt" className="home-flink">실거래가</Link>
+                <Link href="/apt?tab=unsold" className="home-flink">미분양 현황</Link>
+                <Link href="/apt?tab=redev" className="home-flink">재개발 정보</Link>
+                <Link href="/apt?tab=trade" className="home-flink">실거래가</Link>
               </nav>
             </div>
             <div>
