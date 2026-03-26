@@ -55,6 +55,15 @@
   - Phase 3: trades + blogs + posts + nearby 동시 + view increment fire-and-forget
 
 ### PENDING 작업
+- [ ] **토스 미니앱 출시** — 20260326-6 검토 요청 완료 (SPA 방식)
+  - AccessDenied: 토스 CDN 캐시 알려진 버그 (SDK 2.1.0) → 토스팀 확인 대기
+  - 채널톡 답변 대기: 부동산 콘텐츠 미니앱 내 표시 가능 여부
+  - 정보 검수 반려 상세 확인 필요
+  - 정산 정보 등록 필요 (수수료 0% 프로모션 3/31 마감!)
+  - 빌드 이력: redirect→MissingSignature, iframe→AccessDenied, **SPA→현재**
+  - 콘솔 앱 내 기능: 피드/주식/블로그/토론/인기글 5개 (부동산 제외)
+  - 신규 API: `/api/toss/feed` (CORS 전체 허용, 60초 캐시)
+  - 신규 파일: `appintoss-build/build-web.js` (SPA 빌드)
 - [ ] 이미지 수집 크론 자동 진행 중 (200건/일)
 - [ ] 좌표 수집 크론 자동 진행 중 (150건/일)
 - [ ] 지하철역 매칭 크론 자동 진행 중 (좌표 수집 후 자동)
@@ -62,7 +71,6 @@
 - [ ] KIS_APP_KEY 발급 (한국투자증권 실시간 시세)
 - [ ] 카카오 OG 캐시 초기화 (https://developers.kakao.com/tool/clear/og)
 - [ ] 토스 라이브키 교체
-- [ ] 토스 콘솔 한글/영문 기능명 수정 + 번들 빌드 + 업로드 + 재검토 요청
 - [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출)
 - [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
 
