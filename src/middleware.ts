@@ -106,14 +106,13 @@ export async function middleware(request: NextRequest) {
       "font-src 'self' https://cdn.jsdelivr.net",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://api.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com",
       "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
-      "frame-ancestors 'none'",
+      "frame-ancestors 'self' https://*.tossmini.com",
       "base-uri 'self'",
       "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
     ].join('; ');
     response.headers.set('Content-Security-Policy', csp);
     response.headers.set('x-nonce', nonce);
     response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
@@ -199,7 +198,7 @@ export async function middleware(request: NextRequest) {
     "font-src 'self' https://cdn.jsdelivr.net",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://api.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com",
     "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
-    "frame-ancestors 'none'",
+    "frame-ancestors 'self' https://*.tossmini.com",
     "base-uri 'self'",
     "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
   ].join('; ');
@@ -207,7 +206,6 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Content-Security-Policy', csp);
   response.headers.set('x-nonce', nonce);
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
