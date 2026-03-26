@@ -1,4 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+﻿import { cachedJson } from '@/lib/api-cache';
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
@@ -39,6 +40,6 @@ export async function POST(req: NextRequest) {
     const sb = getSupabaseAdmin();
     const { error } = await sb.rpc('refresh_trending_keywords');
     if (error) { console.error('[Trend]', error); return NextResponse.json({ error: '트렌딩 갱신 실패' }, { status: 500 }); }
-    return NextResponse.json({ success: true });
+    return cachedJson({ success: true }, 60);
   } catch (err) { console.error('[Trend]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }

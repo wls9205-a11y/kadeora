@@ -1,3 +1,4 @@
+import { cachedJson } from '@/lib/api-cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
@@ -15,6 +16,6 @@ export async function GET(req: NextRequest) {
       .order('event_date', { ascending: true })
       .limit(20);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ events: data || [] });
-  } catch { return NextResponse.json({ events: [] }); }
+    return cachedJson({ events: data || [] }, 600);
+  } catch { return cachedJson({ events: [] }, 600); }
 }

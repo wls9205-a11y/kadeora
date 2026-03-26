@@ -1,3 +1,4 @@
+import { cachedJson } from '@/lib/api-cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';

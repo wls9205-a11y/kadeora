@@ -1,3 +1,4 @@
+import { cachedJson } from '@/lib/api-cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
       const supabase = getSupabaseAdmin();
       const { data, error } = await supabase.from('apt_subscriptions').select('*').order('rcept_endde', { ascending: false }).limit(50);
       if (error) throw error;
-      return NextResponse.json({ success: true, data, count: data?.length || 0 });
+      return cachedJson({ success: true, data, count: data?.length || 0 }, 120);
     }
 
     if (action === 'sync') {
@@ -63,11 +64,11 @@ export async function GET(request: NextRequest) {
       if (!apiRes.ok) return NextResponse.json({ success: false, error: 'API error: ' + apiRes.status }, { status: 502 });
       const json = await apiRes.json();
       const items = json?.data || json?.response?.body?.items?.item || [];
-      if (!Array.isArray(items) || items.length === 0) return NextResponse.json({ success: true, synced: 0 });
+      if (!Array.isArray(items) || items.length === 0) return cachedJson({ success: true, synced: 0 }, 120);
       const supabase = getSupabaseAdmin();
       const { data, error } = await supabase.from('apt_subscriptions').upsert(items.map(mapItem) as any, { onConflict: 'house_manage_no' }).select();
       if (error) throw error;
-      return NextResponse.json({ success: true, synced: data?.length || 0 });
+      return cachedJson({ success: true, synced: data?.length || 0 }, 120);
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });

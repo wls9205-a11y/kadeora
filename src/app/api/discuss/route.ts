@@ -1,3 +1,4 @@
+import { cachedJson } from '@/lib/api-cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const { data, count, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ topics: data || [], total: count || 0, page });
+    return cachedJson({ topics: data || [], total: count || 0, page }, 60);
   } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
 

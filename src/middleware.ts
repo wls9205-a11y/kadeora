@@ -7,6 +7,31 @@ const PRIVATE_IP_REGEX = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|:
 const ALLOWED_APT_DOMAINS = ['applyhome.co.kr', 'land.naver.com', 'hogangnono.com'];
 const BOT_PATHS = ['/wp-admin', '/wp-login.php', '/.env', '/.git', '/phpmyadmin'];
 
+// CSP 정책 (단일 정의 — 중복 방지)
+const CSP_DIRECTIVES = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://js.tosspayments.com https://*.kakaocdn.net https://*.kakao.com https://dapi.kakao.com https://www.googletagmanager.com",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+  "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://*.kakaocdn.net https://*.daumcdn.net https://www.googletagmanager.com",
+  "font-src 'self' https://cdn.jsdelivr.net",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://api.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com",
+  "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
+  "frame-ancestors 'self' https://*.tossmini.com",
+  "base-uri 'self'",
+  "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
+].join('; ');
+
+/** 보안 헤더 일괄 적용 */
+function applySecurityHeaders(response: NextResponse) {
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  response.headers.set('Content-Security-Policy', CSP_DIRECTIVES);
+  response.headers.set('x-nonce', nonce);
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -96,26 +121,8 @@ export async function middleware(request: NextRequest) {
     if (hasSession) {
       response.headers.set('x-user-logged-in', '1');
     }
-    // CSP 헤더
-    const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-    const csp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://js.tosspayments.com https://*.kakaocdn.net https://*.kakao.com https://dapi.kakao.com https://www.googletagmanager.com",
-      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-      "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://*.kakaocdn.net https://*.daumcdn.net https://www.googletagmanager.com",
-      "font-src 'self' https://cdn.jsdelivr.net",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://api.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com",
-      "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
-      "frame-ancestors 'self' https://*.tossmini.com",
-      "base-uri 'self'",
-      "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
-    ].join('; ');
-    response.headers.set('Content-Security-Policy', csp);
-    response.headers.set('x-nonce', nonce);
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    // CSP + 보안 헤더
+    applySecurityHeaders(response);
     return response;
   }
 
@@ -188,27 +195,8 @@ export async function middleware(request: NextRequest) {
     response.headers.set('x-user-logged-in', '1');
   }
 
-  // ── CSP 헤더 ──
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  const csp = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://js.tosspayments.com https://*.kakaocdn.net https://*.kakao.com https://dapi.kakao.com https://www.googletagmanager.com",
-    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-    "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://*.kakaocdn.net https://*.daumcdn.net https://www.googletagmanager.com",
-    "font-src 'self' https://cdn.jsdelivr.net",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://api.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com",
-    "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
-    "frame-ancestors 'self' https://*.tossmini.com",
-    "base-uri 'self'",
-    "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
-  ].join('; ');
-
-  response.headers.set('Content-Security-Policy', csp);
-  response.headers.set('x-nonce', nonce);
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  // ── CSP + 보안 헤더 ──
+  applySecurityHeaders(response);
   return response;
 }
 

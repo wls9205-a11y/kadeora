@@ -1,3 +1,4 @@
+import { cachedJson } from '@/lib/api-cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
@@ -16,15 +17,15 @@ export async function GET(req: NextRequest) {
     const logsResult = await withTimeout(sb.rpc('get_trending_searches').limit(8));
     const logs = (logsResult as any)?.data;
     if (logs && logs.length > 0) {
-      return NextResponse.json({ keywords: logs });
+      return cachedJson({ keywords: logs }, 300);
     }
 
     const kwResult = await withTimeout(
       sb.from('trending_keywords').select('keyword, heat_score').order('heat_score', { ascending: false }).limit(10)
     );
     const data = (kwResult as any)?.data;
-    return NextResponse.json({ keywords: data ?? [] });
+    return cachedJson({ keywords: data ?? [] }, 300);
   } catch {
-    return NextResponse.json({ keywords: [] });
+    return cachedJson({ keywords: [] }, 300);
   }
 }
