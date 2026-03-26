@@ -1,6 +1,7 @@
 'use client';
 import type { OngoingApt, PremiumListing } from '@/types/apt';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { isNew, NewBadge, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
 import BottomSheet from '@/components/BottomSheet';
 
@@ -173,11 +174,13 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         const premiumMatch = premiumListings.find((pl) => String(pl.listing_id) === String(o.link_id) && pl.listing_type === (isUnsold ? 'unsold' : 'subscription'));
         const isPremium = !!premiumMatch;
 
+        const linkH = `/apt/${encodeURIComponent(generateAptSlug(o.house_nm) || String(o.link_id))}`;
         return (
-          <div key={o.id} onClick={() => setSelectedOngoing(o)} className="kd-card-hover" style={{
+          <Link key={o.id} href={linkH} className="kd-card-hover" style={{
+            display: 'block', textDecoration: 'none', color: 'inherit',
             background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03))' : 'var(--bg-surface)',
             border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8,
-            borderLeft: `4px solid ${isPremium ? 'var(--accent-yellow)' : accentColor}`, cursor: 'pointer',
+            borderLeft: `4px solid ${isPremium ? 'var(--accent-yellow)' : accentColor}`,
             boxShadow: isPremium ? '0 0 12px rgba(251,191,36,0.08)' : undefined,
           }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
@@ -263,7 +266,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
               }}>{isWatched ? '⭐' : '☆'}</button>
             </div>
-          </div>
+          </Link>
         );
       })}
 
@@ -288,7 +291,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             <span style={{ animation: 'pulse 2s infinite' }}>🏠</span> 입주 임박 ({urgentMove.length}건)
           </div>
           {urgentMove.slice(0, 5).map((o) => (
-            <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(52,211,153,0.1)', cursor: 'pointer' }}>
+            <Link key={o.id} href={`/apt/${encodeURIComponent(generateAptSlug(o.house_nm) || String(o.link_id))}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(52,211,153,0.1)', cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
               <div>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{o.house_nm}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{o.region_nm}</span>
@@ -296,7 +299,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: o.daysToMove <= 30 ? 'var(--accent-red)' : 'var(--accent-green)', flexShrink: 0 }}>
                 {o.daysToMove <= 30 ? `D-${o.daysToMove}` : `${Math.ceil(o.daysToMove / 30)}개월 후`}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}
@@ -348,14 +351,14 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             const pct = ((d.sale_price_max || 0) / maxPrice) * 100;
             const pAmt = ((d.sale_price_max ?? 0) / 10000).toFixed(1);
             return (
-              <div key={d.id} onClick={() => setSelectedOngoing(d)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer' }}>
+              <Link key={d.id} href={`/apt/${encodeURIComponent(generateAptSlug(d.house_nm) || String(d.link_id))}`} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                 <div style={{ width: 14, fontSize: '10px', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', textAlign: 'right' }}>{i + 1}</div>
                 <div style={{ width: 80, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{d.house_nm}</div>
                 <div style={{ flex: 1, height: 20, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: `hsl(${240 - (pct / 100) * 240}, 70%, 55%)` }} />
                 </div>
                 <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{pAmt}억</div>
-              </div>
+              </Link>
             );
           })}
         </div>

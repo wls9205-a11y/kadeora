@@ -62,14 +62,20 @@ async function fetchUnifiedData(slug: string) {
   ]);
 
   let sub = subResult.status === 'fulfilled' ? (subResult.value as { data: any })?.data : null;
-  const unsold = unsoldResult.status === 'fulfilled' ? (unsoldResult.value as { data: any })?.data : null;
+  let unsold = unsoldResult.status === 'fulfilled' ? (unsoldResult.value as { data: any })?.data : null;
   const redev = redevResult.status === 'fulfilled' ? (redevResult.value as { data: any })?.data : null;
 
   // sub 폴백: 이름 기반 검색
+  const nameGuess = site?.name || slug.replace(/-/g, ' ');
   if (!sub) {
-    const nameGuess = site?.name || slug.replace(/-/g, ' ');
     const { data } = await sb.from('apt_subscriptions').select('*').ilike('house_nm', nameGuess).order('id', { ascending: false }).limit(1).maybeSingle();
     sub = data;
+  }
+
+  // unsold 폴백: 이름 기반 검색
+  if (!unsold) {
+    const { data } = await sb.from('unsold_apts').select('*').ilike('house_nm', nameGuess).eq('is_active', true).order('id', { ascending: false }).limit(1).maybeSingle();
+    unsold = data;
   }
 
   if (!site && !sub && !unsold && !redev) return null;
