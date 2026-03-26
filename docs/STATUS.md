@@ -78,6 +78,17 @@
 - InterestRegistration: 로그인 유저도 게스트 폼 사용 가능 (API body.type='guest'로 분기)
 - consent_version: v1.1로 갱신됨 (기존 v1.0 데이터는 유지)
 - GRADE_COLORS/GRADE_TITLES: `@/lib/constants`에서 import (로컬 정의 금지)
+
+### 세션 39 전수조사 결과
+- **총 ~1,200줄 삭제** (30개 파일 변경)
+- 죽은 API 라우트 15개 삭제: analytics/visitors, apt/view, apt/watchlist, apt/unsold-stats, apt/sites/forward-lead, auth/toss-disconnect, blog/series(API), bug-report, notifications/read-all, push/click, push/test, shop/exchange, stock-sync, ping, health
+- 미사용 hooks 3개 삭제: useHaptic, useAuthGuard, useKakaoShare
+- 미사용 컴포넌트 2개 삭제: MiniBarChart, PostCard
+- constants.ts 데드코드 삭제: DEMO_TRENDING/STOCKS/DISCUSS/APT/PRODUCTS, CATEGORY_STYLES, GRADE_INFO
+- lib 미사용 export 삭제: maskPhone, softFilter, BRAND_COVERS, env.ts 전체, PaymentCreateSchema, FollowSchema, BookmarkSchema, RATE_LIMITS
+- 크론 59→56개: health-check 30분→1일1회, blog-rewrite 3회→1회, blog-publish-queue 2회→1회
+- Sentry 현대화: disableLogger→webpack.treeshake, automaticVercelMonitors→webpack, onRouterTransitionStart 추가
+- apt/[id]/page.tsx TS 에러 6건 수정 (implicit any + PromiseLike catch)
 - apt/[id] SSR: 3단계 병렬 쿼리 — Phase 1 완료 후 Phase 2, Phase 2 완료 후 Phase 3
 
 ## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 38건+

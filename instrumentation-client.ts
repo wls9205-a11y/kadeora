@@ -28,3 +28,6 @@ Sentry.init({
   },
 });
 }
+
+// Next.js navigation instrumentation
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
