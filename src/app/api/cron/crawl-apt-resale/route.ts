@@ -20,8 +20,8 @@ const LAWD_CODES: Record<string, string> = {
   '세종시':'36110',
 };
 
-function parseXmlItems(xml: string): any[] {
-  const items: any[] = [];
+function parseXmlItems(xml: string): Record<string, any>[] {
+  const items: Record<string, any>[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
   let m;
   while ((m = itemRegex.exec(xml)) !== null) {

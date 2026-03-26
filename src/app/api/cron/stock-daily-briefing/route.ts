@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     let title = '오늘의 시황';
     let summary = '';
     let sentiment = 'neutral';
-    const sectorAnalysis: any[] = sectorPerf.slice(0, 6);
+    const sectorAnalysis: Record<string, any>[] = sectorPerf.slice(0, 6);
     let apiCalls = 0;
 
     if (process.env.ANTHROPIC_API_KEY) {

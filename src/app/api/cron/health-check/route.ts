@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   }
 
   const supabase = getSupabaseAdmin();
-  const results: any[] = [];
+  const results: Record<string, any>[] = [];
 
   for (const service of SERVICES) {
     const start = Date.now();

@@ -132,7 +132,7 @@ export default async function BlogDetailPage({ params }: Props) {
   } catch { /* 비로그인/만료 세션 */ }
 
   // 관련 글 추천 (태그 유사도 → 같은 카테고리 인기순 폴백)
-  let related: any[] = [];
+  let related: Record<string, any>[] = [];
   try {
     const postTags = post.tags || [];
     if (postTags.length > 0) {
@@ -157,7 +157,7 @@ export default async function BlogDetailPage({ params }: Props) {
   } catch { }
 
   // 시리즈 정보
-  let seriesInfo: { series: any; posts: any[] } | null = null;
+  let seriesInfo: { series: any; posts: Record<string, any>[] } | null = null;
   if (post.series_id) {
     try {
       const { data: series } = await sb.from('blog_series').select('id,title,slug,description,cover_image,post_count').eq('id', post.series_id).single();
@@ -173,7 +173,7 @@ export default async function BlogDetailPage({ params }: Props) {
   }
 
   // 댓글 조회 (blog_comments 테이블이 없으면 빈 배열)
-  let comments: any[] = [];
+  let comments: Record<string, any>[] = [];
   try {
     const { data } = await sb.from('blog_comments')
       .select('id, content, created_at, author_id, author_name, is_seed, profiles!blog_comments_author_id_fkey(nickname)')
@@ -182,7 +182,7 @@ export default async function BlogDetailPage({ params }: Props) {
   } catch {}
 
   // 관련 부동산 현장 (apt/unsold 카테고리일 때)
-  let relatedSites: any[] = [];
+  let relatedSites: Record<string, any>[] = [];
   if (post.category === 'apt' || post.category === 'unsold') {
     try {
       const keywords = (post.tags || []).slice(0, 3).filter((t: string) => t.length >= 2);
@@ -197,7 +197,7 @@ export default async function BlogDetailPage({ params }: Props) {
   }
 
   // 관련 종목 (stock 카테고리일 때)
-  let relatedStocks: any[] = [];
+  let relatedStocks: Record<string, any>[] = [];
   if (post.category === 'stock') {
     try {
       const keywords = (post.tags || []).slice(0, 3).filter((t: string) => t.length >= 2);

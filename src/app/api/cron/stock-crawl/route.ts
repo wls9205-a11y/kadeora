@@ -18,7 +18,7 @@ export const maxDuration = 120;
 
 // data.go.kr 금융위원회 주식시세 API
 async function fetchKRXStocks(apiKey: string): Promise<any[]> {
-  const stocks: any[] = [];
+  const stocks: Record<string, any>[] = [];
   
   for (const marketCode of ['KOSPI', 'KOSDAQ']) {
     let pageNo = 1;
@@ -63,7 +63,7 @@ async function fetchKRXStocks(apiKey: string): Promise<any[]> {
 
 // KIS 한국투자증권 API (2단계 — 키 발급 후 활성화)
 async function fetchKISStocks(appKey: string, appSecret: string): Promise<any[]> {
-  const stocks: any[] = [];
+  const stocks: Record<string, any>[] = [];
   
   try {
     // 1. 토큰 발급

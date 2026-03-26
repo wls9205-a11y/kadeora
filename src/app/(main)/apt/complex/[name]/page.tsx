@@ -49,7 +49,7 @@ export default async function ComplexDetailPage({ params }: Props) {
     .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type')
     .eq('apt_name', decoded)
     .order('deal_date', { ascending: false })
-    .limit(200) as { data: any[] | null };
+    .limit(200) as { data: Record<string, any>[] | null };
 
   if (!trades?.length) notFound();
 
@@ -58,12 +58,12 @@ export default async function ComplexDetailPage({ params }: Props) {
   const sigungu = trades[0].sigungu || '';
 
   // 관련 블로그
-  let relatedBlogs: any[] = [];
+  let relatedBlogs: Record<string, any>[] = [];
   try {
     const searchTerm = sanitizeSearchQuery(decoded.length > 4 ? decoded.slice(0, 4) : decoded, 20);
     const { data: rb } = await sb.from('blog_posts').select('slug,title,view_count,published_at')
       .eq('is_published', true).or(`title.ilike.%${searchTerm}%,title.ilike.%${region.slice(0,2)} 부동산%`)
-      .order('view_count', { ascending: false }).limit(3) as { data: any[] | null };
+      .order('view_count', { ascending: false }).limit(3) as { data: Record<string, any>[] | null };
     relatedBlogs = rb || [];
   } catch {}
 
@@ -75,7 +75,7 @@ export default async function ComplexDetailPage({ params }: Props) {
   const latestPrice = trades[0].deal_amount || 0;
 
   // 면적별 그룹핑
-  const areaMap = new Map<string, { count: number; avg: number; trades: any[] }>();
+  const areaMap = new Map<string, { count: number; avg: number; trades: Record<string, any>[] }>();
   trades.forEach(t => {
     const area = `${Math.round(t.exclusive_area)}㎡`;
     const cur = areaMap.get(area) || { count: 0, avg: 0, trades: [] };

@@ -89,10 +89,10 @@ const getCachedExchangeHistory = unstable_cache(fetchExchangeHistory, ['exchange
 const getCachedThemeHistory = unstable_cache(fetchThemeHistory, ['theme-history', 'v1'], { revalidate: 600 });
 
 export default async function StockPage() {
-  let stocks: any[] = [];
+  let stocks: Record<string, any>[] = [];
   let briefing: any = null;
-  let exchangeHistory: any[] = [];
-  let themeHistory: any[] = [];
+  let exchangeHistory: Record<string, any>[] = [];
+  let themeHistory: Record<string, any>[] = [];
 
   try {
     const [stocksData, briefingData, exchData, themeData] = await Promise.all([

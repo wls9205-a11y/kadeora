@@ -114,7 +114,7 @@ async function handler(_req: NextRequest) {
   let tradeInserted = 0;
   try {
     // 실거래에서 고유 단지별 집계 (apt_sites에 없는 것만)
-    const { data: trades } = await sb.rpc('get_trade_sites_for_sync' as any) as { data: any[] | null };
+    const { data: trades } = await sb.rpc('get_trade_sites_for_sync' as any) as { data: Record<string, any>[] | null };
 
     // RPC 없으면 직접 쿼리 (초기 1회는 직접)
     if (!trades) {

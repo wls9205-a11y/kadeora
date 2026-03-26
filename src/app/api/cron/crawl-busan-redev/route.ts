@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 2) 전체 데이터 (100건씩 페이징)
-    const allRows: any[] = [];
+    const allRows: Record<string, any>[] = [];
     const totalPages = Math.ceil(totalCount / 100);
 
     for (let page = 1; page <= totalPages && page <= 50; page++) {

@@ -16,7 +16,9 @@ export async function GET(req: NextRequest) {
       .order('tier', { ascending: false }) // premium > pro > basic
       .order('created_at', { ascending: false });
 
-    return NextResponse.json({ listings: data || [] });
+    return NextResponse.json({ listings: data || [] }, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+    });
   } catch (e: unknown) {
     return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }

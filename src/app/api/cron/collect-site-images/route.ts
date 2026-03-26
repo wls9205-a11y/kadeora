@@ -62,7 +62,7 @@ async function handler(_req: NextRequest) {
         `${site.name} 아파트`,
       ];
 
-      const allImages: any[] = [];
+      const allImages: Record<string, any>[] = [];
       for (const q of queries) {
         const results = await searchNaverImages(q, 2);
         allImages.push(...results);

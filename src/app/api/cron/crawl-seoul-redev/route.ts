@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 2) 전체 데이터 (1000건씩 페이징)
-    const allRows: any[] = [];
+    const allRows: Record<string, any>[] = [];
     for (let start = 1; start <= totalCount; start += 1000) {
       const end = Math.min(start + 999, totalCount);
       const res = await fetch(`${baseUrl}/${start}/${end}/`);

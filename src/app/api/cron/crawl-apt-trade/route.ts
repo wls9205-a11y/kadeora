@@ -95,8 +95,8 @@ const LAWD_CODES: Record<string, string> = {
   '제주 제주시':'50110','제주 서귀포시':'50130',
 };
 
-function parseXmlItems(xml: string): any[] {
-  const items: any[] = [];
+function parseXmlItems(xml: string): Record<string, any>[] {
+  const items: Record<string, any>[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
   let m;
   while ((m = itemRegex.exec(xml)) !== null) {

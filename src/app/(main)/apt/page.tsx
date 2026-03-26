@@ -35,8 +35,8 @@ import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 
 async function fetchAptData() {
-  let apts: any[] = [];
-  let unsold: any[] = [];
+  let apts: Record<string, any>[] = [];
+  let unsold: Record<string, any>[] = [];
   const alertCounts: Record<string, number> = {};
   let lastRefreshed: string | null = null;
   let redevTotalCount = 0;

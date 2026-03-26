@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('crawl-gyeonggi-redev', async () => {
     // 여러 서비스명 후보 시도
     const SERVICE_CANDIDATES = ['Ggcleanupbiz', 'UrbanMntncBizInfo', 'URBMNTNCBIZ', 'GgClnupBsnsSttus'];
-    let allRows: any[] = [];
+    let allRows: Record<string, any>[] = [];
     let usedService = '';
     const debugInfo: any = {};
 
