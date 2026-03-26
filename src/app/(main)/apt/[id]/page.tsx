@@ -91,7 +91,7 @@ async function fetchUnifiedData(slug: string) {
   const nearbySites = nearbyR.status === 'fulfilled' ? (nearbyR.value as any)?.data || [] : [];
 
   // Fire-and-forget: 조회수 증가
-  if (site?.id) { sb.rpc('increment_site_view', { p_site_id: site.id }).then(() => {}).catch(() => {}); }
+  if (site?.id) { Promise.resolve(sb.rpc('increment_site_view', { p_site_id: site.id })).catch(() => {}); }
 
   return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, name, region, slug };
 }
