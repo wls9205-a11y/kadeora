@@ -98,7 +98,8 @@ async function fetchUnifiedData(slug: string) {
 
 export async function generateStaticParams() {
   const sb = getSupabaseAdmin();
-  const { data } = await sb.from('apt_sites').select('slug').eq('is_active', true).gte('content_score', 25).limit(10000);
+  // 상위 200개만 사전 생성, 나머지는 ISR on-demand (revalidate=3600)
+  const { data } = await sb.from('apt_sites').select('slug').eq('is_active', true).gte('content_score', 50).order('page_views', { ascending: false }).limit(200);
   return ((data || []) as any[]).map(s => ({ id: s.slug }));
 }
 
