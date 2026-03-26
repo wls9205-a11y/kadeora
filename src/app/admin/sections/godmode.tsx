@@ -1,5 +1,5 @@
-import { errMsg } from '@/lib/error-utils';
 'use client';
+import { errMsg } from '@/lib/error-utils';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Badge, C, DataTable, KPI, KPICard } from '../admin-shared';
 
