@@ -97,8 +97,8 @@
 - generateStaticParams: 제거됨 → 전량 ISR on-demand (revalidate=3600)
 - next.config.ts: `typescript.ignoreBuildErrors: true`, `eslint.ignoreDuringBuilds: true`
 
-### 세션 39 전수조사 결과
-- **총 ~1,200줄 삭제** (30개 파일 변경)
+### 세션 39 전수조사 결과 (커밋 12건)
+- **총 ~2,000줄 삭제/개선** (50+ 파일 변경)
 - 죽은 API 라우트 15개 삭제: analytics/visitors, apt/view, apt/watchlist, apt/unsold-stats, apt/sites/forward-lead, auth/toss-disconnect, blog/series(API), bug-report, notifications/read-all, push/click, push/test, shop/exchange, stock-sync, ping, health
 - 미사용 hooks 3개 삭제: useHaptic, useAuthGuard, useKakaoShare
 - 미사용 컴포넌트 2개 삭제: MiniBarChart, PostCard
@@ -112,6 +112,16 @@
   - sections/: dashboard(220), analytics(181), users(262), blog(106), content(102), godmode(102), seo(92), realestate(86), system(55), reports(46)
 - **FeedClient 최적화**: useEffect 6→3개 통합, likeCounts 초기화 인라인화
 - **Navigation 최적화**: useEffect 5→3개 통합 (toss+font 1회 초기화)
+- **middleware.ts CSP 중복 제거**: 30줄 중복 → CSP_DIRECTIVES 상수 + applySecurityHeaders() 함수
+- **globals.css 정리**: 1,522→1,194줄 (-328줄, 미사용 88블록 삭제) + 유틸 클래스 18개 추가
+- **API Edge 캐시**: 7개 GET API에 cachedJson() 적용 (trend, search/trending, stock/themes, stock/calendar, apt-proxy, discuss, sparkline)
+- **타입 안전성 강화**: any 596→518건 (-78건)
+  - types/apt.ts 신규: OngoingApt, UnsoldApt, RedevProject, AptTransaction, PremiumListing
+  - types/stock.ts 신규: StockPriceHistory, StockNews, InvestorFlow, Disclosure, AIComment
+  - OngoingTab 22→0, StockDetailTabs 17→0 (완전 제거)
+  - UnsoldTab 20→10, TransactionTab 18→2, RedevTab 15→2
+- **stock_ai_comments 버그 수정**: content 컬럼 미존재 → 쿼리에서 제거
+- **StockClient 인라인 스타일**: 12개 → CSS 유틸 클래스 전환
 
 ## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 38건+
 
