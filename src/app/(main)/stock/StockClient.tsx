@@ -288,6 +288,23 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         </div>
       )}
 
+      {/* 상승/하락 비율 — KR/US 토글 위로 이동 */}
+      {sentimentStocks.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 3 }}>
+            <span style={{ color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 700 }}>▲{upCount}</span>
+            <span>—{flatCount}</span>
+            <span style={{ color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', fontWeight: 700 }}>▼{downCount}</span>
+            <span style={{ marginLeft: 'auto', fontWeight: 600 }}>{sentTotal}종목</span>
+          </div>
+          <div style={{ display: 'flex', height: 3, borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)' }} />
+            <div style={{ width: `${(flatCount/sentTotal)*100}%`, background: 'var(--bg-hover)' }} />
+            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)' }} />
+          </div>
+        </div>
+      )}
+
       {/* 국내/해외 메인 토글 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
         <button onClick={() => { setMode('domestic'); setSearch(''); setSectorFilter('all'); }} aria-pressed={isDomestic} style={{
@@ -325,23 +342,6 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           );
         })}
       </div>
-
-      {/* 상승/하락 비율 — 인라인 */}
-      {sentimentStocks.length > 0 && (
-        <div style={{ marginBottom: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 3 }}>
-            <span style={{ color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 700 }}>▲{upCount}</span>
-            <span>—{flatCount}</span>
-            <span style={{ color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', fontWeight: 700 }}>▼{downCount}</span>
-            <span style={{ marginLeft: 'auto', fontWeight: 600 }}>{sentTotal}종목</span>
-          </div>
-          <div style={{ display: 'flex', height: 3, borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)' }} />
-            <div style={{ width: `${(flatCount/sentTotal)*100}%`, background: 'var(--bg-hover)' }} />
-            <div style={{ width: `${(downCount/sentTotal)*100}%`, background: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)' }} />
-          </div>
-        </div>
-      )}
 
       {/* 서브 탭 */}
       <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '3px' }}>

@@ -133,87 +133,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
 
-      {/* ① 입주 임박 배너 */}
-      {urgentMove.length > 0 && (
-        <div style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(96,165,250,0.1))', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ animation: 'pulse 2s infinite' }}>🏠</span> 입주 임박 ({urgentMove.length}건)
-          </div>
-          {urgentMove.slice(0, 5).map((o) => (
-            <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(52,211,153,0.1)', cursor: 'pointer' }}>
-              <div>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{o.house_nm}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{o.region_nm}</span>
-              </div>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: o.daysToMove <= 30 ? 'var(--accent-red)' : 'var(--accent-green)', flexShrink: 0 }}>
-                {o.daysToMove <= 30 ? `D-${o.daysToMove}` : `${Math.ceil(o.daysToMove / 30)}개월 후`}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 종합 현황 + 수도권/지방 */}
-      <div className="kd-card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 {ongoingRegion !== '전체' ? `${ongoingRegion} ` : ''}분양중 현황</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
-          {[
-            { label: '전체', value: filtered.length, color: 'var(--brand)' },
-            { label: '분양중', value: allSubCount, color: 'var(--accent-green)' },
-            { label: '미분양', value: allUnsoldCount, color: 'var(--accent-red)' },
-            { label: '수도권', value: capitalCount, color: 'var(--text-primary)' },
-            { label: '지방', value: localCount, color: 'var(--text-primary)' },
-          ].map(s => (
-            <div key={s.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준</div>
-      </div>
-
-      {/* ③ 단계별 파이프라인 */}
-      <div className="kd-card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 분양 진행 단계</div>
-        <div style={{ display: 'flex', gap: 3, alignItems: 'stretch' }}>
-          {pipeStages.map((stage, i) => {
-            const count = pipeCounts[stage] || 0;
-            const pct = Math.round((count / pipeTotal) * 100);
-            return (
-              <div key={stage} style={{ flex: Math.max(pct, 10), textAlign: 'center', padding: '8px 2px', borderRadius: 6, background: `${pipeColors[i]}22`, border: `1px solid ${pipeColors[i]}44`, position: 'relative', minWidth: 48 }}>
-                <div style={{ fontSize: '9px', fontWeight: 600, color: pipeColors[i] }}>{stage}</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: pipeColors[i], margin: '2px 0' }}>{count}</div>
-                <div style={{ fontSize: '8px', color: pipeColors[i], opacity: 0.7 }}>{pct}%</div>
-                {i < pipeStages.length - 1 && <div style={{ position: 'absolute', right: -4, top: '50%', transform: 'translateY(-50%)', fontSize: '8px', color: 'var(--text-tertiary)' }}>→</div>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ④ 분양가 TOP10 바 차트 */}
-      {priceTop.length > 0 && (
-        <div className="kd-card" style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>💰 분양가 TOP {Math.min(priceTop.length, 10)}</div>
-          {priceTop.map((d, i: number) => {
-            const pct = ((d.sale_price_max || 0) / maxPrice) * 100;
-            const pAmt = ((d.sale_price_max ?? 0) / 10000).toFixed(1);
-            return (
-              <div key={d.id} onClick={() => setSelectedOngoing(d)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer' }}>
-                <div style={{ width: 14, fontSize: '10px', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', textAlign: 'right' }}>{i + 1}</div>
-                <div style={{ width: 80, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{d.house_nm}</div>
-                <div style={{ flex: 1, height: 20, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: `hsl(${240 - (pct / 100) * 240}, 70%, 55%)` }} />
-                </div>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{pAmt}억</div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* 검색바 */}
+            {/* 검색바 */}
       <div style={{ position: 'relative', marginBottom: 10 }}>
         <input type="text" value={ongoingSearch} onChange={e => { setOngoingSearch(e.target.value); setOngoingPage(1); }} placeholder="단지명, 지역, 시공사 검색..."
           style={{ width: '100%', padding: '9px 12px 9px 32px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box', fontFamily: 'inherit' }} />
@@ -358,6 +278,86 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               color: ongoingPage === p ? 'var(--text-inverse)' : 'var(--text-tertiary)',
             }}>{p}</button>
           ))}
+        </div>
+      )}
+
+      {/* ① 입주 임박 배너 */}
+      {urgentMove.length > 0 && (
+        <div style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(96,165,250,0.1))', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ animation: 'pulse 2s infinite' }}>🏠</span> 입주 임박 ({urgentMove.length}건)
+          </div>
+          {urgentMove.slice(0, 5).map((o) => (
+            <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(52,211,153,0.1)', cursor: 'pointer' }}>
+              <div>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{o.house_nm}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{o.region_nm}</span>
+              </div>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: o.daysToMove <= 30 ? 'var(--accent-red)' : 'var(--accent-green)', flexShrink: 0 }}>
+                {o.daysToMove <= 30 ? `D-${o.daysToMove}` : `${Math.ceil(o.daysToMove / 30)}개월 후`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 종합 현황 + 수도권/지방 */}
+      <div className="kd-card" style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 {ongoingRegion !== '전체' ? `${ongoingRegion} ` : ''}분양중 현황</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
+          {[
+            { label: '전체', value: filtered.length, color: 'var(--brand)' },
+            { label: '분양중', value: allSubCount, color: 'var(--accent-green)' },
+            { label: '미분양', value: allUnsoldCount, color: 'var(--accent-red)' },
+            { label: '수도권', value: capitalCount, color: 'var(--text-primary)' },
+            { label: '지방', value: localCount, color: 'var(--text-primary)' },
+          ].map(s => (
+            <div key={s.label} style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준</div>
+      </div>
+
+      {/* ③ 단계별 파이프라인 */}
+      <div className="kd-card" style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 분양 진행 단계</div>
+        <div style={{ display: 'flex', gap: 3, alignItems: 'stretch' }}>
+          {pipeStages.map((stage, i) => {
+            const count = pipeCounts[stage] || 0;
+            const pct = Math.round((count / pipeTotal) * 100);
+            return (
+              <div key={stage} style={{ flex: Math.max(pct, 10), textAlign: 'center', padding: '8px 2px', borderRadius: 6, background: `${pipeColors[i]}22`, border: `1px solid ${pipeColors[i]}44`, position: 'relative', minWidth: 48 }}>
+                <div style={{ fontSize: '9px', fontWeight: 600, color: pipeColors[i] }}>{stage}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: pipeColors[i], margin: '2px 0' }}>{count}</div>
+                <div style={{ fontSize: '8px', color: pipeColors[i], opacity: 0.7 }}>{pct}%</div>
+                {i < pipeStages.length - 1 && <div style={{ position: 'absolute', right: -4, top: '50%', transform: 'translateY(-50%)', fontSize: '8px', color: 'var(--text-tertiary)' }}>→</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ④ 분양가 TOP10 바 차트 */}
+      {priceTop.length > 0 && (
+        <div className="kd-card" style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>💰 분양가 TOP {Math.min(priceTop.length, 10)}</div>
+          {priceTop.map((d, i: number) => {
+            const pct = ((d.sale_price_max || 0) / maxPrice) * 100;
+            const pAmt = ((d.sale_price_max ?? 0) / 10000).toFixed(1);
+            return (
+              <div key={d.id} onClick={() => setSelectedOngoing(d)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer' }}>
+                <div style={{ width: 14, fontSize: '10px', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', textAlign: 'right' }}>{i + 1}</div>
+                <div style={{ width: 80, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{d.house_nm}</div>
+                <div style={{ flex: 1, height: 20, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: `hsl(${240 - (pct / 100) * 240}, 70%, 55%)` }} />
+                </div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{pAmt}억</div>
+              </div>
+            );
+          })}
         </div>
       )}
 
