@@ -1,23 +1,14 @@
 import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { createSupabaseServer } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const maxDuration = 30;
 
 export async function GET(req: NextRequest) {
-  // Admin check
-  try {
-    const authSb = await createSupabaseServer();
-    const { data: { user } } = await authSb.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { data: profile } = await authSb.from('profiles').select('is_admin').eq('id', user.id).single();
-    if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  } catch {
-    return NextResponse.json({ error: 'Auth failed' }, { status: 401 });
-  }
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
 
-  const sb = getSupabaseAdmin();
+  const sb = auth.supabase;
   const { searchParams } = new URL(req.url);
   const range = searchParams.get('range') || '7d'; // 1d, 7d, 30d
 

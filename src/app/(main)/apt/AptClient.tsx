@@ -190,7 +190,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           { k: 'redev' as const, l: '🏗️ 재개발', type: 'redevelopment', data: lazyRedev || [] },
           { k: 'trade' as const, l: '💰 실거래', type: 'transaction', data: lazyTx || [] },
         ].map(({ k, l, type, data }) => {
-          const hasNew = (data as any[]).some((item: any) => isNew(item, type));
+          const hasNew = (data as any[]).some((item: Record<string, any>) => isNew(item, type));
           return (
             <button key={k} onClick={() => handleTabChange(k)} aria-pressed={activeTab === k} style={{
               flex: '1 0 auto', padding: '8px 6px', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',

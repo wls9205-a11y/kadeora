@@ -1,17 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(_req: Request) {
-  const supabaseAdmin = getSupabaseAdmin();
-  // Admin auth check
-  const { createSupabaseServer } = await import('@/lib/supabase-server');
-  const sb = await createSupabaseServer();
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
-  if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+export async function GET() {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+  const supabaseAdmin = auth.supabase;
 
   // 1. Supabase DB stats via RPC
   let dbStats = null;

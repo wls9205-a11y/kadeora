@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
 import { useToast } from '@/components/Toast';
+import { useAuth } from '@/components/AuthProvider';
 
 interface StockComment {
   id: string; author_id: string; content: string; created_at: string;
@@ -24,7 +25,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
   const [comments, setComments] = useState<StockComment[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useAuth();
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [userReactions, setUserReactions] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -51,29 +52,26 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
   }, [symbol, sort]);
 
   useEffect(() => {
+    if (!userId) return;
     const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(async ({ data }) => {
-      if (data.session) {
-        const uid = data.session.user.id;
-        setUserId(uid);
-        const { data: likes } = await sb.from('stock_comment_likes')
-          .select('comment_id')
-          .eq('author_id', uid);
-        if (likes) setLikedIds(new Set(likes.map((l: any) => l.comment_id)));
-        const { data: reacts } = await sb.from('stock_comment_reactions')
-          .select('comment_id, emoji')
-          .eq('author_id', uid);
-        if (reacts) {
-          const m: Record<string, string> = {};
-          reacts.forEach((r: any) => { m[r.comment_id] = r.emoji; });
-          setUserReactions(m);
-        }
-        const { data: follows } = await sb.from('follows').select('followee_id').eq('follower_id', uid);
-        setFollowingIds(new Set(follows?.map((f: any) => f.followee_id) || []));
+    (async () => {
+      const { data: likes } = await sb.from('stock_comment_likes')
+        .select('comment_id')
+        .eq('author_id', userId);
+      if (likes) setLikedIds(new Set(likes.map((l) => l.comment_id!)));
+      const { data: reacts } = await sb.from('stock_comment_reactions')
+        .select('comment_id, emoji')
+        .eq('author_id', userId);
+      if (reacts) {
+        const m: Record<string, string> = {};
+        reacts.forEach((r) => { if (r.comment_id) m[r.comment_id] = r.emoji; });
+        setUserReactions(m);
       }
-    });
+      const { data: follows } = await sb.from('follows').select('followee_id').eq('follower_id', userId);
+      setFollowingIds(new Set(follows?.map((f) => f.followee_id) || []));
+    })();
     loadComments();
-  }, [loadComments]);
+  }, [loadComments, userId]);
 
   const handleSend = async () => {
     if (!input.trim() || !userId || sending) return;

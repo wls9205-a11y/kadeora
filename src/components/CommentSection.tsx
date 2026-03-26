@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
+import { useAuth } from '@/components/AuthProvider';
 import type { CommentWithProfile } from '@/types/database';
-import type { User } from '@supabase/supabase-js';
 import ReportButton from '@/components/ReportButton';
 import { gradeEmoji, gradeTitle, gradeColor } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -23,20 +23,13 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   const [comments, setComments] = useState<CommentWithProfile[]>(initialComments);
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { userId } = useAuth();
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [likingIds, setLikingIds] = useState<Set<number>>(new Set());
   const { success, error, info } = useToast();
 
-  useEffect(() => {
-    const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-    const { data: { subscription } } = sb.auth.onAuthStateChange((_, session) => setUser(session?.user ?? null));
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleSubmit = async () => {
-    if (!user) { error('로그인이 필요합니다'); return; }
+    if (!userId) { error('로그인이 필요합니다'); return; }
     const trimmed = content.trim();
     if (!trimmed) { error('댓글 내용을 입력해주세요'); return; }
     if (trimmed.length > 500) { error('댓글은 500자 이내로 입력해주세요'); return; }
@@ -49,7 +42,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? '댓글 작성 실패'); }
       const { comment } = await res.json();
-      setComments(prev => [{ ...comment, profiles: { id: user.id, nickname: comment.nickname ?? '나', avatar_url: null } }, ...prev]);
+      setComments(prev => [{ ...comment, profiles: { id: userId!, nickname: comment.nickname ?? '나', avatar_url: null } }, ...prev]);
       setContent('');
       success('댓글이 작성되었습니다');
     } catch (e: unknown) {
@@ -70,7 +63,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   };
 
   const handleCommentLike = async (commentId: number, currentLikes: number) => {
-    if (!user) { info('로그인이 필요합니다'); return; }
+    if (!userId) { info('로그인이 필요합니다'); return; }
     if (likingIds.has(commentId)) return;
     setLikingIds(prev => new Set(prev).add(commentId));
     // Optimistic update
@@ -99,7 +92,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
 
       {/* 댓글 입력 — 채팅 스타일 */}
       <div style={{ marginBottom: 20 }}>
-        {user ? (
+        {userId ? (
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 4 }}>나</div>
             <div style={{ flex: 1 }}>
@@ -175,7 +168,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     ♡ {(comment.likes_count ?? 0) > 0 ? comment.likes_count : ''}
                   </button>
                   {/* 삭제 버튼 */}
-                  {user?.id === comment.author_id && (
+                  {userId === comment.author_id && (
                     <button
                       onClick={() => setDeleteTarget(comment.id)}
                       aria-label="댓글 삭제"
