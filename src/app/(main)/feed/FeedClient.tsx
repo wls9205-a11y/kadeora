@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -25,7 +25,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
-  const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
+  const [likeCounts, setLikeCounts] = useState<Record<number, number>>(() => {
+    const counts: Record<number, number> = {};
+    initialPosts.forEach(p => { counts[p.id] = p.likes_count ?? 0; });
+    return counts;
+  });
   const [showHotBanner, setShowHotBanner] = useState(false);
   const [hotPosts, setHotPosts] = useState<any[]>([]);
 
@@ -33,16 +37,19 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   useEffect(() => {
     setPosts(initialPosts);
     setHasMore(initialPosts.length >= PAGE_SIZE);
+    // Update like counts for new posts
+    const counts: Record<number, number> = {};
+    initialPosts.forEach(p => { counts[p.id] = p.likes_count ?? 0; });
+    setLikeCounts(counts);
   }, [initialPosts]);
 
+  // Initialize: hot banner + hot posts + auth in single effect
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setShowHotBanner(!sessionStorage.getItem('kd_hot_banner_closed'));
     }
-  }, []);
-
-  useEffect(() => {
     const sb = createSupabaseBrowser();
+    // Hot posts
     sb.from('posts')
       .select('id,title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
       .eq('is_deleted', false)
@@ -50,31 +57,18 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       .order('likes_count', { ascending: false })
       .limit(3)
       .then(({ data }) => { if (data && data.length > 0) setHotPosts(data); });
-  }, []);
-
-  // Initialize like counts from posts data
-  useEffect(() => {
-    const counts: Record<number, number> = {};
-    posts.forEach(p => { counts[p.id] = p.likes_count ?? 0; });
-    setLikeCounts(counts);
-  }, [posts]);
-
-  useEffect(() => {
-    const sb = createSupabaseBrowser();
+    // Auth + liked posts
     sb.auth.getSession().then(async ({ data }) => {
       if (data.session?.user) {
         const userId = data.session.user.id;
         setCurrentUserId(userId);
-
-        // Load user's liked posts
         const { data: likes } = await sb.from('post_likes')
           .select('post_id')
           .eq('user_id', userId);
         if (likes) setLikedPosts(new Set(likes.map(l => l.post_id)));
-
       }
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- 초기 로드 1회만
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleUpvote = async (e: React.MouseEvent, postId: number) => {
     e.preventDefault();
