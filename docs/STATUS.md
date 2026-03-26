@@ -53,11 +53,20 @@
 - 메뉴 선택 시 자동 닫힘, 초기 로드 시 닫힘
 - 그리드 반응형: 4열→2열, 2열→1열, 6열→3열, 12열→8열
 
+### 토스 앱인토스 미니앱 반려 사유 수정 (커밋 2건, 12파일)
+- **자체 헤더 제거**: Navigation.tsx — isTossMode() → return null
+- **라이트 모드 강제**: TossModeInit.tsx 신규 + globals.css .toss-mode CSS 변수 41줄
+- **앱 설치 유도 제거**: GuestWelcome/InstallBanner/GuestCTA/GuestGate/AutoPushPrompt 5개 컴포넌트에 isTossMode() 체크
+- **리다이렉트 URL**: build-web.js → `?toss=1` 추가
+- **CORS 허용**: middleware.ts — tossmini.com 도메인 추가
+- 신규 파일: `src/lib/toss-mode.ts`, `src/components/TossModeInit.tsx`
+
 ### PENDING
 - [ ] STOCK_DATA_API_KEY 활성화 후 stock-crawl 수동 실행 → 전종목 시세 갱신
 - [ ] KIS_APP_KEY 발급 (한국투자증권 실시간 시세)
 - [ ] 카카오 OG 캐시 초기화 (https://developers.kakao.com/tool/clear/og)
 - [ ] 토스 라이브키 교체
+- [ ] 토스 콘솔 한글/영문 기능명 수정 + 번들 빌드 + 업로드 + 재검토 요청
 
 ---
 
