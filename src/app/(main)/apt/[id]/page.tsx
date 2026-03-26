@@ -42,10 +42,28 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  // Phase 1: apt_sites (필수 — sourceIds 의존)
-  const { data: site } = await sb.from('apt_sites')
+  // Phase 1: apt_sites — exact slug → fuzzy slug fallback
+  let { data: site } = await sb.from('apt_sites')
     .select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at')
     .eq('slug', slug).maybeSingle();
+  // Fuzzy fallback: "에코델타시티-디에트르-더-퍼스트28bl" → try without trailing letters
+  if (!site && slug.length > 4) {
+    const fuzzy = slug.replace(/[a-z]+$/, ''); // strip trailing latin chars
+    if (fuzzy !== slug && fuzzy.length > 3) {
+      const { data } = await sb.from('apt_sites')
+        .select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at')
+        .eq('slug', fuzzy).maybeSingle();
+      if (data) site = data;
+    }
+    // Also try ilike partial match
+    if (!site) {
+      const nameFromSlug = slug.replace(/-/g, ' ');
+      const { data } = await sb.from('apt_sites')
+        .select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at')
+        .ilike('name', `%${nameFromSlug.slice(0, Math.min(nameFromSlug.length, 20))}%`).eq('is_active', true).limit(1).maybeSingle();
+      if (data) site = data;
+    }
+  }
   const sourceIds = (site?.source_ids || {}) as Record<string, string>;
 
   // Phase 2: 소스 데이터 병렬 조회 (sub + unsold + redev 동시)
@@ -63,7 +81,7 @@ async function fetchUnifiedData(slug: string) {
 
   let sub = subResult.status === 'fulfilled' ? (subResult.value as { data: any })?.data : null;
   let unsold = unsoldResult.status === 'fulfilled' ? (unsoldResult.value as { data: any })?.data : null;
-  const redev = redevResult.status === 'fulfilled' ? (redevResult.value as { data: any })?.data : null;
+  let redev = redevResult.status === 'fulfilled' ? (redevResult.value as { data: any })?.data : null;
 
   // sub 폴백: 이름 기반 검색
   const nameGuess = site?.name || slug.replace(/-/g, ' ');
@@ -76,6 +94,14 @@ async function fetchUnifiedData(slug: string) {
   if (!unsold) {
     const { data } = await sb.from('unsold_apts').select('*').ilike('house_nm', nameGuess).eq('is_active', true).order('id', { ascending: false }).limit(1).maybeSingle();
     unsold = data;
+  }
+
+  // redev 폴백: 이름 기반 검색 (district_name 또는 address)
+  if (!redev) {
+    const { data } = await sb.from('redevelopment_projects').select('*').eq('is_active', true)
+      .or(`district_name.ilike.%${nameGuess}%,address.ilike.%${nameGuess}%`)
+      .order('id', { ascending: false }).limit(1).maybeSingle();
+    redev = data;
   }
 
   if (!site && !sub && !unsold && !redev) return null;
@@ -378,12 +404,13 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* Location */}
       <div className="apt-card"><h2 style={ct}>📍 위치 정보</h2>
-        {(site?.address || sub?.hssply_adres) && <div style={rw}><span style={rl}>주소</span><span style={{ ...rv, fontSize: 'var(--fs-xs)' }}>{site?.address || sub?.hssply_adres}</span></div>}
+        {(site?.address || sub?.hssply_adres || redev?.address) && <div style={rw}><span style={rl}>주소</span><span style={{ ...rv, fontSize: 'var(--fs-xs)' }}>{site?.address || sub?.hssply_adres || redev?.address}</span></div>}
         {(site?.nearby_station || sub?.nearest_station) && <div style={rw}><span style={rl}>최근접역</span><span style={{ ...rv, color: 'var(--accent-green)' }}>{site?.nearby_station || sub?.nearest_station}</span></div>}
         {(site?.school_district || sub?.nearest_school) && <div style={{ ...rw, borderBottom: 'none' }}><span style={rl}>학군</span><span style={rv}>{site?.school_district || sub?.nearest_school}</span></div>}
+        {redev?.notes && <div style={{ ...rw, borderBottom: 'none' }}><span style={rl}>비고</span><span style={rv}>{redev.notes}</span></div>}
         <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
-          <a href={`https://map.kakao.com/?q=${encodeURIComponent(site?.address || sub?.hssply_adres || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
-          <a href={`https://map.naver.com/p/search/${encodeURIComponent(site?.address || sub?.hssply_adres || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+          <a href={`https://map.kakao.com/?q=${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+          <a href={`https://map.naver.com/p/search/${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
         </div>
       </div>
 

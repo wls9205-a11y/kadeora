@@ -1,9 +1,10 @@
 'use client';
 import type { RedevProject } from '@/types/apt';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
+import { generateAptSlug } from '@/lib/apt-slug';
 import RedevTimeline from '@/components/RedevTimeline';
-import BottomSheet from '@/components/BottomSheet';
 
 interface Props extends SharedTabProps {
   redevelopment: RedevProject[];
@@ -15,7 +16,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
   const [redevPage, setRedevPage] = useState(1);
   const [redevStage, setRedevStage] = useState('전체');
   const [redevSearch, setRedevSearch] = useState('');
-  const [selectedRedev, setSelectedRedev] = useState<any | null>(null);
+  // selectedRedev removed — now using Link to /apt/[slug]
 
   useEffect(() => {
     setRedevRegion(globalRegion || '전체');
@@ -176,8 +177,10 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
               const stageIdx = STAGE_ORDER.indexOf(r.stage || '');
               const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
+              const redevSlug = generateAptSlug(r.district_name || r.address || r.notes || `redev-${r.id}`);
               return (
-                <div key={r.id} onClick={() => setSelectedRedev(r)} className="kd-card-hover" style={{
+                <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{
+                  display: 'block', textDecoration: 'none', color: 'inherit',
                   padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   cursor: 'pointer',
@@ -221,7 +224,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                       {r.notes}{r.expected_completion ? (r.notes ? `, ${r.expected_completion}` : r.expected_completion) : ''}
                     </div>
                   )}
-                </div>
+                </Link>
               );
             })}
 
@@ -239,130 +242,6 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
           </div>
 
       {/* 재개발 상세 모달 */}
-      {selectedRedev && (() => {
-        const r = selectedRedev;
-        const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
-        return (
-    <BottomSheet open={!!selectedRedev} onClose={() => setSelectedRedev(null)} title={r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}>
-        {/* 헤더 뱃지 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.stage}</span>
-          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
-        </div>
-        {r.address && (
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 4 }}>
-            📍 {r.address}
-          </div>
-        )}
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: r.ai_summary ? 8 : 16 }}>
-          {r.region}{r.sigungu ? ` ${r.sigungu}` : ''}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ` · 세대수 ${r.stage === '정비구역지정' || r.stage === '조합설립' ? '미확정' : '확인 필요'}`}
-        </div>
-        {r.ai_summary && (
-          <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 3 }}>🤖 AI 분석</div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{r.ai_summary}</div>
-          </div>
-        )}
-
-        {/* 진행 타임라인 */}
-        <RedevTimeline currentStage={r.stage || '정비구역지정'} />
-
-        {/* 사업 진행률 파이프라인 */}
-        {(() => {
-          const currentIdx = STAGE_ORDER.indexOf(r.stage || '');
-          const progress = currentIdx >= 0 ? Math.round(((currentIdx + 1) / STAGE_ORDER.length) * 100) : 0;
-          return (
-            <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>📊 사업 진행률</span>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--brand)' }}>{progress}%</span>
-              </div>
-              <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
-                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-green), var(--brand))', borderRadius: 4, transition: 'width 0.5s' }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                {STAGE_ORDER.map((stage, i) => {
-                  const isCurrent = stage === r.stage;
-                  const isPast = currentIdx >= 0 && i < currentIdx;
-                  const stageColor = STAGE_COLORS[stage] || STAGE_COLORS['정비구역지정'];
-                  return (
-                    <div key={stage} style={{ textAlign: 'center', flex: 1 }}>
-                      <div style={{
-                        width: 20, height: 20, borderRadius: '50%', margin: '0 auto 4px',
-                        background: isCurrent ? stageColor.border : isPast ? 'var(--text-tertiary)' : 'var(--border)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        border: isCurrent ? '2px solid var(--brand)' : 'none',
-                        boxShadow: isCurrent ? '0 0 8px rgba(37,99,235,0.4)' : 'none',
-                      }}>
-                        {(isPast || isCurrent) && <span style={{ color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>✓</span>}
-                      </div>
-                      <div style={{ fontSize: 'var(--fs-xs)', color: isCurrent ? 'var(--brand)' : isPast ? 'var(--text-secondary)' : 'var(--text-tertiary)', fontWeight: isCurrent ? 800 : 400, lineHeight: 1.2 }}>
-                        {stage.replace('사업시행인가', '시행인가').replace('정비구역지정', '구역지정').replace('관리처분', '관리처분')}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
-        <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
-          {[
-            r.address && ['📍 주소', r.address],
-            r.constructor && ['🏗️ 시공사', r.constructor],
-            r.developer && ['🏢 시행사', r.developer],
-            r.total_dong && ['🏠 동수', `${r.total_dong}개 동`],
-            r.max_floor && ['📏 최고층', `지상 ${r.max_floor}층`],
-            r.total_households && ['👥 세대수', `${r.total_households.toLocaleString()}세대`],
-            r.floor_area_ratio && ['📐 용적률', `${r.floor_area_ratio}%`],
-            r.building_coverage && ['📐 건폐율', `${r.building_coverage}%`],
-            r.land_area && ['🗺️ 부지면적', `${r.land_area.toLocaleString()}㎡`],
-            r.nearest_station && ['🚆 최근접 역', r.nearest_station],
-            r.nearest_school && ['🏫 초등학교', r.nearest_school],
-            r.estimated_move_in && ['🗓️ 입주예정', r.estimated_move_in],
-            r.expected_completion && ['🗓️ 예상 준공', r.expected_completion],
-            r.transfer_limit && ['🔒 전매제한', r.transfer_limit],
-            r.stage && ['📅 현재 단계', r.stage],
-            r.notes && ['📝 비고', r.notes],
-          ].filter(Boolean).map(([label, value]: any) => (
-            <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
-              <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, width: 70 }}>{label}</span>
-              <span style={{ color: 'var(--text-primary)' }}>{value}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* 요약 / 핵심 특징 */}
-        {(r.summary || r.key_features) ? (
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📋 사업 요약</div>
-            {r.key_features && <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', marginBottom: 6 }}>💡 {r.key_features}</div>}
-            {r.summary && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{r.summary}</div>}
-          </div>
-        ) : (
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: '12px 0', marginBottom: 16 }}>
-            요약 정보를 준비 중입니다
-          </div>
-        )}
-
-        {/* 한줄평 */}
-        <button onClick={() => { setSelectedRedev(null); setCommentTarget({ houseKey: `redev_${r.id}`, houseNm: r.district_name || '정비사업', houseType: 'redev' as any }); }} style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', marginBottom: 12, fontWeight: 600 }}>
-          💬 한줄평 작성하기
-        </button>
-
-        {/* 지도 버튼 */}
-        {(r.address || (r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중')) && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-            <a href={`https://map.kakao.com/?q=${encodeURIComponent(r.address || r.district_name || '')}`} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
-            <a href={`https://map.naver.com/p/search/${encodeURIComponent(r.address || r.district_name || '')}`} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
-          </div>
-        )}
-    </BottomSheet>
-  );
-
-      })()}
     </>
   );
 }
