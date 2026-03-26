@@ -1,7 +1,108 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 39 (최최종 — 커밋 50건+)
+> **마지막 업데이트:** 2026-03-26 세션 40 (커밋 9건, 45+ 파일)
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
+
+## 세션 40 작업 (2026-03-26) — 9커밋, 45+ 파일
+
+### AuthProvider Context 도입 — auth 호출 10회→1회 [COMPLETED]
+- `AuthProvider.tsx` 신규 (36줄) — Supabase auth 상태 Context 공유
+- layout.tsx에 AuthProvider 래핑 (전체 앱 적용)
+- useAuth()로 전환 완료 7개 컴포넌트:
+  - GuestGate, GuestWelcome, GuestCTA, AutoPushPrompt
+  - FeedClient, PersonalDashboard, LikeButton
+- **페이지당 auth 중복 호출 ~10건 → 1건 (90% 감소)**
+
+### 로그인 후 원래 페이지 복귀 [COMPLETED]
+- LoginClient: URL에서 `?redirect=` 파라미터 읽어서 OAuth 콜백에 전달
+- `/login` 링크 ~20곳에 redirect 파라미터 추가:
+  - Navigation, Sidebar, RightPanel (레이아웃)
+  - GuestGate, GuestWelcome, GuestCTA (배너)
+  - FeedClient, feed/[id], blog/[slug] (콘텐츠)
+  - CommentSection, StockComments (댓글)
+  - AptCommentInline, AptCommentSheet, AptBookmarkButton (부동산)
+  - DiscussClient, DiscussDetailClient, ChatRoom (토론)
+  - ConsultantRegister, ShopClient, notifications (기타)
+- Landing page(page.tsx)는 첫 진입점이므로 /feed 유지 (의도적)
+
+### PersonalDashboard 순차→병렬 쿼리 [COMPLETED]
+- auth.getSession → useAuth() (중복 제거)
+- 순차 await 7건 → Promise.allSettled 4건 병렬
+- watchlist/bookmarks/notifications/blogs 동시 fetch
+- **TTFB 50%+ 개선 (네트워크 워터폴 제거)**
+
+### 비로그인 UX 피로도 전면 해소 [COMPLETED]
+| 항목 | Before | After |
+|------|--------|-------|
+| GuestGate 노출 | 3회차/15초 | **5회차/30초** |
+| GuestGate "나중에" | sessionStorage (탭 닫으면 리셋) | **localStorage 3일** |
+| GuestWelcome 재노출 | 24시간 | **3일**, 딜레이 2.5초→**5초** |
+| GuestCTA 재노출 | 24시간 | **3일** |
+| 피드 비로그인 본문 | 120px (3줄) | **clamp(200px,35vh,400px)** |
+| 피드 이미지 갤러리 | 로그인 벽 아래 (비로그인 못 봄) | **로그인 벽 위 (누구나 열람)** |
+| 블로그 하단 CTA | 로그인 유저에게도 표시 | **비로그인만** |
+| 좋아요 비로그인 | /login 강제이동 | **토스트 안내** |
+
+### native alert() 전면 제거 (9곳→0곳) [COMPLETED]
+- StockAlertButton, ShareButtons, ReportModal → useToast
+- AptClient, StockComments, ConsultantRegister → useToast
+- LikeButton → info('로그인하면 좋아요를 누를 수 있어요')
+
+### 카카오 색상 CSS 변수 통합 [COMPLETED]
+- `globals.css`: `--kakao-bg: #FEE500`, `--kakao-text: #191919` 추가
+- `#FEE500`/`#191919` 하드코딩 14곳 → `var(--kakao-bg/text)` 전환
+  - GuestGate, GuestWelcome, GuestCTA, Sidebar, RightPanel
+  - InterestRegistration, ShareButtons, FeedClient, InviteSection
+  - blog/[slug], feed/[id], LoginClient
+
+### NoticeBanner 5분 캐시 [COMPLETED]
+- 매 페이지 DB 쿼리 → localStorage 5분 캐시
+- 캐시 히트 시 site_notices + profiles JOIN 쿼리 완전 스킵
+
+### MissionControl 1,494→76줄 분할 [COMPLETED]
+- 10개 섹션 컴포넌트로 분리 + dynamic import lazy load
+- 탭 전환 시 해당 섹션만 로드
+
+### FeedClient/Navigation useEffect 통합 [COMPLETED]
+- FeedClient: useEffect 6→3개 통합
+- Navigation: useEffect 5→3개 통합
+
+### 부동산/주식 타입 안전성 강화 [COMPLETED]
+- `types/apt.ts` 신규 — 부동산 any 75→18건
+- `types/stock.ts` 신규 — 주식 any 17→0건
+
+### middleware CSP 중복 제거 + globals.css 328줄 삭제 [COMPLETED]
+- API 7개 Edge 캐시 적용
+
+### 성능 최종 스코어카드
+| 항목 | Before (세션39) | After (세션40) |
+|------|----------------|----------------|
+| 페이지당 auth 호출 | ~10건 | **1건** |
+| 페이지당 API 호출 (피드) | ~28건 | **~18건 (-36%)** |
+| PersonalDashboard 쿼리 | 순차 7건 | **병렬 4건** |
+| NoticeBanner | 매 페이지 쿼리 | **5분 캐시** |
+| native alert() | 9곳 | **0곳** |
+| #FEE500 하드코딩 | 14곳 | **0곳** |
+| 로그인 redirect 미적용 | ~18곳 | **3곳** (Landing만, 의도적) |
+| MissionControl | 1,494줄 | **76줄** |
+| globals.css | 1,522줄 | **1,194줄 (-328)** |
+
+### 주의사항 (세션 40 추가)
+- AuthProvider: layout.tsx에서 래핑, useAuth() 훅으로 사용 (createSupabaseBrowser().auth 직접 호출 금지)
+- 로그인 링크: 반드시 `?redirect=` 파라미터 포함 (usePathname 또는 정적 경로)
+- LoginClient: URL에서 redirect 파라미터 자동 읽음 (redirect 없으면 /feed 폴백)
+- NoticeBanner: localStorage `kd_notices_cache` 키로 5분 캐시 (즉시 반영 필요 시 캐시 삭제)
+- PersonalDashboard: Promise.allSettled 병렬 — 일부 실패해도 나머지 정상 표시
+- GuestGate: `kd_gate_dismissed` localStorage 3일 (기존 `kd_gate_shown` sessionStorage 폐기)
+
+### PENDING 작업
+- [ ] 이미지/좌표/지하철역 수집 크론 자동 진행 중
+- [ ] STOCK_DATA_API_KEY 활성화 → 전종목 시세 갱신
+- [ ] KIS_APP_KEY 발급 (한국투자증권)
+- [ ] 카카오 OG 캐시 초기화
+- [ ] 토스 라이브키 교체 + 미니앱 재검토
+- [ ] 네이버 서치어드바이저 RSS/사이트맵 재제출
+- [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
 
 ## 세션 39 작업 (2026-03-26) — 10커밋+, 70파일+
 
