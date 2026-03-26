@@ -19,6 +19,7 @@ interface Props {
   transactions: Record<string, any>[];
   onRegionClick?: (region: string) => void;
   activeRegion?: string;
+  shareButton?: React.ReactNode;
 }
 
 const COLORS = {
@@ -37,7 +38,7 @@ const LABELS = {
   trade: '실거래',
 };
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, onRegionClick, activeRegion }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, onRegionClick, activeRegion, shareButton }: Props) {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 
   const regions = useMemo(() => {
@@ -132,12 +133,12 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          padding: '5px 0',
+          gap: 6,
+          padding: '3px 0',
           cursor: onRegionClick ? 'pointer' : 'default',
           opacity: isDimmed ? 0.35 : 1,
           transition: 'opacity 0.15s',
-          ...(isAll ? { borderBottom: '1px solid var(--border)', marginBottom: 4, paddingBottom: 7 } : {}),
+          ...(isAll ? { borderBottom: '1px solid var(--border)', marginBottom: 2, paddingBottom: 5 } : {}),
         }}
       >
         <div style={{
@@ -153,7 +154,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
         <div style={{
           flex: 1,
-          height: isAll ? 22 : 20,
+          height: isAll ? 18 : 16,
           borderRadius: 4,
           background: 'var(--bg-elevated)',
           overflow: 'hidden',
@@ -193,21 +194,24 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   };
 
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>
           지역별 현황
         </span>
-        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-          총 {regions.reduce((s, r) => s + r.total, 0)}건
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+            총 {regions.reduce((s, r) => s + r.total, 0)}건
+          </span>
+          {shareButton}
+        </div>
       </div>
 
       <div style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
-        padding: '10px 12px',
+        padding: '6px 10px',
       }}>
         {/* 전체 행 */}
         {renderRow({ name: '전체', ...grandCats, total: grandTotal }, true)}
@@ -218,10 +222,10 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         {/* 범례 */}
         <div style={{
           display: 'flex',
-          gap: 10,
+          gap: 8,
           justifyContent: 'center',
-          marginTop: 8,
-          paddingTop: 8,
+          marginTop: 4,
+          paddingTop: 4,
           borderTop: '1px solid var(--border)',
           fontSize: 'var(--fs-xs)',
           color: 'var(--text-tertiary)',

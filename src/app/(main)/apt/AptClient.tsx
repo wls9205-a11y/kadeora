@@ -133,29 +133,28 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         </div>
       </div>
 
-      {/* KPI 요약 */}
+      {/* KPI 요약 — 클릭 시 해당 탭으로 이동 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
         {[
-          { label: '접수중', value: openCount.toLocaleString(), color: 'var(--accent-green)', bg: 'rgba(52,211,153,0.08)' },
-          { label: '예정', value: upcomingCount.toLocaleString(), color: 'var(--accent-blue)', bg: 'rgba(91,164,245,0.08)' },
-          { label: '분양중', value: ongoingApts.length.toLocaleString(), color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)' },
-          { label: '미분양', value: unsoldTotal.toLocaleString(), color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)' },
-          { label: '재개발', value: redevCount.toLocaleString(), color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)' },
-        ].map(({ label, value, color, bg }) => (
-          <div key={label} style={{
-            flex: 1, textAlign: 'center', padding: '12px 4px', borderRadius: 8,
-            background: bg, border: `1px solid ${color}33`,
+          { label: '접수중', value: openCount.toLocaleString(), color: 'var(--accent-green)', bg: 'rgba(52,211,153,0.08)', tab: 'sub' as const },
+          { label: '예정', value: upcomingCount.toLocaleString(), color: 'var(--accent-blue)', bg: 'rgba(91,164,245,0.08)', tab: 'sub' as const },
+          { label: '분양중', value: ongoingApts.length.toLocaleString(), color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)', tab: 'ongoing' as const },
+          { label: '미분양', value: unsoldTotal.toLocaleString(), color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)', tab: 'unsold' as const },
+          { label: '재개발', value: redevCount.toLocaleString(), color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)', tab: 'redev' as const },
+        ].map(({ label, value, color, bg, tab }) => (
+          <button key={label} onClick={() => handleTabChange(tab)} style={{
+            flex: 1, textAlign: 'center', padding: '10px 2px', borderRadius: 8,
+            background: activeTab === tab && (label === '분양중' || label === '미분양' || label === '재개발') ? `${color}22` : bg,
+            border: activeTab === tab && (label === '분양중' || label === '미분양' || label === '재개발') ? `1.5px solid ${color}55` : `1px solid ${color}33`,
+            cursor: 'pointer', transition: 'all 0.15s',
           }}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color, marginTop: 2, opacity: 0.7 }}>{label}</div>
-          </div>
+          </button>
         ))}
       </div>
 
       {/* 지역별 스택바 현황 */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-        <SectionShareButton section="apt-region" label="전국 부동산 지역별 현황" pagePath="/apt" />
-      </div>
       <RegionStackedBar
         apts={apts}
         ongoingApts={ongoingApts}
@@ -164,6 +163,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         transactions={lazyTx || []}
         onRegionClick={setSelectedRegion}
         activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+        shareButton={<SectionShareButton section="apt-region" label="전국 부동산 지역별 현황" pagePath="/apt" />}
       />
 
       {/* 지역 필터 활성 배지 */}
