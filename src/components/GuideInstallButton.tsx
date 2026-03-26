@@ -27,7 +27,7 @@ export default function GuideInstallButton() {
     }
 
     // 새로 발생할 수도 있으므로 리스너도 등록
-    const handler = (e: any) => {
+    const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setState('can-install');

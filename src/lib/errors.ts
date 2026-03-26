@@ -20,7 +20,7 @@ export interface AppError {
   message: string;
   messageKo: string;
   statusCode: number;
-  context?: Record<string, unknown>;
+  context?: Record<string, any>;
 }
 
 const ERROR_MAP: Record<ErrorCode, Omit<AppError, "context">> = {
@@ -37,12 +37,12 @@ const ERROR_MAP: Record<ErrorCode, Omit<AppError, "context">> = {
 };
 
 /** Create a typed AppError */
-export function createAppError(code: ErrorCode, context?: Record<string, unknown>): AppError {
+export function createAppError(code: ErrorCode, context?: Record<string, any>): AppError {
   return { ...ERROR_MAP[code], context };
 }
 
 /** Log error with structured context — Sentry-ready */
-export function logError(error: unknown, context?: Record<string, unknown>): void {
+export function logError(error: unknown, context?: Record<string, any>): void {
   const timestamp = new Date().toISOString();
   const errorInfo = {
     timestamp,

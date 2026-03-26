@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -56,8 +57,8 @@ export async function GET(req: NextRequest) {
         pnlPct: totalInvested > 0 ? ((totalCurrent - totalInvested) / totalInvested * 100) : 0,
       }
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }
 
@@ -96,8 +97,8 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error;
     return NextResponse.json({ holding: data });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }
 
@@ -114,7 +115,7 @@ export async function DELETE(req: NextRequest) {
 
     await getSupabaseAdmin().from('portfolio_holdings').delete().eq('id', id).eq('user_id', user.id);
     return NextResponse.json({ success: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -109,12 +110,12 @@ export async function POST(req: NextRequest) {
           duration,
           message: res.ok ? 'OK' : `HTTP ${res.status}`,
         });
-      } catch (e: any) {
+      } catch (e: unknown) {
         results.push({
           endpoint: ep,
-          status: e.message === 'timeout' ? 'timeout' : 'error',
+          status: errMsg(e) === 'timeout' ? 'timeout' : 'error',
           duration: Date.now() - start,
-          message: e.message,
+          message: errMsg(e),
         });
       }
     }
@@ -130,8 +131,8 @@ export async function POST(req: NextRequest) {
       duration: totalDuration,
       results,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }
 

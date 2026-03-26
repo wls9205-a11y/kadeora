@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 30;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     const deleted = data?.length ?? 0;
     return NextResponse.json({ ok: true, deleted });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 200 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 200 });
   }
 }

@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -37,9 +38,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       reviews: data || [], total: count || 0, avgRating: Math.round(avgRating * 10) / 10,
+    }, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }
 
@@ -92,7 +95,7 @@ export async function POST(req: NextRequest) {
     try { await getSupabaseAdmin().rpc('award_points', { p_user_id: user.id, p_amount: 10, p_reason: '아파트 리뷰 작성' }); } catch { }
 
     return NextResponse.json({ review: data });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }

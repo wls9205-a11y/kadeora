@@ -375,10 +375,10 @@ export default async function FeedDetailPage({ params }: Props) {
       </div>
 
       {/* Related posts */}
-      {related.filter((r: any) => !r._type).length > 0 && (
+      {related.filter((r: Record<string, any>) => !r._type).length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
-          {related.filter((r: any) => !r._type).map((r: any) => (
+          {related.filter((r: Record<string, any>) => !r._type).map((r: Record<string, any>) => (
             <Link key={r.id} href={`/feed/${r.slug || r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
               <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>{r.title}</span>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>🤍 {r.likes_count ?? 0} · 💬 {r.comments_count ?? 0}</span>
@@ -388,11 +388,11 @@ export default async function FeedDetailPage({ params }: Props) {
       )}
 
       {/* 관련 부동산 현장 (내부 링크 SEO) */}
-      {related.filter((r: any) => r._type === 'site').length > 0 && (
+      {related.filter((r: Record<string, any>) => r._type === 'site').length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🏢 관련 현장</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {related.filter((r: any) => r._type === 'site').map((s: any) => (
+            {related.filter((r: Record<string, any>) => r._type === 'site').map((s: any) => (
               <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 130, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu || ''}</div>
@@ -403,11 +403,11 @@ export default async function FeedDetailPage({ params }: Props) {
       )}
 
       {/* 관련 종목 (내부 링크 SEO) */}
-      {related.filter((r: any) => r._type === 'stock').length > 0 && (
+      {related.filter((r: Record<string, any>) => r._type === 'stock').length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📈 관련 종목</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {related.filter((r: any) => r._type === 'stock').map((s: any) => (
+            {related.filter((r: Record<string, any>) => r._type === 'stock').map((s: any) => (
               <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 130, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: Number(s.change_pct) >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)', marginTop: 2 }}>

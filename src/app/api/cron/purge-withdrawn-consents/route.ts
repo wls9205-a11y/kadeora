@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 30;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -60,12 +61,12 @@ async function handler(_req: NextRequest) {
 
           purged++;
         }
-      } catch (e: any) {
-        errors.push(`consent ${consent.id}: ${e.message}`);
+      } catch (e: unknown) {
+        errors.push(`consent ${consent.id}: ${errMsg(e)}`);
       }
     }
-  } catch (e: any) {
-    errors.push(`main: ${e.message}`);
+  } catch (e: unknown) {
+    errors.push(`main: ${errMsg(e)}`);
   }
 
   return NextResponse.json({

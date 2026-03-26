@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const { data, count, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const comments = (data ?? []).map((c: any) => ({
+    const comments = (data ?? []).map((c: Record<string, any>) => ({
       id: c.id, content: c.content, created_at: c.created_at, is_deleted: c.is_deleted,
       post_id: c.post_id,
       author_nickname: c.profiles?.nickname ?? '-',

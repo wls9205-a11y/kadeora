@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   // Admin user IDs to exclude
   const { data: admins } = await sb.from('profiles').select('id').eq('is_admin', true);
-  const adminIds = (admins || []).map((a: any) => a.id);
+  const adminIds = (admins || []).map((a: { id: string }) => a.id);
 
   try {
     // All page_views in range (exclude admin by user_id — note: most views don't have user_id)
@@ -36,17 +37,20 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(10000);
 
-    const filtered = (views || []).filter((v: any) => !v.user_id || !adminIds.includes(v.user_id));
+    const filtered = (views || []).filter((v) => {
+      if (!v.user_id) return true;
+      return !adminIds.includes(v.user_id);
+    });
 
     // === KPIs ===
     const totalViews = filtered.length;
-    const uniqueVisitors = new Set(filtered.map((v: any) => v.visitor_id)).size;
-    const withUser = filtered.filter((v: any) => v.user_id).length;
+    const uniqueVisitors = new Set(filtered.map((v: { visitor_id?: string }) => v.visitor_id)).size;
+    const withUser = filtered.filter((v: Record<string, any>) => v.user_id).length;
     const avgViewsPerVisitor = uniqueVisitors > 0 ? (totalViews / uniqueVisitors).toFixed(1) : '0';
 
     // === Top Pages ===
     const pageCounts: Record<string, number> = {};
-    filtered.forEach((v: any) => {
+    filtered.forEach((v: Record<string, any>) => {
       // Normalize: decode + group dynamic paths
       let p = v.path;
       try { p = decodeURIComponent(p); } catch {}
@@ -65,7 +69,7 @@ export async function GET(req: NextRequest) {
 
     // === Referrers ===
     const refCounts: Record<string, number> = {};
-    filtered.forEach((v: any) => {
+    filtered.forEach((v: Record<string, any>) => {
       if (!v.referrer) {
         refCounts['직접 방문'] = (refCounts['직접 방문'] || 0) + 1;
         return;
@@ -92,7 +96,7 @@ export async function GET(req: NextRequest) {
 
     // === Hourly distribution ===
     const hourCounts: Record<number, number> = {};
-    filtered.forEach((v: any) => {
+    filtered.forEach((v: Record<string, any>) => {
       const h = new Date(v.created_at).getUTCHours();
       const kstH = (h + 9) % 24;
       hourCounts[kstH] = (hourCounts[kstH] || 0) + 1;
@@ -101,7 +105,7 @@ export async function GET(req: NextRequest) {
 
     // === Daily trend ===
     const dayCounts: Record<string, { views: number; visitors: Set<string> }> = {};
-    filtered.forEach((v: any) => {
+    filtered.forEach((v: Record<string, any>) => {
       const d = new Date(v.created_at).toISOString().split('T')[0];
       if (!dayCounts[d]) dayCounts[d] = { views: 0, visitors: new Set() };
       dayCounts[d].views++;
@@ -113,7 +117,7 @@ export async function GET(req: NextRequest) {
 
     // === Device breakdown (from user_agent) ===
     let mobile = 0, desktop = 0, bot = 0;
-    filtered.forEach((v: any) => {
+    filtered.forEach((v: Record<string, any>) => {
       const ua = (v.user_agent || '').toLowerCase();
       if (/bot|crawl|spider|slurp|bingpreview|facebookexternal|twitterbot|kakaotalk-scrap/i.test(ua)) bot++;
       else if (/mobile|android|iphone|ipad/i.test(ua)) mobile++;
@@ -122,7 +126,7 @@ export async function GET(req: NextRequest) {
     const devices = { mobile, desktop, bot };
 
     // === Top raw pages (not grouped) — recent 20 ===
-    const recentViews = filtered.slice(0, 20).map((v: any) => {
+    const recentViews = filtered.slice(0, 20).map((v: Record<string, any>) => {
       let path = v.path;
       try { path = decodeURIComponent(path); } catch {}
       return {
@@ -145,7 +149,7 @@ export async function GET(req: NextRequest) {
       devices,
       recentViews,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }

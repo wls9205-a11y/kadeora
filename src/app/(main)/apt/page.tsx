@@ -68,7 +68,7 @@ async function fetchAptData() {
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
-    (alertsR.data || []).forEach((a: any) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
+    (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
     redevTotalCount = redevCountR.count ?? 0;
   } catch {}
 
@@ -76,7 +76,7 @@ async function fetchAptData() {
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10); // KST
   const thisMonth = today.slice(0, 7).replace('-', ''); // KST 기준 YYYYMM // 202603
   const regionDetail: Record<string, { total: number; open: number; upcoming: number; closed: number }> = {};
-  apts.forEach((a: any) => {
+  apts.forEach((a: Record<string, any>) => {
     const r = a.region_nm || '기타';
     if (!regionDetail[r]) regionDetail[r] = { total: 0, open: 0, upcoming: 0, closed: 0 };
     regionDetail[r].total++;
@@ -89,20 +89,20 @@ async function fetchAptData() {
   // ━━━ 분양중 데이터 조합 ━━━
   // 경쟁률 데이터 (house_manage_no → 경쟁률)
   const competitionMap: Record<string, number> = {};
-  apts.forEach((a: any) => {
+  apts.forEach((a: Record<string, any>) => {
     if (a.competition_rate_1st) competitionMap[a.house_manage_no] = a.competition_rate_1st;
   });
 
   // 소스1: 청약 마감 + 입주 전 (분양 진행 중)
   const ongoingFromSub = apts
-    .filter((a: any) => {
+    .filter((a: Record<string, any>) => {
       const endDate = String(a.rcept_endde ?? '');
       if (!endDate || endDate >= today) return false;
       const mvn = String(a.mvn_prearnge_ym ?? '').replace(/[^0-9]/g, '').slice(0, 6);
       if (mvn && mvn < thisMonth) return false;
       return true;
     })
-    .map((a: any) => ({
+    .map((a: Record<string, any>) => ({
       id: `sub_${a.id}`,
       source: 'subscription' as const,
       house_nm: a.house_nm || '',

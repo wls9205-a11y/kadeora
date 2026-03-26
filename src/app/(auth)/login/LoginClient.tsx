@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 ﻿'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -29,7 +30,7 @@ function LoginForm({ redirect }: LoginFormProps) {
       });
       if (err) throw err;
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : '로그인 중 오류가 발생했습니다');
+      setError(e instanceof Error ? errMsg(e) : '로그인 중 오류가 발생했습니다');
       setLoading(null);
     }
   };

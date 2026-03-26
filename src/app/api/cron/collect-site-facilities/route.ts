@@ -47,7 +47,7 @@ async function handler(_req: NextRequest) {
     .order('interest_count', { ascending: false })
     .limit(BATCH_SIZE * 3);
 
-  const targets = (sites || []).filter((s: any) => {
+  const targets = (sites || []).filter((s: Record<string, any>) => {
     const fac = s.nearby_facilities;
     if (!fac || typeof fac !== 'object' || Object.keys(fac).length === 0) return true;
     const updatedAt = (fac as any)?.updated_at;

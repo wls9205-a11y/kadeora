@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 60;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
@@ -167,8 +168,8 @@ export async function GET(req: NextRequest) {
         });
       if (_r.success) await admin.from('landmark_apts').update({ blog_generated: true }).eq(apt.blog_slug ? 'blog_slug' : 'slug', slug);
         created++;
-      } catch (e: any) {
-        console.error(`[blog-apt-landmark] Error for ${apt.blog_slug || (apt as any).slug}:`, e.message);
+      } catch (e: unknown) {
+        console.error(`[blog-apt-landmark] Error for ${apt.blog_slug || (apt as any).slug}:`, errMsg(e));
       }
     }
 

@@ -11,7 +11,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ sym
       .eq('symbol', symbol)
       .order('created_at', { ascending: false })
       .limit(50);
-    return NextResponse.json({ comments: data || [] });
+    return NextResponse.json({ comments: data || [] }, {
+      headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=150' },
+    });
   } catch { return NextResponse.json({ comments: [] }); }
 }
 

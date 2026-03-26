@@ -246,7 +246,7 @@ export default async function BlogDetailPage({ params }: Props) {
     },
     ...(comments.length > 0 ? {
       commentCount: comments.length,
-      comment: comments.slice(0, 3).map((c: any) => ({
+      comment: comments.slice(0, 3).map((c: Record<string, any>) => ({
         '@type': 'Comment',
         text: c.content,
         dateCreated: c.created_at,
@@ -378,7 +378,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 댓글 목록 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {comments.map((c: any) => {
+          {comments.map((c: Record<string, any>) => {
             const nick = c.author_name || c.profiles?.nickname || '사용자';
             return (
               <div key={c.id} style={{ display: 'flex', gap: 10 }}>
@@ -416,7 +416,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* 시리즈 네비게이션 */}
       {seriesInfo && seriesInfo.posts.length > 1 && (() => {
-        const idx = seriesInfo.posts.findIndex((p: any) => p.id === post.id);
+        const idx = seriesInfo.posts.findIndex((p: Record<string, any>) => p.id === post.id);
         const prev = idx > 0 ? seriesInfo.posts[idx - 1] : null;
         const next = idx < seriesInfo.posts.length - 1 ? seriesInfo.posts[idx + 1] : null;
         return (
@@ -462,7 +462,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🏢 관련 현장 정보</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {relatedSites.map((s: any) => (
+            {relatedSites.map((s: Record<string, any>) => (
               <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu || ''}</div>
@@ -477,7 +477,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📈 관련 종목</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {relatedStocks.map((s: any) => {
+            {relatedStocks.map((s: Record<string, any>) => {
               const pct = Number(s.change_pct);
               const isUp = pct > 0;
               return (

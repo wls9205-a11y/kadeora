@@ -53,7 +53,7 @@ export default function RealEstateSection() {
       {tab === 'unsold' && (
         <DataTable
           headers={['단지명', '지역', '미분양', '총세대']}
-          rows={(data?.unsold ?? []).map((u: any) => [
+          rows={(data?.unsold ?? []).map((u: Record<string, any>) => [
             u.complex_name || '—', u.region || '—',
             <span key="c" style={{ color: C.red, fontWeight: 700 }}>{u.unsold_count || 0}</span>,
             u.total_units || '—',

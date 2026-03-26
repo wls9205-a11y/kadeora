@@ -5,6 +5,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+interface StockRow { symbol: string; name?: string; market?: string; [key: string]: unknown; }
+interface StockResult { stocks: StockRow[]; success: number; failed: number; }
+
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
@@ -59,7 +64,7 @@ async function fetchKisQuote(
   }
 }
 
-async function fetchViaKis(supabase: any): Promise<{ stocks: any[]; success: number; failed: number } | null> {
+async function fetchViaKis(supabase: SupabaseClient): Promise<StockResult | null> {
   const appkey = process.env.KIS_APP_KEY;
   const appsecret = process.env.KIS_APP_SECRET;
   if (!appkey || !appsecret) return null;
@@ -83,7 +88,7 @@ async function fetchViaKis(supabase: any): Promise<{ stocks: any[]; success: num
   for (let i = 0; i < allStocks.length; i += BATCH) {
     const batch = allStocks.slice(i, i + BATCH);
     const results = await Promise.allSettled(
-      batch.map(async (stock: any) => {
+      batch.map(async (stock: StockRow) => {
         const quote = await fetchKisQuote(stock.symbol, token, appkey, appsecret);
         if (quote) {
           await supabase.from('stock_quotes')
@@ -169,7 +174,7 @@ async function fetchNaverQuote(symbol: string): Promise<{ price: number; change_
   return null;
 }
 
-async function fetchViaNaver(supabase: any): Promise<{ stocks: any[]; success: number; failed: number } | null> {
+async function fetchViaNaver(supabase: SupabaseClient): Promise<StockResult | null> {
   const { data: allStocks } = await supabase
     .from('stock_quotes')
     .select('symbol')
@@ -187,7 +192,7 @@ async function fetchViaNaver(supabase: any): Promise<{ stocks: any[]; success: n
   for (let i = 0; i < allStocks.length; i += BATCH_SIZE) {
     const batch = allStocks.slice(i, i + BATCH_SIZE);
     const results = await Promise.allSettled(
-      batch.map(async (stock: any) => {
+      batch.map(async (stock: StockRow) => {
         const quote = await fetchNaverQuote(stock.symbol);
         if (quote) {
           await supabase.from('stock_quotes')
@@ -219,7 +224,7 @@ async function fetchViaNaver(supabase: any): Promise<{ stocks: any[]; success: n
   return { stocks: data ?? [], success, failed };
 }
 
-async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: number; failed: number } | null> {
+async function fetchViaYahoo(supabase: SupabaseClient): Promise<StockResult | null> {
   const { data: allStocks } = await supabase
     .from('stock_quotes')
     .select('symbol')
@@ -231,7 +236,7 @@ async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: n
 
   // KOSDAQ 판별: DB에서 market='KOSDAQ'인 심볼 조회
   const { data: kosdaqList } = await supabase.from('stock_quotes').select('symbol').eq('market', 'KOSDAQ');
-  const kosdaqSet = new Set((kosdaqList ?? []).map((s: any) => s.symbol));
+  const kosdaqSet = new Set((kosdaqList ?? []).map((s: StockRow) => s.symbol));
 
   const tickers = allStocks.map((s: any) =>
     `${s.symbol}.${kosdaqSet.has(s.symbol) ? 'KQ' : 'KS'}`
@@ -263,8 +268,8 @@ async function fetchViaYahoo(supabase: any): Promise<{ stocks: any[]; success: n
   let failed = 0;
 
   const updates = quotes
-    .filter((q: any) => q.regularMarketPrice)
-    .map((q: any) => {
+    .filter((q: Record<string, any>) => q.regularMarketPrice)
+    .map((q: Record<string, any>) => {
       const price = q.regularMarketPrice;
       const prevClose = q.regularMarketPreviousClose;
       const rawChange = q.regularMarketChange;
@@ -393,7 +398,7 @@ export async function GET(req: NextRequest) {
       .limit(100);
 
     if (usdStocks?.length) {
-      const usdTickers = usdStocks.map((s: any) => s.symbol).join(',');
+      const usdTickers = usdStocks.map((s: StockRow) => s.symbol).join(',');
       const usdController = new AbortController();
       const usdTimeout = setTimeout(() => usdController.abort(), 10000);
 

@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
         const items = json?.data || json?.response?.body?.items?.item || [];
         if (!Array.isArray(items) || items.length === 0) break;
 
-        const mapped = items.map(mapItem).filter((m: any) => m.house_manage_no);
+        const mapped = items.map(mapItem).filter((m: Record<string, any>) => m.house_manage_no);
         if (mapped.length === 0) break;
 
         const { data, error } = await supabase
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
         const json2 = await res2.json();
         const items2 = json2?.data || [];
         if (Array.isArray(items2) && items2.length > 0) {
-          const mapped2 = items2.map(mapItem).filter((m: any) => m.house_manage_no);
+          const mapped2 = items2.map(mapItem).filter((m: Record<string, any>) => m.house_manage_no);
           const { data: d2 } = await supabase
             .from('apt_subscriptions')
             .upsert(mapped2, { onConflict: 'house_manage_no' })

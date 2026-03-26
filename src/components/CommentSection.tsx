@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -52,7 +53,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       setContent('');
       success('댓글이 작성되었습니다');
     } catch (e: unknown) {
-      error(e instanceof Error ? e.message : '댓글 작성 중 오류가 발생했습니다');
+      error(e instanceof Error ? errMsg(e) : '댓글 작성 중 오류가 발생했습니다');
     } finally {
       setLoading(false);
     }

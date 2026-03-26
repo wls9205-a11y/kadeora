@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
@@ -112,7 +113,7 @@ async function runCron(endpoint: string, baseUrl: string, cronSecret: string | u
       duration: Date.now() - start,
     };
   } catch (e: unknown) {
-    const error = e instanceof Error ? e.message : 'Unknown error';
+    const error = e instanceof Error ? errMsg(e) : 'Unknown error';
     return {
       endpoint,
       name,

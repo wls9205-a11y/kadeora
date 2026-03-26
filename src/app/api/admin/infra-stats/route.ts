@@ -50,7 +50,7 @@ export async function GET(_req: Request) {
         open_issues: repo.open_issues_count,
         default_branch: repo.default_branch,
         updated_at: repo.updated_at,
-        recent_commits: Array.isArray(commits) ? commits.map((c: any) => ({
+        recent_commits: Array.isArray(commits) ? commits.map((c: Record<string, any>) => ({
           sha: c.sha?.slice(0, 7),
           message: c.commit?.message?.split('\n')[0]?.slice(0, 60),
           date: c.commit?.author?.date,
@@ -72,7 +72,7 @@ export async function GET(_req: Request) {
       if (res.ok) {
         const data = await res.json();
         vercel = {
-          deployments: (data.deployments ?? []).map((d: any) => ({
+          deployments: (data.deployments ?? []).map((d: Record<string, any>) => ({
             id: d.uid,
             url: d.url,
             state: d.state ?? d.readyState,

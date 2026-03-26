@@ -204,7 +204,7 @@ export default function UsersSection() {
                     ]} />
                     {userDetail.pushDevices?.length > 0 && (
                       <div style={{ marginTop: 6 }}>
-                        {userDetail.pushDevices.map((d: any) => (
+                        {userDetail.pushDevices.map((d: Record<string, any>) => (
                           <div key={d.id} style={{ fontSize: 11, color: C.textSec, padding: '2px 0' }}>
                             📍 {d.browser} · {ago(d.created_at)}
                           </div>

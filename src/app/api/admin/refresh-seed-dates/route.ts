@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -38,8 +39,8 @@ export async function POST() {
     }
 
     return NextResponse.json({ updated, message: `${updated}개 시드 게시글 날짜 갱신 완료` });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('[refresh-seed-dates]', e);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }

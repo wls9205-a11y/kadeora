@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -16,8 +17,8 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false });
 
     return NextResponse.json({ listings: data || [] });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }
 
@@ -76,8 +77,8 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ listing, created: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }
 
@@ -100,7 +101,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }

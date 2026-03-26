@@ -98,15 +98,16 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       .maybeSingle();
     let nextOrder = (maxRow?.series_order || 0) + 1;
 
-    // 배치 업데이트
-    for (let i = 0; i < postIds.length; i += batchSize) {
-      const batch = postIds.slice(i, i + batchSize);
-      for (let j = 0; j < batch.length; j++) {
-        await sb.from('blog_posts')
-          .update({ series_id: seriesId, series_order: nextOrder + j })
-          .eq('id', batch[j]);
-      }
-      nextOrder += batch.length;
+    // 배치 업데이트 (10건씩 병렬)
+    for (let i = 0; i < postIds.length; i += 10) {
+      const batch = postIds.slice(i, i + 10);
+      await Promise.allSettled(
+        batch.map((pid, j) =>
+          sb.from('blog_posts')
+            .update({ series_id: seriesId, series_order: nextOrder + i + j })
+            .eq('id', pid)
+        )
+      );
     }
     totalAssigned += postIds.length;
 

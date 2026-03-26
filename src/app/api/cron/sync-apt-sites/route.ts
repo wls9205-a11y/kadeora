@@ -1,8 +1,9 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 
-export const maxDuration = 120;
+export const maxDuration = 180;
 
 const makeSlug = (name: string) =>
   name.trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase();
@@ -45,44 +46,66 @@ async function handler(_req: NextRequest) {
       }, { onConflict: 'slug', ignoreDuplicates: false });
       if (!error) inserted++;
     }
-  } catch (e: any) { errors.push(`sub: ${e.message}`); }
+  } catch (e: unknown) { errors.push(`sub: ${errMsg(e)}`); }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // Step 2: 재개발(redevelopment_projects) → apt_sites
+  // Step 2: 재개발(redevelopment_projects) → apt_sites (배치 최적화)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   try {
     const { data: redevs } = await sb.from('redevelopment_projects')
       .select('id, district_name, region, sigungu, address, total_households, constructor, developer, stage, nearest_station, nearest_school, latitude, longitude')
       .eq('is_active', true).not('district_name', 'is', null).limit(300);
 
-    for (const r of (redevs || [])) {
-      if (!r.district_name || r.district_name.trim().length < 3) continue;
-      const slug = makeSlug(r.district_name);
-      if (!slug) continue;
+    const validRedevs = (redevs || []).filter(r => r.district_name && r.district_name.trim().length >= 3);
+    if (validRedevs.length > 0) {
+      const slugs = validRedevs.map(r => makeSlug(r.district_name!));
+      // 한 번에 기존 데이터 조회
+      const { data: existingSites } = await sb.from('apt_sites')
+        .select('id, slug, source_ids').in('slug', slugs);
+      const existingMap = new Map((existingSites || []).map(s => [s.slug, s]));
 
-      const { data: existing } = await sb.from('apt_sites').select('id, source_ids').eq('slug', slug).maybeSingle();
-      if (existing) {
-        const srcIds = (existing.source_ids || {}) as Record<string, string>;
-        await sb.from('apt_sites').update({
-          source_ids: { ...srcIds, redev_id: String(r.id), redev_stage: r.stage },
-          latitude: r.latitude || undefined, longitude: r.longitude || undefined,
-          updated_at: new Date().toISOString(),
-        }).eq('id', existing.id);
-        updated++;
-      } else {
-        await sb.from('apt_sites').insert({
-          slug, name: r.district_name.trim(), site_type: 'redevelopment',
-          region: r.region, sigungu: r.sigungu, address: r.address,
-          total_units: r.total_households, builder: r.constructor, developer: r.developer,
-          status: 'active', source_ids: { redev_id: String(r.id), redev_stage: r.stage },
-          nearby_station: r.nearest_station, school_district: r.nearest_school,
-          latitude: r.latitude, longitude: r.longitude,
-          sitemap_wave: 1, key_features: r.stage ? [r.stage] : [],
-        });
-        inserted++;
+      const newRows: any[] = [];
+      const updateOps: Array<() => Promise<void>> = [];
+
+      for (const r of validRedevs) {
+        const slug = makeSlug(r.district_name!);
+        if (!slug) continue;
+        const existing = existingMap.get(slug);
+
+        if (existing) {
+          const srcIds = (existing.source_ids || {}) as Record<string, string>;
+          updateOps.push(() =>
+            sb.from('apt_sites').update({
+              source_ids: { ...srcIds, redev_id: String(r.id), redev_stage: r.stage },
+              latitude: r.latitude || undefined, longitude: r.longitude || undefined,
+              updated_at: new Date().toISOString(),
+            }).eq('id', existing.id) as unknown as Promise<void>
+          );
+          updated++;
+        } else {
+          newRows.push({
+            slug, name: r.district_name!.trim(), site_type: 'redevelopment',
+            region: r.region, sigungu: r.sigungu, address: r.address,
+            total_units: r.total_households, builder: r.constructor, developer: r.developer,
+            status: 'active', source_ids: { redev_id: String(r.id), redev_stage: r.stage },
+            nearby_station: r.nearest_station, school_district: r.nearest_school,
+            latitude: r.latitude, longitude: r.longitude,
+            sitemap_wave: 1, key_features: r.stage ? [r.stage] : [],
+          });
+        }
+      }
+
+      // 배치 삽입 (50건씩)
+      for (let i = 0; i < newRows.length; i += 50) {
+        const { error } = await sb.from('apt_sites').upsert(newRows.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
+        if (!error) inserted += Math.min(50, newRows.length - i);
+      }
+      // 업데이트는 10건씩 병렬
+      for (let i = 0; i < updateOps.length; i += 10) {
+        await Promise.allSettled(updateOps.slice(i, i + 10).map(fn => fn()));
       }
     }
-  } catch (e: any) { errors.push(`redev: ${e.message}`); }
+  } catch (e: unknown) { errors.push(`redev: ${errMsg(e)}`); }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Step 3: 실거래(apt_transactions) → apt_sites (NEW)
@@ -98,7 +121,7 @@ async function handler(_req: NextRequest) {
       // 실거래에서 이미 apt_sites에 있는 이름 목록 가져오기
       const { data: existingNames } = await sb.from('apt_sites')
         .select('name').limit(10000);
-      const nameSet = new Set((existingNames || []).map((n: any) => n.name));
+      const nameSet = new Set((existingNames || []).map((n: Record<string, any>) => n.name));
 
       // 실거래 고유 단지 집계
       const { data: rawTrades } = await sb
@@ -168,11 +191,10 @@ async function handler(_req: NextRequest) {
       }
     }
     inserted += tradeInserted;
-  } catch (e: any) { errors.push(`trade: ${e.message}`); }
+  } catch (e: unknown) { errors.push(`trade: ${errMsg(e)}`); }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // Step 4: 미분양 개별 단지(unsold_apts) → apt_sites (NEW)
-  // 기존 시군구 단위가 아닌 개별 단지 단위로 추가
+  // Step 4: 미분양 개별 단지(unsold_apts) → apt_sites (배치 최적화)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   let unsoldInserted = 0;
   try {
@@ -181,54 +203,69 @@ async function handler(_req: NextRequest) {
       .not('house_nm', 'is', null)
       .limit(500);
 
-    for (const u of (unsolds || [])) {
-      if (!u.house_nm || u.house_nm.trim().length < 3) continue;
-      const slug = makeSlug(u.house_nm);
-      if (!slug) continue;
+    const validUnsolds = (unsolds || []).filter(u => u.house_nm && u.house_nm.trim().length >= 3);
+    if (validUnsolds.length > 0) {
+      const slugs = validUnsolds.map(u => makeSlug(u.house_nm!));
+      // 한 번에 기존 데이터 조회
+      const { data: existingSites } = await sb.from('apt_sites')
+        .select('id, slug, source_ids, site_type').in('slug', slugs);
+      const existingMap = new Map((existingSites || []).map(s => [s.slug, s]));
 
-      const { data: existing } = await sb.from('apt_sites').select('id, source_ids, site_type').eq('slug', slug).maybeSingle();
+      const newRows: any[] = [];
+      const updateOps: Array<() => Promise<void>> = [];
 
-      if (existing) {
-        // 기존 현장에 미분양 정보 보강
-        const srcIds = (existing.source_ids || {}) as Record<string, string>;
-        await sb.from('apt_sites').update({
-          source_ids: { ...srcIds, unsold_id: String(u.id), unsold_count: String(u.tot_unsold_hshld_co || 0) },
-          price_min: u.sale_price_min || undefined,
-          price_max: u.sale_price_max || undefined,
-          total_units: u.tot_supply_hshld_co || undefined,
-          sigungu: u.sigungu_nm || undefined,
-          builder: u.constructor_nm || undefined,
-          developer: u.developer_nm || undefined,
-          latitude: u.latitude || undefined,
-          longitude: u.longitude || undefined,
-          nearby_station: u.nearest_station || undefined,
-          updated_at: new Date().toISOString(),
-        }).eq('id', existing.id);
-        updated++;
-      } else {
-        // 신규 삽입
-        await sb.from('apt_sites').insert({
-          slug, name: u.house_nm.trim(), site_type: 'unsold',
-          region: u.region_nm, sigungu: u.sigungu_nm,
-          address: u.supply_addr,
-          total_units: u.tot_supply_hshld_co || null,
-          price_min: u.sale_price_min || null,
-          price_max: u.sale_price_max || null,
-          builder: u.constructor_nm, developer: u.developer_nm,
-          latitude: u.latitude, longitude: u.longitude,
-          nearby_station: u.nearest_station,
-          status: 'active',
-          source_ids: { unsold_id: String(u.id), unsold_count: String(u.tot_unsold_hshld_co || 0) },
-          move_in_date: u.completion_ym,
-          key_features: u.key_features || (u.discount_info ? [u.discount_info] : []),
-          sitemap_wave: 1,
-          is_active: true,
-        });
-        unsoldInserted++;
+      for (const u of validUnsolds) {
+        const slug = makeSlug(u.house_nm!);
+        if (!slug) continue;
+        const existing = existingMap.get(slug);
+
+        if (existing) {
+          const srcIds = (existing.source_ids || {}) as Record<string, string>;
+          updateOps.push(() =>
+            sb.from('apt_sites').update({
+              source_ids: { ...srcIds, unsold_id: String(u.id), unsold_count: String(u.tot_unsold_hshld_co || 0) },
+              price_min: u.sale_price_min || undefined,
+              price_max: u.sale_price_max || undefined,
+              total_units: u.tot_supply_hshld_co || undefined,
+              sigungu: u.sigungu_nm || undefined,
+              builder: u.constructor_nm || undefined,
+              developer: u.developer_nm || undefined,
+              latitude: u.latitude || undefined,
+              longitude: u.longitude || undefined,
+              nearby_station: u.nearest_station || undefined,
+              updated_at: new Date().toISOString(),
+            }).eq('id', existing.id) as unknown as Promise<void>
+          );
+          updated++;
+        } else {
+          newRows.push({
+            slug, name: u.house_nm!.trim(), site_type: 'unsold',
+            region: u.region_nm, sigungu: u.sigungu_nm, address: u.supply_addr,
+            total_units: u.tot_supply_hshld_co || null,
+            price_min: u.sale_price_min || null, price_max: u.sale_price_max || null,
+            builder: u.constructor_nm, developer: u.developer_nm,
+            latitude: u.latitude, longitude: u.longitude,
+            nearby_station: u.nearest_station, status: 'active',
+            source_ids: { unsold_id: String(u.id), unsold_count: String(u.tot_unsold_hshld_co || 0) },
+            move_in_date: u.completion_ym,
+            key_features: u.key_features || (u.discount_info ? [u.discount_info] : []),
+            sitemap_wave: 1, is_active: true,
+          });
+        }
+      }
+
+      // 배치 삽입
+      for (let i = 0; i < newRows.length; i += 50) {
+        const { error } = await sb.from('apt_sites').upsert(newRows.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
+        if (!error) unsoldInserted += Math.min(50, newRows.length - i);
+      }
+      // 업데이트 10건씩 병렬
+      for (let i = 0; i < updateOps.length; i += 10) {
+        await Promise.allSettled(updateOps.slice(i, i + 10).map(fn => fn()));
       }
     }
     inserted += unsoldInserted;
-  } catch (e: any) { errors.push(`unsold: ${e.message}`); }
+  } catch (e: unknown) { errors.push(`unsold: ${errMsg(e)}`); }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Step 5: content_score 재계산 (배치)
@@ -299,7 +336,7 @@ async function handler(_req: NextRequest) {
         scored += chunk.length;
       }
     }
-  } catch (e: any) { errors.push(`score: ${e.message}`); }
+  } catch (e: unknown) { errors.push(`score: ${errMsg(e)}`); }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Step 6: sitemap_wave 활성화 (score >= 25)

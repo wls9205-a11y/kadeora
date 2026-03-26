@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 30;
 import { NextRequest, NextResponse } from 'next/server'
 import { withCronAuth } from '@/lib/cron-auth'
@@ -52,8 +53,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         alerts: alertCount ?? 0,
       }
     })
-  } catch (e: any) {
-    console.error('[cleanup] error:', e.message)
-    return NextResponse.json({ error: e.message }, { status: 200 })
+  } catch (e: unknown) {
+    console.error('[cleanup] error:', errMsg(e))
+    return NextResponse.json({ error: errMsg(e) }, { status: 200 })
   }
 })

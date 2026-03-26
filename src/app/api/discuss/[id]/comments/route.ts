@@ -12,7 +12,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       .order('created_at', { ascending: true })
       .limit(100);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ comments: data || [] });
+    return NextResponse.json({ comments: data || [] }, {
+      headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=150' },
+    });
   } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
 

@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -15,7 +16,7 @@ export async function DELETE(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     return NextResponse.json({ ok: true, target });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'error' }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) || 'error' }, { status: 500 });
   }
 }

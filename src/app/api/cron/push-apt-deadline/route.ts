@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 관심단지 북마크 유저에게 추가 알림
-    const aptIds = deadlines.map((d: any) => d.id).filter(Boolean);
+    const aptIds = deadlines.map((d: Record<string, any>) => d.id).filter(Boolean);
     if (aptIds.length > 0) {
       const { data: bookmarks } = await admin.from('apt_bookmarks')
         .select('user_id, apt_id')
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
         .eq('notify', true);
 
       if (bookmarks && bookmarks.length > 0) {
-        const aptMap = new Map(deadlines.map((d: any) => [d.id, d]));
+        const aptMap = new Map(deadlines.map((d: Record<string, any>) => [d.id, d]));
         for (const bk of bookmarks) {
           const apt = aptMap.get(bk.apt_id) as any;
           if (!apt) continue;

@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 30;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -22,8 +23,8 @@ export async function GET(req: NextRequest) {
       .select('id');
 
     return NextResponse.json({ ok: true, deactivated: (expired || []).length, fallback: true });
-  } catch (e: any) {
+  } catch (e: unknown) {
     // 에러 시에도 200 반환 (재시도 루프 방지)
-    return NextResponse.json({ ok: true, error: e.message });
+    return NextResponse.json({ ok: true, error: errMsg(e) });
   }
 }

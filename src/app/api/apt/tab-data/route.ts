@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ error: 'Invalid tab' }, { status: 400 });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }

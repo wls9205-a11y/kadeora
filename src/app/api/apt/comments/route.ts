@@ -12,7 +12,9 @@ export async function GET(req: NextRequest) {
       .select('id, content, created_at, author_id, profiles!apt_comments_author_id_fkey(nickname)')
       .eq('house_key', houseKey).order('created_at', { ascending: false }).limit(50);
     if (error) return NextResponse.json({ comments: [] });
-    return NextResponse.json({ comments: (data || []).map((c: any) => ({ id: c.id, content: c.content, nickname: c.profiles?.nickname ?? '익명', created_at: c.created_at })) });
+    return NextResponse.json({ comments: (data || []).map((c: any) => ({ id: c.id, content: c.content, nickname: c.profiles?.nickname ?? '익명', created_at: c.created_at })) }, {
+      headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=150' },
+    });
   } catch { return NextResponse.json({ comments: [] }); }
 }
 

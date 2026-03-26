@@ -21,12 +21,12 @@ export async function GET(req: Request) {
     if (!alerts?.length) return { checked: 0, triggered: 0 };
 
     // 주식 알림 처리
-    const stockAlerts = alerts.filter((a: any) => a.alert_type?.startsWith('stock'));
+    const stockAlerts = alerts.filter((a: Record<string, any>) => a.alert_type?.startsWith('stock'));
     if (stockAlerts.length) {
-      const symbols = [...new Set(stockAlerts.map((a: any) => a.target_symbol).filter(Boolean))];
+      const symbols = [...new Set(stockAlerts.map((a: Record<string, any>) => a.target_symbol).filter(Boolean))];
       const { data: stocks } = await sb.from('stock_quotes')
         .select('symbol,name,price,change_pct').in('symbol', symbols as string[]);
-      const stockMap = new Map((stocks || []).map((s: any) => [s.symbol, s]));
+      const stockMap = new Map((stocks || []).map((s: Record<string, any>) => [s.symbol, s]));
 
       for (const alert of stockAlerts) {
         const stock: any = stockMap.get(alert.target_symbol);
@@ -62,15 +62,15 @@ export async function GET(req: Request) {
     }
 
     // 청약 D-day 알림
-    const aptAlerts = alerts.filter((a: any) => a.alert_type === 'apt_subscription' && a.condition === 'd_day');
+    const aptAlerts = alerts.filter((a: Record<string, any>) => a.alert_type === 'apt_subscription' && a.condition === 'd_day');
     if (aptAlerts.length) {
-      const aptIds = aptAlerts.map((a: any) => a.target_apt_id).filter(Boolean);
+      const aptIds = aptAlerts.map((a: Record<string, any>) => a.target_apt_id).filter(Boolean);
       const { data: apts } = await sb.from('apt_subscriptions')
         .select('id,house_nm,rcept_bgnde,rcept_endde').in('id', aptIds);
       const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
       for (const alert of aptAlerts) {
-        const apt = (apts || []).find((a: any) => a.id === alert.target_apt_id) as any;
+        const apt = (apts || []).find((a: Record<string, any>) => a.id === alert.target_apt_id) as any;
         if (!apt) continue;
         const daysLeft = Math.ceil((new Date(apt.rcept_endde).getTime() - new Date(kstToday).getTime()) / 86400000);
         if (daysLeft === 1 || daysLeft === 3) {

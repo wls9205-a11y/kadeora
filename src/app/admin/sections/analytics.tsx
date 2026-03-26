@@ -18,8 +18,8 @@ export default function AnalyticsSection() {
   if (!data || data.error) return <div style={{ textAlign: 'center', padding: 60, color: C.red }}>데이터 로드 실패: {data?.error || '알 수 없음'}</div>;
 
   const { kpi, topPages, referrers, hourly, daily, devices, recentViews } = data;
-  const maxHour = Math.max(...(hourly || []).map((h: any) => h.count), 1);
-  const maxDaily = Math.max(...(daily || []).map((d: any) => d.views), 1);
+  const maxHour = Math.max(...(hourly || []).map((h: Record<string, any>) => h.count), 1);
+  const maxDaily = Math.max(...(daily || []).map((d: Record<string, any>) => d.views), 1);
   const totalDevices = (devices?.mobile || 0) + (devices?.desktop || 0) + (devices?.bot || 0);
 
   return (
@@ -102,7 +102,7 @@ export default function AnalyticsSection() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>시간대별 분포 (KST)</div>
           <div className="mc-hour-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 3 }}>
-            {(hourly || []).map((h: any) => {
+            {(hourly || []).map((h: Record<string, any>) => {
               const intensity = maxHour > 0 ? h.count / maxHour : 0;
               return (
                 <div key={h.hour} style={{ textAlign: 'center' }}>

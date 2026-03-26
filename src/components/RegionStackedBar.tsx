@@ -12,11 +12,11 @@ interface RegionData {
 }
 
 interface Props {
-  apts: any[];
-  ongoingApts: any[];
-  unsold: any[];
-  redevelopment: any[];
-  transactions: any[];
+  apts: Record<string, any>[];
+  ongoingApts: Record<string, any>[];
+  unsold: Record<string, any>[];
+  redevelopment: Record<string, any>[];
+  transactions: Record<string, any>[];
   onRegionClick?: (region: string) => void;
   activeRegion?: string;
 }
@@ -49,7 +49,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
     };
 
     // 청약
-    apts.forEach((a: any) => {
+    apts.forEach((a: Record<string, any>) => {
       const r = a.region_nm;
       if (!r) return;
       ensure(r);
@@ -57,7 +57,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
     });
 
     // 분양중
-    ongoingApts.forEach((a: any) => {
+    ongoingApts.forEach((a: Record<string, any>) => {
       const r = a.region_nm;
       if (!r) return;
       ensure(r);
@@ -65,7 +65,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
     });
 
     // 미분양
-    unsold.forEach((u: any) => {
+    unsold.forEach((u: Record<string, any>) => {
       const r = u.region_nm;
       if (!r) return;
       ensure(r);
@@ -73,7 +73,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
     });
 
     // 재개발
-    redevelopment.forEach((rd: any) => {
+    redevelopment.forEach((rd: Record<string, any>) => {
       const r = rd.region || rd.region_nm;
       if (!r) return;
       ensure(r);
@@ -82,7 +82,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
     // 실거래 (지역별 고유 거래 수)
     const tradeRegionSet: Record<string, Set<string>> = {};
-    transactions.forEach((t: any) => {
+    transactions.forEach((t: Record<string, any>) => {
       const r = t.region_nm || t.sigungu_nm?.slice(0, 2);
       if (!r) return;
       ensure(r);

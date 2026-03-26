@@ -18,7 +18,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
-    const ch = sb.channel(`apt-inline-${houseKey}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'apt_comments', filter: `house_key=eq.${houseKey}` }, (payload: any) => {
+    const ch = sb.channel(`apt-inline-${houseKey}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'apt_comments', filter: `house_key=eq.${houseKey}` }, (payload: { new: Record<string, any> }) => {
       setComments(p => [{ ...payload.new, nickname: '새 댓글' }, ...p]);
     }).subscribe();
     return () => { sb.removeChannel(ch); };
@@ -51,7 +51,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
       )}
       <div style={{ maxHeight: 300, overflowY: 'auto' }}>
         {comments.length === 0 && <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>첫 한줄평을 남겨보세요! 👋</div>}
-        {comments.map((c: any) => (
+        {comments.map((c: Record<string, any>) => (
           <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{c.nickname}</span>

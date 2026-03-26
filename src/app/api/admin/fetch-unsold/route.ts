@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -86,7 +87,7 @@ export async function POST() {
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
 
     return NextResponse.json({ success: true, count: allItems.length, message: `${allItems.length}개 현장 업데이트 완료` });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || '서버 오류' }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) || '서버 오류' }, { status: 500 });
   }
 }

@@ -48,7 +48,7 @@ function generateSubSummary(apt: any): string {
   return parts.length > 0 ? parts.join(' · ') : `${region} ${supply > 0 ? supply.toLocaleString() + '세대' : ''} 분양`;
 }
 
-function generateUnsoldSummary(u: any): string {
+function generateUnsoldSummary(u: Record<string, any>): string {
   const parts: string[] = [];
   const unsold = u.tot_unsold_hshld_co || 0;
   const total = u.tot_supply_hshld_co || 0;
@@ -66,7 +66,7 @@ function generateUnsoldSummary(u: any): string {
   return parts.join(' · ') || `미분양 ${unsold}호`;
 }
 
-function generateRedevSummary(r: any): string {
+function generateRedevSummary(r: Record<string, any>): string {
   const parts: string[] = [];
   const stage = r.stage || '';
 

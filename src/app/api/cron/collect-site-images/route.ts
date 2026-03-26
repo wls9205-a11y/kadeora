@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 60;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -48,7 +49,7 @@ async function handler(_req: NextRequest) {
     .order('interest_count', { ascending: false })
     .limit(BATCH_SIZE * 2); // 여유있게 가져와서 이미지 없는 것만 필터
 
-  const targets = (sites || []).filter((s: any) => {
+  const targets = (sites || []).filter((s: Record<string, any>) => {
     const imgs = s.images;
     return !imgs || !Array.isArray(imgs) || imgs.length === 0;
   }).slice(0, BATCH_SIZE);
@@ -96,8 +97,8 @@ async function handler(_req: NextRequest) {
       }).eq('id', site.id);
 
       collected++;
-    } catch (e: any) {
-      errors.push(`${site.name}: ${e.message}`);
+    } catch (e: unknown) {
+      errors.push(`${site.name}: ${errMsg(e)}`);
     }
   }
 

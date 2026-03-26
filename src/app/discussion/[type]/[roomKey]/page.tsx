@@ -89,7 +89,7 @@ export default function DiscussionRoomPage() {
       .then(({ data }) => {
         if (data) {
           setMessages(
-            data.map((m: Record<string, unknown>) => ({
+            data.map((m: Record<string, any>) => ({
               ...(m as unknown as Message),
               is_mine: (m as { author_id?: string }).author_id === currentUser?.id,
             }))
@@ -114,7 +114,7 @@ export default function DiscussionRoomPage() {
           filter: 'room_id=eq.' + room.id,
         },
         async (payload) => {
-          const m = payload.new as Record<string, unknown>;
+          const m = payload.new as Record<string, any>;
           const { data: p } = await supabase
             .from('profiles')
             .select('nickname, avatar_url, grade')

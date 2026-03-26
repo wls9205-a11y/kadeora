@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 60;
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
@@ -61,8 +62,8 @@ export async function GET(req: NextRequest) {
         } else {
           debugInfo[svc] = { status: 'empty_rows', keys: Object.keys(testData) };
         }
-      } catch (e: any) {
-        debugInfo[svc] = { error: e.message };
+      } catch (e: unknown) {
+        debugInfo[svc] = { error: errMsg(e) };
       }
     }
 

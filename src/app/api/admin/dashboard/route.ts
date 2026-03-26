@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -71,9 +72,9 @@ export async function GET(req: Request) {
       const pvTodayFiltered = (pvTodayR.data || []);
       const pvWeekFiltered = (pvWeekR.data || []);
       const todayPV = pvTodayFiltered.length;
-      const todayUV = new Set(pvTodayFiltered.map((v: any) => v.visitor_id)).size;
+      const todayUV = new Set(pvTodayFiltered.map((v: { visitor_id?: string }) => v.visitor_id)).size;
       const weekPV = pvWeekFiltered.length;
-      const weekUV = new Set(pvWeekFiltered.map((v: any) => v.visitor_id)).size;
+      const weekUV = new Set(pvWeekFiltered.map((v: { visitor_id?: string }) => v.visitor_id)).size;
       // Top referrer
       const extRef: Record<string, number> = {};
       pvWeekFiltered.forEach((v: any) => {
@@ -214,12 +215,12 @@ export async function GET(req: Request) {
         profile: profileR.data,
         notifications: notiR.data ?? null,
         pushSubscriptions: (pushR.data ?? []).length,
-        pushDevices: (pushR.data ?? []).map((p: any) => ({
+        pushDevices: (pushR.data ?? []).map((p: Record<string, any>) => ({
           id: p.id,
           created_at: p.created_at,
           browser: p.endpoint?.includes('fcm') ? 'Chrome/Android' : p.endpoint?.includes('mozilla') ? 'Firefox' : p.endpoint?.includes('apple') ? 'Safari/iOS' : 'Unknown',
         })),
-        pwaInstalls: (pwaR.data ?? []).map((p: any) => ({
+        pwaInstalls: (pwaR.data ?? []).map((p: Record<string, any>) => ({
           platform: p.platform,
           installed_at: p.installed_at,
           browser: extractBrowser(p.user_agent),
@@ -359,8 +360,8 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ error: 'Unknown section' }, { status: 400 });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e) }, { status: 500 });
   }
 }
 

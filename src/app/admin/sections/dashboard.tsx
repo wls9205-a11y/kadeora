@@ -155,7 +155,7 @@ export default function DashboardSection() {
         {/* 최근 가입 */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>최근 가입</div>
-          {(recentUsers || []).map((u: any) => (
+          {(recentUsers || []).map((u: Record<string, any>) => (
             <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: `1px solid ${C.border}08` }}>
               <span style={{ fontSize: 13 }}>{GRADE_EMOJI[u.grade] || '🌱'}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -171,7 +171,7 @@ export default function DashboardSection() {
         {/* 최근 게시글 */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>최근 게시글</div>
-          {(recentPosts || []).map((p: any) => (
+          {(recentPosts || []).map((p: Record<string, any>) => (
             <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: `1px solid ${C.border}08` }}>
               <span style={{ fontSize: 12 }}>{catIcons[p.category] || '📄'}</span>
               <div style={{ flex: 1, minWidth: 0 }}>

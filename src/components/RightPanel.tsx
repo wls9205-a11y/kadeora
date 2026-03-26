@@ -121,7 +121,7 @@ export default function RightPanel() {
             <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>추천 읽을거리</span>
             <Link href="/blog" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>더보기 →</Link>
           </div>
-          {recBlogs.map((b: any) => (
+          {recBlogs.map((b: Record<string, any>) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{
               display: 'block', padding: '5px 0', textDecoration: 'none',
               fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', lineHeight: 1.4,

@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Badge, C, DataTable, KPI, KPICard } from '../admin-shared';
@@ -29,8 +30,8 @@ export default function GodModeSection() {
       });
       const data = await res.json();
       setResults(data.results || []);
-    } catch (e: any) {
-      setResults([{ name: 'ERROR', ok: false, error: e.message }]);
+    } catch (e: unknown) {
+      setResults([{ name: 'ERROR', ok: false, error: errMsg(e) }]);
     } finally {
       clearInterval(timerRef.current);
       setElapsed(Date.now() - start);

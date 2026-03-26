@@ -84,7 +84,7 @@ export default async function ComplexDetailPage({ params }: Props) {
     areaMap.set(area, cur);
   });
   areaMap.forEach((v) => {
-    const amts = v.trades.filter((t: any) => t.deal_amount > 0).map((t: any) => t.deal_amount);
+    const amts = v.trades.filter((t: Record<string, any>) => t.deal_amount > 0).map((t: Record<string, any>) => t.deal_amount);
     v.avg = amts.length ? Math.round(amts.reduce((s: number, a: number) => s + a, 0) / amts.length) : 0;
   });
   const areaStats = Array.from(areaMap.entries())

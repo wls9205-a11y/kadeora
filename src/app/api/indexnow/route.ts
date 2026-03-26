@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -64,8 +65,8 @@ async function handler(_req: NextRequest) {
       status: res.status,
       ok: res.ok,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message, submitted: 0 }, { status: 200 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: errMsg(e), submitted: 0 }, { status: 200 });
   }
 }
 

@@ -135,7 +135,7 @@ export async function GET(req: NextRequest) {
       const commentCount = randInt(0, 4);
       if (commentCount > 0) {
         const commentUsers = pickN(seedUsers, commentCount);
-        const commentRows = commentUsers.map((u: any) => ({
+        const commentRows = commentUsers.map((u: Record<string, any>) => ({
           post_id: postId,
           author_id: u.id,
           content: pick(COMMENT_TEMPLATES),
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
       const likeCount = randInt(0, 8);
       if (likeCount > 0) {
         const likeUsers = pickN(seedUsers, Math.min(likeCount, seedUsers.length));
-        const likeRows = likeUsers.map((u: any) => ({
+        const likeRows = likeUsers.map((u: Record<string, any>) => ({
           post_id: postId,
           user_id: u.id,
         }));

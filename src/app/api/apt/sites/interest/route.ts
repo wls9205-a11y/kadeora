@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({ success: true, message: '관심단지 등록이 완료되었습니다' });
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('[apt/sites/interest]', e);
     return NextResponse.json({ error: '등록 중 오류가 발생했습니다' }, { status: 500 });
   }

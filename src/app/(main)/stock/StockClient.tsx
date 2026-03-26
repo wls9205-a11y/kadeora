@@ -252,12 +252,12 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {/* Top movers */}
           {(briefing.key_movers || briefing.top_movers) && (
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 6 }}>
-              {((briefing.key_movers || briefing.top_movers)?.gainers || []).slice(0, 2).map((s: any) => (
+              {((briefing.key_movers || briefing.top_movers)?.gainers || []).slice(0, 2).map((s: Record<string, any>) => (
                 <span key={s.symbol} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
                   ▲ {s.name} +{s.change_pct?.toFixed(1)}%
                 </span>
               ))}
-              {((briefing.key_movers || briefing.top_movers)?.losers || []).slice(0, 2).map((s: any) => (
+              {((briefing.key_movers || briefing.top_movers)?.losers || []).slice(0, 2).map((s: Record<string, any>) => (
                 <span key={s.symbol} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, background: 'rgba(248,113,113,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>
                   ▼ {s.name} {s.change_pct?.toFixed(1)}%
                 </span>

@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -144,7 +145,7 @@ export default function WriteClient() {
       }
       router.refresh();
     } catch (e: unknown) {
-      error(e instanceof Error ? e.message : '오류가 발생했습니다');
+      error(e instanceof Error ? errMsg(e) : '오류가 발생했습니다');
     } finally { setLoading(false); }
   };
 

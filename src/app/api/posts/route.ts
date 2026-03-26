@@ -20,7 +20,9 @@ export async function GET(req: NextRequest) {
     if (category) query = query.eq('category', category);
     const { data, error, count } = await query;
     if (error) { console.error('[Posts GET]', error); return NextResponse.json({ error: '게시글을 불러올 수 없습니다.' }, { status: 500 }); }
-    return NextResponse.json({ posts: data || [], total: count || 0, page, limit, hasMore: (count || 0) > page * limit });
+    return NextResponse.json({ posts: data || [], total: count || 0, page, limit, hasMore: (count || 0) > page * limit }, {
+      headers: { 'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=60' },
+    });
   } catch (err) { console.error('[Posts GET]', err); return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
 

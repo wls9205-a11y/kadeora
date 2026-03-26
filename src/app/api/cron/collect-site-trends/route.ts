@@ -26,7 +26,7 @@ async function fetchTrend(keyword: string): Promise<{ period: string; ratio: num
     });
     if (!res.ok) return [];
     const data = await res.json();
-    return (data.results?.[0]?.data || []).map((d: any) => ({ period: d.period, ratio: d.ratio }));
+    return (data.results?.[0]?.data || []).map((d: Record<string, any>) => ({ period: d.period, ratio: d.ratio }));
   } catch { return []; }
 }
 
@@ -45,7 +45,7 @@ async function handler(_req: NextRequest) {
     .order('interest_count', { ascending: false })
     .limit(BATCH_SIZE * 3);
 
-  const targets = (sites || []).filter((s: any) => {
+  const targets = (sites || []).filter((s: Record<string, any>) => {
     if (!s.search_trend) return true;
     const lastUpdated = (s.search_trend as any)?.updated_at;
     if (!lastUpdated) return true;

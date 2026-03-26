@@ -2,6 +2,9 @@ export const maxDuration = 60;
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
+
+type MolitRow = Record<string, string>;
+
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
@@ -18,7 +21,7 @@ export async function GET(req: NextRequest) {
     // 최신 월 데이터 (보통 2~3개월 전까지 제공)
     const now = new Date();
     const attempts = [2, 3, 4]; // 2개월 전, 3개월 전, 4개월 전 순서로 시도
-    let formList: any[] = [];
+    let formList: MolitRow[] = [];
     let usedMonth = '';
 
     for (const monthsAgo of attempts) {
@@ -28,10 +31,10 @@ export async function GET(req: NextRequest) {
 
       const res = await fetch(url);
       const text = await res.text();
-      let data: any;
+      let data: { result_data?: { formList?: MolitRow[] } };
       try { data = JSON.parse(text); } catch { continue; }
 
-      if (data?.result_data?.formList?.length > 0) {
+      if (data?.result_data?.formList && data.result_data.formList.length > 0) {
         formList = data.result_data.formList;
         usedMonth = yyyymm;
         break;
@@ -44,12 +47,12 @@ export async function GET(req: NextRequest) {
 
     // 시군구별 미분양 매핑 (합계 행 제외, 0세대 제외)
     const mapped = formList
-      .filter((r: any) => r['시군구'] && r['시군구'] !== '계' && r['시군구'] !== '소계')
-      .filter((r: any) => {
+      .filter((r: MolitRow) => r['시군구'] && r['시군구'] !== '계' && r['시군구'] !== '소계')
+      .filter((r: MolitRow) => {
         const val = parseInt(String(r['미분양현황'] || '0').replace(/,/g, ''));
         return val > 0;
       })
-      .map((r: any) => ({
+      .map((r: MolitRow) => ({
         region_nm: (r['구분'] || '').replace(/특별시|광역시|특별자치시|특별자치도/g, '').trim(),
         sigungu_nm: r['시군구'],
         house_nm: `${(r['구분'] || '').replace(/특별시|광역시|특별자치시|특별자치도/g, '').trim()} ${r['시군구']} 미분양`,
@@ -80,27 +83,27 @@ export async function GET(req: NextRequest) {
       const summaryUrl = `http://stat.molit.go.kr/portal/openapi/service/rest/getList.do?key=${apiKey}&form_id=2086&style_num=713&start_dt=${year}&end_dt=${year}`;
       const summaryRes = await fetch(summaryUrl);
       const summaryText = await summaryRes.text();
-      let summaryData: any;
+      let summaryData: { result_data?: { formList?: MolitRow[] } } | null;
       try { summaryData = JSON.parse(summaryText); } catch { summaryData = null; }
 
       const summaryList = summaryData?.result_data?.formList || [];
       if (summaryList.length > 0) {
         const lastCol = Object.keys(summaryList[0]).find(k => k.includes('월기준') || k.includes('12월'));
-        const getVal = (item: any) => {
+        const getVal = (item: MolitRow | undefined) => {
           if (!item) return 0;
           const val = lastCol ? item[lastCol] : Object.values(item).pop();
           return parseInt(String(val || '0').replace(/,/g, ''));
         };
 
         const byRegion = summaryList
-          .filter((r: any) => r['대분류'] === '시도별미분양현황' && !['전국', '수도권', '지방'].includes(r['구분']))
-          .map((r: any) => ({ name: r['구분'], value: getVal(r) }));
+          .filter((r: MolitRow) => r['대분류'] === '시도별미분양현황' && !['전국', '수도권', '지방'].includes(r['구분']))
+          .map((r: MolitRow) => ({ name: r['구분'], value: getVal(r) }));
 
         const summary = {
-          total: getVal(summaryList.find((r: any) => r['대분류'] === '시도별미분양현황' && r['구분'] === '전국')),
-          after_completion: getVal(summaryList.find((r: any) => r['구분']?.includes('준공후'))),
-          capital: getVal(summaryList.find((r: any) => r['구분'] === '수도권')),
-          local: getVal(summaryList.find((r: any) => r['구분'] === '지방')),
+          total: getVal(summaryList.find((r: MolitRow) => r['대분류'] === '시도별미분양현황' && r['구분'] === '전국')),
+          after_completion: getVal(summaryList.find((r: MolitRow) => r['구분']?.includes('준공후'))),
+          capital: getVal(summaryList.find((r: MolitRow) => r['구분'] === '수도권')),
+          local: getVal(summaryList.find((r: MolitRow) => r['구분'] === '지방')),
           by_region: byRegion,
           year,
           month: usedMonth,

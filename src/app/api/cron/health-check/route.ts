@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 15;
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -55,7 +56,7 @@ export async function GET(request: Request) {
           message: `응답 없음 또는 에러 (${responseTime}ms)`,
         });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       const responseTime = Date.now() - start;
       await supabase
         .from('health_checks')
@@ -64,7 +65,7 @@ export async function GET(request: Request) {
           status: 'error',
           response_time_ms: responseTime,
           last_checked_at: new Date().toISOString(),
-          error_message: e.message?.substring(0, 200),
+          error_message: errMsg(e)?.substring(0, 200),
         }, { onConflict: 'service_name' });
       results.push({ service: service.name, status: 'error', ms: responseTime });
     }

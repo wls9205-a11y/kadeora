@@ -42,8 +42,8 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
   if (!unsold.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏚️ 미분양 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>매월 국토교통부 통계 업데이트 시 반영됩니다</span></div>;
   const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
-  const regs = ['전체', ...Array.from(new Set(unsold.map((u: any) => u.region_nm || '기타'))).sort()];
-  const fu = (unsoldRegion === '전체' ? unsold : unsold.filter((u: any) => (u.region_nm || '기타') === unsoldRegion)).filter((u: any) => {
+  const regs = ['전체', ...Array.from(new Set(unsold.map((u: Record<string, any>) => u.region_nm || '기타'))).sort()];
+  const fu = (unsoldRegion === '전체' ? unsold : unsold.filter((u: Record<string, any>) => (u.region_nm || '기타') === unsoldRegion)).filter((u: Record<string, any>) => {
     if (!unsoldSearch) return true;
     const q = unsoldSearch.toLowerCase();
     return (u.house_nm || '').toLowerCase().includes(q) || (u.region_nm || '').toLowerCase().includes(q) || (u.sigungu_nm || '').toLowerCase().includes(q);
@@ -55,7 +55,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
   // 지역별 현황판 데이터 집계
   const unsoldRegionStats = regs.filter(r => r !== '전체').map(r => {
-    const items = unsold.filter((u: any) => (u.region_nm || '기타') === r);
+    const items = unsold.filter((u: Record<string, any>) => (u.region_nm || '기타') === r);
     const unitCount = items.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
     return { name: r, siteCount: items.length, unitCount };
   }).sort((a, b) => b.unitCount - a.unitCount);
@@ -121,7 +121,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const filteredTotal = fu.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const filteredAfterCompletion = fu.reduce((s: number, u: any) => s + (u.after_completion_unsold || 0), 0);
         const capitalR = ['서울', '경기', '인천'];
-        const filteredCapital = fu.filter((u: any) => capitalR.some(c => (u.region_nm || '').includes(c))).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+        const filteredCapital = fu.filter((u: Record<string, any>) => capitalR.some(c => (u.region_nm || '').includes(c))).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const filteredLocal = filteredTotal - filteredCapital;
         return (
         <div className="kd-card" style={{ marginBottom: 14 }}>

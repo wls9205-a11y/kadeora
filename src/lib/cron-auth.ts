@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -22,9 +23,9 @@ export function withCronAuth(
     }
     try {
       return await handler(req);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(`[Cron Error]`, e);
-      return NextResponse.json({ error: e.message }, { status: 200 });
+      return NextResponse.json({ error: errMsg(e) }, { status: 200 });
     }
   };
 }

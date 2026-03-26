@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
@@ -67,7 +68,7 @@ export async function GET(req: Request) {
       .select('blog_post_id')
       .in('blog_post_id', posts.map(p => p.id));
 
-    const postsWithComments = new Set((existingComments || []).map((c: any) => c.blog_post_id));
+    const postsWithComments = new Set((existingComments || []).map((c: Record<string, any>) => c.blog_post_id));
     const postsNeedComments = posts.filter(p => !postsWithComments.has(p.id));
 
     // 각 글에 1~2개 시드 댓글 생성
@@ -98,12 +99,12 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json({ seeded, checked: postsNeedComments.length });
-  } catch (e: any) {
+  } catch (e: unknown) {
     await sb.from('cron_logs').insert({
       cron_name: 'blog-seed-comments',
       status: 'failed',
-      error_message: e.message?.substring(0, 500),
+      error_message: errMsg(e)?.substring(0, 500),
     });
-    return NextResponse.json({ error: e.message }, { status: 200 });
+    return NextResponse.json({ error: errMsg(e) }, { status: 200 });
   }
 }

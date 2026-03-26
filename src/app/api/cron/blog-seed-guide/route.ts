@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 60;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
@@ -153,8 +154,8 @@ export async function GET(req: NextRequest) {
           else await admin.from('guide_seeds').update({ blog_generated: true }).eq('slug', slug);
           created++;
         }
-      } catch (e: any) {
-        console.error(`[blog-seed-guide] Error for ${seed.blog_slug || seed.slug}:`, e.message);
+      } catch (e: unknown) {
+        console.error(`[blog-seed-guide] Error for ${seed.blog_slug || seed.slug}:`, errMsg(e));
       }
     }
 

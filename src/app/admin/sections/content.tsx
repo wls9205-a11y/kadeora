@@ -47,7 +47,7 @@ export default function ContentSection() {
           {tab === 'posts' && (
             <DataTable
               headers={['제목', '카테고리', '작성자', '조회', '좋아요', '댓글', '작성일', '삭제']}
-              rows={(data?.posts ?? []).map((p: any) => [
+              rows={(data?.posts ?? []).map((p: Record<string, any>) => [
                 <span key="t" style={{ fontWeight: 500, maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{p.title || '(제목 없음)'}</span>,
                 <Badge key="c" color={C.cyan}>{p.category}</Badge>,
                 p.profiles?.nickname || '—',
@@ -62,7 +62,7 @@ export default function ContentSection() {
           {tab === 'comments' && (
             <DataTable
               headers={['내용', '작성자', '작성일', '삭제']}
-              rows={(data?.comments ?? []).map((c: any) => [
+              rows={(data?.comments ?? []).map((c: Record<string, any>) => [
                 <span key="co" style={{ maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', whiteSpace: 'nowrap' }}>{c.content}</span>,
                 c.profiles?.nickname || '—',
                 ago(c.created_at),
@@ -73,7 +73,7 @@ export default function ContentSection() {
           {tab === 'discuss' && (
             <DataTable
               headers={['제목', '카테고리', 'A vs B', '투표', '댓글', '조회', '🔥', '작성일']}
-              rows={(data?.discussions ?? []).map((d: any) => [
+              rows={(data?.discussions ?? []).map((d: Record<string, any>) => [
                 d.title,
                 <Badge key="c" color={C.purple}>{d.category}</Badge>,
                 `${d.option_a} vs ${d.option_b}`,
@@ -88,7 +88,7 @@ export default function ContentSection() {
           {tab === 'chat' && (
             <DataTable
               headers={['내용', '작성자', '시간']}
-              rows={(data?.messages ?? []).map((m: any) => [
+              rows={(data?.messages ?? []).map((m: Record<string, any>) => [
                 <span key="co" style={{ maxWidth: 500, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{m.content}</span>,
                 m.profiles?.nickname || '—',
                 ago(m.created_at),

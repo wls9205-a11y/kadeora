@@ -68,12 +68,12 @@ export default function NoticeBanner() {
         if (error || !data || data.length === 0) return;
 
         const now = Date.now();
-        const valid = data.filter((n: any) => {
+        const valid = data.filter((n: Record<string, any>) => {
           if (!n.is_paid) return true;
           const start = n.display_start ? new Date(n.display_start).getTime() : 0;
           const end = n.display_end ? new Date(n.display_end).getTime() : Infinity;
           return now >= start && now <= end;
-        }).map((n: any) => ({
+        }).map((n: Record<string, any>) => ({
           ...n,
           tier: n.tier || 'free',
           author: Array.isArray(n.profiles) ? n.profiles[0] : n.profiles,

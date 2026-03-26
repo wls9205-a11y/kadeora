@@ -93,7 +93,7 @@ export default function BlogSection() {
       {/* Recent blogs */}
       <DataTable
         headers={['제목', '카테고리', '조회', '리라이팅', '작성일']}
-        rows={(data?.recentBlogs ?? []).map((b: any) => [
+        rows={(data?.recentBlogs ?? []).map((b: Record<string, any>) => [
           <span key="t" style={{ maxWidth: 350, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', fontWeight: 500 }}>{b.title}</span>,
           <Badge key="c" color={C.purple}>{b.category}</Badge>,
           b.view_count || 0,

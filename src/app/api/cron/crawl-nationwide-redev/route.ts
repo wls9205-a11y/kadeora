@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
@@ -110,8 +111,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           }
 
           regionCount += itemList.length;
-        } catch (e: any) {
-          debugInfo[`${regionKey}_${sigunguName}`] = { error: e.message };
+        } catch (e: unknown) {
+          debugInfo[`${regionKey}_${sigunguName}`] = { error: errMsg(e) };
         }
       }
 

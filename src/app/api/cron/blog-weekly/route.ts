@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
       const aptCount = (apts ?? []).length;
       const totalUnits = (apts ?? []).reduce((s: number, a: any) => s + (a.tot_supply_hshld_co ?? 0), 0);
-      const regions = [...new Set((apts ?? []).map((a: any) => a.region_nm))];
+      const regions = [...new Set((apts ?? []).map((a: Record<string, any>) => a.region_nm))];
       const table = (apts ?? []).map(a => `| [**${a.house_nm}**](/apt/${a.house_manage_no}) | ${a.region_nm} | ${a.rcept_bgnde?.slice(5)} ~ ${a.rcept_endde?.slice(5)} | ${(a.tot_supply_hshld_co ?? 0).toLocaleString()} |`).join('\n');
       const weekTitle = `이번 주 아파트 청약 일정 총정리 (${weekStr})`;
       const content = `## 이번 주 아파트 청약 일정 (${weekStr})
@@ -102,7 +102,7 @@ ${list || '| - | 이번 주 인기 게시글이 없습니다 | - | - |'}
 
 ### 이번 주 트렌드 분석
 
-${(hot ?? []).length >= 3 ? `1위 글 **"${(hot ?? [])[0]?.title}"**이 좋아요 ${(hot ?? [])[0]?.likes_count ?? 0}개로 큰 호응을 얻었습니다. 주식·부동산·자유 카테고리 중 이번 주는 **${(hot ?? []).map((p: any) => p.category).filter((v: string, i: number, a: string[]) => a.indexOf(v) === i).join(', ')}** 카테고리가 두드러졌습니다.` : '이번 주 인기 게시글이 다양한 주제를 다루고 있어 폭넓은 관심이 확인됩니다.'}
+${(hot ?? []).length >= 3 ? `1위 글 **"${(hot ?? [])[0]?.title}"**이 좋아요 ${(hot ?? [])[0]?.likes_count ?? 0}개로 큰 호응을 얻었습니다. 주식·부동산·자유 카테고리 중 이번 주는 **${(hot ?? []).map((p: Record<string, any>) => p.category).filter((v: string, i: number, a: string[]) => a.indexOf(v) === i).join(', ')}** 카테고리가 두드러졌습니다.` : '이번 주 인기 게시글이 다양한 주제를 다루고 있어 폭넓은 관심이 확인됩니다.'}
 
 카더라에서는 매주 커뮤니티 활동이 활발한 글을 자동으로 선정합니다. **좋아요**와 **댓글**로 좋은 글에 참여해보세요!
 

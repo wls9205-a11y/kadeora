@@ -187,9 +187,9 @@ export async function GET(req: NextRequest) {
           .gte('created_at', new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())
           .limit(50);
         if (newTrades?.length) {
-          const notifs = watchItems.filter(w => newTrades.some((t: any) => t.apt_name === w.item_id))
+          const notifs = watchItems.filter(w => newTrades.some((t: Record<string, any>) => t.apt_name === w.item_id))
             .map(w => {
-              const trade = newTrades.find((t: any) => t.apt_name === w.item_id);
+              const trade = newTrades.find((t: Record<string, any>) => t.apt_name === w.item_id);
               return { user_id: w.user_id, type: 'system', content: `관심단지 ${w.item_id}의 새 거래가 등록되었습니다. ${trade?.deal_date} ${trade?.deal_amount ? (trade.deal_amount / 10000).toFixed(1) + '억' : ''}` };
             });
           if (notifs.length > 0) {

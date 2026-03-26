@@ -19,12 +19,12 @@ export async function GET(req: NextRequest) {
         p_query: query, p_limit: limit, p_offset: (page - 1) * limit,
       });
       if (!ftsErr && ftsData && ftsData.length > 0) {
-        const authorIds = [...new Set(ftsData.map((p: any) => p.author_id).filter(Boolean))];
+        const authorIds = [...new Set(ftsData.map((p: { author_id?: string }) => p.author_id).filter((id): id is string => !!id))];
         const { data: authors } = authorIds.length > 0
           ? await supabase.from('profiles').select('id, nickname, avatar_url').in('id', authorIds)
           : { data: [] };
-        const authorMap = new Map((authors || []).map((a: any) => [a.id, a]));
-        const posts = ftsData.map((p: any) => ({ ...p, author: authorMap.get(p.author_id) || null }));
+        const authorMap = new Map((authors || []).map((a: { id: string }) => [a.id, a]));
+        const posts = ftsData.map((p: Record<string, any>) => ({ ...p, author: authorMap.get(p.author_id) || null }));
         return { data: posts, count: posts.length, error: null };
       }
       return supabase.from('posts')

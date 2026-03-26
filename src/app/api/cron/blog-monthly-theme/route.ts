@@ -1,3 +1,4 @@
+import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 60;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
@@ -99,8 +100,8 @@ export async function GET(req: NextRequest) {
           meta_keywords: generateMetaKeywords(theme.category, tags),
         });
       if (_r.success) created++;
-      } catch (e: any) {
-        console.error(`[blog-monthly-theme] Error for ${theme.slug}:`, e.message);
+      } catch (e: unknown) {
+        console.error(`[blog-monthly-theme] Error for ${theme.slug}:`, errMsg(e));
       }
     }
 
