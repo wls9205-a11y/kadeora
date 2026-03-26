@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 41 전수조사 (커밋 5건, 90+ 파일) — any 476→305, 크론 504 해결, Edge 캐시 +5, UX 딥링크
+> **마지막 업데이트:** 2026-03-26 세션 41 전수조사 (커밋 8건, 125+ 파일) — any 476→305, 크론 504 해결, Edge 캐시 +5, UX 딥링크, 어드민 강화
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 세션 41 작업 (2026-03-26) — 5커밋, 90+ 파일
@@ -49,6 +49,26 @@
 - 검색 empty state + 블로그 대체 링크 정상
 - Supabase auth 로그 200 정상 (refresh_token 경쟁 상태 1건 — 정상)
 
+### 어드민 API 안정성 강화 (12개 try/catch) [COMPLETED]
+- blog-popular, comments/[id], env-check, posts/[id], posts, reports/[id]
+- reports, seed-discussions, seed-finance-blogs, seed-rooms, users/[id], users
+- 에러 시 500 JSON 응답 반환 (기존: 런타임 크래시)
+
+### 어드민 loading/error.tsx 20개 일괄 생성 [COMPLETED]
+- 10개 서브 디렉토리: blog, comments, content, infra, notifications, payments, realestate, reports, system, users
+- error.tsx: Sentry captureException + 다시 시도 버튼
+- loading.tsx: 스피너 애니메이션
+
+### 접근성(A11y) 수정 [COMPLETED]
+- AptReviewSection: 버튼 4개 aria-label 추가 (리뷰작성/제출/도움/신고)
+- AptBookmarkButton: 중복 aria-label 제거
+- feed/[id] Image: alt="게시글 이미지" 추가
+
+### auth.getUser → useAuth() 추가 전환 2건 [COMPLETED]
+- AptCommentInline: createSupabaseBrowser().auth.getUser() 제거 → useAuth()
+- AptCommentSheet: 동일 전환
+- **총 auth 중복 호출 감소: 세션40 10건→1건 + 세션41 추가 2건 = 페이지당 최대 1건**
+
 ### 주의사항 (세션 41)
 - errMsg(): `catch (e: unknown)` 사용 시 `import { errMsg } from '@/lib/error-utils'` 필요
 - errMsg import는 반드시 `'use client'` 아래에 위치 (위에 두면 빌드 실패)
@@ -66,6 +86,10 @@
 | blog-series-assign 504 | 건별 UPDATE | **10건 병렬** |
 | tsc --noEmit | 0건 | **0건 유지** |
 | 홈 이미지 LCP | 6개 eager | **3 eager + 3 lazy** |
+| 어드민 API try/catch | 12개 누락 | **전부 추가** |
+| 어드민 loading/error | 0개 | **20개 (10 디렉토리)** |
+| 접근성 aria-label | 8곳 누락 | **5곳 수정** |
+| auth 중복 호출 | useAuth 미전환 2곳 | **AptComment 2곳 전환** |
 
 ### PENDING 작업
 - [ ] **토스 정산 등록 (3/31 마감 D-5!)**
