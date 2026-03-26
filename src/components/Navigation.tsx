@@ -61,29 +61,27 @@ export function Navigation() {
   const [fontSize, setFontSize] = useState('medium');
   const [tossMode, setTossModeState] = useState(false);
 
-  // 토스 앱인토스 모드 감지 — 헤더+하단탭 완전 숨김
-  useEffect(() => { if (isTossMode()) setTossModeState(true); }, []);
-
-  // 토스 모드: 라이트 테마 강제 + body class 추가
+  // 초기화: 토스 모드 + 폰트 사이즈 (1회)
   useEffect(() => {
-    if (!tossMode) return;
-    document.documentElement.setAttribute('data-theme', 'light');
-    document.documentElement.classList.add('toss-mode');
-  }, [tossMode]);
+    // 토스 모드 감지
+    if (isTossMode()) {
+      setTossModeState(true);
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.classList.add('toss-mode');
+    }
+    // 폰트 사이즈 복원
+    const saved = localStorage.getItem('kd_font_size');
+    if (saved && ['small','medium','large'].includes(saved)) {
+      setFontSize(saved);
+      applyFontClass(saved);
+    }
+  }, []);
 
   const applyFontClass = (val: string) => {
     const el = document.documentElement;
     el.classList.remove('font-small', 'font-medium', 'font-large');
     el.classList.add(`font-${val}`);
   };
-
-  useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('kd_font_size') : null;
-    if (saved && ['small','medium','large'].includes(saved)) {
-      setFontSize(saved);
-      applyFontClass(saved);
-    }
-  }, []);
 
   const handleFontSize = (val: string) => {
     setFontSize(val);
