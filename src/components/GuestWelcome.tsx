@@ -13,7 +13,6 @@ import { isTossMode } from '@/lib/toss-mode';
 export default function GuestWelcome() {
   const [show, setShow] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [_isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -35,8 +34,6 @@ export default function GuestWelcome() {
     // 로그인 확인
     createSupabaseBrowser().auth.getUser().then(({ data }) => {
       if (data.user) return; // 로그인됨 → 안 보여줌
-
-      setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
 
       // 글로벌 캡처된 프롬프트 확인
       if ((window as any).__pwaPrompt) {

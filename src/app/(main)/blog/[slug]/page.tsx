@@ -9,6 +9,7 @@ import BlogCommentCTA from '@/components/BlogCommentCTA';
 import ShareButtons from '@/components/ShareButtons';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import BlogToc from '@/components/BlogToc';
+import BlogTocSidebar from '@/components/BlogTocSidebar';
 import { getAvatarColor } from '@/lib/avatar';
 import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
@@ -290,7 +291,8 @@ export default async function BlogDetailPage({ params }: Props) {
   } : null;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div className="blog-detail-layout">
+      <div className="blog-detail-main">
       <ReadingProgress />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
@@ -315,8 +317,10 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 목차 (스크롤 추적) */}
-        {toc.length >= 3 && <BlogToc toc={toc} />}
+        {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
+        <div className="blog-toc-inline">
+          {toc.length >= 3 && <BlogToc toc={toc} />}
+        </div>
 
         {/* 본문 — 마크다운 렌더링 */}
         {isLoggedIn ? (
@@ -484,6 +488,14 @@ export default async function BlogDetailPage({ params }: Props) {
               );
             })}
           </div>
+        </div>
+      )}
+      </div>
+
+      {/* 데스크탑 고정 사이드바 TOC */}
+      {toc.length >= 3 && (
+        <div className="blog-toc-sidebar">
+          <BlogTocSidebar toc={toc} />
         </div>
       )}
     </div>

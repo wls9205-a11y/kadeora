@@ -25,7 +25,6 @@ export const metadata: Metadata = {
 };
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';
-import { CACHE_TTL } from '@/lib/cache-config';
 import StockClient from './StockClient';
 import Disclaimer from '@/components/Disclaimer';
 

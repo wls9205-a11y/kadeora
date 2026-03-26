@@ -591,6 +591,31 @@ input, textarea, select {
 }
 
 /* ========================================
+   블로그 상세 2단 레이아웃
+   ======================================== */
+.blog-detail-layout {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.blog-toc-inline { display: block; }
+.blog-toc-sidebar { display: none; }
+@media (min-width: 1100px) {
+  .blog-detail-layout {
+    max-width: 1020px;
+    display: flex;
+    gap: 40px;
+  }
+  .blog-detail-layout > .blog-detail-main {
+    flex: 1;
+    max-width: 720px;
+    min-width: 0;
+  }
+  .blog-toc-inline { display: none; }
+  .blog-toc-sidebar { display: block; }
+}
+
+/* ========================================
    블로그 본문 마크다운
    ======================================== */
 .blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 28px 0 12px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; }

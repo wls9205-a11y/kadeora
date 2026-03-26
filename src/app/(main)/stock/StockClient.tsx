@@ -22,7 +22,6 @@ interface Props { initialStocks: Stock[]; briefing?: any; exchangeHistory?: any[
 function isIdx(s: Stock) { return ['KOSPI','KOSDAQ','NASDAQ','S&P 500','DOW','NIKKEI'].some(idx => s.name.toUpperCase().includes(idx) || s.symbol.toUpperCase().includes(idx)); }
 
 const M7 = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA'];
-const SECTORS = ['all','반도체','바이오','금융','자동차','방산','IT/소프트웨어','에너지','2차전지','소비재','건설','통신','유틸리티','화학','미디어'];
 
 // 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {

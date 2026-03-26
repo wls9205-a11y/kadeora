@@ -200,7 +200,6 @@ export default async function FeedDetailPage({ params }: Props) {
     permanentRedirect(`/feed/${post.slug}`);
   }
 
-  const cat = CATEGORY_MAP[post.category] ?? CATEGORY_MAP.free;
 
   const jsonLd = {
     '@context': 'https://schema.org',

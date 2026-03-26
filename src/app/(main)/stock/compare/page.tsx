@@ -19,7 +19,7 @@ export default function StockComparePage() {
   const [stockB, setStockB] = useState<Stock | null>(null);
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();

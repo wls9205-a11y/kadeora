@@ -23,12 +23,9 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   const [posts, setPosts] = useState<PostWithProfile[]>(initialPosts);
   const [hasMore, setHasMore] = useState(initialPosts.length >= PAGE_SIZE);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [_showRegionBanner, setShowRegionBanner] = useState(false);
-  const [_tipSeen, setTipSeen] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
-  const [_userRegion, setUserRegion] = useState<string | null>(null);
   const [showHotBanner, setShowHotBanner] = useState(false);
   const [hotPosts, setHotPosts] = useState<any[]>([]);
 
@@ -40,7 +37,6 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setTipSeen(!!localStorage.getItem('kd_tip_seen'));
       setShowHotBanner(!sessionStorage.getItem('kd_hot_banner_closed'));
     }
   }, []);
@@ -69,14 +65,6 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       if (data.session?.user) {
         const userId = data.session.user.id;
         setCurrentUserId(userId);
-
-        const { data: profile } = await sb.from('profiles')
-          .select('region_text').eq('id', userId).single();
-        if (profile && !(profile.region_text ?? '')) setShowRegionBanner(true);
-        if (profile?.region_text) {
-          const matched = REGIONS.find(r => r.value !== 'all' && ((profile.region_text ?? '') as string).startsWith(r.value));
-          if (matched) setUserRegion(matched.value);
-        }
 
         // Load user's liked posts
         const { data: likes } = await sb.from('post_likes')

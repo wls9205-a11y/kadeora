@@ -48,17 +48,17 @@ export async function POST(req: NextRequest) {
     );
     const { data: { user } } = await sb.auth.getUser();
 
-    if (user) {
+    // type 기반 분기 (로그인 유저도 guest 폼 사용 가능)
+    if (body.type === 'member') {
       // ━━━ 회원 등록 (원클릭) ━━━
+      if (!user) return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 });
       const parsed = MemberSchema.safeParse(body);
       if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
 
-      // 중복 체크
       const { data: existing } = await admin.from('apt_site_interests')
         .select('id').eq('site_id', parsed.data.site_id).eq('user_id', user.id).maybeSingle();
       if (existing) return NextResponse.json({ error: '이미 관심 등록된 현장입니다' }, { status: 409 });
 
-      // 등록
       const { error: insertErr } = await admin.from('apt_site_interests').insert({
         site_id: parsed.data.site_id,
         user_id: user.id,
@@ -67,49 +67,33 @@ export async function POST(req: NextRequest) {
       });
       if (insertErr) throw insertErr;
 
-      // 관심 수 증가
       await admin.rpc('increment_site_interest', { p_site_id: parsed.data.site_id });
-
-      // 포인트 +50
-      try {
-        await admin.rpc('award_points', { p_user_id: user.id, p_amount: 50, p_reason: '관심고객 등록' });
-      } catch {}
+      try { await admin.rpc('award_points', { p_user_id: user.id, p_amount: 50, p_reason: '관심단지 등록' }); } catch {}
 
       return NextResponse.json({ success: true, message: '관심 등록 완료! +50P 적립' });
 
     } else {
-      // ━━━ 비회원 등록 ━━━
+      // ━━━ 게스트 폼 등록 (비회원 + 로그인 유저 모두 가능) ━━━
       const parsed = GuestSchema.safeParse(body);
       if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
 
-      // 만 14세 미만 차단
       const birthDate = new Date(parsed.data.birth_date);
       const age = Math.floor((Date.now() - birthDate.getTime()) / 31557600000);
-      if (age < 14) {
-        return NextResponse.json({ error: '만 14세 미만은 법정대리인의 동의가 필요합니다. (개인정보 보호법 제22조의2)' }, { status: 400 });
-      }
-      if (age > 120 || age < 0) {
-        return NextResponse.json({ error: '올바른 생년월일을 입력해주세요' }, { status: 400 });
-      }
+      if (age < 14) return NextResponse.json({ error: '만 14세 미만은 법정대리인의 동의가 필요합니다. (개인정보 보호법 제22조의2)' }, { status: 400 });
+      if (age > 120 || age < 0) return NextResponse.json({ error: '올바른 생년월일을 입력해주세요' }, { status: 400 });
 
-      // 전화번호 정규화 + 해시 + 암호화
       const cleanPhone = parsed.data.phone.replace(/-/g, '');
       const crypto = await import('crypto');
       const phoneHash = crypto.createHash('sha256').update(cleanPhone).digest('hex');
       const encryptedPhone = hasEncryptionKey() ? encrypt(cleanPhone) : cleanPhone;
 
-      // 중복 체크 (해시 기반)
       const { data: existing } = await admin.from('apt_site_interests')
         .select('id').eq('site_id', parsed.data.site_id).eq('guest_phone_hash', phoneHash).maybeSingle();
       if (existing) return NextResponse.json({ error: '이미 등록된 전화번호입니다' }, { status: 409 });
 
-      // 개인정보 동의 기록 저장
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
       const ua = req.headers.get('user-agent') || '';
 
-      const consents = [];
-
-      // 필수 동의
       const { data: c1 } = await admin.from('privacy_consents').insert({
         guest_identifier: cleanPhone.slice(-4),
         consent_type: 'interest_collection',
@@ -118,14 +102,11 @@ export async function POST(req: NextRequest) {
         consent_text: CONSENT_TEXT_V1,
         ip_address: ip,
         user_agent: ua.slice(0, 200),
-        collected_items: ['이름', '전화번호', '생년월일', '거주지역'],
+        collected_items: ['이름', '전화번호', '생년월일'],
         purpose: '관심 현장 분양 정보 제공 및 일정 알림',
         retention_period: '동의 철회 시 또는 목적 달성 후 즉시 파기',
       }).select('id').single();
 
-      if (c1) consents.push(c1.id);
-
-      // 선택 동의: 마케팅
       if (parsed.data.consent_marketing) {
         await admin.from('privacy_consents').insert({
           guest_identifier: cleanPhone.slice(-4),
@@ -140,22 +121,6 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 선택 동의: 제3자 제공
-      if (parsed.data.consent_third_party) {
-        await admin.from('privacy_consents').insert({
-          guest_identifier: cleanPhone.slice(-4),
-          consent_type: 'third_party',
-          consent_version: 'v1.0',
-          is_agreed: true,
-          ip_address: ip,
-          user_agent: ua.slice(0, 200),
-          collected_items: ['이름', '전화번호'],
-          purpose: '분양 상담사 연결',
-          retention_period: '제공 목적 달성 후 즉시 파기',
-        });
-      }
-
-      // 관심고객 등록 (전화번호 암호화 저장)
       const { data: inserted, error: insertErr } = await admin.from('apt_site_interests').insert({
         site_id: parsed.data.site_id,
         guest_name: parsed.data.name,
@@ -166,22 +131,19 @@ export async function POST(req: NextRequest) {
         guest_city: parsed.data.city || null,
         guest_district: parsed.data.district || null,
         source: 'site_page',
-        consent_id: consents[0] || null,
+        consent_id: c1?.id || null,
         is_member: false,
+        ...(user ? { user_id: user.id } : {}),
       }).select('id').single();
       if (insertErr) throw insertErr;
 
-      // 관심 수 증가
       await admin.rpc('increment_site_interest', { p_site_id: parsed.data.site_id });
 
-      // 제3자 제공 동의 시 → 상담사 자동 전달 (비활성 상태면 no-op)
       if (parsed.data.consent_third_party && inserted?.id) {
-        try {
-          await autoForwardLead(inserted.id, parsed.data.site_id);
-        } catch {} // 전달 실패해도 등록 자체는 성공
+        try { await autoForwardLead(inserted.id, parsed.data.site_id); } catch {}
       }
 
-      return NextResponse.json({ success: true, message: '관심고객 등록이 완료되었습니다' });
+      return NextResponse.json({ success: true, message: '관심단지 등록이 완료되었습니다' });
     }
   } catch (e: any) {
     console.error('[apt/sites/interest]', e);

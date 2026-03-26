@@ -8,7 +8,7 @@ interface Props extends SharedTabProps {
   redevelopment: any[];
 }
 
-export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion }: Props) {
+export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion }: Props) {
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState(globalRegion || '전체');
   const [redevPage, setRedevPage] = useState(1);

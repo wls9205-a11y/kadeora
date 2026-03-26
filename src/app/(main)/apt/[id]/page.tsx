@@ -370,7 +370,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Interest CTA */}
+      {/* 관심단지 등록 CTA */}
       {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} />}
 
       {/* Reviews */}

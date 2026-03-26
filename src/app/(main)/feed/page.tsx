@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 };
 import { Suspense } from 'react';
 import { createSupabaseServer } from '@/lib/supabase-server';
-import { DEMO_POSTS, DEMO_TRENDING } from '@/lib/constants';
-import type { PostWithProfile, TrendingKeyword } from '@/types/database';
+import { DEMO_POSTS } from '@/lib/constants';
+import type { PostWithProfile } from '@/types/database';
 import FeedClient from './FeedClient';
 import Disclaimer from '@/components/Disclaimer';
 
@@ -51,21 +51,13 @@ async function getPosts(category: string, region: string = 'all') {
   return data as PostWithProfile[];
 }
 
-async function getTrending() {
-  const sb = await createSupabaseServer();
-  const result = await withTimeout(
-    sb.from('trending_keywords').select('id,keyword,category,heat_score,rank,updated_at').order('heat_score', { ascending: false }).limit(10)
-  );
-  return (result as any)?.data as TrendingKeyword[] | null;
-}
 
 interface Props { searchParams: Promise<{ category?: string; region?: string }>; }
 
 export default async function FeedPage({ searchParams }: Props) {
   const { category = 'all', region = 'all' } = await searchParams;
-  const [postsData, trendingData] = await Promise.allSettled([getPosts(category, region), getTrending()]);
-  const posts = postsData.status === 'fulfilled' && postsData.value ? postsData.value : category === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(p => p.category === category);
-  const _trending = trendingData.status === 'fulfilled' && trendingData.value ? trendingData.value : DEMO_TRENDING;
+  const postsData = await Promise.allSettled([getPosts(category, region)]);
+  const posts = postsData[0].status === 'fulfilled' && postsData[0].value ? postsData[0].value : category === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(p => p.category === category);
   return (
     <Suspense>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '커뮤니티 피드' }] }) }} />

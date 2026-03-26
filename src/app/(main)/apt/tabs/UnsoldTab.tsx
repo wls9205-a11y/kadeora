@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { type SharedTabProps, generateAptSlug } from './apt-utils';
 import Link from 'next/link';
 import MiniLineChart from '@/components/charts/MiniLineChart';
-import MiniBarChart from '@/components/charts/MiniBarChart';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface Props extends SharedTabProps {

@@ -4,7 +4,6 @@ import StockComments from '@/components/StockComments';
 import CandlestickChart from '@/components/charts/CandlestickChart';
 import { timeAgo } from '@/lib/format';
 
-const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸',5:'🌻',6:'⭐',7:'🔥',8:'💎',9:'👑',10:'🚀'};
 
 
 interface Props {
