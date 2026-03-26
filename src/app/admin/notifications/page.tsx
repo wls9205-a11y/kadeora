@@ -235,7 +235,7 @@ function PushSection() {
 
         {/* Preview grid */}
         {(title.trim() || body.trim()) && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
+          <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
             <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 12 }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Android</div>
               <div style={{ background: '#2a2a3e', borderRadius: 8, padding: '8px 10px', display: 'flex', gap: 8 }}>

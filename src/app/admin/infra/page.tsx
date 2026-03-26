@@ -167,7 +167,7 @@ export default function InfraPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+        <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
           {[
             { label: 'Bandwidth', value: '1TB', sub: '/ 월', barPct: 3, barColor: 'var(--accent-blue)' },
             { label: 'Serverless', value: '1,000h', sub: '/ 월', barPct: 5, barColor: 'var(--accent-green)' },
@@ -238,7 +238,7 @@ export default function InfraPage() {
 
         {github ? (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+            <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
               <StatCard icon="💾" value={github.size_pretty} label="레포 크기" bg="rgba(167,139,250,0.08)" />
               <StatCard icon="🐛" value={github.open_issues} label="Open Issues" bg="rgba(251,191,36,0.08)" />
               <StatCard icon="🌿" value={github.default_branch} label="기본 브랜치" bg="rgba(52,211,153,0.08)" />

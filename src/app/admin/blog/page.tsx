@@ -123,7 +123,7 @@ export default function AdminBlogPage() {
       {/* 크론 버튼 6개 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>블로그 자동 생성</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           {CRON_BUTTONS.map(btn => (
             <button key={btn.key} onClick={() => runCron(btn.key)} disabled={!!running}
               style={{

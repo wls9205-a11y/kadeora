@@ -71,7 +71,7 @@ export function KPICard({ icon, label, value, sub, color }: { icon: string; labe
 }
 export function DataTable({ headers, rows, onRowClick }: { headers: string[]; rows: any[][]; onRowClick?: (i: number) => void }) {
   return (
-    <div style={{ overflowX: 'auto', borderRadius: 10, border: `1px solid ${C.border}` }}>
+    <div className="admin-table-wrap" style={{ overflowX: 'auto', borderRadius: 10, border: `1px solid ${C.border}` }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
           <tr>{headers.map((h, i) => <th key={i} style={{ padding: '10px 12px', textAlign: 'left', background: C.card, color: C.textDim, fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 0 }}>{h}</th>)}</tr>
@@ -102,7 +102,7 @@ export function DetailSection({ title, children }: { title: string; children: Re
 }
 export function DetailGrid({ items }: { items: [string, string][] }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 12 }}>
+    <div className="admin-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 12 }}>
       {items.map(([l, v]) => (
         <div key={l}>
           <div style={{ color: C.textDim, marginBottom: 1 }}>{l}</div>

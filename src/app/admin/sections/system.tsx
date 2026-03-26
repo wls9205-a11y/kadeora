@@ -30,7 +30,7 @@ export default function SystemSection() {
       </div>
 
       {/* Health Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
         <KPICard icon="🔄" label="총 실행" value={totalRuns} color={C.brand} />
         <KPICard icon="✅" label="성공률" value={`${successRate}%`} color={successRate >= 90 ? C.green : C.yellow} />
         <KPICard icon="❌" label="실패 크론" value={crons.filter(c => c.failed > 0).length} color={C.red} />

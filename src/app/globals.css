@@ -1225,3 +1225,72 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 .stock-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .stock-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .stock-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+
+/* ══════════════════════════════════════
+   Admin (Mission Control) — 모바일 반응형
+   ══════════════════════════════════════ */
+
+/* 모바일: < 769px */
+@media (max-width: 768px) {
+  /* 모바일 상단 바 표시 */
+  .admin-mobile-bar { display: flex !important; }
+
+  /* 사이드바 오버레이 */
+  .admin-sidebar-overlay { display: block !important; }
+
+  /* 사이드바 → 슬라이드 오버 */
+  .admin-sidebar {
+    position: fixed !important;
+    left: 0; top: 0; bottom: 0;
+    width: 220px !important;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    padding-top: 60px !important;
+  }
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* 메인 콘텐츠 — 상단바 아래 */
+  .admin-main {
+    padding: 60px 12px 24px !important;
+    max-width: 100% !important;
+  }
+
+  /* KPI 그리드 반응형 */
+  .mc-g6 { grid-template-columns: repeat(3, 1fr) !important; }
+  .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .mc-g3 { grid-template-columns: 1fr !important; }
+  .mc-g2 { grid-template-columns: 1fr !important; }
+
+  /* 시간별 그리드 */
+  .mc-hour-grid { grid-template-columns: repeat(6, 1fr) !important; }
+
+  /* 테이블 스크롤 */
+  .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table-wrap table { min-width: 600px; }
+
+  /* 상세 그리드 */
+  .admin-detail-grid { grid-template-columns: 1fr !important; }
+
+  /* KPI 카드 폰트 축소 */
+  .mc-g6 > div, .mc-g4 > div {
+    padding: 10px 12px !important;
+  }
+}
+
+/* 작은 모바일: < 480px */
+@media (max-width: 480px) {
+  .mc-g6 { grid-template-columns: repeat(2, 1fr) !important; }
+  .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .admin-main { padding: 56px 8px 20px !important; }
+}
+
+/* 태블릿: 769~1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .admin-sidebar { width: 170px !important; }
+  .mc-g6 { grid-template-columns: repeat(3, 1fr) !important; }
+  .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .admin-main { padding: 16px 16px 32px !important; }
+}

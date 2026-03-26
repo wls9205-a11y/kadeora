@@ -38,26 +38,29 @@ const SECTION_MAP: Record<Section, React.ComponentType> = {
 
 export default function MissionControl() {
   const [section, setSection] = useState<Section>('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const ActiveSection = SECTION_MAP[section];
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
 
+      {/* 모바일 오버레이 */}
       {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} style={{ display: 'none', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 90 }} />}
 
+      {/* 모바일 상단 바 */}
       <div className="admin-mobile-bar" style={{ display: 'none', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 80, background: C.surface, padding: '10px 16px', borderBottom: `1px solid ${C.border}`, alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{SECTIONS.find(s => s.key === section)?.icon} {SECTIONS.find(s => s.key === section)?.label}</span>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: C.text, fontSize: 20, cursor: 'pointer' }}>{sidebarOpen ? '✕' : '☰'}</button>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: C.text, fontSize: 20, cursor: 'pointer', padding: '4px 8px' }}>{sidebarOpen ? '✕' : '☰'}</button>
       </div>
 
-      <aside className="admin-sidebar" style={{ width: 200, background: C.surface, borderRight: `1px solid ${C.border}`, padding: '16px 8px', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', flexShrink: 0 }}>
+      {/* 사이드바 */}
+      <aside className={`admin-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 200, background: C.surface, borderRight: `1px solid ${C.border}`, padding: '16px 8px', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', flexShrink: 0 }}>
         <div style={{ fontSize: 16, fontWeight: 800, color: C.brand, padding: '4px 12px 16px', letterSpacing: '-0.02em' }}>Mission Control</div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {SECTIONS.map(s => (
-            <button key={s.key} onClick={() => { setSection(s.key); if (typeof window !== 'undefined' && window.innerWidth < 769) setSidebarOpen(false); }} style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            <button key={s.key} onClick={() => { setSection(s.key); setSidebarOpen(false); }} style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', width: '100%',
               background: section === s.key ? C.brandBg : 'transparent',
               color: section === s.key ? C.brand : C.textSec,
               fontWeight: section === s.key ? 700 : 500, fontSize: 13, textAlign: 'left', transition: 'all 0.15s',
@@ -68,7 +71,8 @@ export default function MissionControl() {
         </nav>
       </aside>
 
-      <main style={{ flex: 1, padding: '20px 24px 40px', maxWidth: 1100, minWidth: 0 }}>
+      {/* 메인 콘텐츠 */}
+      <main className="admin-main" style={{ flex: 1, padding: '20px 24px 40px', maxWidth: 1100, minWidth: 0 }}>
         <ActiveSection />
       </main>
     </div>
