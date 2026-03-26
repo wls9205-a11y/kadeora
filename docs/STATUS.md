@@ -1,7 +1,52 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 38 (최종 — 커밋 38건+)
+> **마지막 업데이트:** 2026-03-26 세션 39 (커밋 39건+)
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
+
+## 세션 39 작업 (2026-03-26) — 1커밋, 21파일, +1,028줄 -834줄
+
+### 블로그 TOC 고정 사이드바 (데스크탑) [COMPLETED]
+- `BlogTocSidebar.tsx` 신규 (130줄) — sticky 사이드바, 읽기 진행률 %, 맨 위로 버튼
+- `blog/[slug]/page.tsx` — 2단 레이아웃 적용
+  - 모바일(<1100px): 기존 인라인 BlogToc 유지
+  - 데스크탑(≥1100px): 본문 좌측(720px) + 우측 고정 사이드바(220px)
+- `globals.css` — `.blog-detail-layout` / `.blog-toc-inline` / `.blog-toc-sidebar` 반응형 CSS
+
+### ProfileClient 663줄 → 77줄 분할 (-88%) [COMPLETED]
+| 파일 | 줄 수 | 담당 |
+|------|-------|------|
+| ProfileClient.tsx | 77줄 | 오케스트레이터 (조합만) |
+| ProfileHeader.tsx | 205줄 | 아바타, 닉네임, 팔로우, 편집 폼 |
+| ProfileGradeCard.tsx | 145줄 | 등급 진행 바, 스탯 5종, 출석 체크, 초대 |
+| ProfileTabs.tsx | 325줄 | 5탭 (게시글/댓글/관심종목/관심단지/북마크) |
+
+### 관심단지 등록 리디자인 [COMPLETED]
+- **용어 변경**: "관심고객 등록" → "관심단지 등록"
+- **알림 혜택 명시**: 필태그 3종 (청약 일정, 분양가·경쟁률, 입주 소식)
+- **폼 간소화**: 이름+전화 2열 배치, 거주지(시/도·시/군/구) 제거, 제3자 동의 제거
+- **로그인 유저**: 상단 원클릭 버튼(+50P) + "또는 정보를 직접 입력" + 게스트 폼 동시 표시
+- **비로그인**: 게스트 폼 먼저 + "또는" + 카카오 가입 유도 CTA
+- **API 수정**: `body.type` 기반 분기 (로그인 유저도 게스트 폼 사용 가능), `user_id` 연결
+- **BUG FIX**: `consent_required` → `consent_collection` 필드명 불일치 수정 (비회원 폼 항상 실패하던 버그)
+
+### 코드 품질 감사 + 리팩토링 [COMPLETED]
+- **미사용 state 제거**: FeedClient (`_showRegionBanner`, `_tipSeen`, `_userRegion` + 불필요 DB 쿼리 1개), GuestWelcome (`_isIOS`)
+- **데드코드 제거**: feed/page.tsx `getTrending()` 함수 + `DEMO_TRENDING`/`TrendingKeyword` import (SSR DB 쿼리 1개 절약)
+- **미사용 상수/import 제거**: StockClient `SECTORS`, StockDetailTabs `GRADE_EMOJI`, stock/page `CACHE_TTL`, UnsoldTab `MiniBarChart`
+- **미사용 변수 정리**: feed/[id] `cat`, stock/compare `loading`
+- **미사용 prop 처리**: RedevTab `showToast`, SubscriptionTab `setCommentTarget`/`showToast`
+
+### PENDING 작업
+- [ ] 이미지 수집 크론 자동 진행 중 (200건/일)
+- [ ] 좌표 수집 크론 자동 진행 중 (150건/일)
+- [ ] 지하철역 매칭 크론 자동 진행 중 (좌표 수집 후 자동)
+- [ ] STOCK_DATA_API_KEY 활성화 후 stock-crawl 수동 실행 → 전종목 시세 갱신
+- [ ] KIS_APP_KEY 발급 (한국투자증권 실시간 시세)
+- [ ] 카카오 OG 캐시 초기화 (https://developers.kakao.com/tool/clear/og)
+- [ ] 토스 라이브키 교체
+- [ ] 토스 콘솔 한글/영문 기능명 수정 + 번들 빌드 + 업로드 + 재검토 요청
+- [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출)
+- [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
 
 ## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 38건+
 
