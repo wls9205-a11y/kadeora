@@ -50,6 +50,15 @@ const APT_KEYWORDS: [string, string][] = [
   ['아파트 분양', '/apt'], ['분양 현장', '/apt'],
 ];
 
+const EXTERNAL_KEYWORDS: [string, string][] = [
+  ['부산 급매물', 'https://xn--kj0bw8tr3a.com'],
+  ['부산 부동산 급매물', 'https://xn--kj0bw8tr3a.com'],
+  ['분양권 투자', 'https://xn--zf0bv61a84di4cc7c4tay28c.com'],
+  ['분양권 실전투자', 'https://xn--zf0bv61a84di4cc7c4tay28c.com'],
+  ['주식 초보', 'https://xn--9i2by8fvyb69i.site'],
+  ['주린이 가이드', 'https://xn--9i2by8fvyb69i.site'],
+];
+
 const FEATURE_KEYWORDS: [string, string][] = [
   ['종목 비교', '/stock/compare'], ['관심종목', '/stock'],
   ['부동산 지도', '/apt/map'], ['블로그 시리즈', '/blog/series'],
@@ -75,13 +84,13 @@ export function injectInternalLinks(html: string): string {
 
   const linked = new Set<string>();
   let result = html;
+  let externalLinked = false;
 
+  // Internal links (max 5)
   for (const [keyword, href] of ALL_KEYWORDS) {
     if (linked.has(keyword)) continue;
-    // 2글자 이하 키워드 스킵 (SK, LG 등 과다 매칭 방지)
     if (keyword.length <= 2) continue;
 
-    // <a>, <h2>, <h3>, <code> 태그 안의 텍스트는 건드리지 않음
     const safePattern = new RegExp(
       `(?<![<\\/\\w])(?<!href=")(?<!">)(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![^<]*<\\/a>)(?![^<]*<\\/h[23]>)(?![^<]*<\\/code>)`,
       ''
@@ -96,6 +105,25 @@ export function injectInternalLinks(html: string): string {
     }
 
     if (linked.size >= 5) break;
+  }
+
+  // External links (max 1, separate from internal limit)
+  for (const [keyword, href] of EXTERNAL_KEYWORDS) {
+    if (externalLinked) break;
+    if (keyword.length <= 2) continue;
+
+    const safePattern = new RegExp(
+      `(?<![<\\/\\w])(?<!href=")(?<!">)(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![^<]*<\\/a>)(?![^<]*<\\/h[23]>)(?![^<]*<\\/code>)`,
+      ''
+    );
+
+    if (safePattern.test(result)) {
+      result = result.replace(
+        safePattern,
+        `<a href="${href}" target="_blank" rel="noopener nofollow" style="color:var(--brand);text-decoration:underline;text-underline-offset:2px" title="${keyword}">${keyword}</a>`
+      );
+      externalLinked = true;
+    }
   }
 
   return result;
