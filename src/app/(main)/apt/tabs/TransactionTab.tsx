@@ -1,4 +1,5 @@
 'use client';
+import type { AptTransaction } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { isNew, NewBadge, fmtAmount, type SharedTabProps } from './apt-utils';
 import BottomSheet from '@/components/BottomSheet';
@@ -9,8 +10,8 @@ const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTre
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), { ssr: false });
 
 interface Props extends SharedTabProps {
-  transactions: any[];
-  tradeMonthly: any[];
+  transactions: AptTransaction[];
+  tradeMonthly: { stat_month: string; region: string; avg_price: number; count: number }[];
 }
 
 export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion }: Props) {
@@ -36,8 +37,8 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
     );
   }
 
-  const regs = ['전체', ...Array.from(new Set(transactions.map((t: any) => t.region_nm || '기타'))).sort()];
-  const filtered = transactions.filter((t: any) => {
+  const regs = ['전체', ...Array.from(new Set(transactions.map((t) => t.region_nm || '기타'))).sort()];
+  const filtered = transactions.filter((t) => {
     if (region !== '전체' && t.region_nm !== region) return false;
     if (areaFilter !== '전체') {
       const a = t.exclusive_area || 0;
@@ -52,7 +53,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
     return true;
   });
 
-  filtered.sort((a: any, b: any) => {
+  filtered.sort((a, b) => {
     if (sort === 'price_desc') return (b.deal_amount || 0) - (a.deal_amount || 0);
     if (sort === 'price_asc') return (a.deal_amount || 0) - (b.deal_amount || 0);
     if (sort === 'area') return (b.exclusive_area || 0) - (a.exclusive_area || 0);
@@ -61,12 +62,12 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
   const paged = filtered.slice(0, page * 20);
   const totalCount = filtered.length;
-  const avgAmount = totalCount > 0 ? Math.round(filtered.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
+  const avgAmount = totalCount > 0 ? Math.round(filtered.reduce((s: number, t) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
   const maxTrade = filtered.reduce((max: any, t: any) => (!max || (t.deal_amount || 0) > (max.deal_amount || 0)) ? t : max, null as any);
 
   const regStats = regs.filter(r => r !== '전체').map(r => {
-    const items = transactions.filter((t: any) => (t.region_nm || '기타') === r);
-    const avg = items.length > 0 ? Math.round(items.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / items.length) : 0;
+    const items = transactions.filter((t) => (t.region_nm || '기타') === r);
+    const avg = items.length > 0 ? Math.round(items.reduce((s: number, t) => s + (t.deal_amount || 0), 0) / items.length) : 0;
     return { name: r, count: items.length, avg };
   }).sort((a, b) => b.count - a.count);
 
@@ -129,9 +130,9 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
       {/* 추이 차트 */}
       {tradeMonthly.length > 0 && (() => {
-        const regions = [...new Set(tradeMonthly.map((s: any) => s.region))];
+        const regions = [...new Set(tradeMonthly.map((s) => s.region))];
         const active = chartRegion || regions[0] || '';
-        const data = tradeMonthly.filter((s: any) => s.region === active);
+        const data = tradeMonthly.filter((s) => s.region === active);
         return (
           <div className="kd-card">
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
@@ -140,7 +141,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
               ))}
             </div>
-            <MiniLineChart data={data.map((s: any) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))} color="var(--accent-green)" showValues={true} height={140} />
+            <MiniLineChart data={data.map((s) => ({ label: String(s.stat_month).slice(5), value: Math.round((s.avg_price || 0) / 10000) }))} color="var(--accent-green)" showValues={true} height={140} />
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>단위: 억원</div>
           </div>
         );
@@ -166,11 +167,11 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       </div>
 
       {/* 카드 리스트 */}
-      {paged.map((t: any, i: number) => {
+      {paged.map((t, i: number) => {
         const amt = t.deal_amount || 0;
         const borderColor = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)';
-        const sameApt = filtered.filter((x: any) => x.apt_name === t.apt_name && (x.deal_amount || 0) > 0);
-        const maxP = sameApt.length > 1 ? Math.max(...sameApt.map((x: any) => x.deal_amount || 0)) : 0;
+        const sameApt = filtered.filter((x) => x.apt_name === t.apt_name && (x.deal_amount || 0) > 0);
+        const maxP = sameApt.length > 1 ? Math.max(...sameApt.map((x) => x.deal_amount || 0)) : 0;
         const vsMax = maxP > 0 && amt > 0 && maxP !== amt ? Math.round(((amt - maxP) / maxP) * 100) : null;
         const isMax = maxP > 0 && amt >= maxP && sameApt.length >= 2;
         return (
@@ -220,7 +221,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       {/* 실거래 상세 모달 */}
       {selected && (() => {
         const t = selected;
-        const related = transactions.filter((x: any) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
+        const related = transactions.filter((x) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
         return (
           <BottomSheet open={!!selected} onClose={() => setSelected(null)} title={t.apt_name}>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
@@ -248,7 +249,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
               {/* 거래 이력 */}
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>거래 이력 ({related.length}건)</div>
-              {related.map((r: any, i: number) => (
+              {related.map((r, i: number) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>
                   <span style={{ color: 'var(--text-secondary)' }}>{r.exclusive_area}㎡ · {r.floor}층</span>

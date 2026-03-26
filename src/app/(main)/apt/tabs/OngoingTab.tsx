@@ -1,11 +1,12 @@
 'use client';
+import type { OngoingApt, PremiumListing } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { isNew, NewBadge, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
 import BottomSheet from '@/components/BottomSheet';
 
 interface Props extends SharedTabProps {
-  ongoingApts: any[];
-  premiumListings: any[];
+  ongoingApts: OngoingApt[];
+  premiumListings: PremiumListing[];
 }
 
 export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion }: Props) {
@@ -34,17 +35,17 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
   if (!ongoingApts.length) return <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-tertiary)' }}>🏢 분양중 데이터를 수집 중입니다<br/><span style={{ fontSize: 'var(--fs-sm)' }}>청약 마감 후 입주 전 현장 및 미분양 현장이 표시됩니다</span></div>;
 
-  const regs = ['전체', ...Array.from(new Set(ongoingApts.map((o: any) => o.region_nm || '기타'))).sort()];
-  let filtered = ongoingRegion === '전체' ? ongoingApts : ongoingApts.filter((o: any) => (o.region_nm || '기타') === ongoingRegion);
+  const regs = ['전체', ...Array.from(new Set(ongoingApts.map((o) => o.region_nm || '기타'))).sort()];
+  let filtered = ongoingRegion === '전체' ? ongoingApts : ongoingApts.filter((o) => (o.region_nm || '기타') === ongoingRegion);
   if (ongoingSearch.trim()) {
     const q = ongoingSearch.trim().toLowerCase();
-    filtered = filtered.filter((o: any) => (o.house_nm || '').toLowerCase().includes(q) || (o.address || '').toLowerCase().includes(q) || (o.region_nm || '').toLowerCase().includes(q) || (o.constructor_nm || '').toLowerCase().includes(q));
+    filtered = filtered.filter((o) => (o.house_nm || '').toLowerCase().includes(q) || (o.address || '').toLowerCase().includes(q) || (o.region_nm || '').toLowerCase().includes(q) || (o.constructor_nm || '').toLowerCase().includes(q));
   }
-  if (ongoingStatus !== '전체') filtered = filtered.filter((o: any) => ongoingStatus === '미분양' ? o.source === 'unsold' : o.source === 'subscription');
+  if (ongoingStatus !== '전체') filtered = filtered.filter((o) => ongoingStatus === '미분양' ? o.source === 'unsold' : o.source === 'subscription');
   const totalSites = filtered.length;
-  const totalUnsoldUnits = filtered.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0);
-  const allSubCount = filtered.filter((o: any) => o.source === 'subscription').length;
-  const allUnsoldCount = filtered.filter((o: any) => o.source === 'unsold').length;
+  const totalUnsoldUnits = filtered.reduce((s: number, o) => s + (o.unsold_count || 0), 0);
+  const allSubCount = filtered.filter((o) => o.source === 'subscription').length;
+  const allUnsoldCount = filtered.filter((o) => o.source === 'unsold').length;
   const PER_PAGE = 20;
   const sorted = [...filtered].sort((a, b) => {
     if (ongoingSort === 'unsold') return (b.unsold_count || 0) - (a.unsold_count || 0);
@@ -57,15 +58,15 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
   // 지역별 집계
   const regionCounts = regs.filter(r => r !== '전체').map(r => {
-    const items = ongoingApts.filter((o: any) => (o.region_nm || '기타') === r);
-    const subC = items.filter((o: any) => o.source === 'subscription').length;
-    const unsC = items.filter((o: any) => o.source === 'unsold').length;
-    return { name: r, count: items.length, subCount: subC, unsoldCount: unsC, unsoldUnits: items.reduce((s: number, o: any) => s + (o.unsold_count || 0), 0) };
+    const items = ongoingApts.filter((o) => (o.region_nm || '기타') === r);
+    const subC = items.filter((o) => o.source === 'subscription').length;
+    const unsC = items.filter((o) => o.source === 'unsold').length;
+    return { name: r, count: items.length, subCount: subC, unsoldCount: unsC, unsoldUnits: items.reduce((s: number, o) => s + (o.unsold_count || 0), 0) };
   }).sort((a, b) => b.count - a.count);
 
   // ① 입주 임박 현장
   const todayD = kstNow();
-  const urgentMove = filtered.filter((o: any) => {
+  const urgentMove = filtered.filter((o) => {
     if (!o.mvn_prearnge_ym) return false;
     const mvn = String(o.mvn_prearnge_ym).replace(/[^0-9]/g, '').slice(0, 6);
     if (mvn.length < 6) return false;
@@ -73,18 +74,18 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
     const diffMs = mvnDate.getTime() - todayD.getTime();
     const diffDays = Math.ceil(diffMs / 86400000);
     return diffDays >= 0 && diffDays <= 90;
-  }).map((o: any) => {
+  }).map((o) => {
     const mvn = String(o.mvn_prearnge_ym).replace(/[^0-9]/g, '').slice(0, 6);
     const mvnDate = new Date(parseInt(mvn.slice(0, 4)), parseInt(mvn.slice(4, 6)) - 1, 1);
     return { ...o, daysToMove: Math.ceil((mvnDate.getTime() - todayD.getTime()) / 86400000) };
-  }).sort((a: any, b: any) => a.daysToMove - b.daysToMove);
+  }).sort((a, b) => a.daysToMove - b.daysToMove);
 
   // ③ 단계별 파이프라인
   const todayPipe = kstToday();
   const pipeStages = ['청약마감', '당첨발표', '계약중', '공사중', '입주예정'];
   const pipeCounts: Record<string, number> = {};
   pipeStages.forEach(s => { pipeCounts[s] = 0; });
-  filtered.forEach((o: any) => {
+  filtered.forEach((o) => {
     if (o.source === 'unsold') { pipeCounts['공사중']++; return; }
     const dates = [o.rcept_endde, o.przwner_presnatn_de, o.cntrct_cncls_endde, o.mvn_prearnge_ym].map(d => d ? String(d).slice(0, 10) : '');
     if (dates[3] && dates[3] <= todayPipe) pipeCounts['입주예정']++;
@@ -102,7 +103,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
   // 수도권/지방 집계
   const capitalRegions = ['서울', '경기', '인천'];
-  const capitalCount = filtered.filter((o: any) => capitalRegions.some(c => (o.region_nm || '').includes(c))).length;
+  const capitalCount = filtered.filter((o) => capitalRegions.some(c => (o.region_nm || '').includes(c))).length;
   const localCount = filtered.length - capitalCount;
 
 
@@ -138,7 +139,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ animation: 'pulse 2s infinite' }}>🏠</span> 입주 임박 ({urgentMove.length}건)
           </div>
-          {urgentMove.slice(0, 5).map((o: any) => (
+          {urgentMove.slice(0, 5).map((o) => (
             <div key={o.id} onClick={() => setSelectedOngoing(o)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(52,211,153,0.1)', cursor: 'pointer' }}>
               <div>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{o.house_nm}</span>
@@ -195,9 +196,9 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       {priceTop.length > 0 && (
         <div className="kd-card" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>💰 분양가 TOP {Math.min(priceTop.length, 10)}</div>
-          {priceTop.map((d: any, i: number) => {
+          {priceTop.map((d, i: number) => {
             const pct = ((d.sale_price_max || 0) / maxPrice) * 100;
-            const pAmt = (d.sale_price_max / 10000).toFixed(1);
+            const pAmt = ((d.sale_price_max ?? 0) / 10000).toFixed(1);
             return (
               <div key={d.id} onClick={() => setSelectedOngoing(d)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer' }}>
                 <div style={{ width: 14, fontSize: '10px', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', textAlign: 'right' }}>{i + 1}</div>
@@ -241,7 +242,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       </div>
 
       {/* ⑥⑦ 카드 리스트 (borderLeft + 클릭 모달) */}
-      {paged.map((o: any) => {
+      {paged.map((o) => {
         const isUnsold = o.source === 'unsold';
         const pMin = o.sale_price_min ? Math.round(o.sale_price_min / 10000 * 10) / 10 : null;
         const pMax = o.sale_price_max ? Math.round(o.sale_price_max / 10000 * 10) / 10 : null;
@@ -249,7 +250,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         const wlKey = isUnsold ? `unsold:${o.link_id}` : `sub:${o.link_id}`;
         const isWatched = watchlist.has(wlKey);
         const accentColor = isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)';
-        const premiumMatch = premiumListings.find((pl: any) => String(pl.listing_id) === String(o.link_id) && pl.listing_type === (isUnsold ? 'unsold' : 'subscription'));
+        const premiumMatch = premiumListings.find((pl) => String(pl.listing_id) === String(o.link_id) && pl.listing_type === (isUnsold ? 'unsold' : 'subscription'));
         const isPremium = !!premiumMatch;
 
         return (
@@ -273,19 +274,19 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                   {o.address ? o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : ''}
-                  {o.total_supply > 0 ? ` · 일반분양 ${o.total_supply.toLocaleString()}세대` : ''}
+                  {(o.total_supply ?? 0) > 0 ? ` · 일반분양 ${(o.total_supply ?? 0).toLocaleString()}세대` : ''}
                   {o.constructor_nm ? ` · ${o.constructor_nm}` : ''}
                   {priceStr ? ` · ${priceStr}` : ''}
                 </div>
                 {/* 미분양률 바 */}
-                {isUnsold && o.unsold_count > 0 && o.total_supply > 0 && (() => {
-                  const rate = Math.round((o.unsold_count / o.total_supply) * 100);
+                {isUnsold && (o.unsold_count ?? 0) > 0 && (o.total_supply ?? 0) > 0 && (() => {
+                  const rate = Math.round(((o.unsold_count ?? 0) / (o.total_supply ?? 1)) * 100);
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                       <div style={{ flex: 1, height: 4, background: 'var(--bg-hover)', borderRadius: 2 }}>
                         <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
                       </div>
-                      <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent-red)' }}>미분양 {o.unsold_count.toLocaleString()}호 ({rate}%)</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent-red)' }}>미분양 {(o.unsold_count ?? 0).toLocaleString()}호 ({rate}%)</span>
                     </div>
                   );
                 })()}
@@ -383,8 +384,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
                 {[
-                  ['공급 세대수', o.total_supply > 0 ? `${o.total_supply.toLocaleString()}세대 (일반분양)` : '-'],
-                  ['미분양', o.unsold_count ? `${o.unsold_count.toLocaleString()}호` : '-'],
+                  ['공급 세대수', (o.total_supply ?? 0) > 0 ? `${(o.total_supply ?? 0).toLocaleString()}세대 (일반분양)` : '-'],
+                  ['미분양', o.unsold_count ? `${(o.unsold_count ?? 0).toLocaleString()}호` : '-'],
                   ['분양가', pMin ? `${pMin}${pMax && pMax !== pMin ? `~${pMax}` : ''}억` : '-'],
                   ['입주예정', mvn || '-'],
                   ['시공사', o.constructor_nm || '-'],

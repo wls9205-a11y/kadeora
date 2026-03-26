@@ -1,11 +1,12 @@
 'use client';
+import type { RedevProject } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import RedevTimeline from '@/components/RedevTimeline';
 import BottomSheet from '@/components/BottomSheet';
 
 interface Props extends SharedTabProps {
-  redevelopment: any[];
+  redevelopment: RedevProject[];
 }
 
 export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion }: Props) {
@@ -36,7 +37,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
   // 지역별 현황판 데이터
   const redevRegionMap = new Map<string, { total: number; redev: number; rebuild: number; households: number }>();
-  redevelopment.forEach((r: any) => {
+  redevelopment.forEach((r) => {
     const region = r.region || '기타';
     const cur = redevRegionMap.get(region) || { total: 0, redev: 0, rebuild: 0, households: 0 };
     cur.total++;
@@ -48,8 +49,8 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
     .map(([name, stats]) => ({ name, ...stats }))
     .sort((a, b) => b.total - a.total);
 
-  const redevRegs = ['전체', ...Array.from(new Set(redevelopment.map((r: any) => r.region || '기타'))).sort()];
-  const filteredRedev = redevelopment.filter((r: any) => {
+  const redevRegs = ['전체', ...Array.from(new Set(redevelopment.map((r) => r.region || '기타'))).sort()];
+  const filteredRedev = redevelopment.filter((r) => {
     if (redevType !== '전체' && r.project_type !== redevType) return false;
     if (redevRegion !== '전체' && r.region !== redevRegion) return false;
     if (redevStage !== '전체' && r.stage !== redevStage) return false;
@@ -58,7 +59,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
       if (!(r.district_name || '').toLowerCase().includes(q) && !(r.region || '').toLowerCase().includes(q) && !(r.sigungu || '').toLowerCase().includes(q) && !(r.constructor || '').toLowerCase().includes(q) && !(r.address || '').toLowerCase().includes(q)) return false;
     }
     return true;
-  }).sort((a: any, b: any) => {
+  }).sort((a, b) => {
     const aOk = a.district_name && a.district_name !== '정보 준비중' && a.district_name !== '미상';
     const bOk = b.district_name && b.district_name !== '정보 준비중' && b.district_name !== '미상';
     if (aOk && !bOk) return -1;
@@ -66,17 +67,17 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
     return 0;
   });
 
-  const redevCount = filteredRedev.filter((r: any) => r.project_type === '재개발').length;
-  const rebuildCount = filteredRedev.filter((r: any) => r.project_type === '재건축').length;
+  const redevCount = filteredRedev.filter((r) => r.project_type === '재개발').length;
+  const rebuildCount = filteredRedev.filter((r) => r.project_type === '재건축').length;
   const stageCount: Record<string, number> = {};
   STAGE_ORDER.forEach(s => { stageCount[s] = 0; });
-  filteredRedev.forEach((r: any) => {
+  filteredRedev.forEach((r) => {
     const s = r.stage || '정비구역지정';
     if (stageCount[s] !== undefined) stageCount[s]++;
     else stageCount['정비구역지정']++; // 알 수 없는 stage는 정비구역지정으로
   });
 
-  const totalHouseholds = filteredRedev.reduce((s: number, r: any) => s + (r.total_households || 0), 0);
+  const totalHouseholds = filteredRedev.reduce((s: number, r) => s + (r.total_households || 0), 0);
 
 
   return (
@@ -130,8 +131,8 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏗️ 단계별 파이프라인</div>
               <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
                 {STAGE_ORDER.map((stage, i) => {
-                  const regionFiltered = redevRegion === '전체' ? redevelopment : redevelopment.filter((r: any) => r.region === redevRegion);
-                  const count = regionFiltered.filter((r: any) => r.stage === stage).length;
+                  const regionFiltered = redevRegion === '전체' ? redevelopment : redevelopment.filter((r) => r.region === redevRegion);
+                  const count = regionFiltered.filter((r) => r.stage === stage).length;
                   const total = regionFiltered.length || 1;
                   const pct = Math.round((count / total) * 100);
                   const sc = STAGE_COLORS[stage] || { bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' };
@@ -154,7 +155,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               {pill('재건축', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {/* 시공사 있는 것만 필터 */}
               {(() => {
-                const withConstructor = filteredRedev.filter((r: any) => r.constructor);
+                const withConstructor = filteredRedev.filter((r) => r.constructor);
                 return withConstructor.length > 0 ? (
                   <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)', fontWeight: 600, marginLeft: 'auto' }}>시공사 확정 {withConstructor.length}건</span>
                 ) : null;
@@ -171,9 +172,9 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 카드 리스트 (20건씩 페이지네이션) */}
-            {filteredRedev.slice(0, redevPage * 20).map((r: any) => {
-              const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
-              const stageIdx = STAGE_ORDER.indexOf(r.stage);
+            {filteredRedev.slice(0, redevPage * 20).map((r) => {
+              const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
+              const stageIdx = STAGE_ORDER.indexOf(r.stage || '');
               const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
               return (
                 <div key={r.id} onClick={() => setSelectedRedev(r)} className="kd-card-hover" style={{
@@ -211,7 +212,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                         '관리처분': ' · 관리처분계획 참조',
                         '착공': ' · 사업시행계획 참조',
                       };
-                      return stageMsg[r.stage] || ' · 세대수 미확정';
+                      return stageMsg[r.stage || ''] || ' · 세대수 미확정';
                     })()}{r.constructor ? ` · ${r.constructor}` : ''}
                   </div>
                   {/* 비고/예상준공 */}
@@ -240,7 +241,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
       {/* 재개발 상세 모달 */}
       {selectedRedev && (() => {
         const r = selectedRedev;
-        const sc = STAGE_COLORS[r.stage] || STAGE_COLORS['정비구역지정'];
+        const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
         return (
     <BottomSheet open={!!selectedRedev} onClose={() => setSelectedRedev(null)} title={r.district_name && r.district_name !== '미상' ? r.district_name : r.address || r.notes || '정비사업'}>
         {/* 헤더 뱃지 */}
@@ -268,7 +269,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
         {/* 사업 진행률 파이프라인 */}
         {(() => {
-          const currentIdx = STAGE_ORDER.indexOf(r.stage);
+          const currentIdx = STAGE_ORDER.indexOf(r.stage || '');
           const progress = currentIdx >= 0 ? Math.round(((currentIdx + 1) / STAGE_ORDER.length) * 100) : 0;
           return (
             <div style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: 14, marginBottom: 16 }}>

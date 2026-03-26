@@ -1,4 +1,5 @@
 'use client';
+import type { UnsoldApt } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { type SharedTabProps, generateAptSlug } from './apt-utils';
 import Link from 'next/link';
@@ -6,9 +7,9 @@ import MiniLineChart from '@/components/charts/MiniLineChart';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
 interface Props extends SharedTabProps {
-  unsold: any[];
-  unsoldMonthly: any[];
-  unsoldSummary: any;
+  unsold: UnsoldApt[];
+  unsoldMonthly: { stat_month: string; total_unsold: number; after_completion: number; region?: string }[];
+  unsoldSummary: Record<string, any> | string | null;
 }
 
 export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion }: Props) {
@@ -169,19 +170,19 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📈 전국 미분양 추이 (12개월)</div>
           <MiniLineChart
             data={(() => {
-              const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-12);
+              const months = [...new Set(unsoldMonthly.map((s) => s.stat_month))].slice(-12);
               return months.map(m => {
-                const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
-                const total = rows.reduce((sum: number, r: any) => sum + (r.total_unsold || 0), 0);
+                const rows = unsoldMonthly.filter((s) => s.stat_month === m);
+                const total = rows.reduce((sum: number, r) => sum + (r.total_unsold || 0), 0);
                 return { label: String(m).slice(5), value: total };
               });
             })()}
             color="var(--accent-blue)"
             secondaryData={(() => {
-              const months = [...new Set(unsoldMonthly.map((s: any) => s.stat_month))].slice(-12);
+              const months = [...new Set(unsoldMonthly.map((s) => s.stat_month))].slice(-12);
               return months.map(m => {
-                const rows = unsoldMonthly.filter((s: any) => s.stat_month === m);
-                const total = rows.reduce((sum: number, r: any) => sum + (r.after_completion || 0), 0);
+                const rows = unsoldMonthly.filter((s) => s.stat_month === m);
+                const total = rows.reduce((sum: number, r) => sum + (r.after_completion || 0), 0);
                 return { label: String(m).slice(5), value: total };
               });
             })()}
@@ -208,8 +209,8 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
       </div>
 
       {/* 리스트 */}
-      {fu.map((u: any, i: number) => {
-        const rate = u.tot_supply_hshld_co ? Math.round((u.tot_unsold_hshld_co / u.tot_supply_hshld_co) * 100) : null;
+      {fu.map((u, i: number) => {
+        const rate = u.tot_supply_hshld_co ? Math.round(((u.tot_unsold_hshld_co ?? 0) / u.tot_supply_hshld_co) * 100) : null;
         const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
         const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
         const priceStr = pMin ? `${pMin}억${pMax && pMax !== pMin ? `~${pMax}억` : ''}` : null;
@@ -230,7 +231,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 12, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
                 {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} 미분양 {unsoldCount.toLocaleString()}세대
               </span>
-              {u.after_completion_unsold > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 8, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>악성 {u.after_completion_unsold}호</span>}
+              {(u.after_completion_unsold ?? 0) > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 8, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>악성 {u.after_completion_unsold}호</span>}
               {priceStr && <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--brand)', marginLeft: 'auto', flexShrink: 0 }}>{priceStr}</span>}
               <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('unsold', String(u.id)); }} style={{ fontSize: 'var(--fs-xl)', background: watchlist.has(`unsold:${u.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`unsold:${u.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', transition: 'transform 0.1s', lineHeight: 1 }}>
                 {watchlist.has(`unsold:${u.id}`) ? '⭐' : '☆'}
