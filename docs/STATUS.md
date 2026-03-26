@@ -92,10 +92,26 @@
 - 거주지(시/도): **필수 필드** (GuestSchema city min(1), forward-lead.ts에서 상담사 매칭에 사용)
 - consent_version: v1.1 (수집항목: 이름, 전화번호, 생년월일, 거주지역)
 - GRADE_COLORS/GRADE_TITLES: `@/lib/constants`에서 import (로컬 정의 금지)
-- apt/[id] SSR: 3단계 병렬 쿼리, increment_site_view는 `Promise.resolve().catch()`
+- apt/[id] SSR: 3단계 병렬 쿼리, increment_site_view는 `void` fire-and-forget
 - apt/[id] 카드 스타일: `className="apt-card"` CSS 클래스 사용 (인라인 `crd` 상수 제거됨)
 - generateStaticParams: 제거됨 → 전량 ISR on-demand (revalidate=3600)
 - next.config.ts: `typescript.ignoreBuildErrors: true`, `eslint.ignoreDuringBuilds: true`
+
+### 세션 39 전수조사 결과
+- **총 ~1,200줄 삭제** (30개 파일 변경)
+- 죽은 API 라우트 15개 삭제: analytics/visitors, apt/view, apt/watchlist, apt/unsold-stats, apt/sites/forward-lead, auth/toss-disconnect, blog/series(API), bug-report, notifications/read-all, push/click, push/test, shop/exchange, stock-sync, ping, health
+- 미사용 hooks 3개 삭제: useHaptic, useAuthGuard, useKakaoShare
+- 미사용 컴포넌트 2개 삭제: MiniBarChart, PostCard
+- constants.ts 데드코드 삭제: DEMO_TRENDING/STOCKS/DISCUSS/APT/PRODUCTS, CATEGORY_STYLES, GRADE_INFO
+- lib 미사용 export 삭제: maskPhone, softFilter, BRAND_COVERS, env.ts 전체, PaymentCreateSchema, FollowSchema, BookmarkSchema, RATE_LIMITS
+- 크론 59→56개: health-check 30분→1일1회, blog-rewrite 3회→1회, blog-publish-queue 2회→1회
+- Sentry 현대화: disableLogger→webpack.treeshake, automaticVercelMonitors→webpack, onRouterTransitionStart 추가
+- apt/[id]/page.tsx TS 에러 6건 수정 (implicit any + PromiseLike catch)
+- **MissionControl 분할**: 1,494줄 → 76줄 + 10개 섹션 dynamic import (95% 감소)
+  - admin-shared.tsx: 공유 타입/상수/컴포넌트
+  - sections/: dashboard(220), analytics(181), users(262), blog(106), content(102), godmode(102), seo(92), realestate(86), system(55), reports(46)
+- **FeedClient 최적화**: useEffect 6→3개 통합, likeCounts 초기화 인라인화
+- **Navigation 최적화**: useEffect 5→3개 통합 (toss+font 1회 초기화)
 
 ## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 38건+
 
