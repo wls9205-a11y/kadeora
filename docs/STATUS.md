@@ -1,5 +1,6 @@
 # 카더라 프로젝트 STATUS — 세션 40+41 (2026-03-27 KST)
-> 호스팅어 위성 네트워크 완성 + 딥링크 포스트 18편 + 코드 품질 개선
+> 호스팅어 위성 네트워크 완성 + 딥링크 18편 + 어드민 위성 탭 + 자동화 크론
+> **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 최종 스코어카드
 
@@ -85,7 +86,7 @@
 ### 인프라 완성 (3라운드, 29작업)
 | 항목 | 분양권실전투자 | 급매물 | 주린이 |
 |------|:---:|:---:|:---:|
-| mu-plugins 5/5 | ✅ | ✅ | ✅ |
+| mu-plugins 7+ | ✅ | ✅ | ✅ |
 | favicon + manifest | ✅ 200 | ✅ 200 | ✅ 200 |
 | Article + BreadcrumbList Schema | ✅ | ✅ | -(만료) |
 | 네이버 메타태그 | ✅ | ✅ | -(만료) |
@@ -105,7 +106,23 @@
 
 ### 자동화 시스템 (mu-plugin)
 - kd_deeplink_injector.php — RSS 자동 포스트 33%에 카더라 딥링크 삽입 (키워드 매칭, 5가지 스타일 랜덤)
-- kd_structure_rotation.php — 매주 월요일 크론, 30일+ 포스트 5개 앵커/스타일/위치 변경
+- kd_structure_rotation.php — 매주 월요일 크론, 30일+ 포스트 5개 앵커/스타일/위치 변경 (다음: 4/2)
+
+### 카더라 어드민 위성 네트워크 탭 (e341fc6)
+- admin-shared.tsx: `satellite` Section 타입 + SECTIONS 배열 추가
+- MissionControl.tsx: SatelliteSection dynamic import
+- sections/satellite.tsx: 사이트 상태, SEO 체크리스트, 구조 로테이션 현황, 원클릭 액션
+- api/admin/satellite/route.ts: 3사이트 HTTP 체크 + IndexNow Ping API
+
+### mu-plugin 총 현황 (7개 × 3사이트 = 21파일)
+1. kd_rss_sync.php — RSS 자동 파이프라인 (6시간 간격)
+2. kd_schema_markup.php — Article + BreadcrumbList 구조화 데이터
+3. kd_naver_meta.php — 네이버/다음/카카오 전용 메타태그
+4. kd_image_sitemap.php — 이미지 사이트맵
+5. kd_og_fallback.php — OG 이미지 카더라 API 폴백
+6. kd_favicon.php — 파비콘 head 태그 + theme-color + manifest
+7. kd_deeplink_injector.php — RSS 딥링크 자동 삽입 (33%)
+8. kd_structure_rotation.php — 주간 구조 로테이션 크론
 
 ### 사이트 총 현황
 - 분양권실전투자: 8,675편 (포스트)
