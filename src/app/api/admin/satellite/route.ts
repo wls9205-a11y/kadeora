@@ -9,14 +9,19 @@ const SITES = [
   { domain: 'xn--9i2by8fvyb69i.site', name: '주린이', color: '#059669', label: '주' },
 ];
 
+const FETCH_OPTS = {
+  headers: { 'User-Agent': 'KadeoraBot/1.0 (+https://kadeora.app)' },
+  redirect: 'follow' as const,
+};
+
 async function checkSite(site: typeof SITES[0]) {
   const checks = await Promise.allSettled([
-    fetch(`https://${site.domain}/`, { signal: AbortSignal.timeout(5000) }),
-    fetch(`https://${site.domain}/favicon.ico`, { signal: AbortSignal.timeout(5000) }),
-    fetch(`https://${site.domain}/sitemap_index.xml`, { signal: AbortSignal.timeout(5000) }),
-    fetch(`https://${site.domain}/robots.txt`, { signal: AbortSignal.timeout(5000) }),
-    fetch(`https://${site.domain}/llms.txt`, { signal: AbortSignal.timeout(5000) }),
-    fetch(`https://${site.domain}/feed/`, { signal: AbortSignal.timeout(8000) }),
+    fetch(`https://${site.domain}/`, { ...FETCH_OPTS, signal: AbortSignal.timeout(10000) }),
+    fetch(`https://${site.domain}/favicon.ico`, { ...FETCH_OPTS, signal: AbortSignal.timeout(8000) }),
+    fetch(`https://${site.domain}/sitemap_index.xml`, { ...FETCH_OPTS, signal: AbortSignal.timeout(8000) }),
+    fetch(`https://${site.domain}/robots.txt`, { ...FETCH_OPTS, signal: AbortSignal.timeout(8000) }),
+    fetch(`https://${site.domain}/llms.txt`, { ...FETCH_OPTS, signal: AbortSignal.timeout(8000) }),
+    fetch(`https://${site.domain}/feed/`, { ...FETCH_OPTS, signal: AbortSignal.timeout(10000) }),
   ]);
 
   const [homepage, favicon, sitemap, robots, llms, rss] = checks;
@@ -24,7 +29,7 @@ async function checkSite(site: typeof SITES[0]) {
   let status: 'ok' | 'error' | 'expired' = 'error';
   if (homepage.status === 'fulfilled' && homepage.value.ok) {
     const html = await homepage.value.text();
-    status = html.includes('expired') ? 'expired' : 'ok';
+    status = (html.includes('domain is expired') || html.includes('domain has expired') || html.includes('renovar el dominio')) ? 'expired' : 'ok';
   }
 
   let rssItems = 0;
@@ -50,6 +55,8 @@ async function checkSite(site: typeof SITES[0]) {
     sitemap: sitemap.status === 'fulfilled' && sitemap.value.ok,
     robotsAI,
     llmsTxt: llms.status === 'fulfilled' && llms.value.ok,
+    httpCode: homepage.status === 'fulfilled' ? homepage.value.status : 0,
+    error: homepage.status === 'rejected' ? String(homepage.reason).slice(0, 100) : null,
   };
 }
 

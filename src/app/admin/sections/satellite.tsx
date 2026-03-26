@@ -13,6 +13,8 @@ interface SiteStatus {
   sitemap: boolean;
   robotsAI: boolean;
   llmsTxt: boolean;
+  httpCode?: number;
+  error?: string | null;
 }
 
 const SITES_META = [
@@ -99,9 +101,10 @@ export default function SatelliteSection() {
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11 }}>
                 {dot(site.status === 'ok')}
                 <span style={{ color: site.status === 'ok' ? C.green : site.status === 'expired' ? C.yellow : C.red }}>
-                  {site.status === 'ok' ? '정상' : site.status === 'expired' ? '만료' : '오류'}
+                  {site.status === 'ok' ? '정상' : site.status === 'expired' ? '만료' : `오류${site.httpCode ? ` (${site.httpCode})` : ''}`}
                 </span>
               </div>
+              {site.error && <div style={{ fontSize: 10, color: C.red, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={site.error}>{site.error}</div>}
               <div style={{ fontSize: 12, color: C.textSec }}>{site.rssItems} RSS</div>
             </div>
           ))}
