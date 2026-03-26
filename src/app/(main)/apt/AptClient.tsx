@@ -131,18 +131,18 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {/* KPI 요약 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
         {[
-          { label: '접수중', value: openCount, color: 'var(--accent-green)', bg: 'rgba(52,211,153,0.08)' },
-          { label: '예정', value: upcomingCount, color: 'var(--accent-blue)', bg: 'rgba(91,164,245,0.08)' },
-          { label: '분양중', value: ongoingApts.length, color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)' },
-          { label: '미분양', value: unsoldTotal > 999 ? `${(unsoldTotal/1000).toFixed(1)}k` : unsoldTotal, color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)' },
-          { label: '재개발', value: redevCount, color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)' },
+          { label: '접수중', value: openCount.toLocaleString(), color: 'var(--accent-green)', bg: 'rgba(52,211,153,0.08)' },
+          { label: '예정', value: upcomingCount.toLocaleString(), color: 'var(--accent-blue)', bg: 'rgba(91,164,245,0.08)' },
+          { label: '분양중', value: ongoingApts.length.toLocaleString(), color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)' },
+          { label: '미분양', value: unsoldTotal.toLocaleString(), color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)' },
+          { label: '재개발', value: redevCount.toLocaleString(), color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)' },
         ].map(({ label, value, color, bg }) => (
           <div key={label} style={{
-            flex: 1, textAlign: 'center', padding: '8px 2px', borderRadius: 8,
-            background: bg, border: `1px solid ${color}20`,
+            flex: 1, textAlign: 'center', padding: '12px 4px', borderRadius: 8,
+            background: bg, border: `1px solid ${color}33`,
           }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color }}>{value}</div>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{label}</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color, marginTop: 2, opacity: 0.7 }}>{label}</div>
           </div>
         ))}
       </div>

@@ -15,6 +15,7 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
+const SignupCTA = dynamic(() => import('@/components/SignupCTA'));
 
 export const revalidate = 3600;
 interface Props { params: Promise<{ id: string }> }
@@ -381,6 +382,9 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* 관심단지 등록 CTA */}
       {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} />}
+
+      {/* 비로그인 가입 유도 CTA */}
+      {!aptUser && <SignupCTA />}
 
       {/* Reviews */}
       <AptReviewSection aptName={name} region={region} />

@@ -141,7 +141,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         }}
       >
         <div style={{
-          width: 32,
+          width: 36,
           fontSize: 'var(--fs-xs)',
           fontWeight: isActive ? 800 : 600,
           color: isActive ? 'var(--brand)' : 'var(--text-primary)',
@@ -177,14 +177,16 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         </div>
 
         <div style={{
-          width: 26,
-          fontSize: 'var(--fs-xs)',
-          fontWeight: 700,
-          color: isActive ? 'var(--brand)' : 'var(--text-secondary)',
+          width: 48,
+          fontSize: 'var(--fs-sm)',
+          fontWeight: 800,
+          color: isActive ? 'var(--brand)' : 'var(--text-primary)',
           textAlign: 'right',
           flexShrink: 0,
+          fontVariantNumeric: 'tabular-nums',
+          letterSpacing: '-0.3px',
         }}>
-          {r.total}
+          {r.total.toLocaleString()}
         </div>
       </div>
     );

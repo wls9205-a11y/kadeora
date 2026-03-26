@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import { REGIONS } from '@/lib/regions';
 import Link from 'next/link';
 
@@ -12,8 +13,7 @@ interface Props {
 }
 
 export default function InterestRegistration({ siteId, siteName, interestCount, slug }: Props) {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { userId, loading } = useAuth();
   const [registered, setRegistered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -28,18 +28,12 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   const [consentMarketing, setConsentMarketing] = useState(false);
 
   useEffect(() => {
+    if (!userId) return;
     const sb = createSupabaseBrowser();
-    sb.auth.getUser().then(({ data }) => {
-      const u = data?.user || null;
-      setUser(u);
-      if (u) {
-        sb.from('apt_site_interests').select('id')
-          .eq('site_id', siteId).eq('user_id', u.id).maybeSingle()
-          .then(({ data: existing }: any) => { if (existing) setRegistered(true); });
-      }
-      setLoading(false);
-    });
-  }, [siteId]);
+    sb.from('apt_site_interests').select('id')
+      .eq('site_id', siteId).eq('user_id', userId).maybeSingle()
+      .then(({ data: existing }: any) => { if (existing) setRegistered(true); });
+  }, [userId, siteId]);
 
   const handleMemberRegister = async () => {
     setSubmitting(true);
@@ -169,7 +163,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         cursor: consentCollection ? 'pointer' : 'not-allowed',
         opacity: submitting ? 0.5 : 1,
       }}>
-        {submitting ? '등록 중...' : user ? '정보 입력 후 등록하기' : '관심단지 등록하기'}
+        {submitting ? '등록 중...' : userId ? '정보 입력 후 등록하기' : '관심단지 등록하기'}
       </button>
     </div>
   );
@@ -196,7 +190,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         ))}
       </div>
 
-      {user ? (
+      {userId ? (
         <>
           {/* 로그인 유저: 원클릭 버튼 */}
           {registered ? (
