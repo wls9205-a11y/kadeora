@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
     if (tab === 'redevelopment') {
       let q = sb.from('redevelopment_projects')
-        .select('*')
+        .select('id, district_name, region, sigungu, stage, total_households, constructor, developer, address, latitude, longitude, nearest_station, blog_slug, is_active')
         .eq('is_active', true)
         .order('total_households', { ascending: false });
       if (region && region !== '전체') q = q.ilike('region', `%${region}%`);
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
 
     if (tab === 'unsold') {
       let q = sb.from('unsold_apts')
-        .select('*')
+        .select('id, house_nm, region_nm, sigungu_nm, tot_unsold_hshld_co, tot_supply_hshld_co, sale_price_min, sale_price_max, completion_ym, constructor_nm, supply_addr, is_active')
         .eq('is_active', true)
         .order('tot_unsold_hshld_co', { ascending: false });
       if (region && region !== '전체') q = q.ilike('region_nm', `%${region}%`);

@@ -1,7 +1,87 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 40 (커밋 9건, 45+ 파일) + 세션 39 전수조사 (커밋 12건, any 596→518, CSS -328줄, API 캐시 7개)
+> **마지막 업데이트:** 2026-03-26 세션 41 전수조사 (커밋 5건, 90+ 파일) — any 476→305, 크론 504 해결, Edge 캐시 +5, UX 딥링크
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
+
+## 세션 41 작업 (2026-03-26) — 5커밋, 90+ 파일
+
+### 크론 504 타임아웃 해결 [COMPLETED]
+- `sync-apt-sites`: maxDuration 120→180초, vercel.json 전용 규칙 추가
+- `sync-apt-sites`: 재개발+미분양 N+1 쿼리 → 배치 조회 + 10건 병렬 업데이트
+- `blog-series-assign`: 개별 UPDATE → 10건씩 Promise.allSettled 병렬
+
+### any 타입 476→305건 (-171건, 36%↓) [COMPLETED]
+- `catch (e: any)` 49건 → `catch (e: unknown)` + `errMsg()` 유틸 전환
+- `src/lib/error-utils.ts` 신규 — 타입 안전한 에러 메시지 추출
+- `crawl-unsold-molit`: MolitRow 타입 도입 (13→0건)
+- `stock-refresh`: StockRow/StockResult 인터페이스 (10→1건)
+- `admin/analytics`: 필터 콜백 타입 명시 (11→0건)
+- `apt/[id]`: Promise.allSettled 추출 + map 콜백 타입화 (15→7건)
+- `RegionStackedBar`: props 5개 any[] → Record 타입 (10→0건)
+- 40+ 파일 .map/.filter 콜백 Record<string, any> 전환
+
+### GET API 5개 Vercel Edge 캐시 추가 [COMPLETED]
+- `discuss/[id]/comments` (30s), `posts` (15s), `apt/comments` (30s)
+- `apt/reviews` (60s), `stock/[symbol]/comment` (30s)
+- **총 Edge 캐시 API: 7→12개**
+
+### select('*') 23→19건 최적화 [COMPLETED]
+- `apt/tab-data`: redevelopment 14컬럼, unsold 12컬럼 명시
+- `apt-proxy`: apt_subscriptions 14컬럼 명시
+- `push/send`: push_subscriptions 6컬럼 명시
+
+### UX 전수조사 — 유저 경로 감사 [COMPLETED]
+| 문제 | 수정 |
+|------|------|
+| apt 탭 딥링크 불가 | `?tab=unsold/redev/trade` URL 파라미터 지원 |
+| 홈 푸터 부동산 4링크 모두 /apt | 각 탭별 딥링크로 분리 |
+| 404 → /feed (비로그인 막힘) | / (랜딩 페이지)로 변경 |
+| 더보기 메뉴 /apt 중복 | /apt/map (지도뷰)로 교체 |
+| 홈 이미지 6개 전부 eager | 처음 3개만 eager, 나머지 lazy (LCP↑) |
+| JSON-LD 주소 불일치 | 연제구 통일, 우편번호 47545 수정 |
+
+### UX 전수조사 — 양호 확인 (수정 불필요)
+- 모든 34개 유저 페이지에 loading.tsx + error.tsx 존재
+- 모든 상세 페이지에 ← 뒤로가기 링크 존재
+- 교차 링크(블로그↔부동산↔주식) 양방향 완비
+- 비로그인 글쓰기 → /login?redirect=/write 정상 동작
+- profile 탭 URL 파라미터 지원
+- 검색 empty state + 블로그 대체 링크 정상
+- Supabase auth 로그 200 정상 (refresh_token 경쟁 상태 1건 — 정상)
+
+### 주의사항 (세션 41)
+- errMsg(): `catch (e: unknown)` 사용 시 `import { errMsg } from '@/lib/error-utils'` 필요
+- errMsg import는 반드시 `'use client'` 아래에 위치 (위에 두면 빌드 실패)
+- AptClient: `useSearchParams()`로 `?tab=` 파라미터 읽기 (sub/ongoing/unsold/redev/trade)
+- sync-apt-sites: updateOps는 `(() => Promise<void>)[]` + `.map(fn => fn())` 패턴
+- select('*') 최적화 시 반드시 사용 컬럼 확인 (database.ts 참조)
+
+### 성능 최종 스코어카드
+| 항목 | Before (세션40) | After (세션41) |
+|------|----------------|----------------|
+| any 타입 | 476건 (518→476 세션40) | **305건 (-171)** |
+| Edge 캐시 API | 7개 | **12개 (+5)** |
+| select('*') | 23건 | **19건 (-4)** |
+| sync-apt-sites 504 | 반복 실패 | **maxDuration 180 + 배치 병렬** |
+| blog-series-assign 504 | 건별 UPDATE | **10건 병렬** |
+| tsc --noEmit | 0건 | **0건 유지** |
+| 홈 이미지 LCP | 6개 eager | **3 eager + 3 lazy** |
+
+### PENDING 작업
+- [ ] **토스 정산 등록 (3/31 마감 D-5!)**
+- [ ] 토스 라이브키 교체
+- [ ] KIS_APP_KEY 발급 (한국투자증권)
+- [ ] 카카오 OG 캐시 초기화
+- [ ] 네이버 서치어드바이저 RSS/사이트맵 재제출
+- [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
+- [ ] 이미지/좌표/지하철역 수집 크론 자동 진행 중
+
+### 남은 기술 부채 (다음 세션)
+- [ ] **any 타입 305건** → 250건 이하 목표
+  - 주로 `as any` Supabase 캐스트, window/navigator 벤더 확장
+- [ ] **select('*') 19곳** → 10곳 이하 목표
+- [ ] **API 캐시 미적용 ~115개** → 읽기 전용 GET API에 cachedJson() 순차 적용
+- [ ] **StockClient 인라인 스타일 ~130개** → CSS 유틸 클래스 전환
 
 ## 세션 40 작업 (2026-03-26) — 9커밋, 45+ 파일
 

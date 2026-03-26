@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   if (!title || !body) return NextResponse.json({ error: 'title and body required' }, { status: 400 });
 
   // 구독자 조회
-  let query = admin.from('push_subscriptions').select('*');
+  let query = admin.from('push_subscriptions').select('id, user_id, endpoint, p256dh, auth, created_at');
   if (target === 'specific' && user_ids?.length) {
     query = query.in('user_id', user_ids);
   }

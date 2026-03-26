@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     if (!action || action === 'list') {
       const supabase = getSupabaseAdmin();
-      const { data, error } = await supabase.from('apt_subscriptions').select('*').order('rcept_endde', { ascending: false }).limit(50);
+      const { data, error } = await supabase.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, supply_addr, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, mvn_prearnge_ym, constructor_nm, hssply_adres, pblanc_url').order('rcept_endde', { ascending: false }).limit(50);
       if (error) throw error;
       return cachedJson({ success: true, data, count: data?.length || 0 }, 120);
     }
