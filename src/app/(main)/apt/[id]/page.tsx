@@ -21,19 +21,21 @@ interface Props { params: Promise<{ id: string }> }
 
 async function resolveParam(rawId: string) {
   const decoded = decodeURIComponent(rawId);
+  // 특수문자(|, ;, ', " 등) 제거 — PostgREST 쿼리 인젝션/에러 방지
+  const sanitized = decoded.replace(/[|;'"\\<>]/g, '');
   const sb = getSupabaseAdmin();
-  if (isNumericId(decoded)) {
-    const isHmno = decoded.length >= 7;
+  if (isNumericId(sanitized)) {
+    const isHmno = sanitized.length >= 7;
     const { data: apt } = isHmno
-      ? await sb.from('apt_subscriptions').select('id, house_nm, house_manage_no').eq('house_manage_no', decoded).maybeSingle()
-      : await sb.from('apt_subscriptions').select('id, house_nm, house_manage_no').eq('id', Number(decoded)).maybeSingle();
+      ? await sb.from('apt_subscriptions').select('id, house_nm, house_manage_no').eq('house_manage_no', sanitized).maybeSingle()
+      : await sb.from('apt_subscriptions').select('id, house_nm, house_manage_no').eq('id', Number(sanitized)).maybeSingle();
     if (apt?.house_nm) {
       const slug = generateAptSlug(apt.house_nm);
       if (slug) return { type: 'redirect' as const, slug };
     }
     return { type: 'not_found' as const };
   }
-  return { type: 'slug' as const, slug: decoded };
+  return { type: 'slug' as const, slug: sanitized };
 }
 
 async function fetchUnifiedData(slug: string) {
@@ -160,11 +162,22 @@ const STAGES = ['정비구역지정', '조합설립', '사업시행인가', '관
 
 export default async function AptUnifiedPage({ params }: Props) {
   const { id } = await params;
-  const resolved = await resolveParam(id);
+
+  let resolved;
+  try {
+    resolved = await resolveParam(id);
+  } catch {
+    notFound();
+  }
   if (resolved.type === 'redirect' && resolved.slug) permanentRedirect(`/apt/${encodeURIComponent(resolved.slug)}`);
   if (resolved.type !== 'slug') notFound();
 
-  const d = await fetchUnifiedData(resolved.slug);
+  let d;
+  try {
+    d = await fetchUnifiedData(resolved.slug);
+  } catch {
+    notFound();
+  }
   if (!d) notFound();
   const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, name, region, slug } = d;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
