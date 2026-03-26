@@ -1,4 +1,5 @@
 'use client';
+import { isTossMode } from '@/lib/toss-mode';
 import { useState, useEffect } from 'react';
 
 export default function InstallBanner() {
@@ -8,6 +9,7 @@ export default function InstallBanner() {
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
   useEffect(() => {
+    if (isTossMode()) return; // 토스 미니앱에서 숨김
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(display-mode: standalone)').matches) return;
     const dismissed = localStorage.getItem('kd_install_dismissed');

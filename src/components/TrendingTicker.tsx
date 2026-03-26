@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { isTossMode } from '@/lib/toss-mode';
 
 interface TrendingKeyword { keyword: string; rank: number }
 
@@ -9,6 +10,7 @@ export default function TrendingTicker() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
+    if (isTossMode()) return; // 토스 미니앱에서 숨김
     fetch('/api/trend').then(r => r.json()).then(d => {
       if (Array.isArray(d)) setKeywords(d.slice(0, 10));
       else if (d.trending) setKeywords(d.trending.slice(0, 10));

@@ -8,6 +8,7 @@ import GuestWelcome from '@/components/GuestWelcome';
 import { VercelAnalytics } from '@/components/common/Analytics';
 import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
+import TossModeInit from '@/components/TossModeInit';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
 
@@ -134,6 +135,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* 글로벌 PWA 설치 프롬프트 캡처 — 어디서든 window.__pwaPrompt 로 접근 */}
         <script dangerouslySetInnerHTML={{ __html: `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;});` }} />
         <ThemeProvider>
+        <TossModeInit />
         <OfflineBanner />
         <KakaoInit />
         {children}

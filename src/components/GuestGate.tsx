@@ -1,4 +1,5 @@
 'use client';
+import { isTossMode } from '@/lib/toss-mode';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -7,6 +8,7 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
   const [showGate, setShowGate] = useState(false);
 
   useEffect(() => {
+    if (isTossMode()) return; // 토스 미니앱에서 숨김
     if (isLoggedIn) return;
     if (sessionStorage.getItem('kd_gate_shown')) return;
 

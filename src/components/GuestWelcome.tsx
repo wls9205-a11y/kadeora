@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { isTossMode } from '@/lib/toss-mode';
 
 /**
  * 비로그인 유저 통합 환영 배너
@@ -16,6 +17,9 @@ export default function GuestWelcome() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // 토스 미니앱 모드에서는 설치/가입 유도 금지
+    if (isTossMode()) return;
 
     // 이미 PWA로 실행 중이면 안 보여줌
     if (window.matchMedia('(display-mode: standalone)').matches) return;

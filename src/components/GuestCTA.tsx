@@ -1,4 +1,5 @@
 'use client';
+import { isTossMode } from '@/lib/toss-mode';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -7,6 +8,7 @@ export default function GuestCTA() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    if (isTossMode()) return; // 토스 미니앱에서 숨김
     // 이미 닫은 경우 24시간 숨김
     const exp = localStorage.getItem('kd_guest_cta');
     if (exp && Date.now() < parseInt(exp)) return;

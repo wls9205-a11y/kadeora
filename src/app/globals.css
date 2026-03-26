@@ -1387,3 +1387,44 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 
 /* 부동산 지역 필 스크롤 — 스크롤바 숨김 */
 .apt-pill-scroll::-webkit-scrollbar { display: none; }
+
+/* ═══ 토스 앱인토스 미니앱 라이트 모드 ═══ */
+.toss-mode {
+  --bg-base:       #FFFFFF;
+  --bg-surface:    #F7F8FA;
+  --bg-hover:      #F0F1F3;
+  --nav-bg:        #FFFFFF;
+  --text-primary:  #191F28;
+  --text-secondary: #4E5968;
+  --text-tertiary: #8B95A1;
+  --text-inverse:  #FFFFFF;
+  --border:        #E5E8EB;
+  --brand:         #3182F6;
+  --brand-hover:   #1B64DA;
+  --brand-light:   #E8F3FF;
+  --brand-bg:      rgba(49,130,246,0.08);
+  --brand-border:  rgba(49,130,246,0.15);
+  --accent-red:    #F04452;
+  --accent-blue:   #3182F6;
+  --accent-green:  #00C073;
+  --accent-yellow: #FFC400;
+  --success:       #00C073;
+  --success-bg:    rgba(0,192,115,0.08);
+  color-scheme: light;
+}
+.toss-mode body {
+  background: #FFFFFF !important;
+  color: #191F28 !important;
+}
+.toss-mode .kd-card {
+  background: #F7F8FA;
+  border-color: #E5E8EB;
+}
+.toss-mode .kd-feed-card:hover {
+  background: #F0F1F3;
+}
+/* 토스 모드 레이아웃 조정 */
+.toss-mode .sidebar-wrapper,
+.toss-mode .right-panel-wrapper,
+.toss-mode footer { display: none !important; }
+.toss-mode main { padding-bottom: 16px !important; min-height: 100vh !important; }

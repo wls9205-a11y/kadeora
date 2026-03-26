@@ -1,4 +1,5 @@
 'use client';
+import { isTossMode } from '@/lib/toss-mode';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
@@ -13,6 +14,7 @@ export default function AutoPushPrompt() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (isTossMode()) return; // 토스 미니앱에서 숨김
     // 브라우저 지원 확인
     if (typeof window === 'undefined') return;
     if (!('PushManager' in window) || !('serviceWorker' in navigator)) return;

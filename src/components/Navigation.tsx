@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User as UserIcon, PenSquare, BookOpen, LogOut, FileText } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { haptic } from '@/lib/haptic';
+import { isTossMode } from '@/lib/toss-mode';
 import type { User } from '@supabase/supabase-js';
 
 const NAV_ITEMS = [
@@ -58,6 +59,17 @@ export function Navigation() {
   const [nickname, setNickname] = useState<string | null>(null);
   const [unread, setUnread]     = useState(0);
   const [fontSize, setFontSize] = useState('medium');
+  const [tossMode, setTossModeState] = useState(false);
+
+  // 토스 앱인토스 모드 감지 — 헤더+하단탭 완전 숨김
+  useEffect(() => { if (isTossMode()) setTossModeState(true); }, []);
+
+  // 토스 모드: 라이트 테마 강제 + body class 추가
+  useEffect(() => {
+    if (!tossMode) return;
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.classList.add('toss-mode');
+  }, [tossMode]);
 
   const applyFontClass = (val: string) => {
     const el = document.documentElement;
@@ -158,6 +170,9 @@ export function Navigation() {
     borderBottom: active ? '1.5px solid var(--brand)' : '1.5px solid transparent',
     transition: 'color 0.1s',
   });
+
+  // 토스 미니앱 모드: 네비게이션 전체 숨김 (토스 네이티브 내비바가 대체)
+  if (tossMode) return null;
 
   return (
     <>
