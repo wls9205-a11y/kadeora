@@ -61,9 +61,9 @@ async function fetchUnifiedData(slug: string) {
       : Promise.resolve({ data: null }),
   ]);
 
-  let sub = subResult.status === 'fulfilled' ? (subResult.value as any)?.data : null;
-  const unsold = unsoldResult.status === 'fulfilled' ? (unsoldResult.value as any)?.data : null;
-  const redev = redevResult.status === 'fulfilled' ? (redevResult.value as any)?.data : null;
+  let sub = subResult.status === 'fulfilled' ? (subResult.value as { data: any })?.data : null;
+  const unsold = unsoldResult.status === 'fulfilled' ? (unsoldResult.value as { data: any })?.data : null;
+  const redev = redevResult.status === 'fulfilled' ? (redevResult.value as { data: any })?.data : null;
 
   // sub 폴백: 이름 기반 검색
   if (!sub) {
@@ -89,10 +89,10 @@ async function fetchUnifiedData(slug: string) {
     region ? sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status').eq('is_active', true).eq('region', region).neq('slug', slug).gte('content_score', 25).order('interest_count', { ascending: false }).limit(4) : Promise.resolve({ data: [] }),
   ]);
 
-  const trades = tradesR.status === 'fulfilled' ? (tradesR.value as any)?.data || [] : [];
-  const relatedBlogs = blogsR.status === 'fulfilled' ? (blogsR.value as any)?.data || [] : [];
-  const relatedPosts = postsR.status === 'fulfilled' ? (postsR.value as any)?.data || [] : [];
-  const nearbySites = nearbyR.status === 'fulfilled' ? (nearbyR.value as any)?.data || [] : [];
+  const trades = tradesR.status === 'fulfilled' ? (tradesR.value as { data: any })?.data || [] : [];
+  const relatedBlogs = blogsR.status === 'fulfilled' ? (blogsR.value as { data: any })?.data || [] : [];
+  const relatedPosts = postsR.status === 'fulfilled' ? (postsR.value as { data: any })?.data || [] : [];
+  const nearbySites = nearbyR.status === 'fulfilled' ? (nearbyR.value as { data: any })?.data || [] : [];
 
   // Fire-and-forget: 조회수 증가
   if (site?.id) { void sb.rpc('increment_site_view', { p_site_id: site.id }); }

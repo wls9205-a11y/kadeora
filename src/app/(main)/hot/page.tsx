@@ -50,7 +50,7 @@ export default async function HotPage() {
         .eq('is_deleted', false).gte('created_at', weekAgo)
         .order('likes_count', { ascending: false }).limit(5)
     );
-    topPosts = (topResult as any)?.data ?? null;
+    topPosts = (topResult as { data: any })?.data ?? null;
 
     if (!topPosts || topPosts.length === 0) {
       const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -60,7 +60,7 @@ export default async function HotPage() {
           .eq('is_deleted', false).gte('created_at', monthAgo)
           .order('likes_count', { ascending: false }).limit(5)
       );
-      topPosts = (fallback as any)?.data ?? null;
+      topPosts = (fallback as { data: any })?.data ?? null;
     }
 
     const regionResults = await Promise.allSettled(
@@ -75,7 +75,7 @@ export default async function HotPage() {
     );
     REGION_SECTIONS.forEach((region, i) => {
       const r = regionResults[i];
-      const data = r.status === 'fulfilled' ? (r.value as any)?.data : null;
+      const data = r.status === 'fulfilled' ? (r.value as { data: any })?.data : null;
       if (data && data.length > 0) regionPosts[region] = data;
     });
   } catch { }
