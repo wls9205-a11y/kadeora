@@ -156,6 +156,7 @@ ${t.title}에 대해 꼼꼼히 정리했습니다. 최근 금융 환경이 빠�
 }
 
 export async function GET(req: NextRequest) {
+  try {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     const auth = await requireAdmin();
@@ -182,4 +183,8 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, created });
+} catch (e: unknown) {
+    console.error('[admin] GET', e);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 
 export async function GET(req: NextRequest) {
+  try {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
@@ -32,4 +33,8 @@ export async function GET(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ posts: data ?? [], total: count ?? 0, page, limit });
+} catch (e: unknown) {
+    console.error('[admin] GET', e);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

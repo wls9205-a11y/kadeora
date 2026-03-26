@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import { timeAgo } from '@/lib/format';
 
 export default function AptCommentInline({ houseKey, houseNm, houseType }: { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' }) {
@@ -9,10 +10,9 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
   const [comments, setComments] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { userId } = useAuth();
 
   useEffect(() => {
-    createSupabaseBrowser().auth.getUser().then(({ data }) => setUser(data.user));
     fetch(`/api/apt/comments?house_key=${encodeURIComponent(houseKey)}`).then(r => r.json()).then(d => setComments(d.comments || []));
   }, [houseKey]);
 
@@ -25,7 +25,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
   }, [houseKey]);
 
   const submit = async () => {
-    if (!text.trim() || !user) return;
+    if (!text.trim() || !userId) return;
     setSending(true);
     const res = await fetch('/api/apt/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ house_key: houseKey, house_nm: houseNm, house_type: houseType, content: text.trim() }) });
     if (res.ok) { const d = await res.json(); setComments(p => [d.comment, ...p]); setText(''); }
@@ -35,7 +35,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
   return (
     <div>
       <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>✏️ 한줄평 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>{comments.length}</span></div>
-      {user ? (
+      {userId ? (
         <div style={{ marginBottom: 12 }}>
           <div style={{ position: 'relative' }}>
             <textarea value={text} onChange={e => setText(e.target.value.slice(0, 200))} rows={2} maxLength={200} placeholder="이 현장 어때요? (200자)"

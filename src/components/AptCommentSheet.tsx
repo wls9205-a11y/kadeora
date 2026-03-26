@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import BottomSheet from '@/components/BottomSheet';
 import { timeAgo } from '@/lib/format';
 
@@ -12,11 +13,9 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
   const [comments, setComments] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { userId } = useAuth();
 
-  useEffect(() => {
-    createSupabaseBrowser().auth.getUser().then(({ data }) => setUser(data.user));
-  }, []);
+
 
   useEffect(() => {
     if (!open) return;
@@ -35,7 +34,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
   useEffect(() => { if (open) document.body.style.overflow = 'hidden'; else document.body.style.overflow = ''; return () => { document.body.style.overflow = ''; }; }, [open]);
 
   const submit = async () => {
-    if (!text.trim() || !user) return;
+    if (!text.trim() || !userId) return;
     setSending(true);
     const res = await fetch('/api/apt/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ house_key: houseKey, house_nm: houseNm, house_type: houseType, content: text.trim() }) });
     if (res.ok) { const d = await res.json(); setComments(p => [d.comment, ...p]); setText(''); }
@@ -78,7 +77,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
             </div>
           ))}
         </div>
-        {user ? (
+        {userId ? (
           <div>
             <div style={{ position: 'relative' }}>
               <textarea value={text} onChange={e => setText(e.target.value.slice(0, 200))} rows={2} maxLength={200} placeholder={houseType === 'sub' ? '이 단지 분양가 어때요? 주변 환경은?' : houseType === 'unsold' ? '미분양 이유가 뭘까요? 할인 소식?' : '사업 진행 상황이나 주변 분위기는?'}

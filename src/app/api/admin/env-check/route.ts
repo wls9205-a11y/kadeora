@@ -23,6 +23,7 @@ const REQUIRED_PUBLIC_VARS = [
 ]
 
 export async function GET() {
+  try {
   const auth = await requireAdmin()
   if ('error' in auth) return auth.error
 
@@ -30,4 +31,8 @@ export async function GET() {
     serverVars: REQUIRED_SERVER_VARS.map(k => ({ key: k, set: !!process.env[k] })),
     publicVars: REQUIRED_PUBLIC_VARS.map(k => ({ key: k, set: !!process.env[k] })),
   })
+} catch (e: unknown) {
+    console.error('[admin] GET', e);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

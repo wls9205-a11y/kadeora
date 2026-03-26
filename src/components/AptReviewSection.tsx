@@ -122,7 +122,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
           )}
           <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>({reviews.length})</span>
         </div>
-        <button onClick={() => setShowForm(!showForm)} style={{
+        <button aria-label="리뷰 작성" onClick={() => setShowForm(!showForm)} style={{
           display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px',
           background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 6,
           fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
@@ -162,7 +162,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
             </label>
           </div>
           {error && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', marginBottom: 6 }}>{error}</div>}
-          <button onClick={handleSubmit} disabled={submitting} style={{
+          <button aria-label="리뷰 제출" onClick={handleSubmit} disabled={submitting} style={{
             width: '100%', padding: '8px', borderRadius: 6, border: 'none', cursor: 'pointer',
             background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 600, fontSize: 'var(--fs-xs)',
             opacity: submitting ? 0.5 : 1,
@@ -207,7 +207,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
             )}
             {/* 좋아요 / 신고 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-              <button onClick={() => handleLike(r.id)} style={{
+              <button aria-label="도움이 됐어요" onClick={() => handleLike(r.id)} style={{
                 display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
                 background: likedSet.has(r.id) ? 'var(--brand-bg)' : 'transparent',
                 border: `1px solid ${likedSet.has(r.id) ? 'var(--brand)' : 'var(--border)'}`,
@@ -218,7 +218,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 <ThumbsUp size={12} fill={likedSet.has(r.id) ? 'var(--brand)' : 'none'} />
                 {r.likes_count > 0 ? r.likes_count : '좋아요'}
               </button>
-              <button onClick={() => handleReport(r.id)} style={{
+              <button aria-label="신고" onClick={() => handleReport(r.id)} style={{
                 display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
                 background: 'transparent', border: 'none', cursor: 'pointer',
                 fontSize: 'var(--fs-xs)', color: reportedSet.has(r.id) ? 'var(--accent-red)' : 'var(--text-tertiary)',

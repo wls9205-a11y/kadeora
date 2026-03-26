@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 
 export async function GET(req: NextRequest) {
+  try {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
 
@@ -26,4 +27,8 @@ export async function GET(req: NextRequest) {
   const { data } = await query.order('view_count', { ascending: false }).limit(limit);
 
   return NextResponse.json({ blogs: data || [] });
+} catch (e: unknown) {
+    console.error('[admin] GET', e);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

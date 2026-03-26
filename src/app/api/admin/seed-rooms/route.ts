@@ -12,6 +12,7 @@ const DEFAULT_ROOMS = [
 ]
 
 export async function POST() {
+  try {
   const auth = await requireAdmin()
   if ('error' in auth) return auth.error
 
@@ -37,4 +38,8 @@ export async function POST() {
   }
 
   return NextResponse.json({ ok: true, created, skipped, total: DEFAULT_ROOMS.length })
+} catch (e: unknown) {
+    console.error('[admin] POST', e);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
