@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { REGIONS } from '@/lib/regions';
 import Link from 'next/link';
 
 interface Props {
@@ -22,6 +23,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [city, setCity] = useState('');
   const [consentCollection, setConsentCollection] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
 
@@ -90,6 +92,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           name: name.trim(),
           phone,
           birth_date: birthDate,
+          city: city || undefined,
           consent_collection: true,
           consent_marketing: consentMarketing,
         }),
@@ -98,7 +101,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       if (res.ok) {
         setCount(c => c + 1);
         setMessage('관심단지 등록이 완료되었습니다!');
-        setName(''); setPhone(''); setBirthDate('');
+        setName(''); setPhone(''); setBirthDate(''); setCity('');
         setConsentCollection(false); setConsentMarketing(false);
       } else {
         setMessage(data.error || '등록 실패');
@@ -130,16 +133,25 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           <input value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="01012345678" inputMode="tel" maxLength={11} style={inputStyle} />
         </div>
       </div>
-      <div style={{ marginBottom: 8 }}>
-        <label style={labelStyle}>생년월일 <span style={{ color: 'var(--error)' }}>*</span></label>
-        <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={inputStyle} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+        <div>
+          <label style={labelStyle}>생년월일 <span style={{ color: 'var(--error)' }}>*</span></label>
+          <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={inputStyle} />
+        </div>
+        <div>
+          <label style={labelStyle}>거주 지역</label>
+          <select value={city} onChange={e => setCity(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+            <option value="">선택 (선택사항)</option>
+            {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </div>
       </div>
 
       {/* 동의 */}
       <div style={{ background: 'var(--bg-base)', borderRadius: 8, padding: 10, marginBottom: 10 }}>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
           <input type="checkbox" checked={consentCollection} onChange={e => setConsentCollection(e.target.checked)} style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
-          <span><span style={{ color: 'var(--error)' }}>[필수]</span> 개인정보 수집·이용 동의 (이름, 전화번호, 생년월일)</span>
+          <span><span style={{ color: 'var(--error)' }}>[필수]</span> 개인정보 수집·이용 동의 (이름, 전화번호, 생년월일, 거주지역)</span>
         </label>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
           <input type="checkbox" checked={consentMarketing} onChange={e => setConsentMarketing(e.target.checked)} style={{ marginTop: 2, accentColor: 'var(--brand)' }} />

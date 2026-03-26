@@ -26,11 +26,11 @@ const MemberSchema = z.object({
   site_id: z.string().uuid(),
 });
 
-const CONSENT_TEXT_V1 = `[필수] 개인정보 수집·이용 동의 (v1.0)
+const CONSENT_TEXT_V1 = `[필수] 개인정보 수집·이용 동의 (v1.1)
 1. 수집항목: 이름, 전화번호, 생년월일, 거주지역
-2. 수집목적: 관심 현장 분양 정보 제공 및 일정 알림
+2. 수집목적: 관심 단지 분양 정보 제공 및 일정 알림
 3. 보유기간: 동의 철회 시 또는 수집 목적 달성 후 즉시 파기
-4. 동의를 거부할 권리가 있으며, 거부 시 관심고객 등록 서비스를 이용할 수 없습니다.`;
+4. 동의를 거부할 권리가 있으며, 거부 시 관심단지 등록 서비스를 이용할 수 없습니다.`;
 
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'auth'))) return rateLimitResponse();
@@ -97,13 +97,13 @@ export async function POST(req: NextRequest) {
       const { data: c1 } = await admin.from('privacy_consents').insert({
         guest_identifier: cleanPhone.slice(-4),
         consent_type: 'interest_collection',
-        consent_version: 'v1.0',
+        consent_version: 'v1.1',
         is_agreed: true,
         consent_text: CONSENT_TEXT_V1,
         ip_address: ip,
         user_agent: ua.slice(0, 200),
-        collected_items: ['이름', '전화번호', '생년월일'],
-        purpose: '관심 현장 분양 정보 제공 및 일정 알림',
+        collected_items: ['이름', '전화번호', '생년월일', '거주지역'],
+        purpose: '관심 단지 분양 정보 제공 및 일정 알림',
         retention_period: '동의 철회 시 또는 목적 달성 후 즉시 파기',
       }).select('id').single();
 
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
         await admin.from('privacy_consents').insert({
           guest_identifier: cleanPhone.slice(-4),
           consent_type: 'marketing',
-          consent_version: 'v1.0',
+          consent_version: 'v1.1',
           is_agreed: true,
           ip_address: ip,
           user_agent: ua.slice(0, 200),
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// 내 관심 현장 조회
+// 내 관심단지 조회
 export async function GET(req: NextRequest) {
   if (!(await rateLimit(req))) return rateLimitResponse();
 

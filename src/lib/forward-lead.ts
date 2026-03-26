@@ -21,7 +21,7 @@ async function auditLog(sb: any, action: string, detail: Record<string, any>, ac
 }
 
 /**
- * 관심고객 → 상담사 자동 전달
+ * 관심단지 → 상담사 자동 전달
  * 
  * feature_flags.premium_consultant_forwarding = false면 no-op
  * true면: 지역 매칭 상담사 찾기 → 복호화 → leads 기록 → 감사 로그 → 알림
@@ -85,7 +85,7 @@ export async function autoForwardLead(interestId: number, siteId: string) {
       await sb.from('notifications').insert({
         user_id: consultant.user_id,
         type: 'consultant_lead',
-        content: `새 관심고객: ${site.name} — ${interest.guest_name || '고객'}님 (****${interest.guest_phone_last4 || '????'})`,
+        content: `관심단지 신규 등록: ${site.name} — ${interest.guest_name || '고객'}님 (****${interest.guest_phone_last4 || '????'})`,
       });
     } catch {}
   }

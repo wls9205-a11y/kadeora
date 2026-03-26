@@ -1219,7 +1219,7 @@ function RealEstateSection() {
     { key: 'subscriptions' as const, label: `청약 (${data?.subscriptions?.length || 0})`, icon: '📋' },
     { key: 'unsold' as const, label: `미분양 (${data?.unsold?.length || 0})`, icon: '📉' },
     { key: 'redev' as const, label: `재개발 (${data?.redevelopment?.length || 0})`, icon: '🏗️' },
-    { key: 'interests' as const, label: `관심고객 (${data?.interests?.length || 0})`, icon: '❤️' },
+    { key: 'interests' as const, label: `관심단지 (${data?.interests?.length || 0})`, icon: '❤️' },
   ];
 
   return (

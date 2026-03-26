@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { fmtAmount } from '@/lib/format';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export const metadata: Metadata = {
   title: '아파트 실거래가 검색',
@@ -36,7 +37,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
     .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type', { count: 'exact' })
     .order('deal_date', { ascending: false });
 
-  if (q) query = query.or(`apt_name.ilike.%${q}%,dong.ilike.%${q}%,sigungu.ilike.%${q}%`);
+  if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) query = query.or(`apt_name.ilike.%${sq}%,dong.ilike.%${sq}%,sigungu.ilike.%${sq}%`); }
   if (region) query = query.ilike('region_nm', `%${region}%`);
   if (area === 'small') query = query.lte('exclusive_area', 60);
   else if (area === 'mid') query = query.gt('exclusive_area', 60).lte('exclusive_area', 85);

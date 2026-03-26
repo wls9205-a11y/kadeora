@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export const maxDuration = 30;
 
@@ -164,7 +165,7 @@ export async function GET(req: Request) {
         .select('id, nickname, full_name, grade, grade_title, provider, created_at, last_active_at, posts_count, likes_count, points, is_admin, is_banned, is_deleted, is_seed, is_premium, premium_expires_at, region_text, residence_city, bio, interests, influence_score, streak_days, followers_count, following_count, kakao_id, google_email, phone, age_group, gender, onboarded, profile_completed, marketing_agreed, consent_analytics, nickname_change_count', { count: 'exact' })
         .order('created_at', { ascending: false });
 
-      if (search) query = query.or(`nickname.ilike.%${search}%,full_name.ilike.%${search}%`);
+      if (search) { const sq = sanitizeSearchQuery(search, 50); if (sq) query = query.or(`nickname.ilike.%${sq}%,full_name.ilike.%${sq}%`); }
       if (filter === 'real') query = query.or('is_seed.is.null,is_seed.eq.false');
       if (filter === 'seed') query = query.eq('is_seed', true);
       if (filter === 'banned') query = query.eq('is_banned', true);

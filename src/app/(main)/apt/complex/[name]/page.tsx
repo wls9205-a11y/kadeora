@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 import dynamic from 'next/dynamic';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
@@ -59,7 +60,7 @@ export default async function ComplexDetailPage({ params }: Props) {
   // 관련 블로그
   let relatedBlogs: any[] = [];
   try {
-    const searchTerm = decoded.length > 4 ? decoded.slice(0, 4) : decoded;
+    const searchTerm = sanitizeSearchQuery(decoded.length > 4 ? decoded.slice(0, 4) : decoded, 20);
     const { data: rb } = await sb.from('blog_posts').select('slug,title,view_count,published_at')
       .eq('is_published', true).or(`title.ilike.%${searchTerm}%,title.ilike.%${region.slice(0,2)} 부동산%`)
       .order('view_count', { ascending: false }).limit(3) as { data: any[] | null };

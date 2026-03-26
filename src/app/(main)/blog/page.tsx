@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import EmptyState from '@/components/EmptyState';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export const revalidate = 300;
 
@@ -89,7 +90,7 @@ export default async function BlogPage({ searchParams }: Props) {
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
   if (category !== 'all') q2 = q2.eq('category', category);
-  if (q) q2 = q2.or(`title.ilike.%${q}%,excerpt.ilike.%${q}%`);
+  if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
   if (sort === 'popular') {
     q2 = q2.order('view_count', { ascending: false });
   } else {

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
@@ -20,6 +20,7 @@ interface Props {
 
 export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
   const searchParams = useSearchParams();
+  const sb = useMemo(() => createSupabaseBrowser(), []);
   const paramTab = searchParams.get('tab');
   const initialTab: TabType = paramTab === 'bookmarks' ? 'bookmarks' : paramTab === 'comments' ? 'comments' : paramTab === 'stocks' ? 'stocks' : paramTab === 'apts' ? 'apts' : 'posts';
 
@@ -50,7 +51,6 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
   const loadBookmarks = async () => {
     if (bookmarksLoaded) return;
     try {
-      const sb = createSupabaseBrowser();
       const { data: { user } } = await sb.auth.getUser();
       if (!user || user.id !== profileId) return;
       const { data: bm } = await sb.from('bookmarks').select('post_id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
@@ -63,7 +63,6 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
 
   const loadMyComments = async () => {
     if (commentsLoaded) return;
-    const sb = createSupabaseBrowser();
     const { data } = await sb.from('comments').select('id,content,created_at,post_id')
       .eq('author_id', profileId).eq('is_deleted', false)
       .order('created_at', { ascending: false }).limit(20);
@@ -73,7 +72,6 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
 
   const loadWatchStocks = async () => {
     if (watchStocksLoaded) return;
-    const sb = createSupabaseBrowser();
     const { data: wl } = await sb.from('stock_watchlist').select('symbol').eq('user_id', profileId);
     if (wl && wl.length > 0) {
       const symbols = wl.map((w: any) => w.symbol);
@@ -85,7 +83,6 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
 
   const loadWatchApts = async () => {
     if (watchAptsLoaded) return;
-    const sb = createSupabaseBrowser();
     const { data: bm } = await sb.from('apt_bookmarks').select('apt_id').eq('user_id', profileId);
     if (bm && bm.length > 0) {
       const ids = bm.map((b: any) => b.apt_id);
@@ -98,7 +95,6 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
   const loadMorePosts = async () => {
     setLoadingMorePosts(true);
     try {
-      const sb = createSupabaseBrowser();
       const { data } = await sb.from('posts')
         .select('id,title,category,created_at,view_count,likes_count,comments_count')
         .eq('author_id', profileId).eq('is_deleted', false)

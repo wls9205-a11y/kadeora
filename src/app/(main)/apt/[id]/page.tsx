@@ -10,6 +10,7 @@ import AptCommentInline from '@/components/AptCommentInline';
 import ShareButtons from '@/components/ShareButtons';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
 import Disclaimer from '@/components/Disclaimer';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
@@ -75,15 +76,15 @@ async function fetchUnifiedData(slug: string) {
 
   let relatedBlogs: any[] = [];
   try {
-    const term = name.length > 4 ? name.slice(0, 4) : name;
-    const rShort = region.slice(0, 2);
+    const term = sanitizeSearchQuery(name.length > 4 ? name.slice(0, 4) : name, 20);
+    const rShort = sanitizeSearchQuery(region.slice(0, 2), 10);
     const { data } = await sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${term}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5);
     relatedBlogs = data || [];
   } catch {}
 
   let relatedPosts: any[] = [];
   try {
-    const term = name.length > 3 ? name.slice(0, 3) : name;
+    const term = sanitizeSearchQuery(name.length > 3 ? name.slice(0, 3) : name, 20);
     const { data } = await sb.from('posts').select('id, title, created_at, comments_count').eq('is_deleted', false).ilike('title', `%${term}%`).order('created_at', { ascending: false }).limit(3);
     relatedPosts = data || [];
   } catch {}

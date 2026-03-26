@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { SITE_URL } from '@/lib/constants';
+import { SITE_URL, GRADE_COLORS } from '@/lib/constants';
 import { createSupabaseServer as createClient } from '@/lib/supabase-server';
 
 export const revalidate = 3600; // 1시간 캐시 — 등급 정보는 자주 안 바뀜
@@ -21,11 +21,6 @@ export const metadata: Metadata = {
   other: { 'naver:written_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/grades' },
 };
 
-const GRADE_COLORS: Record<number, string> = {
-  1: 'var(--accent-green)', 2: 'var(--accent-blue)', 3: 'var(--accent-purple)', 4: 'var(--accent-yellow)',
-  5: 'var(--accent-red)', 6: '#FB7185', 7: '#22D3EE', 8: 'var(--accent-yellow)',
-  9: 'var(--accent-purple)', 10: '#C084FC',
-};
 
 export default async function GradesPage() {
   const supabase = await createClient();

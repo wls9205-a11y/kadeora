@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export const maxDuration = 10;
 
 // 토스 미니앱용 공개 피드 API (인증 불필요)
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await rateLimit(req))) return rateLimitResponse();
   const sb = getSupabaseAdmin();
 
   try {

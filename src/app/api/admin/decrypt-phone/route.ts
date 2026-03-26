@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       .eq('id', interest_id).single();
 
     if (!interest || !interest.guest_phone) {
-      return NextResponse.json({ error: '해당 관심고객 없음' }, { status: 404 });
+      return NextResponse.json({ error: '해당 관심단지 없음' }, { status: 404 });
     }
 
     // 5. 복호화

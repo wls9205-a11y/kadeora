@@ -36,9 +36,9 @@ async function handler(_req: NextRequest) {
     for (const consent of withdrawnConsents) {
       try {
         // guest_identifier는 전화번호 뒤 4자리 — 이걸로 매칭
-        // 해당 사용자의 모든 관심고객 데이터 삭제
+        // 해당 사용자의 모든 관심단지 데이터 삭제
         if (consent.guest_identifier && consent.guest_identifier !== '삭제됨') {
-          // 비회원 관심고객 중 해당 전화번호 뒤 4자리로 매칭되는 레코드 삭제
+          // 비회원 관심단지 중 해당 전화번호 뒤 4자리로 매칭되는 레코드 삭제
           const { data: interests } = await sb.from('apt_site_interests')
             .select('id, guest_phone')
             .not('guest_phone', 'is', null);

@@ -1,18 +1,9 @@
 'use client';
 import PullToRefresh from '@/components/PullToRefresh';
-import { GRADE_EMOJI } from '@/lib/constants';
+import { GRADE_EMOJI, GRADE_COLORS, GRADE_TITLES } from '@/lib/constants';
 import ProfileHeader from './ProfileHeader';
 import ProfileGradeCard from './ProfileGradeCard';
 import ProfileTabs from './ProfileTabs';
-
-const GRADE_COLORS: Record<number, string> = {
-  1:'var(--accent-green)',2:'var(--accent-blue)',3:'var(--accent-purple)',4:'var(--accent-yellow)',5:'var(--accent-red)',
-  6:'#FB7185',7:'#22D3EE',8:'var(--accent-yellow)',9:'var(--accent-purple)',10:'#C084FC',
-};
-const GRADE_TITLES: Record<number, string> = {
-  1:'새싹',2:'정보통',3:'동네어른',4:'소문난집',5:'인플루언서',
-  6:'빅마우스',7:'찐고수',8:'전설',9:'신의경지',10:'카더라신',
-};
 
 interface Profile {
   id: string; nickname: string | null; bio: string | null; avatar_url: string | null;
