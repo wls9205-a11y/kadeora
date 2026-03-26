@@ -14,6 +14,7 @@ const RealEstateSection = dynamic(() => import('./sections/realestate'), { loadi
 const SystemSection = dynamic(() => import('./sections/system'), { loading: () => <Spin /> });
 const ReportsSection = dynamic(() => import('./sections/reports'), { loading: () => <Spin /> });
 const GodModeSection = dynamic(() => import('./sections/godmode'), { loading: () => <Spin /> });
+const SatelliteSection = dynamic(() => import('./sections/satellite'), { loading: () => <Spin /> });
 
 function Spin() {
   return (
@@ -34,6 +35,7 @@ const SECTION_MAP: Record<Section, React.ComponentType> = {
   system: SystemSection,
   reports: ReportsSection,
   godmode: GodModeSection,
+  satellite: SatelliteSection,
 };
 
 export default function MissionControl() {
