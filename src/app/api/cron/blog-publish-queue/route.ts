@@ -20,6 +20,7 @@ export const dynamic = 'force-dynamic';
  */
 
 export async function GET(req: NextRequest) {
+  try {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
@@ -56,4 +57,8 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, ...result });
+} catch (e: unknown) {
+    console.error('[cron/blog-publish-queue]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

@@ -39,6 +39,7 @@ function parseXmlItems(xml: string): Record<string, any>[] {
 }
 
 export async function GET(req: NextRequest) {
+  try {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
@@ -100,4 +101,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: 200 });
   }
   return NextResponse.json({ ok: true, ...result });
+} catch (e: unknown) {
+    console.error('[cron/crawl-apt-resale]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

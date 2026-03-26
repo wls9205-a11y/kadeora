@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
+  try {
   // CRON_SECRET 검증 — 환경변수 없으면 항상 차단
   const authHeader = req.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
@@ -83,4 +84,8 @@ export async function GET(req: Request) {
     winner: winnerId,
     inviteCount: winnerData.count
   })
+} catch (e: unknown) {
+    console.error('[cron/invite-reward]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

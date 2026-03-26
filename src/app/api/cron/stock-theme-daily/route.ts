@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
 export async function GET(req: NextRequest) {
+  try {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -51,4 +52,8 @@ export async function GET(req: NextRequest) {
 
   if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });
   return NextResponse.json({ ok: true, ...result });
+} catch (e: unknown) {
+    console.error('[cron/stock-theme-daily]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

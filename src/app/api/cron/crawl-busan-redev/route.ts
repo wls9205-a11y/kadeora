@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 export async function GET(req: NextRequest) {
+  try {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
@@ -124,4 +125,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: 200 });
   }
   return NextResponse.json({ ok: true, ...result });
+} catch (e: unknown) {
+    console.error('[cron/crawl-busan-redev]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

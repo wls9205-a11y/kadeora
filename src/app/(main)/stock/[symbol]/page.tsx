@@ -1,4 +1,5 @@
 import type { AIComment, StockPriceHistory, StockNews, InvestorFlow, Disclosure } from '@/types/stock';
+export const maxDuration = 30;
 export const revalidate = 300;
 import { SITE_URL } from '@/lib/constants';
 

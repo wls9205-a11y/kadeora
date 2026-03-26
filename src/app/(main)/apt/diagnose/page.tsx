@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
+
 export default function DiagnosePage() {
   const [years, setYears] = useState(5);
   const [family, setFamily] = useState(2);

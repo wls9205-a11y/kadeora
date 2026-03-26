@@ -5,6 +5,7 @@ import { withCronLock } from '@/lib/cron-lock';
 import { sendPushToUsers } from '@/lib/push-utils';
 
 export async function GET(req: Request) {
+  try {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -91,4 +92,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ skipped: true, reason: lockResult.reason });
   }
   return NextResponse.json({ success: true, ...lockResult.result });
+} catch (e: unknown) {
+    console.error('[cron/check-price-alerts]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

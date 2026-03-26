@@ -18,6 +18,7 @@ const InterestRegistration = dynamic(() => import('@/components/InterestRegistra
 const SignupCTA = dynamic(() => import('@/components/SignupCTA'));
 
 export const revalidate = 3600;
+export const maxDuration = 30;
 interface Props { params: Promise<{ id: string }> }
 
 async function resolveParam(rawId: string) {

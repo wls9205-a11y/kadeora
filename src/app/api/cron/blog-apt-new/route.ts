@@ -19,6 +19,7 @@ function fmtDate(d: string | null) {
 }
 
 export async function GET(req: NextRequest) {
+  try {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -198,4 +199,8 @@ ${unsoldPct >= 50 ? `**${u.house_nm}**의 미분양률이 ${unsoldPct}%로 상�
     return NextResponse.json({ error: result.error }, { status: 200 });
   }
   return NextResponse.json({ ok: true, created: result.created });
+} catch (e: unknown) {
+    console.error('[cron/blog-apt-new]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

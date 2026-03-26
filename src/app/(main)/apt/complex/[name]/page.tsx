@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic';
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
 
+export const maxDuration = 30;
 export const revalidate = 3600;
 
 interface Props { params: Promise<{ name: string }> }

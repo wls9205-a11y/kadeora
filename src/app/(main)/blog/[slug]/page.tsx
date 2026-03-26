@@ -14,6 +14,7 @@ import { getAvatarColor } from '@/lib/avatar';
 import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
 
+export const maxDuration = 30;
 export const revalidate = 300;
 import { SITE_URL as SITE } from '@/lib/constants';
 import ReadingProgress from '@/components/ReadingProgress';

@@ -86,6 +86,7 @@ function generateRedevSummary(r: Record<string, any>): string {
 }
 
 export async function GET(req: NextRequest) {
+  try {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -136,4 +137,8 @@ export async function GET(req: NextRequest) {
   });
 
   return NextResponse.json({ ok: true, ...result });
+} catch (e: unknown) {
+    console.error('[cron/apt-ai-summary]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }

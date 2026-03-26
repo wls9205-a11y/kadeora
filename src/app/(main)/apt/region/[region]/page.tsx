@@ -54,6 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+export const maxDuration = 30;
 export const revalidate = 3600;
 
 async function fetchRegionData(region: string) {
