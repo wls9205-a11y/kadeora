@@ -74,6 +74,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
     if (!name.trim()) { setMessage('이름을 입력해주세요'); return; }
     if (!phone.match(/^01[016789]\d{7,8}$/)) { setMessage('올바른 전화번호를 입력해주세요 (하이픈 없이)'); return; }
     if (!birthDate.match(/^\d{4}-\d{2}-\d{2}$/)) { setMessage('생년월일을 입력해주세요'); return; }
+    if (!city) { setMessage('거주 지역을 선택해주세요'); return; }
     if (!consentCollection) { setMessage('필수 동의 항목에 체크해주세요'); return; }
 
     const birth = new Date(birthDate);
@@ -139,9 +140,9 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={inputStyle} />
         </div>
         <div>
-          <label style={labelStyle}>거주 지역</label>
+          <label style={labelStyle}>거주 지역 <span style={{ color: 'var(--error)' }}>*</span></label>
           <select value={city} onChange={e => setCity(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-            <option value="">선택 (선택사항)</option>
+            <option value="">시/도 선택</option>
             {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>

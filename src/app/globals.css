@@ -591,6 +591,71 @@ input, textarea, select {
 }
 
 /* ========================================
+   부동산 상세 모바일 반응형
+   ======================================== */
+.apt-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.apt-metrics-grid > div {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.apt-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.apt-stages {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.apt-stages > div {
+  flex: 1;
+  text-align: center;
+  padding: 6px 2px;
+  border-radius: 6px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.apt-trade-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  font-size: var(--fs-sm);
+  gap: 8px;
+}
+.apt-trade-row > div {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .apt-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .apt-stages > div {
+    font-size: 10px;
+    padding: 5px 1px;
+  }
+  .apt-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+}
+
+/* ========================================
    블로그 상세 2단 레이아웃
    ======================================== */
 .blog-detail-layout {

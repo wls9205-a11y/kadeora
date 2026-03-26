@@ -15,7 +15,7 @@ const GuestSchema = z.object({
   name: z.string().min(2, '이름은 2자 이상').max(20),
   phone: z.string().regex(phoneRegex, '올바른 전화번호 형식이 아닙니다 (010-XXXX-XXXX)'),
   birth_date: z.string().regex(birthRegex, '생년월일은 YYYY-MM-DD 형식'),
-  city: z.string().optional(),
+  city: z.string().min(1, '거주 지역을 선택해주세요'),
   district: z.string().optional(),
   consent_collection: z.literal(true, { errorMap: () => ({ message: '개인정보 수집·이용 동의는 필수입니다' }) }),
   consent_marketing: z.boolean().optional(),
