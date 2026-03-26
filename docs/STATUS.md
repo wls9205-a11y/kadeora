@@ -1,9 +1,9 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 38 (최종)
+> **마지막 업데이트:** 2026-03-26 세션 38 (최종 — 커밋 38건+)
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 32건+
+## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 38건+
 
 ### 카카오톡 공유 완전 수정 (커밋 4건)
 - SDK 로드 후 초기화 실패 → ensureKakaoReady() 클릭 시 재시도
@@ -61,12 +61,53 @@
 - **CORS 허용**: middleware.ts — tossmini.com 도메인 추가
 - 신규 파일: `src/lib/toss-mode.ts`, `src/components/TossModeInit.tsx`
 
+### DB 콘텐츠 대규모 보강 (SQL 8건, ~4,800건)
+- 블로그 meta_description 80자 미만 1,451건 → 80자+ 확장
+- 블로그 image_alt 누락 962건 → 제목 기반 자동 생성
+- 블로그 cover_image 누락 168건 → 기본 이미지
+- 주식 description 누락 229건 → 종목/마켓/섹터 기반 자동 생성
+- 블로그 875건 일괄 발행 (14,578→15,453편, draft 0건)
+- 크론 충돌 12건 스태거링 해소
+
+### SEO 노출면적 극대화 (20페이지+)
+- 주식 상세: description 확장, twitter card, naver 메타, article:tag, BreadcrumbList
+- 14개 공개 페이지 OG image + twitter card 일괄 추가 → **전체 100%**
+- BreadcrumbList 24페이지 (전체 공개 100%)
+- FAQPage 10페이지 (guide + grades 추가)
+- Article+Speakable 5페이지 (stock/[symbol] + discuss/[id] 추가)
+- ItemList 캐러셀 5페이지 (stock 목록 추가)
+- dg:plink 21페이지 100% (12페이지 일괄 추가)
+- GEO 메타 4페이지 (apt/[id], apt/region, blog)
+- max-snippet:-1 전역 100% (오버라이드 누락 수정)
+- IndexNow: stock URL 추가, 임계치 40→25, 정적 페이지 5개 추가
+- opensearch.xml: /apt/sites?q= → /search?q=
+
+### 양방향 내부 링크 완성
+- blog → apt/stock (14,000편에서 관련 현장/종목 카드 3개씩)
+- feed → apt/stock (2,455개 피드에서 관련 현장/종목 카드)
+- discuss → blog (30개 토론에서 관련 블로그 3개)
+
+### 성능·모니터링 강화
+- Vercel Analytics + Speed Insights 활성화 (미렌더링 → root layout 추가)
+- Sentry: browserTracingIntegration, beforeSend URL 태그, ignoreErrors 확장
+- 에러 자동 재시도 (error.tsx: 일시적 에러 3초 후 auto reset)
+- ReadingProgress 바 (blog + feed 상세)
+- 홈/가이드/매니페스트 통계 최신화 (5,400건+, 15,400편+)
+- WebApplication JSON-LD: 사업장 주소, 전화번호, SearchAction URL 변수화
+
 ### PENDING
+- [ ] 이미지 수집 크론 자동 진행 중 (200건/일, ~27일 소요)
+- [ ] 좌표 수집 크론 자동 진행 중 (150건/일, ~36일 소요)
+- [ ] 지하철역 매칭 크론 자동 진행 중 (좌표 수집 후 자동)
 - [ ] STOCK_DATA_API_KEY 활성화 후 stock-crawl 수동 실행 → 전종목 시세 갱신
 - [ ] KIS_APP_KEY 발급 (한국투자증권 실시간 시세)
 - [ ] 카카오 OG 캐시 초기화 (https://developers.kakao.com/tool/clear/og)
 - [ ] 토스 라이브키 교체
 - [ ] 토스 콘솔 한글/영문 기능명 수정 + 번들 빌드 + 업로드 + 재검토 요청
+- [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출)
+- [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
+- [ ] 블로그 TOC 고정 사이드바 (데스크탑)
+- [ ] ProfileClient 663줄 분할 (코드 스플리팅)
 
 ---
 
