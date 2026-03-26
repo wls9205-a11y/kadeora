@@ -79,7 +79,7 @@ export default function ConsultantRegister() {
       <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>분양 상담사 등록</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 24 }}>로그인 후 분양 상담사로 등록하고, 프리미엄 리스팅으로 고객을 만나세요.</p>
-      <Link href="/login" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
+      <Link href="/login?redirect=/consultant" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
     </div>
   );
 

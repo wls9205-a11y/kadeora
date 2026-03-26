@@ -80,7 +80,7 @@ export default function NotificationsPage() {
     <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
       <div style={{ fontSize: 40, marginBottom: 12 }}>🔔</div>
       <p>로그인이 필요합니다</p>
-      <a href="/login" style={{ color: 'var(--brand)', fontWeight: 700 }}>로그인하기 →</a>
+      <a href="/login?redirect=/notifications" style={{ color: 'var(--brand)', fontWeight: 700 }}>로그인하기 →</a>
     </div>
   );
 

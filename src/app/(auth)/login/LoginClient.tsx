@@ -52,12 +52,12 @@ function LoginForm({ redirect }: LoginFormProps) {
         <button
           onClick={() => login('kakao')}
           disabled={!!loading}
-          style={{ width: '100%', padding: '14px 20px', marginBottom: 12, borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', marginBottom: 12, borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'kakao' ? (
-            <div style={{ width: 20, height: 20, border: '2px solid #191919', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: 20, height: 20, border: '2px solid var(--kakao-text, #191919)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
-            <svg width="20" height="20" viewBox="0 0 512 512" fill="#191919">
+            <svg width="20" height="20" viewBox="0 0 512 512" fill="currentColor">
               <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z"/>
             </svg>
           )}
@@ -101,5 +101,11 @@ function LoginForm({ redirect }: LoginFormProps) {
 }
 
 export default function LoginClient() {
-  return <LoginForm redirect="/feed" />;
+  const [redirect, setRedirect] = useState('/feed');
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('redirect');
+    if (r && r.startsWith('/')) setRedirect(r);
+  }, []);
+  return <LoginForm redirect={redirect} />;
 }

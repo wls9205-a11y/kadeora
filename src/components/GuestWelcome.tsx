@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { usePathname } from 'next/navigation';
 import { isTossMode } from '@/lib/toss-mode';
+import { useAuth } from '@/components/AuthProvider';
 
 /**
  * 비로그인 유저 통합 환영 배너
@@ -13,9 +14,13 @@ import { isTossMode } from '@/lib/toss-mode';
 export default function GuestWelcome() {
   const [show, setShow] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const { userId, loading } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (loading) return;
+    if (userId) return; // 로그인됨 → 안 보여줌
 
     // 토스 미니앱 모드에서는 설치/가입 유도 금지
     if (isTossMode()) return;
@@ -31,24 +36,19 @@ export default function GuestWelcome() {
     const consent = localStorage.getItem('kd_cookie_consent');
     if (consent === 'accepted' || consent === 'declined') return;
 
-    // 로그인 확인
-    createSupabaseBrowser().auth.getUser().then(({ data }) => {
-      if (data.user) return; // 로그인됨 → 안 보여줌
+    // 글로벌 캡처된 프롬프트 확인
+    if ((window as any).__pwaPrompt) {
+      setDeferredPrompt((window as any).__pwaPrompt);
+    }
 
-      // 글로벌 캡처된 프롬프트 확인
-      if ((window as any).__pwaPrompt) {
-        setDeferredPrompt((window as any).__pwaPrompt);
-      }
+    // 새로 발생할 수도 있으므로 리스너도 등록
+    const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler);
 
-      // 새로 발생할 수도 있으므로 리스너도 등록
-      const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
-      window.addEventListener('beforeinstallprompt', handler);
+    setTimeout(() => setShow(true), 5000);
 
-      setTimeout(() => setShow(true), 5000);
-
-      return () => window.removeEventListener('beforeinstallprompt', handler);
-    });
-  }, []);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, [loading, userId]);
 
   const handleStart = async () => {
     // 1. 쿠키 자동 동의
@@ -64,7 +64,7 @@ export default function GuestWelcome() {
     }
 
     // 3. 로그인 페이지로 이동
-    window.location.href = '/login';
+    window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`;
   };
 
   const handleDismiss = () => {

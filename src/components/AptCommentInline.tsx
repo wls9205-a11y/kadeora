@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { timeAgo } from '@/lib/format';
 
 export default function AptCommentInline({ houseKey, houseNm, houseType }: { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' }) {
+  const pathname = usePathname();
   const [comments, setComments] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -45,7 +47,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
           </button>
         </div>
       ) : (
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}><a href="/login" style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요</div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}><a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요</div>
       )}
       <div style={{ maxHeight: 300, overflowY: 'auto' }}>
         {comments.length === 0 && <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>첫 한줄평을 남겨보세요! 👋</div>}

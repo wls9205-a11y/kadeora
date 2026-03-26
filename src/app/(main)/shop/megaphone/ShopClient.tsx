@@ -53,7 +53,7 @@ export default function ShopClient() {
     if (!confirmProduct) return;
     const sb = createSupabaseBrowser();
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) { error('로그인이 필요합니다'); router.push('/login'); return; }
+    if (!session) { error('로그인이 필요합니다'); router.push('/login?redirect=/shop/megaphone'); return; }
     router.push(`/payment?product=${confirmProduct.id}&amount=${confirmProduct.price_krw}`);
     setConfirmProduct(null);
   };

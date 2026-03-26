@@ -2,22 +2,25 @@
 import { isTossMode } from '@/lib/toss-mode';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function GuestCTA() {
   const [show, setShow] = useState(false);
+  const { userId, loading } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (isTossMode()) return; // 토스 미니앱에서 숨김
-    // 이미 닫은 경우 3일 숨김
+    if (isTossMode()) return;
+    if (loading) return;
+    if (userId) return;
+
     const exp = localStorage.getItem('kd_guest_cta');
     if (exp && Date.now() < parseInt(exp)) return;
 
-    // GuestWelcome이 아직 닫히지 않았으면 대기
     const consent = localStorage.getItem('kd_cookie_consent');
     if (consent !== 'accepted' && consent !== 'declined') return;
 
-    // GuestWelcome 닫은 직후면 30초 유예
     const welcomeDismissed = localStorage.getItem('kd-welcome-dismissed');
     if (welcomeDismissed && Date.now() - Number(welcomeDismissed) < 30000) {
       const delay = 30000 - (Date.now() - Number(welcomeDismissed));
@@ -28,22 +31,17 @@ export default function GuestCTA() {
     checkAndShow();
 
     function checkAndShow() {
-      // InstallBanner가 활성 상태면 양보
       const installDismissed = localStorage.getItem('kd_install_dismissed');
       const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
       const installBannerGone = isPWA || (installDismissed && Date.now() - Number(installDismissed) < 7 * 24 * 60 * 60 * 1000);
 
-      createSupabaseBrowser().auth.getUser().then(({ data }) => {
-        if (!data.user) {
-          if (!installBannerGone) {
-            setTimeout(() => setShow(true), 8000);
-          } else {
-            setShow(true);
-          }
-        }
-      });
+      if (!installBannerGone) {
+        setTimeout(() => setShow(true), 8000);
+      } else {
+        setShow(true);
+      }
     }
-  }, []);
+  }, [userId, loading]);
 
   if (!show) return null;
   return (
@@ -56,7 +54,7 @@ export default function GuestCTA() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>댓글·좋아요·알림 받기 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>3초 가입</span></div>
         </div>
-        <Link href="/login" style={{
+        <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
           background: 'var(--brand)', color: '#fff', padding: '6px 14px', borderRadius: 8,
           fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
         }}>가입</Link>

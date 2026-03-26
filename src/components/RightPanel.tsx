@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { GRADE_EMOJI, gradeTitle } from '@/lib/constants';
@@ -26,6 +27,7 @@ export default function RightPanel() {
   const [trending, setTrending] = useState<{ keyword: string }[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const pathname = usePathname();
   const [recBlogs, setRecBlogs] = useState<{ slug: string; title: string }[]>([]);
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export default function RightPanel() {
       {isLoggedIn === false && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>카더라와 함께하세요!</div>
-          <Link href="/login" style={{
+          <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
             display: 'block', padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none',
           }}>로그인 / 회원가입</Link>
@@ -132,7 +134,7 @@ export default function RightPanel() {
 
       {/* 비로그인 가입 유도 */}
       {isLoggedIn === false && (
-        <Link href="/login" style={{
+        <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
           display: 'block', textAlign: 'center', padding: '12px 14px',
           borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', textDecoration: 'none',
           fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--kakao-text, #191919)',

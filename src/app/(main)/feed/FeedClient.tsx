@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Heart, MessageCircle, Share2, Search, User } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
@@ -14,12 +14,14 @@ import EmptyState from '@/components/EmptyState';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import PersonalDashboard from '@/components/PersonalDashboard';
 import { timeAgo, numFmt } from '@/lib/format';
+import { useAuth } from '@/components/AuthProvider';
 const PAGE_SIZE = 20;
 
 interface Props { posts: PostWithProfile[]; activeCategory: string; activeRegion?: string; }
 
 export default function FeedClient({ posts: initialPosts, activeCategory, activeRegion = 'all' }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const [posts, setPosts] = useState<PostWithProfile[]>(initialPosts);
   const [hasMore, setHasMore] = useState(initialPosts.length >= PAGE_SIZE);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -57,23 +59,34 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       .order('likes_count', { ascending: false })
       .limit(3)
       .then(({ data }) => { if (data && data.length > 0) setHotPosts(data); });
-    // Auth + liked posts
-    sb.auth.getSession().then(async ({ data }) => {
-      if (data.session?.user) {
-        const userId = data.session.user.id;
-        setCurrentUserId(userId);
-        const { data: likes } = await sb.from('post_likes')
-          .select('post_id')
-          .eq('user_id', userId);
-        if (likes) setLikedPosts(new Set(likes.map(l => l.post_id)));
-      }
-    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Initialize like counts from posts data
+  useEffect(() => {
+    const counts: Record<number, number> = {};
+    posts.forEach(p => { counts[p.id] = p.likes_count ?? 0; });
+    setLikeCounts(counts);
+  }, [posts]);
+
+  const { userId: authUserId } = useAuth();
+
+  useEffect(() => {
+    if (!authUserId) return;
+    setCurrentUserId(authUserId);
+
+    const sb = createSupabaseBrowser();
+    sb.from('post_likes')
+      .select('post_id')
+      .eq('user_id', authUserId)
+      .then(({ data: likes }) => {
+        if (likes) setLikedPosts(new Set(likes.map(l => l.post_id)));
+      });
+  }, [authUserId]);
 
   const handleUpvote = async (e: React.MouseEvent, postId: number) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!currentUserId) { router.push('/login'); return; }
+    if (!currentUserId) { router.push(`/login?redirect=${encodeURIComponent(pathname)}`); return; }
 
     const alreadyLiked = likedPosts.has(postId);
 
@@ -360,7 +373,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                     <span key={f} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 20, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f}</span>
                   ))}
                 </div>
-                <Link href="/login" style={{ display: 'block', textAlign: 'center', padding: '11px 0', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
+                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ display: 'block', textAlign: 'center', padding: '11px 0', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
                   카카오로 3초 가입
                 </Link>
               </div>

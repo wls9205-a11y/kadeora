@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { timeAgo } from '@/lib/format';
@@ -24,6 +24,7 @@ interface Props {
 
 export default function DiscussDetailClient({ initialTopic, initialComments }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const { error, success } = useToast();
 
   const [topic, setTopic] = useState<Topic>(initialTopic);
@@ -51,7 +52,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
   }, [initialTopic.id, initialTopic.view_count]);
 
   const handleVote = async (vote: 'a' | 'b') => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(pathname)}`); return; }
     if (voting) return;
     setVoting(true);
 
@@ -84,7 +85,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
   };
 
   const handleComment = async () => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(pathname)}`); return; }
     const t = input.trim();
     if (!t) return;
     setSending(true);
@@ -163,7 +164,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
             </>
           ) : (
             <div style={{ flex: 1, textAlign: 'center', padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-              <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 의견을 남길 수 있습니다
+              <a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 의견을 남길 수 있습니다
             </div>
           )}
         </div>

@@ -150,7 +150,7 @@ export function Navigation() {
 
   const handleLogout = async () => {
     await createSupabaseBrowser().auth.signOut();
-    router.push('/login'); setMenuOpen(false);
+    router.push(`/login?redirect=${encodeURIComponent(pathname)}`); setMenuOpen(false);
   };
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
@@ -356,7 +356,7 @@ export function Navigation() {
                   borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:16,
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
                 }}><Search size={18} /></Link>
-                <Link href="/login" style={{
+                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
                   height:34, padding:'0 14px', borderRadius:17,
                   border:'1px solid var(--brand)',
                   color:'var(--brand)', background:'transparent',
@@ -367,7 +367,7 @@ export function Navigation() {
                   onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
                   onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                 >로그인</Link>
-                <Link href="/login" className="hidden md:flex" style={{
+                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="hidden md:flex" style={{
                   height:34, padding:'0 14px', borderRadius:17,
                   background:'var(--brand)', color:'var(--text-inverse, #fff)',
                   alignItems:'center', textDecoration:'none', fontSize:13, fontWeight:700,

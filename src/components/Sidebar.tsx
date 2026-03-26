@@ -145,7 +145,7 @@ export default function Sidebar() {
       </div>
 
       {!user && (
-        <Link href="/login" style={{
+        <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           padding: '11px 14px', borderRadius: 10, marginTop: 8,
           textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,

@@ -42,6 +42,20 @@ export default function NoticeBanner() {
   const impressionLogged = useRef<Set<number>>(new Set());
 
   useEffect(() => {
+    // 5분 캐시: 매 페이지 로드마다 DB 쿼리 방지
+    const CACHE_KEY = 'kd_notices_cache';
+    const CACHE_TTL = 5 * 60 * 1000;
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data: cachedData, ts } = JSON.parse(cached);
+        if (Date.now() - ts < CACHE_TTL && cachedData?.length) {
+          setNotices(cachedData);
+          return;
+        }
+      }
+    } catch {}
+
     const sb = createSupabaseBrowser();
 
     sb.from('site_notices')
@@ -65,7 +79,10 @@ export default function NoticeBanner() {
           author: Array.isArray(n.profiles) ? n.profiles[0] : n.profiles,
         })) as NoticeData[];
 
-        if (valid.length > 0) setNotices(valid);
+        if (valid.length > 0) {
+          setNotices(valid);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: valid, ts: Date.now() })); } catch {}
+        }
       })
   }, []);
 

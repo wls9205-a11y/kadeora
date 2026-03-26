@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
 import { useToast } from '@/components/Toast';
@@ -19,6 +20,7 @@ const GL = (g?: number) => { if(!g||g<2) return '새싹'; if(g<4) return '정보
 const REACTIONS = ['📉','📈','❤️','👍','🙏','😊','😮'];
 
 export default function StockComments({ symbol, stockName }: { symbol: string; stockName: string }) {
+  const pathname = usePathname();
   const [comments, setComments] = useState<StockComment[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -423,7 +425,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
         </div>
       ) : (
         <Link
-          href="/login"
+          href={`/login?redirect=${encodeURIComponent(pathname)}`}
           style={{
             display: 'block', textAlign: 'center', padding: '12px 0', marginBottom: 14,
             borderRadius: 10, border: '1px dashed var(--border)',

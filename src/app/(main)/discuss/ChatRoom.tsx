@@ -263,7 +263,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '14px 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            <a href="/login" style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</a>하고 라운지에 참여하세요 🎉
+            <a href="/login?redirect=/discuss" style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</a>하고 라운지에 참여하세요 🎉
           </div>
         )}
       </div>

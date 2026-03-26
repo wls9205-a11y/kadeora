@@ -1,7 +1,7 @@
 'use client';
 import { isTossMode } from '@/lib/toss-mode';
 import { useState, useEffect } from 'react';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 
 /**
  * 로그인 후 자동 푸시 알림 프롬프트
@@ -12,37 +12,30 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 export default function AutoPushPrompt() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { userId, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (isTossMode()) return; // 토스 미니앱에서 숨김
-    // 브라우저 지원 확인
+    if (isTossMode()) return;
+    if (authLoading) return;
+    if (!userId) return; // 비로그인이면 안 보여줌
+
     if (typeof window === 'undefined') return;
     if (!('PushManager' in window) || !('serviceWorker' in navigator)) return;
     if (!('Notification' in window)) return;
 
-    // 이미 허용됨 or 이미 거부됨 → 안 보여줌
     if (Notification.permission === 'granted' || Notification.permission === 'denied') return;
 
-    // 이미 닫은 적 있으면 7일 동안 안 보여줌 (기존 24시간 → 7일)
     const dismissed = localStorage.getItem('kd-push-dismissed');
     if (dismissed && Date.now() - Number(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
 
-    // 로그인 상태 확인
-    const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(({ data }) => {
-      if (!data.session?.user) return;
-
-      // 이미 구독 되어있는지 확인
-      navigator.serviceWorker.ready.then(reg =>
-        reg.pushManager.getSubscription().then(sub => {
-          if (!sub) {
-            // 다른 배너가 안 보일 때만, 5초 후 표시
-            setTimeout(() => setShow(true), 5000);
-          }
-        })
-      ).catch(() => {});
-    });
-  }, []);
+    navigator.serviceWorker.ready.then(reg =>
+      reg.pushManager.getSubscription().then(sub => {
+        if (!sub) {
+          setTimeout(() => setShow(true), 5000);
+        }
+      })
+    ).catch(() => {});
+  }, [userId, authLoading]);
 
   const handleEnable = async () => {
     setLoading(true);

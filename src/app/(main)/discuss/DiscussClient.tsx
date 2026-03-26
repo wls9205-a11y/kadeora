@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import type { User } from '@supabase/supabase-js';
@@ -98,6 +98,7 @@ export default function DiscussClient() {
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const { error, success } = useToast();
 
   useEffect(() => {
@@ -197,7 +198,7 @@ export default function DiscussClient() {
           </div>
 
           {/* 새 토론 만들기 */}
-          <button onClick={() => user ? setShowCreate(!showCreate) : router.push('/login')} style={{
+          <button onClick={() => user ? setShowCreate(!showCreate) : router.push(`/login?redirect=${encodeURIComponent(pathname)}`)} style={{
             width: '100%', padding: '12px', marginBottom: 12, borderRadius: 12,
             border: '1px dashed var(--border)', background: 'var(--bg-surface)',
             color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer',

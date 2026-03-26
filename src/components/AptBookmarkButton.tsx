@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface Props {
   aptId: number;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function AptBookmarkButton({ aptId, isLoggedIn }: Props) {
+  const pathname = usePathname();
   const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +22,7 @@ export default function AptBookmarkButton({ aptId, isLoggedIn }: Props) {
 
   const toggle = async () => {
     if (!isLoggedIn) {
-      window.location.href = '/login';
+      window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`;
       return;
     }
     setLoading(true);

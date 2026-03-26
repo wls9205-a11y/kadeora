@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
+import { useAuth } from '@/components/AuthProvider';
 
 interface LikeButtonProps {
   postId: number;
@@ -14,21 +15,16 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState<number>(Number(initialCount) || 0);
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useAuth();
   const { info } = useToast();
 
   useEffect(() => {
+    if (!userId) return;
     const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(async ({ data }) => {
-      const uid = data.session?.user?.id ?? null;
-      setUserId(uid);
-      if (uid) {
-        const { data: like } = await sb.from('post_likes')
-          .select('post_id').eq('post_id', postId).eq('user_id', uid).maybeSingle();
-        setLiked(!!like);
-      }
-    });
-  }, [postId]);
+    sb.from('post_likes')
+      .select('post_id').eq('post_id', postId).eq('user_id', userId).maybeSingle()
+      .then(({ data: like }) => setLiked(!!like));
+  }, [postId, userId]);
 
   const toggle = async (e?: React.MouseEvent) => {
     e?.stopPropagation?.();

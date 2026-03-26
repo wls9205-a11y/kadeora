@@ -5,6 +5,7 @@ import { TrendingUp, Building2, Bell, ChevronRight, Star } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { stockColor } from '@/lib/format';
 import { SkeletonDashboard } from '@/components/Skeleton';
+import { useAuth } from '@/components/AuthProvider';
 
 interface WatchStock { symbol: string; name: string; price: number; change_pct: number; currency?: string; }
 interface FavApt { id: number; house_nm: string; rcept_endde: string; region_nm: string; }
@@ -36,78 +37,64 @@ export default function PersonalDashboard() {
     }
   }, []);
 
+  const { userId: authUid, loading: authLoading } = useAuth();
+
   useEffect(() => {
+    if (authLoading) return;
+    if (!authUid) { setLoading(false); return; }
+    setUserId(authUid);
+
     const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(async ({ data }) => {
-      if (!data.session?.user) { setLoading(false); return; }
-      const uid = data.session.user.id;
-      setUserId(uid);
+    const uid = authUid;
 
-      try {
-        // 관심종목 가져오기
-        const { data: wl } = await sb.from('stock_watchlist').select('symbol').eq('user_id', uid) as { data: any[] | null };
-        if (wl?.length) {
-          const symbols = wl.map((w: any) => w.symbol);
-          const { data: stocks } = await sb.from('stock_quotes')
-            .select('symbol,name,price,change_pct,currency')
-            .in('symbol', symbols)
-            .order('market_cap', { ascending: false })
-            .limit(5);
-          if (stocks) setWatchStocks(stocks as WatchStock[]);
-        }
+    // 모든 쿼리를 병렬 실행
+    Promise.allSettled([
+      // [0] 관심종목
+      sb.from('stock_watchlist').select('symbol').eq('user_id', uid),
+      // [1] 북마크
+      sb.from('apt_bookmarks').select('apt_id').eq('user_id', uid).limit(5),
+      // [2] 알림
+      sb.from('notifications').select('id,type,content,created_at').eq('user_id', uid).eq('is_read', false).order('created_at', { ascending: false }).limit(3),
+      // [3] 인기 블로그 (폴백용)
+      sb.from('blog_posts').select('slug,title,category,view_count').eq('is_published', true).order('view_count', { ascending: false }).limit(3),
+    ]).then(async ([watchlistRes, bookmarkRes, notifRes, blogRes]) => {
+      // 관심종목 → 시세
+      const wl = watchlistRes.status === 'fulfilled' ? (watchlistRes.value.data as any[] | null) : null;
+      if (wl?.length) {
+        const symbols = wl.map((w: any) => w.symbol);
+        const { data: stocks } = await sb.from('stock_quotes')
+          .select('symbol,name,price,change_pct,currency')
+          .in('symbol', symbols)
+          .order('market_cap', { ascending: false })
+          .limit(5);
+        if (stocks) setWatchStocks(stocks as WatchStock[]);
+      }
 
-        // 관심 청약 (북마크) — 테이블 미존재 방어
-        try {
-          const { data: bm } = await sb.from('apt_bookmarks').select('apt_id').eq('user_id', uid).limit(5) as { data: any[] | null };
-          if (bm?.length) {
-            const ids = bm.map((b: any) => b.apt_id);
-            const { data: apts } = await sb.from('apt_subscriptions')
-              .select('id,house_nm,rcept_endde,region_nm')
-              .in('id', ids)
-              .order('rcept_endde', { ascending: true })
-              .limit(3);
-            if (apts) setFavApts(apts as FavApt[]);
-          }
-        } catch {}
+      // 북마크 → 청약 상세
+      const bm = bookmarkRes.status === 'fulfilled' ? (bookmarkRes.value.data as any[] | null) : null;
+      if (bm?.length) {
+        const ids = bm.map((b: any) => b.apt_id);
+        const { data: apts } = await sb.from('apt_subscriptions')
+          .select('id,house_nm,rcept_endde,region_nm')
+          .in('id', ids)
+          .order('rcept_endde', { ascending: true })
+          .limit(3);
+        if (apts) setFavApts(apts as FavApt[]);
+      }
 
-        // 최근 알림 — 테이블 미존재 방어
-        try {
-          const { data: notifs } = await sb.from('notifications')
-            .select('id,type,content,created_at')
-            .eq('user_id', uid).eq('is_read', false)
-            .order('created_at', { ascending: false })
-            .limit(3);
-          if (notifs) setAlerts(notifs as unknown as Alert[]);
-        } catch {}
+      // 알림
+      if (notifRes.status === 'fulfilled' && notifRes.value.data) {
+        setAlerts(notifRes.value.data as unknown as Alert[]);
+      }
 
-        // 관심종목 기반 블로그 추천
-        try {
-          if (wl?.length) {
-            const stockNames = (await sb.from('stock_quotes').select('name').in('symbol', wl.map((w: any) => w.symbol)).limit(3)).data || [];
-            const nameQueries = stockNames.map((s: any) => `title.ilike.%${s.name}%`).join(',');
-            if (nameQueries) {
-              const { data: blogs } = await sb.from('blog_posts')
-                .select('slug,title,category,view_count')
-                .eq('is_published', true)
-                .or(nameQueries)
-                .order('view_count', { ascending: false })
-                .limit(3);
-              if (blogs) setRecBlogs(blogs as RecBlog[]);
-            }
-          }
-          if (!wl?.length) {
-            const { data: blogs } = await sb.from('blog_posts')
-              .select('slug,title,category,view_count')
-              .eq('is_published', true)
-              .order('view_count', { ascending: false })
-              .limit(3);
-            if (blogs) setRecBlogs(blogs as RecBlog[]);
-          }
-        } catch {}
-      } catch { }
+      // 블로그 추천
+      if (blogRes.status === 'fulfilled' && blogRes.value.data) {
+        setRecBlogs(blogRes.value.data as RecBlog[]);
+      }
+
       setLoading(false);
     });
-  }, []);
+  }, [authUid, authLoading]);
 
   if (loading) return <SkeletonDashboard />;
   if (!userId) return null;

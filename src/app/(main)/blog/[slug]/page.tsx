@@ -332,7 +332,7 @@ export default async function BlogDetailPage({ params }: Props) {
             <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
               <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>전체 글을 보려면 로그인하세요</div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>청약 마감 알림도 받을 수 있어요</div>
-              <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
+              <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
                 카카오로 가입
               </Link>
             </div>
@@ -372,7 +372,7 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogCommentInput blogPostId={post.id} />
         ) : (
           <div style={{ padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', marginBottom: 16, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            <Link href="/login" style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
+            <Link href={`/login?redirect=/blog/${slug}`} style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
           </div>
         )}
 
@@ -408,7 +408,7 @@ export default async function BlogDetailPage({ params }: Props) {
       <div style={{ padding: '20px 16px', margin: '20px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, textAlign: 'center' }}>
         <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>매일 업데이트되는 투자 정보를 받아보세요</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>청약 마감 알림 · 급등주 알림 · 미분양 업데이트</div>
-        <Link href="/login" style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
+        <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
           카카오로 3초 가입
         </Link>
       </div>

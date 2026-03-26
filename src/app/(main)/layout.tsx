@@ -8,6 +8,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, GuestCTA, PageViewTracker, AutoPushPrompt } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
+import { AuthProvider } from '@/components/AuthProvider';
 
 export const metadata: Metadata = {
   title: { template: '%s | 카더라', default: '카더라 — 대한민국 소리소문 정보 커뮤니티' },
@@ -23,6 +24,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <ToastProvider>
+      <AuthProvider serverLoggedIn={isLoggedIn}>
       <TopLoadingBar />
       <Navigation />
       <NoticeBanner />
@@ -66,6 +68,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           <p style={{marginTop:4}}>© 2026 카더라. All rights reserved.</p>
         </div>
       </footer>
+      </AuthProvider>
     </ToastProvider>
   );
 }

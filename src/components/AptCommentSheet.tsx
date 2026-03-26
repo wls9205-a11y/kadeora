@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import BottomSheet from '@/components/BottomSheet';
 import { timeAgo } from '@/lib/format';
@@ -7,6 +8,7 @@ import { timeAgo } from '@/lib/format';
 interface Props { houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev'; open: boolean; onClose: () => void; }
 
 export default function AptCommentSheet({ houseKey, houseNm, houseType, open, onClose }: Props) {
+  const pathname = usePathname();
   const [comments, setComments] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -89,7 +91,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
           </div>
         ) : (
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', padding: 12 }}>
-            <a href="/login" style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요
+            <a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요
           </div>
         )}
     </BottomSheet>

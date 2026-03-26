@@ -2,14 +2,17 @@
 import { isTossMode } from '@/lib/toss-mode';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
 
 export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode; isLoggedIn: boolean }) {
   const [showGate, setShowGate] = useState(false);
+  const { userId } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (isTossMode()) return; // 토스 미니앱에서 숨김
-    if (isLoggedIn) return;
+    if (isTossMode()) return;
+    if (isLoggedIn || userId) return;
 
     // 이전에 닫은 적 있으면 3일간 안 보여줌
     const dismissed = localStorage.getItem('kd_gate_dismissed');
@@ -19,23 +22,13 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
     const visitCount = parseInt(localStorage.getItem('kd_visit_count') || '0') + 1;
     localStorage.setItem('kd_visit_count', String(visitCount));
 
-    if (visitCount < 5) return; // 1~4회차는 자유 탐색
+    if (visitCount < 5) return;
 
-    const checkAuth = async () => {
-      try {
-        const { data } = await createSupabaseBrowser().auth.getSession();
-        if (data.session) return;
-      } catch { }
-
-      // 5회차부터: 30초 후 표시 (충분히 탐색한 뒤)
-      const timer = setTimeout(() => {
-        setShowGate(true);
-      }, 30000);
-      return () => clearTimeout(timer);
-    };
-
-    checkAuth();
-  }, [isLoggedIn]);
+    const timer = setTimeout(() => {
+      setShowGate(true);
+    }, 30000);
+    return () => clearTimeout(timer);
+  }, [isLoggedIn, userId]);
 
   const handleDismiss = () => {
     setShowGate(false);
@@ -66,7 +59,7 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
               주식 시세 · 청약 알림 · 실시간 토론<br />
               무료로 모든 기능을 이용할 수 있어요
             </div>
-            <Link href="/login" style={{
+            <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
               display: 'block', padding: '12px 0', borderRadius: 12,
               background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)',
               textDecoration: 'none', marginBottom: 10,

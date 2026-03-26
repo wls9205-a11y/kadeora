@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
@@ -17,6 +18,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ postId, initialComments = [] }: CommentSectionProps) {
+  const pathname = usePathname();
   const [comments, setComments] = useState<CommentWithProfile[]>(initialComments);
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
@@ -130,7 +132,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-surface)', borderRadius: 14, border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            💬 <a href="/login" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하고 대화에 참여하세요
+            💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하고 대화에 참여하세요
           </div>
         )}
       </div>
