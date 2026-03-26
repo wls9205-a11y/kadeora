@@ -9,6 +9,7 @@ const StockDetailSheet = dynamic(() => import('./StockDetailSheet'), { ssr: fals
 import MiniSparkline from '@/components/MiniSparkline';
 import { fmtCap, stockColor, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
+import SectionShareButton from '@/components/SectionShareButton';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -526,10 +527,20 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 섹터 히트맵 (시총순위 탭) */}
       {domesticTab === 'ranking' && isDomestic && (
-        <SectorHeatmap stocks={stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')} isKR={true} />
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+            <SectionShareButton section="stock-kr" label="국내 주식 섹터 히트맵" pagePath="/stock" />
+          </div>
+          <SectorHeatmap stocks={stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')} isKR={true} />
+        </div>
       )}
       {!isDomestic && globalTab === 'ranking' && (
-        <SectorHeatmap stocks={stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')} isKR={false} />
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+            <SectionShareButton section="stock-us" label="해외 주식 섹터 히트맵" pagePath="/stock" />
+          </div>
+          <SectorHeatmap stocks={stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')} isKR={false} />
+        </div>
       )}
 
       {/* KOSPI/KOSDAQ 토글 (국내 시총 탭) */}

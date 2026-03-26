@@ -42,6 +42,61 @@ export async function GET(req: NextRequest) {
   const author = searchParams.get('author') ?? '';
   const category = searchParams.get('category') ?? '';
   const likes = searchParams.get('likes') ?? '0';
+  const section = searchParams.get('section');
+
+  // ━━━ 섹션별 OG 이미지 ━━━
+  if (section) {
+    const SEC: Record<string, { title: string; desc: string; emoji: string; color: string; stats: string[] }> = {
+      'stock-kr':      { title: '국내 주식 시세', desc: 'KOSPI · KOSDAQ 실시간 시세', emoji: '📊', color: '#38BDF8', stats: ['삼성전자', 'SK하이닉스', 'LG에너지솔루션'] },
+      'stock-us':      { title: '해외 주식 시세', desc: 'NASDAQ · S&P 500 글로벌 시세', emoji: '🌍', color: '#2EE8A5', stats: ['Apple', 'Microsoft', 'NVIDIA'] },
+      'stock-heatmap': { title: '섹터별 등락률 히트맵', desc: '업종별 시장 흐름을 한눈에', emoji: '🗺️', color: '#A78BFA', stats: ['반도체', '금융', '바이오', 'IT'] },
+      'apt-region':    { title: '전국 부동산 현황', desc: '지역별 청약·분양·미분양·재개발', emoji: '🏢', color: '#2EE8A5', stats: ['경기 625', '서울 160', '부산 150'] },
+      'apt-calendar':  { title: '이번 달 청약 캘린더', desc: '접수중·예정 청약 일정 모아보기', emoji: '📅', color: '#FFD43B', stats: ['접수중 3건', '예정 7건'] },
+      'apt-subscription': { title: '전국 청약 현황', desc: '접수중·예정·마감 청약 정보', emoji: '🏗️', color: '#38BDF8', stats: ['전체 1,000건'] },
+    };
+    const s = SEC[section] || { title: '카더라', desc: '대한민국 소리소문 정보', emoji: '📡', color: '#38BDF8', stats: [] };
+
+    return new ImageResponse(
+      (
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', padding: '48px 56px' }}>
+          {/* 상단: 로고 + 섹션 라벨 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+            <svg width="36" height="36" viewBox="0 0 72 72"><defs><linearGradient id="slg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E" /><stop offset="100%" stopColor="#2563EB" /></linearGradient></defs><rect width="72" height="72" rx="18" fill="url(#slg)" /><circle cx="18" cy="36" r="7" fill="white" /><circle cx="36" cy="36" r="7" fill="white" /><circle cx="54" cy="36" r="7" fill="white" /></svg>
+            <span style={{ fontSize: 22, fontWeight: 800, color: '#93C5FD', letterSpacing: '-0.5px' }}>카더라</span>
+          </div>
+
+          {/* 중앙: 메인 콘텐츠 */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>{s.emoji}</div>
+            <div style={{ fontSize: 44, fontWeight: 900, color: '#E8EDF5', lineHeight: 1.2, marginBottom: 12, letterSpacing: '-1px' }}>
+              {s.title}
+            </div>
+            <div style={{ fontSize: 22, color: '#94A8C4', fontWeight: 500, marginBottom: 28 }}>
+              {s.desc}
+            </div>
+
+            {/* 통계 칩 */}
+            {s.stats.length > 0 && (
+              <div style={{ display: 'flex', gap: 10 }}>
+                {s.stats.map((st, i) => (
+                  <div key={i} style={{ padding: '8px 18px', borderRadius: 12, background: `${s.color}18`, border: `1px solid ${s.color}33`, color: s.color, fontSize: 17, fontWeight: 700 }}>
+                    {st}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 하단: URL */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 16, color: '#64748B' }}>kadeora.app</span>
+            <span style={{ fontSize: 14, color: '#475569', padding: '4px 12px', borderRadius: 8, background: '#ffffff0a', border: '1px solid #ffffff12' }}>실시간 업데이트</span>
+          </div>
+        </div>
+      ),
+      { width: 1200, height: 630 }
+    );
+  }
   const comments = searchParams.get('comments') ?? '0';
 
   const catColor = CATEGORY_COLORS[category] ?? '#B794FF';

@@ -1,28 +1,39 @@
 ﻿import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
-export const metadata: Metadata = {
-  title: '실시간 주식 시세',
-  description: '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.',
-  alternates: { canonical: SITE_URL + '/stock' },
-  openGraph: {
-    title: '실시간 주식 시세',
-    description: '국내외 주요 종목 실시간 시세와 등락률. KOSPI, KOSDAQ, NYSE, NASDAQ.',
-    url: SITE_URL + '/stock',
-    siteName: '카더라',
-    locale: 'ko_KR',
-    type: 'website',
-    images: [{ url: SITE_URL + '/images/brand/kadeora-wide.png', alt: '카더라 주식' }],
-  },
-  other: {
-    'naver:written_time': new Date().toISOString(),
-    'naver:updated_time': new Date().toISOString(),
-    'dg:plink': SITE_URL + '/stock',
-    'article:section': '주식',
-    'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',
-  },
-  twitter: { card: 'summary_large_image', title: '실시간 주식 시세', description: 'KOSPI·KOSDAQ·NYSE·NASDAQ 시세·등락률' },
+
+const SECTION_META: Record<string, { title: string; desc: string }> = {
+  'stock-kr':      { title: '국내 주식 시세', desc: 'KOSPI·KOSDAQ 실시간 시세와 등락률을 확인하세요' },
+  'stock-us':      { title: '해외 주식 시세', desc: 'NASDAQ·S&P 500 글로벌 종목 시세와 등락률' },
+  'stock-heatmap': { title: '섹터별 등락률 히트맵', desc: '업종별 시장 흐름을 한눈에 파악하세요' },
 };
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ section?: string }> }): Promise<Metadata> {
+  const { section } = await searchParams;
+  const s = section ? SECTION_META[section] : null;
+  const title = s?.title || '실시간 주식 시세';
+  const desc = s?.desc || '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.';
+  const ogImg = section ? `${SITE_URL}/api/og?section=${section}` : `${SITE_URL}/images/brand/kadeora-wide.png`;
+
+  return {
+    title, description: desc,
+    alternates: { canonical: SITE_URL + '/stock' },
+    openGraph: {
+      title, description: desc,
+      url: SITE_URL + '/stock',
+      siteName: '카더라', locale: 'ko_KR', type: 'website',
+      images: [{ url: ogImg, alt: `카더라 ${title}` }],
+    },
+    other: {
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
+      'dg:plink': SITE_URL + '/stock',
+      'article:section': '주식',
+      'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',
+    },
+    twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
+  };
+}
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';
 import StockClient from './StockClient';

@@ -14,6 +14,7 @@ const UnsoldTab = dynamic(() => import('./tabs/UnsoldTab'), { ssr: false });
 import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
 import { useToast } from '@/components/Toast';
+import SectionShareButton from '@/components/SectionShareButton';
 
 export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade'>('sub');
@@ -147,6 +148,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       </div>
 
       {/* 지역별 스택바 현황 */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+        <SectionShareButton section="apt-region" label="전국 부동산 지역별 현황" pagePath="/apt" />
+      </div>
       <RegionStackedBar
         apts={apts}
         ongoingApts={ongoingApts}

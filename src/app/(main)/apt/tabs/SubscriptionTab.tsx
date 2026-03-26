@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { haptic } from '@/lib/haptic';
 import { type Apt, getStatus, fmtD, kstNow, isNew, NewBadge, STATUS_BADGE, generateAptSlug, type SharedTabProps } from './apt-utils';
+import SectionShareButton from '@/components/SectionShareButton';
 
 interface Props extends SharedTabProps {
   apts: Apt[];
@@ -160,6 +161,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
 
           {/* 청약 캘린더 */}
           <div className="kd-card">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
+              <SectionShareButton section="apt-calendar" label="이번 달 청약 캘린더" pagePath="/apt" />
+            </div>
             {(() => {
               const now = kstNow();
               const targetDate = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);

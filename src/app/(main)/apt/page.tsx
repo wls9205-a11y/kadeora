@@ -1,23 +1,33 @@
 import { Suspense } from 'react';
 import { SITE_URL } from '@/lib/constants';
 import type { Metadata } from 'next';
-export const metadata: Metadata = {
-  title: '아파트 청약 일정 · 분양중 · 미분양 · 재개발',
-  description: '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요. 실시간 경쟁률, 실거래가 분석까지.',
-  alternates: { canonical: SITE_URL + '/apt' },
-  robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
-  openGraph: {
-    title: '전국 아파트 청약·분양·미분양·재개발',
-    description: '2026년 전국 청약 일정, 분양중 현장, 미분양 현황, 재개발·재건축, 실거래가 분석',
-    url: SITE_URL + '/apt',
-    siteName: '카더라',
-    locale: 'ko_KR',
-    type: 'website',
-    images: [{ url: SITE_URL + '/api/og?title=' + encodeURIComponent('아파트 청약·분양·재개발') + '&subtitle=' + encodeURIComponent('전국 실시간 현황'), width: 1200, height: 630, alt: '카더라 부동산 청약 분양 미분양 재개발' }],
-  },
-  twitter: { card: 'summary_large_image', title: '전국 아파트 청약·분양·미분양·재개발', description: '2026년 전국 청약 일정, 분양중 현장, 미분양 현황, 재개발 진행 현황' },
-  other: { 'article:section': '부동산', 'naver:written_time': new Date().toISOString() },
+
+const APT_SECTION_META: Record<string, { title: string; desc: string }> = {
+  'apt-region':       { title: '전국 부동산 현황', desc: '지역별 청약·분양·미분양·재개발 현황을 한눈에' },
+  'apt-calendar':     { title: '이번 달 청약 캘린더', desc: '접수중·예정 청약 일정 모아보기' },
+  'apt-subscription': { title: '전국 청약 현황', desc: '접수중·예정·마감 전국 아파트 청약 정보' },
 };
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ section?: string }> }): Promise<Metadata> {
+  const { section } = await searchParams;
+  const s = section ? APT_SECTION_META[section] : null;
+  const title = s?.title || '아파트 청약 일정 · 분양중 · 미분양 · 재개발';
+  const desc = s?.desc || '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요. 실시간 경쟁률, 실거래가 분석까지.';
+  const ogImg = section ? `${SITE_URL}/api/og?section=${section}` : `${SITE_URL}/api/og?title=${encodeURIComponent('아파트 청약·분양·재개발')}&subtitle=${encodeURIComponent('전국 실시간 현황')}`;
+
+  return {
+    title, description: desc,
+    alternates: { canonical: SITE_URL + '/apt' },
+    robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
+    openGraph: {
+      title, description: desc,
+      url: SITE_URL + '/apt', siteName: '카더라', locale: 'ko_KR', type: 'website',
+      images: [{ url: ogImg, width: 1200, height: 630, alt: `카더라 ${title}` }],
+    },
+    twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
+    other: { 'article:section': '부동산', 'naver:written_time': new Date().toISOString() },
+  };
+}
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
 export const revalidate = 3600;
 import { createSupabaseServer } from '@/lib/supabase-server';
