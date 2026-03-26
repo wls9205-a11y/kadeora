@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 41 전수조사 (커밋 9건, 125+ 파일) — any 476→278, select 23→11, auth 전환 9건, 어드민 강화
+> **마지막 업데이트:** 2026-03-26 세션 40 호스팅어 위성 네트워크 완성 (3라운드, 29작업, 29분) + sameAs 양방향 + blog-auto-link 역링크
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 세션 41 작업 (2026-03-26) — 5커밋, 90+ 파일
@@ -91,14 +91,80 @@
 | 접근성 aria-label | 8곳 누락 | **5곳 수정** |
 | auth 중복 호출 | 미전환 12곳 | **12곳 전부 useAuth() 전환 (0곳 잔여)** |
 
+### 호스팅어 위성 사이트 네트워크 완성 (3라운드, 29작업) [COMPLETED]
+
+**커밋:**
+- `96168ef` — sameAs Organization 스키마에 호스팅어 3사이트 양방향 연결
+- `adc7997` — blog-auto-link EXTERNAL_KEYWORDS 6개 추가 (호스팅어 역링크)
+
+**라운드 1 (클로드 코드, 11m 19s):**
+- sameAs 스키마 3사이트, CTA 위젯 3사이트, 포스트 8편 발행
+- 크로스링크 급매물 URL 수정, rel=nofollow 변경
+- RSS 자동 파이프라인: mu-plugin 방식, 6시간 간격, 회당 최대 3편
+
+**라운드 2 (클로드 코드, 11m 27s):**
+- 106개 기타 사이트에서 카더라 크로스링크 전수 제거 (PBN 차단) → 잔존 0건
+- stockcoin.net/julin2.com 크로스링크 완전 제거 (스팸 연좌제 차단)
+- E-E-A-T: About/Privacy/저자 프로필 3사이트 완료
+- 주린이.site: 블랑써밋74→주린이 복구, 주식 FAQ 생성
+- 성능: WP 6.9.4, Gzip 활성, DISABLE_WP_CRON 미설정(정상)
+- RSS 파이프라인 작동 검증: 분양권실전투자 6편, 급매물 6편, 주린이 3편 자동 생성
+- 네이버 SEO 메타태그 플레이스홀더 추가
+- 보안: 멀웨어 미발견, wp-config 보호 존재
+- IndexNow: RankMath instant_indexing 3사이트 활성화
+- OG 이미지: 8편 포스트 카더라 OG API 썸네일 적용
+
+**라운드 3 (클로드 코드, 7m 0s):**
+- 카더라 blog-auto-link.ts에 EXTERNAL_KEYWORDS 6개 추가 (git push adc7997)
+- CTA/Footer/RSS 모든 링크에 UTM 파라미터 (utm_source=byanggwon/geupmae/jurini)
+- RSS 품질 강화: RankMath 메타, 카테고리 자동분류, E-E-A-T 출처 표시
+- GA 크로스 도메인 연동 (G-VP4F6TH2GD) 3사이트
+- NAP 일관성 사업자 footer 3사이트 (카더라/노영진/278-57-00801)
+- Bing 웹마스터 메타태그 플레이스홀더
+- 8편 포스트 상호 내부링크 완료
+- 분양권실전투자 Google/Bing ping 인덱스 부스팅
+- FAQ 스키마: kd_post_faq_schema 이미 존재 확인
+
+**최종 생태계 현황:**
+| 자원 | 상태 |
+|------|------|
+| 카더라 → 호스팅어 sameAs | 양방향 완료 (layout.tsx 96168ef) |
+| 호스팅어 → 카더라 sameAs | 3개 사이트 완료 |
+| 포스트 + 백링크 | 8편 수동 + RSS 자동 15편 = 23편, ~30개 백링크 |
+| CTA 위젯 | 3개 사이트 전 글 하단 (rel=sponsored, UTM 추적) |
+| PBN 리스크 | 106개 사이트 잔존 링크 0건 |
+| 스팸 연좌제 | stockcoin/julin2 ↔ 카더라 연결 0건 |
+| E-E-A-T | About/Privacy/저자 프로필 3개 사이트 |
+| IndexNow | 3개 사이트 RankMath instant_indexing 활성 |
+| RSS 자동 파이프라인 | 6시간 간격 작동 검증 완료 |
+| GA 크로스 도메인 | G-VP4F6TH2GD 호스팅어 3사이트 연동 |
+| blog-auto-link 역링크 | 15,400편 블로그에 6키워드 자동 적용 |
+
 ### PENDING 작업
 - [ ] **토스 정산 등록 (3/31 마감 D-5!)**
+- [ ] **호스팅어 플랜 갱신 (20일 내 만료 경고!)**
+- [ ] 구글 서치콘솔에 분양권실전투자.com 등록 + 사이트맵 제출
+- [ ] 네이버 서치어드바이저 호스팅어 3사이트 등록 + 인증코드 교체
+- [ ] Bing 웹마스터 호스팅어 3사이트 등록 + 인증코드 교체
+- [ ] 급매물 "123" 관리자 계정 비밀번호 강화/삭제
+- [ ] 분양권실전투자 1MB+ 이미지 581개 압축 (ShortPixel 등)
+- [ ] WP 플러그인 8개 업데이트 (Elementor, RankMath 등)
 - [ ] 토스 라이브키 교체
 - [ ] KIS_APP_KEY 발급 (한국투자증권)
 - [ ] 카카오 OG 캐시 초기화
 - [ ] 네이버 서치어드바이저 RSS/사이트맵 재제출
 - [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
 - [ ] 이미지/좌표/지하철역 수집 크론 자동 진행 중
+
+### 주의사항 (호스팅어 위성 네트워크)
+- AuthProvider: layout.tsx에서 래핑, useAuth() 훅 (userId/loading 반환, user 아님)
+- 호스팅어 위성 전략: 3개 사이트만 사용, rel=sponsored/nofollow 필수
+- stockcoin.net: 절대 카더라와 연결 금지 (스팸 연좌제 위험)
+- 106개 기타 사이트: 카더라 크로스링크 전수 제거 완료, 다시 추가 금지
+- blog-auto-link.ts: EXTERNAL_KEYWORDS로 호스팅어 역링크 자동 생성 (nofollow, 포스트당 1개)
+- RSS 파이프라인: mu-plugin 방식, wp-cron 6시간 간격, 주린이는 ?category=stock 필터
+- UTM 파라미터: CTA(utm_medium=cta), Footer(utm_medium=footer), RSS(utm_medium=rss_sync)
+- GA: G-VP4F6TH2GD 호스팅어 3사이트에도 연동됨
 
 ### 남은 기술 부채 (다음 세션)
 - [ ] **any 타입 278건** → 250건 이하 목표
