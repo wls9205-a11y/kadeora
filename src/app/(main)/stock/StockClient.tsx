@@ -158,7 +158,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 1 }}>
             {s.sector && <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 3, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{s.sector}</span>}
-            {s.market_cap > 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtCap(s.market_cap, s.currency)}</span>}
+            {s.market_cap > 0 && <span className="text-xs-tertiary">{fmtCap(s.market_cap, s.currency)}</span>}
           </div>
         </div>
         {/* 미니 스파크라인 */}
@@ -175,7 +175,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               <div className="stock-price-text" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                 {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
               </div>
-              {isGlobal && <div className="stock-krw-text" style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
+              {isGlobal && <div className="stock-krw-text text-xs-tertiary">≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
               {isStale ? (
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>장 마감</div>
               ) : (
@@ -317,7 +317,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                     {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                   </span>
                 ) : (
-                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>마감</span>
+                  <span className="text-xs-tertiary">마감</span>
                 )}
               </div>
             </div>
@@ -366,7 +366,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           calendarEvents.map(ev => (
             <div key={ev.id} style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 6, alignItems: 'center' }}>
               <div style={{ textAlign: 'center', flexShrink: 0, width: 44 }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{new Date(ev.event_date).toLocaleDateString('ko-KR',{month:'short'})}</div>
+                <div className="text-xs-tertiary">{new Date(ev.event_date).toLocaleDateString('ko-KR',{month:'short'})}</div>
                 <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{new Date(ev.event_date).getDate()}</div>
               </div>
               <div style={{ flex: 1 }}>
@@ -396,7 +396,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot&&'🔥 '}{t.theme_name}</span>
                   {(th?.avg_change_rate != null || th?.prev_change_pct != null) && (
-                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                    <span className="text-xs-tertiary">
                       전일 {(Number(th.avg_change_rate ?? th.prev_change_pct) > 0 ? '+' : '')}{Number(th.avg_change_rate ?? th.prev_change_pct).toFixed(1)}%
                     </span>
                   )}
@@ -463,7 +463,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                   <div style={{ padding: '10px', background: bg, borderRadius: 8, border: `1px solid ${borderColor}`, transition: 'border-color 0.15s' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{st.name}</span>
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sym}</span>
+                      <span className="text-xs-tertiary">{sym}</span>
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>${st.price?.toFixed(2)}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -472,9 +472,9 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                           {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                         </span>
                       ) : (
-                        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>마감</span>
+                        <span className="text-xs-tertiary">마감</span>
                       )}
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtCap(st.market_cap, 'USD')}</span>
+                      <span className="text-xs-tertiary">{fmtCap(st.market_cap, 'USD')}</span>
                     </div>
                   </div>
                 </Link>
@@ -600,13 +600,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                   <table style={{ width: '100%', fontSize: 'var(--fs-sm)', borderCollapse: 'collapse' }}>
                     <thead><tr style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}><td></td><td>{c.sa.name}</td><td>{c.sb.name}</td></tr></thead>
                     <tbody>
-                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>현재가</td><td style={{ fontWeight: 600 }}>₩{fmt(c.sa.price)}</td><td style={{ fontWeight: 600 }}>₩{fmt(c.sb.price)}</td></tr>
-                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>시총</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sa.market_cap,c.sa.currency)}</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sb.market_cap,c.sb.currency)}</td></tr>
-                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>등락</td>
+                      <tr><td className="text-xs-tertiary" style={{ padding: '4px 0' }}>현재가</td><td style={{ fontWeight: 600 }}>₩{fmt(c.sa.price)}</td><td style={{ fontWeight: 600 }}>₩{fmt(c.sb.price)}</td></tr>
+                      <tr><td className="text-xs-tertiary" style={{ padding: '4px 0' }}>시총</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sa.market_cap,c.sa.currency)}</td><td style={{ fontWeight: 600 }}>{fmtCap(c.sb.market_cap,c.sb.currency)}</td></tr>
+                      <tr><td className="text-xs-tertiary" style={{ padding: '4px 0' }}>등락</td>
                         <td style={{ fontWeight: 700, color: stockColor(c.sa.change_pct??0, true) }}>{(c.sa.change_pct??0)>0?'+':''}{(c.sa.change_pct??0).toFixed(2)}%</td>
                         <td style={{ fontWeight: 700, color: stockColor(c.sb.change_pct??0, true) }}>{(c.sb.change_pct??0)>0?'+':''}{(c.sb.change_pct??0).toFixed(2)}%</td>
                       </tr>
-                      <tr><td style={{ color: 'var(--text-tertiary)', padding: '4px 0' }}>거래량</td><td style={{ fontWeight: 600, fontSize: 'var(--fs-xs)' }}>{c.sa.volume ? fmt(c.sa.volume) : '-'}</td><td style={{ fontWeight: 600, fontSize: 'var(--fs-xs)' }}>{c.sb.volume ? fmt(c.sb.volume) : '-'}</td></tr>
+                      <tr><td className="text-xs-tertiary" style={{ padding: '4px 0' }}>거래량</td><td style={{ fontWeight: 600, fontSize: 'var(--fs-xs)' }}>{c.sa.volume ? fmt(c.sa.volume) : '-'}</td><td style={{ fontWeight: 600, fontSize: 'var(--fs-xs)' }}>{c.sb.volume ? fmt(c.sb.volume) : '-'}</td></tr>
                     </tbody>
                   </table>
                 </div>
