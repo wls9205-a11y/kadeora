@@ -149,7 +149,7 @@ export default function Sidebar() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           padding: '11px 14px', borderRadius: 10, marginTop: 8,
           textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
-          color: '#191919', background: '#FEE500',
+          color: 'var(--kakao-text, #191919)', background: 'var(--kakao-bg, #FEE500)',
         }}>
           카카오로 3초 가입
         </Link>

@@ -300,24 +300,14 @@ export default async function FeedDetailPage({ params }: Props) {
           </div>
         ) : (
           <div style={{ position: 'relative', margin: '0 0 24px' }}>
-            <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 120, overflow: 'hidden' }}>
+            <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 'clamp(200px, 35vh, 400px)', overflow: 'hidden' }}>
               {post.content}
             </div>
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, background: 'linear-gradient(transparent, var(--bg-base))' }} />
-            <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
-              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>전체 글을 보려면 로그인하세요</div>
-              <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
-                카카오로 로그인
-              </Link>
-            </div>
           </div>
         )}
 
-        {(post.category === 'apt' || post.category === 'stock') && (
-          <Disclaimer type="feed" compact />
-        )}
-
-        {/* Image gallery */}
+        {/* Image gallery — 로그인 여부 상관없이 표시 */}
         {post.images && post.images.length > 0 && (
           <div style={{
             display: 'grid',
@@ -342,6 +332,20 @@ export default async function FeedDetailPage({ params }: Props) {
               </a>
             ))}
           </div>
+        )}
+
+        {/* 비로그인 가입 유도 — 이미지 아래에 배치 */}
+        {!currentUserId && (
+          <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 24 }}>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>전체 글을 보려면 로그인하세요</div>
+            <Link href="/login" style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
+              카카오로 로그인
+            </Link>
+          </div>
+        )}
+
+        {(post.category === 'apt' || post.category === 'stock') && (
+          <Disclaimer type="feed" compact />
         )}
 
       </article>

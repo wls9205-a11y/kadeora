@@ -63,7 +63,7 @@ export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props
           </button>
         )}
         <button onClick={handleKakaoShare}
-          style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: 'none', background: '#FEE500', color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: 'none', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
           💬 카카오톡 공유
         </button>
       </div>

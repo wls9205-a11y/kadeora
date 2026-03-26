@@ -23,9 +23,9 @@ export default function GuestWelcome() {
     // 이미 PWA로 실행 중이면 안 보여줌
     if (window.matchMedia('(display-mode: standalone)').matches) return;
 
-    // 이미 닫은 적 있으면 24시간 숨김
+    // 이미 닫은 적 있으면 3일 숨김
     const dismissed = localStorage.getItem('kd-welcome-dismissed');
-    if (dismissed && Date.now() - Number(dismissed) < 24 * 60 * 60 * 1000) return;
+    if (dismissed && Date.now() - Number(dismissed) < 3 * 24 * 60 * 60 * 1000) return;
 
     // 쿠키 동의 이미 했으면 안 보여줌 (개별 배너들이 처리)
     const consent = localStorage.getItem('kd_cookie_consent');
@@ -44,7 +44,7 @@ export default function GuestWelcome() {
       const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
       window.addEventListener('beforeinstallprompt', handler);
 
-      setTimeout(() => setShow(true), 2500);
+      setTimeout(() => setShow(true), 5000);
 
       return () => window.removeEventListener('beforeinstallprompt', handler);
     });

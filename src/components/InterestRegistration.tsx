@@ -235,7 +235,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
               회원은 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>입력 없이 원클릭</span> + <span style={{ fontWeight: 700, color: 'var(--brand)' }}>50P 적립</span>
             </p>
             <Link href={`/login?redirect=/apt/${slug}`} style={{
-              display: 'block', padding: 12, borderRadius: 10, background: '#FEE500', color: '#191919',
+              display: 'block', padding: 12, borderRadius: 10, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
               fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none', textAlign: 'center',
             }}>
               카카오로 3초 가입 →

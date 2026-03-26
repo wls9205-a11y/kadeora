@@ -4,6 +4,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
+import { useToast } from '@/components/Toast';
 
 interface StockComment {
   id: string; author_id: string; content: string; created_at: string;
@@ -31,6 +32,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
   const [sort, setSort] = useState<'latest' | 'popular'>('latest');
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { success } = useToast();
 
   const loadComments = useCallback(async () => {
     const sb = createSupabaseBrowser();
@@ -180,11 +182,11 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
 
   const handleBookmark = async (content: string) => {
     await navigator.clipboard.writeText(content);
-    alert('클립보드에 복사되었습니다.');
+    success('클립보드에 복사되었습니다');
   };
 
   const reportComment = async (id: string) => {
-    alert('신고가 접수되었습니다.');
+    success('신고가 접수되었습니다');
     setMenuId(null);
   };
 

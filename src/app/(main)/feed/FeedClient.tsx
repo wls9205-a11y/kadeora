@@ -358,7 +358,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                   <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>💬</div>
                   <div>
                     <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>대화에 참여해보세요</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>111명의 투자자가 함께합니다</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>다른 투자자들과 함께하세요</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -366,7 +366,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                     <span key={f} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 20, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f}</span>
                   ))}
                 </div>
-                <Link href="/login" style={{ display: 'block', textAlign: 'center', padding: '11px 0', borderRadius: 12, background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
+                <Link href="/login" style={{ display: 'block', textAlign: 'center', padding: '11px 0', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
                   카카오로 3초 가입
                 </Link>
               </div>

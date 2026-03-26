@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import BottomSheet from '@/components/BottomSheet';
+import { useToast } from '@/components/Toast';
 
 export default function StockAlertButton({ symbol, stockName, currentPrice, currency }: { symbol: string; stockName: string; currentPrice: number; currency?: string }) {
   const [open, setOpen] = useState(false);
@@ -10,6 +11,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
   const [myAlerts, setMyAlerts] = useState<any[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const { info } = useToast();
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -56,7 +58,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
 
   return (
     <div>
-      <button onClick={() => { if (!userId) { alert('로그인 후 이용해주세요'); return; } setOpen(!open); }} style={{
+      <button onClick={() => { if (!userId) { info('로그인하면 알림을 설정할 수 있어요'); return; } setOpen(!open); }} style={{
         display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8,
         background: myAlerts.length > 0 ? 'rgba(251,191,36,0.1)' : 'var(--bg-hover)',
         border: myAlerts.length > 0 ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',

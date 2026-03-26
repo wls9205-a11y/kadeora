@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useToast } from '@/components/Toast';
 
 interface LikeButtonProps {
   postId: number;
@@ -14,6 +15,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
   const [count, setCount] = useState<number>(Number(initialCount) || 0);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const { info } = useToast();
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -31,7 +33,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
   const toggle = async (e?: React.MouseEvent) => {
     e?.stopPropagation?.();
     try { if ('vibrate' in navigator) navigator.vibrate(10); } catch {}
-    if (!userId) { window.location.href = '/login'; return; }
+    if (!userId) { info('로그인하면 좋아요를 누를 수 있어요'); return; }
     if (loading) return;
     setLoading(true);
 

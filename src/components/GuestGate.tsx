@@ -10,13 +10,16 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
   useEffect(() => {
     if (isTossMode()) return; // 토스 미니앱에서 숨김
     if (isLoggedIn) return;
-    if (sessionStorage.getItem('kd_gate_shown')) return;
 
-    // 방문 횟수 카운터 — 3회차부터 게이트 표시
+    // 이전에 닫은 적 있으면 3일간 안 보여줌
+    const dismissed = localStorage.getItem('kd_gate_dismissed');
+    if (dismissed && Date.now() - Number(dismissed) < 3 * 24 * 60 * 60 * 1000) return;
+
+    // 방문 횟수 카운터 — 5회차부터 게이트 표시
     const visitCount = parseInt(localStorage.getItem('kd_visit_count') || '0') + 1;
     localStorage.setItem('kd_visit_count', String(visitCount));
 
-    if (visitCount < 3) return; // 1~2회차는 자유 탐색
+    if (visitCount < 5) return; // 1~4회차는 자유 탐색
 
     const checkAuth = async () => {
       try {
@@ -24,16 +27,20 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
         if (data.session) return;
       } catch { }
 
-      // 3회차부터: 15초 후 표시 (충분히 탐색한 뒤)
+      // 5회차부터: 30초 후 표시 (충분히 탐색한 뒤)
       const timer = setTimeout(() => {
         setShowGate(true);
-        sessionStorage.setItem('kd_gate_shown', '1');
-      }, 15000);
+      }, 30000);
       return () => clearTimeout(timer);
     };
 
     checkAuth();
   }, [isLoggedIn]);
+
+  const handleDismiss = () => {
+    setShowGate(false);
+    localStorage.setItem('kd_gate_dismissed', String(Date.now()));
+  };
 
   return (
     <>
@@ -61,12 +68,12 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
             </div>
             <Link href="/login" style={{
               display: 'block', padding: '12px 0', borderRadius: 12,
-              background: '#FEE500', color: '#191919', fontWeight: 700, fontSize: 'var(--fs-md)',
+              background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)',
               textDecoration: 'none', marginBottom: 10,
             }}>
               카카오로 3초 가입
             </Link>
-            <button onClick={() => setShowGate(false)} style={{
+            <button onClick={handleDismiss} style={{
               background: 'none', border: 'none', color: 'var(--text-tertiary)',
               fontSize: 'var(--fs-sm)', cursor: 'pointer', padding: '8px 0',
             }}>

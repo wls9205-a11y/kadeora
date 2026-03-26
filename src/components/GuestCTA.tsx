@@ -9,7 +9,7 @@ export default function GuestCTA() {
 
   useEffect(() => {
     if (isTossMode()) return; // 토스 미니앱에서 숨김
-    // 이미 닫은 경우 24시간 숨김
+    // 이미 닫은 경우 3일 숨김
     const exp = localStorage.getItem('kd_guest_cta');
     if (exp && Date.now() < parseInt(exp)) return;
 
@@ -60,7 +60,7 @@ export default function GuestCTA() {
           background: 'var(--brand)', color: '#fff', padding: '6px 14px', borderRadius: 8,
           fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
         }}>가입</Link>
-        <button onClick={() => { setShow(false); localStorage.setItem('kd_guest_cta', String(Date.now() + 24 * 60 * 60 * 1000)); }}
+        <button onClick={() => { setShow(false); localStorage.setItem('kd_guest_cta', String(Date.now() + 3 * 24 * 60 * 60 * 1000)); }}
           style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 16, cursor: 'pointer', padding: 2, lineHeight: 1 }} aria-label="닫기">×</button>
       </div>
     </div>

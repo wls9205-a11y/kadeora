@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import BottomSheet from '@/components/BottomSheet';
+import { useToast } from '@/components/Toast';
 
 interface Props { title: string; postId: number | string; content?: string; }
 
 const PLATFORMS = [
-  { id: 'kakao', label: '카카오톡', emoji: '💬', bg: '#FEE500', color: '#191919' },
+  { id: 'kakao', label: '카카오톡', emoji: '💬', bg: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)' },
   { id: 'twitter', label: 'X', emoji: '𝕏', bg: '#1DA1F2', color: 'var(--text-inverse)' },
   { id: 'facebook', label: '페이스북', emoji: 'f', bg: '#1877F2', color: 'var(--text-inverse)' },
   { id: 'copy', label: '링크 복사', emoji: '🔗', bg: 'var(--bg-hover)', color: 'var(--text-primary)' },
@@ -15,6 +16,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState('');
+  const { success } = useToast();
 
   useEffect(() => { setUrl(`${window.location.origin}/feed/${postId}`); }, [postId]);
 
@@ -44,11 +46,11 @@ export default function ShareButtons({ title, postId, content }: Props) {
             });
           } catch {
             await navigator.clipboard.writeText(shareUrl);
-            alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요.');
+            success('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
           }
         } else {
           await navigator.clipboard.writeText(shareUrl);
-          alert('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요.');
+          success('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
         }
         break;
       case 'twitter':

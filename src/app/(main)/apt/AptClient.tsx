@@ -13,6 +13,7 @@ const OngoingTab = dynamic(() => import('./tabs/OngoingTab'), { ssr: false });
 const UnsoldTab = dynamic(() => import('./tabs/UnsoldTab'), { ssr: false });
 import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
+import { useToast } from '@/components/Toast';
 
 export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number }) {
   const [activeTab, setActiveTab] = useState<'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade'>('sub');
@@ -20,6 +21,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [commentTarget, setCommentTarget] = useState<{ houseKey: string; houseNm: string; houseType: 'sub' | 'unsold' | 'redev' } | null>(null);
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [premiumListings, setPremiumListings] = useState<any[]>([]);
+  const { info } = useToast();
 
   // ━━━ Lazy fetch state ━━━
   const [lazyUnsold, setLazyUnsold] = useState<any[] | null>(unsold.length > 0 ? unsold : null);
@@ -85,7 +87,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
   const toggleWatchlist = async (itemType: string, itemId: string) => {
-    if (!aptUser) { alert('로그인 후 이용해주세요'); return; }
+    if (!aptUser) { info('로그인하면 관심 단지를 등록할 수 있어요'); return; }
     try {
       const sb = createSupabaseBrowser();
       const { data: existing } = await sb.from('apt_watchlist').select('id').eq('user_id', aptUser.id).eq('item_type', itemType).eq('item_id', itemId).maybeSingle();

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
+import { useToast } from '@/components/Toast';
 
 const TIERS = [
   { id: 'basic', name: 'BASIC', price: 49000, icon: '🏢', color: 'var(--accent-blue)', features: ['카드 골드 하이라이트', '분양중 탭 상단 고정', '상담사 이름·연락처 표시', '월간 노출 리포트'] },
@@ -17,6 +18,7 @@ export default function ConsultantRegister() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState<'register' | 'pricing' | 'dashboard'>('register');
+  const { info } = useToast();
 
   // 폼 상태
   const [name, setName] = useState('');
@@ -201,7 +203,7 @@ export default function ConsultantRegister() {
               </div>
               <button onClick={() => {
                 // TODO: 토스 결제 연동 후 활성화
-                alert(`${tier.name} 요금제 결제 기능은 곧 오픈됩니다.\n문의: kadeora.app@gmail.com`);
+                info(`${tier.name} 요금제 결제 기능은 곧 오픈됩니다. 문의: kadeora.app@gmail.com`);
               }} style={{
                 width: '100%', padding: '10px 0', borderRadius: 8, border: `1px solid ${tier.color}`, cursor: 'pointer',
                 background: i === 1 ? tier.color : 'transparent',

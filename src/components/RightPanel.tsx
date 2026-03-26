@@ -134,8 +134,8 @@ export default function RightPanel() {
       {isLoggedIn === false && (
         <Link href="/login" style={{
           display: 'block', textAlign: 'center', padding: '12px 14px',
-          borderRadius: 12, background: '#FEE500', textDecoration: 'none',
-          fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#191919',
+          borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', textDecoration: 'none',
+          fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--kakao-text, #191919)',
         }}>카카오로 3초 가입</Link>
       )}
 
