@@ -1,9 +1,9 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 39 (커밋 39건+)
+> **마지막 업데이트:** 2026-03-26 세션 39 (최종 — 커밋 42건+)
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
-## 세션 39 작업 (2026-03-26) — 1커밋, 21파일, +1,028줄 -834줄
+## 세션 39 작업 (2026-03-26) — 4커밋, 62파일+, +1,800줄+ -1,300줄+
 
 ### 블로그 TOC 고정 사이드바 (데스크탑) [COMPLETED]
 - `BlogTocSidebar.tsx` 신규 (130줄) — sticky 사이드바, 읽기 진행률 %, 맨 위로 버튼
@@ -21,20 +21,38 @@
 | ProfileTabs.tsx | 325줄 | 5탭 (게시글/댓글/관심종목/관심단지/북마크) |
 
 ### 관심단지 등록 리디자인 [COMPLETED]
-- **용어 변경**: "관심고객 등록" → "관심단지 등록"
+- **용어 변경**: "관심고객 등록" → "관심단지 등록" (전 프로젝트 일괄 교체)
 - **알림 혜택 명시**: 필태그 3종 (청약 일정, 분양가·경쟁률, 입주 소식)
-- **폼 간소화**: 이름+전화 2열 배치, 거주지(시/도·시/군/구) 제거, 제3자 동의 제거
+- **폼 간소화**: 이름+전화 2열, 생년월일+거주시/도 2열 (시/군/구 제거)
 - **로그인 유저**: 상단 원클릭 버튼(+50P) + "또는 정보를 직접 입력" + 게스트 폼 동시 표시
 - **비로그인**: 게스트 폼 먼저 + "또는" + 카카오 가입 유도 CTA
 - **API 수정**: `body.type` 기반 분기 (로그인 유저도 게스트 폼 사용 가능), `user_id` 연결
 - **BUG FIX**: `consent_required` → `consent_collection` 필드명 불일치 수정 (비회원 폼 항상 실패하던 버그)
 
-### 코드 품질 감사 + 리팩토링 [COMPLETED]
-- **미사용 state 제거**: FeedClient (`_showRegionBanner`, `_tipSeen`, `_userRegion` + 불필요 DB 쿼리 1개), GuestWelcome (`_isIOS`)
-- **데드코드 제거**: feed/page.tsx `getTrending()` 함수 + `DEMO_TRENDING`/`TrendingKeyword` import (SSR DB 쿼리 1개 절약)
-- **미사용 상수/import 제거**: StockClient `SECTORS`, StockDetailTabs `GRADE_EMOJI`, stock/page `CACHE_TTL`, UnsoldTab `MiniBarChart`
-- **미사용 변수 정리**: feed/[id] `cat`, stock/compare `loading`
-- **미사용 prop 처리**: RedevTab `showToast`, SubscriptionTab `setCommentTarget`/`showToast`
+### 전면 코드 감사 — P0 보안 [COMPLETED]
+- **ILIKE injection 방지**: SSR 6곳에 `sanitizeSearchQuery()` 적용
+  - apt/search, blog, apt/[id] 2곳, apt/complex, admin/dashboard
+- **consent 동의문 수정**: v1.0→v1.1, 수집항목·용어 실제 폼과 일치
+  - CONSENT_TEXT, collected_items, consent_version 전부 갱신
+
+### 전면 코드 감사 — P1 안정성 [COMPLETED]
+- **rate limit 추가**: toss/feed, push/test (2개 API)
+- **error.tsx 14곳 생성** (Sentry 캡처 + 재시도 버튼):
+  apt/[id], apt/complex, apt/diagnose, apt/map, apt/region, apt/search,
+  apt/sites, apt/sites/[slug], blog/series, blog/series/[slug],
+  discuss/[id], notifications/settings, shop/megaphone, stock/compare
+- **loading.tsx**: stock/compare 추가
+
+### 전면 코드 감사 — P2 코드 품질 [COMPLETED]
+- **미사용 lib 5개 삭제**: api-response, cache-config, push-templates, safe-catch, use-modal-a11y
+- **GRADE_COLORS/GRADE_TITLES**: constants.ts 통합, ProfileClient+grades 중복 제거
+- **"관심고객" → "관심단지"** 일괄 교체 (MissionControl, decrypt-phone, purge-withdrawn, forward-lead, privacy 등 7곳)
+- **ProfileTabs**: createSupabaseBrowser() 5회→1회 useMemo 최적화
+- **미사용 state/import/변수 제거**: FeedClient 3개, GuestWelcome 1개, getTrending 데드코드, SECTORS, GRADE_EMOJI, CACHE_TTL, MiniBarChart 등
+- **apt/[id] SSR 쿼리 병렬화**: 13개 순차 → 3단계 Promise.allSettled (TTFB 50%+ 개선 예상)
+  - Phase 1: apt_sites (필수)
+  - Phase 2: sub + unsold + redev 동시
+  - Phase 3: trades + blogs + posts + nearby 동시 + view increment fire-and-forget
 
 ### PENDING 작업
 - [ ] 이미지 수집 크론 자동 진행 중 (200건/일)
@@ -47,6 +65,12 @@
 - [ ] 토스 콘솔 한글/영문 기능명 수정 + 번들 빌드 + 업로드 + 재검토 요청
 - [ ] 네이버 서치어드바이저 수동 조치 (RSS/사이트맵 재제출)
 - [ ] 프리미엄 상담사 카카오 알림톡 비즈 채널 개설
+
+### 주의사항 추가 (세션 39)
+- InterestRegistration: 로그인 유저도 게스트 폼 사용 가능 (API body.type='guest'로 분기)
+- consent_version: v1.1로 갱신됨 (기존 v1.0 데이터는 유지)
+- GRADE_COLORS/GRADE_TITLES: `@/lib/constants`에서 import (로컬 정의 금지)
+- apt/[id] SSR: 3단계 병렬 쿼리 — Phase 1 완료 후 Phase 2, Phase 2 완료 후 Phase 3
 
 ## 세션 38 후반 작업 (2026-03-26 오전) — 커밋 38건+
 

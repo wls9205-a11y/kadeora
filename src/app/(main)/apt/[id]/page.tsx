@@ -38,32 +38,34 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
+  // Phase 1: apt_sites (필수 — sourceIds 의존)
   const { data: site } = await sb.from('apt_sites')
     .select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at')
     .eq('slug', slug).maybeSingle();
   const sourceIds = (site?.source_ids || {}) as Record<string, string>;
 
-  let sub: any = null;
-  if (sourceIds.subscription_id) {
-    const { data } = await sb.from('apt_subscriptions').select('*').eq('id', Number(sourceIds.subscription_id)).maybeSingle();
-    sub = data;
-  }
+  // Phase 2: 소스 데이터 병렬 조회 (sub + unsold + redev 동시)
+  const [subResult, unsoldResult, redevResult] = await Promise.allSettled([
+    sourceIds.subscription_id
+      ? sb.from('apt_subscriptions').select('*').eq('id', Number(sourceIds.subscription_id)).maybeSingle()
+      : Promise.resolve({ data: null }),
+    sourceIds.unsold_id
+      ? sb.from('unsold_apts').select('*').eq('id', Number(sourceIds.unsold_id)).maybeSingle()
+      : Promise.resolve({ data: null }),
+    sourceIds.redev_id
+      ? sb.from('redevelopment_projects').select('*').eq('id', Number(sourceIds.redev_id)).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  let sub = subResult.status === 'fulfilled' ? (subResult.value as any)?.data : null;
+  const unsold = unsoldResult.status === 'fulfilled' ? (unsoldResult.value as any)?.data : null;
+  const redev = redevResult.status === 'fulfilled' ? (redevResult.value as any)?.data : null;
+
+  // sub 폴백: 이름 기반 검색
   if (!sub) {
     const nameGuess = site?.name || slug.replace(/-/g, ' ');
     const { data } = await sb.from('apt_subscriptions').select('*').ilike('house_nm', nameGuess).order('id', { ascending: false }).limit(1).maybeSingle();
     sub = data;
-  }
-
-  let unsold: any = null;
-  if (sourceIds.unsold_id) {
-    const { data } = await sb.from('unsold_apts').select('*').eq('id', Number(sourceIds.unsold_id)).maybeSingle();
-    unsold = data;
-  }
-
-  let redev: any = null;
-  if (sourceIds.redev_id) {
-    const { data } = await sb.from('redevelopment_projects').select('*').eq('id', Number(sourceIds.redev_id)).maybeSingle();
-    redev = data;
   }
 
   if (!site && !sub && !unsold && !redev) return null;
@@ -71,28 +73,25 @@ async function fetchUnifiedData(slug: string) {
   const name = sub?.house_nm || site?.name || unsold?.house_nm || redev?.district_name || slug.replace(/-/g, ' ');
   const region = sub?.region_nm || site?.region || unsold?.region_nm || redev?.region || '';
 
-  let trades: any[] = [];
-  try { const { data } = await sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').eq('apt_name', name).order('deal_date', { ascending: false }).limit(30); trades = data || []; } catch {}
+  // Phase 3: 관련 데이터 전부 병렬 (trades + blogs + posts + nearby + view increment)
+  const termBlog = sanitizeSearchQuery(name.length > 4 ? name.slice(0, 4) : name, 20);
+  const termPost = sanitizeSearchQuery(name.length > 3 ? name.slice(0, 3) : name, 20);
+  const rShort = sanitizeSearchQuery(region.slice(0, 2), 10);
 
-  let relatedBlogs: any[] = [];
-  try {
-    const term = sanitizeSearchQuery(name.length > 4 ? name.slice(0, 4) : name, 20);
-    const rShort = sanitizeSearchQuery(region.slice(0, 2), 10);
-    const { data } = await sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${term}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5);
-    relatedBlogs = data || [];
-  } catch {}
+  const [tradesR, blogsR, postsR, nearbyR] = await Promise.allSettled([
+    sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').eq('apt_name', name).order('deal_date', { ascending: false }).limit(30),
+    termBlog ? sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${termBlog}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
+    termPost ? sb.from('posts').select('id, title, created_at, comments_count').eq('is_deleted', false).ilike('title', `%${termPost}%`).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
+    region ? sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status').eq('is_active', true).eq('region', region).neq('slug', slug).gte('content_score', 25).order('interest_count', { ascending: false }).limit(4) : Promise.resolve({ data: [] }),
+  ]);
 
-  let relatedPosts: any[] = [];
-  try {
-    const term = sanitizeSearchQuery(name.length > 3 ? name.slice(0, 3) : name, 20);
-    const { data } = await sb.from('posts').select('id, title, created_at, comments_count').eq('is_deleted', false).ilike('title', `%${term}%`).order('created_at', { ascending: false }).limit(3);
-    relatedPosts = data || [];
-  } catch {}
+  const trades = tradesR.status === 'fulfilled' ? (tradesR.value as any)?.data || [] : [];
+  const relatedBlogs = blogsR.status === 'fulfilled' ? (blogsR.value as any)?.data || [] : [];
+  const relatedPosts = postsR.status === 'fulfilled' ? (postsR.value as any)?.data || [] : [];
+  const nearbySites = nearbyR.status === 'fulfilled' ? (nearbyR.value as any)?.data || [] : [];
 
-  let nearbySites: any[] = [];
-  if (region) { try { const { data } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status').eq('is_active', true).eq('region', region).neq('slug', slug).gte('content_score', 25).order('interest_count', { ascending: false }).limit(4); nearbySites = data || []; } catch {} }
-
-  if (site?.id) { try { await sb.rpc('increment_site_view', { p_site_id: site.id }); } catch {} }
+  // Fire-and-forget: 조회수 증가
+  if (site?.id) { sb.rpc('increment_site_view', { p_site_id: site.id }).then(() => {}).catch(() => {}); }
 
   return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, name, region, slug };
 }
