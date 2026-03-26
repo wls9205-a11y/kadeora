@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 
 interface Props {

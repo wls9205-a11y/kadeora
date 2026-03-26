@@ -3,7 +3,6 @@ import { errMsg } from '@/lib/error-utils';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useAuth } from '@/components/AuthProvider';
