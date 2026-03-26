@@ -1,4 +1,5 @@
 'use client';
+import type { StockPriceHistory, StockNews, InvestorFlow, Disclosure, AIComment } from '@/types/stock';
 import { useState } from 'react';
 import StockComments from '@/components/StockComments';
 import CandlestickChart from '@/components/charts/CandlestickChart';
@@ -9,11 +10,11 @@ import { timeAgo } from '@/lib/format';
 interface Props {
   symbol: string;
   stockName: string;
-  aiComment: any;
-  priceHistory: any[];
-  news: any[];
-  investorFlow: any[];
-  disclosures: any[];
+  aiComment: AIComment | null;
+  priceHistory: StockPriceHistory[];
+  news: StockNews[];
+  investorFlow: InvestorFlow[];
+  disclosures: Disclosure[];
   description: string;
   currency: string;
 }
@@ -68,11 +69,11 @@ const PERIODS = [
   { key: 'all', label: '전체', days: 999 },
 ] as const;
 
-function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: string }) {
+function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[]; currency: string }) {
   const [chartType, setChartType] = useState<'candle' | 'line'>('candle');
   const [period, setPeriod] = useState<string>('all');
 
-  const hasOHLC = priceHistory.some((d: any) => d.open_price && d.high_price && d.low_price);
+  const hasOHLC = priceHistory.some((d) => d.open_price && d.high_price && d.low_price);
 
   const periodDays = PERIODS.find(p => p.key === period)?.days ?? 999;
   const slicedData = periodDays >= 999
@@ -125,7 +126,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: s
       {/* 차트 렌더링 */}
       {chartType === 'candle' && hasOHLC ? (
         <CandlestickChart
-          data={slicedData.filter((d: any) => d.open_price && d.high_price && d.low_price).map((d: any) => ({
+          data={slicedData.filter((d) => d.open_price && d.high_price && d.low_price).map((d) => ({
             date: d.date,
             open: Number(d.open_price),
             high: Number(d.high_price),
@@ -147,8 +148,8 @@ function ChartTab({ priceHistory, currency }: { priceHistory: any[]; currency: s
         const last = Number(slicedData[slicedData.length - 1].close_price);
         const change = last - first;
         const changePct = first > 0 ? (change / first * 100) : 0;
-        const high = Math.max(...slicedData.map((d: any) => Number(d.high_price || d.close_price)));
-        const low = Math.min(...slicedData.map((d: any) => Number(d.low_price || d.close_price)).filter((v: number) => v > 0));
+        const high = Math.max(...slicedData.map((d) => Number(d.high_price || d.close_price)));
+        const low = Math.min(...slicedData.map((d) => Number(d.low_price || d.close_price)).filter((v: number) => v > 0));
         const isUp = change >= 0;
         return (
           <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
@@ -222,7 +223,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                 </div>
                 <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>
-                  {new Date(aiComment.created_at).toLocaleDateString('ko-KR')} 기준 · AI 분석은 참고용
+                  {new Date(aiComment.created_at || '').toLocaleDateString('ko-KR')} 기준 · AI 분석은 참고용
                 </div>
               </div>
             );
@@ -250,8 +251,8 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
         <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 투자자별 수급</div>
           {investorFlow.length > 0 && (() => {
-            const totalForeign = investorFlow.reduce((s: number, d: any) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
-            const totalInst = investorFlow.reduce((s: number, d: any) => s + ((d.inst_buy || 0) - (d.inst_sell || 0)), 0);
+            const totalForeign = investorFlow.reduce((s: number, d) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
+            const totalInst = investorFlow.reduce((s: number, d) => s + ((d.inst_buy || 0) - (d.inst_sell || 0)), 0);
             return (
               <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 12px', textAlign: 'center' }}>
@@ -267,7 +268,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           })()}
           {investorFlow.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📊 외국인·기관 매매 데이터가 수집되면 표시됩니다</div>
-          ) : investorFlow.map((d: any) => {
+          ) : investorFlow.map((d) => {
             const foreignNet = (d.foreign_buy || 0) - (d.foreign_sell || 0);
             const instNet = (d.inst_buy || 0) - (d.inst_sell || 0);
             const maxVal = Math.max(Math.abs(foreignNet), Math.abs(instNet), 1);
@@ -305,8 +306,8 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
         <div className="kd-card">
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
           {news.length > 0 && (() => {
-            const pos = news.filter((n: any) => n.sentiment_label === 'positive' || n.sentiment === 'positive').length;
-            const neg = news.filter((n: any) => n.sentiment_label === 'negative' || n.sentiment === 'negative').length;
+            const pos = news.filter((n) => n.sentiment_label === 'positive' || n.sentiment === 'positive').length;
+            const neg = news.filter((n) => n.sentiment_label === 'negative' || n.sentiment === 'negative').length;
             const neu = news.length - pos - neg;
             const total = news.length || 1;
             return (
@@ -324,8 +325,8 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           })()}
           {news.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📰 최근 관련 뉴스가 없습니다<br/><span style={{ fontSize: 'var(--fs-xs)' }}>새로운 뉴스가 발행되면 자동으로 수집됩니다</span></div>
-          ) : news.map((n: any) => (
-            <a key={n.id} href={n.url} target="_blank" rel="noopener noreferrer"
+          ) : news.map((n) => (
+            <a key={n.id} href={n.url || "#"} target="_blank" rel="noopener noreferrer"
               style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, flex: 1 }}>{n.title}</div>
@@ -361,13 +362,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           </div>
           {disclosures.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>📋 최근 공시 내역이 없습니다<br/><span style={{ fontSize: 'var(--fs-xs)' }}>DART 공시 등록 시 자동으로 수집됩니다</span></div>
-          ) : disclosures.map((d: any) => {
+          ) : disclosures.map((d) => {
             const typeMap: Record<string, string> = { earnings: '📈실적', dividend: '💰배당', buyback: '🔄자사주', contract: '📝수주', ir: '🎤IR' };
             return (
               <div key={d.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                    {typeMap[d.disclosure_type] || '📋공시'}
+                    {typeMap[d.disclosure_type || ""] || '📋공시'}
                   </span>
                   <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 500 }}>{d.title}</span>
                 </div>

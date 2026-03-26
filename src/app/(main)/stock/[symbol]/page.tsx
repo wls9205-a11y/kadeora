@@ -1,3 +1,4 @@
+import type { AIComment, StockPriceHistory, StockNews, InvestorFlow, Disclosure } from '@/types/stock';
 export const revalidate = 300;
 import { SITE_URL } from '@/lib/constants';
 
@@ -59,7 +60,7 @@ export default async function StockDetailPage({ params }: Props) {
   // Parallel fetch all data (필요 컬럼만 select)
   const [histR, aiR, newsR, flowR, discR, similarR, relatedBlogsR] = await Promise.all([
     sb.from('stock_price_history').select('date, close_price, open_price, high_price, low_price, volume, change_pct').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
-    sb.from('stock_ai_comments').select('id, symbol, comment, content, signal, created_at').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    sb.from('stock_ai_comments').select('id, symbol, comment, signal, created_at').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('stock_news').select('id, title, url, source, published_at, sentiment, sentiment_label, sentiment_score, ai_summary').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
     sb.from('stock_investor_flow').select('id, date, foreign_buy, foreign_sell, inst_buy, inst_sell').eq('symbol', symbol).order('date', { ascending: false }).limit(5),
     sb.from('stock_disclosures').select('id, title, disclosure_type, source, published_at, created_at').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
@@ -181,11 +182,11 @@ export default async function StockDetailPage({ params }: Props) {
       <StockDetailTabs
         symbol={symbol}
         stockName={s.name}
-        aiComment={aiR.data || null}
-        priceHistory={histR.data || []}
-        news={newsR.data || []}
-        investorFlow={flowR.data || []}
-        disclosures={discR.data || []}
+        aiComment={(aiR.data as AIComment) || null}
+        priceHistory={(histR.data || []) as StockPriceHistory[]}
+        news={(newsR.data || []) as StockNews[]}
+        investorFlow={(flowR.data || []) as InvestorFlow[]}
+        disclosures={(discR.data || []) as Disclosure[]}
         description={s.description ?? `${s.name}은(는) ${s.market} 상장 종목입니다. 자세한 기업 정보는 공식 홈페이지나 증권사 앱에서 확인해보세요.`}
         currency={s.currency ?? 'KRW'}
       />
