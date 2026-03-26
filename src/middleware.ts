@@ -68,7 +68,7 @@ export async function middleware(request: NextRequest) {
       if (!isCron && !hasBearer) {
         const origin = request.headers.get('origin');
         const host = request.headers.get('host');
-        if (origin && host && !origin.includes(host) && !origin.includes('kadeora.app') && !origin.includes('localhost')) {
+        if (origin && host && !origin.includes(host) && !origin.includes('kadeora.app') && !origin.includes('localhost') && !origin.includes('tossmini.com')) {
           return NextResponse.json({ error: 'CSRF: Origin mismatch' }, { status: 403 });
         }
       }
