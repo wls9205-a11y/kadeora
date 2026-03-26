@@ -124,7 +124,7 @@ function NoticeSection() {
           <div style={{ marginTop: 8 }}>
             <DateFilterButtons value={dateFilter} onChange={setDateFilter} />
             <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
+              <div className="admin-table-wrap" style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                     <th style={{ padding: '6px 10px', fontWeight: 600 }}>내용</th>
@@ -151,7 +151,7 @@ function NoticeSection() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         )}
@@ -279,7 +279,7 @@ function PushSection() {
           <div style={{ marginTop: 8 }}>
             <DateFilterButtons value={dateFilter} onChange={setDateFilter} />
             <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
+              <div className="admin-table-wrap" style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-sunken)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                     <th style={{ padding: '6px 10px', fontWeight: 600 }}>제목</th>
@@ -311,7 +311,7 @@ function PushSection() {
                     );
                   })}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         )}

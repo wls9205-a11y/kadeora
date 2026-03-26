@@ -55,7 +55,7 @@ export default async function AdminPaymentsPage() {
             <div style={{ fontSize: 'var(--fs-sm)' }}>전광판 상품이 등록되면 여기에 표시됩니다.</div>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)', minWidth: 500 }}>
+          <div className="admin-table-wrap" style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)', minWidth: 500 }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                 <th style={{ padding: '10px 12px' }}>결제일</th>
@@ -80,7 +80,7 @@ export default async function AdminPaymentsPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 

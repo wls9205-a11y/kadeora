@@ -152,7 +152,7 @@ export default function AdminBlogPage() {
 
       {/* 목록 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
+        <div className="admin-table-wrap" style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
           <thead>
             <tr style={{ background: 'var(--bg-hover)', textAlign: 'left' }}>
               <th style={{ padding: '8px 12px', fontWeight: 700, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>제목</th>
@@ -183,7 +183,7 @@ export default function AdminBlogPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   );
