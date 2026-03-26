@@ -1210,3 +1210,18 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
 .mb-12 { margin-bottom: 12px; }
 .mb-16 { margin-bottom: 16px; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ━━━ Stock utilities (세션41) ━━━ */
+.stock-section-title { font-size: var(--fs-base); font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.stock-row { display: flex; align-items: center; padding: 4px 0; text-decoration: none; color: inherit; border-bottom: 1px solid var(--border); }
+.stock-row:last-child { border-bottom: none; }
+.stock-name { font-size: 13px; font-weight: 700; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stock-price { font-weight: 600; font-size: var(--fs-sm); min-width: 70px; text-align: right; }
+.stock-change { font-size: var(--fs-xs); min-width: 60px; text-align: right; font-weight: 600; }
+.stock-change-up { color: var(--accent-red); }
+.stock-change-down { color: var(--accent-blue); }
+.stock-change-flat { color: var(--text-tertiary); }
+.stock-chip { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+.stock-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.stock-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stock-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }

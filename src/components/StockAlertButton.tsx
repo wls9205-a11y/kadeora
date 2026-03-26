@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import BottomSheet from '@/components/BottomSheet';
 import { useToast } from '@/components/Toast';
 
@@ -9,23 +10,20 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
   const [alertType, setAlertType] = useState<'above' | 'below'>('above');
   const [threshold, setThreshold] = useState('');
   const [myAlerts, setMyAlerts] = useState<any[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useAuth();
   const [saving, setSaving] = useState(false);
   const { info } = useToast();
 
   useEffect(() => {
+    if (!userId) return;
     const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(async ({ data }) => {
-      if (!data.session?.user) return;
-      setUserId(data.session.user.id);
-      const { data: alerts } = await sb.from('price_alerts')
-        .select('id, alert_type, condition, threshold, is_triggered')
-        .eq('user_id', data.session.user.id)
-        .eq('target_symbol', symbol)
-        .eq('is_active', true);
-      setMyAlerts(alerts || []);
-    });
-  }, [symbol]);
+    sb.from('price_alerts')
+      .select('id, alert_type, condition, threshold, is_triggered')
+      .eq('user_id', userId)
+      .eq('target_symbol', symbol)
+      .eq('is_active', true)
+      .then(({ data: alerts }) => setMyAlerts(alerts || []));
+  }, [symbol, userId]);
 
   const addAlert = async () => {
     if (!userId || !threshold || saving) return;

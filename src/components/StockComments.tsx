@@ -47,7 +47,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       .is('parent_id', null)
       .order(order.column as any, { ascending: order.ascending })
       .limit(30);
-    if (data) setComments(data as any);
+    if (data) setComments(data as StockComment[]);
   }, [symbol, sort]);
 
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       .select('id, author_id, content, created_at, likes_count, replies_count, parent_id, profiles:author_id(nickname, grade)')
       .single();
     if (!error && data) {
-      setReplies(prev => ({ ...prev, [parentId]: [...(prev[parentId] || []), data as any] }));
+      setReplies(prev => ({ ...prev, [parentId]: [...(prev[parentId] || []), data as StockComment] }));
       setReplyInputs(prev => ({ ...prev, [parentId]: '' }));
       setComments(prev => prev.map(c =>
         c.id === parentId ? { ...c, replies_count: c.replies_count + 1 } : c

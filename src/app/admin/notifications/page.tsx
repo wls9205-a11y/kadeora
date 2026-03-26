@@ -54,7 +54,7 @@ function NoticeSection() {
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
 
   const loadHistory = () => {
-    createSupabaseBrowser().from('site_notices').select('*').order('created_at', { ascending: false }).limit(30)
+    createSupabaseBrowser().from('site_notices').select('id, title, content, type, is_active, created_at, author_id').order('created_at', { ascending: false }).limit(30)
       .then(({ data }) => setHistory(data || []));
   };
   useEffect(loadHistory, []);
@@ -174,7 +174,7 @@ function PushSection() {
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
 
   useEffect(() => {
-    createSupabaseBrowser().from('push_logs').select('*').order('created_at', { ascending: false }).limit(30)
+    createSupabaseBrowser().from('push_logs').select('id, title, body, target, sent_count, created_at').order('created_at', { ascending: false }).limit(30)
       .then(({ data }) => setLogs(data || []));
   }, []);
 
@@ -192,7 +192,7 @@ function PushSection() {
         setResult(`앱내 ${data.app_notif}명, 푸시 ${data.push_sent}/${data.push_total}명 발송`);
         setTitle(''); setBody('');
         // Reload logs
-        createSupabaseBrowser().from('push_logs').select('*').order('created_at', { ascending: false }).limit(30)
+        createSupabaseBrowser().from('push_logs').select('id, title, body, target, sent_count, created_at').order('created_at', { ascending: false }).limit(30)
           .then(({ data: d }) => setLogs(d || []));
       } else { setResult(`발송 실패: ${data.error}`); }
     } catch { setResult('발송 실패'); }

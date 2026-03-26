@@ -15,7 +15,7 @@ export default async function AdminPaymentsPage() {
 
   const { data: payments } = await supabase
     .from('payments')
-    .select('*')
+    .select('id, user_id, amount_krw, status, product_type, created_at, toss_order_id')
     .order('created_at', { ascending: false })
     .limit(100);
 

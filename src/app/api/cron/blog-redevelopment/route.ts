@@ -10,7 +10,7 @@ import { SITE_URL } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
-function generateRedevelopmentBlog(z: any): string {
+function generateRedevelopmentBlog(z: Record<string, any>): string {
   const name = z.zone_name || z.zone_name || '구역';
   const region = z.region || '';
   const district = z.district || '';
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('blog-redevelopment', async () => {
     const admin = getSupabaseAdmin();
-    const { data: zones, error: fetchErr } = await admin.from('redevelopment_zones').select('*').eq('blog_generated', false);
+    const { data: zones, error: fetchErr } = await admin.from('redevelopment_zones').select('id, zone_name, region, district, blog_slug, blog_generated, zone_type, progress_stage, tags').eq('blog_generated', false);
 
     if (fetchErr) { console.error('[blog-redevelopment] fetch error:', fetchErr); throw new Error(fetchErr.message); }
     if (!zones || zones.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { api_name: 'anthropic', api_calls: 0 } };

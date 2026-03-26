@@ -164,7 +164,7 @@ export default function AnalyticsSection() {
               </tr>
             </thead>
             <tbody>
-              {(recentViews || []).map((v: any, i: number) => (
+              {(recentViews || []).map((v: Record<string, any>, i: number) => (
                 <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
                   <td style={{ padding: '5px 8px', color: C.textSec, whiteSpace: 'nowrap' }}>{ago(v.time)}</td>
                   <td style={{ padding: '5px 8px', color: C.text, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.path}</td>

@@ -18,7 +18,7 @@ interface Stock {
 }
 interface Theme { id: number; theme_name: string; change_pct: number; is_hot: boolean; related_symbols?: string[]; description?: string; }
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
-interface Props { initialStocks: Stock[]; briefing?: any; exchangeHistory?: any[]; themeHistory?: any[]; }
+interface Props { initialStocks: Stock[]; briefing?: Record<string, any>; exchangeHistory?: Record<string, any>[]; themeHistory?: Record<string, any>[]; }
 
 function isIdx(s: Stock) { return ['KOSPI','KOSDAQ','NASDAQ','S&P 500','DOW','NIKKEI'].some(idx => s.name.toUpperCase().includes(idx) || s.symbol.toUpperCase().includes(idx)); }
 
@@ -210,7 +210,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           <span style={{ color: 'var(--text-tertiary)' }}>$/₩</span>
           <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
           {exchangeHistory && exchangeHistory.length > 1 && (() => {
-            const rates = exchangeHistory.map((h: any) => h.rate);
+            const rates = exchangeHistory.map((h: Record<string, any>) => h.rate);
             const min = Math.min(...rates); const max = Math.max(...rates);
             const range = max - min || 1;
             const points = rates.map((r: number, i: number) => `${(i / (rates.length - 1)) * 32},${16 - ((r - min) / range) * 14}`).join(' ');
@@ -267,7 +267,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {/* Sector bars */}
           {briefing.sector_analysis?.length > 0 && (
             <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-              {briefing.sector_analysis.slice(0, 6).map((sec: any) => {
+              {briefing.sector_analysis.slice(0, 6).map((sec: Record<string, any>) => {
                 const pct = sec.avg_pct || 0;
                 return (
                   <div key={sec.name} style={{
@@ -390,7 +390,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             ))}
           </div>
           {themes.filter(t => !selectedTheme || t.theme_name === selectedTheme).map(t => {
-            const th = themeHistory?.find((h: any) => h.theme_name === t.theme_name);
+            const th = themeHistory?.find((h: Record<string, any>) => h.theme_name === t.theme_name);
             return (
             <div key={t.id} style={{ padding: 16, background: 'var(--bg-surface)', border: selectedTheme === t.theme_name ? '2px solid var(--brand)' : '1px solid var(--border)', borderRadius: 12, marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -407,7 +407,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               {t.description && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>{t.description}</div>}
               {/* 테마 추이 스파크라인 */}
               {th?.history && Array.isArray(th.history) && th.history.length >= 2 && (() => {
-                const vals = th.history.map((h: any) => Number(h.change_pct || h.avg_change_rate || 0));
+                const vals = th.history.map((h: Record<string, any>) => Number(h.change_pct || h.avg_change_rate || 0));
                 const min = Math.min(...vals); const max = Math.max(...vals);
                 const range = max - min || 1; const W = 200; const H = 30; const P = 2;
                 const points = vals.map((v: number, i: number) => `${P + (i / (vals.length - 1)) * (W - P * 2)},${H - P - ((v - min) / range) * (H - P * 2)}`).join(' ');

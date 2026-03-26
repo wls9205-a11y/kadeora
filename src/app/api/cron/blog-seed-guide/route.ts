@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('blog-seed-guide', async () => {
     const admin = getSupabaseAdmin();
-    const { data: seedsRaw, error: fetchErr } = await admin.from('guide_seeds').select('*').eq('blog_generated', false);
+    const { data: seedsRaw, error: fetchErr } = await admin.from('guide_seeds').select('id, category, slug, title, blog_generated, outline, tags').eq('blog_generated', false);
     const seeds = (seedsRaw || []) as any[];
 
     if (fetchErr) { console.error('[blog-seed-guide] fetch error:', fetchErr); throw new Error(fetchErr.message); }

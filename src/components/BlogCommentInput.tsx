@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import { useToast } from '@/components/Toast';
 
 export default function BlogCommentInput({ blogPostId }: { blogPostId: number }) {
@@ -9,18 +10,18 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
   const [loading, setLoading] = useState(false);
   const { success, error } = useToast();
   const router = useRouter();
+  const { userId } = useAuth();
 
   const handleSubmit = async () => {
     const trimmed = content.trim();
     if (!trimmed) { error('의견을 입력해주세요'); return; }
     if (trimmed.length > 1000) { error('1000자 이내로 입력해주세요'); return; }
+    if (!userId) { error('로그인이 필요합니다'); return; }
     setLoading(true);
     try {
       const sb = createSupabaseBrowser();
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) { error('로그인이 필요합니다'); return; }
       const { error: insertErr } = await sb.from('blog_comments').insert({
-        blog_post_id: blogPostId, author_id: user.id, content: trimmed,
+        blog_post_id: blogPostId, author_id: userId, content: trimmed,
       });
       if (insertErr) throw insertErr;
       setContent('');

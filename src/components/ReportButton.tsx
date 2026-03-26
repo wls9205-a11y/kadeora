@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Props {
   postId?: number;
@@ -23,6 +24,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
   const [details, setDetails] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
+  const { userId } = useAuth();
 
   const handleSubmit = async () => {
     if (!reason) {
@@ -32,9 +34,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
     setLoading(true);
     setResult('');
     try {
-      const sb = createSupabaseBrowser();
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
+      if (!userId) {
         setResult('로그인이 필요합니다');
         setLoading(false);
         return;

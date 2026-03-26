@@ -40,8 +40,8 @@ export default function MapClient() {
       if (layers.has('subscription')) {
         const { data } = await sb.from('apt_subscriptions')
           .select('id, house_nm, hssply_adres, region_nm, tot_supply_hshld_co, rcept_endde')
-          .order('rcept_endde', { ascending: false }).limit(300) as { data: any[] | null };
-        (data || []).forEach((d: any) => allPins.push({
+          .order('rcept_endde', { ascending: false }).limit(300) as { data: Record<string, any>[] | null };
+        (data || []).forEach((d: Record<string, any>) => allPins.push({
           id: d.id, name: d.house_nm, address: d.hssply_adres || d.region_nm || '',
           layer: 'subscription', extra: `${d.tot_supply_hshld_co || '?'}세대 · ~${(d.rcept_endde || '').slice(5)}`,
         }));
@@ -50,8 +50,8 @@ export default function MapClient() {
       if (layers.has('redevelopment')) {
         const { data } = await sb.from('redevelopment_projects')
           .select('id, district_name, address, region, stage, total_households, latitude, longitude')
-          .eq('is_active', true).limit(300) as { data: any[] | null };
-        (data || []).forEach((d: any) => allPins.push({
+          .eq('is_active', true).limit(300) as { data: Record<string, any>[] | null };
+        (data || []).forEach((d: Record<string, any>) => allPins.push({
           id: `r${d.id}`, name: d.district_name || d.address || '', address: d.address || d.region || '',
           layer: 'redevelopment', extra: d.stage || '진행중',
           lat: d.latitude ? parseFloat(d.latitude) : undefined,
@@ -62,8 +62,8 @@ export default function MapClient() {
       if (layers.has('unsold')) {
         const { data } = await sb.from('unsold_apts')
           .select('id, house_nm, region_nm, tot_unsold_hshld_co, latitude, longitude')
-          .eq('is_active', true).limit(300) as { data: any[] | null };
-        (data || []).forEach((d: any) => allPins.push({
+          .eq('is_active', true).limit(300) as { data: Record<string, any>[] | null };
+        (data || []).forEach((d: Record<string, any>) => allPins.push({
           id: `u${d.id}`, name: d.house_nm || '', address: d.region_nm || '',
           layer: 'unsold', extra: `${d.tot_unsold_hshld_co || 0}세대 미분양`,
           lat: d.latitude ? parseFloat(d.latitude) : undefined,
@@ -111,7 +111,7 @@ export default function MapClient() {
     }
 
     const geocoder = new window.kakao.maps.services.Geocoder();
-    const newMarkers: any[] = [];
+    const newMarkers: Record<string, any>[] = [];
     let processed = 0;
     const total = pins.length;
 
@@ -160,7 +160,7 @@ export default function MapClient() {
       }
       // 좌표 없으면 주소로 Geocoding
       if (!pin.address) { tryFinalize(); return; }
-      geocoder.addressSearch(pin.address, (result: any, status: any) => {
+      geocoder.addressSearch(pin.address, (result: Record<string, any>[], status: string) => {
         if (status === window.kakao.maps.services.Status.OK && result.length) {
           addMarker(pin, result[0].y, result[0].x);
         }

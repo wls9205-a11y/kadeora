@@ -101,7 +101,7 @@ export default function WriteClient() {
     if (!editId) return;
     setLoadingEdit(true);
     const sb = createSupabaseBrowser();
-    sb.from('posts').select('*').eq('id', Number(editId)).single()
+    sb.from('posts').select('id, title, content, category, images, tag, is_anonymous').eq('id', Number(editId)).single()
       .then(({ data, error: err }) => {
         if (err || !data) { error('게시글을 불러올 수 없습니다'); return; }
         setCategory(data.category); setTitle(data.title); setContent(data.content);

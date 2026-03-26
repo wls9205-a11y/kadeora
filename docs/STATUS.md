@@ -1,6 +1,6 @@
 # 카더라 프로젝트 현황 (STATUS.md)
 
-> **마지막 업데이트:** 2026-03-26 세션 41 전수조사 (커밋 8건, 125+ 파일) — any 476→305, 크론 504 해결, Edge 캐시 +5, UX 딥링크, 어드민 강화
+> **마지막 업데이트:** 2026-03-26 세션 41 전수조사 (커밋 9건, 125+ 파일) — any 476→281, select 23→11, auth 전환 7건, 어드민 강화
 > **다음 세션 시작 명령:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 세션 41 작업 (2026-03-26) — 5커밋, 90+ 파일
@@ -10,7 +10,7 @@
 - `sync-apt-sites`: 재개발+미분양 N+1 쿼리 → 배치 조회 + 10건 병렬 업데이트
 - `blog-series-assign`: 개별 UPDATE → 10건씩 Promise.allSettled 병렬
 
-### any 타입 476→305건 (-171건, 36%↓) [COMPLETED]
+### any 타입 476→281건 (-195건, 41%↓) [COMPLETED]
 - `catch (e: any)` 49건 → `catch (e: unknown)` + `errMsg()` 유틸 전환
 - `src/lib/error-utils.ts` 신규 — 타입 안전한 에러 메시지 추출
 - `crawl-unsold-molit`: MolitRow 타입 도입 (13→0건)
@@ -64,10 +64,10 @@
 - AptBookmarkButton: 중복 aria-label 제거
 - feed/[id] Image: alt="게시글 이미지" 추가
 
-### auth.getUser → useAuth() 추가 전환 2건 [COMPLETED]
+### auth.getUser → useAuth() 추가 전환 7건 [COMPLETED]
 - AptCommentInline: createSupabaseBrowser().auth.getUser() 제거 → useAuth()
 - AptCommentSheet: 동일 전환
-- **총 auth 중복 호출 감소: 세션40 10건→1건 + 세션41 추가 2건 = 페이지당 최대 1건**
+- **총 auth 전환: AptCommentInline, AptCommentSheet, BlogCommentInput, ImageUpload, ReportButton, StockAlertButton, ReportModal — 7곳 완료, 5곳 잔여(프로필 데이터 필요)**
 
 ### 주의사항 (세션 41)
 - errMsg(): `catch (e: unknown)` 사용 시 `import { errMsg } from '@/lib/error-utils'` 필요
@@ -79,9 +79,9 @@
 ### 성능 최종 스코어카드
 | 항목 | Before (세션40) | After (세션41) |
 |------|----------------|----------------|
-| any 타입 | 476건 (518→476 세션40) | **305건 (-171)** |
+| any 타입 | 476건 (518→476 세션40) | **281건 (-195, 41%↓)** |
 | Edge 캐시 API | 7개 | **12개 (+5)** |
-| select('*') | 23건 | **19건 (-4)** |
+| select('*') | 23건 | **11건 (-12)** |
 | sync-apt-sites 504 | 반복 실패 | **maxDuration 180 + 배치 병렬** |
 | blog-series-assign 504 | 건별 UPDATE | **10건 병렬** |
 | tsc --noEmit | 0건 | **0건 유지** |
@@ -89,7 +89,7 @@
 | 어드민 API try/catch | 12개 누락 | **전부 추가** |
 | 어드민 loading/error | 0개 | **20개 (10 디렉토리)** |
 | 접근성 aria-label | 8곳 누락 | **5곳 수정** |
-| auth 중복 호출 | useAuth 미전환 2곳 | **AptComment 2곳 전환** |
+| auth 중복 호출 | 미전환 12곳 | **7곳 useAuth() 전환 (5곳 잔여)** |
 
 ### PENDING 작업
 - [ ] **토스 정산 등록 (3/31 마감 D-5!)**
@@ -101,9 +101,9 @@
 - [ ] 이미지/좌표/지하철역 수집 크론 자동 진행 중
 
 ### 남은 기술 부채 (다음 세션)
-- [ ] **any 타입 305건** → 250건 이하 목표
+- [ ] **any 타입 281건** → 250건 이하 목표
   - 주로 `as any` Supabase 캐스트, window/navigator 벤더 확장
-- [ ] **select('*') 19곳** → 10곳 이하 목표
+- [ ] **select('*') 11곳** → 대부분 상세/크론 페이지 (전 컬럼 필요)
 - [ ] **API 캐시 미적용 ~115개** → 읽기 전용 GET API에 cachedJson() 순차 적용
 - [ ] **StockClient 인라인 스타일 ~130개** → CSS 유틸 클래스 전환
 

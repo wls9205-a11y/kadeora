@@ -386,7 +386,7 @@ export default function SearchClient() {
             {acRedevs.length > 0 && (
               <div>
                 {acSectionHeader('재개발·재건축')}
-                {acRedevs.map((r: any) => (
+                {acRedevs.map((r: Record<string, any>) => (
                   <div key={r.id} className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
                     onClick={() => { handleAcNavigate('/apt'); }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

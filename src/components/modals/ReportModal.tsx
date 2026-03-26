@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import { useToast } from '@/components/Toast';
 
 interface ReportModalProps {
@@ -26,16 +27,16 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const { info, error: showError } = useToast();
+  const { userId } = useAuth();
 
   const handleSubmit = async () => {
     if (!reason) return;
     setSubmitting(true);
     try {
+      if (!userId) { info('로그인하면 신고할 수 있어요'); onClose(); return; }
       const sb = createSupabaseBrowser();
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) { info('로그인하면 신고할 수 있어요'); onClose(); return; }
       await sb.from('content_reports').insert({
-        reporter_id: user.id,
+        reporter_id: userId,
         target_type: targetType,
         target_id: Number(targetId),
         reason: `${reason}${detail ? `: ${detail}` : ''}`,

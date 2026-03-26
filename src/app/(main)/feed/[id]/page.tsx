@@ -154,7 +154,7 @@ export default async function FeedDetailPage({ params }: Props) {
             const { data: sitesData } = await sb.from('apt_sites').select('slug, name, site_type, region, sigungu')
               .eq('is_active', true).or(orQuery).gte('content_score', 25)
               .order('interest_count', { ascending: false }).limit(3);
-            if (sitesData?.length) related = [...related, ...sitesData.map((s: any) => ({ ...s, _type: 'site' }))];
+            if (sitesData?.length) related = [...related, ...sitesData.map((s: Record<string, any>) => ({ ...s, _type: 'site' }))];
           }
         } catch {}
       }
@@ -167,7 +167,7 @@ export default async function FeedDetailPage({ params }: Props) {
             const orQuery = keywords.map((k: string) => `name.ilike.%${k}%`).join(',');
             const { data: stocksData } = await sb.from('stock_quotes').select('symbol, name, market, price, change_pct, currency')
               .eq('is_active', true).or(orQuery).gt('price', 0).limit(3);
-            if (stocksData?.length) related = [...related, ...stocksData.map((s: any) => ({ ...s, _type: 'stock' }))];
+            if (stocksData?.length) related = [...related, ...stocksData.map((s: Record<string, any>) => ({ ...s, _type: 'stock' }))];
           }
         } catch {}
       }
@@ -392,7 +392,7 @@ export default async function FeedDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🏢 관련 현장</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {related.filter((r: Record<string, any>) => r._type === 'site').map((s: any) => (
+            {related.filter((r: Record<string, any>) => r._type === 'site').map((s: Record<string, any>) => (
               <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 130, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu || ''}</div>
@@ -407,7 +407,7 @@ export default async function FeedDetailPage({ params }: Props) {
         <div style={{ marginBottom: 20 }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📈 관련 종목</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {related.filter((r: Record<string, any>) => r._type === 'stock').map((s: any) => (
+            {related.filter((r: Record<string, any>) => r._type === 'stock').map((s: Record<string, any>) => (
               <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 130, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: Number(s.change_pct) >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)', marginTop: 2 }}>

@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 
 interface ImageUploadProps { images: string[]; onImagesChange: (images: string[]) => void; maxImages?: number; }
 
@@ -9,6 +10,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 5 }: I
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { userId } = useAuth();
   const supabase = createSupabaseBrowser();
   const MAX_FILE_SIZE = 5 * 1024 * 1024;
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -26,12 +28,11 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 5 }: I
     }
     setUploading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setError('로그인 필요'); setUploading(false); return; }
+      if (!userId) { setError('로그인 필요'); setUploading(false); return; }
       const uploadedUrls: string[] = [];
       for (const file of filesToUpload) {
         const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-        const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, file, { cacheControl: '3600', upsert: false });
         if (uploadError) { setError(`업로드 실패: ${uploadError.message}`); continue; }
         const { data: urlData } = supabase.storage.from('posts').getPublicUrl(fileName);
