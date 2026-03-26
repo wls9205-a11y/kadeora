@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import PushSubscribeButton from './PushSubscribeButton';
 import { useState, useEffect } from 'react';
 
@@ -15,22 +16,17 @@ const MENU = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const { userId } = useAuth();
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    // 모바일에서는 숨겨져 있으므로 API 호출 스킵
+    if (!userId) { setUnread(0); return; }
     if (typeof window !== 'undefined' && window.innerWidth < 900) return;
     const sb = createSupabaseBrowser();
-    sb.auth.getSession().then(({ data }) => {
-      if (data.session?.user) {
-        setUser(data.session.user);
-        sb.from('notifications').select('id', { count: 'exact', head: true })
-          .eq('user_id', data.session.user.id).eq('is_read', false)
-          .then(({ count }) => setUnread(count ?? 0));
-      }
-    });
-  }, []);
+    sb.from('notifications').select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('is_read', false)
+      .then(({ count }) => setUnread(count ?? 0));
+  }, [userId]);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -62,9 +58,9 @@ export default function Sidebar() {
 
       <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
 
-      {user && (
+      {userId && (
         <>
-          <Link href={`/profile/${user.id}?tab=bookmarks`} style={{
+          <Link href={`/profile/${userId}?tab=bookmarks`} style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px', borderRadius: 10,
             textDecoration: 'none', fontSize: 'var(--fs-base)',
@@ -74,7 +70,7 @@ export default function Sidebar() {
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
             <span style={{ fontSize: 'var(--fs-lg)' }}>🔖</span> 내 북마크
           </Link>
-          <Link href={`/profile/${user.id}`} style={{
+          <Link href={`/profile/${userId}`} style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px', borderRadius: 10,
             textDecoration: 'none', fontSize: 'var(--fs-base)',
@@ -144,7 +140,7 @@ export default function Sidebar() {
         <PushSubscribeButton />
       </div>
 
-      {!user && (
+      {!userId && (
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           padding: '11px 14px', borderRadius: 10, marginTop: 8,

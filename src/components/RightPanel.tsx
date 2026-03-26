@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { GRADE_EMOJI, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
+import { useAuth } from '@/components/AuthProvider';
 
 const GRADES = [
   { emoji: '🌱', title: '새싹', pts: '0' }, { emoji: '📡', title: '정보통', pts: '100' },
@@ -16,44 +17,24 @@ const GRADES = [
 
 const FALLBACK = ['삼성전자', 'AI 반도체', '청약 경쟁률', '엔비디아', '기준금리'];
 
-interface UserProfile {
-  id: string;
-  nickname: string;
-  grade: number;
-  points: number;
-}
-
 export default function RightPanel() {
   const [trending, setTrending] = useState<{ keyword: string }[]>([]);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const { userId, profile: authProfile } = useAuth();
   const pathname = usePathname();
   const [recBlogs, setRecBlogs] = useState<{ slug: string; title: string }[]>([]);
 
   useEffect(() => {
-    // 모바일/태블릿에서는 숨겨져 있으므로 API 호출 스킵
     if (typeof window !== 'undefined' && window.innerWidth < 1200) return;
 
     fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 5)); })
 
-    // 추천 블로그 (인기순 3개)
     const sb = createSupabaseBrowser();
     sb.from('blog_posts').select('slug, title')
       .eq('is_published', true)
       .order('view_count', { ascending: false })
       .limit(3)
       .then(({ data }) => { if (data?.length) setRecBlogs(data); })
-
-    sb.auth.getSession().then(async ({ data }) => {
-      if (!data.session?.user) { setIsLoggedIn(false); return; }
-      setIsLoggedIn(true);
-      const { data: p } = await sb.from('profiles')
-        .select('id, nickname, grade, points')
-        .eq('id', data.session.user.id)
-        .single();
-      if (p) setProfile(p as UserProfile);
-    });
   }, []);
 
   const display = trending.length > 0 ? trending : FALLBACK.map(k => ({ keyword: k }));
@@ -61,28 +42,28 @@ export default function RightPanel() {
   return (
     <div style={{ width: 200, flexShrink: 0, position: 'sticky', top: 72, height: 'fit-content', display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
       {/* 프로필 카드 */}
-      {isLoggedIn === true && profile && (
+      {userId && authProfile && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <div style={{
               width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-              background: getAvatarColor(profile.nickname), display: 'flex',
+              background: getAvatarColor(authProfile.nickname ?? '유저'), display: 'flex',
               alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 700,
             }}>
-              {profile.nickname[0]?.toUpperCase()}
+              {(authProfile.nickname ?? '유')[0].toUpperCase()}
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.nickname}</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{authProfile.nickname}</span>
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                {GRADE_EMOJI[profile.grade] ?? '🌱'} {gradeTitle(profile.grade)} · {(profile.points ?? 0).toLocaleString()}P
+                {GRADE_EMOJI[authProfile.grade] ?? '🌱'} {gradeTitle(authProfile.grade)} · {(authProfile.points ?? 0).toLocaleString()}P
               </div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <Link href={`/profile/${profile.id}`} style={{
+            <Link href={`/profile/${userId}`} style={{
               flex: 1, textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '6px 0', borderRadius: 8,
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
             }}>내 프로필</Link>
@@ -93,7 +74,7 @@ export default function RightPanel() {
           </div>
         </div>
       )}
-      {isLoggedIn === false && (
+      {!userId && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>카더라와 함께하세요!</div>
           <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
@@ -133,7 +114,7 @@ export default function RightPanel() {
       )}
 
       {/* 비로그인 가입 유도 */}
-      {isLoggedIn === false && (
+      {!userId && (
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
           display: 'block', textAlign: 'center', padding: '12px 14px',
           borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', textDecoration: 'none',

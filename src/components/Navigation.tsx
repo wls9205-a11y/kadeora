@@ -4,9 +4,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User as UserIcon, PenSquare, BookOpen, LogOut, FileText } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
-import type { User } from '@supabase/supabase-js';
 
 const NAV_ITEMS = [
   { href: '/feed',    label: '피드',   Icon: Home },
@@ -53,10 +53,9 @@ const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
 export function Navigation() {
   const pathname  = usePathname();
   const router    = useRouter();
-  const [user, setUser]         = useState<User | null>(null);
+  const { userId, profile } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [nickname, setNickname] = useState<string | null>(null);
   const [unread, setUnread]     = useState(0);
   const [fontSize, setFontSize] = useState('medium');
   const [tossMode, setTossModeState] = useState(false);
@@ -87,66 +86,47 @@ export function Navigation() {
     setFontSize(val);
     localStorage.setItem('kd_font_size', val);
     applyFontClass(val);
-    if (user) {
+    if (userId) {
       const sb = createSupabaseBrowser();
-      sb.from('profiles').update({ font_size_preference: val }).eq('id', user.id).then(() => {});
+      sb.from('profiles').update({ font_size_preference: val }).eq('id', userId).then(() => {});
     }
   };
 
+  // 프로필 fontSizePref 동기화
   useEffect(() => {
+    if (profile?.fontSizePref && ['small','medium','large'].includes(profile.fontSizePref)) {
+      const current = localStorage.getItem('kd_font_size');
+      if (!current || current !== profile.fontSizePref) {
+        localStorage.setItem('kd_font_size', profile.fontSizePref);
+        setFontSize(profile.fontSizePref);
+        applyFontClass(profile.fontSizePref);
+      }
+    }
+  }, [profile?.fontSizePref]);
+
+  // 알림 뱃지 초기 로드
+  useEffect(() => {
+    if (!userId) { setUnread(0); return; }
     const sb = createSupabaseBrowser();
-    const syncFontSize = (fontPref: string | null) => {
-      if (fontPref && ['small','medium','large'].includes(fontPref)) {
-        const current = localStorage.getItem('kd_font_size');
-        if (!current || current !== fontPref) {
-          localStorage.setItem('kd_font_size', fontPref);
-          setFontSize(fontPref);
-          applyFontClass(fontPref);
-        }
-      }
-    };
-    sb.auth.getSession().then(async ({ data }) => {
-      const u = data.session?.user ?? null;
-      setUser(u);
-      if (u) {
-        const [pr, nr] = await Promise.all([
-          sb.from('profiles').select('nickname, font_size_preference').eq('id', u.id).single(),
-          sb.from('notifications').select('id', { count:'exact', head:true }).eq('user_id', u.id).eq('is_read', false),
-        ]);
-        setNickname(pr.data?.nickname ?? null);
-        setUnread(nr.count ?? 0);
-        syncFontSize(pr.data?.font_size_preference ?? null);
-      }
-    });
-    const { data:{ subscription } } = sb.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const s = createSupabaseBrowser();
-        s.from('profiles').select('nickname, font_size_preference').eq('id', session.user.id).single()
-          .then(({ data:p }) => {
-            setNickname(p?.nickname ?? null);
-            syncFontSize(p?.font_size_preference ?? null);
-          });
-      } else { setNickname(null); setUnread(0); }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+    sb.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false)
+      .then(({ count }) => setUnread(count ?? 0));
+  }, [userId]);
 
   // 알림 뱃지 30초 폴링 (탭 활성 시만)
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     const poll = async () => {
       if (document.visibilityState !== 'visible') return;
       try {
         const sb = createSupabaseBrowser();
-        const { count } = await sb.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false);
+        const { count } = await sb.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false);
         setUnread(count ?? 0);
       } catch {}
     };
     const id = setInterval(poll, 30000);
     document.addEventListener('visibilitychange', poll);
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', poll); };
-  }, [user]);
+  }, [userId]);
 
   const handleLogout = async () => {
     await createSupabaseBrowser().auth.signOut();
@@ -242,7 +222,7 @@ export function Navigation() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
             </button>
 
-            {user ? (
+            {userId ? (
               <>
                 {/* 알림 */}
                 <Link href="/notifications" aria-label="알림" style={{
@@ -288,10 +268,10 @@ export function Navigation() {
                       display:'flex', alignItems:'center', justifyContent:'center',
                       fontSize: 'var(--fs-xs)', fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
                     }}>
-                      {(nickname ?? user.email ?? 'U')[0].toUpperCase()}
+                      {(profile?.nickname ?? 'U')[0].toUpperCase()}
                     </span>
                     <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                      {nickname ?? '유저'}
+                      {profile?.nickname ?? '유저'}
                     </span>
                     <span style={{ fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)' }}>▼</span>
                   </button>
@@ -305,7 +285,7 @@ export function Navigation() {
                     }}>
                       {[
                         { href:'/search',             label:'검색', LIcon: Search },
-                        { href:`/profile/${user.id}`, label:'내 프로필', LIcon: UserIcon },
+                        { href:`/profile/${userId}`, label:'내 프로필', LIcon: UserIcon },
                         { href:'/write',              label:'글쓰기', LIcon: PenSquare },
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
                         { href:'/hot',                label:'이번주 HOT', LIcon: Flame },
@@ -456,9 +436,9 @@ export function Navigation() {
                 </Link>
               ))}
             </div>
-            {user && (
+            {userId && (
               <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--border)', display:'flex', gap:8 }}>
-                <Link href={`/profile/${user.id}`} onClick={() => setMoreOpen(false)} style={{
+                <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
                   flex:1, textAlign:'center', padding:'10px 0', borderRadius:10,
                   background:'var(--bg-hover)', color:'var(--text-primary)',
                   fontSize:13, fontWeight:600, textDecoration:'none',
