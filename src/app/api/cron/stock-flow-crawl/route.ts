@@ -63,11 +63,14 @@ JSON 배열만 응답:
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
-        signal: AbortSignal.timeout(20000),
+        body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
+        signal: AbortSignal.timeout(30000),
       });
 
-      if (!res.ok) return { processed: 0, created: 0, failed: 1 };
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        return { processed: 0, created: 0, failed: 1, metadata: { reason: 'api_error', status: res.status, detail: errText.slice(0, 200) } };
+      }
 
       const data = await res.json();
       const text = data.content?.[0]?.text || '';
@@ -92,8 +95,8 @@ JSON 배열만 응답:
       }
 
       return { processed: targets.length, created, failed: 0, metadata: { api_name: 'anthropic', api_calls: 1 } };
-    } catch {
-      return { processed: 0, created: 0, failed: 1 };
+    } catch (e) {
+      return { processed: 0, created: 0, failed: 1, metadata: { reason: 'exception', error: String(e).slice(0, 200) } };
     }
   });
 
