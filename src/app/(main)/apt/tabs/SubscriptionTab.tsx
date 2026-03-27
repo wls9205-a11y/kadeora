@@ -98,7 +98,6 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           </div>
 
           {/* 검색 + 정렬 통합 */}
-          {!globalSearch && <input value={subSearch} onChange={e => setSubSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" style={{ marginBottom: 6 }} />}
           <div style={{ display: 'flex', gap: 4, marginBottom: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             {([['date', '최신순'], ['deadline', '마감임박'], ['supply', '세대수'], ['competition', '경쟁률']] as const).map(([k, l]) => (
               <button key={k} onClick={() => setAptSort(k)} style={{ padding: '3px 8px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: aptSort === k ? 700 : 500, background: aptSort === k ? 'var(--brand)' : 'var(--bg-hover)', color: aptSort === k ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{l}</button>
@@ -252,7 +251,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           {/* 청약 캘린더 */}
           <div className="kd-card">
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
-              <SectionShareButton section="apt-calendar" label="이번 달 청약 캘린더" pagePath="/apt" />
+              <SectionShareButton section="apt-calendar" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />
             </div>
             {(() => {
               const now = kstNow();

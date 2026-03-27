@@ -200,7 +200,6 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 안내 + 검색 + 필터 */}
       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
-      {!globalSearch && <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" />}
       <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 8, paddingBottom: 2 }}>
         {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
         <div style={{ flexShrink: 0, width: 16 }} aria-hidden />

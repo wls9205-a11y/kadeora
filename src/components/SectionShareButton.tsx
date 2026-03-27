@@ -3,11 +3,12 @@ import { useToast } from '@/components/Toast';
 
 interface Props {
   section: string;     // e.g. 'stock-heatmap', 'apt-region'
-  label?: string;      // 공유 시 표시할 텍스트
+  label?: string;      // 공유 시 표시할 제목
+  text?: string;       // 공유 시 표시할 본문 (없으면 label 사용)
   pagePath: string;    // e.g. '/stock', '/apt'
 }
 
-export default function SectionShareButton({ section, label, pagePath }: Props) {
+export default function SectionShareButton({ section, label, text, pagePath }: Props) {
   const { success } = useToast();
 
   const handleShare = async () => {
@@ -18,7 +19,7 @@ export default function SectionShareButton({ section, label, pagePath }: Props) 
       try {
         await navigator.share({
           title: label || '카더라',
-          text: label || '카더라에서 확인하세요',
+          text: text || label || '카더라에서 확인하세요',
           url,
         });
         return;

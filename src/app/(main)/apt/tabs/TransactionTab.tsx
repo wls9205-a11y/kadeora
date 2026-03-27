@@ -149,7 +149,6 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       })()}
 
       {/* 검색 + 필터 */}
-      {!globalSearch && <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="단지명, 동(법정동) 검색..." className="kd-search-input" />}
 
       <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
         {[{ key: '전체', label: '전체 면적' }, { key: '~59', label: '~59㎡' }, { key: '59~84', label: '59~84㎡' }, { key: '84~', label: '84㎡~' }].map(a => pill(a.key, areaFilter, setAreaFilter, a.label))}

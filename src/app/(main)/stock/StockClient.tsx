@@ -532,7 +532,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {domesticTab === 'ranking' && isDomestic && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-            <SectionShareButton section="stock-kr" label="국내 주식 섹터 히트맵" pagePath="/stock" />
+            <SectionShareButton section="stock-kr" label="주식 찾기 힘드시죠? 주식 종목 한눈에 보기!" pagePath="/stock" />
           </div>
           <SectorHeatmap stocks={stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')} isKR={true} />
         </div>
@@ -540,7 +540,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {!isDomestic && globalTab === 'ranking' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-            <SectionShareButton section="stock-us" label="해외 주식 섹터 히트맵" pagePath="/stock" />
+            <SectionShareButton section="stock-us" label="주식 찾기 힘드시죠? 주식 종목 한눈에 보기!" pagePath="/stock" />
           </div>
           <SectorHeatmap stocks={stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')} isKR={false} />
         </div>
