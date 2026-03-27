@@ -80,10 +80,65 @@ function insertSummaryCard(html: string, excerpt?: string | null): string {
 }
 
 /**
+ * 지도 링크 깨짐 수정
+ * - 카카오맵/네이버지도 링크의 인코딩된 한글 URL을 깔끔한 버튼으로 교체
+ * - %EC%9A%B8 같은 깨진 텍스트 제거
+ */
+function fixMapLinks(html: string): string {
+  // 카카오맵 링크를 깔끔한 버튼으로 교체
+  let fixed = html.replace(
+    /<p>👉\s*<a\s+href="(https:\/\/map\.kakao\.com\/[^"]*)"[^>]*>.*?카카오맵.*?<\/a><\/p>/gi,
+    (_, url) => {
+      const decoded = decodeURIComponent(url);
+      return `<div style="display:flex;gap:8px;margin:8px 0"><a href="${decoded}" target="_blank" rel="noopener noreferrer" style="flex:1;text-align:center;padding:10px 0;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);text-decoration:none;font-size:var(--fs-sm);font-weight:600">🗺️ 카카오맵에서 보기</a>`;
+    }
+  );
+
+  // 네이버지도 링크
+  fixed = fixed.replace(
+    /<p>👉\s*<a\s+href="(https:\/\/map\.naver\.com\/[^"]*)"[^>]*>.*?네이버.*?<\/a><\/p>/gi,
+    (_, url) => {
+      const decoded = decodeURIComponent(url);
+      return `<a href="${decoded}" target="_blank" rel="noopener noreferrer" style="flex:1;text-align:center;padding:10px 0;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);text-decoration:none;font-size:var(--fs-sm);font-weight:600">🗺️ 네이버지도에서 보기</a></div>`;
+    }
+  );
+
+  // 인라인 깨진 패턴 (👉 텍스트 안에 인코딩된 URL이 노출되는 경우)
+  fixed = fixed.replace(
+    /👉\s*(?:<a[^>]*>)?[^<]*(%[0-9A-F]{2}){3,}[^<]*(?:<\/a>)?/gi,
+    ''
+  );
+
+  return fixed;
+}
+
+/**
+ * 위치 확인 섹션 전체를 깔끔하게 교체
+ */
+function cleanLocationSection(html: string): string {
+  // "위치 확인" h2/h3 + 다음 내용을 찾아서 깔끔하게 교체
+  return html.replace(
+    /<h[23][^>]*id="[^"]*"[^>]*>.*?위치\s*확인.*?<\/h[23]>\s*(?:<p>.*?지도.*?확인.*?<\/p>\s*)?/gi,
+    '<h2 id="위치-확인" style="display:flex;align-items:center;gap:6px">📍 위치 확인</h2><p style="color:var(--text-tertiary);font-size:var(--fs-sm)">아래 버튼으로 지도에서 정확한 위치를 확인하세요.</p>'
+  );
+}
+
+/**
  * 메인 함수: 블로그 HTML에 시각화 요소 추가
  */
 export function enhanceBlogVisuals(html: string, options?: { excerpt?: string | null }): string {
   let enhanced = html;
+  
+  // 0. 지도 링크 깨짐 수정 (가장 먼저)
+  enhanced = cleanLocationSection(enhanced);
+  enhanced = fixMapLinks(enhanced);
+  
+  // 0.5 테이블을 스크롤 래퍼로 감싸기 (삐져나감 방지)
+  enhanced = enhanced.replace(
+    /<table/g,
+    '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0;border-radius:8px;border:1px solid var(--border)"><table style="min-width:400px"'
+  );
+  enhanced = enhanced.replace(/<\/table>/g, '</table></div>');
   
   // 1. 숫자 통계 하이라이트
   enhanced = highlightStats(enhanced);
