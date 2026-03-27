@@ -201,8 +201,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           }} aria-label="검색어 지우기">✕</button>
         )}
       </div>
-
-      {/* 탭 */}
+      {globalSearch && (
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8, marginTop: -6 }}>
+          🔍 &quot;{globalSearch}&quot; — 현재 탭에서 필터링 중 · 다른 탭에서도 동일하게 적용됩니다
+        </div>
+      )}
       <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {[
           { k: 'sub' as const, l: '📅 청약', type: 'subscription', data: apts },

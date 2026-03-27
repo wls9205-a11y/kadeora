@@ -239,7 +239,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               </button>
             )}
 
-            {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>조건에 맞는 프로젝트가 없습니다</div>}
+            {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '조건에 맞는 프로젝트가 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>구역명, 지역, 시공사로 검색해보세요</div>}</div>}
           </div>
 
       {/* 재개발 상세 모달 */}

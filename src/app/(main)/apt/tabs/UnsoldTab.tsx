@@ -265,7 +265,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         );
       })}
 
-      {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>해당 지역 데이터가 없습니다</div>}
+      {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '해당 지역 데이터가 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역으로 검색해보세요</div>}</div>}
     </div>
   );
 

@@ -164,6 +164,12 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       </div>
 
       {/* ⑥⑦ 카드 리스트 (borderLeft + 클릭 모달) */}
+      {filtered.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>
+          {effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '조건에 맞는 분양 현장이 없습니다'}
+          {effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역, 시공사로 검색해보세요</div>}
+        </div>
+      )}
       {paged.map((o) => {
         const isUnsold = o.source === 'unsold';
         const pMin = o.sale_price_min ? Math.round(o.sale_price_min / 10000 * 10) / 10 : null;
