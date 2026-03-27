@@ -168,6 +168,12 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       </div>
 
       {/* 카드 리스트 */}
+      {filtered.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>
+          {effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '해당 조건의 실거래 데이터가 없습니다'}
+          {effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 법정동, 시군구로 검색해보세요</div>}
+        </div>
+      )}
       {paged.map((t, i: number) => {
         const amt = t.deal_amount || 0;
         const borderColor = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)';

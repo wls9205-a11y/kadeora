@@ -519,7 +519,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         return (
         <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
           {sectorList.map(s => (
-            <button key={s} onClick={() => setSectorFilter(s)} style={{ padding: '4px 10px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: sectorFilter===s?'var(--text-primary)':'var(--bg-hover)', color: sectorFilter===s?'var(--bg-base)':'var(--text-tertiary)' }}>{s==='all'?'전체':s}</button>
+            <button key={s} onClick={() => setSectorFilter(s)} style={{ padding: '4px 10px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: sectorFilter===s?'var(--brand)':'var(--bg-hover)', color: sectorFilter===s?'var(--text-inverse)':'var(--text-tertiary)' }}>{s==='all'?'전체':s}</button>
           ))}
         </div>
         );
@@ -560,6 +560,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="종목명 또는 코드 검색"
             className="kd-search-input" style={{ paddingRight: 36 }} />
           {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-sm)', padding: 4 }} aria-label="닫기">✕</button>}
+          {search && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>🔍 &quot;{search}&quot; 검색 결과 {filteredStocks.length}건{sectorFilter !== 'all' ? ` (${sectorFilter} 필터)` : ''}</div>}
         </div>
       )}
 
