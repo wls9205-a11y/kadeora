@@ -59,10 +59,17 @@ export async function POST(req: NextRequest) {
         .select('id').eq('site_id', parsed.data.site_id).eq('user_id', user.id).maybeSingle();
       if (existing) return NextResponse.json({ error: '이미 관심 등록된 현장입니다' }, { status: 409 });
 
+      // 프로필에서 거주 시도/시군구 가져오기
+      const { data: profile } = await admin.from('profiles')
+        .select('residence_city, residence_district')
+        .eq('id', user.id).single();
+
       const { error: insertErr } = await admin.from('apt_site_interests').insert({
         site_id: parsed.data.site_id,
         user_id: user.id,
         is_member: true,
+        guest_city: profile?.residence_city || null,
+        guest_district: profile?.residence_district || null,
         source: 'site_page',
       });
       if (insertErr) throw insertErr;

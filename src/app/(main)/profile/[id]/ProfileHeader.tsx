@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useToast } from '@/components/Toast';
 import { REGIONS, GRADE_EMOJI, SITE_URL } from '@/lib/constants';
+import { SIGUNGU_MAP } from '@/lib/regions';
 import { validateNickname } from '@/lib/nickname-filter';
 
 interface Profile {
@@ -12,6 +13,7 @@ interface Profile {
   grade: number | null; grade_title: string | null; points: number | null;
   posts_count: number | null; likes_count: number | null; is_premium: boolean | null;
   created_at: string; provider: string | null; interests: string[] | null; region_text: string | null;
+  residence_city: string | null; residence_district: string | null;
 }
 
 interface Props {
@@ -37,6 +39,8 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
   const [followers, setFollowers] = useState(followersCount);
   const [followLoading, setFollowLoading] = useState(false);
   const [regionText, setRegionText] = useState(profile.region_text ?? '');
+  const [residenceCity, setResidenceCity] = useState(profile.residence_city ?? '');
+  const [residenceDistrict, setResidenceDistrict] = useState(profile.residence_district ?? '');
   const { success, error } = useToast();
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -77,7 +81,13 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
-      const { error: err } = await sb.from('profiles').update({ nickname: nickname.trim(), bio: bio.trim(), region_text: regionText || null, updated_at: new Date().toISOString() }).eq('id', profile.id);
+      const { error: err } = await sb.from('profiles').update({
+        nickname: nickname.trim(), bio: bio.trim(),
+        region_text: regionText || null,
+        residence_city: residenceCity || null,
+        residence_district: residenceDistrict || null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', profile.id);
       if (err) throw err;
       success('프로필이 수정되었습니다'); setEditing(false); router.refresh();
     } catch { error('프로필 수정 중 오류가 발생했습니다'); }
@@ -136,7 +146,12 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>📍 지역</label>
-              <select value={regionText} onChange={e => setRegionText(e.target.value)}
+              <select value={regionText} onChange={e => {
+                const v = e.target.value;
+                setRegionText(v);
+                setResidenceCity(v);
+                setResidenceDistrict('');
+              }}
                 style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 'var(--fs-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer' }}>
                 <option value="">미설정</option>
                 {REGIONS.filter(r => r.value !== 'all').map(r => (
@@ -144,6 +159,18 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
                 ))}
               </select>
             </div>
+            {residenceCity && (SIGUNGU_MAP[residenceCity] || []).length > 0 && (
+              <div>
+                <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4, padding: '0 4px' }}>📍 시/군/구</label>
+                <select value={residenceDistrict} onChange={e => setResidenceDistrict(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 'var(--fs-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                  <option value="">시/군/구 선택</option>
+                  {(SIGUNGU_MAP[residenceCity] || []).map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setEditing(false)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-sm)' }}>취소</button>
               <button onClick={handleSave} disabled={saving} className="kd-btn kd-btn-primary" style={{ fontSize: 'var(--fs-sm)' }}>{saving ? '저장 중...' : '저장'}</button>
@@ -184,7 +211,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
             </p>
             <div style={{ display: 'flex', gap: 12, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
               <span>{joinDate} 가입</span>
-              {profile.region_text && <span>📍 {profile.region_text}</span>}
+              {profile.region_text && <span>📍 {profile.region_text}{profile.residence_district ? ` ${profile.residence_district}` : ''}</span>}
             </div>
             <div style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

@@ -1,11 +1,15 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import BottomSheet from '@/components/BottomSheet';
 import { useToast } from '@/components/Toast';
 
 interface Props { title: string; postId: number | string; content?: string; }
 
-const PLATFORMS = [
+interface Platform {
+  id: string; label: string; emoji: string; bg: string; color: string;
+}
+
+const BASE_PLATFORMS: Platform[] = [
   { id: 'kakao', label: '카카오톡', emoji: '💬', bg: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)' },
   { id: 'twitter', label: 'X', emoji: '𝕏', bg: '#1DA1F2', color: 'var(--text-inverse)' },
   { id: 'facebook', label: '페이스북', emoji: 'f', bg: '#1877F2', color: 'var(--text-inverse)' },
@@ -15,43 +19,58 @@ const PLATFORMS = [
 export default function ShareButtons({ title, postId, content }: Props) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [url, setUrl] = useState('');
+  const [supportsNative, setSupportsNative] = useState(false);
   const { success } = useToast();
 
-  useEffect(() => { setUrl(`${window.location.origin}/feed/${postId}`); }, [postId]);
+  useEffect(() => {
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    setSupportsNative(isMobile && !!navigator.share);
+  }, []);
 
-  const ensureKakaoReady = (): boolean => {
-    try {
-      const kakao = (window as any).Kakao;
-      if (!kakao) return false;
-      if (!kakao.isInitialized()) {
-        const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
-        if (key) kakao.init(key);
-      }
-      return kakao.isInitialized() && !!kakao.Share;
-    } catch { return false; }
-  };
+  const platforms = useMemo<Platform[]>(() => {
+    if (!supportsNative) return BASE_PLATFORMS;
+    return [
+      { id: 'native', label: '공유하기', emoji: '📤', bg: 'var(--brand)', color: '#fff' },
+      ...BASE_PLATFORMS,
+    ];
+  }, [supportsNative]);
 
   const share = async (platform: string) => {
-    const shareUrl = url;
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
     const shareTitle = title;
+    const shareDesc = content?.slice(0, 80) || '카더라에서 확인하세요';
+    const ogImage = typeof window !== 'undefined'
+      ? `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}`
+      : '';
+
     switch (platform) {
+      case 'native':
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: shareTitle, text: shareDesc, url: shareUrl });
+          } catch { /* 사용자가 취소 */ }
+          setOpen(false);
+          return;
+        }
+        break;
       case 'kakao':
         if (typeof window !== 'undefined' && ensureKakaoReady()) {
           try {
             (window as any).Kakao.Share.sendDefault({
               objectType: 'feed',
-              content: { title: shareTitle, description: content?.slice(0, 80) || '카더라에서 확인하세요', imageUrl: `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}`, link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
+              content: {
+                title: shareTitle,
+                description: shareDesc,
+                imageUrl: ogImage,
+                link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+              },
               buttons: [{ title: '카더라에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
             });
-          } catch {
-            await navigator.clipboard.writeText(shareUrl);
-            success('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
-          }
-        } else {
-          await navigator.clipboard.writeText(shareUrl);
-          success('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
+            break;
+          } catch { /* fall through to clipboard */ }
         }
+        await navigator.clipboard.writeText(shareUrl);
+        success('링크가 복사됐어요! 카카오톡에서 붙여넣기 해주세요');
         break;
       case 'twitter':
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
@@ -67,8 +86,19 @@ export default function ShareButtons({ title, postId, content }: Props) {
         return;
     }
     setOpen(false);
-    // 공유 로그 + 포인트 적립
     fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: postId, platform }) }).catch(() => {});
+  };
+
+  const ensureKakaoReady = (): boolean => {
+    try {
+      const kakao = (window as any).Kakao;
+      if (!kakao) return false;
+      if (!kakao.isInitialized()) {
+        const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+        if (key) kakao.init(key);
+      }
+      return kakao.isInitialized() && !!kakao.Share;
+    } catch { return false; }
   };
 
   return (
@@ -78,7 +108,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
       </button>
       <BottomSheet open={open} onClose={() => setOpen(false)} title="공유하기" maxWidth={480}>
         <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
-          {PLATFORMS.map(p => (
+          {platforms.map(p => (
             <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 60 }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: 'var(--fs-xl)', fontWeight: 900 }}>
                 {p.id === 'copy' && copied ? '✓' : p.emoji}
@@ -87,7 +117,9 @@ export default function ShareButtons({ title, postId, content }: Props) {
             </button>
           ))}
         </div>
-        <div style={{ padding: '10px 14px', background: 'var(--bg-hover)', borderRadius: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</div>
+        <div style={{ padding: '10px 14px', background: 'var(--bg-hover)', borderRadius: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {typeof window !== 'undefined' ? window.location.href : ''}
+        </div>
       </BottomSheet>
     </>
   );

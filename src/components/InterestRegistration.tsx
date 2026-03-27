@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
-import { REGIONS } from '@/lib/regions';
+import { REGIONS, SIGUNGU_MAP } from '@/lib/regions';
 import Link from 'next/link';
 
 interface Props {
@@ -24,6 +24,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [city, setCity] = useState('');
+  const [district, setDistrict] = useState('');
   const [consentCollection, setConsentCollection] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
 
@@ -69,6 +70,8 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
     if (!phone.match(/^01[016789]\d{7,8}$/)) { setMessage('올바른 전화번호를 입력해주세요 (하이픈 없이)'); return; }
     if (!birthDate.match(/^\d{4}-\d{2}-\d{2}$/)) { setMessage('생년월일을 입력해주세요'); return; }
     if (!city) { setMessage('거주 지역을 선택해주세요'); return; }
+    const districts = SIGUNGU_MAP[city] || [];
+    if (districts.length > 0 && !district) { setMessage('시/군/구를 선택해주세요'); return; }
     if (!consentCollection) { setMessage('필수 동의 항목에 체크해주세요'); return; }
 
     const birth = new Date(birthDate);
@@ -88,6 +91,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           phone,
           birth_date: birthDate,
           city: city || undefined,
+          district: district || undefined,
           consent_collection: true,
           consent_marketing: consentMarketing,
         }),
@@ -96,7 +100,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       if (res.ok) {
         setCount(c => c + 1);
         setMessage('관심단지 등록이 완료되었습니다!');
-        setName(''); setPhone(''); setBirthDate(''); setCity('');
+        setName(''); setPhone(''); setBirthDate(''); setCity(''); setDistrict('');
         setConsentCollection(false); setConsentMarketing(false);
       } else {
         setMessage(data.error || '등록 실패');
@@ -135,12 +139,21 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         </div>
         <div>
           <label style={labelStyle}>거주 지역 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <select value={city} onChange={e => setCity(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+          <select value={city} onChange={e => { setCity(e.target.value); setDistrict(''); }} style={{ ...inputStyle, cursor: 'pointer' }}>
             <option value="">시/도 선택</option>
             {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
       </div>
+      {city && (SIGUNGU_MAP[city] || []).length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <label style={labelStyle}>시/군/구 <span style={{ color: 'var(--error)' }}>*</span></label>
+          <select value={district} onChange={e => setDistrict(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+            <option value="">시/군/구 선택</option>
+            {(SIGUNGU_MAP[city] || []).map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+      )}
 
       {/* 동의 */}
       <div style={{ background: 'var(--bg-base)', borderRadius: 8, padding: 10, marginBottom: 10 }}>

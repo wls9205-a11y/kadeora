@@ -18,7 +18,7 @@ const CSP_DIRECTIVES = [
   "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://js.tosspayments.com",
   "frame-ancestors 'self' https://*.tossmini.com",
   "base-uri 'self'",
-  "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com",
+  "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com https://www.googletagmanager.com",
 ].join('; ');
 
 /** 보안 헤더 일괄 적용 */
