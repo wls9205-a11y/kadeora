@@ -143,7 +143,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     } catch {}
   }, [watchlistSymbols]);
 
-  function StockRow({ s, rank }: { s: Stock; rank: number }) {
+  const StockRow = useCallback(({ s, rank }: { s: Stock; rank: number }) => {
     const pct = s.change_pct ?? 0;
     const isGlobal = s.currency === 'USD';
     const isWatched = watchlistSymbols.includes(s.symbol);
@@ -164,7 +164,6 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             {s.market_cap > 0 && <span className="text-xs-tertiary">{fmtCap(s.market_cap, s.currency)}</span>}
           </div>
         </div>
-        {/* 미니 스파크라인 */}
         {sparklines[s.symbol]?.length >= 2 && (
           <span className="stock-sparkline">
             <MiniSparkline data={sparklines[s.symbol]} width={44} height={18} />
@@ -196,7 +195,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         </div>
       </Link>
     );
-  }
+  }, [watchlistSymbols, toggleWatchlist, sparklines, exchangeRate]);
 
   const domesticTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['themes','🔥 테마'],['calendar','📅 캘린더'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
   const globalTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['m7','🏆 M7'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;

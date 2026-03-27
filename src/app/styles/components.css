@@ -1,0 +1,133 @@
+/* ========================================
+   공통 컴포넌트
+   ======================================== */
+
+/* 버튼 시스템 */
+.btn-primary {
+  background-color: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary:hover  { background-color: var(--brand-hover); }
+.btn-primary:active { transform: scale(0.97); }
+
+/* 카드 — 배경과 확실한 구분 */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+/* 카드/패널 구분감 강화 — 라이트/다크 공통 */
+.card,
+.feed-card,
+[class*="rounded-xl"],
+[class*="rounded-2xl"],
+[class*="rounded-lg"] {
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+.dark .card,
+.dark .feed-card,
+.dark [class*="rounded-xl"],
+.dark [class*="rounded-2xl"],
+.dark [class*="rounded-lg"] {
+  background-color: var(--bg-surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+
+/* ========================================
+   햅틱 피드백 (시각적)
+   ======================================== */
+button,
+[role="button"],
+[data-haptic],
+/* ========================================
+   헤더/네비 — 명확한 경계선 + 그림자
+   ======================================== */
+.dark .nav-bar {
+  background-color: var(--nav-bg);
+  border-bottom: 1px solid var(--border-strong);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+
+/* 탭바/푸터 — 상단 경계선 명확화 */
+.dark .tab-bar {
+  border-top: 1px solid var(--border-strong);
+  box-shadow: 0 -1px 6px rgba(0,0,0,.3);
+}
+/* ========================================
+   피드 카드
+   ======================================== */
+.feed-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.feed-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+
+/* ========================================
+   액션 버튼 — 배경색으로 구분
+   ======================================== */
+/* ========================================
+   주식 색상
+   ======================================== */
+.stock-up   { color: var(--stock-up); }
+.stock-down { color: var(--stock-down); }
+/* ========================================
+   토론방
+   ======================================== */
+/* ========================================
+   섹션 구분선
+   ======================================== */
+/* ========================================
+   스켈레톤 로딩
+   ======================================== */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-active) 50%, var(--bg-hover) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease infinite;
+  border-radius: 0.375rem;
+}
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-fade-in, .animate-fadeIn { animation: fadeIn 0.2s ease forwards; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* pulse animation — loading 스켈레톤에서 사용 */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ========================================
+   스크롤바
+   ======================================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* 포커스 접근성 */
+*:focus-visible { outline: 2px solid var(--brand) !important; outline-offset: 2px !important; }
+

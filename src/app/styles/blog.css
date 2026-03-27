@@ -1,0 +1,162 @@
+/* ========================================
+   블로그 상세 2단 레이아웃
+   ======================================== */
+.blog-detail-layout {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.blog-toc-inline { display: block; }
+.blog-toc-sidebar { display: none; }
+@media (min-width: 1100px) {
+  .blog-detail-layout {
+    max-width: 1020px;
+    display: flex;
+    gap: 40px;
+  }
+  .blog-detail-layout > .blog-detail-main {
+    flex: 1;
+    max-width: 720px;
+    min-width: 0;
+  }
+  .blog-toc-inline { display: none; }
+  .blog-toc-sidebar { display: block; }
+}
+
+/* ========================================
+   블로그 본문 마크다운
+   ======================================== */
+.blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 28px 0 12px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+.blog-content h3 { font-size: var(--fs-lg); font-weight: 700; margin: 20px 0 8px; color: var(--text-primary); }
+.blog-content p { margin: 10px 0; line-height: 1.8; }
+.blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: var(--fs-base); }
+.blog-content thead { background: var(--bg-surface); }
+.blog-content th { font-weight: 700; padding: 10px 12px; border: 1px solid var(--border); text-align: left; white-space: nowrap; }
+.blog-content td { padding: 10px 12px; border: 1px solid var(--border); }
+.blog-content tr:nth-child(even) { background: var(--bg-hover); }
+.blog-content a { color: var(--brand); text-decoration: none; font-weight: 600; }
+.blog-content a:hover { text-decoration: underline; }
+.blog-content hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.blog-content ul, .blog-content ol { padding-left: 20px; margin: 8px 0; }
+.blog-content li { margin: 4px 0; line-height: 1.7; }
+.blog-content strong { color: var(--text-primary); font-weight: 700; }
+
+/* 코드 블록 */
+.blog-content code {
+  background: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: var(--accent-purple);
+  border: 1px solid var(--border);
+}
+.blog-content pre {
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 16px 0;
+  -webkit-overflow-scrolling: touch;
+}
+.blog-content pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* 이미지 + 캡션 */
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 16px 0;
+}
+.blog-content figure {
+  margin: 20px 0;
+  text-align: center;
+}
+.blog-content figcaption {
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* blockquote 강화 */
+.blog-content blockquote {
+  border-left: 4px solid var(--brand);
+  padding: 12px 16px;
+  color: var(--text-secondary);
+  font-size: var(--fs-base);
+  margin: 20px 0;
+  background: linear-gradient(135deg, var(--bg-hover) 0%, rgba(37,99,235,0.04) 100%);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-style: italic;
+  line-height: 1.7;
+}
+.blog-content blockquote p { margin: 0; }
+
+/* 글로벌 카드 hover 효과 */
+.kd-card-hover { transition: border-color var(--transition-fast), background var(--transition-fast); }
+@media (hover: hover) {
+  .kd-card-hover:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+}
+@media (hover: none) {
+  .kd-card-hover:active { background: var(--bg-hover); }
+}
+
+/* focus-visible 전역 */
+*:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 피드 카드 hover */
+.kd-feed-card { transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease; }
+@media (hover: hover) {
+  .kd-feed-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: var(--brand) !important; }
+}
+@media (hover: none) {
+  .kd-feed-card:active { transform: scale(0.98); opacity: 0.9; }
+}
+
+/* 카드 등장 stagger 애니메이션 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn { animation: fadeInUp 0.3s ease both; }
+.animate-fadeIn:nth-child(1) { animation-delay: 0s; }
+.animate-fadeIn:nth-child(2) { animation-delay: 0.03s; }
+.animate-fadeIn:nth-child(3) { animation-delay: 0.06s; }
+.animate-fadeIn:nth-child(4) { animation-delay: 0.09s; }
+.animate-fadeIn:nth-child(5) { animation-delay: 0.12s; }
+.animate-fadeIn:nth-child(n+6) { animation-delay: 0.15s; }
+
+/* 좋아요/관심 bounce 애니메이션 */
+@keyframes likeBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.3); }
+  50% { transform: scale(0.9); }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+.animate-like { animation: likeBounce 0.4s ease; }
+
+/* 스켈레톤 shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-active) 50%, var(--bg-hover) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+}
+

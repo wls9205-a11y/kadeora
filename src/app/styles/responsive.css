@@ -1,0 +1,633 @@
+/* ========================================
+   모바일
+   ======================================== */
+@media (max-width: 639px) {
+}
+
+@media (max-width: 640px) {
+  body { font-size: 1rem; }
+}
+input, textarea, select {
+  font-size: 16px !important;
+}
+
+/* ========================================
+   부동산 상세 모바일 반응형
+   ======================================== */
+.apt-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.apt-metrics-grid > div {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.apt-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.apt-stages {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.apt-stages > div {
+  flex: 1;
+  text-align: center;
+  padding: 6px 2px;
+  border-radius: 6px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+@media (max-width: 480px) {
+  .apt-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .apt-stages > div {
+    font-size: 10px;
+    padding: 5px 1px;
+  }
+  .apt-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+}
+
+/* ========================================
+   반응형 강화
+   ======================================== */
+
+/* 모바일: 어드민 헤더 */
+@media (max-width: 767px) {
+}
+
+/* 모바일: 테이블 가로 스크롤 */
+@media (max-width: 767px) {
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .blog-content table { font-size: var(--fs-xs); }
+  .blog-content th, .blog-content td { padding: 6px 8px; }
+}
+
+/* 모바일: 그리드 1열 강제 */
+@media (max-width: 480px) {
+}
+
+/* 모바일: 블로그 카드 이미지 크기 축소 */
+@media (max-width: 480px) {
+}
+
+/* 모바일: 부동산 지역 버튼 그리드 */
+@media (max-width: 480px) {
+}
+
+/* 터치 디바이스: 스크롤바 숨기기 */
+@media (hover: none) {
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+}
+
+/* safe-area 패딩 (노치 디바이스) */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* 모바일: 모달 바텀시트 전체폭 */
+@media (max-width: 520px) {
+}
+
+/* 모바일: 어드민 패딩 축소 */
+@media (max-width: 767px) {
+}
+
+/* 텍스트 잘림 방지 */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ========================================
+   글씨 크기 연동 유틸리티 클래스
+   카드, 버튼, 입력필드, 모달 등에서 사용
+   ======================================== */
+
+/* 카드 컨테이너 — 글씨 크기에 따라 패딩/간격 자동 조절 */
+.kd-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--card-p);
+  margin-bottom: var(--sp-md);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+@media (max-width: 480px) {
+  .kd-card { padding: var(--space-md) !important; }
+}
+
+/* 버튼 — 글씨 크기에 따라 높이/패딩 자동 조절 */
+.kd-btn {
+  min-height: var(--btn-h);
+  padding: var(--sp-sm) var(--sp-lg);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-xs);
+}
+.kd-btn-primary { background: var(--brand); color: #fff; }
+/* 필 (태그, 카테고리) */
+/* 입력 필드 */
+.kd-input {
+  width: 100%;
+  padding: var(--sp-sm) var(--sp-md);
+  font-size: var(--fs-base);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  min-height: var(--btn-h);
+  box-sizing: border-box;
+}
+
+/* 섹션 간격 */
+/* 리스트 아이템 */
+/* 탭 바 */
+/* 모바일: font-large 일 때 탭 글씨 축소 (화면에 5개 들어가야 하니까) */
+@media (max-width: 640px) {
+  html.font-large .kd-tab { font-size: var(--fs-xs); padding: var(--sp-xs) 0; }
+  html.font-large .kd-pill { font-size: var(--fs-xs); padding: var(--sp-xs) var(--sp-sm); }
+}
+
+/* font-large: 모달/바텀시트 간격 확대 */
+html.font-large .bottom-sheet { padding: var(--sp-xl) !important; }
+html.font-large .kd-card { padding: var(--card-p); }
+
+/* font-small: 전체적으로 밀도 높임 */
+html.font-small .kd-card { padding: var(--card-p); }
+html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
+
+
+/* 검색 인풋 공통 스타일 */
+.kd-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  outline: none;
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+  margin-bottom: 8px;
+}
+.kd-search-input:focus {
+  border-color: var(--brand);
+}
+.kd-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* 필 버튼 공통 */
+/* 지역 필터 버튼 */
+/* 텍스트 대비 개선: 소형 텍스트용 */
+/* 헤더 액션 링크 버튼 */
+.kd-action-link {
+  font-size: var(--fs-xs);
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--brand-bg);
+  border: 1px solid var(--brand-border);
+  transition: opacity var(--transition-fast);
+}
+.kd-action-link:hover { opacity: 0.8; }
+
+/* ========================================
+   모바일 UX 강화 — 세션 29
+   ======================================== */
+
+/* 모바일: 카드 패딩/간격 최적화 */
+@media (max-width: 640px) {
+  .kd-feed-card {
+    border-radius: 10px !important;
+  }
+  /* 프로필 카드 모바일 */
+}
+
+/* 모바일: 피드 상세 본문 가독성 */
+@media (max-width: 640px) {
+  .feed-detail-content {
+    font-size: var(--fs-base) !important;
+    line-height: 1.85 !important;
+    word-break: keep-all !important;
+  }
+}
+
+/* 모바일: 블로그 본문 */
+@media (max-width: 640px) {
+  .blog-content {
+    font-size: var(--fs-base) !important;
+    line-height: 1.9 !important;
+    word-break: keep-all !important;
+  }
+  .blog-content h2 {
+    font-size: var(--fs-lg) !important;
+    margin: 20px 0 8px !important;
+  }
+  .blog-content h3 {
+    font-size: var(--fs-md) !important;
+    margin: 16px 0 6px !important;
+  }
+  .blog-content img {
+    border-radius: 8px !important;
+  }
+}
+
+/* 모바일: 버튼 터치 타겟 최소 44px */
+@media (max-width: 640px) {
+  button, [role="button"], a[href] {
+    min-height: 36px;
+  }
+}
+
+/* 모바일: 탭 바 스크롤 개선 */
+@media (max-width: 640px) {
+}
+
+/* 모바일: 입력 폼 터치 최적화 */
+@media (max-width: 640px) {
+  .kd-input {
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    font-size: 16px !important; /* iOS 자동 줌 방지 */
+  }
+  textarea.kd-input {
+    min-height: 100px !important;
+  }
+}
+
+/* 모바일: 주식 그리드 2열→1열 */
+@media (max-width: 380px) {
+}
+
+/* 모바일: 피드 인터랙션 바 풀폭 */
+@media (max-width: 480px) {
+  .kd-interaction-bar {
+    gap: 2px !important;
+  }
+  .kd-interaction-bar > * {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 8px 4px !important;
+  }
+}
+
+/* 모바일: 헤더 높이 최적화 */
+@media (max-width: 640px) {
+}
+
+/* 모바일: 하단 바 위 콘텐츠 마진 */
+@media (max-width: 899px) {
+}
+
+/* 모바일: 토스트 위치 하단바 위 */
+@media (max-width: 899px) {
+}
+
+/* 모바일: 롱 텍스트 말줄임 */
+/* 모바일: 이미지 라운드 */
+@media (max-width: 640px) {
+  .kd-card img {
+    border-radius: 8px !important;
+  }
+}
+
+/* 터치 디바이스: -webkit-tap-highlight 제거 */
+@media (hover: none) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* 모바일에서 등급 텍스트 숨김 (이모지만 유지) */
+@media (max-width: 480px) {
+  .grade-title-text { display: none; }
+}
+
+/* 주식 비교 — 모바일 반응형 */
+@media (max-width: 480px) {
+}
+
+/* 더보기 메뉴 — 5개 아이템 정렬 개선 */
+@media (max-width: 767px) {
+}
+
+/* 모바일 탭바 — 블로그 탭 active 스타일 보강 */
+@media (max-width: 767px) {
+  nav[class*="md:hidden"] a[aria-current="page"] span {
+    font-weight: 700 !important;
+  }
+}
+
+/* 모바일 카드 내 이미지 — 최소 높이 보장 */
+@media (max-width: 480px) {
+  .kd-feed-card img { min-height: 60px; }
+}
+
+/* 주식 비교 페이지 — 모바일 테이블 스크롤 */
+@media (max-width: 480px) {
+}
+
+/* 블로그 카드 — 모바일 터치 피드백 */
+@media (hover: none) {
+}
+
+/* ═══ iOS 자동 줌 완전 차단 ═══ */
+/* iOS Safari는 font-size < 16px인 input에 포커스하면 자동 줌합니다 */
+@media screen and (max-width: 767px) {
+  input, textarea, select, [contenteditable] {
+    font-size: 16px !important;
+  }
+}
+
+/* ═══ 모바일 테이블 수평 스크롤 ═══ */
+@media screen and (max-width: 640px) {
+  .blog-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .blog-content table::-webkit-scrollbar { display: none; }
+  .blog-content th, .blog-content td {
+    padding: 8px 10px !important;
+    font-size: var(--fs-sm) !important;
+  }
+}
+
+/* 작은 글씨 모드에서도 모바일 최소 12px 보장 */
+@media screen and (max-width: 480px) {
+  html.font-small {
+    --fs-xs: 12px;
+  }
+}
+
+/* ═══ 모바일 전역 — 가장자리 붙는 콘텐츠 방지 ═══ */
+@media screen and (max-width: 767px) {
+  
+  /* 모달/바텀시트 좌우 여유 */
+  [role="dialog"] {
+    max-width: calc(100vw - 24px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ═══ 모바일 긴 단어 줄바꿈 ═══ */
+@media screen and (max-width: 480px) {
+  h1, h2, h3 {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+}
+
+/* ═══ 모바일 버튼 최소 터치 타겟 ═══ */
+@media screen and (max-width: 767px) {
+  button, [role="button"], a[href] {
+    min-height: 36px;
+  }
+  /* 인라인 링크는 제외 */
+  p a, span a, li a, td a, .blog-content a {
+    min-height: unset;
+  }
+}
+
+/* ═══ 주식 리스트 모바일 — 종목명 잘림 방지 ═══ */
+@media screen and (max-width: 480px) {
+  /* 미니 스파크라인 숨김 — 공간 확보 */
+  .stock-sparkline { display: none !important; }
+  /* 종목코드(005930) 숨김 — 이름 공간 확보 */
+  .stock-symbol-code { display: none !important; }
+  /* 상세 버튼 숨김 — 행 전체가 클릭 가능하므로 불필요 */
+  /* 퍼센트 막대 그래프 숨김 */
+  /* 가격 폰트 축소 */
+  .stock-price-text { font-size: var(--fs-sm) !important; }
+  /* 원화 환산 숨김 */
+  .stock-krw-text { display: none !important; }
+}
+
+
+/* ═══ 부동산 지역 그리드 ═══ */
+@media (max-width: 480px) {
+}
+@media (min-width: 768px) {
+}
+
+/* ═══ 간격 시스템 — 전역 통일 ═══ */
+:root {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --content-max: 720px;
+  --page-padding: clamp(12px, 3vw, 24px);
+}
+
+/* ═══ 어드민 간격 ═══ */
+@media (max-width: 640px) {
+}
+
+/* ═══ 섹션 간격 ═══ */
+/* ═══ 하단 탭바 여백 보정 ═══ */
+@media (max-width: 767px) {
+  main, [role="main"] {
+    padding-bottom: 60px !important;
+  }
+}
+
+/* ═══ 데스크톱 사이드바-콘텐츠 간격 ═══ */
+@media (min-width: 900px) {
+  .sidebar-wrapper {
+    position: sticky;
+    top: 52px;
+    padding-top: var(--space-lg);
+  }
+}
+
+/* ═══ 면적 최적화 — 과다 영역 축소 ═══ */
+/* 블로그 카드 높이 축소 */
+/* 미분양/분양 카드 — 즐겨찾기(★) 영역 축소 */
+@media (max-width: 480px) {
+  .kd-card { margin-bottom: 10px !important; }
+}
+
+/* 부동산 지역 그리드 — 전체 카드 숫자 크기 축소 */
+@media (max-width: 480px) {
+}
+
+/* 부동산 지역 필 스크롤 — 스크롤바 숨김 */
+.apt-pill-scroll::-webkit-scrollbar { display: none; }
+
+/* ═══ 토스 앱인토스 미니앱 라이트 모드 ═══ */
+.toss-mode {
+  --bg-base:       #FFFFFF;
+  --bg-surface:    #F7F8FA;
+  --bg-hover:      #F0F1F3;
+  --nav-bg:        #FFFFFF;
+  --text-primary:  #191F28;
+  --text-secondary: #4E5968;
+  --text-tertiary: #8B95A1;
+  --text-inverse:  #FFFFFF;
+  --border:        #E5E8EB;
+  --brand:         #3182F6;
+  --brand-hover:   #1B64DA;
+  --brand-light:   #E8F3FF;
+  --brand-bg:      rgba(49,130,246,0.08);
+  --brand-border:  rgba(49,130,246,0.15);
+  --accent-red:    #F04452;
+  --accent-blue:   #3182F6;
+  --accent-green:  #00C073;
+  --accent-yellow: #FFC400;
+  --success:       #00C073;
+  --success-bg:    rgba(0,192,115,0.08);
+  color-scheme: light;
+}
+.toss-mode body {
+  background: #FFFFFF !important;
+  color: #191F28 !important;
+}
+.toss-mode .kd-card {
+  background: #F7F8FA;
+  border-color: #E5E8EB;
+}
+.toss-mode .kd-feed-card:hover {
+  background: #F0F1F3;
+}
+/* 토스 모드 레이아웃 조정 */
+.toss-mode .sidebar-wrapper,
+.toss-mode .right-panel-wrapper,
+.toss-mode footer { display: none !important; }
+.toss-mode main { padding-bottom: 16px !important; min-height: 100vh !important; }
+
+/* ── Stock/Common utility classes (세션39) ── */
+.text-xs-tertiary { font-size: var(--fs-xs); color: var(--text-tertiary); }
+.text-xs-secondary { font-size: var(--fs-xs); color: var(--text-secondary); }
+.text-sm-primary { font-size: var(--fs-sm); color: var(--text-primary); }
+.text-sm-secondary { font-size: var(--fs-sm); color: var(--text-secondary); }
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+.fw-800 { font-weight: 800; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-4 { gap: 4px; }
+.gap-6 { gap: 6px; }
+.gap-8 { gap: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ━━━ Stock utilities (세션41) ━━━ */
+.stock-section-title { font-size: var(--fs-base); font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.stock-row { display: flex; align-items: center; padding: 4px 0; text-decoration: none; color: inherit; border-bottom: 1px solid var(--border); }
+.stock-row:last-child { border-bottom: none; }
+.stock-name { font-size: 13px; font-weight: 700; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stock-price { font-weight: 600; font-size: var(--fs-sm); min-width: 70px; text-align: right; }
+.stock-change { font-size: var(--fs-xs); min-width: 60px; text-align: right; font-weight: 600; }
+.stock-change-up { color: var(--accent-red); }
+.stock-change-down { color: var(--accent-blue); }
+.stock-change-flat { color: var(--text-tertiary); }
+.stock-chip { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+.stock-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.stock-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stock-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+
+/* ══════════════════════════════════════
+   Admin (Mission Control) — 모바일 반응형
+   ══════════════════════════════════════ */
+
+/* 모바일: < 769px */
+@media (max-width: 768px) {
+  /* 모바일 상단 바 표시 */
+  .admin-mobile-bar { display: flex !important; }
+
+  /* 사이드바 오버레이 */
+  .admin-sidebar-overlay { display: block !important; }
+
+  /* 사이드바 → 슬라이드 오버 */
+  .admin-sidebar {
+    position: fixed !important;
+    left: 0; top: 0; bottom: 0;
+    width: 220px !important;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    padding-top: 60px !important;
+  }
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* 메인 콘텐츠 — 상단바 아래 */
+  .admin-main {
+    padding: 60px 12px 24px !important;
+    max-width: 100% !important;
+  }
+
+  /* KPI 그리드 반응형 */
+  .mc-g6 { grid-template-columns: repeat(3, 1fr) !important; }
+  .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .mc-g3 { grid-template-columns: 1fr !important; }
+  .mc-g2 { grid-template-columns: 1fr !important; }
+
+  /* 시간별 그리드 */
+  .mc-hour-grid { grid-template-columns: repeat(6, 1fr) !important; }
+
+  /* 테이블 스크롤 */
+  .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table-wrap table { min-width: 600px; }
+
+  /* 상세 그리드 */
+  .admin-detail-grid { grid-template-columns: 1fr !important; }
+
+  /* KPI 카드 폰트 축소 */
+  .mc-g6 > div, .mc-g4 > div {
+    padding: 10px 12px !important;
+  }
+}
+
+/* 작은 모바일: < 480px */
+@media (max-width: 480px) {
+  .mc-g6 { grid-template-columns: repeat(2, 1fr) !important; }
+  .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .admin-main { padding: 56px 8px 20px !important; }
+}
+
+/* 태블릿: 769~1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .admin-sidebar { width: 170px !important; }
+  .mc-g6 { grid-template-columns: repeat(3, 1fr) !important; }
+  .mc-g4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .admin-main { padding: 16px 16px 32px !important; }
+}
