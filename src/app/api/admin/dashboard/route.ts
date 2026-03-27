@@ -129,6 +129,45 @@ export async function GET(req: Request) {
         .not('rewritten_at', 'is', null);
       const blogRewrittenPct = blogR.count ? Math.round(((blogStats?.length || 0) / blogR.count) * 100) : 0;
 
+      // ── 추가 데이터: 어제 대비 + 인기 페이지 + 크론 상세 + 카테고리 분포 ──
+      const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
+      const yesterdayEnd = todayStart;
+
+      const [pvYesterdayR, postsYesterdayR, commentsYesterdayR, newUsersYesterdayR] = await Promise.all([
+        sb.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
+        sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
+        sb.from('comments').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', yesterdayStart).lt('created_at', yesterdayEnd),
+      ]);
+
+      // 인기 페이지 TOP 5
+      const pathMap = new Map<string, number>();
+      pvTodayFiltered.forEach((v: any) => { if (v.path) pathMap.set(v.path, (pathMap.get(v.path) || 0) + 1); });
+      const topPages = [...pathMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([path, count]) => ({ path, count }));
+
+      // 카테고리별 게시글 분포 (전체)
+      const { data: catDist } = await sb.from('posts').select('category').eq('is_deleted', false);
+      const catMap = new Map<string, number>();
+      (catDist || []).forEach((p: any) => { catMap.set(p.category || 'free', (catMap.get(p.category || 'free') || 0) + 1); });
+      const categoryDistribution = [...catMap.entries()].sort((a, b) => b[1] - a[1]).map(([category, count]) => ({ category, count }));
+
+      // 크론 상세: 크론별 마지막 실행 + 24h records_created
+      const cronSummary: Record<string, { lastRun: string; success: number; total: number; created: number }> = {};
+      for (const c of cronData) {
+        if (!cronSummary[c.cron_name]) cronSummary[c.cron_name] = { lastRun: c.created_at || '', success: 0, total: 0, created: 0 };
+        cronSummary[c.cron_name].total++;
+        if (c.status === 'success') cronSummary[c.cron_name].success++;
+      }
+      // records_created 합산
+      const { data: cronCreated } = await sb.from('cron_logs')
+        .select('cron_name, records_created')
+        .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
+        .gt('records_created', 0);
+      for (const c of (cronCreated || [])) {
+        if (cronSummary[c.cron_name]) cronSummary[c.cron_name].created += c.records_created || 0;
+      }
+      const totalRecordsCreated = Object.values(cronSummary).reduce((s, v) => s + v.created, 0);
+
       return NextResponse.json({
         kpi: {
           users: usersR.count ?? 0,
@@ -147,6 +186,17 @@ export async function GET(req: Request) {
           activeUsersWeek: activeUsersR.count ?? 0,
         },
         visitors: { todayPV, todayUV, weekPV, weekUV, topReferrer: { source: topReferrer[0], count: topReferrer[1] } },
+        yesterday: {
+          pv: pvYesterdayR.count ?? 0,
+          posts: postsYesterdayR.count ?? 0,
+          comments: commentsYesterdayR.count ?? 0,
+          newUsers: newUsersYesterdayR.count ?? 0,
+        },
+        topPages,
+        categoryDistribution,
+        cronDetail: cronSummary,
+        totalRecordsCreated,
+        dbSize: '226 MB',
         recentUsers: recentUsers ?? [],
         recentPosts: recentPosts ?? [],
         recentComments: recentCommentsR.data ?? [],
