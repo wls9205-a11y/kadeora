@@ -6,6 +6,7 @@ export default function AnalyticsSection() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState('7d');
+  const [view, setView] = useState<'visitors' | 'insights'>('visitors');
 
   const load = useCallback((r: string) => {
     setLoading(true);
@@ -24,6 +25,14 @@ export default function AnalyticsSection() {
 
   return (
     <div>
+      {/* View selector */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        <Pill active={view === 'visitors'} onClick={() => setView('visitors')}>📈 방문자</Pill>
+        <Pill active={view === 'insights'} onClick={() => setView('insights')}>💡 인사이트</Pill>
+      </div>
+
+      {view === 'insights' && <InsightsPanel />}
+      {view !== 'insights' && <>
       {/* Range selector */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
         {[['1d', '오늘'], ['7d', '7일'], ['30d', '30일']].map(([k, l]) => (
@@ -176,6 +185,113 @@ export default function AnalyticsSection() {
           </table></div>
         </div>
       </div>
+    </>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════
+// 📊 인사이트 (검색어+공유+피드백+초대)
+// ══════════════════════════════════════
+export function InsightsPanel() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/dashboard?section=insights').then(r => r.json()).then(setData).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: C.textSec }}>인사이트 로딩...</div>;
+  if (!data) return <div style={{ textAlign: 'center', padding: 40, color: C.red }}>로드 실패</div>;
+
+  const { topSearches, noResults, sharePlatforms, topShared, feedback, inviteStats } = data;
+  const totalShares = (sharePlatforms || []).reduce((s: number, p: any) => s + p.count, 0);
+
+  return (
+    <div>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        {/* 인기 검색어 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>🔍 인기 검색어 (24h)</div>
+          {(topSearches || []).map((s: any, i: number) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.border}08` }}>
+              <span style={{ fontSize: 12, color: C.text }}><span style={{ color: C.textDim, marginRight: 6 }}>{i + 1}</span>{s.query}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.brand }}>{s.count}</span>
+            </div>
+          ))}
+          {(!topSearches || topSearches.length === 0) && <div style={{ fontSize: 11, color: C.textDim, textAlign: 'center', padding: 16 }}>검색 데이터 없음</div>}
+        </div>
+
+        {/* 결과 없음 (콘텐츠 갭) */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>🚫 결과 없음 검색 (7d)</div>
+          {(noResults || []).map((s: any, i: number) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.border}08` }}>
+              <span style={{ fontSize: 12, color: C.yellow }}>{s.query}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.red }}>{s.count}</span>
+            </div>
+          ))}
+          {(!noResults || noResults.length === 0) && <div style={{ fontSize: 11, color: C.textDim, textAlign: 'center', padding: 16 }}>데이터 없음</div>}
+        </div>
+      </div>
+
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        {/* 공유 플랫폼 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>📤 공유 플랫폼 (7d) — 총 {totalShares}회</div>
+          {(sharePlatforms || []).map((s: any, i: number) => {
+            const pct = totalShares > 0 ? Math.round((s.count / totalShares) * 100) : 0;
+            const platformColors: Record<string, string> = { kakao: '#FEE500', twitter: '#1DA1F2', facebook: '#1877F2', copy: C.green, link: C.cyan };
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+                <span style={{ fontSize: 12, color: C.text, minWidth: 60 }}>{s.platform}</span>
+                <div style={{ flex: 1, height: 8, background: C.surface, borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ width: `${pct}%`, height: '100%', background: platformColors[s.platform] || C.brand, borderRadius: 4 }} />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: C.textSec, minWidth: 32 }}>{s.count}</span>
+                <span style={{ fontSize: 10, color: C.textDim }}>{pct}%</span>
+              </div>
+            );
+          })}
+          {(!sharePlatforms || sharePlatforms.length === 0) && <div style={{ fontSize: 11, color: C.textDim, textAlign: 'center', padding: 16 }}>공유 데이터 없음</div>}
+        </div>
+
+        {/* 초대 현황 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>🎟️ 초대 현황</div>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+            <div><div style={{ fontSize: 18, fontWeight: 800, color: C.brand }}>{inviteStats?.total || 0}</div><div style={{ fontSize: 10, color: C.textDim }}>총 초대</div></div>
+            <div><div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{inviteStats?.used || 0}</div><div style={{ fontSize: 10, color: C.textDim }}>사용됨</div></div>
+          </div>
+          {inviteStats?.topInviters?.length > 0 && (
+            <>
+              <div style={{ fontSize: 11, color: C.textDim, marginBottom: 4 }}>초대왕 Top 5</div>
+              {inviteStats.topInviters.map((t: any, i: number) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12 }}>
+                  <span style={{ color: C.text, fontFamily: 'monospace' }}>{t.creator_id.slice(0, 8)}</span>
+                  <span style={{ fontWeight: 700, color: C.green }}>{t.count}명</span>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* 최근 피드백 */}
+      {feedback && feedback.length > 0 && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>💬 최근 유저 피드백</div>
+          {feedback.slice(0, 10).map((f: any, i: number) => (
+            <div key={i} style={{ padding: '8px 0', borderBottom: `1px solid ${C.border}08` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 11, color: C.textDim }}>{f.category || '일반'} {f.rating ? `⭐${f.rating}` : ''}</span>
+                <span style={{ fontSize: 10, color: C.textDim }}>{ago(f.created_at)}</span>
+              </div>
+              <div style={{ fontSize: 12, color: C.text }}>{f.message?.slice(0, 100)}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

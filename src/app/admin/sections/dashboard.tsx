@@ -13,7 +13,7 @@ export default function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, visitors, recentUsers, recentPosts, dailyStats, cron, seo } = data;
+  const { kpi, visitors, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo } = data;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const totalSites = seo?.totalSites || 0;
@@ -150,7 +150,13 @@ export default function DashboardSection() {
         </div>
       </div>
 
-      {/* ── Row 5: 최근 가입 + 최근 게시글 ── */}
+      {/* ── Row 5: 실시간 활동 피드 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>실시간 활동</div>
+        <ActivityFeed users={recentUsers || []} posts={recentPosts || []} comments={recentComments || []} reports={recentReports || []} />
+      </div>
+
+      {/* ── Row 6: 최근 가입 + 최근 게시글 ── */}
       <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {/* 최근 가입 */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
@@ -215,6 +221,30 @@ function MiniChart({ data }: { data: DailyStat[] }) {
         </div>
         <span style={{ fontSize: 9, color: C.textDim }}>{data[data.length - 1]?.date?.slice(5)}</span>
       </div>
+    </div>
+  );
+}
+
+function ActivityFeed({ users, posts, comments, reports }: { users: any[]; posts: any[]; comments: any[]; reports: any[] }) {
+  // 모든 활동을 시간순 합체
+  const items: { type: string; icon: string; text: string; time: string }[] = [];
+  for (const u of users) items.push({ type: 'user', icon: '👤', text: `${u.nickname || '익명'} 가입 (${PROVIDER_LABEL[u.provider] || '—'})`, time: u.created_at });
+  for (const p of posts) items.push({ type: 'post', icon: '📝', text: `"${p.title?.slice(0, 30)}" — ${(p.profiles as any)?.nickname || '—'}`, time: p.created_at });
+  for (const c of comments) items.push({ type: 'comment', icon: '💬', text: `${(c.profiles as any)?.nickname || '—'}: ${c.content?.slice(0, 30)}`, time: c.created_at });
+  for (const r of reports) items.push({ type: 'report', icon: '🚨', text: `신고: ${r.reason} (${r.content_type})`, time: r.created_at });
+  items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+  if (items.length === 0) return <div style={{ fontSize: 11, color: C.textDim, textAlign: 'center', padding: 12 }}>활동 없음</div>;
+
+  return (
+    <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+      {items.slice(0, 15).map((item, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: `1px solid ${C.border}08` }}>
+          <span style={{ fontSize: 12, flexShrink: 0 }}>{item.icon}</span>
+          <span style={{ flex: 1, fontSize: 11, color: item.type === 'report' ? C.red : C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
+          <span style={{ fontSize: 9, color: C.textDim, flexShrink: 0 }}>{ago(item.time)}</span>
+        </div>
+      ))}
     </div>
   );
 }

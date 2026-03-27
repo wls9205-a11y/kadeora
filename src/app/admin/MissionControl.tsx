@@ -13,6 +13,8 @@ const BlogSection = dynamic(() => import('./sections/blog'), { loading: () => <S
 const RealEstateSection = dynamic(() => import('./sections/realestate'), { loading: () => <Spin /> });
 const SystemSection = dynamic(() => import('./sections/system'), { loading: () => <Spin /> });
 const ReportsSection = dynamic(() => import('./sections/reports'), { loading: () => <Spin /> });
+const NoticesSection = dynamic(() => import('./sections/notices'), { loading: () => <Spin /> });
+const ShopSection = dynamic(() => import('./sections/shop'), { loading: () => <Spin /> });
 const GodModeSection = dynamic(() => import('./sections/godmode'), { loading: () => <Spin /> });
 const SatelliteSection = dynamic(() => import('./sections/satellite'), { loading: () => <Spin /> });
 
@@ -34,6 +36,8 @@ const SECTION_MAP: Record<Section, React.ComponentType> = {
   realestate: RealEstateSection,
   system: SystemSection,
   reports: ReportsSection,
+  notices: NoticesSection,
+  shop: ShopSection,
   godmode: GodModeSection,
   satellite: SatelliteSection,
 };

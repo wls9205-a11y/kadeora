@@ -40,12 +40,12 @@ export default function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: '42개 전 크론', color: C.brand },
+    { key: 'full', label: '⚡ 전체 실행', desc: '57개 전 크론', color: C.brand },
     { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식/재개발 15개', color: C.green },
     { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/테마/검증 6개', color: C.cyan },
     { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드/리라이트 6개', color: C.purple },
-    { key: 'content', label: '📝 콘텐츠', desc: '시드/블로그/채팅 6개', color: C.yellow },
-    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/정리 10개', color: C.textSec },
+    { key: 'content', label: '📝 콘텐츠', desc: '시드/블로그/채팅 17개', color: C.yellow },
+    { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/정리 15개', color: C.textSec },
     { key: 'failed', label: '🔴 실패 재시도', desc: '실패한 것만', color: C.red },
   ];
 

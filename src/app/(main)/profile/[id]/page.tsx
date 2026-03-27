@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import ProfileClient from './ProfileClient';
 import { DeleteAccountSection } from '@/components/DeleteAccountSection';
+import FeedbackButton from '@/components/FeedbackButton';
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -54,6 +55,11 @@ export default async function ProfilePage({ params }: Props) {
       followingCount={followingCount ?? 0}
       isFollowing={!!(followCheck as { data: unknown }).data}
     />
+      {isOwner && (
+        <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 20px' }}>
+          <FeedbackButton />
+        </div>
+      )}
       {isOwner && <DeleteAccountSection />}
     </>
   );

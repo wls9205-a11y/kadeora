@@ -89,6 +89,12 @@ export async function GET(req: Request) {
         .eq('is_deleted', false)
         .order('created_at', { ascending: false }).limit(5);
 
+      // 활동 피드: 최근 댓글 + 신고 혼합
+      const [recentCommentsR, recentReportsR] = await Promise.all([
+        sb.from('comments').select('id, content, created_at, profiles!inner(nickname)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+        sb.from('reports').select('id, reason, content_type, created_at, profiles!reports_reporter_id_fkey(nickname)').eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
+      ]);
+
       // 크론 요약
       const cronData = cronR.data || [];
       const cronSuccess = cronData.filter(c => c.status === 'success').length;
@@ -143,6 +149,8 @@ export async function GET(req: Request) {
         visitors: { todayPV, todayUV, weekPV, weekUV, topReferrer: { source: topReferrer[0], count: topReferrer[1] } },
         recentUsers: recentUsers ?? [],
         recentPosts: recentPosts ?? [],
+        recentComments: recentCommentsR.data ?? [],
+        recentReports: recentReportsR.data ?? [],
         payments: paymentsR.data ?? [],
         dailyStats: dailyR.data ?? [],
         cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames },
@@ -357,6 +365,69 @@ export async function GET(req: Request) {
         .select('id, reason, details, content_type, status, auto_hidden, created_at, post_id, comment_id, profiles!reports_reporter_id_fkey(nickname)')
         .order('created_at', { ascending: false }).limit(100);
       return NextResponse.json({ reports: data ?? [] });
+    }
+
+    if (section === 'payments') {
+      const { data } = await sb.from('payments')
+        .select('id, user_id, amount_krw, status, product_type, created_at, toss_order_id')
+        .order('created_at', { ascending: false }).limit(100);
+      return NextResponse.json({ payments: data ?? [] });
+    }
+
+    if (section === 'insights') {
+      const now24h = new Date(Date.now() - 24 * 3600000).toISOString();
+      const now7d = new Date(Date.now() - 7 * 86400000).toISOString();
+
+      const [searchR, noResultR, shareR, shareTopR, feedbackR, inviteR] = await Promise.all([
+        // 인기 검색어 24h (직접 쿼리)
+        sb.from('search_logs').select('query').gte('created_at', now24h).limit(500),
+        // 결과 없음 검색어 7d
+        sb.from('search_logs').select('query').eq('results_count', 0).gte('created_at', now7d).limit(200),
+        // 공유 플랫폼별 7d
+        sb.from('share_logs').select('platform').gte('created_at', now7d).limit(500),
+        // 가장 많이 공유된 글
+        sb.from('share_logs').select('post_id').gte('created_at', now7d).limit(500),
+        // 피드백 최근
+        sb.from('user_feedback').select('id, user_id, message, category, rating, created_at').order('created_at', { ascending: false }).limit(20),
+        // 초대 현황
+        sb.from('invite_codes').select('id, creator_id, is_used, used_at, created_at').limit(500),
+      ]);
+
+      // 검색어 집계
+      const sMap = new Map<string, number>();
+      for (const r of searchR.data || []) { sMap.set(r.query, (sMap.get(r.query) || 0) + 1); }
+      const topSearches = [...sMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([query, count]) => ({ query, count }));
+
+      // 결과 없음 검색어 집계
+      const noMap = new Map<string, number>();
+      for (const r of noResultR.data || []) { noMap.set(r.query, (noMap.get(r.query) || 0) + 1); }
+      const noResults = [...noMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([query, count]) => ({ query, count }));
+
+      // 공유 플랫폼별
+      const platformMap = new Map<string, number>();
+      for (const r of shareR.data || []) { platformMap.set(r.platform, (platformMap.get(r.platform) || 0) + 1); }
+      const sharePlatforms = [...platformMap.entries()].sort((a, b) => b[1] - a[1]).map(([platform, count]) => ({ platform, count }));
+
+      // 가장 많이 공유된 글
+      const postShareMap = new Map<number, number>();
+      for (const r of shareTopR.data || []) { postShareMap.set(r.post_id, (postShareMap.get(r.post_id) || 0) + 1); }
+      const topShared = [...postShareMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([post_id, count]) => ({ post_id, count }));
+
+      // 초대 현황
+      const invites = inviteR.data || [];
+      const inviteUsed = invites.filter((i: any) => i.is_used).length;
+      const inviterMap = new Map<string, number>();
+      for (const i of invites.filter((x: any) => x.is_used)) { inviterMap.set(i.creator_id, (inviterMap.get(i.creator_id) || 0) + 1); }
+      const topInviters = [...inviterMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([creator_id, count]) => ({ creator_id, count }));
+
+      return NextResponse.json({
+        topSearches,
+        noResults,
+        sharePlatforms,
+        topShared,
+        feedback: feedbackR.data || [],
+        inviteStats: { total: invites.length, used: inviteUsed, topInviters },
+      });
     }
 
     return NextResponse.json({ error: 'Unknown section' }, { status: 400 });
