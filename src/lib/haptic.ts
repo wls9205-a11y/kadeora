@@ -6,7 +6,7 @@ export function haptic(style: 'light' | 'medium' | 'heavy' = 'light') {
     }
   } catch {}
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
     if (ctx.state === 'suspended') ctx.resume();

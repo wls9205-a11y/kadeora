@@ -12,7 +12,7 @@ export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props
 
   const handleKakaoShare = () => {
     try {
-      const kakao = typeof window !== 'undefined' ? (window as any).Kakao : null;
+      const kakao = typeof window !== 'undefined' ? window.Kakao : null;
       if (kakao) {
         if (!kakao.isInitialized()) {
           const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;

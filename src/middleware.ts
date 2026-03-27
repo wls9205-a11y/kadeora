@@ -170,7 +170,7 @@ export async function middleware(request: NextRequest) {
         supabase.from('profiles').select('is_admin').eq('id', user.id).single(),
         new Promise<null>((r) => setTimeout(() => r(null), 2000)),
       ]);
-      const adminProfile = (adminResult as any)?.data;
+      const adminProfile = (adminResult as { data: Record<string, unknown> | null })?.data;
       if (!adminProfile?.is_admin) {
         return NextResponse.redirect(new URL('/feed', request.url));
       }
@@ -187,7 +187,7 @@ export async function middleware(request: NextRequest) {
         supabase.from('profiles').select('onboarded, nickname_set').eq('id', user.id).single(),
         new Promise<null>((r) => setTimeout(() => r(null), 2000)),
       ]);
-      const profile = (profileResult as any)?.data;
+      const profile = (profileResult as { data: Record<string, unknown> | null })?.data;
       if (profile && (!profile.onboarded || !profile.nickname_set)) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }

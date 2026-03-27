@@ -56,7 +56,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
       case 'kakao':
         if (typeof window !== 'undefined' && ensureKakaoReady()) {
           try {
-            (window as any).Kakao.Share.sendDefault({
+            window.Kakao?.Share.sendDefault({
               objectType: 'feed',
               content: {
                 title: shareTitle,
@@ -91,7 +91,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
 
   const ensureKakaoReady = (): boolean => {
     try {
-      const kakao = (window as any).Kakao;
+      const kakao = window.Kakao;
       if (!kakao) return false;
       if (!kakao.isInitialized()) {
         const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;

@@ -11,7 +11,7 @@ export default function PushSubscribeButton() {
 
     // iOS standalone 체크
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      || (navigator as any).standalone === true;
+      || navigator.standalone === true;
 
     if (!('PushManager' in window)) {
       // iOS Safari (PWA 아님)인 경우

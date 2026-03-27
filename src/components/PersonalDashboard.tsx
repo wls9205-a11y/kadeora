@@ -59,7 +59,7 @@ export default function PersonalDashboard() {
       sb.from('blog_posts').select('slug,title,category,view_count').eq('is_published', true).order('view_count', { ascending: false }).limit(3),
     ]).then(async ([watchlistRes, bookmarkRes, notifRes, blogRes]) => {
       // 관심종목 → 시세
-      const wl = watchlistRes.status === 'fulfilled' ? (watchlistRes.value.data as any[] | null) : null;
+      const wl = watchlistRes.status === 'fulfilled' ? (watchlistRes.value.data as Record<string, unknown>[] | null) : null;
       if (wl?.length) {
         const symbols = wl.map((w: any) => w.symbol);
         const { data: stocks } = await sb.from('stock_quotes')
@@ -71,7 +71,7 @@ export default function PersonalDashboard() {
       }
 
       // 북마크 → 청약 상세
-      const bm = bookmarkRes.status === 'fulfilled' ? (bookmarkRes.value.data as any[] | null) : null;
+      const bm = bookmarkRes.status === 'fulfilled' ? (bookmarkRes.value.data as Record<string, unknown>[] | null) : null;
       if (bm?.length) {
         const ids = bm.map((b: any) => b.apt_id);
         const { data: apts } = await sb.from('apt_subscriptions')

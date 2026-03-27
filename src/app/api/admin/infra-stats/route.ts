@@ -31,8 +31,8 @@ export async function GET() {
     if (process.env.GITHUB_TOKEN) headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
 
     const [repoRes, commitsRes] = await Promise.all([
-      fetch('https://api.github.com/repos/wls9205-a11y/kadeora', { headers, next: { revalidate: 3600 } as any }),
-      fetch('https://api.github.com/repos/wls9205-a11y/kadeora/commits?per_page=5', { headers, next: { revalidate: 600 } as any }),
+      fetch('https://api.github.com/repos/wls9205-a11y/kadeora', { headers, next: { revalidate: 3600 } as RequestInit['next'] }),
+      fetch('https://api.github.com/repos/wls9205-a11y/kadeora/commits?per_page=5', { headers, next: { revalidate: 600 } as RequestInit['next'] }),
     ]);
 
     if (repoRes.ok) {

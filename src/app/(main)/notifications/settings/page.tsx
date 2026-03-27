@@ -14,7 +14,7 @@ export default function NotificationSettingsPage() {
     if (typeof window === 'undefined') { setPushState('unsupported'); return; }
     if (!('PushManager' in window) || !('serviceWorker' in navigator)) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
       setPushState(isIOS && !isStandalone ? 'not-pwa' : 'unsupported');
       return;
     }

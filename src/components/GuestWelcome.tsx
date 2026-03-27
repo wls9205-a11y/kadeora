@@ -37,8 +37,8 @@ export default function GuestWelcome() {
     if (consent === 'accepted' || consent === 'declined') return;
 
     // 글로벌 캡처된 프롬프트 확인
-    if ((window as any).__pwaPrompt) {
-      setDeferredPrompt((window as any).__pwaPrompt);
+    if (window.__pwaPrompt) {
+      setDeferredPrompt(window.__pwaPrompt);
     }
 
     // 새로 발생할 수도 있으므로 리스너도 등록

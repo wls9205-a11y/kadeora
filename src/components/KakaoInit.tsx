@@ -8,7 +8,7 @@ export default function KakaoInit() {
       strategy="afterInteractive"
       onLoad={() => {
         try {
-          const kakao = (window as any).Kakao;
+          const kakao = window.Kakao;
           if (kakao && !kakao.isInitialized()) {
             const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
             if (key) kakao.init(key);

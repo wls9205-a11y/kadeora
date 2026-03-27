@@ -9,8 +9,8 @@ const REQUIRED_SERVER = [
 const VALIDATED_KEY = '__kd_env_validated';
 
 export function validateEnv() {
-  if ((globalThis as any)[VALIDATED_KEY]) return;
-  (globalThis as any)[VALIDATED_KEY] = true;
+  if (((globalThis as unknown) as Record<string, unknown>)[VALIDATED_KEY]) return;
+  ((globalThis as unknown) as Record<string, unknown>)[VALIDATED_KEY] = true;
 
   const missing: string[] = [];
   for (const key of REQUIRED_SERVER) {

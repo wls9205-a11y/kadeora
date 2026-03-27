@@ -12,7 +12,7 @@ export default function GuideInstallButton() {
     if (typeof window === 'undefined') { setState('unsupported'); return; }
 
     // 이미 설치됨
-    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
+    if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
       setState('installed');
       return;
     }
@@ -20,8 +20,8 @@ export default function GuideInstallButton() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
     // 글로벌 캡처된 프롬프트 확인
-    if ((window as any).__pwaPrompt) {
-      setDeferredPrompt((window as any).__pwaPrompt);
+    if (window.__pwaPrompt) {
+      setDeferredPrompt(window.__pwaPrompt);
       setState('can-install');
       return;
     }

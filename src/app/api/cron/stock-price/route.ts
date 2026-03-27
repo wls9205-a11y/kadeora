@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 
       const { error } = await supabase
         .from('stock_price_history')
-        .upsert(rows as any, { onConflict: 'symbol,date' });
+        .upsert(rows as any,  { onConflict: 'symbol,date' });
 
       if (!error) {
         created += rows.length;
