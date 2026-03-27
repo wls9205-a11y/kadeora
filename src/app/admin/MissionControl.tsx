@@ -65,7 +65,7 @@ export default function MissionControl() {
         <div style={{ fontSize: 16, fontWeight: 800, color: C.brand, padding: '4px 12px 16px', letterSpacing: '-0.02em' }}>Mission Control</div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {SECTIONS.map(s => (
-            <button key={s.key} onClick={() => { setSection(s.key); setSidebarOpen(false); }} style={{
+            <button key={s.key} data-section={s.key} onClick={() => { setSection(s.key); setSidebarOpen(false); }} style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', width: '100%',
               background: section === s.key ? C.brandBg : 'transparent',
               color: section === s.key ? C.brand : C.textSec,

@@ -297,31 +297,40 @@ export async function GET(req: Request) {
       const limit = 30;
       const tab = searchParams.get('tab') || 'posts'; // posts, comments, chat, discuss
 
+      // 총계 항상 포함
+      const [postsCountR, commentsCountR, discussCountR, messagesCountR] = await Promise.all([
+        sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
+        sb.from('comments').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
+        sb.from('discussion_topics').select('id', { count: 'exact', head: true }),
+        sb.from('chat_messages').select('id', { count: 'exact', head: true }),
+      ]);
+      const totals = { totalPosts: postsCountR.count ?? 0, totalComments: commentsCountR.count ?? 0, totalDiscussions: discussCountR.count ?? 0, totalMessages: messagesCountR.count ?? 0 };
+
       if (tab === 'posts') {
         const { data, count } = await sb.from('posts')
           .select('id, title, content, category, created_at, view_count, likes_count, comments_count, is_deleted, slug, profiles!posts_author_id_fkey(nickname)', { count: 'exact' })
           .order('created_at', { ascending: false })
           .range((page - 1) * limit, page * limit - 1);
-        return NextResponse.json({ posts: data ?? [], total: count ?? 0 });
+        return NextResponse.json({ posts: data ?? [], total: count ?? 0, ...totals });
       }
       if (tab === 'comments') {
         const { data, count } = await sb.from('comments')
           .select('id, content, created_at, is_deleted, post_id, profiles!comments_author_id_fkey(nickname)', { count: 'exact' })
           .order('created_at', { ascending: false })
           .range((page - 1) * limit, page * limit - 1);
-        return NextResponse.json({ comments: data ?? [], total: count ?? 0 });
+        return NextResponse.json({ comments: data ?? [], total: count ?? 0, ...totals });
       }
       if (tab === 'discuss') {
         const { data } = await sb.from('discussion_topics')
           .select('id, title, category, option_a, option_b, vote_a, vote_b, comment_count, view_count, is_hot, created_at')
           .order('created_at', { ascending: false }).limit(100);
-        return NextResponse.json({ discussions: data ?? [] });
+        return NextResponse.json({ discussions: data ?? [], ...totals });
       }
       if (tab === 'chat') {
         const { data } = await sb.from('chat_messages')
           .select('id, content, created_at, profiles!chat_messages_user_id_fkey(nickname)')
           .order('created_at', { ascending: false }).limit(100);
-        return NextResponse.json({ messages: data ?? [] });
+        return NextResponse.json({ messages: data ?? [], ...totals });
       }
     }
 

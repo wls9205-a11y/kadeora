@@ -37,7 +37,30 @@ export default function ContentSection() {
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 20px' }}>📝 콘텐츠 관리</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 12px' }}>📝 콘텐츠 관리</h1>
+
+      {/* KPI 요약 */}
+      {data && !loading && (
+        <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, color: C.textDim }}>📝 게시글</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.brand }}>{data?.totalPosts ?? '—'}</div>
+          </div>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, color: C.textDim }}>💬 댓글</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{data?.totalComments ?? '—'}</div>
+          </div>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, color: C.textDim }}>🗳️ 토론</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.purple }}>{data?.totalDiscussions ?? '—'}</div>
+          </div>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, color: C.textDim }}>💭 채팅</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.cyan }}>{data?.totalMessages ?? '—'}</div>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
         {tabs.map(t => <Pill key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>{t.icon} {t.label}</Pill>)}
       </div>
