@@ -373,7 +373,7 @@ export function Navigation() {
           return (
             <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
               display:'flex', flexDirection:'column', alignItems:'center', gap:2,
-              padding:'8px 4px 4px', textDecoration:'none', minHeight:48,
+              padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
               justifyContent:'center', flex:1,
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
             }}>
@@ -399,7 +399,7 @@ export function Navigation() {
           return (
             <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
               display:'flex', flexDirection:'column', alignItems:'center', gap:2,
-              padding:'8px 4px 4px', textDecoration:'none', minHeight:48,
+              padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
               justifyContent:'center', flex:1,
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
             }}>

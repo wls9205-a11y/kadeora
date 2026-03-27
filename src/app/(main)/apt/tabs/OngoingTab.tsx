@@ -135,13 +135,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
 
-            {/* 검색바 */}
-      {!globalSearch && <div style={{ position: 'relative', marginBottom: 10 }}>
-        <input type="text" value={ongoingSearch} onChange={e => { setOngoingSearch(e.target.value); setOngoingPage(1); }} placeholder="단지명, 지역, 시공사 검색..."
-          style={{ width: '100%', padding: '9px 12px 9px 32px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box', fontFamily: 'inherit' }} />
-        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>🔍</span>
-        {ongoingSearch && <button onClick={() => setOngoingSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>✕</button>}
-      </div>}
+            {/* 검색은 상단 통합 검색창 사용 */}
 
       {/* 정렬 + 상태 필터 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>

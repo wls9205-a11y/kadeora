@@ -17,6 +17,7 @@ import { timeAgo } from '@/lib/format';
 export const maxDuration = 30;
 export const revalidate = 300;
 import { SITE_URL as SITE } from '@/lib/constants';
+import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -272,7 +273,8 @@ export default async function BlogDetailPage({ params }: Props) {
   };
 
   // 마크다운 → HTML (볼드 소제목 → h2 정규화 포함)
-  const htmlFull = injectInternalLinks(sanitizeHtml(marked(normalizeMarkdownHeadings(post.content)) as string));
+  const htmlRaw = injectInternalLinks(sanitizeHtml(marked(normalizeMarkdownHeadings(post.content)) as string));
+  const htmlFull = enhanceBlogVisuals(htmlRaw, { excerpt: post.excerpt });
   const cutoff = Math.floor(htmlFull.length * 0.7);
   const htmlTruncated = htmlFull.slice(0, cutoff);
 
