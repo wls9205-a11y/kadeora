@@ -14,7 +14,7 @@ interface Props extends SharedTabProps {
 
 const SB = STATUS_BADGE;
 
-export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion }: Props) {
+export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'>('date');
@@ -22,6 +22,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   const [calOffset, setCalOffset] = useState(0);
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
+  const effectiveSearch = globalSearch || subSearch;
 
   // globalRegion 변경 시 내부 필터 동기화
   useEffect(() => {
@@ -44,9 +45,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
     const f = apts.filter(a => {
       if (region !== '전체' && a.region_nm !== region) return false;
       if (statusFilter !== '전체' && getStatus(a) !== statusFilter) return false;
-      if (subSearch) {
-        const q = subSearch.toLowerCase();
-        if (!(a.house_nm || '').toLowerCase().includes(q) && !(a.region_nm || '').toLowerCase().includes(q) && !(a.hssply_adres || '').toLowerCase().includes(q)) return false;
+      if (effectiveSearch) {
+        const q = effectiveSearch.toLowerCase();
+        if (!(a.house_nm || '').toLowerCase().includes(q) && !(a.region_nm || '').toLowerCase().includes(q) && !(a.hssply_adres || '').toLowerCase().includes(q) && !(a.constructor_nm || '').toLowerCase().includes(q)) return false;
       }
       return true;
     });
@@ -54,7 +55,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
     if (aptSort === 'deadline') f.sort((a, b) => String(a.rcept_endde || '9999').localeCompare(String(b.rcept_endde || '9999')));
     if (aptSort === 'competition') f.sort((a, b) => (Number(b.competition_rate_1st) || 0) - (Number(a.competition_rate_1st) || 0));
     return f;
-  }, [apts, region, statusFilter, aptSort, subSearch]);
+  }, [apts, region, statusFilter, aptSort, effectiveSearch]);
 
   const _toggleAlert = async (apt: Apt) => {
     if (!aptUser) return;
@@ -97,7 +98,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           </div>
 
           {/* 검색 + 정렬 통합 */}
-          <input value={subSearch} onChange={e => setSubSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" style={{ marginBottom: 6 }} />
+          {!globalSearch && <input value={subSearch} onChange={e => setSubSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" style={{ marginBottom: 6 }} />}
           <div style={{ display: 'flex', gap: 4, marginBottom: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             {([['date', '최신순'], ['deadline', '마감임박'], ['supply', '세대수'], ['competition', '경쟁률']] as const).map(([k, l]) => (
               <button key={k} onClick={() => setAptSort(k)} style={{ padding: '3px 8px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: aptSort === k ? 700 : 500, background: aptSort === k ? 'var(--brand)' : 'var(--bg-hover)', color: aptSort === k ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{l}</button>

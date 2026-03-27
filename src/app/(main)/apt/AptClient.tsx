@@ -38,6 +38,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const [lazyUnsoldSummary, setLazyUnsoldSummary] = useState<any>(unsoldSummary);
   const [tabLoading, setTabLoading] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [globalSearch, setGlobalSearch] = useState('');
 
   const fetchTabData = async (tab: string) => {
     setTabLoading(tab);
@@ -181,6 +182,26 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         </div>
       )}
 
+      {/* 통합 검색창 */}
+      <div style={{ position: 'relative', marginBottom: 10 }}>
+        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
+        <input
+          value={globalSearch}
+          onChange={e => setGlobalSearch(e.target.value)}
+          placeholder="단지명, 지역, 시공사 통합 검색..."
+          className="kd-search-input"
+          style={{ paddingLeft: 34, width: '100%', boxSizing: 'border-box' }}
+        />
+        {globalSearch && (
+          <button onClick={() => setGlobalSearch('')} style={{
+            position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+            background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: '50%',
+            width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, lineHeight: 1,
+          }} aria-label="검색어 지우기">✕</button>
+        )}
+      </div>
+
       {/* 탭 */}
       <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {[
@@ -223,6 +244,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           setCommentTarget={setCommentTarget}
           showToast={showToast}
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+          globalSearch={globalSearch}
         />
       )}
 
@@ -236,6 +258,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           setCommentTarget={setCommentTarget}
           showToast={showToast}
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+          globalSearch={globalSearch}
         />
       )}
 
@@ -252,6 +275,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           setCommentTarget={setCommentTarget}
           showToast={showToast}
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+          globalSearch={globalSearch}
         />
       )}
 
@@ -265,6 +289,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           setCommentTarget={setCommentTarget}
           showToast={showToast}
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+          globalSearch={globalSearch}
         />
       )}
 
@@ -280,6 +305,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           setCommentTarget={setCommentTarget}
           showToast={showToast}
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+          globalSearch={globalSearch}
         />
       )}
 

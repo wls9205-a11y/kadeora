@@ -12,10 +12,11 @@ interface Props extends SharedTabProps {
   unsoldSummary: Record<string, any> | string | null;
 }
 
-export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion }: Props) {
+export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch }: Props) {
   const [unsoldRegion, setUnsoldRegion] = useState(globalRegion || '전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
   const [surgeAlerts, setSurgeAlerts] = useState<{ region_nm: string; current_count: number; change_pct: number }[]>([]);
+  const effectiveSearch = globalSearch || unsoldSearch;
 
   useEffect(() => {
     setUnsoldRegion(globalRegion || '전체');
@@ -44,8 +45,8 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
   const total = unsold.reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
   const regs = ['전체', ...Array.from(new Set(unsold.map((u: Record<string, any>) => u.region_nm || '기타'))).sort()];
   const fu = (unsoldRegion === '전체' ? unsold : unsold.filter((u: Record<string, any>) => (u.region_nm || '기타') === unsoldRegion)).filter((u: Record<string, any>) => {
-    if (!unsoldSearch) return true;
-    const q = unsoldSearch.toLowerCase();
+    if (!effectiveSearch) return true;
+    const q = effectiveSearch.toLowerCase();
     return (u.house_nm || '').toLowerCase().includes(q) || (u.region_nm || '').toLowerCase().includes(q) || (u.sigungu_nm || '').toLowerCase().includes(q);
   });
   const usRaw = unsoldSummary;
@@ -199,7 +200,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 안내 + 검색 + 필터 */}
       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
-      <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" />
+      {!globalSearch && <input value={unsoldSearch} onChange={e => setUnsoldSearch(e.target.value)} placeholder="단지명, 지역 검색..." className="kd-search-input" />}
       <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 8, paddingBottom: 2 }}>
         {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
         <div style={{ flexShrink: 0, width: 16 }} aria-hidden />

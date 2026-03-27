@@ -10,12 +10,13 @@ interface Props extends SharedTabProps {
   redevelopment: RedevProject[];
 }
 
-export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion }: Props) {
+export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion, globalSearch }: Props) {
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState(globalRegion || '전체');
   const [redevPage, setRedevPage] = useState(1);
   const [redevStage, setRedevStage] = useState('전체');
   const [redevSearch, setRedevSearch] = useState('');
+  const effectiveSearch = globalSearch || redevSearch;
   // selectedRedev removed — now using Link to /apt/[slug]
 
   useEffect(() => {
@@ -55,8 +56,8 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
     if (redevType !== '전체' && r.project_type !== redevType) return false;
     if (redevRegion !== '전체' && r.region !== redevRegion) return false;
     if (redevStage !== '전체' && r.stage !== redevStage) return false;
-    if (redevSearch) {
-      const q = redevSearch.toLowerCase();
+    if (effectiveSearch) {
+      const q = effectiveSearch.toLowerCase();
       if (!(r.district_name || '').toLowerCase().includes(q) && !(r.region || '').toLowerCase().includes(q) && !(r.sigungu || '').toLowerCase().includes(q) && !(r.constructor || '').toLowerCase().includes(q) && !(r.address || '').toLowerCase().includes(q)) return false;
     }
     return true;
@@ -162,7 +163,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 ) : null;
               })()}
             </div>
-            <input value={redevSearch} onChange={e => { setRedevSearch(e.target.value); setRedevPage(1); }} placeholder="구역명, 지역, 시공사 검색..." className="kd-search-input" />
+            {!globalSearch && <input value={redevSearch} onChange={e => { setRedevSearch(e.target.value); setRedevPage(1); }} placeholder="구역명, 지역, 시공사 검색..." className="kd-search-input" />}
 
             {/* 안내 */}
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준 · 매주 월요일 자동 갱신</div>

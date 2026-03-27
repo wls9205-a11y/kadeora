@@ -10,13 +10,14 @@ interface Props extends SharedTabProps {
   premiumListings: PremiumListing[];
 }
 
-export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion }: Props) {
+export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion, globalSearch }: Props) {
   const [ongoingRegion, setOngoingRegion] = useState(globalRegion || '전체');
   const [ongoingPage, setOngoingPage] = useState(1);
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
   const [ongoingSearch, setOngoingSearch] = useState('');
   const [ongoingStatus, setOngoingStatus] = useState('전체');
   const [selectedOngoing, setSelectedOngoing] = useState<any | null>(null);
+  const effectiveSearch = globalSearch || ongoingSearch;
 
   useEffect(() => {
     setOngoingRegion(globalRegion || '전체');
@@ -38,8 +39,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
   const regs = ['전체', ...Array.from(new Set(ongoingApts.map((o) => o.region_nm || '기타'))).sort()];
   let filtered = ongoingRegion === '전체' ? ongoingApts : ongoingApts.filter((o) => (o.region_nm || '기타') === ongoingRegion);
-  if (ongoingSearch.trim()) {
-    const q = ongoingSearch.trim().toLowerCase();
+  if (effectiveSearch.trim()) {
+    const q = effectiveSearch.trim().toLowerCase();
     filtered = filtered.filter((o) => (o.house_nm || '').toLowerCase().includes(q) || (o.address || '').toLowerCase().includes(q) || (o.region_nm || '').toLowerCase().includes(q) || (o.constructor_nm || '').toLowerCase().includes(q));
   }
   if (ongoingStatus !== '전체') filtered = filtered.filter((o) => ongoingStatus === '미분양' ? o.source === 'unsold' : o.source === 'subscription');
@@ -135,12 +136,12 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       </div>
 
             {/* 검색바 */}
-      <div style={{ position: 'relative', marginBottom: 10 }}>
+      {!globalSearch && <div style={{ position: 'relative', marginBottom: 10 }}>
         <input type="text" value={ongoingSearch} onChange={e => { setOngoingSearch(e.target.value); setOngoingPage(1); }} placeholder="단지명, 지역, 시공사 검색..."
           style={{ width: '100%', padding: '9px 12px 9px 32px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box', fontFamily: 'inherit' }} />
         <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>🔍</span>
         {ongoingSearch && <button onClick={() => setOngoingSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>✕</button>}
-      </div>
+      </div>}
 
       {/* 정렬 + 상태 필터 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>

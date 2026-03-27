@@ -14,7 +14,7 @@ interface Props extends SharedTabProps {
   tradeMonthly: { stat_month: string; region: string; avg_price: number; count: number }[];
 }
 
-export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion }: Props) {
+export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion, globalSearch }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [page, setPage] = useState(1);
   const [areaFilter, setAreaFilter] = useState('전체');
@@ -22,6 +22,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
   const [search, setSearch] = useState('');
   const [chartRegion, setChartRegion] = useState('');
   const [selected, setSelected] = useState<any>(null);
+  const effectiveSearch = globalSearch || search;
 
   useEffect(() => {
     setRegion(globalRegion || '전체');
@@ -46,8 +47,8 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       if (areaFilter === '59~84' && (a <= 59 || a > 85)) return false;
       if (areaFilter === '84~' && a <= 84) return false;
     }
-    if (search) {
-      const q = search.toLowerCase();
+    if (effectiveSearch) {
+      const q = effectiveSearch.toLowerCase();
       if (!(t.apt_name || '').toLowerCase().includes(q) && !(t.dong || '').toLowerCase().includes(q) && !(t.sigungu || '').toLowerCase().includes(q)) return false;
     }
     return true;
@@ -148,7 +149,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       })()}
 
       {/* 검색 + 필터 */}
-      <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="단지명, 동(법정동) 검색..." className="kd-search-input" />
+      {!globalSearch && <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="단지명, 동(법정동) 검색..." className="kd-search-input" />}
 
       <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
         {[{ key: '전체', label: '전체 면적' }, { key: '~59', label: '~59㎡' }, { key: '59~84', label: '59~84㎡' }, { key: '84~', label: '84㎡~' }].map(a => pill(a.key, areaFilter, setAreaFilter, a.label))}
