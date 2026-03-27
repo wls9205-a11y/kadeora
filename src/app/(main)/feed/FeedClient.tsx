@@ -137,7 +137,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   const handleShare = async (e: React.MouseEvent, post: PostWithProfile) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = `${window.location.origin}/feed/${(post as any).slug || post.id}`;
+    const url = `${window.location.origin}/feed/${post.slug || post.id}`;
     let platform = 'clipboard';
     if (navigator.share) {
       try { await navigator.share({ title: post.title, url }); platform = 'native'; } catch { return; }
@@ -157,7 +157,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       const lastPost = posts[posts.length - 1];
       const cursor = lastPost?.created_at;
       let q = sb.from('posts')
-        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images,slug,excerpt, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
         .limit(PAGE_SIZE);
@@ -277,7 +277,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
           const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
           const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
           const isLiked = likedPosts.has(post.id as number);
-          const postHref = `/feed/${(post as any).slug || post.id}`;
+          const postHref = `/feed/${post.slug || post.id}`;
           const cat = { apt: { label: '부동산', color: '#2EE8A5', bg: 'rgba(52,211,153,0.1)' }, stock: { label: '주식', color: '#38BDF8', bg: 'rgba(56,189,248,0.1)' }, local: { label: '우리동네', color: '#FFD43B', bg: 'rgba(251,191,36,0.1)' }, free: { label: '자유', color: '#B794FF', bg: 'rgba(167,139,250,0.1)' } }[post.category] || { label: '자유', color: '#B794FF', bg: 'rgba(167,139,250,0.1)' };
           const commentCount = post.comments_count ?? 0;
           return (
@@ -312,19 +312,19 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 )}
                 {/* 본문 미리보기 */}
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                  {(post as any).excerpt || post.content}
+                  {post.excerpt || post.content}
                 </div>
                 {/* 이미지 썸네일 */}
-                {(post as any).images && (post as any).images.length > 0 && (
+                {post.images && post.images.length > 0 && (
                   <div style={{ marginTop: 10, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
-                    {((post as any).images as string[]).slice(0, 3).map((img: string, i: number) => (
+                    {(post.images as string[]).slice(0, 3).map((img: string, i: number) => (
                       <div key={i} style={{ width: 90, height: 90, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
                         <Image src={img} alt="게시글 이미지" fill sizes="90px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
                       </div>
                     ))}
-                    {(post as any).images.length > 3 && (
+                    {post.images.length > 3 && (
                       <div style={{ width: 90, height: 90, borderRadius: 10, flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
-                        +{(post as any).images.length - 3}
+                        +{post.images.length - 3}
                       </div>
                     )}
                   </div>
