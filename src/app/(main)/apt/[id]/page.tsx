@@ -42,25 +42,37 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  // Phase 1: apt_sites — exact slug → fuzzy slug fallback
-  let { data: site } = await sb.from('apt_sites')
-    .select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at')
-    .eq('slug', slug).maybeSingle();
-  // Fuzzy fallback: "에코델타시티-디에트르-더-퍼스트28bl" → try without trailing letters
+  const APT_COLS = 'id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at';
+
+  // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
+  let { data: site } = await sb.from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
+
   if (!site && slug.length > 4) {
-    const fuzzy = slug.replace(/[a-z]+$/, ''); // strip trailing latin chars
-    if (fuzzy !== slug && fuzzy.length > 3) {
-      const { data } = await sb.from('apt_sites')
-        .select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at')
-        .eq('slug', fuzzy).maybeSingle();
+    // Helper: extract Korean-only portion (remove all latin letters & standalone digits)
+    const koreanOnly = slug.replace(/-/g, ' ').replace(/[a-z0-9]+/gi, '').replace(/\s+/g, ' ').trim();
+    const slugNoAlpha = slug.replace(/[a-z]+/g, ''); // strip all english letters from slug
+
+    // Stage 2: slug with letters stripped (a3bl→3, 중흥s-클래스→중흥-클래스)
+    if (slugNoAlpha !== slug && slugNoAlpha.length > 3) {
+      const { data } = await sb.from('apt_sites').select(APT_COLS).eq('slug', slugNoAlpha).maybeSingle();
       if (data) site = data;
     }
-    // Also try ilike partial match
+
+    // Stage 3: slug with all alphanumeric suffix stripped (메트로시티a3bl→메트로시티)
     if (!site) {
-      const nameFromSlug = slug.replace(/-/g, ' ');
-      const { data } = await sb.from('apt_sites')
-        .select('id,slug,name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,developer,total_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,images,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at')
-        .ilike('name', `%${nameFromSlug.slice(0, Math.min(nameFromSlug.length, 20))}%`).eq('is_active', true).limit(1).maybeSingle();
+      const noSuffix = slug.replace(/[a-z0-9]+$/i, '').replace(/-+$/, '');
+      if (noSuffix !== slug && noSuffix.length > 3) {
+        const { data } = await sb.from('apt_sites').select(APT_COLS).eq('slug', noSuffix).maybeSingle();
+        if (data) site = data;
+      }
+    }
+
+    // Stage 4: Korean-only ilike search on apt_sites.name
+    if (!site && koreanOnly.length >= 4) {
+      const searchTerm = koreanOnly.slice(0, 20);
+      const { data } = await sb.from('apt_sites').select(APT_COLS)
+        .ilike('name', `%${searchTerm}%`).eq('is_active', true)
+        .order('content_score', { ascending: false }).limit(1).maybeSingle();
       if (data) site = data;
     }
   }
@@ -83,23 +95,33 @@ async function fetchUnifiedData(slug: string) {
   let unsold = unsoldResult.status === 'fulfilled' ? (unsoldResult.value as { data: any })?.data : null;
   let redev = redevResult.status === 'fulfilled' ? (redevResult.value as { data: any })?.data : null;
 
-  // sub 폴백: 이름 기반 검색
+  // sub 폴백: 이름 기반 검색 (Korean-only로 검색 범위 확대)
   const nameGuess = site?.name || slug.replace(/-/g, ' ');
+  const koreanNameGuess = nameGuess.replace(/[a-z0-9]+/gi, '').replace(/\s+/g, ' ').trim();
   if (!sub) {
-    const { data } = await sb.from('apt_subscriptions').select('*').ilike('house_nm', nameGuess).order('id', { ascending: false }).limit(1).maybeSingle();
+    // 1차: 전체 이름 정확 매칭
+    let { data } = await sb.from('apt_subscriptions').select('*').ilike('house_nm', nameGuess).order('id', { ascending: false }).limit(1).maybeSingle();
+    // 2차: 한글만으로 부분 매칭
+    if (!data && koreanNameGuess.length >= 4) {
+      ({ data } = await sb.from('apt_subscriptions').select('*').ilike('house_nm', `%${koreanNameGuess}%`).order('id', { ascending: false }).limit(1).maybeSingle());
+    }
     sub = data;
   }
 
   // unsold 폴백: 이름 기반 검색
   if (!unsold) {
-    const { data } = await sb.from('unsold_apts').select('*').ilike('house_nm', nameGuess).eq('is_active', true).order('id', { ascending: false }).limit(1).maybeSingle();
+    let { data } = await sb.from('unsold_apts').select('*').ilike('house_nm', nameGuess).eq('is_active', true).order('id', { ascending: false }).limit(1).maybeSingle();
+    if (!data && koreanNameGuess.length >= 4) {
+      ({ data } = await sb.from('unsold_apts').select('*').ilike('house_nm', `%${koreanNameGuess}%`).eq('is_active', true).order('id', { ascending: false }).limit(1).maybeSingle());
+    }
     unsold = data;
   }
 
   // redev 폴백: 이름 기반 검색 (district_name 또는 address)
   if (!redev) {
+    const searchName = koreanNameGuess.length >= 4 ? koreanNameGuess : nameGuess;
     const { data } = await sb.from('redevelopment_projects').select('*').eq('is_active', true)
-      .or(`district_name.ilike.%${nameGuess}%,address.ilike.%${nameGuess}%`)
+      .or(`district_name.ilike.%${searchName}%,address.ilike.%${searchName}%`)
       .order('id', { ascending: false }).limit(1).maybeSingle();
     redev = data;
   }
