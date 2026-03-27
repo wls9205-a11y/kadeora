@@ -47,7 +47,7 @@ async function fetchUnifiedData(slug: string) {
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await sb.from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
 
-  if (!site && slug.length > 4) {
+  if (!site && slug.length > 2) {
     // Helper: extract Korean-only portion (remove all latin letters & standalone digits)
     const koreanOnly = slug.replace(/-/g, ' ').replace(/[a-z0-9]+/gi, '').replace(/\s+/g, ' ').trim();
     const slugNoAlpha = slug.replace(/[a-z]+/g, ''); // strip all english letters from slug
@@ -67,13 +67,24 @@ async function fetchUnifiedData(slug: string) {
       }
     }
 
-    // Stage 4: Korean-only ilike search on apt_sites.name
-    if (!site && koreanOnly.length >= 4) {
+    // Stage 4: Korean-only ilike search on apt_sites.name (min 2 chars)
+    if (!site && koreanOnly.length >= 2) {
       const searchTerm = koreanOnly.slice(0, 20);
       const { data } = await sb.from('apt_sites').select(APT_COLS)
         .ilike('name', `%${searchTerm}%`).eq('is_active', true)
         .order('content_score', { ascending: false }).limit(1).maybeSingle();
       if (data) site = data;
+    }
+
+    // Stage 5: slug word-parts ilike on apt_sites.slug (동성로-sk-leaders-view → %동성로%sk%leaders%view%)
+    if (!site) {
+      const slugWords = slug.split('-').filter(w => w.length > 0).join('%');
+      if (slugWords.length > 3) {
+        const { data } = await sb.from('apt_sites').select(APT_COLS)
+          .ilike('slug', `%${slugWords}%`).eq('is_active', true)
+          .order('content_score', { ascending: false }).limit(1).maybeSingle();
+        if (data) site = data;
+      }
     }
   }
   const sourceIds = (site?.source_ids || {}) as Record<string, string>;
@@ -102,7 +113,7 @@ async function fetchUnifiedData(slug: string) {
     // 1차: 전체 이름 정확 매칭
     let { data } = await sb.from('apt_subscriptions').select('*').ilike('house_nm', nameGuess).order('id', { ascending: false }).limit(1).maybeSingle();
     // 2차: 한글만으로 부분 매칭
-    if (!data && koreanNameGuess.length >= 4) {
+    if (!data && koreanNameGuess.length >= 2) {
       ({ data } = await sb.from('apt_subscriptions').select('*').ilike('house_nm', `%${koreanNameGuess}%`).order('id', { ascending: false }).limit(1).maybeSingle());
     }
     sub = data;
@@ -111,7 +122,7 @@ async function fetchUnifiedData(slug: string) {
   // unsold 폴백: 이름 기반 검색
   if (!unsold) {
     let { data } = await sb.from('unsold_apts').select('*').ilike('house_nm', nameGuess).eq('is_active', true).order('id', { ascending: false }).limit(1).maybeSingle();
-    if (!data && koreanNameGuess.length >= 4) {
+    if (!data && koreanNameGuess.length >= 2) {
       ({ data } = await sb.from('unsold_apts').select('*').ilike('house_nm', `%${koreanNameGuess}%`).eq('is_active', true).order('id', { ascending: false }).limit(1).maybeSingle());
     }
     unsold = data;
@@ -119,7 +130,7 @@ async function fetchUnifiedData(slug: string) {
 
   // redev 폴백: 이름 기반 검색 (district_name 또는 address)
   if (!redev) {
-    const searchName = koreanNameGuess.length >= 4 ? koreanNameGuess : nameGuess;
+    const searchName = koreanNameGuess.length >= 2 ? koreanNameGuess : nameGuess;
     const { data } = await sb.from('redevelopment_projects').select('*').eq('is_active', true)
       .or(`district_name.ilike.%${searchName}%,address.ilike.%${searchName}%`)
       .order('id', { ascending: false }).limit(1).maybeSingle();
@@ -208,9 +219,9 @@ function fmtAmount(n: number | null) { if (!n) return '-'; return n >= 10000 ? `
 function fmtYM(s: string | null) { if (!s) return null; return `${s.slice(0, 4)}년 ${parseInt(s.slice(4, 6))}월`; }
 
 const ct: React.CSSProperties = { fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5, margin: '0 0 8px' };
-const rw: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' };
-const rl: React.CSSProperties = { color: 'var(--text-tertiary)' };
-const rv: React.CSSProperties = { color: 'var(--text-primary)', fontWeight: 600 };
+const rw: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)', gap: 8 };
+const rl: React.CSSProperties = { color: 'var(--text-tertiary)', flexShrink: 0, whiteSpace: 'nowrap' };
+const rv: React.CSSProperties = { color: 'var(--text-primary)', fontWeight: 600, textAlign: 'right', wordBreak: 'keep-all', overflowWrap: 'break-word', minWidth: 0 };
 const tLabel: Record<string, string> = { subscription: '분양', redevelopment: '재개발', unsold: '미분양', landmark: '랜드마크', complex: '기존단지', trade: '실거래' };
 const tBg: Record<string, string> = { subscription: 'rgba(52,211,153,0.2)', redevelopment: 'rgba(183,148,255,0.15)', unsold: 'rgba(255,107,107,0.15)', landmark: 'rgba(56,189,248,0.15)', complex: 'rgba(56,189,248,0.15)', trade: 'rgba(251,191,36,0.15)' };
 const tClr: Record<string, string> = { subscription: '#2EE8A5', redevelopment: '#B794FF', unsold: '#FF6B6B', landmark: '#38BDF8', complex: '#38BDF8', trade: '#FBBF24' };
@@ -316,7 +327,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           {redevStage && <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 'var(--fs-xs)', fontWeight: 700, background: 'rgba(255,212,59,0.15)', color: '#FFD43B' }}>{redevStage}</span>}
           {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-purple)', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 10 }}>{Number(sub.competition_rate_1st).toFixed(1)}:1</span>}
         </div>
-        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 2px', lineHeight: 1.3 }}>{name}</h1>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 2px', lineHeight: 1.3, wordBreak: 'keep-all', overflowWrap: 'break-word' }}>{name}</h1>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{[region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || ''}{(site?.builder || sub?.constructor_nm) ? ` · ${site?.builder || sub?.constructor_nm} 시공` : ''}</p>
         {(sub?.ai_summary || site?.description) && (
           <div style={{ padding: '10px 14px', borderRadius: 10, background: 'linear-gradient(135deg, var(--brand-bg), rgba(139,92,246,0.06))', border: '1px solid var(--brand-border)' }}>
@@ -370,7 +381,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             {sub.transfer_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)' }}>전매제한 {sub.transfer_limit}</span>}
             {sub.residence_obligation && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>거주의무 {sub.residence_obligation}</span>}
           </div>
-          {sub.model_house_addr && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '8px 0', borderTop: '1px solid var(--border)' }}>🏠 견본주택: {sub.model_house_addr}</div>}
+          {sub.model_house_addr && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '8px 0', borderTop: '1px solid var(--border)', wordBreak: 'keep-all', overflowWrap: 'break-word' }}>🏠 견본주택: {sub.model_house_addr}</div>}
         </div>
       )}
 
@@ -419,14 +430,14 @@ export default async function AptUnifiedPage({ params }: Props) {
       {trades.length > 0 && (
         <div className="apt-card"><h2 style={ct}>💰 실거래 이력 ({trades.length}건)</h2>
           <AptPriceTrendChart aptName={name} region={region} />
-          {trades.slice(0, 10).map((t: Record<string, any>, i: number) => <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: i < Math.min(trades.length, 10) - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)' }}><div><span style={{ color: 'var(--text-tertiary)' }}>{t.deal_date}</span><span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{t.exclusive_area}㎡ · {t.floor}층</span></div><span style={{ fontWeight: 700, color: t.deal_amount >= 100000 ? 'var(--accent-red)' : t.deal_amount >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)' }}>{fmtAmount(t.deal_amount)}</span></div>)}
+          {trades.slice(0, 10).map((t: Record<string, any>, i: number) => <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: i < Math.min(trades.length, 10) - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)', gap: 6 }}><div style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span style={{ color: 'var(--text-tertiary)' }}>{t.deal_date}</span><span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{t.exclusive_area}㎡ · {t.floor}층</span></div><span style={{ fontWeight: 700, flexShrink: 0, color: t.deal_amount >= 100000 ? 'var(--accent-red)' : t.deal_amount >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)' }}>{fmtAmount(t.deal_amount)}</span></div>)}
           <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 8, background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>전체 실거래 내역 보기 →</Link>
         </div>
       )}
 
       {/* Location */}
       <div className="apt-card"><h2 style={ct}>📍 위치 정보</h2>
-        {(site?.address || sub?.hssply_adres || redev?.address) && <div style={rw}><span style={rl}>주소</span><span style={{ ...rv, fontSize: 'var(--fs-xs)' }}>{site?.address || sub?.hssply_adres || redev?.address}</span></div>}
+        {(site?.address || sub?.hssply_adres || redev?.address) && <div style={rw}><span style={rl}>주소</span><span style={{ ...rv, fontSize: 'var(--fs-xs)', maxWidth: '70%' }}>{site?.address || sub?.hssply_adres || redev?.address}</span></div>}
         {(site?.nearby_station || sub?.nearest_station) && <div style={rw}><span style={rl}>최근접역</span><span style={{ ...rv, color: 'var(--accent-green)' }}>{site?.nearby_station || sub?.nearest_station}</span></div>}
         {(site?.school_district || sub?.nearest_school) && <div style={{ ...rw, borderBottom: 'none' }}><span style={rl}>학군</span><span style={rv}>{site?.school_district || sub?.nearest_school}</span></div>}
         {redev?.notes && <div style={{ ...rw, borderBottom: 'none' }}><span style={rl}>비고</span><span style={rv}>{redev.notes}</span></div>}
