@@ -81,45 +81,58 @@ function insertSummaryCard(html: string, excerpt?: string | null): string {
 
 /**
  * 지도 링크 깨짐 수정
- * - 카카오맵/네이버지도 링크의 인코딩된 한글 URL을 깔끔한 버튼으로 교체
- * - %EC%9A%B8 같은 깨진 텍스트 제거
+ * marked 출력: <p>👉 <a href="https://map.kakao.com/?q=%EC%..."><strong>카카오맵에서 위치 보기</strong> →</a></p>
  */
 function fixMapLinks(html: string): string {
-  // 카카오맵 링크를 깔끔한 버튼으로 교체
-  let fixed = html.replace(
-    /<p>👉\s*<a\s+href="(https:\/\/map\.kakao\.com\/[^"]*)"[^>]*>.*?카카오맵.*?<\/a><\/p>/gi,
-    (_, url) => {
-      const decoded = decodeURIComponent(url);
-      return `<div style="display:flex;gap:8px;margin:8px 0"><a href="${decoded}" target="_blank" rel="noopener noreferrer" style="flex:1;text-align:center;padding:10px 0;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);text-decoration:none;font-size:var(--fs-sm);font-weight:600">🗺️ 카카오맵에서 보기</a>`;
-    }
-  );
+  // 카카오맵 + 네이버지도 링크를 모두 찾아서 깔끔한 버튼 쌍으로 교체
+  const kakaoRx = /<p>\s*👉\s*<a\s+href="([^"]*map\.kakao[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi;
+  const naverRx = /<p>\s*👉\s*<a\s+href="([^"]*map\.naver[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi;
 
-  // 네이버지도 링크
-  fixed = fixed.replace(
-    /<p>👉\s*<a\s+href="(https:\/\/map\.naver\.com\/[^"]*)"[^>]*>.*?네이버.*?<\/a><\/p>/gi,
-    (_, url) => {
-      const decoded = decodeURIComponent(url);
-      return `<a href="${decoded}" target="_blank" rel="noopener noreferrer" style="flex:1;text-align:center;padding:10px 0;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);text-decoration:none;font-size:var(--fs-sm);font-weight:600">🗺️ 네이버지도에서 보기</a></div>`;
-    }
-  );
+  let kakaoUrl = '';
+  let naverUrl = '';
 
-  // 인라인 깨진 패턴 (👉 텍스트 안에 인코딩된 URL이 노출되는 경우)
-  fixed = fixed.replace(
-    /👉\s*(?:<a[^>]*>)?[^<]*(%[0-9A-F]{2}){3,}[^<]*(?:<\/a>)?/gi,
-    ''
-  );
+  const kakaoMatch = kakaoRx.exec(html);
+  if (kakaoMatch) kakaoUrl = decodeURIComponent(kakaoMatch[1]);
+
+  const naverMatch = naverRx.exec(html);
+  if (naverMatch) naverUrl = decodeURIComponent(naverMatch[1]);
+
+  // 기존 링크 패턴 전부 제거
+  let fixed = html.replace(/<p>\s*👉\s*<a\s+href="[^"]*map\.(kakao|naver)[^"]*"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi, '');
+
+  // 깔끔한 버튼 삽입 (카카오+네이버 한 줄로)
+  if (kakaoUrl || naverUrl) {
+    const btnStyle = 'flex:1;text-align:center;padding:12px 0;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);text-decoration:none;font-size:var(--fs-sm);font-weight:600';
+    let buttons = '<div style="display:flex;gap:8px;margin:12px 0">';
+    if (kakaoUrl) buttons += `<a href="${kakaoUrl}" target="_blank" rel="noopener noreferrer" style="${btnStyle}">🗺️ 카카오맵</a>`;
+    if (naverUrl) buttons += `<a href="${naverUrl}" target="_blank" rel="noopener noreferrer" style="${btnStyle}">🗺️ 네이버지도</a>`;
+    buttons += '</div>';
+
+    // 위치 확인 h2 바로 뒤에 삽입
+    const locH2 = fixed.indexOf('위치 확인</h2>');
+    if (locH2 > 0) {
+      const insertPos = fixed.indexOf('</p>', locH2);
+      if (insertPos > 0) {
+        fixed = fixed.slice(0, insertPos + 4) + buttons + fixed.slice(insertPos + 4);
+      } else {
+        fixed = fixed.slice(0, locH2 + 13) + buttons + fixed.slice(locH2 + 13);
+      }
+    }
+  }
+
+  // 남은 인코딩 깨짐 텍스트 제거 (혹시 모를 잔재)
+  fixed = fixed.replace(/<p>\s*👉[^<]*(%[0-9A-Fa-f]{2}){3,}[\s\S]*?<\/p>/gi, '');
 
   return fixed;
 }
 
 /**
- * 위치 확인 섹션 전체를 깔끔하게 교체
+ * 위치 확인 섹션 제목 정규화
  */
 function cleanLocationSection(html: string): string {
-  // "위치 확인" h2/h3 + 다음 내용을 찾아서 깔끔하게 교체
   return html.replace(
-    /<h[23][^>]*id="[^"]*"[^>]*>.*?위치\s*확인.*?<\/h[23]>\s*(?:<p>.*?지도.*?확인.*?<\/p>\s*)?/gi,
-    '<h2 id="위치-확인" style="display:flex;align-items:center;gap:6px">📍 위치 확인</h2><p style="color:var(--text-tertiary);font-size:var(--fs-sm)">아래 버튼으로 지도에서 정확한 위치를 확인하세요.</p>'
+    /<h[23][^>]*>[\s\S]*?위치\s*확인[\s\S]*?<\/h[23]>\s*(?:<p>[^<]*지도[^<]*<\/p>\s*)?/gi,
+    '<h2 id="위치-확인">📍 위치 확인</h2><p style="color:var(--text-tertiary);font-size:var(--fs-sm)">아래 버튼으로 정확한 위치를 확인하세요.</p>'
   );
 }
 
