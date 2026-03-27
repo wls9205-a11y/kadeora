@@ -198,8 +198,11 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
                     {followLoading ? '...' : following ? '✓ 팔로잉' : '+ 팔로우'}
                   </button>
                 )}
-                <button onClick={() => {
+                <button onClick={async () => {
                   const url = `${SITE_URL}/profile/${profile.id}`;
+                  if (navigator.share) {
+                    try { await navigator.share({ title: `${profile.nickname} — 카더라`, url }); return; } catch {}
+                  }
                   navigator.clipboard.writeText(url).then(() => success('프로필 링크가 복사됐어요!'));
                 }} style={{ padding: '4px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', fontWeight: 600 }}>
                   공유

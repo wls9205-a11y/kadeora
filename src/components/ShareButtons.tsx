@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import BottomSheet from '@/components/BottomSheet';
 import { useToast } from '@/components/Toast';
 
-interface Props { title: string; postId: number | string; content?: string; }
+interface Props { title: string; postId?: number | string; content?: string; }
 
 interface Platform {
   id: string; label: string; emoji: string; bg: string; color: string;
