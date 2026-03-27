@@ -122,6 +122,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   }).length;
   const unsoldTotal = (lazyUnsold || unsold).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
   const redevCount = (lazyRedev || []).length || redevTotalCount;
+  const tradeCount = (lazyTx || transactions).length;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -140,11 +141,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           { label: '분양중', value: ongoingApts.length.toLocaleString(), color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)', tab: 'ongoing' as const },
           { label: '미분양', value: unsoldTotal.toLocaleString(), color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)', tab: 'unsold' as const },
           { label: '재개발', value: redevCount.toLocaleString(), color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)', tab: 'redev' as const },
+          { label: '실거래', value: tradeCount > 999 ? `${(tradeCount / 1000).toFixed(1)}k` : tradeCount.toLocaleString(), color: 'var(--accent-cyan)', bg: 'rgba(34,211,238,0.08)', tab: 'trade' as const },
         ].map(({ label, value, color, bg, tab }) => (
           <button key={label} onClick={() => handleTabChange(tab)} style={{
             flex: 1, textAlign: 'center', padding: '10px 2px', borderRadius: 8,
-            background: activeTab === tab && (label === '분양중' || label === '미분양' || label === '재개발') ? `${color}22` : bg,
-            border: activeTab === tab && (label === '분양중' || label === '미분양' || label === '재개발') ? `1.5px solid ${color}55` : `1px solid ${color}33`,
+            background: activeTab === tab ? `${color}22` : bg,
+            border: activeTab === tab ? `1.5px solid ${color}55` : `1px solid ${color}33`,
             cursor: 'pointer', transition: 'all 0.15s',
           }}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color, fontVariantNumeric: 'tabular-nums' }}>{value}</div>

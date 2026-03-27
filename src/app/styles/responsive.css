@@ -374,7 +374,7 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    white-space: nowrap;
+    max-width: 100%;
   }
   .blog-content table::-webkit-scrollbar { display: none; }
   .blog-content th, .blog-content td {

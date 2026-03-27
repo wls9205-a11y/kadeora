@@ -20,6 +20,7 @@ const HIGHLIGHT_BOX_STYLE = `
   border-left: 4px solid var(--brand);
   background: var(--bg-surface); border-top: 1px solid var(--border);
   border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  overflow-wrap: break-word; word-break: break-word;
 `.replace(/\n/g, '').trim();
 
 /**

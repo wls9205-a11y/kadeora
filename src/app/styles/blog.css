@@ -5,6 +5,9 @@
   max-width: 720px;
   margin: 0 auto;
   padding: 0 16px;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 .blog-toc-inline { display: block; }
 .blog-toc-sidebar { display: none; }
@@ -26,13 +29,13 @@
 /* ========================================
    블로그 본문 마크다운
    ======================================== */
-.blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 28px 0 12px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; }
-.blog-content h3 { font-size: var(--fs-lg); font-weight: 700; margin: 20px 0 8px; color: var(--text-primary); }
-.blog-content p { margin: 10px 0; line-height: 1.8; }
-.blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: var(--fs-base); }
+.blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 28px 0 12px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; word-break: keep-all; }
+.blog-content h3 { font-size: var(--fs-lg); font-weight: 700; margin: 20px 0 8px; color: var(--text-primary); word-break: keep-all; }
+.blog-content p { margin: 10px 0; line-height: 1.8; overflow-wrap: break-word; word-break: break-word; }
+.blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: var(--fs-base); table-layout: auto; }
 .blog-content thead { background: var(--bg-surface); }
-.blog-content th { font-weight: 700; padding: 10px 12px; border: 1px solid var(--border); text-align: left; white-space: nowrap; }
-.blog-content td { padding: 10px 12px; border: 1px solid var(--border); }
+.blog-content th { font-weight: 700; padding: 10px 12px; border: 1px solid var(--border); text-align: left; word-break: keep-all; }
+.blog-content td { padding: 10px 12px; border: 1px solid var(--border); word-break: break-word; }
 .blog-content tr:nth-child(even) { background: var(--bg-hover); }
 .blog-content a { color: var(--brand); text-decoration: none; font-weight: 600; }
 .blog-content a:hover { text-decoration: underline; }

@@ -67,6 +67,9 @@ const CRON_GROUPS = {
     '/api/cron/blog-apt-new',
     '/api/cron/blog-apt-landmark',
     '/api/cron/blog-redevelopment',
+    '/api/cron/blog-trade-analysis',
+    '/api/cron/blog-stock-deep',
+    '/api/cron/blog-subscription-strategy',
   ],
   // Phase 5: 시스템 작업 (마지막)
   system: [
