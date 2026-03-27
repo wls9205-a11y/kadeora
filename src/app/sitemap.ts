@@ -48,7 +48,15 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }));
-    return [...staticPages, ...regionPages];
+    // 섹터별 SEO 페이지
+    const SECTORS = ['반도체','금융','자동차','바이오','화학','철강','건설','유통','IT','에너지','통신','엔터','방산','조선'];
+    const sectorPages: MetadataRoute.Sitemap = SECTORS.map(s => ({
+      url: `${BASE}/stock/sector/${encodeURIComponent(s)}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }));
+    return [...staticPages, ...regionPages, ...sectorPages];
   }
 
   // ── 1: stock ──

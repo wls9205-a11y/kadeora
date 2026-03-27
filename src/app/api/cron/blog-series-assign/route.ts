@@ -96,7 +96,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       .order('series_order', { ascending: false, nullsFirst: false })
       .limit(1)
       .maybeSingle();
-    let nextOrder = (maxRow?.series_order || 0) + 1;
+    const nextOrder = (maxRow?.series_order || 0) + 1;
 
     // 배치 업데이트 (10건씩 병렬)
     for (let i = 0; i < postIds.length; i += 10) {
