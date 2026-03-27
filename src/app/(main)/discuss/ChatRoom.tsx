@@ -109,7 +109,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
       created_at: new Date().toISOString(),
       parent_id: replyTarget?.id || null,
       likes: [{ count: 0 }],
-      profiles: { id: user.id, nickname: (user as any).user_metadata?.nickname || '나', avatar_url: (user as any).user_metadata?.avatar_url || null, grade: null },
+      profiles: { id: user.id, nickname: (user as unknown as { user_metadata?: Record<string, string> }).user_metadata?.nickname || '나', avatar_url: (user as unknown as { user_metadata?: Record<string, string> }).user_metadata?.avatar_url || null, grade: null },
     };
     setMsgs(prev => [...prev, optimisticMsg]);
     setInput(''); setShowMention(false);

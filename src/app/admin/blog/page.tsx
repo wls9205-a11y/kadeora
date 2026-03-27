@@ -106,16 +106,16 @@ export default function AdminBlogPage() {
 
       {/* KPI */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
-        {[
+        {([
           { label: '총 글', value: total, sub: `오늘 +${todayCount}` },
           { label: '평균 길이', value: `${avgLen.toLocaleString()}자`, sub: avgLen >= 1500 ? '목표 달성' : '1500자 미달', color: avgLen >= 1500 ? 'var(--accent-green)' : 'var(--accent-red)' },
           { label: '총 조회', value: totalViews.toLocaleString() },
           { label: '카테고리', value: cats.length },
-        ].map(k => (
+        ] as { label: string; value: string | number; sub?: string; color?: string }[]).map(k => (
           <div key={k.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: (k as any).color ?? 'var(--text-primary)' }}>{k.value}</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: k.color ?? 'var(--text-primary)' }}>{k.value}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{k.label}</div>
-            {(k as any).sub && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{(k as any).sub}</div>}
+            {k.sub && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{k.sub}</div>}
           </div>
         ))}
       </div>

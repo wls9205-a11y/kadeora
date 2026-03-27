@@ -69,7 +69,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     try {
       const sb = (await import('@/lib/supabase-browser')).createSupabaseBrowser();
       const { data } = await sb.from('stock_quotes').select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active').order('market_cap', { ascending: false });
-      if (data?.length) setStocks(data as any);
+      if (data?.length) setStocks(data as unknown as Stock[]);
     } catch (e) { if (process.env.NODE_ENV === 'development') console.warn('[Stock.refresh]', e); }
   }, []);
 

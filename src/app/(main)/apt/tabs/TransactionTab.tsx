@@ -64,7 +64,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
   const paged = filtered.slice(0, page * 20);
   const totalCount = filtered.length;
   const avgAmount = totalCount > 0 ? Math.round(filtered.reduce((s: number, t) => s + (t.deal_amount || 0), 0) / totalCount) : 0;
-  const maxTrade = filtered.reduce((max: any, t: any) => (!max || (t.deal_amount || 0) > (max.deal_amount || 0)) ? t : max, null as any);
+  const maxTrade = filtered.reduce((max: any, t: any) => (!max || (t.deal_amount || 0) > (max.deal_amount || 0)) ? t : max, null as typeof filtered[0] | null);
 
   const regStats = regs.filter(r => r !== '전체').map(r => {
     const items = transactions.filter((t) => (t.region_nm || '기타') === r);
@@ -158,8 +158,8 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건</span>
         <div style={{ display: 'flex', gap: 4 }}>
-          {[{ key: 'date', label: '최신순' }, { key: 'price_desc', label: '고가순' }, { key: 'price_asc', label: '저가순' }, { key: 'area', label: '면적순' }].map(s => (
-            <button key={s.key} onClick={() => { setSort(s.key as any); setPage(1); }} style={{
+          {([{ key: 'date' as const, label: '최신순' }, { key: 'price_desc' as const, label: '고가순' }, { key: 'price_asc' as const, label: '저가순' }, { key: 'area' as const, label: '면적순' }]).map(s => (
+            <button key={s.key} onClick={() => { setSort(s.key); setPage(1); }} style={{
               fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
               background: sort === s.key ? 'var(--brand)' : 'var(--bg-hover)', color: sort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600,
             }}>{s.label}</button>
