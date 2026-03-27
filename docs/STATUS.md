@@ -1,5 +1,5 @@
-# 카더라 프로젝트 STATUS — 세션 42 (2026-03-27 KST)
-> 풀스택 전수 조사 + 주식/부동산 강화 + 보안/SEO/코드품질 개선 + 어드민 대시보드 진화
+# 카더라 프로젝트 STATUS — 세션 42~43 (2026-03-28 KST)
+> 공유 수정 + 시군구 수집 + 어드민 13가지 진화 + 블로그 갭 분석 + 호스팅어 준비
 > **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 프로덕션 현황 (실시간)
@@ -34,6 +34,60 @@
 | `as any` | 59건 (98→59, -39) |
 | `ignoreBuildErrors` | **false** (tsc 빌드 에러→배포 차단) |
 | `tsc --noEmit` | 0건 에러 |
+
+## 세션 43 (2026-03-28) — 공유 수정 + 시군구 + 블로그 갭 + 호스팅어
+
+### 공유 버튼 전수조사 + 수정 [COMPLETED]
+- **핵심 버그:** ShareButtons URL이 `/feed/{postId}` 고정 → 부동산/주식에서 404
+- `window.location.href`로 변경 (6파일), `postId` prop → optional
+- 모바일 네이티브 공유 시트(📤) 최우선 + 프로필 공유에도 추가
+- CSP form-action에 googletagmanager 추가 (콘솔 에러 해결)
+- 카카오 JS Key Vercel 등록 확인 (`30cf0c6a...` kadeora-prod)
+
+### 시군구 수집 강화 [COMPLETED]
+- InterestRegistration: 시도→시군구 드롭다운 + 유효성 검사
+- interest API: 회원 원클릭 시 profiles residence_district 자동 사용
+- ProfileHeader: 프로필 편집에서 시군구 수정 가능
+
+### 어드민 13가지 풀스택 진화 (ebdf37d) [COMPLETED]
+1. 숨겨진 3페이지 MissionControl 통합 (infra/notifications/payments)
+2. 환경변수 체크 UI (system.tsx)
+3. 푸시 알림 관리 (notices.tsx — 발송+이력)
+4. 실시간 활동 피드 (dashboard.tsx)
+5. 검색어 트렌드 (analytics.tsx 인사이트 탭)
+6. 공유 분석 (플랫폼별 비율)
+7. 유저 피드백 (FeedbackButton.tsx + /api/feedback)
+8. 기능 플래그 토글 (system.tsx + /api/admin/feature-flags)
+9. 콘텐츠 인사이트
+10. 주식/초대 현황
+11. 초대 시스템 (총 초대 수 + 초대왕 Top 5)
+12. 상점 관리 (shop.tsx + /api/admin/shop)
+13. GOD MODE 42→57크론
+
+**MissionControl 사이드바:** 11→13 섹션 (📢 공지·알림, 🛍️ 상점)
+
+### 블로그 콘텐츠 갭 분석 — 빠진 7가지 발견
+| # | 유형 | 데이터 소스 | 편수 |
+|---|------|------------|------|
+| 1 | 실거래가 트렌드 리포트 | apt_trade_monthly_stats | 17편 |
+| 2 | 종목 딥다이브 | stock_quotes+news+flow | 15편 |
+| 3 | 재개발 종합 리포트 | redevelopment_zones 전체 | 5편 |
+| 4 | 테마주/ETF 분석 | stock_themes | 10편 |
+| 5 | 투자 캘린더 | invest_calendar | 4편 |
+| 6 | A vs B 비교 | 부동산 8 + 주식 7 | 15편 |
+| 7 | 생활 정보 | general 카테고리 보강 | 10편 |
+| | **합계** | | **76편** |
+
+스팸 리스크: ✅ 안전 (15,400+ 대비 0.49%, DB 실데이터 기반, safeBlogInsert 유지)
+
+### 호스팅어 전수조사 프롬프트 준비
+11단계: 도메인+SSL → robots.txt → sitemap → RSS → mu-plugin(8개) → 파비콘 → Schema → .htaccess → WP 상태 → 사업자정보 제거 → 최종검증
+
+### 호스팅어 도메인/플랜 갱신 완료
+- [x] 주린이.site 도메인 — 만료 기간 충분
+- [x] 호스팅어 호스팅 플랜 — 갱신 완료
+
+---
 
 ## 세션 42 커밋 (15건+)
 
@@ -100,18 +154,20 @@
 ## 🟡 PENDING 작업
 
 ### 수동 (직접 해야 함)
-- [ ] **토스 정산 등록 (D-4!)** — 앱인토스 반려 → 서비스 내용 답변 제출 필요
+- [ ] **토스 정산 등록 (D-3!)** — 앱인토스 반려 → 서비스 내용 답변 제출 필요
+- [x] ~~주린이.site 도메인 갱신~~ ✅
+- [x] ~~호스팅어 플랜 갱신~~ ✅
 - [ ] 토스 라이브키 교체
 - [ ] KIS_APP_KEY 발급 (한국투자증권)
-- [ ] 주린이.site 도메인 갱신
 - [ ] Naver Search Advisor 재제출
+- [ ] GA 콘솔에서 stockcoin.net 데이터 스트림/크로스 도메인 제거
 
-### 다음 세션 (코드)
+### 다음 세션 (클로드 코드 프롬프트 준비됨)
+- [ ] **호스팅어 전수조사 + 사업자 정보 제거** → `claude-code-hostinger-full-audit.md`
+- [ ] **블로그 76편 대량 생성 (7가지 유형)** → `claude-code-blog-mass-content.md`
+- [ ] **stockcoin.net GA 제거** → `claude-code-stockcoin-ga-remove.md`
 - [ ] 지역별 현황 디자인 변경 (8개 옵션 미리보기 완료 → 선택 대기)
-- [ ] 검색창 2개 → 1개 통합 (글로벌 검색만 유지)
-- [ ] 공유 문구 수정 (주식/부동산) — 로컬 변경 완료, 커밋 대기
 - [ ] as any 59건 추가 정리 (Supabase 타입 재생성으로 근본 해결)
-- [ ] 미사용 인덱스 30개 삭제 (pg_stat 리셋 여부 확인 후)
 
 ## DB 변경 완료 (이번 세션)
 
@@ -125,4 +181,5 @@
 
 ## 트랜스크립트
 
-`/mnt/transcripts/` 디렉토리에 세션 42 관련 6개 파일 존재.
+`/mnt/transcripts/` 디렉토리에 세션 42~43 관련 파일 존재.
+- 세션 43: 공유 수정, 시군구 수집, 어드민 13가지 진화, 블로그 갭 분석, 호스팅어 전수조사 준비
