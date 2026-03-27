@@ -26,15 +26,16 @@ const HIGHLIGHT_BOX_STYLE = `
 /**
  * 숫자 통계 하이라이트
  * "약 3.2조원" → 하이라이트 스팬
- * "전년 대비 15.3% 증가" → 증감 표시
+ * HTML 태그 속성(href, style 등) 안의 숫자는 건드리지 않음
  */
 function highlightStats(html: string): string {
-  // 큰 숫자 (억, 조, 만, %) 패턴
+  // HTML 태그와 텍스트 노드를 분리하여 텍스트만 처리
   return html.replace(
-    /([약]?\s*)([\d,.]+)\s*(조원?|억원?|만원?|만\s*세대|만\s*호|%|퍼센트)/g,
-    (match, prefix, num, unit) => {
-      const isPercent = unit.includes('%') || unit.includes('퍼센트');
-      return `${prefix}<span style="${STAT_CARD_STYLE}">${num}${unit}</span>`;
+    /(<[^>]+>)|([약]?\s*)([\d,.]+)\s*(조원?|억원?|만원?|만\s*세대|만\s*호|퍼센트)/g,
+    (match, tag, prefix, num, unit) => {
+      if (tag) return tag; // HTML 태그는 그대로 유지
+      if (!num || !unit) return match;
+      return `${prefix || ''}<span style="${STAT_CARD_STYLE}">${num}${unit}</span>`;
     }
   );
 }
