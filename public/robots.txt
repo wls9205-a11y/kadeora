@@ -37,3 +37,6 @@ Crawl-delay: 2
 Host: https://kadeora.app
 Sitemap: https://kadeora.app/sitemap.xml
 Sitemap: https://kadeora.app/feed.xml
+
+# AI 크롤러 안내
+# https://kadeora.app/llms.txt

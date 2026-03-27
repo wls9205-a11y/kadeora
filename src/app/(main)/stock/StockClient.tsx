@@ -34,6 +34,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const [moversTab, setMoversTab] = useState<'up'|'down'|'volume'>('up');
   const [sectorFilter, setSectorFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [stockListLimit, setStockListLimit] = useState(30);
   const [exchangeRate, setExchangeRate] = useState(1500);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
@@ -121,11 +122,12 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       const bZero = b.price === 0 ? 1 : 0;
       if (aZero !== bZero) return aZero - bZero;
       return (b.market_cap ?? 0) - (a.market_cap ?? 0);
-    }).slice(0, 50);
+    });
   }
 
   const filteredStocks = getFilteredStocks();
   const currentTab = isDomestic ? domesticTab : globalTab;
+  const displayStocks = currentTab === 'ranking' ? filteredStocks.slice(0, stockListLimit) : filteredStocks;
 
   const toggleWatchlist = useCallback(async (symbol: string) => {
     const isWatched = watchlistSymbols.includes(symbol);
@@ -307,13 +309,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
 
       {/* 국내/해외 메인 토글 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-        <button onClick={() => { setMode('domestic'); setSearch(''); setSectorFilter('all'); }} aria-pressed={isDomestic} style={{
+        <button onClick={() => { setMode('domestic'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }} aria-pressed={isDomestic} style={{
           flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 15, fontWeight: 700,
           background: isDomestic ? 'var(--brand)' : 'var(--bg-surface)',
           color: isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           border: isDomestic ? 'none' : '1px solid var(--border)', cursor: 'pointer',
         }}>🇰🇷 국내주식</button>
-        <button onClick={() => { setMode('global'); setSearch(''); setSectorFilter('all'); }} aria-pressed={!isDomestic} style={{
+        <button onClick={() => { setMode('global'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }} aria-pressed={!isDomestic} style={{
           flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 15, fontWeight: 700,
           background: !isDomestic ? 'var(--accent-blue)' : 'var(--bg-surface)',
           color: !isDomestic ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -516,10 +518,12 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         const sectorSet = new Set(targetStocks.map(s => s.sector).filter((s): s is string => !!s));
         const sectorList = ['all', ...Array.from(sectorSet).sort()];
         if (sectorList.length < 3) return null;
+        const sectorCounts: Record<string, number> = { all: targetStocks.length };
+        targetStocks.forEach(s => { if (s.sector) sectorCounts[s.sector] = (sectorCounts[s.sector] || 0) + 1; });
         return (
         <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
           {sectorList.map(s => (
-            <button key={s} onClick={() => setSectorFilter(s)} style={{ padding: '4px 10px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: sectorFilter===s?'var(--brand)':'var(--bg-hover)', color: sectorFilter===s?'var(--text-inverse)':'var(--text-tertiary)' }}>{s==='all'?'전체':s}</button>
+            <button key={s} onClick={() => { setSectorFilter(s); setStockListLimit(30); }} style={{ padding: '4px 10px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0, background: sectorFilter===s?'var(--brand)':'var(--bg-hover)', color: sectorFilter===s?'var(--text-inverse)':'var(--text-tertiary)' }}>{s==='all'?'전체':s}{sectorCounts[s] ? ` ${sectorCounts[s]}` : ''}</button>
           ))}
         </div>
         );
@@ -570,7 +574,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 종목 리스트 */}
       {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && currentTab !== 'portfolio' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px' }}>
-          {filteredStocks.length === 0 ? (
+          {displayStocks.length === 0 ? (
             <div style={{ padding: 40, textAlign: 'center' }}>
               {currentTab === 'watchlist' ? (
                 <div>
@@ -593,7 +597,18 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 </div>
               )}
             </div>
-          ) : filteredStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
+          ) : displayStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
+          {/* 더보기 버튼 (시총 탭) */}
+          {currentTab === 'ranking' && filteredStocks.length > stockListLimit && (
+            <button onClick={() => setStockListLimit(prev => prev + 30)} style={{
+              display: 'block', width: '100%', padding: '12px 0', margin: '8px 0 12px',
+              background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8,
+              color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600,
+              cursor: 'pointer',
+            }}>
+              더보기 ({stockListLimit}/{filteredStocks.length}종목)
+            </button>
+          )}
         </div>
       )}
 

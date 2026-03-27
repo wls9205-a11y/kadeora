@@ -215,6 +215,14 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           { k: 'trade' as const, l: '💰 실거래', type: 'transaction', data: lazyTx || [] },
         ].map(({ k, l, type, data }) => {
           const hasNew = (data as any[]).some((item: Record<string, any>) => isNew(item, type));
+          // 통합 검색 시 탭별 매칭 건수 계산
+          const matchCount = globalSearch ? (() => {
+            const q = globalSearch.toLowerCase();
+            return (data as any[]).filter((item: Record<string, any>) => {
+              const fields = [item.house_nm, item.apt_name, item.district_name, item.region_nm, item.region, item.hssply_adres, item.address, item.sigungu, item.sigungu_nm, item.constructor_nm, item.constructor, item.dong];
+              return fields.some(f => f && String(f).toLowerCase().includes(q));
+            }).length;
+          })() : null;
           return (
             <button key={k} onClick={() => handleTabChange(k)} aria-pressed={activeTab === k} style={{
               flex: '1 0 auto', padding: '8px 6px', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
@@ -224,12 +232,16 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
             }}>
               {l}
-              {data.length > 0 && <span style={{ fontSize: 10, marginLeft: 2, opacity: 0.7 }}>{
-                type === 'unsold'
-                  ? (() => { const total = (data as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0); return total > 999 ? `${(total/1000).toFixed(0)}k` : total; })()
-                  : data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length
-              }</span>}
-              {hasNew && activeTab !== k && <span style={{ position: 'absolute', top: 4, right: 4, width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-red)' }} />}
+              {globalSearch ? (
+                <span style={{ fontSize: 10, marginLeft: 2, opacity: matchCount ? 1 : 0.4, fontWeight: matchCount ? 800 : 500 }}>{matchCount}</span>
+              ) : (
+                data.length > 0 && <span style={{ fontSize: 10, marginLeft: 2, opacity: 0.7 }}>{
+                  type === 'unsold'
+                    ? (() => { const total = (data as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0); return total > 999 ? `${(total/1000).toFixed(0)}k` : total; })()
+                    : data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length
+                }</span>
+              )}
+              {hasNew && activeTab !== k && !globalSearch && <span style={{ position: 'absolute', top: 4, right: 4, width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-red)' }} />}
             </button>
           );
         })}
