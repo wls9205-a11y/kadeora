@@ -29,10 +29,6 @@ const nextConfig: NextConfig = {
 
   experimental: {
     optimizePackageImports: ['@supabase/supabase-js', 'lucide-react', 'marked'],
-    outputFileTracingIncludes: {
-      '/api/og':        ['./public/fonts/**'],
-      '/api/og-square': ['./public/fonts/**'],
-    },
   },
 
   env: {
