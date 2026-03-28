@@ -1,7 +1,9 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 /* ── 카테고리 설정 ── */
 const CAT: Record<string, { a: string; b: string; g: [string,string,string]; L: string; I: string; E: string }> = {
@@ -17,13 +19,19 @@ const CAT: Record<string, { a: string; b: string; g: [string,string,string]; L: 
 
 const SITE = 'https://kadeora.app';
 
-/* ── 폰트: 빌드타임 번들링 ──
-   import.meta.url 기반 → Edge Function에 woff 파일이 번들됨
-   런타임 HTTP fetch 0회, cold start 영향 0
+/* ── 폰트: Node.js fs.readFileSync — 100% 확실 ──
+   Edge Runtime의 import.meta.url/fetch 불안정 → Node.js로 전환
+   public/fonts/에서 직접 읽기, 캐시되므로 cold start 1회만
 ── */
-const fontPromise = fetch(
-  new URL('./NotoSansKR-Bold.woff', import.meta.url)
-).then(res => res.arrayBuffer()).catch(() => null);
+let _fontCache: ArrayBuffer | null = null;
+function loadFont(): ArrayBuffer | null {
+  if (_fontCache) return _fontCache;
+  try {
+    const buf = readFileSync(join(process.cwd(), 'public/fonts/NotoSansKR-Bold.woff'));
+    _fontCache = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    return _fontCache;
+  } catch { return null; }
+}
 
 function fo(d: ArrayBuffer | null) {
   return d ? { fonts: [{ name: 'NK', data: d, style: 'normal' as const, weight: 700 as const }] } : {};
@@ -359,7 +367,7 @@ function D6(C: typeof CAT[string], title: string, sub: string, author: string, f
 /* ── GET handler ── */
 export async function GET(req: NextRequest) {
   try {
-    const fontData = await fontPromise;
+    const fontData = loadFont();
     const ff = fontData ? 'NK, sans-serif' : 'sans-serif';
     const opts = fo(fontData);
     const CACHE = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };

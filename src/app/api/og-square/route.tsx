@@ -1,7 +1,9 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 // og-square: 630×630 — 네이버 모바일 1:1 크롭 전용
 // 모든 핵심 정보가 중앙 100%에 집중 → 크롭 손실 없음
@@ -31,10 +33,16 @@ const CAT_KPI: Record<string, { kw: string; kwv: string }> = {
 
 const SITE = 'https://kadeora.app';
 
-/* ── 폰트: 빌드타임 번들링 ── */
-const fontPromise = fetch(
-  new URL('./NotoSansKR-Bold.woff', import.meta.url)
-).then(res => res.arrayBuffer()).catch(() => null);
+/* ── 폰트: Node.js fs.readFileSync — 100% 확실 ── */
+let _fontCache: ArrayBuffer | null = null;
+function loadFont(): ArrayBuffer | null {
+  if (_fontCache) return _fontCache;
+  try {
+    const buf = readFileSync(join(process.cwd(), 'public/fonts/NotoSansKR-Bold.woff'));
+    _fontCache = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    return _fontCache;
+  } catch { return null; }
+}
 
 function LogoSVG({ size }: { size: number }) {
   return (
@@ -55,7 +63,7 @@ function LogoSVG({ size }: { size: number }) {
 
 export async function GET(req: NextRequest) {
   try {
-    const fontData = await fontPromise;
+    const fontData = loadFont();
     const ff = fontData ? 'NK, sans-serif' : 'sans-serif';
     const opts = fontData ? { fonts: [{ name: 'NK', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {};
     const CACHE = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };
