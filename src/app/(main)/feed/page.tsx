@@ -45,14 +45,14 @@ async function getPosts(category: string, region: string = 'all', sort: SortKey 
     if (!userId) return null;
     const { data: follows } = await sb.from('follows').select('followee_id').eq('follower_id', userId);
     const ids = (follows ?? []).map((f: { followee_id: string }) => f.followee_id);
-    if (ids.length === 0) return [] as PostWithProfile[];
+    if (ids.length === 0) return [] as unknown as PostWithProfile[];
     const { data } = await sb.from('posts')
       .select('id,title,excerpt,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,tags,stock_tags,apt_tags,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
       .eq('is_deleted', false)
       .in('author_id', ids)
       .order('created_at', { ascending: false })
       .limit(20);
-    return (data ?? []) as PostWithProfile[];
+    return (data ?? []) as unknown as PostWithProfile[];
   }
 
   const orderCol = sort === 'popular' ? 'likes_count' : sort === 'comments' ? 'comments_count' : 'created_at';
@@ -68,7 +68,7 @@ async function getPosts(category: string, region: string = 'all', sort: SortKey 
   const result = await withTimeout(q);
   const data = (result as { data?: PostWithProfile[] } | null)?.data;
   if (!data || data.length === 0) return null;
-  return data as PostWithProfile[];
+  return data as unknown as PostWithProfile[];
 }
 
 

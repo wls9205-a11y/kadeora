@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { cronAuth } from '@/lib/cron-auth';
 
 export async function POST(req: NextRequest) {
   // 어드민 또는 CRON_SECRET으로 인증
@@ -15,7 +14,7 @@ export async function POST(req: NextRequest) {
     } catch { return false; }
   })();
 
-  const hasCronAuth = cronAuth(req);
+  const hasCronAuth = req.headers.get('authorization') === `Bearer ${process.env.CRON_SECRET}`;
   if (!isAdmin && !hasCronAuth) return NextResponse.json({ error: '권한 없음' }, { status: 403 });
 
   try {

@@ -5,10 +5,31 @@ import { Badge, C, DataTable, KPI, KPICard } from '../admin-shared';
 
 export default function GodModeSection() {
   const [running, setRunning] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Record<string, unknown>[]>([]);
   const [elapsed, setElapsed] = useState(0);
   const [mode, setMode] = useState<string>('full');
-  const timerRef = useRef<any>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [specialLog, setSpecialLog] = useState('');
+  const [specialRunning, setSpecialRunning] = useState(false);
+
+  const runSpecial = async (endpoint: string, label: string, body?: Record<string, unknown>) => {
+    if (specialRunning) return;
+    setSpecialRunning(true);
+    setSpecialLog(`⏳ ${label} 실행 중...`);
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json();
+      setSpecialLog(`✅ ${label} 완료 — ${JSON.stringify(data).slice(0, 200)}`);
+    } catch (e: unknown) {
+      setSpecialLog(`❌ ${label} 실패 — ${errMsg(e)}`);
+    } finally {
+      setSpecialRunning(false);
+    }
+  };
 
   const run = async (m: string) => {
     setRunning(true);
@@ -33,7 +54,7 @@ export default function GodModeSection() {
     } catch (e: unknown) {
       setResults([{ name: 'ERROR', ok: false, error: errMsg(e) }]);
     } finally {
-      clearInterval(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
       setElapsed(Date.now() - start);
       setRunning(false);
     }
@@ -93,15 +114,38 @@ export default function GodModeSection() {
           <DataTable
             headers={['크론', '상태', 'HTTP', '소요시간', '에러']}
             rows={results.map(r => [
-              <span key="n" style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{r.name}</span>,
+              <span key="n" style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{r.name as string}</span>,
               r.ok ? <Badge key="s" color={C.green}>✓ OK</Badge> : <Badge key="s" color={C.red}>✗ FAIL</Badge>,
-              r.status ? <span key="h" style={{ color: r.status >= 400 ? C.red : r.status >= 200 ? C.green : C.textDim, fontFamily: 'monospace', fontSize: 12 }}>{r.status}</span> : '—',
-              r.duration ? `${(r.duration / 1000).toFixed(1)}s` : '—',
-              r.error ? <span key="e" style={{ color: C.red, fontSize: 11, maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{r.error}</span> : '—',
+              r.status ? <span key="h" style={{ color: (r.status as number) >= 400 ? C.red : (r.status as number) >= 200 ? C.green : C.textDim, fontFamily: 'monospace', fontSize: 12 }}>{r.status as number}</span> : '—',
+              r.duration ? `${((r.duration as number) / 1000).toFixed(1)}s` : '—',
+              r.error ? <span key="e" style={{ color: C.red, fontSize: 11, maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{r.error as string}</span> : '—',
             ])}
           />
         </>
       )}
+
+      {/* ━━━ 특수 작업 ━━━ */}
+      <div style={{ marginTop: 32, borderTop: `1px solid ${C.border}`, paddingTop: 24 }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 4 }}>🛠 특수 작업</div>
+        <div style={{ fontSize: 12, color: C.textDim, marginBottom: 16 }}>크론 외 1회성 관리 작업</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          <button onClick={() => runSpecial('/api/admin/seed-longtail-80', '롱테일 80편 시드')}
+            disabled={specialRunning}
+            style={{ padding: '10px 16px', borderRadius: 10, border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            📝 롱테일 80편 시드 생성
+          </button>
+          <button onClick={() => runSpecial('/api/admin/blog-limit-reset', 'daily_create_limit 10 원복')}
+            disabled={specialRunning}
+            style={{ padding: '10px 16px', borderRadius: 10, border: `1px solid ${C.cyan}40`, background: C.card, color: C.cyan, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            🔢 블로그 생성 한도 원복 (→10)
+          </button>
+        </div>
+        {specialLog && (
+          <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 8, background: C.card, border: `1px solid ${C.border}`, fontSize: 12, color: specialLog.startsWith('✅') ? C.green : specialLog.startsWith('❌') ? C.red : C.textSec, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            {specialLog}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

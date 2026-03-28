@@ -3330,6 +3330,7 @@ export type Database = {
         Row: {
           apt_tags: string[]
           author_id: string | null
+          bookmarks_count: number
           category: string
           city: string
           comments_count: number
@@ -3344,6 +3345,7 @@ export type Database = {
           is_anonymous: boolean
           is_deleted: boolean
           is_hidden: boolean | null
+          is_pinned: boolean
           likes_count: number
           region_id: string
           report_count: number
@@ -3358,6 +3360,7 @@ export type Database = {
         }
         Insert: {
           apt_tags?: string[]
+          bookmarks_count?: number
           author_id?: string | null
           category: string
           city?: string
@@ -3373,8 +3376,8 @@ export type Database = {
           is_anonymous?: boolean
           is_deleted?: boolean
           is_hidden?: boolean | null
+          is_pinned?: boolean
           likes_count?: number
-          region_id: string
           report_count?: number
           room_id?: number | null
           slug?: string | null
@@ -3388,6 +3391,7 @@ export type Database = {
         Update: {
           apt_tags?: string[]
           author_id?: string | null
+          bookmarks_count?: number
           category?: string
           city?: string
           comments_count?: number
@@ -3402,6 +3406,7 @@ export type Database = {
           is_anonymous?: boolean
           is_deleted?: boolean
           is_hidden?: boolean | null
+          is_pinned?: boolean
           likes_count?: number
           region_id?: string
           report_count?: number

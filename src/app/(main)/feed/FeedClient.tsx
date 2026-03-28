@@ -169,7 +169,7 @@ export default function FeedClient({
       if (activeCategory === 'local' && activeRegion !== 'all') q = q.eq('region_id', activeRegion);
       const { data } = await q;
       if (data && data.length > 0) {
-        setPosts((prev: PostWithProfile[]) => [...prev, ...data as PostWithProfile[]]);
+        setPosts((prev: PostWithProfile[]) => [...prev, ...data as unknown as PostWithProfile[]]);
         if (data.length < PAGE_SIZE) setHasMore(false);
       } else { setHasMore(false); }
     } catch { /* ignore */ } finally { setLoadingMore(false); }
