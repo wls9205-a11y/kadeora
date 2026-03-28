@@ -166,7 +166,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       {/* Compact tile grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(105px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
         gap: 6,
       }}>
         {regions.map((r, i) => {
@@ -207,7 +207,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                   </span>
                 </div>
                 {/* Mini stacked bar */}
-                <div style={{ display: 'flex', width: 32, height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
+                <div style={{ display: 'flex', width: 40, height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
                   {CAT_KEYS.map(k => {
                     const v = r[k];
                     if (v <= 0) return null;
