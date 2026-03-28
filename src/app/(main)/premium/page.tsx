@@ -15,6 +15,12 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 프리미엄' }],
   },
+  other: {
+    'naver:author': '카더라',
+    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:updated_time': new Date().toISOString(),
+    'og:updated_time': new Date().toISOString(),
+  },
 };
 
 const FREE_FEATURES = [
@@ -38,7 +44,25 @@ const PREMIUM_FEATURES = [
 
 export default function PremiumPage() {
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 80px' }}>
+    <article style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 80px' }}>
+
+      {/* 브레드크럼 */}
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+        <span>›</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>프리미엄</span>
+      </nav>
+
+      {/* OG 히어로 이미지 (검색엔진 썸네일) */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general&subtitle=${encodeURIComponent('AI 분석 · 청약 알림 · 광고 없는 피드')}`} alt="카더라 프리미엄 멤버십 — AI 종목 분석 청약 알림 광고 없는 피드" width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
+
+      <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'block', marginBottom: 12 }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
+
+      {/* FAQPage JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '카더라 프리미엄 멤버십 가격은?', acceptedAnswer: { '@type': 'Answer', text: '월 9,900원입니다. AI 종목 분석 리포트, 청약 마감 알림, 광고 없는 피드, 전용 배지 등 프리미엄 기능을 이용할 수 있습니다.' } }, { '@type': 'Question', name: '프리미엄 가입 없이도 카더라를 사용할 수 있나요?', acceptedAnswer: { '@type': 'Answer', text: '네, 카더라의 주식 시세 조회, 청약 일정 확인, 블로그 열람, 커뮤니티 글 작성은 모두 무료입니다. 프리미엄은 추가 기능을 제공합니다.' } }] }) }} />
+      {/* BreadcrumbList JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '홈', item: SITE }, { '@type': 'ListItem', position: 2, name: '프리미엄 멤버십' }] }) }} />
 
       {/* 히어로 */}
       <div className="kd-card-glow" style={{
@@ -186,6 +210,6 @@ export default function PremiumPage() {
           { '@type': 'ListItem', position: 2, name: '프리미엄' },
         ],
       }) }} />
-    </div>
+    </article>
   );
 }
