@@ -17,18 +17,45 @@ const CAT: Record<string, { color: string; dim: string; bg: [string,string,strin
 const SITE = process.env.NEXT_PUBLIC_BASE_URL || 'https://kadeora.app';
 
 let cachedFont: ArrayBuffer | null = null;
+let fontLoadAttempted = false;
+
 async function loadFont(): Promise<ArrayBuffer | null> {
   if (cachedFont) return cachedFont;
+  if (fontLoadAttempted) return null; // 이미 실패한 경우 재시도 안 함
+  fontLoadAttempted = true;
+  
+  // 1순위: Google Fonts subset API (한국어만, ~35KB)
+  const GOOGLE_FONT_URL = 'https://fonts.gstatic.com/s/notosanskr/v36/PbyxFmXiEBPT4ITbgNA5Cgm20xz64px_1hVWr0wuPNGmlQNMEfD4.0.woff2';
   try {
-    const res = await fetch(`${SITE}/fonts/NotoSansKR-Bold.woff`);
-    if (res.ok) { cachedFont = await res.arrayBuffer(); return cachedFont; }
+    const res = await fetch(GOOGLE_FONT_URL, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const buf = await res.arrayBuffer();
+      // woff2 헤더 확인 (woff2 = satori 미지원, 건너뜀)
+      const header = new Uint8Array(buf.slice(0, 4));
+      const isWoff2 = header[0] === 0x77 && header[1] === 0x4F && header[2] === 0x46 && header[3] === 0x32;
+      if (!isWoff2) { cachedFont = buf; return cachedFont; }
+    }
   } catch { /* ignore */ }
-  return null;
+
+  // 2순위: 로컬 woff 파일
+  try {
+    const res = await fetch(`${SITE}/fonts/NotoSansKR-Bold.woff`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const buf = await res.arrayBuffer();
+      // woff2 여부 확인
+      const header = new Uint8Array(buf.slice(0, 4));
+      const isWoff2 = header[0] === 0x77 && header[1] === 0x4F && header[2] === 0x46 && header[3] === 0x32;
+      if (!isWoff2) { cachedFont = buf; return cachedFont; }
+    }
+  } catch { /* ignore */ }
+
+  return null; // 폰트 없어도 sans-serif 폴백으로 OG 생성
 }
 
 export async function GET(req: NextRequest) {
   try {
-    const fontData = await loadFont();
+    let fontData: ArrayBuffer | null = null;
+    try { fontData = await loadFont(); } catch { /* 폰트 없어도 계속 */ }
     const fonts = fontData ? [{ name: 'NK', data: fontData, style: 'normal' as const, weight: 700 as const }] : [];
     const ff = fontData ? 'NK, sans-serif' : 'sans-serif';
     const CACHE = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };
