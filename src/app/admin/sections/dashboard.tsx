@@ -10,6 +10,37 @@ export default function DashboardSection() {
   const [showCronDetail, setShowCronDetail] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // GOD MODE 전체실행 상태
+  const [godRunning, setGodRunning] = useState(false);
+  const [godResults, setGodResults] = useState<any[] | null>(null);
+  const [godElapsed, setGodElapsed] = useState(0);
+  const godTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const runGodMode = async (mode = 'full') => {
+    if (godRunning) return;
+    setGodRunning(true);
+    setGodResults(null);
+    setGodElapsed(0);
+    const start = Date.now();
+    godTimerRef.current = setInterval(() => setGodElapsed(Date.now() - start), 200);
+    try {
+      const res = await fetch('/api/admin/god-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode }),
+      });
+      const d = await res.json();
+      setGodResults(d.results || []);
+    } catch {
+      setGodResults([{ name: 'ERROR', ok: false }]);
+    } finally {
+      if (godTimerRef.current) clearInterval(godTimerRef.current);
+      setGodElapsed(Date.now() - start);
+      setGodRunning(false);
+      setTimeout(loadData, 2000); // 2초 후 대시보드 새로고침
+    }
+  };
+
   const loadData = useCallback(() => {
     fetch('/api/admin/dashboard?section=overview').then(r => r.json()).then(d => {
       setData(d);
@@ -58,11 +89,69 @@ export default function DashboardSection() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <button onClick={() => runGodMode('full')} disabled={godRunning} style={{
+            padding: '6px 14px', borderRadius: 8, border: 'none',
+            background: godRunning ? C.yellow : 'linear-gradient(135deg, #2563EB, #7C3AED)',
+            color: '#fff', cursor: godRunning ? 'wait' : 'pointer', fontSize: 11, fontWeight: 800,
+            display: 'flex', alignItems: 'center', gap: 5,
+            boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
+            animation: godRunning ? 'pulse 1s infinite' : 'none',
+          }}>
+            {godRunning ? `⏳ ${(godElapsed / 1000).toFixed(1)}s` : '⚡ 전체실행'}
+          </button>
           <button onClick={() => setAutoRefresh(!autoRefresh)} style={{ padding: '4px 8px', borderRadius: 6, border: `1px solid ${autoRefresh ? C.green + '40' : C.border}`, background: autoRefresh ? C.green + '15' : C.card, color: autoRefresh ? C.green : C.textDim, cursor: 'pointer', fontSize: 10, fontWeight: 600 }}>
-            {autoRefresh ? '🟢 LIVE' : '⏸ 일시정지'}
+            {autoRefresh ? '🟢 LIVE' : '⏸ 정지'}
           </button>
           <button onClick={loadData} style={{ padding: '5px 12px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.card, color: C.textSec, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}>🔄</button>
         </div>
+      </div>
+
+      {/* ── GOD MODE 실행 결과 (인라인) ── */}
+      {godResults && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>⚡ 실행 결과</span>
+              <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>✅ {godResults.filter((r: any) => r.ok).length}</span>
+              {godResults.filter((r: any) => !r.ok).length > 0 && <span style={{ fontSize: 10, color: C.red, fontWeight: 700 }}>❌ {godResults.filter((r: any) => !r.ok).length}</span>}
+              <span style={{ fontSize: 9, color: C.textDim }}>{(godElapsed / 1000).toFixed(1)}초</span>
+            </div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {godResults.filter((r: any) => !r.ok).length > 0 && (
+                <button onClick={() => runGodMode('failed')} style={{ padding: '3px 8px', borderRadius: 4, border: `1px solid ${C.red}40`, background: C.red + '10', color: C.red, fontSize: 9, fontWeight: 700, cursor: 'pointer' }}>🔴 실패 재시도</button>
+              )}
+              <button onClick={() => setGodResults(null)} style={{ padding: '3px 8px', borderRadius: 4, border: `1px solid ${C.border}`, background: C.card, color: C.textDim, fontSize: 9, cursor: 'pointer' }}>✕ 닫기</button>
+            </div>
+          </div>
+          <div style={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
+            {godResults.map((r: any, i: number) => (
+              <div key={i} style={{ flex: 1, background: r.ok ? C.green : C.red, borderRight: i < godResults.length - 1 ? '1px solid var(--bg-base)' : 'none' }} title={r.name || r.endpoint} />
+            ))}
+          </div>
+          {godResults.filter((r: any) => !r.ok).length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 4 }}>
+              {godResults.filter((r: any) => !r.ok).map((r: any, i: number) => (
+                <Badge key={i} color={C.red}>{(r.name || r.endpoint || '').replace('/api/cron/', '')}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 카테고리별 빠른실행 버튼 ── */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+        {[
+          { mode: 'data', label: '📊 데이터', color: C.green },
+          { mode: 'process', label: '⚙️ 가공', color: C.cyan },
+          { mode: 'ai', label: '🤖 AI', color: C.purple },
+          { mode: 'content', label: '📝 콘텐츠', color: C.yellow },
+          { mode: 'system', label: '🔧 시스템', color: C.textSec },
+        ].map(g => (
+          <button key={g.mode} onClick={() => runGodMode(g.mode)} disabled={godRunning}
+            style={{ padding: '4px 10px', borderRadius: 6, border: `1px solid ${g.color}30`, background: `${g.color}10`, color: g.color, fontSize: 10, fontWeight: 700, cursor: godRunning ? 'wait' : 'pointer' }}>
+            {g.label}
+          </button>
+        ))}
       </div>
 
       {/* ── Row 1: 시스템 헬스 바 ── */}
@@ -76,14 +165,16 @@ export default function DashboardSection() {
         {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
       </div>
 
-      {/* ── Row 2: 핵심 KPI 6카드 + 어제 대비 ── */}
-      <div className="mc-g6" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8, marginBottom: 12 }}>
+      {/* ── Row 2: 핵심 KPI 8카드 + 어제 대비 ── */}
+      <div className="mc-g6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
         {[
           { icon: '👁️', label: '오늘 PV', value: visitors?.todayPV ?? 0, color: C.brand, yest: yesterday?.pv },
           { icon: '👤', label: '오늘 UV', value: visitors?.todayUV ?? 0, color: C.cyan, yest: null },
-          { icon: '📊', label: '주간 PV', value: visitors?.weekPV ?? 0, color: C.brand, yest: null },
           { icon: '🧑‍🤝‍🧑', label: '전체 유저', value: kpi.users, color: C.green, yest: null },
           { icon: '📝', label: '게시글', value: kpi.posts, color: C.purple, yest: null },
+          { icon: '📰', label: '블로그', value: kpi.blogs, color: C.yellow, yest: null },
+          { icon: '📈', label: '주식종목', value: kpi.stocks, color: C.cyan, yest: null },
+          { icon: '🏢', label: '부동산', value: (kpi.subscriptions ?? 0) + (kpi.unsold ?? 0) + (kpi.redev ?? 0), color: C.green, yest: null },
           { icon: '🚨', label: '미처리 신고', value: kpi.pendingReports, color: kpi.pendingReports > 0 ? C.red : C.green, yest: null },
         ].map(item => {
           const d = item.yest != null ? delta(item.value, item.yest) : null;
@@ -373,6 +464,70 @@ export default function DashboardSection() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* ── Row 5.5: 어제 대비 증감 요약 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 14px', marginBottom: 12, display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: C.textSec }}>📊 어제 대비</span>
+        {[
+          { label: 'PV', today: visitors?.todayPV ?? 0, yest: yesterday?.pv ?? 0 },
+          { label: '글', today: recentPosts?.length ?? 0, yest: yesterday?.posts ?? 0 },
+          { label: '댓글', today: commentStats?.today ?? 0, yest: yesterday?.comments ?? 0 },
+          { label: '신규유저', today: kpi.newUsersWeek ?? 0, yest: yesterday?.newUsers ?? 0 },
+        ].map(item => {
+          const d = delta(item.today, item.yest);
+          return (
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 10, color: C.textDim }}>{item.label}</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: C.text }}>{fmt(item.today)}</span>
+              {d && <span style={{ fontSize: 9, fontWeight: 700, color: d.color }}>{d.arrow}{Math.abs(d.d)}</span>}
+            </div>
+          );
+        })}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 10, color: C.textDim }}>주간PV</span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: C.brand }}>{fmt(visitors?.weekPV ?? 0)}</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>UV</span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: C.cyan }}>{fmt(visitors?.weekUV ?? 0)}</span>
+        </div>
+      </div>
+
+      {/* ── Row 5.6: 자동발행 파이프라인 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🔄 자동발행 파이프라인</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {[
+            { label: '크론 수집', value: cronByCategory?.blog?.total ?? 0, sub: `${cronByCategory?.blog?.success ?? 0}성공`, color: C.brand, icon: '⚡' },
+            { label: '', value: 0, sub: '', color: '', icon: '→' },
+            { label: 'AI 생성', value: cronByCategory?.blog?.created ?? 0, sub: '편 생산', color: C.purple, icon: '🤖' },
+            { label: '', value: 0, sub: '', color: '', icon: '→' },
+            { label: '발행 큐', value: blogProduction?.queue ?? 0, sub: '대기', color: C.yellow, icon: '📋' },
+            { label: '', value: 0, sub: '', color: '', icon: '→' },
+            { label: '발행 완료', value: blogProduction?.today ?? 0, sub: '오늘', color: C.green, icon: '✅' },
+          ].map((step, i) => step.icon === '→' ? (
+            <div key={i} style={{ fontSize: 14, color: C.textDim, padding: '0 2px' }}>→</div>
+          ) : (
+            <div key={i} style={{ flex: 1, textAlign: 'center', padding: '8px 4px', background: `${step.color}08`, borderRadius: 8, border: `1px solid ${step.color}20` }}>
+              <div style={{ fontSize: 12, marginBottom: 2 }}>{step.icon}</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: step.color }}>{fmt(step.value)}</div>
+              <div style={{ fontSize: 8, color: C.textDim, marginTop: 1 }}>{step.label}</div>
+              <div style={{ fontSize: 8, color: step.color, fontWeight: 600 }}>{step.sub}</div>
+            </div>
+          ))}
+        </div>
+        {/* 발행 가능 글 + 리라이팅 진행률 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', gap: 12, fontSize: 10 }}>
+            <span style={{ color: C.textDim }}>발행가능 <strong style={{ color: C.cyan }}>{fmt(blogProduction?.readyToPublish ?? 0)}</strong>편</span>
+            <span style={{ color: C.textDim }}>리라이팅 <strong style={{ color: (seo?.blogRewrittenPct ?? 0) > 50 ? C.green : C.yellow }}>{seo?.blogRewrittenPct ?? 0}%</strong></span>
+            <span style={{ color: C.textDim }}>총 <strong style={{ color: C.text }}>{fmt(kpi.blogs)}</strong>편</span>
+          </div>
+          {cron.anthropicCreditWarning && (
+            <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: '#FF6B1A', fontWeight: 700, textDecoration: 'none', padding: '2px 6px', background: '#FF6B1A15', borderRadius: 4, border: '1px solid #FF6B1A30' }}>
+              ⚠️ AI 크레딧 충전 필요
+            </a>
+          )}
         </div>
       </div>
 
