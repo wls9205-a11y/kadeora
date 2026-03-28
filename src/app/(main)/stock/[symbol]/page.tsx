@@ -55,6 +55,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'article:section': '주식',
         'article:tag': `${s.name},${symbol},${s.market},주식,시세,차트`,
         'dg:plink': `${SITE_URL}/stock/${symbol}`,
+        'naver:author': '카더라',
+        'og:updated_time': s.updated_at || new Date().toISOString(),
       };
     })(),
   };
@@ -96,7 +98,7 @@ export default async function StockDetailPage({ params }: Props) {
   ];
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* JSON-LD 1: FinancialProduct + ExchangeRateSpecification */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
@@ -214,6 +216,22 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       )}
 
+      {/* 투자 요약 (네이버 크롤러 가시적 텍스트) */}
+      <section className="stock-investment-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📋 {s.name} ({symbol}) 종목 요약</h2>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 8px', wordBreak: 'keep-all' }}>
+          {s.name}({symbol})은 {s.market} 시장에 상장된 {s.sector || '종목'}입니다.
+          {!isStale && <> 현재가는 {fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 {isUp ? '상승' : isDown ? '하락' : '보합'}({isUp ? '+' : ''}{changePct.toFixed(2)}%)했습니다.</>}
+          {s.market_cap && Number(s.market_cap) > 0 && <> 시가총액은 {fmtCap(Number(s.market_cap), s.currency ?? undefined)}입니다.</>}
+          {high52 && low52 && high52 > low52 && <> 최근 가격 범위는 {s.currency === 'USD' ? '$' : '₩'}{low52.toLocaleString()} ~ {s.currency === 'USD' ? '$' : '₩'}{high52.toLocaleString()}입니다.</>}
+        </p>
+        {s.description && s.description.length > 20 && (
+          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.65, margin: 0, wordBreak: 'keep-all' }}>
+            {s.description.length > 200 ? s.description.slice(0, 200) + '...' : s.description}
+          </p>
+        )}
+      </section>
+
       {/* 탭 콘텐츠 */}
       <StockDetailTabs
         symbol={symbol}
@@ -291,6 +309,6 @@ export default async function StockDetailPage({ params }: Props) {
           💬 {s.name} 토론방
         </Link>
       </div>
-    </div>
+    </article>
   );
 }

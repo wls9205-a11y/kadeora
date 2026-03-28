@@ -201,6 +201,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         // Naver specific
         'naver:written_time': d.site?.created_at || d.sub?.fetched_at || '',
         'naver:updated_time': d.site?.updated_at || new Date().toISOString(),
+        'naver:author': '카더라',
+        'og:updated_time': d.site?.updated_at || new Date().toISOString(),
         // Daum
         'dg:plink': `${SITE_URL}/apt/${resolved.slug}`,
         // GEO (지역 검색 노출)
@@ -264,7 +266,14 @@ export default async function AptUnifiedPage({ params }: Props) {
   const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, name, region, slug } = d;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
-  const faq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
+  const dbFaq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
+  // DB FAQ가 없으면 자동 생성 (네이버 FAQ 리치스니펫 확보)
+  const faq: { q: string; a: string }[] = dbFaq.length > 0 ? dbFaq : [
+    { q: `${name} 위치가 어디인가요?`, a: `${name}은(는) ${region} ${site?.sigungu || ''} ${site?.dong || site?.address || ''}에 위치해 있습니다. ${site?.nearby_station || sub?.nearest_station ? `최근접 역은 ${site?.nearby_station || sub?.nearest_station}입니다.` : ''}` },
+    ...(sub?.rcept_bgnde ? [{ q: `${name} 청약 일정은 언제인가요?`, a: `${name}의 청약 접수 기간은 ${sub.rcept_bgnde} ~ ${sub.rcept_endde || ''}입니다. ${sub.przwner_presnatn_de ? `당첨자 발표일은 ${sub.przwner_presnatn_de}입니다.` : ''} ${sub.mvn_prearnge_ym ? `입주 예정은 ${fmtYM(sub.mvn_prearnge_ym)}입니다.` : ''}` }] : []),
+    { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} 총 ${site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대 규모입니다.` },
+    ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다. 타입별 상세 분양가는 청약홈에서 확인할 수 있습니다.` }] : []),
+  ].filter(f => f.a.trim().length > 10);
   const redevStage = (site?.source_ids as Record<string, string>)?.redev_stage || redev?.stage;
   const noindex = site ? (site.content_score ?? 0) < 40 : false;
 
@@ -352,10 +361,23 @@ export default async function AptUnifiedPage({ params }: Props) {
         )}
       </div>
 
-      {/* Naver SEO: Crawlable Korean description paragraph */}
-      <p style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }} aria-hidden="true">
-        {`${region} ${site?.sigungu || ''} ${name} 아파트 분양 정보. ${site?.builder || sub?.constructor_nm || ''} 시공, 총 ${site?.total_units || sub?.tot_supply_hshld_co || ''}세대 규모. ${sub?.rcept_bgnde ? `청약 접수일 ${sub.rcept_bgnde}` : ''} ${sub?.mvn_prearnge_ym ? `입주예정 ${fmtYM(sub.mvn_prearnge_ym)}` : ''}. 분양가, 경쟁률, 실거래가, 주변 인프라 정보를 카더라에서 확인하세요.`}
-      </p>
+      {/* SEO 요약 섹션 (가시적 텍스트 — 네이버/구글 크롤러 인덱싱 대상) */}
+      <section className="site-description" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📋 {name} 분양 요약</h2>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
+          {region} {site?.sigungu || ''} {name}은(는) {site?.builder || sub?.constructor_nm || ''}{site?.builder || sub?.constructor_nm ? ' 시공, ' : ''}총 {site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대 규모의 {tLabel[sType] || '분양'} 현장입니다.
+          {sub?.rcept_bgnde && <> 청약 접수일은 {sub.rcept_bgnde}이며,</>}
+          {sub?.mvn_prearnge_ym && <> 입주 예정일은 {fmtYM(sub.mvn_prearnge_ym)}입니다.</>}
+          {(site?.price_min || site?.price_max) && <> 분양가는 {site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}{site?.price_min && site?.price_max ? ' ~ ' : ''}{site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다.</>}
+          {(site?.nearby_station || sub?.nearest_station) && <> 최근접 역은 {site?.nearby_station || sub?.nearest_station}입니다.</>}
+          {(site?.school_district || sub?.nearest_school) && <> 학군은 {site?.school_district || sub?.nearest_school} 인근입니다.</>}
+        </p>
+        {site?.description && site.description !== `${region} ${name}` && (
+          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.65, margin: '8px 0 0', wordBreak: 'keep-all' }}>
+            {site.description.length > 300 ? site.description.slice(0, 300) + '...' : site.description}
+          </p>
+        )}
+      </section>
 
       {/* Share + Bookmark */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
