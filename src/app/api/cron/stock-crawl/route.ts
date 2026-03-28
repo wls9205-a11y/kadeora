@@ -17,48 +17,86 @@ export const maxDuration = 120;
  */
 
 // data.go.kr 금융위원회 주식시세 API
-async function fetchKRXStocks(apiKey: string): Promise<any[]> {
+async function fetchKRXStocks(apiKey: string): Promise<{ stocks: any[]; debug: string }> {
   const stocks: Record<string, any>[] = [];
+  const debugLines: string[] = [];
   
   for (const marketCode of ['KOSPI', 'KOSDAQ']) {
     let pageNo = 1;
-    const numOfRows = 1000;
+    const numOfRows = 100; // 디버그용 소량 먼저
     
-    while (true) {
+    try {
+      const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&resultType=json&mrktCls=${marketCode}`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
+      const httpStatus = res.status;
+      const rawText = await res.text();
+      debugLines.push(`[${marketCode}] HTTP ${httpStatus} | len=${rawText.length} | preview=${rawText.slice(0, 200)}`);
+      
+      if (!res.ok) { debugLines.push(`[${marketCode}] HTTP 오류: ${httpStatus}`); continue; }
+      
+      let data: any;
       try {
-        const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&resultType=json&mrktCls=${marketCode}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-        if (!res.ok) break;
-        const data = await res.json();
-        const items = data?.response?.body?.items?.item || [];
-        if (items.length === 0) break;
-        
-        for (const item of items) {
-          const price = parseInt(item.clpr) || 0;
-          if (price <= 0) continue;
-          
-          stocks.push({
-            symbol: item.srtnCd || item.isinCd,
-            name: item.itmsNm,
-            market: marketCode,
-            price,
-            change_amt: parseInt(item.vs) || 0,
-            change_pct: parseFloat(item.fltRt) || 0,
-            volume: parseInt(item.trqu) || 0,
-            market_cap: parseInt(item.mrktTotAmt) || 0,
-            currency: 'KRW',
-          });
+        data = JSON.parse(rawText);
+      } catch (e) {
+        debugLines.push(`[${marketCode}] JSON 파싱 실패: ${String(e).slice(0, 100)}`);
+        continue;
+      }
+      
+      // 응답 구조 확인
+      const resultCode = data?.response?.header?.resultCode;
+      const resultMsg = data?.response?.header?.resultMsg;
+      debugLines.push(`[${marketCode}] resultCode=${resultCode} msg=${resultMsg}`);
+      
+      const items = data?.response?.body?.items?.item || [];
+      const totalCount = data?.response?.body?.totalCount || 0;
+      debugLines.push(`[${marketCode}] items=${Array.isArray(items) ? items.length : typeof items} totalCount=${totalCount}`);
+      
+      const itemArr = Array.isArray(items) ? items : (items ? [items] : []);
+      for (const item of itemArr) {
+        const price = parseInt(item.clpr) || 0;
+        if (price <= 0) continue;
+        stocks.push({
+          symbol: item.srtnCd || item.isinCd,
+          name: item.itmsNm,
+          market: marketCode,
+          price,
+          change_amt: parseInt(item.vs) || 0,
+          change_pct: parseFloat(item.fltRt) || 0,
+          volume: parseInt(item.trqu) || 0,
+          market_cap: parseInt(item.mrktTotAmt) || 0,
+          currency: 'KRW',
+        });
+      }
+      
+      // 페이지 추가 수집 (정상이면)
+      if (itemArr.length >= numOfRows && totalCount > numOfRows) {
+        let pg = 2;
+        const fullRows = 1000;
+        while (pg * fullRows <= totalCount + fullRows) {
+          try {
+            const u2 = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${fullRows}&pageNo=${pg}&resultType=json&mrktCls=${marketCode}`;
+            const r2 = await fetch(u2, { signal: AbortSignal.timeout(15000) });
+            if (!r2.ok) break;
+            const d2 = await r2.json();
+            const it2 = d2?.response?.body?.items?.item || [];
+            const arr2 = Array.isArray(it2) ? it2 : (it2 ? [it2] : []);
+            if (!arr2.length) break;
+            for (const item of arr2) {
+              const price = parseInt(item.clpr) || 0;
+              if (price <= 0) continue;
+              stocks.push({ symbol: item.srtnCd || item.isinCd, name: item.itmsNm, market: marketCode, price, change_amt: parseInt(item.vs)||0, change_pct: parseFloat(item.fltRt)||0, volume: parseInt(item.trqu)||0, market_cap: parseInt(item.mrktTotAmt)||0, currency: 'KRW' });
+            }
+            if (arr2.length < fullRows) break;
+            pg++;
+          } catch { break; }
         }
-        
-        // 마지막 페이지면 종료
-        const totalCount = data?.response?.body?.totalCount || 0;
-        if (pageNo * numOfRows >= totalCount || items.length < numOfRows) break;
-        pageNo++;
-      } catch { break; }
+      }
+    } catch (e) {
+      debugLines.push(`[${marketCode}] 예외: ${String(e).slice(0, 200)}`);
     }
   }
   
-  return stocks;
+  return { stocks, debug: debugLines.join(' | ') };
 }
 
 // KIS 한국투자증권 API (2단계 — 키 발급 후 활성화)
@@ -148,12 +186,13 @@ export async function GET(req: NextRequest) {
 
     // === 2단계: 공공데이터 API (종가, 키가 있을 때) ===
     const stockApiKey = process.env.STOCK_DATA_API_KEY || process.env.BUSAN_DATA_API_KEY;
+    let krxDebug = '';
     if (stockApiKey && totalCreated === 0) {
-      const krxStocks = await fetchKRXStocks(stockApiKey);
+      const { stocks: krxStocks, debug } = await fetchKRXStocks(stockApiKey);
+      krxDebug = debug;
       if (krxStocks.length > 0) {
         source = 'data_go_kr';
         const now = new Date().toISOString();
-        // 배치 upsert (100개씩)
         for (let i = 0; i < krxStocks.length; i += 100) {
           const batch = krxStocks.slice(i, i + 100).map(s => ({
             ...s,
@@ -161,7 +200,7 @@ export async function GET(req: NextRequest) {
             is_active: true,
             updated_at: now,
           }));
-          const { error, count } = await supabase.from('stock_quotes').upsert(batch, { onConflict: 'symbol' });
+          const { error } = await supabase.from('stock_quotes').upsert(batch, { onConflict: 'symbol' });
           if (!error) totalCreated += batch.length;
         }
       }
@@ -180,6 +219,7 @@ export async function GET(req: NextRequest) {
         source,
         kis_available: !!(kisKey && kisSecret),
         public_api_available: !!stockApiKey,
+        krx_debug: krxDebug.slice(0, 800),
       },
     };
   });
