@@ -6,21 +6,24 @@ export const revalidate = 3600;
 export async function GET() {
   const sb = getSupabaseAdmin();
   const { data: posts } = await sb.from('blog_posts')
-    .select('slug, title, excerpt, category, published_at, author_name, tags')
+    .select('slug, title, excerpt, category, published_at, created_at, author_name, tags')
     .eq('is_published', true)
-    .order('published_at', { ascending: false })
+    .order('published_at', { ascending: false, nullsFirst: false })
     .limit(50);
 
-  const items = (posts || []).map(p => `
+  const items = (posts || []).map(p => {
+    const dateStr = p.published_at || p.created_at || new Date().toISOString();
+    return `
     <item>
       <title><![CDATA[${p.title}]]></title>
       <link>${SITE_URL}/blog/${p.slug}</link>
       <description><![CDATA[${p.excerpt || ''}]]></description>
-      <pubDate>${new Date(p.published_at || '').toUTCString()}</pubDate>
+      <pubDate>${new Date(dateStr).toUTCString()}</pubDate>
       <category>${p.category}</category>
       <author>${p.author_name || '카더라 데이터팀'}</author>
       <guid isPermaLink="true">${SITE_URL}/blog/${p.slug}</guid>
-    </item>`).join('\n');
+    </item>`;
+  }).join('\n');
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
