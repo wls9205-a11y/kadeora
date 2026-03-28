@@ -232,10 +232,8 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       if (result.success) {
         created++;
-        console.log(`[blog-exchange-rate] Created: ${slug}`);
       } else {
         skipped++;
-        console.log(`[blog-exchange-rate] Skipped ${slug}: ${result.reason}`);
       }
     } catch (err: any) {
       console.error(`[blog-exchange-rate] Error for ${monthInfo.label}:`, err.message);

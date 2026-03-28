@@ -268,7 +268,7 @@ export default function InfraPage() {
       {/* === 바로가기 === */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
         {[
-          { icon: '⚡', label: 'Supabase', sub: 'DB 대시보드', href: 'https://supabase.com/dashboard/project/tezftxakuwhsclarprlz', bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.15)' },
+          { icon: '⚡', label: 'Supabase', sub: 'DB 대시보드', href: `https://supabase.com/dashboard/project/${process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID || 'tezftxakuwhsclarprlz'}`, bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.15)' },
           { icon: '▲', label: 'Vercel', sub: '배포 / Analytics', href: 'https://vercel.com/dashboard', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.08)' },
           { icon: '🐙', label: 'GitHub', sub: '소스코드', href: 'https://github.com/wls9205-a11y/kadeora', bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.15)' },
           { icon: '📊', label: 'GA4', sub: '트래픽 분석', href: 'https://analytics.google.com', bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.15)' },

@@ -3,15 +3,16 @@ import crypto from 'crypto';
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
 
-function getKey(): Buffer {
+function getKey(): Buffer | null {
   const key = process.env.ENCRYPTION_KEY;
-  if (!key) throw new Error('ENCRYPTION_KEY environment variable is not set');
+  if (!key) return null;
   return Buffer.from(key, 'hex');
 }
 
 /** AES-256-GCM 암호화 — 전화번호 등 민감 데이터 */
 export function encrypt(text: string): string {
   const key = getKey();
+  if (!key) return '';
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -24,8 +25,9 @@ export function encrypt(text: string): string {
 /** AES-256-GCM 복호화 */
 export function decrypt(encryptedText: string): string {
   const key = getKey();
+  if (!key) return '';
   const parts = encryptedText.split(':');
-  if (parts.length !== 3) throw new Error('Invalid encrypted format');
+  if (parts.length !== 3) return '';
   const iv = Buffer.from(parts[0], 'hex');
   const tag = Buffer.from(parts[1], 'hex');
   const encrypted = parts[2];

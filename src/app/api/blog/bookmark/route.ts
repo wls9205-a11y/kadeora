@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { createSupabaseServer } from '@/lib/supabase-server';
 
+const recentActions = new Map<string, number>();
+
 export async function GET(req: NextRequest) {
   const sb = await createSupabaseServer();
   const { data: { user } } = await sb.auth.getUser();
@@ -45,6 +47,15 @@ export async function POST(req: NextRequest) {
 
   const { blogPostId } = await req.json();
   if (!blogPostId) return NextResponse.json({ error: 'Missing blogPostId' }, { status: 400 });
+
+  // Rate limit: 1 action per user+post per 2 seconds
+  const rateKey = `${user.id}:${blogPostId}`;
+  const now = Date.now();
+  if (recentActions.has(rateKey) && now - recentActions.get(rateKey)! < 2000) {
+    return NextResponse.json({ error: 'Too fast' }, { status: 429 });
+  }
+  recentActions.set(rateKey, now);
+  if (recentActions.size > 5000) { const keys = [...recentActions.keys()].slice(0, 2500); keys.forEach(k => recentActions.delete(k)); }
 
   const admin = getSupabaseAdmin();
 

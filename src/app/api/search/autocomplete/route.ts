@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export async function GET(req: NextRequest) {
-  const q = req.nextUrl.searchParams.get('q') || '';
+  const q = sanitizeSearchQuery(req.nextUrl.searchParams.get('q') || '', 50);
   if (!q || q.length < 1) return NextResponse.json({ suggestions: [] });
 
   try {

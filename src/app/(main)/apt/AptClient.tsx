@@ -419,7 +419,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
               {bigApts.map((a: any) => {
                 const slug = (a.house_nm || '').trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.id;
                 return (
-                  <Link key={a.id} href={`/apt/sites/${slug}`} style={{
+                  <Link key={a.id} href={`/apt/${slug}`} style={{
                     padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
                     background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
                     border: '1px solid var(--border)',

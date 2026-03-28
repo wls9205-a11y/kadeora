@@ -352,9 +352,6 @@ export const GET = withCronAuth(async (req: NextRequest) => {
   /*  Step 4: Apply offset / limit                                   */
   /* -------------------------------------------------------------- */
   const batch = districts.slice(offset, offset + limit);
-  console.log(
-    `[blog-district-guide] Total districts: ${districts.length}, batch: offset=${offset} limit=${limit} → ${batch.length} items`,
-  );
 
   /* -------------------------------------------------------------- */
   /*  Step 5: Process each sigungu sequentially                      */
@@ -395,7 +392,6 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       }));
 
       if (top10.length === 0) {
-        console.log(`[blog-district-guide] No apt_sites for ${region} ${sigungu}, skipping`);
         skipped++;
         continue;
       }
@@ -443,20 +439,14 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       if (result.success) {
         created++;
-        console.log(`[blog-district-guide] Created: ${slug}`);
       } else {
         skipped++;
-        console.log(`[blog-district-guide] Skipped ${slug}: ${result.reason}${result.similarTo ? ` (similar to: ${result.similarTo})` : ''}`);
       }
     } catch (err: any) {
       console.error(`[blog-district-guide] Error for ${region} ${sigungu}:`, err.message);
       skipped++;
     }
   }
-
-  console.log(
-    `[blog-district-guide] Done — created: ${created}, skipped: ${skipped}, batch: ${batch.length}/${districts.length}`,
-  );
 
   return NextResponse.json({
     ok: true,

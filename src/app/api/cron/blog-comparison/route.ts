@@ -335,12 +335,10 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       // Skip pair if either side has no data at all
       if (sA.length === 0 && tA.length === 0) {
-        console.log(`[blog-comparison] No data for ${sigunguA}, skipping pair`);
         skipped++;
         continue;
       }
       if (sB.length === 0 && tB.length === 0) {
-        console.log(`[blog-comparison] No data for ${sigunguB}, skipping pair`);
         skipped++;
         continue;
       }
@@ -393,10 +391,8 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       if (result.success) {
         created++;
-        console.log(`[blog-comparison] Created: ${slug}`);
       } else {
         skipped++;
-        console.log(`[blog-comparison] Skipped ${slug}: ${result.reason}`);
       }
     } catch (err: any) {
       console.error(`[blog-comparison] Error for ${slug}:`, err.message);
@@ -428,7 +424,6 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       ]);
 
       if (!resA.data || !resB.data) {
-        console.log(`[blog-comparison] No stock data for ${symbolA} or ${symbolB}, skipping`);
         skipped++;
         continue;
       }
@@ -460,10 +455,8 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       if (result.success) {
         created++;
-        console.log(`[blog-comparison] Created: ${slug}`);
       } else {
         skipped++;
-        console.log(`[blog-comparison] Skipped ${slug}: ${result.reason}`);
       }
     } catch (err: any) {
       console.error(`[blog-comparison] Error for ${slug}:`, err.message);

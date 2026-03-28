@@ -171,7 +171,6 @@ export const GET = withCronAuth(async (req: NextRequest) => {
         .eq('stat_month', statMonth);
 
       if (statsErr || !stats || stats.length === 0) {
-        console.log(`[blog-unsold-trend] No data for ${statMonth}, skipping`);
         skipped++;
         continue;
       }
@@ -210,10 +209,8 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       if (result.success) {
         created++;
-        console.log(`[blog-unsold-trend] Created: ${slug}`);
       } else {
         skipped++;
-        console.log(`[blog-unsold-trend] Skipped ${slug}: ${result.reason}`);
       }
     } catch (err: any) {
       console.error(`[blog-unsold-trend] Error for ${statMonth}:`, err.message);

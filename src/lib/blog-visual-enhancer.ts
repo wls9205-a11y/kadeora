@@ -20,6 +20,9 @@ const UNIT_COLORS: Record<string, string> = {
 };
 function colorFor(unit: string): string { return UNIT_COLORS[unit.replace(/\s/g, '')] || '#60a5fa'; }
 
+// ── HTML attribute escape ──
+function escapeAttr(s: string): string { return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
 // ── 1. OG 커버 이미지 히어로 ──
 function insertCoverImage(html: string, opts: EnhanceOptions): string {
   let imgUrl = '';
@@ -31,8 +34,8 @@ function insertCoverImage(html: string, opts: EnhanceOptions): string {
   }
   if (!imgUrl) return html;
 
-  const alt = opts.imageAlt || opts.title || '카더라 블로그';
-  const hero = '<div style="margin:0 0 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"><img src="' + imgUrl + '" alt="' + alt + '" loading="eager" decoding="async" style="width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover" onerror="this.parentElement.style.display=\'none\'" /></div>';
+  const alt = escapeAttr(opts.imageAlt || opts.title || '카더라 블로그');
+  const hero = '<div style="margin:0 0 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"><img src="' + imgUrl + '" alt="' + alt + '" loading="eager" decoding="async" style="width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover" onerror="this.parentElement.style.display=&apos;none&apos;" /></div>';
   return hero + html;
 }
 

@@ -302,7 +302,6 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       }
 
       if (!projects || projects.length === 0) {
-        console.log(`[blog-builder-analysis] No projects for ${constructorNm}, skipping`);
         skipped++;
         continue;
       }
@@ -336,10 +335,8 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       if (result.success) {
         created++;
-        console.log(`[blog-builder-analysis] Created: ${slug}`);
       } else {
         skipped++;
-        console.log(`[blog-builder-analysis] Skipped ${slug}: ${result.reason}`);
       }
     } catch (err: any) {
       console.error(`[blog-builder-analysis] Error for ${constructorNm}:`, err.message);

@@ -123,7 +123,7 @@ function InfraTab() {
       {/* Quick Links */}
       <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
         {[
-          { label: 'Supabase', href: 'https://supabase.com/dashboard/project/tezftxakuwhsclarprlz', icon: '⚡' },
+          { label: 'Supabase', href: `https://supabase.com/dashboard/project/${process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID || 'tezftxakuwhsclarprlz'}`, icon: '⚡' },
           { label: 'Vercel', href: 'https://vercel.com/dashboard', icon: '▲' },
           { label: 'GitHub', href: 'https://github.com/wls9205-a11y/kadeora', icon: '🐙' },
           { label: 'GA4', href: 'https://analytics.google.com', icon: '📊' },

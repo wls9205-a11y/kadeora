@@ -253,7 +253,6 @@ async function processRegions(
       );
 
       if (!regionStat) {
-        console.log(`[blog-trade-trend] No data for ${region}, skipping`);
         skipped++;
         continue;
       }
@@ -297,7 +296,6 @@ async function processRegions(
       }
 
       if ((aggregatedStat.trade_count ?? 0) === 0) {
-        console.log(`[blog-trade-trend] Zero trades for ${region}, skipping`);
         skipped++;
         continue;
       }
@@ -341,11 +339,9 @@ async function processRegions(
 
       if (result.success) {
         created++;
-        console.log(`[blog-trade-trend] Created: ${slug}`);
       } else {
         if (result.reason === 'duplicate_slug' || result.reason === 'similar_title') {
           skipped++;
-          console.log(`[blog-trade-trend] Skipped ${slug}: ${result.reason}`);
         } else {
           console.warn(`[blog-trade-trend] Failed ${slug}: ${result.reason}`);
           skipped++;

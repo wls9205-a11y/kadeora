@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import DiscussClient from './DiscussClient';
 import Disclaimer from '@/components/Disclaimer';
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: '토론',

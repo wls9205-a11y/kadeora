@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const q = searchParams.get('q') || '';
+  const q = sanitizeSearchQuery(searchParams.get('q') || '', 100);
   const category = searchParams.get('category') || '';
   const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
   const offset = parseInt(searchParams.get('offset') || '0');
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
     let query = sb.from('blog_posts')
       .select('id, slug, title, excerpt, category, tags, view_count, created_at, published_at', { count: 'exact' })
       .eq('is_published', true)
-      .or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,content.ilike.%${q}%`);
+      .or(`title.ilike.%${q}%,excerpt.ilike.%${q}%`);
 
     if (category) query = query.eq('category', category);
     query = query.order('view_count', { ascending: false }).range(offset, offset + limit - 1);
