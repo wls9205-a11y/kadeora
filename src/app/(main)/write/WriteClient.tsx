@@ -295,24 +295,24 @@ export default function WriteClient() {
                 maxLength={100}
                 style={{ width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box', marginBottom: 8 }}
               />
-              {pollOptions.map((opt, i) => (
+              {pollOptions.map((opt: string, i: number) => (
                 <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
                   <input
                     value={opt}
-                    onChange={e => setPollOptions(prev => { const n = [...prev]; n[i] = e.target.value; return n; })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPollOptions((prev: string[]) => { const n = [...prev]; n[i] = e.target.value; return n; })}
                     placeholder={`선택지 ${i + 1}`}
                     maxLength={50}
                     style={{ flex: 1, padding: '7px 10px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
                   />
                   {pollOptions.length > 2 && (
-                    <button onClick={() => setPollOptions(prev => prev.filter((_, j) => j !== i))}
+                    <button onClick={() => setPollOptions((prev: string[]) => prev.filter((_: string, j: number) => j !== i))}
                       style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 16, padding: '0 4px' }}>×</button>
                   )}
                 </div>
               ))}
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
                 {pollOptions.length < 6 && (
-                  <button onClick={() => setPollOptions(prev => [...prev, ''])}
+                  <button onClick={() => setPollOptions((prev: string[]) => [...prev, ''])}
                     style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
                     + 선택지 추가
                   </button>

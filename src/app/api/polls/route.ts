@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/polls — 투표 생성
 export async function POST(req: NextRequest) {
-  if (!(await rateLimit(req, 'write'))) return rateLimitResponse();
+  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
