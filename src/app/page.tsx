@@ -100,9 +100,12 @@ export default async function HomePage() {
   let indices: any[] = [];
   let openApts: any[] = [];
   let latestBlog: any = null;
+  let todayActivity = { posts: 0, comments: 0 };
+  let hotPost: any = null;
   try {
     const sb = getSupabaseAdmin();
-    const [blogR, stockR, aptR, postR, profileR, redevR, indicesR, openAptsR, latestBlogR] = await Promise.all([
+    const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10) + 'T00:00:00';
+    const [blogR, stockR, aptR, postR, profileR, redevR, indicesR, openAptsR, latestBlogR, todayPostsR, todayCommentsR, hotPostR] = await Promise.all([
       sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
       sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }),
       sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }),
@@ -112,6 +115,9 @@ export default async function HomePage() {
       sb.from('stock_quotes').select('symbol,name,price,change_pct').or('name.ilike.%KOSPI%,name.ilike.%KOSDAQ%').limit(2),
       sb.from('apt_subscriptions').select('id,house_nm,region_nm,rcept_endde').lte('rcept_bgnde', new Date().toISOString().slice(0, 10)).gte('rcept_endde', new Date().toISOString().slice(0, 10)).order('rcept_endde', { ascending: true }).limit(2),
       sb.from('blog_posts').select('title,slug,category').eq('is_published', true).order('published_at', { ascending: false }).limit(1).maybeSingle(),
+      sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', today),
+      sb.from('comments').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', today),
+      sb.from('posts').select('id,title,slug,likes_count').eq('is_deleted', false).order('likes_count', { ascending: false }).limit(1).maybeSingle(),
     ]);
     stats = {
       blogs: blogR.count ?? stats.blogs,
@@ -124,6 +130,8 @@ export default async function HomePage() {
     indices = indicesR?.data || [];
     openApts = openAptsR?.data || [];
     latestBlog = latestBlogR?.data || null;
+    todayActivity = { posts: todayPostsR.count ?? 0, comments: todayCommentsR.count ?? 0 };
+    hotPost = hotPostR?.data || null;
   } catch {}
 
   const fmtNum = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}만` : n >= 1000 ? `${(n / 1000).toFixed(1)}천` : String(n);
@@ -359,6 +367,23 @@ export default async function HomePage() {
                   </Link>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* 커뮤니티 라이브 활동 */}
+          {(todayActivity.posts > 0 || todayActivity.comments > 0 || hotPost) && (
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 8, marginBottom: 8 }}>
+              {todayActivity.posts > 0 && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 20, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-green)', animation: 'pulse 1.5s infinite' }} />
+                  오늘 {todayActivity.posts}개 글 · {todayActivity.comments}개 댓글
+                </div>
+              )}
+              {hotPost && (
+                <Link href={`/feed/${hotPost.slug || hotPost.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 20, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-red)', textDecoration: 'none', maxWidth: 280, overflow: 'hidden' }}>
+                  🔥 {(hotPost.title || '').slice(0, 20)}{(hotPost.title || '').length > 20 ? '…' : ''} · ♥{hotPost.likes_count}
+                </Link>
+              )}
             </div>
           )}
         </section>

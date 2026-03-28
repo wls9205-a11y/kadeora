@@ -109,6 +109,7 @@ export default async function FeedDetailPage({ params }: Props) {
   let numId = 0;
   let relatedQuote: any = null;
   let relatedAptCount = 0;
+  let relatedBlogs: { slug: string; title: string; category: string; view_count: number }[] = [];
 
   try {
     const sb = await createSupabaseServer();
@@ -195,6 +196,16 @@ export default async function FeedDetailPage({ params }: Props) {
           }
         } catch {}
       }
+
+      // 관련 블로그 (카테고리 기반 크로스셀)
+      try {
+        const blogCat = postData.category === 'apt' ? 'apt' : postData.category === 'stock' ? 'stock' : postData.category === 'local' ? 'general' : 'finance';
+        const { data: blogData } = await sb.from('blog_posts')
+          .select('slug,title,category,view_count')
+          .eq('is_published', true).eq('category', blogCat)
+          .order('view_count', { ascending: false }).limit(3);
+        if (blogData?.length) relatedBlogs = blogData;
+      } catch {}
     }
   } catch {
     // fallback to demo
@@ -481,6 +492,25 @@ export default async function FeedDetailPage({ params }: Props) {
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 📝 관련 블로그 크로스셀 */}
+      {relatedBlogs.length > 0 && (
+        <div style={{ marginBottom: 20, padding: 16, background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(167,139,250,0.04) 100%)', borderRadius: 14, border: '1px solid rgba(37,99,235,0.12)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>📰 관련 분석 글</h3>
+            <Link href="/blog" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>더보기 →</Link>
+          </div>
+          {relatedBlogs.map(b => (
+            <Link key={b.slug} href={`/blog/${b.slug}`} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none',
+            }}>
+              <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 10 }}>{b.title}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>👀 {(b.view_count || 0).toLocaleString()}</span>
+            </Link>
+          ))}
         </div>
       )}
     </div>
