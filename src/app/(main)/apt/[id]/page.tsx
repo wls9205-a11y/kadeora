@@ -341,7 +341,14 @@ export default async function AptUnifiedPage({ params }: Props) {
         }) }} />
       )}
 
-      <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 12 }}>← 부동산</Link>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, flexWrap: 'wrap' }}>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+        <span>›</span>
+        <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
+        {region && <><span>›</span><Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>{region}</Link></>}
+        <span>›</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{name}</span>
+      </nav>
 
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
@@ -521,6 +528,18 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* FAQ */}
       {faq.length > 0 && <div className="apt-card"><h2 style={ct}>❓ 자주 묻는 질문</h2>{faq.map((f, i) => <details key={i} style={{ borderBottom: i < faq.length - 1 ? '1px solid var(--border)' : 'none', padding: '10px 0' }}><summary style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}><span>{f.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span></summary><p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0' }}>{f.a}</p></details>)}</div>}
+
+      {/* 업데이트 시간 + 태그 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 12, fontSize: 11, color: 'var(--text-tertiary)', flexWrap: 'wrap', gap: 6 }}>
+        <time dateTime={site?.updated_at || sub?.fetched_at || new Date().toISOString()}>
+          최종 업데이트: {new Date(site?.updated_at || sub?.fetched_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </time>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {[region, site?.sigungu, tLabel[sType], site?.builder || sub?.constructor_nm, '아파트'].filter(Boolean).slice(0, 4).map(tag => (
+            <Link key={tag} href={`/search?q=${encodeURIComponent(String(tag))}`} style={{ padding: '2px 8px', borderRadius: 12, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 10, textDecoration: 'none' }}>#{tag}</Link>
+          ))}
+        </div>
+      </div>
 
       <Disclaimer />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>📊 데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>

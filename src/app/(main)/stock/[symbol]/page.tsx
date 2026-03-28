@@ -149,7 +149,14 @@ export default async function StockDetailPage({ params }: Props) {
       })}} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Link href="/stock" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식</Link>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)' }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+          <span>›</span>
+          <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>
+          {s.sector && <><span>›</span><Link href={`/stock/sector/${encodeURIComponent(s.sector)}`} style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>{s.sector}</Link></>}
+          <span>›</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{s.name}</span>
+        </nav>
         <div style={{ display: 'flex', gap: 6 }}>
           <StockAlertButton symbol={symbol} stockName={s.name} currentPrice={Number(s.price)} currency={s.currency ?? 'KRW'} />
           <StockWatchlistButton symbol={symbol} />
@@ -245,6 +252,55 @@ export default async function StockDetailPage({ params }: Props) {
         currency={s.currency ?? 'KRW'}
       />
 
+      {/* ── 크롤러용 서버 렌더링 섹션 (탭 내용은 클라이언트 전용이므로 핵심 데이터를 텍스트로 제공) ── */}
+
+      {/* 최신 뉴스 요약 (서버 렌더링) */}
+      {(newsR.data ?? []).length > 0 && (
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📰 {s.name} 최신 뉴스</h2>
+          {(newsR.data ?? []).slice(0, 5).map((n: any) => (
+            <div key={n.id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.5 }}>{n.title}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2, display: 'flex', gap: 8 }}>
+                <span>{n.source || '뉴스'}</span>
+                <span>{n.published_at?.slice(0, 10)}</span>
+                {n.sentiment_label && <span style={{ color: n.sentiment_label === 'positive' ? 'var(--accent-green)' : n.sentiment_label === 'negative' ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{n.sentiment_label === 'positive' ? '긍정' : n.sentiment_label === 'negative' ? '부정' : '중립'}</span>}
+              </div>
+              {n.ai_summary && <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '4px 0 0', wordBreak: 'keep-all' }}>{n.ai_summary.slice(0, 100)}</p>}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* 수급 요약 (서버 렌더링) */}
+      {(flowR.data ?? []).length > 0 && (
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📊 {s.name} 투자자별 매매동향</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, wordBreak: 'keep-all' }}>
+            {(() => {
+              const latest = (flowR.data ?? [])[0] as any;
+              if (!latest) return '';
+              const foreignNet = (Number(latest.foreign_buy) || 0) - (Number(latest.foreign_sell) || 0);
+              const instNet = (Number(latest.inst_buy) || 0) - (Number(latest.inst_sell) || 0);
+              return `최근 ${latest.date} 기준, 외국인은 ${foreignNet >= 0 ? '순매수' : '순매도'} ${Math.abs(foreignNet).toLocaleString()}주, 기관은 ${instNet >= 0 ? '순매수' : '순매도'} ${Math.abs(instNet).toLocaleString()}주입니다.`;
+            })()}
+          </p>
+        </section>
+      )}
+
+      {/* 공시 요약 (서버 렌더링) */}
+      {(discR.data ?? []).length > 0 && (
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📄 {s.name} 최근 공시</h2>
+          {(discR.data ?? []).slice(0, 3).map((d: any) => (
+            <div key={d.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)' }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.title}</span>
+              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>{d.published_at?.slice(0, 10)}</span>
+            </div>
+          ))}
+        </section>
+      )}
+
       {/* 비슷한 종목 */}
       {(similarR.data ?? []).length > 0 && (
         <div className="kd-card">
@@ -293,6 +349,35 @@ export default async function StockDetailPage({ params }: Props) {
           ))}
         </div>
       )}
+
+      {/* 자주 묻는 질문 (본문 렌더링 — 네이버 FAQ 리치스니펫) */}
+      <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>❓ {s.name} 자주 묻는 질문</h2>
+        {[
+          { q: `${s.name} 현재 주가는?`, a: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` },
+          { q: `${s.name} 어떤 섹터인가요?`, a: `${s.name}은(는) ${s.sector || s.market} 섹터에 속하며, ${s.description?.slice(0, 80) || `${s.market}에 상장된 종목입니다.`}` },
+          { q: `${s.name} 시세를 어디서 확인하나요?`, a: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 차트, 수급 분석, AI 한줄평, 관련 뉴스를 무료로 확인할 수 있습니다.` },
+        ].map((faq, i) => (
+          <details key={i} style={{ borderBottom: i < 2 ? '1px solid var(--border)' : 'none', padding: '8px 0' }}>
+            <summary style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
+              <span>{faq.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span>
+            </summary>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0', wordBreak: 'keep-all' }}>{faq.a}</p>
+          </details>
+        ))}
+      </section>
+
+      {/* 업데이트 시간 + 태그 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <time dateTime={s.updated_at || new Date().toISOString()}>
+          최종 업데이트: {new Date(s.updated_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </time>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {[s.market, s.sector, '시세'].filter(Boolean).map(tag => (
+            <Link key={tag} href={`/search?q=${encodeURIComponent(tag!)}`} style={{ padding: '2px 8px', borderRadius: 12, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 10, textDecoration: 'none' }}>#{tag}</Link>
+          ))}
+        </div>
+      </div>
 
       {/* 면책고지 */}
       <Disclaimer type="stock" compact />
