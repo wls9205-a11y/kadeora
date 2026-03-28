@@ -94,6 +94,6 @@ export async function GET(req: Request) {
   return NextResponse.json({ success: true, ...lockResult.result });
 } catch (e: unknown) {
     console.error('[cron/check-price-alerts]', e);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal error' }, { status: 200 });
   }
 }

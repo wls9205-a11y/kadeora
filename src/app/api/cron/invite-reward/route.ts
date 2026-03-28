@@ -86,6 +86,6 @@ export async function GET(req: Request) {
   })
 } catch (e: unknown) {
     console.error('[cron/invite-reward]', e);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal error' }, { status: 200 });
   }
 }
