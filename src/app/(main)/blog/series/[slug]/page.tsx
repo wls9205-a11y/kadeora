@@ -26,9 +26,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&category=blog`, width: 1200, height: 630, alt: s.title }],
     },
-    twitter: { card: 'summary_large_image' as const },
+    twitter: { card: 'summary_large_image' as const, title: s.title, images: [`${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&category=blog`] },
     other: {
       'naver:written_time': s.created_at || '2026-01-15T00:00:00Z',
+      'naver:updated_time': s.created_at || new Date().toISOString(),
       'article:section': '블로그',
       'article:tag': `${s.title},시리즈,카더라`, 'dg:plink': `${SITE_URL}/blog/series/${slug}`,
     },

@@ -196,7 +196,13 @@ export default async function HomePage() {
         name: '카더라',
         alternateName: ['KADEORA', '카더라 커뮤니티'],
         url: SITE,
-        logo: `${SITE}/images/brand/kadeora-hero.png`,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE}/icons/icon-192.png`,
+          width: 192,
+          height: 192,
+        },
+        image: `${SITE}/images/brand/kadeora-wide.png`,
         description: '대한민국 소리소문 정보 커뮤니티 — 주식 시세, 아파트 청약, 실시간 토론',
         foundingDate: '2026',
         contactPoint: {

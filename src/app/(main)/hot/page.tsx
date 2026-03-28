@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('오늘의 HOT')}&category=general`, width: 1200, height: 630, alt: '카더라 HOT' }],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': '2026-03-01T00:00:00Z', 'dg:plink': SITE_URL + '/hot' },
+  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/hot' },
 };
 
 export const revalidate = 60;

@@ -39,9 +39,10 @@ export async function generateMetadata({ params }: Props) {
       url: `${SITE}/discuss/${id}`,
       images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(topic.title)}&category=${topic.category}`, width: 1200, height: 630 }],
     },
-    twitter: { card: 'summary_large_image' as const },
+    twitter: { card: 'summary_large_image' as const, title: topic.title, description: desc, images: [`${SITE}/api/og?title=${encodeURIComponent(topic.title)}&category=${topic.category}`] },
     other: {
-      'naver:written_time': topic.created_at || '2026-01-15T00:00:00Z',
+      'naver:written_time': topic.created_at || new Date().toISOString(),
+      'naver:updated_time': topic.created_at || new Date().toISOString(),
       'dg:plink': `${SITE}/discuss/${id}`,
       'article:section': catLabel,
       'article:tag': catLabel,

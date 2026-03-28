@@ -27,9 +27,12 @@ User-agent: Googlebot
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /api/og
+Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/
-Disallow: /api/
+Disallow: /api/cron
+Disallow: /api/admin
 
 User-agent: Googlebot-Image
 Allow: /api/og
@@ -42,27 +45,36 @@ Allow: /
 Allow: /apt/
 Allow: /blog/
 Allow: /feed.xml
+Allow: /api/og
+Allow: /images/
 Crawl-delay: 1
 Disallow: /admin/
-Disallow: /api/
+Disallow: /api/cron
+Disallow: /api/admin
 
 # ===== Bing =====
 User-agent: Bingbot
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /api/og
+Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/
-Disallow: /api/
+Disallow: /api/cron
+Disallow: /api/admin
 
 # ===== Daum =====
 User-agent: DaumCrawler
 Allow: /
 Allow: /apt/
 Allow: /blog/
+Allow: /api/og
+Allow: /images/
 Crawl-delay: 1
 Disallow: /admin/
-Disallow: /api/
+Disallow: /api/cron
+Disallow: /api/admin
 
 # ===== Zum =====
 User-agent: ZumBot

@@ -13,7 +13,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const s = section ? SECTION_META[section] : null;
   const title = s?.title || '실시간 주식 시세';
   const desc = s?.desc || '국내외 주요 종목 실시간 시세와 등락률을 확인하세요. KOSPI, KOSDAQ, NYSE, NASDAQ.';
-  const ogImg = section ? `${SITE_URL}/api/og?section=${section}` : `${SITE_URL}/images/brand/kadeora-wide.png`;
+  const ogImg = section ? `${SITE_URL}/api/og?section=${section}` : `${SITE_URL}/api/og?title=${encodeURIComponent('실시간 주식 시세')}&subtitle=${encodeURIComponent('KOSPI·KOSDAQ·해외주식')}&category=stock`;
 
   return {
     title, description: desc,
@@ -26,7 +26,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     },
     other: {
       'naver:written_time': '2026-01-15T00:00:00Z',
-      'naver:updated_time': '2026-03-01T00:00:00Z',
+      'naver:updated_time': new Date().toISOString(),
       'dg:plink': SITE_URL + '/stock',
       'article:section': '주식',
       'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',

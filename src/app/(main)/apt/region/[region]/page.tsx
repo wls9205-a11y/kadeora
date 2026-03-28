@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: { card: 'summary_large_image' as const, title: `${decoded} 부동산`, description: `청약·실거래·재개발·미분양 종합 정보` },
     other: {
       'naver:written_time': '2026-01-15T00:00:00Z',
-      'naver:updated_time': '2026-03-01T00:00:00Z',
+      'naver:updated_time': new Date().toISOString(),
       'dg:plink': `${SITE_URL}/apt/region/${decoded}`,
       'article:section': '부동산',
       'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양`,

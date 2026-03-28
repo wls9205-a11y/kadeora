@@ -14,6 +14,10 @@ ${SITEMAP_IDS.map(id => `  <sitemap>
     <loc>${SITE_URL}/sitemap/${id}.xml</loc>
     <lastmod>${now}</lastmod>
   </sitemap>`).join('\n')}
+  <sitemap>
+    <loc>${SITE_URL}/image-sitemap.xml</loc>
+    <lastmod>${now}</lastmod>
+  </sitemap>
 </sitemapindex>`;
 
   return new NextResponse(xml, {

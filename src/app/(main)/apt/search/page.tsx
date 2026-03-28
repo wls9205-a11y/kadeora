@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   alternates: { canonical: SITE_URL + '/apt/search' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': '2026-03-01T00:00:00Z', 'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/search' },
+  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/search' },
 };
 
 export const revalidate = 300;

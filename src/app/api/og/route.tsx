@@ -8,19 +8,43 @@ const CATEGORY_COLORS: Record<string, string> = {
   stock: '#38BDF8',
   local: '#FFD43B',
   free: '#B794FF',
-  finance: '#2EE8A5',
-  unsold: '#FFD43B',
-  general: '#B794FF',
+  finance: '#F59E0B',
+  unsold: '#FB923C',
+  general: '#A78BFA',
+  blog: '#60A5FA',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
   stock: '주식',
-  apt: '청약',
+  apt: '청약·분양',
   local: '우리동네',
   free: '자유',
   finance: '재테크',
   unsold: '미분양',
-  general: '정보',
+  general: '생활정보',
+  blog: '블로그',
+};
+
+// 카테고리별 이모지 아이콘
+const CATEGORY_ICONS: Record<string, string> = {
+  apt: '🏢',
+  stock: '📈',
+  finance: '💰',
+  unsold: '🏚️',
+  general: '📰',
+  blog: '✍️',
+  local: '📍',
+  free: '💬',
+};
+
+// 카테고리별 그라디언트 배경 (어두운 계열)
+const CATEGORY_BG: Record<string, string> = {
+  apt:     'linear-gradient(135deg, #050A18 0%, #0A1F10 50%, #0F2D18 100%)',
+  stock:   'linear-gradient(135deg, #050A18 0%, #071828 50%, #0C2040 100%)',
+  finance: 'linear-gradient(135deg, #050A18 0%, #1A1005 50%, #2A1A00 100%)',
+  unsold:  'linear-gradient(135deg, #050A18 0%, #1A0E05 50%, #2A1500 100%)',
+  general: 'linear-gradient(135deg, #050A18 0%, #100A2A 50%, #1A0F40 100%)',
+  blog:    'linear-gradient(135deg, #050A18 0%, #071828 50%, #0C2040 100%)',
 };
 
 const SITE = process.env.NEXT_PUBLIC_BASE_URL || 'https://kadeora.app';
@@ -167,7 +191,15 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Post OG image
+  // Post OG image — 네이버 VIEW탭 최적화
+  const catIcon = CATEGORY_ICONS[category] ?? '✍️';
+  const catBg = CATEGORY_BG[category] ?? 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)';
+
+  // 제목 길이에 따른 폰트 크기 조정
+  const titleLen = title.length;
+  const titleFontSize = titleLen > 60 ? 32 : titleLen > 40 ? 38 : titleLen > 25 ? 44 : 52;
+  const titleDisplay = titleLen > 80 ? title.slice(0, 77) + '...' : title;
+
   return new ImageResponse(
     (
       <div
@@ -177,85 +209,116 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)',
-          padding: '56px 64px',
+          background: catBg,
+          padding: '48px 60px',
           fontFamily: 'NotoSansKR, sans-serif',
+          position: 'relative',
         }}
       >
-        {/* Top: logo + category */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <svg width="40" height="40" viewBox="0 0 72 72">
-            <defs><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E" /><stop offset="100%" stopColor="#2563EB" /></linearGradient></defs>
-            <rect width="72" height="72" rx="18" fill="url(#lg2)" />
-            <circle cx="18" cy="36" r="7" fill="white" /><circle cx="36" cy="36" r="7" fill="white" /><circle cx="54" cy="36" r="7" fill="white" />
-          </svg>
-          <span style={{ fontSize: 24, fontWeight: 900, color: '#E8EDF5', letterSpacing: '-0.5px' }}>
-            카더라
-          </span>
+        {/* 배경 장식 원 */}
+        <div style={{
+          position: 'absolute', top: -80, right: -80,
+          width: 320, height: 320, borderRadius: '50%',
+          background: `radial-gradient(circle, ${catColor}18 0%, transparent 70%)`,
+          display: 'flex',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: -60, left: -60,
+          width: 240, height: 240, borderRadius: '50%',
+          background: `radial-gradient(circle, ${catColor}10 0%, transparent 70%)`,
+          display: 'flex',
+        }} />
+
+        {/* Top: 로고 + 카테고리 뱃지 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <svg width="36" height="36" viewBox="0 0 72 72">
+              <defs><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E" /><stop offset="100%" stopColor="#2563EB" /></linearGradient></defs>
+              <rect width="72" height="72" rx="18" fill="url(#lg2)" />
+              <circle cx="18" cy="36" r="7" fill="white" /><circle cx="36" cy="36" r="7" fill="white" /><circle cx="54" cy="36" r="7" fill="white" />
+            </svg>
+            <span style={{ fontSize: 22, fontWeight: 900, color: '#E8EDF5', letterSpacing: '-0.5px' }}>
+              카더라
+            </span>
+          </div>
           {catLabel && (
             <span style={{
-              fontSize: 14, padding: '4px 14px', borderRadius: 999,
-              background: `${catColor}22`, color: catColor,
-              fontWeight: 700, marginLeft: 8,
+              fontSize: 15, padding: '6px 18px', borderRadius: 999,
+              background: `${catColor}25`,
+              border: `1.5px solid ${catColor}50`,
+              color: catColor,
+              fontWeight: 700,
             }}>
-              {catLabel}
+              {catIcon} {catLabel}
             </span>
           )}
         </div>
 
-        {/* Center: title + subtitle */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* Center: 아이콘 + 제목 + 부제 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1, justifyContent: 'center', padding: '24px 0' }}>
+          {/* 카테고리 아이콘 (큰 것) */}
+          <div style={{ fontSize: 48, lineHeight: 1, marginBottom: 4 }}>{catIcon}</div>
+
+          {/* 제목 */}
           <div style={{
-            fontSize: title.length > 50 ? 34 : title.length > 30 ? 40 : 48,
+            fontSize: titleFontSize,
             fontWeight: 800,
-            color: '#E8EDF5',
-            lineHeight: 1.35,
-            maxWidth: 1000,
-            overflow: 'hidden',
+            color: '#F1F5F9',
+            lineHeight: 1.3,
+            maxWidth: 1040,
+            wordBreak: 'keep-all',
+            letterSpacing: titleLen > 40 ? '-0.5px' : '-1px',
           }}>
-            {title.length > 90 ? title.slice(0, 87) + '...' : title}
+            {titleDisplay}
           </div>
+
+          {/* 부제 */}
           {subtitle && (
             <div style={{
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: 500,
               color: '#94A8C4',
-              lineHeight: 1.4,
+              lineHeight: 1.5,
+              maxWidth: 900,
             }}>
-              {subtitle.length > 80 ? subtitle.slice(0, 77) + '...' : subtitle}
+              {subtitle.length > 90 ? subtitle.slice(0, 87) + '...' : subtitle}
             </div>
           )}
         </div>
 
-        {/* Bottom: author + stats */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {author && (
+        {/* Bottom: 저자 + 사이트 URL + 구분선 */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          borderTop: `1px solid ${catColor}30`, paddingTop: 20,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {author ? (
               <>
                 <div style={{
-                  width: 38, height: 38, borderRadius: '50%',
+                  width: 34, height: 34, borderRadius: '50%',
                   background: `linear-gradient(135deg, ${catColor}, #3B7BF6)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 16, fontWeight: 700, color: 'white',
+                  fontSize: 14, fontWeight: 800, color: 'white',
                 }}>
                   {author[0].toUpperCase()}
                 </div>
-                <span style={{ fontSize: 16, color: '#94A8C4', fontWeight: 500 }}>{author}</span>
+                <span style={{ fontSize: 15, color: '#94A8C4', fontWeight: 600 }}>{author}</span>
               </>
+            ) : (
+              <span style={{ fontSize: 14, color: '#64748B', fontWeight: 500 }}>카더라 데이터팀</span>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            {(Number(likes) > 0 || Number(comments) > 0) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                {Number(likes) > 0 && (
-                  <span style={{ fontSize: 15, color: '#7D8DA3' }}>♥ {likes}</span>
-                )}
-                {Number(comments) > 0 && (
-                  <span style={{ fontSize: 15, color: '#7D8DA3' }}>💬 {comments}</span>
-                )}
-              </div>
-            )}
-            <span style={{ fontSize: 14, color: '#7D8DA3' }}>kadeora.app</span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {Number(likes) > 0 && <span style={{ fontSize: 14, color: '#64748B' }}>♥ {likes}</span>}
+            {Number(comments) > 0 && <span style={{ fontSize: 14, color: '#64748B' }}>💬 {comments}</span>}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '5px 14px', borderRadius: 8,
+              background: `${catColor}15`, border: `1px solid ${catColor}30`,
+            }}>
+              <span style={{ fontSize: 13, color: catColor, fontWeight: 700 }}>kadeora.app</span>
+            </div>
           </div>
         </div>
       </div>
@@ -265,6 +328,7 @@ export async function GET(req: NextRequest) {
       height: 630,
       headers: {
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+        'X-Content-Type-Options': 'nosniff',
       },
       ...(fontData ? { fonts: [{ name: 'NotoSansKR', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}),
     },

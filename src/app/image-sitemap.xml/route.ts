@@ -10,7 +10,7 @@ export const revalidate = 3600; // 1시간 캐시
  * 
  * 포함 대상:
  * 1. apt_sites — 현장 이미지 (네이버 이미지 검색 수집분)
- * 2. blog_posts — 블로그 커버 이미지
+ * 2. blog_posts — 블로그 커버 이미지 (정적 URL만, /api/og 동적 URL 필터)
  */
 export async function GET() {
   const sb = getSupabaseAdmin();
@@ -26,6 +26,7 @@ export async function GET() {
       .select('slug, title, cover_image, image_alt, category')
       .eq('is_published', true)
       .not('cover_image', 'is', null)
+      // /api/og 동적 URL도 포함 (Googlebot-Image, Yeti가 렌더링 가능)
       .order('published_at', { ascending: false })
       .limit(50000),
   ]);

@@ -29,13 +29,13 @@ function insertCoverImage(html: string, opts: EnhanceOptions): string {
   if (opts.coverImage && opts.coverImage.trim() && !opts.coverImage.includes('default-cover') && !opts.coverImage.includes('generic')) {
     imgUrl = opts.coverImage;
   } else if (opts.title) {
-    const cat = opts.category || 'general';
-    imgUrl = '/api/og?title=' + encodeURIComponent(opts.title) + '&category=' + cat;
+    const cat = opts.category || 'blog';
+    imgUrl = '/api/og?title=' + encodeURIComponent(opts.title.slice(0, 60)) + '&category=' + cat;
   }
   if (!imgUrl) return html;
 
   const alt = escapeAttr(opts.imageAlt || opts.title || '카더라 블로그');
-  const hero = '<div style="margin:0 0 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"><img src="' + imgUrl + '" alt="' + alt + '" loading="eager" decoding="async" style="width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover" onerror="this.parentElement.style.display=&apos;none&apos;" /></div>';
+  const hero = `<div style="margin:0 0 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"><img src="${imgUrl}" alt="${alt}" loading="eager" fetchpriority="high" decoding="async" style="width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover" onerror="this.parentElement.style.display='none'" width="1200" height="630" /></div>`;
   return hero + html;
 }
 

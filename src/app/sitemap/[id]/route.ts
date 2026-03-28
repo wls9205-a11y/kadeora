@@ -139,14 +139,14 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     } catch { return xmlResponse([]); }
   }
 
-  // ── 10+: blog chunks ──
+  // ── 10+: blog chunks (image 사이트맵 포함) ──
   if (id >= 10) {
     try {
       const sb = getSupabaseAdmin();
       const chunk = id - 10;
       const offset = chunk * BLOG_PER_SITEMAP;
       const { data } = await sb.from('blog_posts')
-        .select('slug, updated_at, published_at')
+        .select('slug, title, updated_at, published_at, cover_image, image_alt, category')
         .eq('is_published', true).not('published_at', 'is', null)
         .lte('published_at', now)
         .order('published_at', { ascending: false })
@@ -165,18 +165,50 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         } catch {}
       }
 
-      const blogEntries = (data || []).map(b => {
+      // image 사이트맵 포함 XML 생성
+      const escXml = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const blogXml = (data || []).map(b => {
         const pubDate = new Date(b.published_at || b.updated_at || now);
         const daysSincePub = Math.floor((Date.now() - pubDate.getTime()) / 86400000);
-        return {
-          url: `${BASE}/blog/${b.slug}`,
-          lastModified: b.updated_at || b.published_at || now,
-          changeFrequency: daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly',
-          priority: daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5,
-        };
-      });
+        const freq = daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly';
+        const prio = daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5;
+        const lastmod = b.updated_at || b.published_at || now;
+        const imgUrl = b.cover_image || `${BASE}/api/og?title=${encodeURIComponent((b.title || '').slice(0, 60))}&category=${b.category || 'blog'}`;
+        const imgAlt = escXml(b.image_alt || b.title || '카더라 블로그');
+        const imgTitle = escXml((b.title || '').slice(0, 80));
+        return `  <url>
+    <loc>${BASE}/blog/${b.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${freq}</changefreq>
+    <priority>${prio}</priority>
+    <image:image>
+      <image:loc>${escXml(imgUrl)}</image:loc>
+      <image:title>${imgTitle}</image:title>
+      <image:caption>${imgAlt}</image:caption>
+    </image:image>
+  </url>`;
+      }).join('\n');
 
-      return xmlResponse([...seriesEntries, ...blogEntries]);
+      const seriesXml = seriesEntries.map(e => `  <url>
+    <loc>${e.url}</loc>
+    <lastmod>${e.lastModified}</lastmod>
+    <changefreq>${e.changeFrequency}</changefreq>
+    <priority>${e.priority}</priority>
+  </url>`).join('\n');
+
+      const fullXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${seriesXml}
+${blogXml}
+</urlset>`;
+
+      return new NextResponse(fullXml, {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        },
+      });
     } catch { return xmlResponse([]); }
   }
 

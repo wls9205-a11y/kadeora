@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description: '주식 시세, 아파트 청약, 우리동네 소식을 가장 빠르게. 소리소문 정보 커뮤니티.',
     url: SITE_URL,
     siteName: '카더라',
-    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', width: 1024, height: 1024, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' }],
+    images: [{ url: SITE_URL + '/api/og', width: 1200, height: 630, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' }],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -112,17 +112,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           applicationCategory: 'FinanceApplication',
           operatingSystem: 'Web, iOS, Android',
           inLanguage: 'ko-KR',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
           provider: {
             '@type': 'Organization',
             name: '카더라',
             url: SITE_URL,
             logo: {
               '@type': 'ImageObject',
-              url: SITE_URL + '/images/brand/kadeora-hero.png',
+              url: SITE_URL + '/icons/icon-192.png',
+              width: 192,
+              height: 192,
             },
             contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', telephone: '+82-10-5001-1382', availableLanguage: '한국어' },
             address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호' },
-            // sameAs removed — no active SNS profiles
           },
         }) }} />
         {/* WebSite schema — Google Sitelinks 검색 박스 */}
@@ -130,7 +132,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           '@context': 'https://schema.org',
           '@type': 'WebSite',
           name: '카더라',
+          alternateName: 'KADEORA',
           url: SITE_URL,
+          inLanguage: 'ko-KR',
+          copyrightYear: new Date().getFullYear(),
+          copyrightHolder: { '@type': 'Organization', name: '카더라', url: SITE_URL },
           potentialAction: {
             '@type': 'SearchAction',
             target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },

@@ -76,7 +76,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     ...(pageNum > 1 ? { robots: { index: false, follow: true } } : {}),
     other: {
       'naver:written_time': '2026-01-15T00:00:00Z',
-      'naver:updated_time': '2026-03-01T00:00:00Z',
+      'naver:updated_time': new Date().toISOString(),
       'dg:plink': `${SITE}/blog`,
       'article:section': category === 'all' ? '블로그' : (CAT_META[category]?.title?.split('—')[0]?.trim() || '블로그'),
       'article:tag': '블로그,주식,청약,부동산,미분양,재테크',
