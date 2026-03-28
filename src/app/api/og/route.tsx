@@ -101,46 +101,92 @@ function D1(C: typeof CAT[string], title: string, sub: string, author: string, f
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   디자인 2: 빛줄기 글래스
-   순수 블랙 + 컬러 빛기둥 2개 + 글래스 카드
+   디자인 2: 풀컬러 좌측
+   좌 40% = 카테고리 acColor 배경 (원형 장식 2개 + 대형 이모지 + 카테고리명)
+   우 60% = 다크 그라디언트 (카테고리 뱃지 + 제목 + 부제 + LIVE 바)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function D2(C: typeof CAT[string], title: string, sub: string, author: string, ff: string) {
+  const titleFS = title.length > 22 ? 28 : title.length > 16 ? 34 : 40;
+  const bg = `linear-gradient(150deg, ${C.g[0]} 0%, ${C.g[1]} 55%, ${C.g[2]} 100%)`;
   return (
-    <div style={{ width:'100%', height:'100%', overflow:'hidden', position:'relative', background:'#000', display:'flex', fontFamily: ff }}>
-      {/* 빛기둥 1 */}
-      <div style={{ position:'absolute', top:'-30%', left:'8%', width:'22%', height:'120%', background:`linear-gradient(180deg,${C.a}35,transparent)`, transform:'rotate(-18deg)', transformOrigin:'top center', borderRadius:'50%', display:'flex' }} />
-      {/* 빛기둥 2 */}
-      <div style={{ position:'absolute', top:'-15%', right:'15%', width:'18%', height:'100%', background:`linear-gradient(180deg,${C.a}18,transparent)`, transform:'rotate(15deg)', transformOrigin:'top center', borderRadius:'50%', display:'flex' }} />
-      {/* 배경 글로우 */}
-      <div style={{ position:'absolute', top:'-40%', left:'-5%', width:'55%', aspectRatio:'1', borderRadius:'50%', background:`radial-gradient(circle,${C.a}20 0%,transparent 60%)`, display:'flex' }} />
-      {/* 글래스 카드 */}
-      <div style={{ position:'absolute', inset:'5% 4%', background:'rgba(255,255,255,.05)', border:'0.5px solid rgba(255,255,255,.14)', borderRadius:14, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'28px 32px', zIndex:2 }}>
-        {/* 상단 */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+    <div style={{ width:'100%', height:'100%', display:'flex', overflow:'hidden', fontFamily: ff }}>
+
+      {/* ── 좌측 40%: 순수 컬러 패널 ── */}
+      <div style={{ width:'40%', background:C.a, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 28px', position:'relative', overflow:'hidden', flexShrink:0 }}>
+        {/* 원형 장식 1 — 우하단 큰 원 */}
+        <div style={{ position:'absolute', bottom:'-28%', right:'-28%', width:'85%', aspectRatio:'1', borderRadius:'50%', background:'rgba(0,0,0,0.14)', display:'flex' }} />
+        {/* 원형 장식 2 — 좌상단 작은 원 */}
+        <div style={{ position:'absolute', top:'-18%', left:'-18%', width:'58%', aspectRatio:'1', borderRadius:'50%', background:'rgba(255,255,255,0.13)', display:'flex' }} />
+
+        {/* 상단: 로고 */}
+        <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', gap:8 }}>
+          {Logo(20)}
+          <span style={{ fontSize:13, fontWeight:700, color:'rgba(0,0,0,0.55)', letterSpacing:0.2 }}>카더라</span>
+        </div>
+
+        {/* 중앙: 대형 이모지 + 카테고리 */}
+        <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+          <span style={{ fontSize:62, lineHeight:1 }}>{C.I}</span>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:19, fontWeight:900, color:'#000', letterSpacing:-0.3 }}>{C.L}</div>
+            <div style={{ fontSize:10, fontWeight:700, color:'rgba(0,0,0,0.42)', letterSpacing:2, marginTop:3 }}>{C.E}</div>
+          </div>
+        </div>
+
+        {/* 하단: kadeora.app */}
+        <div style={{ position:'relative', zIndex:1 }}>
+          <div style={{ fontSize:9, fontWeight:700, color:'rgba(0,0,0,0.28)', letterSpacing:0.5 }}>kadeora.app</div>
+        </div>
+      </div>
+
+      {/* ── 우측 60%: 다크 그라디언트 ── */}
+      <div style={{ flex:1, background: bg, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'28px 32px' }}>
+
+        {/* 상단: 카테고리 뱃지 우상단 */}
+        <div style={{ display:'flex', justifyContent:'flex-end' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', background:C.b, border:`0.5px solid ${C.a}55`, borderRadius:99 }}>
+            <span style={{ fontSize:14 }}>{C.I}</span>
+            <span style={{ fontSize:11, fontWeight:700, color:C.a }}>{C.L}</span>
+          </div>
+        </div>
+
+        {/* 중앙: 컬러 언더라인 + 제목 + 부제 */}
+        <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+          {/* 컬러 언더라인 24px */}
+          <div style={{ width:24, height:3, background:C.a, borderRadius:99, marginBottom:18 }} />
+          {/* 제목 */}
+          <div style={{ fontSize:titleFS, fontWeight:900, color:'#ffffff', lineHeight:1.18, letterSpacing:-0.8, marginBottom:14, wordBreak:'keep-all' }}>
+            {title}
+          </div>
+          {/* 부제 */}
+          {sub && (
+            <div style={{ fontSize:15, color:'rgba(255,255,255,0.38)', lineHeight:1.6, letterSpacing:-0.1 }}>
+              {sub}
+            </div>
+          )}
+        </div>
+
+        {/* 하단: LIVE + 저자 + kadeora.app */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingTop:14, borderTop:'0.5px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            {Logo(22)}<span style={{ fontSize:14, fontWeight:700, color:'rgba(255,255,255,.45)' }}>카더라</span>
+            {/* LIVE 도트 */}
+            <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+              <div style={{ width:6, height:6, borderRadius:'50%', background:'#00FF87' }} />
+              <span style={{ fontSize:10, color:'rgba(255,255,255,0.25)', fontWeight:600, letterSpacing:0.5 }}>LIVE</span>
+            </div>
+            {author && (
+              <>
+                <div style={{ width:1, height:12, background:'rgba(255,255,255,0.12)' }} />
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  <div style={{ width:20, height:20, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563EB)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:900, color:'#fff' }}>
+                    {author[0].toUpperCase()}
+                  </div>
+                  <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)' }}>{author}</span>
+                </div>
+              </>
+            )}
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', background:'rgba(255,255,255,.07)', border:`0.5px solid ${C.a}40`, borderRadius:99 }}>
-            <span style={{ fontSize:17 }}>{C.I}</span>
-            <span style={{ fontSize:12, fontWeight:700, color:C.a }}>{C.L}</span>
-          </div>
-        </div>
-        {/* 중앙: 제목 */}
-        <div>
-          <div style={{ width:32, height:2, background:C.a, borderRadius:99, marginBottom:16 }} />
-          <div style={{ fontSize: title.length > 22 ? 36 : title.length > 16 ? 42 : 48, fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:-1.2, marginBottom:12 }}>{title}</div>
-          {sub && <div style={{ fontSize:16, color:'rgba(255,255,255,.4)', lineHeight:1.55 }}>{sub}</div>}
-        </div>
-        {/* 하단 */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', borderTop:'0.5px solid rgba(255,255,255,.07)', paddingTop:14 }}>
-          {author
-            ? <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <div style={{ width:22, height:22, borderRadius:'50%', background:`linear-gradient(135deg,${C.a},#2563eb)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, color:'#fff' }}>{author[0].toUpperCase()}</div>
-                <span style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{author}</span>
-              </div>
-            : <span style={{ fontSize:12, color:'rgba(255,255,255,.3)' }}>카더라 데이터팀</span>
-          }
-          <span style={{ fontSize:11, color:'rgba(255,255,255,.18)', fontWeight:700 }}>kadeora.app</span>
+          <span style={{ fontSize:10, color:'rgba(255,255,255,0.18)', fontWeight:700, letterSpacing:0.3 }}>kadeora.app</span>
         </div>
       </div>
     </div>
