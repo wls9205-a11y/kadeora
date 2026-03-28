@@ -44,8 +44,8 @@ function getMarketStatus(): { label: string; color: string } {
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [mode, setMode] = useState<'domestic'|'global'>('domestic');
-  const [domesticTab, setDomesticTab] = useState<'ranking'|'movers'|'sector'|'themes'|'calendar'|'watchlist'|'portfolio'>('ranking');
-  const [globalTab, setGlobalTab] = useState<'ranking'|'movers'|'sector'|'m7'|'watchlist'|'portfolio'>('ranking');
+  const [domesticTab, setDomesticTab] = useState<'ranking'|'movers'|'sector'|'themes'|'news'|'calendar'|'watchlist'|'portfolio'>('ranking');
+  const [globalTab, setGlobalTab] = useState<'ranking'|'movers'|'sector'|'news'|'m7'|'watchlist'|'portfolio'>('ranking');
   const [domesticMarket, setDomesticMarket] = useState<'ALL'|'KOSPI'|'KOSDAQ'>('ALL');
   const [moversTab, setMoversTab] = useState<'up'|'down'|'volume'>('up');
   const [sectorFilter, setSectorFilter] = useState('all');
@@ -59,6 +59,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
+  const [news, setNews] = useState<Record<string, any>[]>([]);
+  const [briefingOpen, setBriefingOpen] = useState(true);
 
   const LS_WATCHLIST_KEY = 'kd_stock_watchlist';
 
@@ -71,6 +73,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       else { try { const ls = JSON.parse(localStorage.getItem(LS_WATCHLIST_KEY) || '[]'); if (Array.isArray(ls)) setWatchlistSymbols(ls); } catch {} }
     }).catch(() => { try { const ls = JSON.parse(localStorage.getItem(LS_WATCHLIST_KEY) || '[]'); if (Array.isArray(ls)) setWatchlistSymbols(ls); } catch {} });
     fetch('https://open.er-api.com/v6/latest/USD').then(r => r.json()).then(d => { if (d?.rates?.KRW) setExchangeRate(d.rates.KRW); }).catch(() => {});
+    // 뉴스 로드 (최신 20건)
+    fetch('/api/stock/news-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.news) setNews(d.news); }).catch(() => {});
   }, []);
 
   // 모달 Escape 키 핸들러
@@ -100,12 +104,16 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
   }, [refresh]);
 
-  // 관심종목 스파크라인 데이터 로드
+  // 스파크라인: 전체 종목 로드 (시가총액순 상위 60개 + 관심종목)
   useEffect(() => {
-    if (!watchlistSymbols.length) return;
-    fetch(`/api/stock/sparkline?symbols=${watchlistSymbols.join(',')}`)
+    const allSymbols = [...new Set([
+      ...stocks.filter(s => s.price > 0).slice(0, 60).map(s => s.symbol),
+      ...watchlistSymbols,
+    ])];
+    if (!allSymbols.length) return;
+    fetch(`/api/stock/sparkline?symbols=${allSymbols.join(',')}`)
       .then(r => r.json()).then(d => { if (d.data) setSparklines(d.data); }).catch(() => {});
-  }, [watchlistSymbols]);
+  }, [stocks, watchlistSymbols]);
 
   const isDomestic = mode === 'domestic';
   const domesticStocks = useMemo(() => stocks.filter(s => (s.market === 'KOSPI' || s.market === 'KOSDAQ') && !isIdx(s)), [stocks]);
@@ -177,6 +185,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
             <span className="stock-symbol-code" style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.symbol}</span>
+            {Math.abs(pct) >= 15 && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: pct > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(96,165,250,0.15)', color: pct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)', fontWeight: 700, flexShrink: 0 }}>{pct > 0 ? '급등' : '급락'}</span>}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 1 }}>
             {s.sector && <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 3, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{s.sector}</span>}
@@ -216,8 +225,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     );
   }, [watchlistSymbols, toggleWatchlist, sparklines, exchangeRate]);
 
-  const domesticTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['sector','🗺️ 섹터'],['themes','🔥 테마'],['calendar','📅 캘린더'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
-  const globalTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['sector','🗺️ 섹터'],['m7','🏆 M7'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
+  const domesticTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['sector','🗺️ 섹터'],['themes','🔥 테마'],['news','📰 뉴스'],['calendar','📅 캘린더'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
+  const globalTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['sector','🗺️ 섹터'],['news','📰 뉴스'],['m7','🏆 M7'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -268,7 +277,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           border: `1px solid ${briefing.sentiment === 'bullish' ? 'rgba(52,211,153,0.2)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.2)' : 'var(--border)'}`,
           borderRadius: 10, padding: '12px 14px', marginBottom: 10,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: briefingOpen ? 6 : 0, cursor: 'pointer' }} onClick={() => setBriefingOpen(v => !v)}>
             <span style={{ fontSize: 22 }}>{briefing.sentiment === 'bullish' ? '🐂' : briefing.sentiment === 'bearish' ? '🐻' : '😐'}</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>{briefing.title}</div>
@@ -277,10 +286,11 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               background: briefing.sentiment === 'bullish' ? 'rgba(52,211,153,0.15)' : briefing.sentiment === 'bearish' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.15)',
               color: briefing.sentiment === 'bullish' ? 'var(--accent-green)' : briefing.sentiment === 'bearish' ? 'var(--accent-red)' : 'var(--text-secondary)',
             }}>{briefing.sentiment === 'bullish' ? '강세' : briefing.sentiment === 'bearish' ? '약세' : '보합'}</span>
+            <span style={{ fontSize: 16, color: 'var(--text-tertiary)', marginLeft: 4 }}>{briefingOpen ? '▲' : '▼'}</span>
           </div>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 8 }}>{briefing.summary}</div>
+          {briefingOpen && <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 8 }}>{briefing.summary}</div>}
           {/* Top movers */}
-          {(briefing.key_movers || briefing.top_movers) && (
+          {briefingOpen && (briefing.key_movers || briefing.top_movers) && (
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 6 }}>
               {((briefing.key_movers || briefing.top_movers)?.gainers || []).slice(0, 2).map((s: Record<string, any>) => (
                 <span key={s.symbol} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
@@ -295,7 +305,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             </div>
           )}
           {/* Sector bars */}
-          {briefing.sector_analysis?.length > 0 && (
+          {briefingOpen && briefing.sector_analysis?.length > 0 && (
             <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               {briefing.sector_analysis.slice(0, 6).map((sec: Record<string, any>) => {
                 const pct = sec.avg_pct || 0;
@@ -312,9 +322,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               })}
             </div>
           )}
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6 }}>
-            {briefing.briefing_date} 기준 · AI 분석
-          </div>
+          {briefingOpen && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6 }}>{briefing.briefing_date} 기준 · AI 분석</div>}
         </div>
       )}
 
@@ -358,19 +366,24 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         {indexStocks.filter(s => isDomestic ? (s.market === 'KOSPI' || s.market === 'KOSDAQ') : (s.market === 'NYSE' || s.market === 'NASDAQ')).slice(0, 3).map(s => {
           const pct = s.change_pct ?? 0;
           return (
-            <div key={s.symbol} style={{ padding: '6px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, flexShrink: 0, minWidth: 120 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.name}</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{s.currency === 'USD' ? `$${s.price?.toFixed(0)}` : fmt(s.price)}</span>
-                {pct !== 0 ? (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: stockColor(pct, isDomestic) }}>
-                    {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
-                  </span>
-                ) : (
-                  <span className="text-xs-tertiary">마감</span>
+            <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+              <div style={{ padding: '6px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, minWidth: 120, cursor: 'pointer', transition: 'border-color 0.15s' }} className="kd-card-hover">
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.name}</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: sparklines[s.symbol]?.length >= 2 ? 4 : 0 }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{s.currency === 'USD' ? `$${s.price?.toFixed(0)}` : fmt(s.price)}</span>
+                  {pct !== 0 ? (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: stockColor(pct, isDomestic) }}>
+                      {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                    </span>
+                  ) : (
+                    <span className="text-xs-tertiary">마감</span>
+                  )}
+                </div>
+                {sparklines[s.symbol]?.length >= 2 && (
+                  <MiniSparkline data={sparklines[s.symbol]} width={90} height={20} />
                 )}
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -424,6 +437,42 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               : stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')}
             isKR={isDomestic}
           />
+        </div>
+      )}
+
+      {/* 뉴스 탭 */}
+      {currentTab === 'news' && (
+        <div style={{ marginBottom: 16 }}>
+          {news.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>
+              <div style={{ fontSize: 32, marginBottom: 10 }}>📰</div>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>뉴스를 수집 중입니다</div>
+              <div style={{ fontSize: 13 }}>잠시 후 다시 확인해주세요</div>
+            </div>
+          ) : news.map((item: Record<string, any>) => {
+            const sent = item.sentiment_label;
+            const sentColor = sent === 'positive' ? 'var(--accent-green)' : sent === 'negative' ? 'var(--accent-red)' : 'var(--text-tertiary)';
+            const sentLabel = sent === 'positive' ? '긍정' : sent === 'negative' ? '부정' : '중립';
+            const stock = stocks.find(s => s.symbol === item.symbol);
+            return (
+              <a key={item.id} href={item.url || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', marginBottom: 8 }}>
+                <div className="kd-card" style={{ padding: '12px 14px', transition: 'border-color 0.15s' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, flex: 1 }}>{item.title}</div>
+                    <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: sent === 'positive' ? 'rgba(52,211,153,0.1)' : sent === 'negative' ? 'rgba(248,113,113,0.1)' : 'var(--bg-hover)', color: sentColor, fontWeight: 700, flexShrink: 0 }}>{sentLabel}</span>
+                  </div>
+                  {item.ai_summary && <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 6 }}>{item.ai_summary}</div>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                    {stock && (
+                      <span style={{ fontWeight: 600, color: 'var(--brand)' }}>{stock.name}</span>
+                    )}
+                    <span>{item.source}</span>
+                    <span style={{ marginLeft: 'auto' }}>{item.published_at ? new Date(item.published_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
         </div>
       )}
 
@@ -594,7 +643,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       )}
 
       {/* 검색 + 시장 + 섹터 필터 한 줄 (시총/등락 탭) */}
-      {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && currentTab !== 'sector' && currentTab !== 'portfolio' && currentTab !== 'watchlist' && (
+      {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && currentTab !== 'sector' && currentTab !== 'news' && currentTab !== 'portfolio' && currentTab !== 'watchlist' && (
         <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
           {/* 검색 */}
           <div style={{ position: 'relative', flex: 1 }}>
@@ -643,7 +692,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {currentTab === 'portfolio' && <PortfolioTab />}
 
       {/* 종목 리스트 */}
-      {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && currentTab !== 'sector' && currentTab !== 'portfolio' && (
+      {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && currentTab !== 'sector' && currentTab !== 'news' && currentTab !== 'portfolio' && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px' }}>
           {displayStocks.length === 0 ? (
             <div style={{ padding: 40, textAlign: 'center' }}>

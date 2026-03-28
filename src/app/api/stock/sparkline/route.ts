@@ -7,7 +7,7 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 export async function GET(req: NextRequest) {
   const rl = await rateLimit(req); if (!rl) return rateLimitResponse();
   try {
-  const symbols = req.nextUrl.searchParams.get('symbols')?.split(',').filter(Boolean).slice(0, 20);
+  const symbols = req.nextUrl.searchParams.get('symbols')?.split(',').filter(Boolean).slice(0, 150);
   if (!symbols?.length) return NextResponse.json({ data: {} });
 
   const sb = getSupabaseAdmin();
