@@ -38,6 +38,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
         <textarea
           value={content}
           onChange={e => setContent(e.target.value)}
+          aria-label="댓글 입력"
           placeholder="의견을 남겨보세요..."
           maxLength={1000}
           rows={2}

@@ -39,7 +39,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
   };
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+    <nav aria-label="목차" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
       <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>목차</div>
       {toc.map((item, i) => (
         <button
@@ -60,6 +60,6 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
           {item.text.replace(/<[^>]+>/g, '')}
         </button>
       ))}
-    </div>
+    </nav>
   );
 }
