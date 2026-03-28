@@ -509,6 +509,43 @@ export default async function AptUnifiedPage({ params }: Props) {
           {[redev.constructor && ['🏗️ 시공사', redev.constructor], redev.developer && ['🏢 시행사', redev.developer], redev.total_households && ['👥 세대수', `${redev.total_households.toLocaleString()}세대`]].filter(Boolean).map(([l, v]: [string, string]) => <div key={l} style={{ ...rw, borderBottom: 'none' }}><span style={rl}>{l}</span><span style={rv}>{v}</span></div>)}
         </div>); })()}
 
+      {/* 주변 시설 (nearby_facilities) — 크롤러 가시적 텍스트 */}
+      {site?.nearby_facilities && Object.keys(site.nearby_facilities as Record<string, number>).length > 0 && (
+        <div className="apt-card">
+          <h2 style={ct}>🏪 주변 시설</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {Object.entries(site.nearby_facilities as Record<string, number>).map(([facility, count]) => (
+              <div key={facility} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 20, background: 'var(--bg-hover)', border: '1px solid var(--border)', fontSize: 'var(--fs-xs)' }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{facility}</span>
+                <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{count}개</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.6 }}>
+            {name} 주변에는 {Object.entries(site.nearby_facilities as Record<string, number>).map(([f, c]) => `${f} ${c}개`).join(', ')} 등의 편의시설이 있습니다.
+          </p>
+        </div>
+      )}
+
+      {/* 실거래 텍스트 요약 (서버 렌더링 — 크롤러용) */}
+      {trades.length > 0 && (
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📊 {name} 실거래 요약</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
+            {name}의 최근 실거래 이력은 총 {trades.length}건입니다.
+            {(() => {
+              const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
+              if (amounts.length === 0) return '';
+              const min = Math.min(...amounts);
+              const max = Math.max(...amounts);
+              const avg = Math.round(amounts.reduce((s: number, a: number) => s + a, 0) / amounts.length);
+              return ` 거래 금액은 ${fmtAmount(min)} ~ ${fmtAmount(max)} 범위이며, 평균 ${fmtAmount(avg)}입니다.`;
+            })()}
+            {trades[0]?.deal_date && ` 가장 최근 거래일은 ${trades[0].deal_date}입니다.`}
+          </p>
+        </section>
+      )}
+
       {/* Transactions */}
       {trades.length > 0 && (
         <div className="apt-card"><h2 style={ct}>💰 실거래 이력 ({trades.length}건)</h2>
