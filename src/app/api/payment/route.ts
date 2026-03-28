@@ -72,10 +72,26 @@ export async function POST(request: NextRequest) {
     if (productId && userId) {
       try {
         if (productId === 'premium_badge') {
-          await supabaseAuth.from('profiles').update({ is_premium: true }).eq('id', userId);
+          const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          await supabaseAuth.from('profiles').update({ is_premium: true, premium_expires_at: expiresAt }).eq('id', userId);
+        }
+        if (productId === 'premium_monthly') {
+          // 프리미엄 멤버십 30일 활성화
+          const { data: profile } = await supabaseAuth.from('profiles').select('premium_expires_at').eq('id', userId).single();
+          // 기존 구독이 남아있으면 거기서 30일 연장, 없으면 지금부터 30일
+          const baseDate = profile?.premium_expires_at && new Date(profile.premium_expires_at) > new Date()
+            ? new Date(profile.premium_expires_at)
+            : new Date();
+          const expiresAt = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          await supabaseAuth.from('profiles').update({
+            is_premium: true,
+            premium_expires_at: expiresAt,
+            nickname_change_tickets: (profile as any)?.nickname_change_tickets
+              ? ((profile as any).nickname_change_tickets as number) + 1
+              : 1,
+          }).eq('id', userId);
         }
         if (productId === 'nickname_change') {
-          // nickname_change_tickets 필드가 있으면 +1 증가
           const { data: profile } = await supabaseAuth.from('profiles').select('nickname_change_tickets').eq('id', userId).single();
           const current = (profile?.nickname_change_tickets as number) ?? 0;
           await supabaseAuth.from('profiles').update({ nickname_change_tickets: current + 1 }).eq('id', userId);

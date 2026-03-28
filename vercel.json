@@ -355,6 +355,10 @@
     {
       "path": "/api/cron/indexnow-mass",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/premium-expire",
+      "schedule": "0 0 * * *"
     }
   ]
 }

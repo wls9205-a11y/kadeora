@@ -296,6 +296,7 @@ export function Navigation() {
                     <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                       {profile?.nickname ?? '유저'}
                     </span>
+                    {profile?.isPremium && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000', fontWeight: 800, lineHeight: 1.2 }}>P</span>}
                     <span style={{ fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)' }}>▼</span>
                   </button>
 
