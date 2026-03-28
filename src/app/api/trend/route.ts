@@ -23,9 +23,9 @@ export async function GET() {
         { keyword: '재개발 투자', heat_score: 60 },
         { keyword: '배당주 TOP', heat_score: 55 },
       ];
-      return NextResponse.json(defaults);
+      return NextResponse.json(defaults, { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } });
     }
-    return NextResponse.json(data);
+    return NextResponse.json(data, { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } });
   } catch {
     return NextResponse.json([]);
   }

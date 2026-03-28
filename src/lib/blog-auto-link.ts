@@ -105,6 +105,23 @@ const GUIDE_KEYWORDS: [string, string][] = [
 
 const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FINANCE_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS];
 
+// 정규식 사전 컴파일 (모듈 로딩 시 1회) — 블로그 렌더링 성능 최적화
+function buildPattern(keyword: string): RegExp {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(
+    `(?<![<\\/\\w])(?<!href=")(?<!">)(${escaped})(?![^<]*<\\/a>)(?![^<]*<\\/h[23]>)(?![^<]*<\\/code>)`,
+    ''
+  );
+}
+
+const COMPILED_KEYWORDS: [RegExp, string, string][] = ALL_KEYWORDS
+  .filter(([kw]) => kw.length > 2)
+  .map(([kw, href]) => [buildPattern(kw), href, kw]);
+
+const COMPILED_EXTERNAL: [RegExp, string, string][] = EXTERNAL_KEYWORDS
+  .filter(([kw]) => kw.length > 2)
+  .map(([kw, href]) => [buildPattern(kw), href, kw]);
+
 export function injectInternalLinks(html: string): string {
   if (!html || html.length < 200) return html;
 
@@ -112,19 +129,13 @@ export function injectInternalLinks(html: string): string {
   let result = html;
   let externalLinked = false;
 
-  // Internal links (max 5)
-  for (const [keyword, href] of ALL_KEYWORDS) {
+  // Internal links — 사전 컴파일된 정규식 사용
+  for (const [pattern, href, keyword] of COMPILED_KEYWORDS) {
     if (linked.has(keyword)) continue;
-    if (keyword.length <= 2) continue;
 
-    const safePattern = new RegExp(
-      `(?<![<\\/\\w])(?<!href=")(?<!">)(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![^<]*<\\/a>)(?![^<]*<\\/h[23]>)(?![^<]*<\\/code>)`,
-      ''
-    );
-
-    if (safePattern.test(result)) {
+    if (pattern.test(result)) {
       result = result.replace(
-        safePattern,
+        pattern,
         `<a href="${href}" style="color:var(--brand);text-decoration:underline;text-underline-offset:2px" title="${keyword} — 카더라">${keyword}</a>`
       );
       linked.add(keyword);
@@ -133,19 +144,13 @@ export function injectInternalLinks(html: string): string {
     if (linked.size >= 7) break;
   }
 
-  // External links (max 1, separate from internal limit)
-  for (const [keyword, href] of EXTERNAL_KEYWORDS) {
+  // External links — 사전 컴파일된 정규식 사용
+  for (const [pattern, href, keyword] of COMPILED_EXTERNAL) {
     if (externalLinked) break;
-    if (keyword.length <= 2) continue;
 
-    const safePattern = new RegExp(
-      `(?<![<\\/\\w])(?<!href=")(?<!">)(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![^<]*<\\/a>)(?![^<]*<\\/h[23]>)(?![^<]*<\\/code>)`,
-      ''
-    );
-
-    if (safePattern.test(result)) {
+    if (pattern.test(result)) {
       result = result.replace(
-        safePattern,
+        pattern,
         `<a href="${href}" target="_blank" rel="noopener nofollow" style="color:var(--brand);text-decoration:underline;text-underline-offset:2px" title="${keyword}">${keyword}</a>`
       );
       externalLinked = true;

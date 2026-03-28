@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { SITE_URL } from '@/lib/constants';
 
-const INDEXNOW_KEY = '3a23def313e1b1283822c54a0f9a5675';
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675';
 
 /**
  * IndexNow API — Bing/Yandex 즉시 색인

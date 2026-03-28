@@ -1,7 +1,7 @@
 {
   "name": "카더라 - 소리소문 커뮤니티",
   "short_name": "카더라",
-  "description": "주식 시세, 아파트 청약, 실거래가, 미분양, 재개발 정보와 커뮤니티를 하나의 앱에서. 15,502편+ 투자 블로그, 5,522건+ 부동산 현장 데이터.",
+  "description": "주식 시세, 아파트 청약, 실거래가, 미분양, 재개발 정보와 커뮤니티를 하나의 앱에서. 15,500편+ 투자 블로그, 5,500건+ 부동산 현장 데이터.",
   "start_url": "/feed",
   "scope": "/",
   "display": "standalone",
@@ -83,18 +83,25 @@
   ],
   "screenshots": [
     {
-      "src": "/images/previews/preview-feed.png",
-      "sizes": "1280x720",
+      "src": "/images/previews/main-preview.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "wide",
-      "label": "카더라 피드"
+      "form_factor": "narrow",
+      "label": "카더라 메인"
     },
     {
-      "src": "/images/previews/preview-stock.png",
-      "sizes": "1280x720",
+      "src": "/images/previews/stock.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "wide",
+      "form_factor": "narrow",
       "label": "주식 시세"
+    },
+    {
+      "src": "/images/previews/feed.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "커뮤니티 피드"
     }
   ],
   "shortcuts": [
@@ -143,5 +150,15 @@
       ]
     }
   ],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "id": "/",
+  "share_target": {
+    "action": "/write",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

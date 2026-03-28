@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
     query = query.order('view_count', { ascending: false }).range(offset, offset + limit - 1);
 
     const { data, count } = await query;
-    return NextResponse.json({ posts: data || [], total: count || 0 });
+    return NextResponse.json({ posts: data || [], total: count || 0 }, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+    });
   } catch (e: any) {
     return NextResponse.json({ posts: [], total: 0, error: e.message }, { status: 200 });
   }

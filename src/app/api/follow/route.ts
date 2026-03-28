@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       following: !!(followCheck as { data: unknown }).data,
       followers: followers ?? 0,
       following_count: following_count ?? 0,
-    });
+    }, { headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=120' } });
   } catch {
     return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
