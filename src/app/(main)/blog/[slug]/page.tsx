@@ -274,7 +274,14 @@ export default async function BlogDetailPage({ params }: Props) {
 
   // 마크다운 → HTML (볼드 소제목 → h2 정규화 포함)
   const htmlRaw = injectInternalLinks(sanitizeHtml(marked(normalizeMarkdownHeadings(post.content)) as string));
-  const htmlFull = enhanceBlogVisuals(htmlRaw, { excerpt: post.excerpt });
+  const htmlFull = enhanceBlogVisuals(htmlRaw, {
+    excerpt: post.excerpt,
+    coverImage: post.cover_image,
+    imageAlt: post.image_alt,
+    title: post.title,
+    category: post.category,
+    tags: post.tags,
+  });
   const cutoff = Math.floor(htmlFull.length * 0.7);
   const htmlTruncated = htmlFull.slice(0, cutoff);
 

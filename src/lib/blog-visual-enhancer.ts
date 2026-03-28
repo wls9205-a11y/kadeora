@@ -1,135 +1,190 @@
 /**
- * 블로그 본문 시각화 강화
- * 마크다운 → HTML 변환 후 적용하여 시각적 요소를 자동 삽입
- * 
- * 1. 숫자 통계를 하이라이트 카드로 변환
- * 2. 핵심 포인트(✅, ⚡, 💡 등) 강조 박스
- * 3. 첫 번째 h2 앞에 요약 카드 삽입
- * 4. 비교 문장을 비주얼 비교 블록으로 변환
+ * 블로그 본문 시각화 강화 v2
+ * 8가지 알록달록 시각화 요소를 HTML 파이프라인에 자동 삽입
  */
 
-const STAT_CARD_STYLE = `
-  display: inline-flex; align-items: baseline; gap: 4px;
-  padding: 4px 12px; border-radius: 8px;
-  background: var(--brand-bg); border: 1px solid var(--brand-border);
-  font-weight: 700; color: var(--brand);
-`.replace(/\n/g, '').trim();
-
-const HIGHLIGHT_BOX_STYLE = `
-  padding: 14px 16px; border-radius: 10px; margin: 16px 0;
-  border-left: 4px solid var(--brand);
-  background: var(--bg-surface); border-top: 1px solid var(--border);
-  border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  overflow-wrap: break-word; word-break: break-word;
-`.replace(/\n/g, '').trim();
-
-/**
- * 숫자 통계 하이라이트
- * "약 3.2조원" → 하이라이트 스팬
- * HTML 태그 속성(href, style 등) 안의 숫자는 건드리지 않음
- */
-function highlightStats(html: string): string {
-  // HTML 태그와 텍스트 노드를 분리하여 텍스트만 처리
-  return html.replace(
-    /(<[^>]+>)|([약]?\s*)([\d,.]+)\s*(조원?|억원?|만원?|만\s*세대|만\s*호|퍼센트)/g,
-    (match, tag, prefix, num, unit) => {
-      if (tag) return tag; // HTML 태그는 그대로 유지
-      if (!num || !unit) return match;
-      return `${prefix || ''}<span style="${STAT_CARD_STYLE}">${num}${unit}</span>`;
-    }
-  );
+interface EnhanceOptions {
+  excerpt?: string | null;
+  coverImage?: string | null;
+  imageAlt?: string | null;
+  title?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
 }
 
-/**
- * 핵심 포인트 강조 박스
- * ✅, ⚡, 💡, ⚠️, 📌 로 시작하는 문단을 강조 박스로 변환
- */
-function enhanceKeyPoints(html: string): string {
-  const icons = ['✅', '⚡', '💡', '⚠️', '📌', '🔑', '💰', '📊', '🎯', '🏆'];
-  const iconPattern = icons.map(i => i.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-  
-  return html.replace(
-    new RegExp(`<p>((?:${iconPattern})\\s*.+?)<\\/p>`, 'g'),
-    (_, content) => `<div style="${HIGHLIGHT_BOX_STYLE}">${content}</div>`
-  );
+// ── 색상 팔레트 ──
+const COLORS = ['#60a5fa', '#34d399', '#c4b5fd', '#fdba74', '#fca5a5', '#22d3ee', '#f472b6', '#a3e635'];
+const UNIT_COLORS: Record<string, string> = {
+  '만원': '#60a5fa', '억원': '#c4b5fd', '억': '#c4b5fd', '조원': '#f472b6', '조': '#f472b6',
+  '만세대': '#34d399', '만호': '#34d399', '퍼센트': '#fdba74',
+};
+function colorFor(unit: string): string { return UNIT_COLORS[unit.replace(/\s/g, '')] || '#60a5fa'; }
+
+// ── 1. OG 커버 이미지 히어로 ──
+function insertCoverImage(html: string, opts: EnhanceOptions): string {
+  if (!opts.coverImage) return html;
+  const alt = opts.imageAlt || `${opts.title || '카더라 블로그'} — ${opts.category === 'stock' ? '주식 분석' : opts.category === 'apt' ? '부동산 분석' : '투자 정보'}`;
+  const hero = `<div style="margin:0 0 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"><img src="${opts.coverImage}" alt="${alt}" loading="eager" decoding="async" style="width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover" /></div>`;
+  return hero + html;
 }
 
-/**
- * 요약 카드: 첫 번째 h2 앞에 글 요약 삽입
- * excerpt가 있으면 사용
- */
-function insertSummaryCard(html: string, excerpt?: string | null): string {
-  if (!excerpt || excerpt.length < 20) return html;
-  
-  const summaryCard = `
-<div style="padding: 16px 18px; border-radius: 12px; margin: 16px 0 24px; background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%); border: 1px solid var(--border);">
-  <div style="font-size: var(--fs-xs); font-weight: 700; color: var(--brand); margin-bottom: 6px; letter-spacing: 0.5px;">📋 핵심 요약</div>
-  <div style="font-size: var(--fs-sm); color: var(--text-secondary); line-height: 1.7;">${excerpt}</div>
-</div>`.trim();
+// ── 2. 히어로 통계 카드 (알록달록) ──
+function insertHeroStats(html: string): string {
+  const tableMatch = html.match(/<div[^>]*><table[^>]*>([\s\S]*?)<\/table><\/div>/i);
+  if (!tableMatch) return html;
+  const rows = tableMatch[1].match(/<tr>([\s\S]*?)<\/tr>/gi);
+  if (!rows || rows.length < 3) return html;
 
-  // 첫 번째 h2 앞에 삽입
-  const h2Index = html.indexOf('<h2');
-  if (h2Index > 0) {
-    return html.slice(0, h2Index) + summaryCard + html.slice(h2Index);
-  }
-  // h2 없으면 첫 번째 p 뒤에
-  const firstPEnd = html.indexOf('</p>');
-  if (firstPEnd > 0) {
-    return html.slice(0, firstPEnd + 4) + summaryCard + html.slice(firstPEnd + 4);
-  }
-  return summaryCard + html;
-}
+  const stats: { label: string; value: string; color: string }[] = [];
+  const labels: Record<string, string> = {
+    '평균': '#60a5fa', '최고': '#34d399', '최저': '#f87171',
+    '평당': '#c4b5fd', '건수': '#fdba74', '면적': '#22d3ee', '세대': '#f472b6', '거래': '#fdba74',
+  };
 
-/**
- * 지도 링크 깨짐 수정
- * marked 출력: <p>👉 <a href="https://map.kakao.com/?q=%EC%..."><strong>카카오맵에서 위치 보기</strong> →</a></p>
- */
-function fixMapLinks(html: string): string {
-  // 카카오맵 + 네이버지도 링크를 모두 찾아서 깔끔한 버튼 쌍으로 교체
-  const kakaoRx = /<p>\s*👉\s*<a\s+href="([^"]*map\.kakao[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi;
-  const naverRx = /<p>\s*👉\s*<a\s+href="([^"]*map\.naver[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi;
-
-  let kakaoUrl = '';
-  let naverUrl = '';
-
-  const kakaoMatch = kakaoRx.exec(html);
-  if (kakaoMatch) kakaoUrl = decodeURIComponent(kakaoMatch[1]);
-
-  const naverMatch = naverRx.exec(html);
-  if (naverMatch) naverUrl = decodeURIComponent(naverMatch[1]);
-
-  // 기존 링크 패턴 전부 제거
-  let fixed = html.replace(/<p>\s*👉\s*<a\s+href="[^"]*map\.(kakao|naver)[^"]*"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi, '');
-
-  // 깔끔한 버튼 삽입 (카카오+네이버 한 줄로)
-  if (kakaoUrl || naverUrl) {
-    const btnStyle = 'flex:1;text-align:center;padding:12px 0;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);text-decoration:none;font-size:var(--fs-sm);font-weight:600';
-    let buttons = '<div style="display:flex;gap:8px;margin:12px 0">';
-    if (kakaoUrl) buttons += `<a href="${kakaoUrl}" target="_blank" rel="noopener noreferrer" style="${btnStyle}">🗺️ 카카오맵</a>`;
-    if (naverUrl) buttons += `<a href="${naverUrl}" target="_blank" rel="noopener noreferrer" style="${btnStyle}">🗺️ 네이버지도</a>`;
-    buttons += '</div>';
-
-    // 위치 확인 h2 바로 뒤에 삽입
-    const locH2 = fixed.indexOf('위치 확인</h2>');
-    if (locH2 > 0) {
-      const insertPos = fixed.indexOf('</p>', locH2);
-      if (insertPos > 0) {
-        fixed = fixed.slice(0, insertPos + 4) + buttons + fixed.slice(insertPos + 4);
-      } else {
-        fixed = fixed.slice(0, locH2 + 13) + buttons + fixed.slice(locH2 + 13);
+  for (const row of rows) {
+    const cells = row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi);
+    if (!cells || cells.length < 2) continue;
+    const label = cells[0].replace(/<[^>]+>/g, '').trim();
+    const value = cells[1].replace(/<[^>]+>/g, '').trim();
+    if (!value || value.length > 30 || !value.match(/[\d,.]+/)) continue;
+    for (const [key, color] of Object.entries(labels)) {
+      if (label.includes(key) && stats.length < 4) {
+        stats.push({ label: label.replace(/\*\*/g, ''), value, color });
+        break;
       }
     }
   }
+  if (stats.length < 2) return html;
 
-  // 남은 인코딩 깨짐 텍스트 제거 (혹시 모를 잔재)
+  const cards = stats.map(s =>
+    `<div style="background:var(--bg-surface);border-radius:10px;padding:12px 10px;border-left:4px solid ${s.color};border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border)"><div style="font-size:11px;color:var(--text-tertiary)">${s.label}</div><div style="font-size:18px;font-weight:700;color:${s.color};margin-top:2px">${s.value}</div></div>`
+  ).join('');
+  const grid = `<div style="display:grid;grid-template-columns:repeat(${Math.min(stats.length, 4)},1fr);gap:6px;margin:16px 0">${cards}</div>`;
+  const h2Idx = html.indexOf('<h2');
+  return h2Idx > 0 ? html.slice(0, h2Idx) + grid + html.slice(h2Idx) : grid + html;
+}
+
+// ── 3. 카테고리 컬러 태그 바 ──
+function insertColorTags(html: string, opts: EnhanceOptions): string {
+  const tags = opts.tags;
+  if (!tags || tags.length === 0) return html;
+  const tagHtml = tags.slice(0, 6).map((t, i) => {
+    const c = COLORS[i % COLORS.length];
+    return `<span style="font-size:12px;padding:4px 12px;border-radius:14px;background:${c}15;color:${c};border:1px solid ${c}40;font-weight:600">#${t}</span>`;
+  }).join('');
+  const bar = `<div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0">${tagHtml}</div>`;
+  const h2Idx = html.indexOf('<h2');
+  return h2Idx > 0 ? html.slice(0, h2Idx) + bar + html.slice(h2Idx) : bar + html;
+}
+
+// ── 4. 가격 레인지 바 ──
+function insertPriceRange(html: string): string {
+  const text = html.replace(/<[^>]+>/g, ' ');
+  const avgM = text.match(/평균[^0-9]*([\d,.]+)\s*만원/);
+  const minM = text.match(/최저[^0-9]*([\d,.]+)\s*만원/);
+  const maxM = text.match(/최고[^0-9]*([\d,.]+)\s*만원/);
+  if (!avgM || !minM || !maxM) return html;
+  const avg = parseFloat(avgM[1].replace(/,/g, ''));
+  const min = parseFloat(minM[1].replace(/,/g, ''));
+  const max = parseFloat(maxM[1].replace(/,/g, ''));
+  if (max <= min) return html;
+
+  const pct = Math.round(((avg - min) / (max - min)) * 100);
+  const fmt = (v: number) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${v.toLocaleString()}만`;
+
+  const bar = `<div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:16px 0"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span style="color:#f87171;font-weight:600">최저 ${fmt(min)}</span><span style="color:#60a5fa;font-weight:600">평균 ${fmt(avg)}</span><span style="color:#34d399;font-weight:600">최고 ${fmt(max)}</span></div><div style="height:24px;border-radius:8px;background:var(--bg-hover);position:relative;overflow:hidden"><div style="position:absolute;left:0;width:${pct}%;height:100%;background:linear-gradient(90deg,#f87171,#fb923c,#60a5fa);border-radius:8px;opacity:0.4"></div><div style="position:absolute;left:${pct}%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:var(--bg-surface);border:3px solid #60a5fa;z-index:1"></div></div></div>`;
+
+  // 두 번째 table 뒤에 삽입
+  let cnt = 0;
+  return html.replace(/<\/div>(?=\s*<div style="margin:24px)/g, (m) => { cnt++; return cnt === 1 ? m + bar : m; });
+}
+
+// ── 5. 체크포인트 아이콘 카드 ──
+function enhanceCheckpoints(html: string): string {
+  const iconMap: Record<string, { emoji: string; color: string }> = {
+    '교통': { emoji: '🚇', color: '#60a5fa' }, '학군': { emoji: '🏫', color: '#34d399' },
+    '개발': { emoji: '🏗️', color: '#fb923c' }, '호재': { emoji: '🏗️', color: '#fb923c' },
+    '전세': { emoji: '🏠', color: '#c4b5fd' }, '인프라': { emoji: '🏥', color: '#22d3ee' },
+    '리모델링': { emoji: '🔨', color: '#f472b6' }, '재건축': { emoji: '🏢', color: '#fdba74' },
+  };
+  return html.replace(/<li>\s*<strong>([^<]+)<\/strong>\s*[:：]\s*([^<]+)<\/li>/g, (match, title, desc) => {
+    for (const [key, cfg] of Object.entries(iconMap)) {
+      if (title.includes(key)) {
+        return `<li style="list-style:none;margin:6px 0"><div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-surface);border-radius:8px;border-left:4px solid ${cfg.color};border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border)"><span style="font-size:16px;flex-shrink:0">${cfg.emoji}</span><div><div style="font-size:13px;font-weight:600;color:var(--text-primary)">${title.replace(/\*\*/g, '')}</div><div style="font-size:12px;color:var(--text-secondary)">${desc.trim()}</div></div></div></li>`;
+      }
+    }
+    return match;
+  });
+}
+
+// ── 6. 그라데이션 구분선 ──
+function enhanceDividers(html: string): string {
+  return html.replace(/<hr\s*\/?>/gi,
+    '<div style="margin:24px 0;height:2px;border-radius:1px;background:linear-gradient(90deg,transparent,#f87171,#fb923c,#60a5fa,#a78bfa,#34d399,transparent)"></div>'
+  );
+}
+
+// ── 7. 인용 블록 스타일링 ──
+function enhanceBlockquotes(html: string): string {
+  return html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/gi, (_, content) =>
+    `<div style="margin:16px 0;padding:14px 16px;border-left:4px solid #a78bfa;background:rgba(167,139,250,0.06);border-top:1px solid rgba(167,139,250,0.2);border-right:1px solid rgba(167,139,250,0.2);border-bottom:1px solid rgba(167,139,250,0.2);border-radius:0 8px 8px 0"><div style="font-size:13px;color:var(--text-secondary);line-height:1.7;font-style:italic">${content}</div></div>`
+  );
+}
+
+// ── 8. 숫자 컬러 뱃지 (단위별 색상) ──
+function highlightStats(html: string): string {
+  return html.replace(
+    /(<[^>]+>)|([약]?\s*)([\d,.]+)\s*(조원?|억원?|만원?|만\s*세대|만\s*호|퍼센트)/g,
+    (match, tag, prefix, num, unit) => {
+      if (tag) return tag;
+      if (!num || !unit) return match;
+      const c = colorFor(unit);
+      return `${prefix || ''}<span style="display:inline-flex;padding:2px 10px;border-radius:6px;background:${c}15;border:1px solid ${c}40;font-weight:700;color:${c};font-size:inherit">${num}${unit}</span>`;
+    }
+  );
+}
+
+// ── 핵심 포인트 강조 박스 ──
+function enhanceKeyPoints(html: string): string {
+  const icons = ['✅', '⚡', '💡', '⚠️', '📌', '🔑', '💰', '📊', '🎯', '🏆'];
+  const iconPattern = icons.map(i => i.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  return html.replace(
+    new RegExp(`<p>((?:${iconPattern})\\s*.+?)<\\/p>`, 'g'),
+    (_, content) => `<div style="padding:14px 16px;border-radius:0 8px 8px 0;margin:16px 0;border-left:4px solid var(--brand);background:var(--bg-surface);border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);overflow-wrap:break-word">${content}</div>`
+  );
+}
+
+// ── 요약 카드 ──
+function insertSummaryCard(html: string, excerpt?: string | null): string {
+  if (!excerpt || excerpt.length < 20) return html;
+  const card = `<div style="padding:16px 18px;border-radius:12px;margin:16px 0 24px;background:linear-gradient(135deg,var(--bg-surface) 0%,var(--bg-elevated) 100%);border:1px solid var(--border)"><div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:6px;letter-spacing:0.5px">📋 핵심 요약</div><div style="font-size:var(--fs-sm);color:var(--text-secondary);line-height:1.7">${excerpt}</div></div>`;
+  const h2Idx = html.indexOf('<h2');
+  if (h2Idx > 0) return html.slice(0, h2Idx) + card + html.slice(h2Idx);
+  const pEnd = html.indexOf('</p>');
+  return pEnd > 0 ? html.slice(0, pEnd + 4) + card + html.slice(pEnd + 4) : card + html;
+}
+
+// ── 지도 링크 수정 ──
+function fixMapLinks(html: string): string {
+  const kakaoRx = /<p>\s*👉\s*<a\s+href="([^"]*map\.kakao[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi;
+  const naverRx = /<p>\s*👉\s*<a\s+href="([^"]*map\.naver[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi;
+  let kakaoUrl = '', naverUrl = '';
+  const km = kakaoRx.exec(html); if (km) kakaoUrl = decodeURIComponent(km[1]);
+  const nm = naverRx.exec(html); if (nm) naverUrl = decodeURIComponent(nm[1]);
+  let fixed = html.replace(/<p>\s*👉\s*<a\s+href="[^"]*map\.(kakao|naver)[^"]*"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi, '');
+  if (kakaoUrl || naverUrl) {
+    const bs = 'flex:1;text-align:center;padding:12px 0;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);text-decoration:none;font-size:var(--fs-sm);font-weight:600';
+    let btns = '<div style="display:flex;gap:8px;margin:12px 0">';
+    if (kakaoUrl) btns += `<a href="${kakaoUrl}" target="_blank" rel="noopener noreferrer" style="${bs}">🗺️ 카카오맵</a>`;
+    if (naverUrl) btns += `<a href="${naverUrl}" target="_blank" rel="noopener noreferrer" style="${bs}">🗺️ 네이버지도</a>`;
+    btns += '</div>';
+    const loc = fixed.indexOf('위치 확인</h2>');
+    if (loc > 0) { const ins = fixed.indexOf('</p>', loc); if (ins > 0) fixed = fixed.slice(0, ins + 4) + btns + fixed.slice(ins + 4); }
+  }
   fixed = fixed.replace(/<p>\s*👉[^<]*(%[0-9A-Fa-f]{2}){3,}[\s\S]*?<\/p>/gi, '');
-
   return fixed;
 }
 
-/**
- * 위치 확인 섹션 제목 정규화
- */
 function cleanLocationSection(html: string): string {
   return html.replace(
     /<h[23][^>]*>[\s\S]*?위치\s*확인[\s\S]*?<\/h[23]>\s*(?:<p>[^<]*지도[^<]*<\/p>\s*)?/gi,
@@ -137,31 +192,25 @@ function cleanLocationSection(html: string): string {
   );
 }
 
-/**
- * 메인 함수: 블로그 HTML에 시각화 요소 추가
- */
-export function enhanceBlogVisuals(html: string, options?: { excerpt?: string | null }): string {
-  let enhanced = html;
-  
-  // 0. 지도 링크 깨짐 수정 (가장 먼저)
-  enhanced = cleanLocationSection(enhanced);
-  enhanced = fixMapLinks(enhanced);
-  
-  // 0.5 테이블을 스크롤 래퍼로 감싸기 (삐져나감 방지)
-  enhanced = enhanced.replace(
-    /<table/g,
-    '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0;border-radius:8px;border:1px solid var(--border)"><table style="min-width:400px"'
-  );
-  enhanced = enhanced.replace(/<\/table>/g, '</table></div>');
-  
-  // 1. 숫자 통계 하이라이트
-  enhanced = highlightStats(enhanced);
-  
-  // 2. 핵심 포인트 강조 박스
-  enhanced = enhanceKeyPoints(enhanced);
-  
-  // 3. 요약 카드 삽입
-  enhanced = insertSummaryCard(enhanced, options?.excerpt);
-  
-  return enhanced;
+// ── 메인 함수 ──
+export function enhanceBlogVisuals(html: string, options?: EnhanceOptions): string {
+  let e = html;
+  const opts = options || {};
+
+  e = cleanLocationSection(e);
+  e = fixMapLinks(e);
+  e = e.replace(/<table/g, '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0;border-radius:8px;border:1px solid var(--border)"><table style="min-width:400px"');
+  e = e.replace(/<\/table>/g, '</table></div>');
+  e = enhanceDividers(e);        // #6
+  e = enhanceBlockquotes(e);     // #7
+  e = enhanceCheckpoints(e);     // #5
+  e = highlightStats(e);         // #8
+  e = enhanceKeyPoints(e);
+  e = insertPriceRange(e);       // #4
+  e = insertSummaryCard(e, opts.excerpt);
+  e = insertHeroStats(e);        // #2
+  e = insertColorTags(e, opts);  // #3
+  e = insertCoverImage(e, opts); // #1
+
+  return e;
 }
