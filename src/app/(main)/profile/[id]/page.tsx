@@ -33,6 +33,7 @@ export default async function ProfilePage({ params }: Props) {
     { count: followersCount },
     { count: followingCount },
     followCheck,
+    { data: recentComments },
   ] = await Promise.all([
     sb.from('profiles').select('id,nickname,avatar_url,bio,grade,grade_title,influence_score,points,posts_count,likes_count,followers_count,following_count,streak_days,is_premium,is_admin,is_banned,is_seed,residence_city,residence_district,region_text,created_at,updated_at,interests').eq('id', id).single(),
     sb.from('posts').select('id,title,category,created_at,view_count,likes_count,comments_count').eq('author_id', id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(20),
@@ -42,6 +43,7 @@ export default async function ProfilePage({ params }: Props) {
     authUser
       ? sb.from('follows').select('follower_id').eq('follower_id', authUser.id).eq('followee_id', id).maybeSingle()
       : Promise.resolve({ data: null }),
+    sb.from('comments').select('id,content,created_at,post_id').eq('author_id', id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
   ]);
 
   return (
@@ -62,6 +64,39 @@ export default async function ProfilePage({ params }: Props) {
         ))}
       </div>
     </div>
+
+    {/* 최근 활동 타임라인 */}
+    {((posts && posts.length > 0) || (recentComments && recentComments.length > 0)) && (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 16px' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>최근 활동</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', paddingLeft: 16 }}>
+          <div style={{ position: 'absolute', left: 5, top: 6, bottom: 6, width: 2, background: 'var(--border)', borderRadius: 1 }} />
+          {[
+            ...(posts || []).slice(0, 3).map((p: any) => ({
+              type: 'post' as const, title: p.title, date: p.created_at, href: `/feed/${p.id}`,
+              emoji: p.category === 'stock' ? '📈' : p.category === 'apt' ? '🏢' : '💬',
+            })),
+            ...(recentComments || []).slice(0, 3).map((c: any) => ({
+              type: 'comment' as const, title: (c.content || '').slice(0, 40), date: c.created_at, href: `/feed/${c.post_id}#comments`,
+              emoji: '💬',
+            })),
+          ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5).map((item, i) => (
+            <a key={i} href={item.href} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '6px 0', textDecoration: 'none', color: 'inherit', position: 'relative' }}>
+              <div style={{ width: 12, height: 12, borderRadius: '50%', background: item.type === 'post' ? 'var(--brand)' : 'var(--accent-green)', border: '2px solid var(--bg-base)', flexShrink: 0, marginTop: 3, position: 'relative', zIndex: 1 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {item.emoji} {item.title}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                  {item.type === 'post' ? '글 작성' : '댓글'} · {new Date(item.date).toLocaleDateString('ko-KR')}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
     <ProfileClient
       profile={profile as unknown as React.ComponentProps<typeof ProfileClient>['profile']}
       posts={posts ?? []}

@@ -16,6 +16,7 @@ export const PostCreateSchema = z.object({
 export const CommentCreateSchema = z.object({
   content: z.string().min(1, '댓글을 입력해주세요').max(2000, '2000자 이하'),
   post_id: z.number().int().positive('유효한 게시글 ID'),
+  parent_id: z.number().int().positive().nullable().optional(),
 });
 
 // 신고

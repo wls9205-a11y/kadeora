@@ -25,6 +25,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   const { userId } = useAuth();
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [likingIds, setLikingIds] = useState<Set<number>>(new Set());
+  const [replyTo, setReplyTo] = useState<{ id: number; nickname: string } | null>(null);
   const { success, error, info } = useToast();
 
   const handleSubmit = async () => {
@@ -34,16 +35,19 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
     if (trimmed.length > 500) { error('댓글은 500자 이내로 입력해주세요'); return; }
     setLoading(true);
     try {
+      const body: Record<string, unknown> = { post_id: postId, content: trimmed };
+      if (replyTo) body.parent_id = replyTo.id;
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId, content: trimmed }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? '댓글 작성 실패'); }
       const { comment } = await res.json();
       setComments(prev => [{ ...comment, profiles: { id: userId!, nickname: comment.nickname ?? '나', avatar_url: null } }, ...prev]);
       setContent('');
-      success('댓글이 작성되었습니다');
+      setReplyTo(null);
+      success(replyTo ? '답글이 작성되었습니다' : '댓글이 작성되었습니다');
     } catch (e: unknown) {
       error(e instanceof Error ? errMsg(e) : '댓글 작성 중 오류가 발생했습니다');
     } finally {
@@ -91,6 +95,12 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
 
       {/* 댓글 입력 — 채팅 스타일 */}
       <div style={{ marginBottom: 20 }}>
+        {replyTo && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '4px 10px', background: 'rgba(37,99,235,0.06)', borderRadius: 8, fontSize: 12, color: 'var(--brand)' }}>
+            ↩ <strong>{replyTo.nickname}</strong>에게 답글
+            <button onClick={() => setReplyTo(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
+          </div>
+        )}
         {userId ? (
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 4 }}>나</div>
@@ -130,55 +140,63 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
         )}
       </div>
 
-      {/* 댓글 목록 — 대화 스레드 */}
+      {/* 댓글 목록 — 대화 스레드 (대댓글 지원) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {comments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
             아직 대화가 없어요. 첫 의견을 남겨보세요!
           </div>
-        ) : (
-          comments.map(comment => (
-            <div key={comment.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0' }}>
-              {/* 아바타 */}
+        ) : (() => {
+          const rootComments = comments.filter(c => !c.parent_id);
+          const replyMap = new Map<number, CommentWithProfile[]>();
+          comments.filter(c => c.parent_id).forEach(r => {
+            const pid = r.parent_id as number;
+            if (!replyMap.has(pid)) replyMap.set(pid, []);
+            replyMap.get(pid)!.push(r);
+          });
+
+          const renderComment = (comment: CommentWithProfile, isReply = false) => (
+            <div key={comment.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0', marginLeft: isReply ? 42 : 0 }}>
               <Link href={`/profile/${comment.profiles?.id || comment.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: getAvatarColor(comment.profiles?.nickname ?? 'U'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)' }}>
+                <div style={{ width: isReply ? 26 : 32, height: isReply ? 26 : 32, borderRadius: '50%', background: getAvatarColor(comment.profiles?.nickname ?? 'U'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 10 : 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)' }}>
                   {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}
                 </div>
               </Link>
-              {/* 말풍선 */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '4px 14px 14px 14px', padding: '10px 14px' }}>
+                <div style={{ background: isReply ? 'var(--bg-hover)' : 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: isReply ? '4px 12px 12px 12px' : '4px 14px 14px 14px', padding: '10px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
                   </div>
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.55, wordBreak: 'break-word' }}>
-                    {comment.content}
-                  </div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.55, wordBreak: 'break-word' }}>{comment.content}</div>
                 </div>
-                {/* 메타: 시간 + 좋아요 + 신고/삭제 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4, paddingLeft: 4 }}>
                   <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
-                  <button
-                    onClick={() => handleCommentLike(comment.id, comment.likes_count ?? 0)}
-                    disabled={likingIds.has(comment.id)}
-                    aria-label="댓글 좋아요"
+                  <button onClick={() => handleCommentLike(comment.id, comment.likes_count ?? 0)} disabled={likingIds.has(comment.id)} aria-label="좋아요"
                     style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
                     ♡ {(comment.likes_count ?? 0) > 0 ? comment.likes_count : ''}
                   </button>
-                  {/* 삭제 버튼 */}
+                  {!isReply && userId && (
+                    <button onClick={() => setReplyTo({ id: comment.id, nickname: comment.profiles?.nickname ?? '익명' })}
+                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>답글</button>
+                  )}
                   {userId === comment.author_id && (
-                    <button
-                      onClick={() => setDeleteTarget(comment.id)}
-                      aria-label="댓글 삭제"
+                    <button onClick={() => setDeleteTarget(comment.id)} aria-label="삭제"
                       style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0 }}>삭제</button>
                   )}
                   <ReportButton commentId={comment.id} />
                 </div>
               </div>
             </div>
-          ))
-        )}
+          );
+
+          return rootComments.map(c => (
+            <div key={c.id}>
+              {renderComment(c)}
+              {(replyMap.get(c.id) || []).map(r => renderComment(r, true))}
+            </div>
+          ));
+        })()}
       </div>
 
       <ConfirmModal
