@@ -193,6 +193,44 @@ export async function GET(req: Request) {
       }
       const totalRecordsCreated = Object.values(cronSummary).reduce((s, v) => s + v.created, 0);
 
+      // ── 추가: 블로그 생산 + 댓글 + 크론 카테고리 ──
+      const [blogTodayR, blogCatR, commentsTodayR, repliesR, blogQueueR, blogUnpubR] = await Promise.all([
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).gte('published_at', todayStr),
+        sb.from('blog_posts').select('category').eq('is_published', true),
+        sb.from('comments').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', todayStart),
+        sb.from('comments').select('id', { count: 'exact', head: true }).not('parent_id', 'is', null),
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false).eq('is_deleted', false),
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false).gte('content_length', 1200),
+      ]);
+
+      // 블로그 카테고리 분포
+      const blogCatMap: Record<string, number> = {};
+      (blogCatR.data || []).forEach((b: any) => { blogCatMap[b.category || 'general'] = (blogCatMap[b.category || 'general'] || 0) + 1; });
+
+      // 크론 카테고리별 분류
+      const cronByCategory: Record<string, { success: number; fail: number; total: number; created: number }> = {
+        blog: { success: 0, fail: 0, total: 0, created: 0 },
+        stock: { success: 0, fail: 0, total: 0, created: 0 },
+        apt: { success: 0, fail: 0, total: 0, created: 0 },
+        system: { success: 0, fail: 0, total: 0, created: 0 },
+      };
+      for (const c of cronData) {
+        const cat = c.cron_name?.startsWith('blog-') || c.cron_name?.startsWith('seed-') ? 'blog'
+          : c.cron_name?.startsWith('stock-') ? 'stock'
+          : c.cron_name?.includes('apt') || c.cron_name?.includes('redev') || c.cron_name?.includes('unsold') || c.cron_name?.includes('subscription') || c.cron_name?.includes('trade') ? 'apt'
+          : 'system';
+        cronByCategory[cat].total++;
+        if (c.status === 'success') cronByCategory[cat].success++;
+        else cronByCategory[cat].fail++;
+      }
+      for (const [name, info] of Object.entries(cronSummary)) {
+        const cat = name.startsWith('blog-') || name.startsWith('seed-') ? 'blog'
+          : name.startsWith('stock-') ? 'stock'
+          : name.includes('apt') || name.includes('redev') || name.includes('unsold') || name.includes('subscription') || name.includes('trade') ? 'apt'
+          : 'system';
+        cronByCategory[cat].created += info.created;
+      }
+
       return NextResponse.json({
         kpi: {
           users: usersR.count ?? 0,
@@ -237,6 +275,17 @@ export async function GET(req: Request) {
           sitemapPct: scoreStats?.length ? Math.round((totalSitemap / scoreStats.length) * 100) : 0,
           blogRewrittenPct,
         },
+        blogProduction: {
+          today: blogTodayR.count ?? 0,
+          queue: blogQueueR.count ?? 0,
+          readyToPublish: blogUnpubR.count ?? 0,
+          categoryBreakdown: blogCatMap,
+        },
+        commentStats: {
+          today: commentsTodayR.count ?? 0,
+          totalReplies: repliesR.count ?? 0,
+        },
+        cronByCategory,
       });
     }
 

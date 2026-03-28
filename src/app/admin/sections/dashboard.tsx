@@ -29,7 +29,7 @@ export default function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi } = data as any;
+  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, blogProduction, commentStats, cronByCategory } = data as any;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const totalSites = seo?.totalSites || 0;
@@ -68,10 +68,12 @@ export default function DashboardSection() {
       {/* ── Row 1: 시스템 헬스 바 ── */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <HealthBadge label="크론" value={`${cron.success}/${cron.total}`} ok={cron.fail === 0} />
-        <HealthBadge label="에러" value={kpi.pendingReports > 0 ? `${kpi.pendingReports}건` : '없음'} ok={kpi.pendingReports === 0} />
-        <HealthBadge label="DB" value={data.dbSize || '226MB'} ok={true} />
+        <HealthBadge label="신고" value={kpi.pendingReports > 0 ? `${kpi.pendingReports}건` : '없음'} ok={kpi.pendingReports === 0} />
+        <HealthBadge label="블로그" value={`오늘 ${blogProduction?.today ?? 0}편`} ok={(blogProduction?.today ?? 0) > 0} />
+        <HealthBadge label="댓글" value={`오늘 ${commentStats?.today ?? 0}개`} ok={(commentStats?.today ?? 0) > 0} />
         <HealthBadge label="24h 생산" value={fmt(totalRecordsCreated || 0) + '건'} ok={(totalRecordsCreated || 0) > 0} />
         <HealthBadge label="사이트맵" value={`${seo?.sitemapPct || 0}%`} ok={(seo?.sitemapPct || 0) > 80} />
+        {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
       </div>
 
       {/* ── Row 2: 핵심 KPI 6카드 + 어제 대비 ── */}
@@ -243,6 +245,95 @@ export default function DashboardSection() {
         </div>
       )}
 
+      {/* ── Row 4.5: 블로그 생산 현황 + 댓글/크론 카테고리 ── */}
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        {/* 블로그 생산 현황 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>📰 블로그 생산 현황</span>
+            <span style={{ fontSize: 10, color: C.textDim }}>총 {fmt(kpi.blogs)}편</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: (blogProduction?.today ?? 0) > 0 ? C.green : C.red }}>{blogProduction?.today ?? 0}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>오늘 발행</div>
+            </div>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.yellow }}>{fmt(blogProduction?.queue ?? 0)}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>미발행 큐</div>
+            </div>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.cyan }}>{fmt(blogProduction?.readyToPublish ?? 0)}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>발행 가능</div>
+            </div>
+          </div>
+          {/* 블로그 카테고리 분포 바 */}
+          {blogProduction?.categoryBreakdown && (() => {
+            const cats = Object.entries(blogProduction.categoryBreakdown as Record<string, number>).sort((a, b) => b[1] - a[1]);
+            const total = cats.reduce((s, [, c]) => s + c, 0) || 1;
+            const catColors: Record<string, string> = { stock: '#00E5FF', apt: '#00FF87', unsold: '#FF6B1A', finance: '#FFE000', general: '#C084FC' };
+            const catLabels: Record<string, string> = { stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' };
+            return (
+              <>
+                <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
+                  {cats.map(([cat, cnt]) => (
+                    <div key={cat} style={{ width: `${(cnt / total) * 100}%`, background: catColors[cat] || C.textDim }} title={`${catLabels[cat] || cat}: ${fmt(cnt)}편`} />
+                  ))}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {cats.slice(0, 5).map(([cat, cnt]) => (
+                    <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10 }}>
+                      <div style={{ width: 5, height: 5, borderRadius: 2, background: catColors[cat] || C.textDim }} />
+                      <span style={{ color: C.textSec }}>{catLabels[cat] || cat}</span>
+                      <span style={{ color: C.text, fontWeight: 700 }}>{fmt(cnt)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
+          {/* 리라이팅 현황 */}
+          <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 8, paddingTop: 8, display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 10, color: C.textDim }}>AI 리라이팅</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: (seo?.blogRewrittenPct ?? 0) > 50 ? C.green : C.yellow }}>{seo?.blogRewrittenPct ?? 0}% 완료</span>
+          </div>
+        </div>
+
+        {/* 댓글 + 크론 카테고리 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+          {/* 댓글 통계 */}
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>💬 댓글 & 크론 현황</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.green }}>{commentStats?.today ?? 0}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>오늘 댓글</div>
+            </div>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.purple }}>{fmt(commentStats?.totalReplies ?? 0)}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>대댓글</div>
+            </div>
+          </div>
+          {/* 크론 카테고리별 */}
+          <div style={{ fontSize: 11, fontWeight: 700, color: C.textSec, marginBottom: 6 }}>크론 카테고리 (24h)</div>
+          {cronByCategory && Object.entries(cronByCategory as Record<string, any>).map(([cat, info]: [string, any]) => {
+            const icons: Record<string, string> = { blog: '📝', stock: '📈', apt: '🏢', system: '⚙️' };
+            const labels: Record<string, string> = { blog: '블로그', stock: '주식', apt: '부동산', system: '시스템' };
+            const pct = info.total > 0 ? Math.round((info.success / info.total) * 100) : 100;
+            return (
+              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <span style={{ fontSize: 12, width: 16, textAlign: 'center' }}>{icons[cat]}</span>
+                <span style={{ fontSize: 10, color: C.textSec, width: 40 }}>{labels[cat]}</span>
+                <div style={{ flex: 1, height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 3, background: pct === 100 ? C.green : pct > 70 ? C.yellow : C.red, width: `${pct}%` }} />
+                </div>
+                <span style={{ fontSize: 9, fontWeight: 700, color: pct === 100 ? C.green : C.red, minWidth: 32, textAlign: 'right' }}>{info.success}/{info.total}</span>
+                {info.created > 0 && <span style={{ fontSize: 9, color: C.cyan }}>+{fmt(info.created)}</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* ── Row 5: 페이지 타입 분포 + 카테고리 분포 ── */}
       <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
         {/* 페이지 타입 분포 */}
@@ -293,6 +384,12 @@ export default function DashboardSection() {
         <QuickAction label="🏢 부동산" href="#" onClick={() => { const el = document.querySelector('[data-section="realestate"]') as HTMLElement; el?.click(); }} />
         <QuickAction label="📈 주식" href="/stock" external />
         <QuickAction label="🔍 사이트" href="https://kadeora.app" external />
+        <QuickAction label="📝 블로그" href="/blog" external />
+        <QuickAction label="💬 토론" href="/discuss" external />
+        <QuickAction label="🔥 HOT" href="/hot" external />
+        <QuickAction label="🛒 상점" href="/shop" external />
+        <QuickAction label="🔑 Anthropic" href="https://console.anthropic.com" external />
+        <QuickAction label="📊 Vercel" href="https://vercel.com/wls9205-5665s-projects/kadeora" external />
       </div>
 
       {/* ── Row 7: 실시간 활동 피드 ── */}
