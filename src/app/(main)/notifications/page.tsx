@@ -49,11 +49,11 @@ export default function NotificationsPage() {
       if (u) {
         const { data: n } = await sb
           .from('notifications')
-          .select('id, type, content, is_read, created_at')
+          .select('id, type, content, is_read, created_at, link')
           .eq('user_id', u.id)
           .order('created_at', { ascending: false })
           .limit(50);
-        setNotifs(n ?? []);
+        setNotifs((n ?? []) as unknown as Notif[]);
       }
       setLoading(false);
     });
