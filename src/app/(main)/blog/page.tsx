@@ -1,8 +1,20 @@
 import type { Metadata } from 'next';
+import React from 'react';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+
+function highlightTitle(title: string, query: string): React.ReactNode {
+  if (!query) return title;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = title.split(new RegExp(`(${escaped})`, 'gi'));
+  return parts.map((part, i) =>
+    part.toLowerCase() === query.toLowerCase()
+      ? <mark key={i} style={{ background: 'rgba(37,99,235,0.15)', color: 'var(--brand)', borderRadius: 2, padding: '0 2px' }}>{part}</mark>
+      : part
+  );
+}
 
 export const revalidate = 300;
 
@@ -431,7 +443,7 @@ export default async function BlogPage({ searchParams }: Props) {
                     )}
                   </div>
                   {/* 제목 */}
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.title}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
                   {p.excerpt && (
                     <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>
                   )}

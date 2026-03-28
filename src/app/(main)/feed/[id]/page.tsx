@@ -304,6 +304,12 @@ export default async function FeedDetailPage({ params }: Props) {
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
               {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
+            {post.content && post.content.length > 500 && (
+              <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+                <span>📝 {post.content.length.toLocaleString()}자</span>
+                <span>⏱ ~{Math.max(1, Math.round(post.content.length / 500))}분</span>
+              </div>
+            )}
           </div>
           <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
             <PostActions postId={post.id} isOwner={currentUserId === post.author_id} />

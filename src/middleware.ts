@@ -40,6 +40,17 @@ function applySecurityHeaders(response: NextResponse) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // XSS URL probing defense
+  try {
+    const decoded = decodeURIComponent(pathname);
+    if (/<|>|<script|<template|javascript:/i.test(decoded)) {
+      return new NextResponse('Bad Request', { status: 400 });
+    }
+  } catch {
+    // malformed URI — block it
+    return new NextResponse('Bad Request', { status: 400 });
+  }
+
   // ── 봇 차단 ──
   if (BOT_PATHS.some(p => pathname.startsWith(p))) {
     return new NextResponse(null, { status: 404 });

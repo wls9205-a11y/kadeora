@@ -93,8 +93,6 @@ export default async function StockDetailPage({ params }: Props) {
     { label: '거래량', value: s.volume ? Number(s.volume).toLocaleString() : '-' },
     { label: '섹터', value: s.sector || '-' },
     { label: '전일대비', value: s.change_amt ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
-    ...(high52 ? [{ label: '기간 최고', value: s.currency === 'USD' ? `$${high52.toFixed(2)}` : `₩${high52.toLocaleString()}` }] : []),
-    ...(low52 ? [{ label: '기간 최저', value: s.currency === 'USD' ? `$${low52.toFixed(2)}` : `₩${low52.toLocaleString()}` }] : []),
   ];
 
   return (
@@ -191,6 +189,30 @@ export default async function StockDetailPage({ params }: Props) {
           </div>
         ))}
       </div>
+
+      {/* 52주 가격 범위 바 */}
+      {high52 && low52 && high52 > 0 && low52 > 0 && high52 !== low52 && (
+        <div style={{ marginBottom: 12, padding: '10px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>가격 범위 (기간)</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 600 }}>
+              {s.currency === 'USD' ? '$' : '₩'}{low52.toLocaleString()}
+            </span>
+            <div style={{ flex: 1, height: 8, background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-green), var(--accent-red))', borderRadius: 4, position: 'relative' }}>
+              <div style={{
+                position: 'absolute', top: -3,
+                left: `${Math.min(Math.max(((Number(s.price) - low52) / (high52 - low52)) * 100, 2), 98)}%`,
+                width: 14, height: 14, borderRadius: '50%',
+                background: 'var(--text-primary)', border: '3px solid var(--bg-surface)',
+                transform: 'translateX(-50%)',
+              }} />
+            </div>
+            <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 600 }}>
+              {s.currency === 'USD' ? '$' : '₩'}{high52.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* 탭 콘텐츠 */}
       <StockDetailTabs

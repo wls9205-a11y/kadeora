@@ -194,8 +194,11 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   }, [loadMorePosts]);
 
   const categories = [
-    { key: 'all', label: '전체' }, { key: 'stock', label: '주식' },
-    { key: 'apt', label: '부동산' }, { key: 'local', label: '우리동네' }, { key: 'free', label: '자유' },
+    { key: 'all', label: '전체', icon: '📋' },
+    { key: 'stock', label: '주식', icon: '📊' },
+    { key: 'apt', label: '부동산', icon: '🏢' },
+    { key: 'local', label: '우리동네', icon: '📍' },
+    { key: 'free', label: '자유', icon: '💬' },
   ];
   const visiblePosts = posts;
 
@@ -232,7 +235,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
                 color: isActive ? 'var(--bg-base, #fff)' : 'var(--text-secondary)',
                 transition: 'all 0.15s', fontFamily: 'inherit',
               }}>
-              {cat.label}
+              {cat.icon} {cat.label}
             </button>
           );
         })}
@@ -257,6 +260,24 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
             );
           })}
         </div>
+      )}
+
+      {/* 글쓰기 CTA */}
+      {currentUserId && (
+        <Link href="/write" style={{
+          display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12,
+          textDecoration: 'none', color: 'inherit', marginBottom: 12,
+        }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--brand)', fontSize: 14, fontWeight: 700, flexShrink: 0,
+          }}>✍️</div>
+          <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
+            지금 무슨 생각을 하고 계세요?
+          </span>
+        </Link>
       )}
 
       {/* 🔥 이번 주 인기글 (간결하게 3개만) */}
@@ -411,6 +432,22 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       )}
       {posts.length === 0 && (
         <EmptyState icon="📝" title="아직 게시글이 없어요" description="첫 번째 글의 주인공이 되어보세요" action={{ label: "글쓰기", href: "/write" }} />
+      )}
+      {visiblePosts.length === 0 && !loadingMore && posts.length > 0 && (
+        <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--text-tertiary)' }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>
+            아직 이 카테고리에 글이 없어요
+          </div>
+          <div style={{ fontSize: 'var(--fs-sm)' }}>첫 글을 작성해보세요!</div>
+          {currentUserId && (
+            <Link href="/write" style={{
+              display: 'inline-block', marginTop: 12, padding: '8px 20px', borderRadius: 8,
+              background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13,
+              textDecoration: 'none',
+            }}>글쓰기</Link>
+          )}
+        </div>
       )}
     </div>
     </PullToRefresh>

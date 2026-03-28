@@ -2,6 +2,11 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+const MapClient = dynamic(() => import('./MapClient'), {
+  ssr: false,
+  loading: () => <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>지도를 불러오는 중...</div>,
+});
 
 export const metadata: Metadata = {
   title: '부동산 지도',
@@ -25,10 +30,11 @@ const REGIONS = ['서울','부산','대구','인천','광주','대전','울산',
 export default async function AptMapPage() {
   const sb = await createSupabaseServer();
 
-  const [subR, unsoldR, redevR] = await Promise.all([
+  const [subR, unsoldR, redevR, tradeR] = await Promise.all([
     sb.from('apt_subscriptions').select('region_nm').gte('rcept_endde', new Date().toISOString().slice(0, 10)).limit(5000),
     sb.from('unsold_apts').select('region_nm').eq('is_active', true).limit(5000),
     sb.from('redevelopment_projects').select('region').eq('is_active', true).limit(5000),
+    sb.from('apt_transactions').select('region_nm').gte('deal_date', new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10)).limit(5000),
   ]);
 
   // Count by region
@@ -46,6 +52,11 @@ export default async function AptMapPage() {
   (redevR.data || []).forEach((r: any) => {
     const key = REGIONS.find(reg => (r.region || '').startsWith(reg));
     if (key) redevByRegion[key] = (redevByRegion[key] || 0) + 1;
+  });
+  const tradeByRegion: Record<string, number> = {};
+  (tradeR?.data || []).forEach((r: { region_nm: string | null }) => {
+    const key = REGIONS.find(reg => (r.region_nm || '').startsWith(reg));
+    if (key) tradeByRegion[key] = (tradeByRegion[key] || 0) + 1;
   });
 
   return (
@@ -71,12 +82,16 @@ export default async function AptMapPage() {
                   {sub > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>청약 {sub}</span>}
                   {unsold > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>미분양 {unsold}</span>}
                   {redev > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,159,67,0.1)', color: 'var(--accent-orange)', fontWeight: 600 }}>재개발 {redev}</span>}
-                  {sub === 0 && unsold === 0 && redev === 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>데이터 준비 중</span>}
+                  {(tradeByRegion[r] || 0) > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontWeight: 600 }}>실거래 {tradeByRegion[r]}</span>}
+                  {sub === 0 && unsold === 0 && redev === 0 && (tradeByRegion[r] || 0) === 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>데이터 준비 중</span>}
                 </div>
               </Link>
             );
           })}
         </div>
+      </div>
+      <div style={{ marginTop: 20 }}>
+        <MapClient />
       </div>
     </>
   );

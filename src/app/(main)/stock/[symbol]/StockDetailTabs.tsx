@@ -212,7 +212,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             padding: '7px 14px', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 6, flexShrink: 0,
             background: tab === t.key ? 'var(--brand)' : 'transparent',
             color: tab === t.key ? '#fff' : 'var(--text-tertiary)',
-          }}>{t.label}</button>
+            display: 'flex', alignItems: 'center', gap: 2,
+          }}>
+            {t.label}
+            {t.key === 'disclosure' && disclosures?.some((d: Disclosure) => new Date(d.published_at || d.created_at || '').getTime() > Date.now() - 86400000) && (
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-red)', display: 'inline-block' }} />
+            )}
+          </button>
         ))}
       </div>
 

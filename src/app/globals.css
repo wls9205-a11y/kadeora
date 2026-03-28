@@ -18,6 +18,62 @@
   .kd-card:active { transform: scale(0.98); }
 }
 
+/* Feed & Card hover classes */
+@media (hover: hover) {
+  .kd-feed-card:hover { background: var(--bg-hover) !important; }
+  .kd-card-hover:hover {
+    border-color: var(--brand-border, rgba(37,99,235,0.3)) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+}
+@media (hover: none) {
+  .kd-feed-card:active { background: var(--bg-hover) !important; }
+  .kd-card-hover:active { transform: scale(0.99); }
+}
+
+.kd-action-link {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  transition: all var(--transition-fast);
+}
+@media (hover: hover) {
+  .kd-action-link:hover {
+    color: var(--brand);
+    border-color: var(--brand);
+  }
+}
+
+.kd-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  outline: none;
+  transition: border-color var(--transition-fast);
+  font-family: inherit;
+}
+.kd-search-input:focus {
+  border-color: var(--brand);
+}
+.kd-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.kd-feed-card, .kd-card-hover {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 /* 태블릿 사이드바 숨김 */
 @media (min-width: 768px) and (max-width: 899px) {
   .sidebar-wrapper { display: none; }

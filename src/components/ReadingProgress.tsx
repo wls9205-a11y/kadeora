@@ -19,7 +19,7 @@ export default function ReadingProgress() {
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
-      height: 3, background: 'transparent', pointerEvents: 'none',
+      height: 2, background: 'transparent', pointerEvents: 'none',
     }}>
       <div style={{
         height: '100%', width: `${progress}%`,

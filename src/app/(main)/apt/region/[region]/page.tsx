@@ -152,9 +152,9 @@ export default async function RegionLandingPage({ params }: Props) {
           { icon: '🏗️', label: '재개발', count: data.redevelopments.length, href: '/apt', color: 'var(--accent-orange)' },
           { icon: '🏚️', label: '미분양', count: data.unsolds.length, href: '/apt', color: 'var(--accent-red)' },
         ].map(s => (
-          <div key={s.label} style={{
+          <div key={s.label} className="kd-card-hover" style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderRadius: 10, padding: '12px 14px', textAlign: 'center',
+            borderRadius: 10, padding: '12px 14px', textAlign: 'center', cursor: 'pointer',
           }}>
             <div style={{ fontSize: 20, marginBottom: 4 }}>{s.icon}</div>
             <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: s.color }}>{s.count}</div>

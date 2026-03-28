@@ -452,6 +452,20 @@ export default async function AptUnifiedPage({ params }: Props) {
 
       {/* Location */}
       <div className="apt-card"><h2 style={ct}>📍 위치 정보</h2>
+        {((site?.nearby_station || sub?.nearest_station) || (site?.school_district || sub?.nearest_school)) && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+            {(site?.nearby_station || sub?.nearest_station) && (
+              <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                🚇 {site?.nearby_station || sub?.nearest_station}
+              </span>
+            )}
+            {(site?.school_district || sub?.nearest_school) && (
+              <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                🏫 {site?.school_district || sub?.nearest_school}
+              </span>
+            )}
+          </div>
+        )}
         {(site?.address || sub?.hssply_adres || redev?.address) && <div style={rw}><span style={rl}>주소</span><span style={{ ...rv, fontSize: 'var(--fs-xs)', maxWidth: '70%' }}>{site?.address || sub?.hssply_adres || redev?.address}</span></div>}
         {(site?.nearby_station || sub?.nearest_station) && <div style={rw}><span style={rl}>최근접역</span><span style={{ ...rv, color: 'var(--accent-green)' }}>{site?.nearby_station || sub?.nearest_station}</span></div>}
         {(site?.school_district || sub?.nearest_school) && <div style={{ ...rw, borderBottom: 'none' }}><span style={rl}>학군</span><span style={rv}>{site?.school_district || sub?.nearest_school}</span></div>}
