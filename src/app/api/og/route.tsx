@@ -34,17 +34,19 @@ const FALLBACK_IMAGES: Record<string, string> = {
   default: `${SITE}/images/brand/kadeora-hero.png`,
 };
 
-// Noto Sans KR Bold OTF (Vercel Edge Runtime은 woff2 미지원, otf/ttf만 지원)
+// Noto Sans KR Bold WOFF — public/fonts에서 로드 (Edge Runtime 호환)
+// woff(1)은 satori/Vercel Edge 지원. woff2/otf/ttf는 미지원.
 let cachedFont: ArrayBuffer | null = null;
 async function loadFont(): Promise<ArrayBuffer | null> {
   if (cachedFont) return cachedFont;
   try {
-    const res = await fetch('https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/SubsetOTF/KR/NotoSansKR-Bold.otf');
+    const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://kadeora.app';
+    const res = await fetch(`${base}/fonts/NotoSansKR-Bold.woff`);
     if (res.ok) {
       cachedFont = await res.arrayBuffer();
       return cachedFont;
     }
-  } catch {}
+  } catch { /* ignore */ }
   return null;
 }
 

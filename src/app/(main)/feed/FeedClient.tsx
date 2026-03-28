@@ -169,7 +169,7 @@ export default function FeedClient({
       if (activeCategory === 'local' && activeRegion !== 'all') q = q.eq('region_id', activeRegion);
       const { data } = await q;
       if (data && data.length > 0) {
-        setPosts(prev => [...prev, ...data as PostWithProfile[]]);
+        setPosts((prev: PostWithProfile[]) => [...prev, ...data as PostWithProfile[]]);
         if (data.length < PAGE_SIZE) setHasMore(false);
       } else { setHasMore(false); }
     } catch { /* ignore */ } finally { setLoadingMore(false); }
@@ -203,13 +203,13 @@ export default function FeedClient({
   const visiblePosts = useMemo(() => {
     let filtered = activeTag
       ? posts.filter(p => {
-          const tags = (p as PostWithProfile & { tags?: string[] }).tags;
+          const tags = p.tags;
           return tags?.includes(activeTag);
         })
       : posts;
     // 핀 글 상단 고정
-    const pinned = filtered.filter(p => (p as PostWithProfile & { is_pinned?: boolean }).is_pinned);
-    const normal = filtered.filter(p => !(p as PostWithProfile & { is_pinned?: boolean }).is_pinned);
+    const pinned = filtered.filter(p => p.is_pinned);
+    const normal = filtered.filter(p => !p.is_pinned);
     return [...pinned, ...normal];
   }, [posts, activeTag]);
 
@@ -369,7 +369,7 @@ export default function FeedClient({
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 14, position: 'relative' }}>
             <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }} aria-label="닫기">✕</button>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
-            {hotPosts.slice(0, 3).map((hp, i) => (
+            {hotPosts.slice(0, 3).map((hp: Record<string, unknown>, i: number) => (
               <Link key={hp.id as number} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 18 }}>{i + 1}</span>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title as string}</span>
@@ -389,8 +389,8 @@ export default function FeedClient({
 
         {/* ━━━ 게시글 목록 ━━━ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {visiblePosts.map((post, i) => {
-            const postExt = post as PostWithProfile & { tags?: string[]; stock_tags?: string[]; apt_tags?: string[]; is_pinned?: boolean; bookmarks_count?: number };
+          {visiblePosts.map((post: PostWithProfile, i: number) => {
+            const postExt = post;
             const displayName = post.is_anonymous ? '익명' : (post.profiles?.nickname ?? '익명');
             const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
             const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
@@ -467,7 +467,7 @@ export default function FeedClient({
                 {/* B: 해시태그 칩 */}
                 {postTags.length > 0 && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
-                    {postTags.slice(0, 5).map(tag => (
+                    {postTags.slice(0, 5).map((tag: string) => (
                       <button key={tag}
                         onClick={(e) => { e.preventDefault(); setActiveTag(activeTag === tag ? null : tag); }}
                         style={{
@@ -486,13 +486,13 @@ export default function FeedClient({
                 {/* F: stock/apt 태그 미니 칩 */}
                 {(stockTags.length > 0 || aptTags.length > 0) && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
-                    {stockTags.slice(0, 3).map(tag => (
+                    {stockTags.slice(0, 3).map((tag: string) => (
                       <Link key={`s-${tag}`} href="/stock"
                         style={{ padding: '2px 8px', borderRadius: 999, border: '1px solid rgba(56,189,248,0.3)', background: 'rgba(56,189,248,0.08)', color: '#38BDF8', fontSize: 10, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
                         📈 {tag}
                       </Link>
                     ))}
-                    {aptTags.slice(0, 3).map(tag => (
+                    {aptTags.slice(0, 3).map((tag: string) => (
                       <Link key={`a-${tag}`} href="/apt"
                         style={{ padding: '2px 8px', borderRadius: 999, border: '1px solid rgba(52,211,153,0.3)', background: 'rgba(52,211,153,0.08)', color: '#2EE8A5', fontSize: 10, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
                         🏢 {tag}
