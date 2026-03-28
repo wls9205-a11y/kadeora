@@ -107,7 +107,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   // 스파크라인: 전체 종목 로드 (시가총액순 상위 60개 + 관심종목)
   useEffect(() => {
     const allSymbols = [...new Set([
-      ...stocks.filter(s => s.price > 0).slice(0, 60).map(s => s.symbol),
+      ...stocks.filter(s => s.price > 0).slice(0, 100).map(s => s.symbol),
       ...watchlistSymbols,
     ])];
     if (!allSymbols.length) return;
