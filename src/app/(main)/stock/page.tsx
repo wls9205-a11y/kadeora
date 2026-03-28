@@ -52,7 +52,7 @@ async function fetchBriefing() {
   const sb = await createSupabaseServer();
   const { data } = await sb
     .from('stock_daily_briefing')
-    .select('id, market, briefing_date, summary, top_gainers, top_losers, market_sentiment')
+    .select('id, market, briefing_date, title, summary, sentiment, top_gainers, top_losers')
     .eq('market', 'KR')
     .order('briefing_date', { ascending: false })
     .limit(1)
@@ -64,7 +64,7 @@ async function fetchBriefingUS() {
   const sb = await createSupabaseServer();
   const { data } = await sb
     .from('stock_daily_briefing')
-    .select('id, market, briefing_date, summary, top_gainers, top_losers, market_sentiment')
+    .select('id, market, briefing_date, title, summary, sentiment, top_gainers, top_losers')
     .eq('market', 'US')
     .order('briefing_date', { ascending: false })
     .limit(1)
