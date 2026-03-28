@@ -2,9 +2,10 @@
 import type { AptTransaction } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { isNew, NewBadge, fmtAmount, type SharedTabProps } from './apt-utils';
-import BottomSheet from '@/components/BottomSheet';
-import MiniLineChart from '@/components/charts/MiniLineChart';
 import dynamic from 'next/dynamic';
+
+const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
+const MiniLineChart = dynamic(() => import('@/components/charts/MiniLineChart'), { ssr: false });
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'), { ssr: false });
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), { ssr: false });

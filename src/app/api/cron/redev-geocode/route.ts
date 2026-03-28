@@ -74,7 +74,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
 
     if (coords && coords.lat > 33 && coords.lat < 39 && coords.lng > 124 && coords.lng < 132) {
       const { error } = await sb.from('redevelopment_projects')
-        .update({ latitude: coords.lat, longitude: coords.lng } as any)
+        // @ts-expect-error supabase update type
+        .update({ latitude: coords.lat, longitude: coords.lng })
         .eq('id', p.id);
       if (!error) updated++;
       else failed++;

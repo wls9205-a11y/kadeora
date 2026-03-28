@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
       if (bookmarks && bookmarks.length > 0) {
         const aptMap = new Map(deadlines.map((d: Record<string, any>) => [d.id, d]));
         for (const bk of bookmarks) {
-          const apt = aptMap.get(bk.apt_id) as any;
+          const apt = aptMap.get(bk.apt_id) as Record<string, any>;
           if (!apt) continue;
           const isToday = apt.rcept_endde === today;
           notifications.push({

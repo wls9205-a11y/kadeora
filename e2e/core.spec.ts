@@ -36,6 +36,38 @@ test.describe("Core page accessibility", () => {
   });
 });
 
+test.describe("Main page navigation", () => {
+  test("landing page loads", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("text=카더라")).toBeVisible();
+  });
+
+  test("stock page loads", async ({ page }) => {
+    await page.goto("/stock");
+    await expect(page.locator("text=주식")).toBeVisible();
+  });
+
+  test("apt page loads", async ({ page }) => {
+    await page.goto("/apt");
+    await expect(page.locator("text=부동산")).toBeVisible();
+  });
+
+  test("blog page loads", async ({ page }) => {
+    await page.goto("/blog");
+    await expect(page.locator("text=블로그")).toBeVisible();
+  });
+
+  test("search page loads", async ({ page }) => {
+    await page.goto("/search");
+    await expect(page.locator("text=검색")).toBeVisible();
+  });
+
+  test("guide page loads", async ({ page }) => {
+    await page.goto("/guide");
+    await expect(page.locator("text=가이드")).toBeVisible();
+  });
+});
+
 test.describe("Auth protection", () => {
   test("write page redirects to login when unauthenticated", async ({ page }) => {
     await page.goto("/write");

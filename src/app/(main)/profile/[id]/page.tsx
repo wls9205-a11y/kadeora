@@ -63,7 +63,7 @@ export default async function ProfilePage({ params }: Props) {
       </div>
     </div>
     <ProfileClient
-      profile={profile as any}
+      profile={profile as unknown as React.ComponentProps<typeof ProfileClient>['profile']}
       posts={posts ?? []}
       isOwner={isOwner}
       commentCount={commentCount ?? 0}

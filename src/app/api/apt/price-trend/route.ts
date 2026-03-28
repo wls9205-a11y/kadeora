@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
     if (error) throw error;
 
-    const trend = ((data || []) as any[]).map((t: any) => ({
+    const trend = ((data || []) as Record<string, unknown>[]).map((t: Record<string, any>) => ({
       deal_date: t.deal_date,
       price: t.deal_amount,
       area: t.exclusive_area,

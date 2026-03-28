@@ -42,7 +42,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const col = vote === 'a' ? 'vote_a' : 'vote_b';
     const { data: topic } = await sb.from('discussion_topics').select(col).eq('id', topicId).single();
     if (topic) {
-      await sb.from('discussion_topics').update({ [col]: ((topic as any)[col] || 0) + 1 }).eq('id', topicId);
+      await sb.from('discussion_topics').update({ [col]: ((topic as Record<string, any>)[col] || 0) + 1 }).eq('id', topicId);
     }
 
     return NextResponse.json({ voted: vote }, { status: 201 });

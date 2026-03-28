@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { STAGE_COLORS, STAGE_ORDER, type SharedTabProps } from './apt-utils';
 import { generateAptSlug } from '@/lib/apt-slug';
-import RedevTimeline from '@/components/RedevTimeline';
+import dynamic from 'next/dynamic';
+
+const RedevTimeline = dynamic(() => import('@/components/RedevTimeline'), { ssr: false });
 
 interface Props extends SharedTabProps {
   redevelopment: RedevProject[];

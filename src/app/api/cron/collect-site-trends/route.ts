@@ -47,7 +47,7 @@ async function handler(_req: NextRequest) {
 
   const targets = (sites || []).filter((s: Record<string, any>) => {
     if (!s.search_trend) return true;
-    const lastUpdated = (s.search_trend as any)?.updated_at;
+    const lastUpdated = (s.search_trend as Record<string, any>)?.updated_at;
     if (!lastUpdated) return true;
     return Date.now() - new Date(lastUpdated).getTime() > 7 * 24 * 60 * 60 * 1000;
   }).slice(0, BATCH_SIZE);

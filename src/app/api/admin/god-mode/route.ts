@@ -263,8 +263,8 @@ export async function POST(req: NextRequest) {
     const totalDuration = Date.now() - startTime;
     const avgDuration = Math.round(results.reduce((sum, r) => sum + r.duration, 0) / results.length);
 
-    // 5. 로그 기록 (eslint-disable-next-line @typescript-eslint/no-explicit-any)
-    await (supabase.from('admin_alerts') as any).insert({
+    // 5. 로그 기록
+    await supabase.from('admin_alerts').insert({
       type: 'god_mode',
       severity: failed > 0 ? 'warning' : 'info',
       title: `🚀 GOD MODE: ${success}/${results.length} 성공`,

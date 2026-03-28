@@ -2,8 +2,10 @@
 import type { StockPriceHistory, StockNews, InvestorFlow, Disclosure, AIComment } from '@/types/stock';
 import { useState } from 'react';
 import StockComments from '@/components/StockComments';
-import CandlestickChart from '@/components/charts/CandlestickChart';
+import dynamic from 'next/dynamic';
 import { timeAgo } from '@/lib/format';
+
+const CandlestickChart = dynamic(() => import('@/components/charts/CandlestickChart'), { ssr: false });
 
 
 

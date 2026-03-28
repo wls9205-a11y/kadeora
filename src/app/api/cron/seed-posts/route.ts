@@ -147,7 +147,7 @@ export async function GET(req: NextRequest) {
 
       if (attempts >= 5) continue; // skip if all attempts produced duplicates
 
-      const finalCategory = (selectedTemplate as any).category || category;
+      const finalCategory = (selectedTemplate as Record<string, any>).category || category;
       const finalRegion = finalCategory === 'local' ? regionId : 'all';
 
       // 게시글 created_at에 0~25분 랜덤 오프셋

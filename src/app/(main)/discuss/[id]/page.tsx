@@ -71,7 +71,7 @@ export default async function DiscussDetailPage({ params }: Props) {
   if (!topicR.data) notFound();
 
   const topic = topicR.data;
-  const comments = (commentsR.data || []) as any[];
+  const comments = (commentsR.data || []) as Record<string, any>[];
   const total = (topic.vote_a || 0) + (topic.vote_b || 0);
 
   // 관련 블로그 (카테고리 기반)
@@ -159,7 +159,7 @@ export default async function DiscussDetailPage({ params }: Props) {
       </div>
 
       {/* Client interactive part (투표 + 댓글) */}
-      <DiscussDetailClient initialTopic={topic as any} initialComments={comments} />
+      <DiscussDetailClient initialTopic={topic as React.ComponentProps<typeof DiscussDetailClient>['initialTopic']} initialComments={comments as React.ComponentProps<typeof DiscussDetailClient>['initialComments']} />
 
       {/* 관련 블로그 (내부 링크 SEO) */}
       {relatedBlogs.length > 0 && (

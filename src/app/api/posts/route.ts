@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
     const images = parsed!.images ?? [];
     const tags = parsed!.tags ?? [];
     const slug = generateEnglishSlug(title, String(Date.now()));
-    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId, images, tags, slug } as any).select().single();
+    // @ts-expect-error supabase insert type
+    const { data, error } = await supabase.from('posts').insert({ title, content, category, author_id: user.id, is_anonymous: body.is_anonymous ?? false, tag, region_id: regionId, images, tags, slug }).select().single();
     if (error) { console.error('[Posts POST]', error); return NextResponse.json({ error: '게시글 작성에 실패했습니다.' }, { status: 500 }); }
 
     try { revalidatePath('/feed'); } catch {}

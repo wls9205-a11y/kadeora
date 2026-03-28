@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 발행 성공 시 푸시 알림
-    const publishedId = (publishResult as any)?.published_id;
+    const publishedId = (publishResult as Record<string, any>)?.published_id;
     if (publishedId) {
       try {
         const { data: post } = await admin.from('blog_posts')
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
     // 큐 상태도 조회 (로그용)
     const { data: queueStatus } = await admin.rpc('blog_queue_status');
 
-    const published = (publishResult as any)?.published ?? 0;
+    const published = (publishResult as Record<string, any>)?.published ?? 0;
     console.info(`[blog-publish-queue] Result: ${JSON.stringify(publishResult)}, Queue: ${JSON.stringify(queueStatus)}`);
 
     return {

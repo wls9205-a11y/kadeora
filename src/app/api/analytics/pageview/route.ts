@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
   // Fire-and-forget
   const sb = getSupabaseAdmin();
-  sb.from('page_views').insert({ visitor_id: body.visitor_id, path: body.path, referrer: body.referrer || null } as any).then(() => {});
+  sb.from('page_views').insert({ visitor_id: body.visitor_id, path: body.path, referrer: body.referrer || null }).then(() => {});
 
   return NextResponse.json({ ok: true });
 }

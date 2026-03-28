@@ -1,7 +1,9 @@
 'use client';
 import Link from 'next/link';
-import BottomSheet from '@/components/BottomSheet';
+import dynamic from 'next/dynamic';
 import { fmtCap, stockColor, fmt } from '@/lib/format';
+
+const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;

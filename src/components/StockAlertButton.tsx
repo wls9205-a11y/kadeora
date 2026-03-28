@@ -30,7 +30,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
     setSaving(true);
     try {
       const sb = createSupabaseBrowser();
-      await (sb.from('price_alerts') as any).insert({
+      await sb.from('price_alerts').insert({
         user_id: userId, alert_type: 'stock_price', condition: alertType,
         threshold: Number(threshold), target_symbol: symbol, is_active: true, is_triggered: false,
       });

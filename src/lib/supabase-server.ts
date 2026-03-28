@@ -18,7 +18,7 @@ export async function createSupabaseServer() {
         setAll(cookiesToSet: CookieEntry[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }: CookieEntry) =>
-              cookieStore.set(name, value, options as any)
+              cookieStore.set(name, value, options as Record<string, unknown>)
             );
           } catch {
             // The `setAll` method was called from a Server Component.
@@ -42,7 +42,7 @@ export async function createSupabaseAdmin() {
         setAll(cookiesToSet: CookieEntry[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }: CookieEntry) =>
-              cookieStore.set(name, value, options as any)
+              cookieStore.set(name, value, options as Record<string, unknown>)
             );
           } catch {}
         },

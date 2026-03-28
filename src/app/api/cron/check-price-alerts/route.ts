@@ -71,7 +71,7 @@ export async function GET(req: Request) {
       const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
       for (const alert of aptAlerts) {
-        const apt = (apts || []).find((a: Record<string, any>) => a.id === alert.target_apt_id) as any;
+        const apt = (apts || []).find((a: Record<string, any>) => a.id === alert.target_apt_id) as Record<string, any>;
         if (!apt) continue;
         const daysLeft = Math.ceil((new Date(apt.rcept_endde).getTime() - new Date(kstToday).getTime()) / 86400000);
         if (daysLeft === 1 || daysLeft === 3) {

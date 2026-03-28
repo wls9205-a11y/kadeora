@@ -126,14 +126,14 @@ export async function GET(req: NextRequest) {
     let created = 0;
     for (const zone of zones) {
       try {
-        const slug = zone.blog_slug || (zone as any).slug;
+        const slug = zone.blog_slug || (zone as Record<string, any>).slug;
         if (!slug) continue;
 
         const { data: exists } = await admin.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
         if (exists) { await admin.from('redevelopment_zones').update({ blog_generated: true }).eq(zone.blog_slug ? 'blog_slug' : 'slug', slug); continue; }
 
-        const zName = zone.zone_name || (zone as any).name || '';
-        const zType = zone.zone_type || (zone as any).project_type || '재개발';
+        const zName = zone.zone_name || (zone as Record<string, any>).name || '';
+        const zType = zone.zone_type || (zone as Record<string, any>).project_type || '재개발';
         const title = `${zone.region || ''} ${zName} ${zType} 현황 — 진행 단계·시공사·분담금·투자 전망 (2026)`;
         const content = generateRedevelopmentBlog(zone);
         const tags = zone.tags || [zone.region, zName, zType].filter(Boolean);
@@ -141,7 +141,7 @@ export async function GET(req: NextRequest) {
         const _r = await safeBlogInsert(admin, {
           slug, title,
           content: ensureMinLength(content, 'apt'),
-          excerpt: `${zName} ${zType} ${zone.progress_stage || (zone as any).stage || ''} 시공사 분담금 투자전망 2026`,
+          excerpt: `${zName} ${zType} ${zone.progress_stage || (zone as Record<string, any>).stage || ''} 시공사 분담금 투자전망 2026`,
           category: 'apt', tags, cron_type: 'redevelopment',
           cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&type=blog`,
           image_alt: generateImageAlt('apt', title),
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
       if (_r.success) await admin.from('redevelopment_zones').update({ blog_generated: true }).eq(zone.blog_slug ? 'blog_slug' : 'slug', slug);
         created++;
       } catch (e: unknown) {
-        console.error(`[blog-redevelopment] Error for ${zone.blog_slug || (zone as any).slug}:`, errMsg(e));
+        console.error(`[blog-redevelopment] Error for ${zone.blog_slug || (zone as Record<string, any>).slug}:`, errMsg(e));
       }
     }
 

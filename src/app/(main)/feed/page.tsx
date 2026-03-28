@@ -46,7 +46,7 @@ async function getPosts(category: string, region: string = 'all') {
   if (category !== 'all') q = q.eq('category', category);
   if (category === 'local' && region !== 'all') q = q.eq('region_id', region);
   const result = await withTimeout(q);
-  const data = (result as any)?.data;
+  const data = (result as { data?: PostWithProfile[] } | null)?.data;
   if (!data || data.length === 0) return null;
   return data as PostWithProfile[];
 }

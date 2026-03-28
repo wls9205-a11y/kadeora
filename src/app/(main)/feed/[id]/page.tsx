@@ -214,7 +214,7 @@ export default async function FeedDetailPage({ params }: Props) {
         is_deleted: false, created_at: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
         profiles: { id: 'demo-b', nickname: '투자마니아', avatar_url: null, grade: 1 },
       },
-    ] as any[];
+    ] as CommentWithProfile[];
   }
 
   if (!post) return notFound();
@@ -318,7 +318,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {/* Content body */}
         {currentUserId ? (
-          <div className="feed-detail-content" style={{ fontSize: 'var(--content-font-size, 16px)' as any, color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
+          <div className="feed-detail-content" style={{ fontSize: 'var(--content-font-size, 16px)' as React.CSSProperties['fontSize'], color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
             {post.content}
           </div>
         ) : (

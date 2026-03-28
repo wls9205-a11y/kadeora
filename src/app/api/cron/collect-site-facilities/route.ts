@@ -50,7 +50,7 @@ async function handler(_req: NextRequest) {
   const targets = (sites || []).filter((s: Record<string, any>) => {
     const fac = s.nearby_facilities;
     if (!fac || typeof fac !== 'object' || Object.keys(fac).length === 0) return true;
-    const updatedAt = (fac as any)?.updated_at;
+    const updatedAt = (fac as Record<string, any>)?.updated_at;
     if (!updatedAt) return true;
     return Date.now() - new Date(updatedAt).getTime() > 30 * 24 * 60 * 60 * 1000;
   }).slice(0, BATCH_SIZE);

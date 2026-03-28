@@ -7,7 +7,9 @@ import EmptyState from '@/components/EmptyState';
 import type { User } from '@supabase/supabase-js';
 import { getAvatarColor } from '@/lib/avatar';
 import { timeAgo } from '@/lib/format';
-import BottomSheet from '@/components/BottomSheet';
+import dynamic from 'next/dynamic';
+
+const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
 
 interface MsgProfile { id: string; nickname: string | null; grade: number | null; points: number | null; }
 interface ChatMsg {
@@ -145,7 +147,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
   const openSheet = async (p: MsgProfile | null) => { if (!p) return; setSheetUser(p); if (user && user.id !== p.id) { const { data } = await createSupabaseBrowser().from('follows').select('id').eq('follower_id', user.id).eq('followee_id', p.id).maybeSingle(); setIsFollowing(!!data); } };
   const toggleFollow = async () => { if (!user || !sheetUser) return; const sb = createSupabaseBrowser(); if (isFollowing) { await sb.from('follows').delete().eq('follower_id', user.id).eq('followee_id', sheetUser.id); setIsFollowing(false); } else { await sb.from('follows').insert({ follower_id: user.id, followee_id: sheetUser.id }); setIsFollowing(true); } };
 
-  const handleInput = (val: string) => { setInput(val); const match = val.match(/@([^\s@]*)$/); if (match) { setMentionIndex(0); if (mentionTimer.current) clearTimeout(mentionTimer.current); mentionTimer.current = setTimeout(async () => { if (!match[1]) { setShowMention(false); return; } const { data } = await createSupabaseBrowser().from('profiles').select('id,nickname,grade').ilike('nickname', `${match[1]}%`).limit(6); setMentionList((data ?? []) as any); setShowMention((data ?? []).length > 0); }, 200); } else { setShowMention(false); } };
+  const handleInput = (val: string) => { setInput(val); const match = val.match(/@([^\s@]*)$/); if (match) { setMentionIndex(0); if (mentionTimer.current) clearTimeout(mentionTimer.current); mentionTimer.current = setTimeout(async () => { if (!match[1]) { setShowMention(false); return; } const { data } = await createSupabaseBrowser().from('profiles').select('id,nickname,grade').ilike('nickname', `${match[1]}%`).limit(6); setMentionList((data ?? []) as { id: string; nickname: string; grade: number }[]); setShowMention((data ?? []).length > 0); }, 200); } else { setShowMention(false); } };
   const selectMention = (n: string) => { setInput(p => p.replace(/@([^\s@]*)$/, `@${n} `)); setShowMention(false); };
   const handleKeyDown = (e: React.KeyboardEvent) => { if (showMention && mentionList.length > 0) { if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => Math.min(i + 1, mentionList.length - 1)); return; } if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => Math.max(i - 1, 0)); return; } if (e.key === 'Enter') { e.preventDefault(); selectMention(mentionList[mentionIndex].nickname); return; } if (e.key === 'Escape') { setShowMention(false); return; } } if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 

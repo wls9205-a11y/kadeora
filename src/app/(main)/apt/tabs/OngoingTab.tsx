@@ -3,7 +3,9 @@ import type { OngoingApt, PremiumListing } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { isNew, NewBadge, kstNow, kstToday, generateAptSlug, type SharedTabProps } from './apt-utils';
-import BottomSheet from '@/components/BottomSheet';
+import dynamic from 'next/dynamic';
+
+const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: false });
 
 interface Props extends SharedTabProps {
   ongoingApts: OngoingApt[];

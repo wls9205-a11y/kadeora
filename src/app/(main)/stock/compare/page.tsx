@@ -77,7 +77,7 @@ export default function StockComparePage() {
     </div>
   );
 
-  const SelectBox = ({ value, search, setSearch, onSelect, placeholder }: { value: Stock | null; search: string; setSearch: (v: string) => void; onSelect: (s: Stock) => void; placeholder: string }) => (
+  const SelectBox = ({ value, search, setSearch, onSelect, placeholder }: { value: Stock | null; search: string; setSearch: (v: string) => void; onSelect: (s: Stock | null) => void; placeholder: string }) => (
     <div style={{ position: 'relative', flex: 1 }}>
       {value ? (
         <div style={{ padding: '12px 16px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -85,7 +85,7 @@ export default function StockComparePage() {
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{value.name}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{value.symbol} · {value.market}</div>
           </div>
-          <button onClick={() => { onSelect(null as any); setSearch(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
+          <button onClick={() => { onSelect(null); setSearch(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
         </div>
       ) : (
         <div>

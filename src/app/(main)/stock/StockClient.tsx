@@ -402,7 +402,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {/* 서브 탭 */}
       <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '3px' }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
-          <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as any) : setGlobalTab(k as any); }} aria-pressed={currentTab === k} style={{
+          <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as typeof domesticTab) : setGlobalTab(k as typeof globalTab); }} aria-pressed={currentTab === k} style={{
             padding: '6px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap',
             background: currentTab === k ? 'var(--brand)' : 'transparent',
             color: currentTab === k ? '#fff' : 'var(--text-tertiary)',

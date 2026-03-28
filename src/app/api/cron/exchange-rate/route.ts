@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     // Update exchange_rates
     await supabase.from('exchange_rates').upsert({
       base_currency: 'KRW',
-      rates: { 'USD/KRW': rate } as any,
+      rates: { 'USD/KRW': rate } as Record<string, number>,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'base_currency' });
 

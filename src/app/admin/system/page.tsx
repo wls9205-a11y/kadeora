@@ -185,7 +185,7 @@ function ManualControlSection() {
   const [triggering, setTriggering] = useState('');
   const [result, setResult] = useState('');
 
-  const actions = [
+  const actions: { endpoint: string; label: string; direct: boolean }[] = [
     { endpoint: '/api/admin/refresh-apt-cache', label: '부동산 캐시 갱신', direct: true },
     { endpoint: '/api/cron/crawl-unsold-molit', label: '미분양 데이터 수집 (통계누리)', direct: false },
     { endpoint: '/api/cron/crawl-seoul-redev', label: '서울 재개발 수집', direct: false },
@@ -233,7 +233,7 @@ function ManualControlSection() {
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{a.label}</div>
             </div>
-            <button onClick={() => trigger(a.endpoint, a.label, (a as any).direct)} disabled={!!triggering} style={{
+            <button onClick={() => trigger(a.endpoint, a.label, a.direct)} disabled={!!triggering} style={{
               padding: '6px 14px', borderRadius: 6, border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: triggering ? 'not-allowed' : 'pointer',
               background: triggering === a.endpoint ? 'var(--bg-hover)' : 'var(--brand)',
               color: triggering === a.endpoint ? 'var(--text-tertiary)' : '#fff',

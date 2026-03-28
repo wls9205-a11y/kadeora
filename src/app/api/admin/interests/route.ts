@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     const grouped: Record<string, { name: string; slug: string; region: string; sigungu: string; site_id: string; count: number; members: number; guests: number }> = {};
     for (const row of data || []) {
       const key = row.site_id;
-      const site = row.apt_sites as any;
+      const site = row.apt_sites as Record<string, any>;
       if (!grouped[key]) {
         grouped[key] = {
           site_id: key,

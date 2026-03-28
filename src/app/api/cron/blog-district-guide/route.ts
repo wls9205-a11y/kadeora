@@ -291,7 +291,8 @@ export const GET = withCronAuth(async (req: NextRequest) => {
   /*  Step 1-3: Query distinct (region, sigungu) with count >= 3    */
   /* -------------------------------------------------------------- */
   const { data: districtRows, error: districtErr } = await admin.rpc(
-    'get_district_apt_counts' as any,
+    // @ts-expect-error rpc name
+    'get_district_apt_counts',
   ).then(
     // If RPC doesn't exist, fall back to a raw approach
     (res: any) => res,
@@ -302,7 +303,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
   let districts: { region: string; sigungu: string; cnt: number }[] = [];
 
   if (districtRows && !districtErr) {
-    districts = (districtRows as any[]).map((r: any) => ({
+    districts = (districtRows as Record<string, unknown>[]).map((r: Record<string, any>) => ({
       region: r.region,
       sigungu: r.sigungu,
       cnt: Number(r.cnt),

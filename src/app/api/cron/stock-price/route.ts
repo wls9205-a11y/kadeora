@@ -63,7 +63,8 @@ export async function GET(req: NextRequest) {
 
       const { error } = await supabase
         .from('stock_price_history')
-        .upsert(rows as any,  { onConflict: 'symbol,date' });
+        // @ts-expect-error supabase upsert type
+        .upsert(rows,  { onConflict: 'symbol,date' });
 
       if (!error) {
         created += rows.length;
@@ -72,7 +73,8 @@ export async function GET(req: NextRequest) {
         for (const row of rows) {
           const { error: singleErr } = await supabase
             .from('stock_price_history')
-            .upsert(row as any, { onConflict: 'symbol,date' });
+            // @ts-expect-error supabase upsert type
+            .upsert(row, { onConflict: 'symbol,date' });
           if (!singleErr) created++;
           else failed++;
         }

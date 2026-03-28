@@ -145,7 +145,7 @@ export async function GET(req: NextRequest) {
     let created = 0;
     for (const apt of apts) {
       try {
-        const slug = apt.blog_slug || (apt as any).slug;
+        const slug = apt.blog_slug || (apt as Record<string, any>).slug;
         if (!slug) continue;
 
         const { data: exists } = await admin.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
@@ -169,7 +169,7 @@ export async function GET(req: NextRequest) {
       if (_r.success) await admin.from('landmark_apts').update({ blog_generated: true }).eq(apt.blog_slug ? 'blog_slug' : 'slug', slug);
         created++;
       } catch (e: unknown) {
-        console.error(`[blog-apt-landmark] Error for ${apt.blog_slug || (apt as any).slug}:`, errMsg(e));
+        console.error(`[blog-apt-landmark] Error for ${apt.blog_slug || (apt as Record<string, any>).slug}:`, errMsg(e));
       }
     }
 

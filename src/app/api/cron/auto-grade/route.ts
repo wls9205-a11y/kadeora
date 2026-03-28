@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
           // 등급 승급 알림
           await supabase.from('notifications').insert({
             user_id: profile.id,
-            type: 'badge' as any,
+            type: 'badge',
             content: `🎉 ${GRADE_TITLES[newGrade]} 등급으로 승급! 축하합니다!`,
           }).then(() => {});
         }

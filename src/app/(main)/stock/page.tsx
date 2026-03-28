@@ -148,7 +148,7 @@ export default async function StockPage() {
           "url": `${SITE_URL}/stock/${s.symbol}`,
         })),
       }) }} />}
-      <StockClient initialStocks={stocks as any} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
+      <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
     </Suspense>
   );

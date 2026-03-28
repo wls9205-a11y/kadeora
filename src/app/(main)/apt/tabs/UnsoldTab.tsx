@@ -3,8 +3,10 @@ import type { UnsoldApt } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { type SharedTabProps, generateAptSlug } from './apt-utils';
 import Link from 'next/link';
-import MiniLineChart from '@/components/charts/MiniLineChart';
+import dynamic from 'next/dynamic';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+
+const MiniLineChart = dynamic(() => import('@/components/charts/MiniLineChart'), { ssr: false });
 
 interface Props extends SharedTabProps {
   unsold: UnsoldApt[];

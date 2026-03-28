@@ -46,7 +46,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       .select('id, author_id, content, created_at, likes_count, replies_count, parent_id, profiles:author_id(nickname, grade)')
       .eq('symbol', symbol)
       .is('parent_id', null)
-      .order(order.column as any, { ascending: order.ascending })
+      .order(order.column, { ascending: order.ascending })
       .limit(30);
     if (data) setComments(data as StockComment[]);
   }, [symbol, sort]);
@@ -82,7 +82,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       .select('id, author_id, content, created_at, likes_count, replies_count, parent_id, profiles:author_id(nickname, grade)')
       .single();
     if (!error && data) {
-      setComments(prev => [data as any, ...prev]);
+      setComments(prev => [data as StockComment, ...prev]);
       setInput('');
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
     }
@@ -133,7 +133,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       .eq('parent_id', commentId)
       .order('created_at', { ascending: true })
       .limit(30);
-    if (data) setReplies(prev => ({ ...prev, [commentId]: data as any }));
+    if (data) setReplies(prev => ({ ...prev, [commentId]: data as StockComment[] }));
   };
 
   const sendReply = async (parentId: string) => {

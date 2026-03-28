@@ -106,7 +106,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>인기 지역</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {(regionStats as any[])?.slice(0, 10).map((r: any) => (
+            {regionStats.slice(0, 10).map((r: any) => (
               <Link key={r.region_nm} href={`/apt/search?region=${r.region_nm}`} style={{
                 padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
                 background: region === r.region_nm ? 'var(--brand)' : 'var(--bg-surface)',
