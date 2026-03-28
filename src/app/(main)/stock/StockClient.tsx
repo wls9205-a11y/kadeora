@@ -22,7 +22,7 @@ interface Stock {
 }
 interface Theme { id: number; theme_name: string; change_pct: number; is_hot: boolean; related_symbols?: string[]; description?: string; }
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
-interface Props { initialStocks: Stock[]; briefing?: Record<string, any>; exchangeHistory?: Record<string, any>[]; themeHistory?: Record<string, any>[]; }
+interface Props { initialStocks: Stock[]; briefing?: Record<string, any>; briefingUS?: Record<string, any>; exchangeHistory?: Record<string, any>[]; themeHistory?: Record<string, any>[]; }
 
 function isIdx(s: Stock) { return ['KOSPI','KOSDAQ','NASDAQ','S&P 500','DOW','NIKKEI'].some(idx => s.name.toUpperCase().includes(idx) || s.symbol.toUpperCase().includes(idx)); }
 
@@ -45,7 +45,7 @@ function getMarketStatus(): { label: string; color: string } {
 }
 
 // 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
-export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
+export default function StockClient({ initialStocks, briefing, briefingUS, exchangeHistory, themeHistory }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
   const [mode, setMode] = useState<'domestic'|'global'>('domestic');
   const [domesticTab, setDomesticTab] = useState<'ranking'|'movers'|'sector'|'themes'|'news'|'calendar'|'watchlist'|'portfolio'>('ranking');
@@ -850,7 +850,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             stocks={stocks}
             exchangeRate={exchangeRate}
             briefingKR={briefing || null}
-            briefingUS={null}
+            briefingUS={briefingUS || null}
           />
           {/* 포트폴리오 시뮬레이터 */}
           <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8, marginTop: 12 }}>포트폴리오 시뮬레이터</div>

@@ -59,7 +59,8 @@ export async function GET(req: NextRequest) {
           signal: AbortSignal.timeout(45000),
         });
         apiCalls = 1;
-        if (res.ok) {
+        if (!res.ok) { if (res.status === 529 || res.status === 402) break; continue; }
+      if (res.ok) {
           const data = await res.json();
           content = data.content?.[0]?.text || '';
         }

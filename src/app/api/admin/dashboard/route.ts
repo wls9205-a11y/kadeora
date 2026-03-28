@@ -141,6 +141,12 @@ export async function GET(req: Request) {
       const cronFails = cronData.filter(c => c.status === 'failed');
       const cronFailNames = [...new Set(cronFails.map(c => c.cron_name))].slice(0, 5);
 
+      // Anthropic 크레딧 부족 감지: blog 크론 연속 0건 생성 시 경고
+      const blogCronData = cronData.filter(c => c.cron_name && c.cron_name.startsWith('blog-'));
+      const blogCronFails = blogCronData.filter(c => c.status === 'failed').length;
+      const blogCronTotal = blogCronData.length;
+      const anthropicCreditWarning = blogCronTotal > 0 && (blogCronFails / blogCronTotal) > 0.5;
+
       // 블로그 리라이팅 현황
       const { data: blogStats } = await sb.from('blog_posts')
         .select('rewritten_at', { count: 'exact' })
@@ -222,7 +228,7 @@ export async function GET(req: Request) {
         recentReports: recentReportsR.data ?? [],
         payments: paymentsR.data ?? [],
         dailyStats: dailyR.data ?? [],
-        cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames },
+        cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames, anthropicCreditWarning },
         stockKpi,
         seo: {
           siteTypeBreakdown,

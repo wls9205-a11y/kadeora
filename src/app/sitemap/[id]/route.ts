@@ -173,7 +173,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         const freq = daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly';
         const prio = daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5;
         const lastmod = b.updated_at || b.published_at || now;
-        const imgUrl = b.cover_image || `${BASE}/api/og?title=${encodeURIComponent((b.title || '').slice(0, 60))}&category=${b.category || 'blog'}`;
+        const imgUrl = b.cover_image || `${BASE}/api/og?title=${encodeURIComponent((b.title || '').slice(0, 60))}&category=${b.category || 'blog'}&design=2`;
         const imgAlt = escXml(b.image_alt || b.title || '카더라 블로그');
         const imgTitle = escXml((b.title || '').slice(0, 80));
         return `  <url>

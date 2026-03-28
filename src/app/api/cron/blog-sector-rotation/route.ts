@@ -66,6 +66,7 @@ JSON만: {"title":"섹터 로테이션 완벽분석 — ${now.getFullYear()}년 
         body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 3500, messages: [{ role: 'user', content: prompt }] }),
         signal: AbortSignal.timeout(45000),
       });
+      if (!res.ok) { if (res.status === 529 || res.status === 402) break; continue; }
       if (res.ok) {
         const d = await res.json();
         const text = d.content?.[0]?.text || '';

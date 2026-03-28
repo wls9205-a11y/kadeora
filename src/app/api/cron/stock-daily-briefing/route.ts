@@ -61,7 +61,8 @@ ${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${Num
           signal: AbortSignal.timeout(15000),
         });
         apiCalls = 1;
-        if (res.ok) {
+        if (!res.ok) { if (res.status === 529 || res.status === 402) break; continue; }
+      if (res.ok) {
           const data = await res.json();
           const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
           if (match) {

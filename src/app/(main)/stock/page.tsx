@@ -60,6 +60,18 @@ async function fetchBriefing() {
   return data ?? null;
 }
 
+async function fetchBriefingUS() {
+  const sb = await createSupabaseServer();
+  const { data } = await sb
+    .from('stock_daily_briefing')
+    .select('id, market, briefing_date, summary, top_gainers, top_losers, market_sentiment')
+    .eq('market', 'US')
+    .order('briefing_date', { ascending: false })
+    .limit(1)
+    .single();
+  return data ?? null;
+}
+
 async function fetchExchangeHistory() {
   const sb = await createSupabaseServer();
   const since = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -85,24 +97,28 @@ async function fetchThemeHistory() {
 // Cache: 300s — 주식 목록 (시세 크론 5분 주기)
 const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v5'], { revalidate: 300 });
 const getCachedBriefing = unstable_cache(fetchBriefing, ['stock-briefing', 'v1'], { revalidate: 600 });
+const getCachedBriefingUS = unstable_cache(fetchBriefingUS, ['stock-briefing-us', 'v1'], { revalidate: 600 });
 const getCachedExchangeHistory = unstable_cache(fetchExchangeHistory, ['exchange-history', 'v1'], { revalidate: 3600 });
 const getCachedThemeHistory = unstable_cache(fetchThemeHistory, ['theme-history', 'v1'], { revalidate: 600 });
 
 export default async function StockPage() {
   let stocks: Record<string, any>[] = [];
   let briefing: any = null;
+  let briefingUS: any = null;
   let exchangeHistory: Record<string, any>[] = [];
   let themeHistory: Record<string, any>[] = [];
 
   try {
-    const [stocksData, briefingData, exchData, themeData] = await Promise.all([
+    const [stocksData, briefingData, briefingUSData, exchData, themeData] = await Promise.all([
       getCachedStocks(),
       getCachedBriefing().catch(() => null),
+      getCachedBriefingUS().catch(() => null),
       getCachedExchangeHistory().catch(() => []),
       getCachedThemeHistory().catch(() => []),
     ]);
     stocks = stocksData.length > 0 ? stocksData : await fetchStocks();
     briefing = briefingData;
+    briefingUS = briefingUSData;
     exchangeHistory = exchData;
     themeHistory = themeData;
   } catch {
@@ -148,7 +164,7 @@ export default async function StockPage() {
           "url": `${SITE_URL}/stock/${s.symbol}`,
         })),
       }) }} />}
-      <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
+      <StockClient initialStocks={stocks as React.ComponentProps<typeof StockClient>['initialStocks']} briefing={briefing} briefingUS={briefingUS} exchangeHistory={exchangeHistory} themeHistory={themeHistory} />
       <Disclaimer />
     </Suspense>
   );

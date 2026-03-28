@@ -109,6 +109,11 @@ export default function DashboardSection() {
             <div style={{ height: '100%', borderRadius: 3, background: cron.fail > 0 ? C.red : C.green, width: `${cron.total > 0 ? (cron.success / cron.total) * 100 : 100}%` }} />
           </div>
           {cron.failNames?.length > 0 && <div style={{ marginTop: 4, display: 'flex', gap: 3, flexWrap: 'wrap' }}>{cron.failNames.slice(0, 2).map((n: string) => <Badge key={n} color={C.red}>{n}</Badge>)}</div>}
+          {cron.anthropicCreditWarning && (
+            <div style={{ marginTop: 6, padding: '4px 8px', background: '#FF6B1A22', border: '1px solid #FF6B1A66', borderRadius: 6, fontSize: 10, color: '#FF6B1A', fontWeight: 700 }}>
+              ⚠️ Anthropic 크레딧 부족 의심 — blog 크론 50%+ 실패 · console.anthropic.com 확인
+            </div>
+          )}
         </div>
         {/* 유저 활동 */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
