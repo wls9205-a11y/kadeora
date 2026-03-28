@@ -525,17 +525,20 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* 관련 종목/현장은 하단 섹션에서만 렌더링 (중복 제거) */}
 
         {/* 공유 + 도움이됐어요 + 북마크 */}
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>공유하기</span>
+        <div style={{
+          borderTop: '1px solid var(--border)', paddingTop: 20, marginTop: 28,
+          display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+          background: 'linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(167,139,250,0.04) 100%)',
+          margin: '28px -16px 0', padding: '16px 16px', borderRadius: '0 0 12px 12px',
+        }}>
           <ShareButtons title={post.title} postId={slug} />
-          <div style={{ marginLeft: 'auto' }}>
-            <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
-          </div>
+          <div style={{ flex: 1 }} />
+          <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
       </article>
 
       {/* 댓글 섹션 */}
-      {isLoggedIn && <BlogCommentCTA commentCount={comments.length} />}
+      <BlogCommentCTA commentCount={comments.length} />
       <div id="blog-comments" style={{ marginBottom: 20 }}>
         <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
