@@ -56,8 +56,8 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
 
       {/* 관심종목 + 상세 버튼 */}
       <div style={{ display: 'flex', gap: 8 }}>
-        <button onClick={() => onToggleWatchlist(stock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 8, border: '1px solid var(--border)', background: isWatched ? 'var(--accent-yellow-bg)' : 'var(--bg-hover)', color: isWatched ? 'var(--accent-yellow)' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
-          {isWatched ? '★ 관심종목 해제' : '☆ 관심종목 추가'}
+        <button onClick={() => onToggleWatchlist(stock.symbol)} style={{ flex: 1, padding: 12, borderRadius: 8, border: `1px solid ${isWatched ? 'var(--accent-yellow)' : 'var(--border)'}`, background: isWatched ? 'rgba(251,191,36,0.08)' : 'var(--bg-hover)', color: isWatched ? '#D97706' : 'var(--text-secondary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', transition: 'all 0.15s' }}>
+          {isWatched ? '★ 관심 해제' : '☆ 관심 추가'}
         </button>
         <Link href={`/stock/${encodeURIComponent(stock.symbol)}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDomestic ? 'var(--brand)' : 'var(--accent-blue)', color: 'var(--text-inverse)', padding: 12, borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>
           종목 상세 →

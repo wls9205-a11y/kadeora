@@ -192,11 +192,23 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             {s.market_cap > 0 && <span className="text-xs-tertiary">{fmtCap(s.market_cap, s.currency)}</span>}
           </div>
         </div>
-        {sparklines[s.symbol]?.length >= 2 && (
-          <span className="stock-sparkline">
-            <MiniSparkline data={sparklines[s.symbol]} width={44} height={18} />
-          </span>
-        )}
+        {sparklines[s.symbol]?.length >= 2 && (() => {
+          const pts = sparklines[s.symbol];
+          const periodHigh = Math.max(...pts);
+          const periodLow = Math.min(...pts);
+          const cur = pts[pts.length - 1];
+          const isNearHigh = cur >= periodHigh * 0.99;
+          const isNearLow = cur <= periodLow * 1.01;
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              {isNearHigh && <span style={{ fontSize: 8, padding: '1px 3px', borderRadius: 2, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)', fontWeight: 700, lineHeight: 1 }}>신고</span>}
+              {isNearLow && !isNearHigh && <span style={{ fontSize: 8, padding: '1px 3px', borderRadius: 2, background: 'rgba(96,165,250,0.12)', color: 'var(--accent-blue)', fontWeight: 700, lineHeight: 1 }}>신저</span>}
+              <span className="stock-sparkline">
+                <MiniSparkline data={pts} width={44} height={18} />
+              </span>
+            </div>
+          );
+        })()}
         <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 80 }}>
           {s.price === 0 ? (
             <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>시세 미제공</span>
@@ -330,10 +342,16 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {sentimentStocks.length > 0 && (
         <div style={{ marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 3 }}>
-            <span style={{ color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 700 }}>▲{upCount}</span>
+            <button onClick={() => { isDomestic ? setDomesticTab('movers') : setGlobalTab('movers'); setMoversTab('up'); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+              <span style={{ color: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)', fontWeight: 700 }}>▲{upCount}</span>
+            </button>
             <span>—{flatCount}</span>
-            <span style={{ color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', fontWeight: 700 }}>▼{downCount}</span>
-            <span style={{ marginLeft: 'auto', fontWeight: 600 }}>{sentTotal}종목</span>
+            <button onClick={() => { isDomestic ? setDomesticTab('movers') : setGlobalTab('movers'); setMoversTab('down'); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+              <span style={{ color: isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)', fontWeight: 700 }}>▼{downCount}</span>
+            </button>
+            <button onClick={() => { isDomestic ? setDomesticTab('ranking') : setGlobalTab('ranking'); }} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-tertiary)' }}>{sentTotal}종목 →</span>
+            </button>
           </div>
           <div style={{ display: 'flex', height: 3, borderRadius: 2, overflow: 'hidden' }}>
             <div style={{ width: `${(upCount/sentTotal)*100}%`, background: isDomestic ? 'var(--accent-red)' : 'var(--accent-green)' }} />
@@ -718,6 +736,19 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               )}
             </div>
           ) : displayStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
+          {/* 관심종목 탭: 알림 설정 링크 */}
+          {currentTab === 'watchlist' && displayStocks.length > 0 && (
+            <div style={{ padding: '10px 0 14px', borderTop: '1px solid var(--border)', marginTop: 4 }}>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                <Link href="/stock/compare" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '5px 10px', borderRadius: 6, background: 'var(--brand-bg)', border: '1px solid var(--brand-border)' }}>
+                  ⚔️ 관심종목 비교
+                </Link>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '5px 10px', borderRadius: 6, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                  총 {displayStocks.length}종목 관심
+                </span>
+              </div>
+            </div>
+          )}
           {/* 더보기 버튼 (시총 탭) */}
           {currentTab === 'ranking' && filteredStocks.length > stockListLimit && (
             <button onClick={() => setStockListLimit(prev => prev + 30)} style={{
