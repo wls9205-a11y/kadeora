@@ -1,5 +1,5 @@
-# 카더라 프로젝트 STATUS — 세션 47 (2026-03-28 KST)
-> 코드 품질 전면 정비 — as any 62→0건 + dynamic import + E2E
+# 카더라 프로젝트 STATUS — 세션 48 (2026-03-28 KST)
+> 전수조사 기반 풀스택 23가지 강화 — 디자인/피드/부동산/블로그/보안/주식
 > **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 프로덕션 현황 (실시간)
@@ -30,6 +30,50 @@
 | `as any` | **0건** ✅ |
 | `ignoreBuildErrors` | **false** |
 | `tsc --noEmit` | 0건 에러 |
+
+---
+
+## 세션 48 완료 작업 (2026-03-28)
+
+> 커밋: `5709261` — feat: 전수조사 기반 풀스택 23가지 강화 (세션48)
+
+### BLOCK A: CSS + 디자인 (5건)
+1. globals.css에 kd-feed-card/kd-card-hover/kd-action-link/kd-search-input 클래스 정의
+2. hover:hover/hover:none 미디어쿼리로 데스크탑/모바일 분리
+3. 블로그 오늘의 추천 아이콘 사이즈 강화
+4. 테마 탭 관련 종목 중복 제거
+5. 모바일 tap-highlight-color + touch-action 설정
+
+### BLOCK B: 피드 (4건)
+6. 글쓰기 CTA 유도 바 (로그인 유저만)
+7. 빈 피드 카테고리 EmptyState (📭 + 글쓰기 버튼)
+8. 게시글 상세 본문 길이 + 읽기 시간 표시
+9. 카테고리 pill에 이모지 아이콘 추가
+
+### BLOCK C: 부동산 (4건)
+10. 지도 페이지 MapClient 동적 import 연결
+11. 지역 카드에 실거래 건수 뱃지 추가
+12. 지역 상세 stat 카드에 kd-card-hover 적용
+13. 단지 상세 교통/학군 아이콘+뱃지 강화
+
+### BLOCK D: 블로그 (3건)
+14. ReadingProgress 높이 3→2px 컴팩트화
+15. 스크롤 복원 확인 (Next.js Link scroll 기본값)
+16. 검색 키워드 하이라이트 (mark 태그, 브랜드 컬러)
+
+### BLOCK E: 성능+보안 (4건)
+17. public/meta.json (PWA/Lighthouse용)
+18. OG 이미지 폰트 에러 핸들링 확인 (기존 정상)
+19. XSS URL 프로빙 방어 (middleware에서 <script>/<template>/javascript: 차단)
+20. 크론 실행 상태 가시성 확인 (기존 admin system.tsx 정상)
+
+### BLOCK F: 주식 (3건)
+21. 52주 최고/최저 그래디언트 레인지 바 (텍스트→시각화)
+22. 공시 탭 24시간 이내 새 공시 빨간 dot 뱃지
+23. 비교 페이지 항목 확인 (PER/PBR 미지원 — 기존 6항목 유지)
+
+### PENDING
+- 없음
 
 ---
 
