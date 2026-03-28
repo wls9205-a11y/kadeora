@@ -141,7 +141,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           { label: '분양중', value: ongoingApts.length.toLocaleString(), color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)', tab: 'ongoing' as const },
           { label: '미분양', value: unsoldTotal.toLocaleString(), color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)', tab: 'unsold' as const },
           { label: '재개발', value: redevCount.toLocaleString(), color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)', tab: 'redev' as const },
-          { label: '실거래', value: tradeCount > 999 ? `${(tradeCount / 1000).toFixed(1)}k` : tradeCount.toLocaleString(), color: 'var(--accent-cyan)', bg: 'rgba(34,211,238,0.08)', tab: 'trade' as const },
+          { label: '실거래', value: tradeCount.toLocaleString(), color: 'var(--accent-cyan)', bg: 'rgba(34,211,238,0.08)', tab: 'trade' as const },
         ].map(({ label, value, color, bg, tab }) => (
           <button key={label} onClick={() => handleTabChange(tab)} style={{
             flex: 1, textAlign: 'center', padding: '10px 2px', borderRadius: 8,
