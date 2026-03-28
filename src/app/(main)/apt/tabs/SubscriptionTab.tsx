@@ -73,67 +73,36 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
 
   return (
         <div>
-          {/* 지역 필터 — 컴팩트 필 */}
-          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 4, marginBottom: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2, WebkitOverflowScrolling: 'touch' }}>
-            <button onClick={() => setRegion('전체')} style={{
-              padding: '4px 10px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === '전체' ? 700 : 500,
-              background: region === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
-              color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
-              border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+          {/* 정렬 + 상태 필터 한 줄 */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
+            <select value={aptSort} onChange={e => setAptSort(e.target.value as typeof aptSort)} style={{
+              padding: '6px 10px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)',
+              background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
             }}>
-              전체 {apts.length}
-            </button>
-            {regionStats.filter(r => r.total > 0).map(r => (
-              <button key={r.name} onClick={() => setRegion(r.name === region ? '전체' : r.name)} style={{
-                padding: '4px 10px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === r.name ? 700 : 500,
-                background: region === r.name ? 'var(--brand)' : 'var(--bg-hover)',
-                color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-              }}>
-                {r.name} {r.total}
-                {r.open > 0 && <span style={{ color: region === r.name ? 'rgba(255,255,255,0.7)' : 'var(--accent-green)', marginLeft: 2, fontSize: 9 }}>●</span>}
-              </button>
-            ))}
-            <div style={{ flexShrink: 0, width: 12 }} aria-hidden />
-          </div>
-
-          {/* 검색 + 정렬 통합 */}
-          <div style={{ display: 'flex', gap: 4, marginBottom: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            {([['date', '최신순'], ['deadline', '마감임박'], ['supply', '세대수'], ['competition', '경쟁률']] as const).map(([k, l]) => (
-              <button key={k} onClick={() => setAptSort(k)} style={{ padding: '3px 8px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: aptSort === k ? 700 : 500, background: aptSort === k ? 'var(--brand)' : 'var(--bg-hover)', color: aptSort === k ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{l}</button>
-            ))}
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, fontSize: 11 }}>
-              <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}</span>
-              <span style={{ color: 'var(--accent-yellow)', fontWeight: 700 }}>예정 {filtered.filter(a => getStatus(a) === 'upcoming').length}</span>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-            {pill('전체', statusFilter, setStatusFilter)}
-            {pill('open', statusFilter, setStatusFilter, '접수중')}
-            {pill('upcoming', statusFilter, setStatusFilter, '예정')}
-            {pill('closed', statusFilter, setStatusFilter, '마감')}
-          </div>
-
-          {/* 필터 결과 카운트 + 정렬 */}
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건
-              {filtered.filter(a => getStatus(a) === 'open').length > 0 && (
-                <span style={{ color: 'var(--accent-green)', fontWeight: 600, marginLeft: 8 }}>접수중 {filtered.filter(a => getStatus(a) === 'open').length}건</span>
-              )}
-            </span>
-            <div style={{ display: 'flex', gap: 4 }}>
-              {([
-                { key: 'date' as const, label: '최신순' },
-                { key: 'supply' as const, label: '세대수순' },
-                { key: 'deadline' as const, label: '마감임박' },
-              ]).map(s => (
-                <button key={s.key} onClick={() => setAptSort(s.key)} style={{
-                  fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                  background: aptSort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: aptSort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600,
-                }}>{s.label}</button>
-              ))}
+              <option value="date">최신순</option>
+              <option value="deadline">마감임박</option>
+              <option value="supply">세대수</option>
+              <option value="competition">경쟁률</option>
+            </select>
+            <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
+              {(['전체', 'open', 'upcoming', 'closed'] as const).map(v => {
+                const labels: Record<string, string> = { '전체': '전체', 'open': '접수중', 'upcoming': '예정', 'closed': '마감' };
+                const counts: Record<string, number> = {
+                  '전체': filtered.length,
+                  'open': filtered.filter(a => getStatus(a) === 'open').length,
+                  'upcoming': filtered.filter(a => getStatus(a) === 'upcoming').length,
+                  'closed': filtered.filter(a => getStatus(a) === 'closed').length,
+                };
+                return (
+                  <button key={v} onClick={() => setStatusFilter(v)} style={{
+                    padding: '4px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
+                    background: statusFilter === v ? 'var(--brand)' : 'var(--bg-hover)',
+                    color: statusFilter === v ? '#fff' : 'var(--text-secondary)',
+                  }}>
+                    {labels[v]}{counts[v] > 0 ? ` ${counts[v]}` : ''}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

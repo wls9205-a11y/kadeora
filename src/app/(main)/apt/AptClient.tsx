@@ -133,29 +133,34 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         </div>
       </div>
 
-      {/* KPI 요약 — 클릭 시 해당 탭으로 이동 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+      {/* 탭 세그먼트 — KPI 숫자 인라인 표시 */}
+      <div style={{ display: 'flex', gap: 0, marginBottom: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
-          { label: '접수중', value: openCount.toLocaleString(), subLabel: '', color: 'var(--accent-green)', bg: 'rgba(52,211,153,0.08)', tab: 'sub' as const },
-          { label: '예정', value: upcomingCount.toLocaleString(), subLabel: '', color: 'var(--accent-blue)', bg: 'rgba(91,164,245,0.08)', tab: 'sub' as const },
-          { label: '분양중', value: ongoingApts.length.toLocaleString(), subLabel: '', color: 'var(--accent-purple)', bg: 'rgba(183,148,255,0.08)', tab: 'ongoing' as const },
-          { label: '미분양', value: unsoldTotal.toLocaleString(), subLabel: '세대', color: 'var(--accent-red)', bg: 'rgba(255,107,107,0.08)', tab: 'unsold' as const },
-          { label: '재개발', value: redevCount.toLocaleString(), subLabel: '', color: 'var(--accent-orange)', bg: 'rgba(255,159,67,0.08)', tab: 'redev' as const },
-          { label: '실거래', value: tradeCount.toLocaleString(), subLabel: '', color: 'var(--accent-cyan)', bg: 'rgba(34,211,238,0.08)', tab: 'trade' as const },
-        ].map(({ label, value, subLabel, color, bg, tab }) => (
-          <button key={label} onClick={() => handleTabChange(tab)} style={{
-            flex: 1, textAlign: 'center', padding: '10px 2px', borderRadius: 8,
-            background: activeTab === tab ? `${color}22` : bg,
-            border: activeTab === tab ? `1.5px solid ${color}55` : `1px solid ${color}33`,
-            cursor: 'pointer', transition: 'all 0.15s',
-          }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color, fontVariantNumeric: 'tabular-nums' }}>
-              {value}
-              {subLabel && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, opacity: 0.75, marginLeft: 1 }}>{subLabel}</span>}
-            </div>
-            <div style={{ fontSize: 'var(--fs-xs)', color, marginTop: 2, opacity: 0.7 }}>{label}</div>
-          </button>
-        ))}
+          { k: 'sub' as const,     icon: '📅', label: '청약',   badge: `${openCount}접·${upcomingCount}예`,  badgeColor: 'var(--accent-green)' },
+          { k: 'ongoing' as const, icon: '🏢', label: '분양중', badge: ongoingApts.length > 0 ? String(ongoingApts.length) : '',         badgeColor: 'var(--accent-purple)' },
+          { k: 'unsold' as const,  icon: '🏚️', label: '미분양', badge: unsoldTotal > 0 ? `${Math.round(unsoldTotal/1000)}k세대` : '',   badgeColor: 'var(--accent-red)' },
+          { k: 'redev' as const,   icon: '🏗️', label: '재개발', badge: redevCount > 0 ? String(redevCount) : '',                         badgeColor: 'var(--accent-orange)' },
+          { k: 'trade' as const,   icon: '💰', label: '실거래', badge: tradeCount > 0 ? `${(tradeCount/1000).toFixed(1)}k` : '',          badgeColor: 'var(--accent-cyan)' },
+        ].map(({ k, icon, label, badge, badgeColor }) => {
+          const isActive = activeTab === k;
+          return (
+            <button key={k} onClick={() => handleTabChange(k)} aria-pressed={isActive} style={{
+              flex: '1 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              padding: '7px 4px', borderRadius: 7, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+              background: isActive ? 'var(--brand)' : 'transparent',
+              color: isActive ? '#fff' : 'var(--text-tertiary)',
+              transition: 'all 0.15s',
+              minWidth: 0,
+            }}>
+              <span style={{ fontSize: 12, lineHeight: 1 }}>{icon} <span style={{ fontWeight: 700, fontSize: 12 }}>{label}</span></span>
+              {badge && (
+                <span style={{ fontSize: 9, marginTop: 2, opacity: isActive ? 0.85 : 0.7, color: isActive ? '#fff' : badgeColor, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  {badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* 지역별 스택바 현황 */}
@@ -223,47 +228,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           🔍 &quot;{globalSearch}&quot; — 현재 탭에서 필터링 중 · 다른 탭에서도 동일하게 적용됩니다
         </div>
       )}
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-        {[
-          { k: 'sub' as const, l: '📅 청약', type: 'subscription', data: apts },
-          { k: 'ongoing' as const, l: '🏢 분양중', type: 'ongoing', data: ongoingApts },
-          { k: 'unsold' as const, l: '🏚️ 미분양', type: 'unsold', data: lazyUnsold || [] },
-          { k: 'redev' as const, l: '🏗️ 재개발', type: 'redevelopment', data: lazyRedev || [] },
-          { k: 'trade' as const, l: '💰 실거래', type: 'transaction', data: lazyTx || [] },
-        ].map(({ k, l, type, data }) => {
-          const hasNew = data.some((item: Record<string, any>) => isNew(item, type));
-          // 통합 검색 시 탭별 매칭 건수 계산
-          const matchCount = globalSearch ? (() => {
-            const q = globalSearch.toLowerCase();
-            return data.filter((item: Record<string, any>) => {
-              const fields = [item.house_nm, item.apt_name, item.district_name, item.region_nm, item.region, item.hssply_adres, item.address, item.sigungu, item.sigungu_nm, item.constructor_nm, item.constructor, item.dong];
-              return fields.some(f => f && String(f).toLowerCase().includes(q));
-            }).length;
-          })() : null;
-          return (
-            <button key={k} onClick={() => handleTabChange(k)} aria-pressed={activeTab === k} style={{
-              flex: '1 0 auto', padding: '8px 6px', borderRadius: 6, border: 'none', cursor: 'pointer', position: 'relative',
-              whiteSpace: 'nowrap',
-              background: activeTab === k ? 'var(--brand)' : 'transparent',
-              color: activeTab === k ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600, fontSize: 12,
-              boxShadow: activeTab === k ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
-            }}>
-              {l}
-              {globalSearch ? (
-                <span style={{ fontSize: 10, marginLeft: 2, opacity: matchCount ? 1 : 0.4, fontWeight: matchCount ? 800 : 500 }}>{matchCount}</span>
-              ) : (
-                data.length > 0 && <span style={{ fontSize: 10, marginLeft: 2, opacity: 0.7 }}>{
-                  type === 'unsold'
-                    ? (() => { const total = data.reduce((s: number, u: Record<string, any>) => s + (u.tot_unsold_hshld_co || 0), 0); return total > 999 ? `${(total/1000).toFixed(0)}k` : total; })()
-                    : data.length > 999 ? `${(data.length/1000).toFixed(0)}k` : data.length
-                }</span>
-              )}
-              {hasNew && activeTab !== k && !globalSearch && <span style={{ position: 'absolute', top: 4, right: 4, width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-red)' }} />}
-            </button>
-          );
-        })}
-      </div>
-
       {/* ━━━ 청약 일정 탭 ━━━ */}
       {activeTab === 'sub' && (
         <SubscriptionTab

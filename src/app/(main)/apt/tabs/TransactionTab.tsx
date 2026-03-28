@@ -85,31 +85,9 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
   return (
     <div>
-      {/* 지역 필터 — 컴팩트 필 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>실거래 현황</span>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-link)' }}>총 {transactions.length}건</span>
-      </div>
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-        <button onClick={() => { setRegion('전체'); setPage(1); }} style={{
-          padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === '전체' ? 700 : 500,
-          background: region === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
-          color: region === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
-          border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-        }}>
-          전체 {transactions.length}
-        </button>
-        {regStats.filter(r => r.count > 0).map(r => (
-          <button key={r.name} onClick={() => { setRegion(r.name === region ? '전체' : r.name); setPage(1); }} style={{
-            padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: region === r.name ? 700 : 500,
-            background: region === r.name ? 'var(--brand)' : 'var(--bg-hover)',
-            color: region === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
-            border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-          }}>
-            {r.name} {r.count}
-          </button>
-        ))}
-        <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
 
       {/* 대시보드 */}
@@ -150,22 +128,27 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         );
       })()}
 
-      {/* 검색 + 필터 */}
-
-      <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
-        {[{ key: '전체', label: '전체 면적' }, { key: '~59', label: '~59㎡' }, { key: '59~84', label: '59~84㎡' }, { key: '84~', label: '84㎡~' }].map(a => pill(a.key, areaFilter, setAreaFilter, a.label))}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건</span>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {([{ key: 'date' as const, label: '최신순' }, { key: 'price_desc' as const, label: '고가순' }, { key: 'price_asc' as const, label: '저가순' }, { key: 'area' as const, label: '면적순' }]).map(s => (
-            <button key={s.key} onClick={() => { setSort(s.key); setPage(1); }} style={{
-              fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-              background: sort === s.key ? 'var(--brand)' : 'var(--bg-hover)', color: sort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)', fontWeight: 600,
-            }}>{s.label}</button>
+      {/* 면적 필터 + 정렬 한 줄 */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
+        <select value={sort} onChange={e => { setSort(e.target.value as typeof sort); setPage(1); }} style={{
+          padding: '6px 10px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)',
+          background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
+        }}>
+          <option value="date">최신순</option>
+          <option value="price_desc">고가순</option>
+          <option value="price_asc">저가순</option>
+          <option value="area">면적순</option>
+        </select>
+        <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
+          {([{ key: '전체', label: '전체' }, { key: '~59', label: '~59㎡' }, { key: '59~84', label: '59~84㎡' }, { key: '84~', label: '84㎡~' }] as const).map(a => (
+            <button key={a.key} onClick={() => setAreaFilter(a.key)} style={{
+              padding: '4px 7px', borderRadius: 999, fontSize: 10, fontWeight: 600, border: 'none', cursor: 'pointer',
+              background: areaFilter === a.key ? 'var(--brand)' : 'var(--bg-hover)',
+              color: areaFilter === a.key ? '#fff' : 'var(--text-secondary)',
+            }}>{a.label}</button>
           ))}
         </div>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{filtered.length}건</span>
       </div>
 
       {/* 평당가 TOP10 */}

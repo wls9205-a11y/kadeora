@@ -173,11 +173,11 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         </div>
       </div>
 
-      {/* Compact tile grid */}
+      {/* Compact tile grid — 4열 고정 */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-        gap: 6,
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: 5,
       }}>
         {regions.map((r, i) => {
           const isActive = activeRegion === r.name;
@@ -186,9 +186,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               key={r.name}
               onClick={() => onRegionClick?.(isActive ? '전체' : r.name)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                padding: '4px 6px',
-                background: 'var(--bg-surface)',
+                display: 'flex', alignItems: 'center', gap: 3,
+                padding: '5px 6px',
+                background: isActive ? 'var(--brand-bg, rgba(37,99,235,0.06))' : 'var(--bg-surface)',
                 border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                 borderRadius: 8,
                 cursor: 'pointer',
@@ -201,7 +201,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               {/* Rank */}
               <span style={{
                 fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)',
-                width: 14, textAlign: 'center', flexShrink: 0,
+                width: 12, textAlign: 'center', flexShrink: 0,
               }}>
                 {i + 1}
               </span>
@@ -209,15 +209,15 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               {/* Name + mini bar */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 11, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {r.name}
                   </span>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                     {r.total.toLocaleString()}
                   </span>
                 </div>
                 {/* Mini stacked bar */}
-                <div style={{ display: 'flex', width: 40, height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
+                <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
                   {CAT_KEYS.map(k => {
                     const v = r[k];
                     if (v <= 0) return null;

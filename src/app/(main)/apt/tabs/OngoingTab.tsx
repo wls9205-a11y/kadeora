@@ -113,51 +113,28 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
     return (
     <div>
-      {/* 지역 필터 — 컴팩트 필 */}
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-        <button onClick={() => { setOngoingRegion('전체'); setOngoingPage(1); }} style={{
-          padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: ongoingRegion === '전체' ? 700 : 500,
-          background: ongoingRegion === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
-          color: ongoingRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
-          border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+      {/* 정렬 + 상태 필터 한 줄 */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
+        <select value={ongoingSort} onChange={e => { setOngoingSort(e.target.value as typeof ongoingSort); setOngoingPage(1); }} style={{
+          padding: '6px 10px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)',
+          background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
         }}>
-          전체 {ongoingApts.length}
-        </button>
-        {regionCounts.filter(r => r.count > 0).map(r => (
-          <button key={r.name} onClick={() => { setOngoingRegion(r.name === ongoingRegion ? '전체' : r.name); setOngoingPage(1); }} style={{
-            padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: ongoingRegion === r.name ? 700 : 500,
-            background: ongoingRegion === r.name ? 'var(--brand)' : 'var(--bg-hover)',
-            color: ongoingRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
-            border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-          }}>
-            {r.name} {r.count}
-            {r.unsoldCount > 0 && <span style={{ color: ongoingRegion === r.name ? 'rgba(255,255,255,0.7)' : 'var(--accent-red)', marginLeft: 3, fontSize: 'var(--fs-xs)' }}>●</span>}
-          </button>
-        ))}
-        <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
+          <option value="supply">세대수순</option>
+          <option value="unsold">미분양순</option>
+          <option value="price">분양가순</option>
+          <option value="competition">경쟁률순</option>
+        </select>
+        <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
+          {(['전체', '분양중', '미분양'] as const).map(s => (
+            <button key={s} onClick={() => { setOngoingStatus(s); setOngoingPage(1); }} style={{
+              padding: '4px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
+              background: ongoingStatus === s ? 'var(--brand)' : 'var(--bg-hover)',
+              color: ongoingStatus === s ? '#fff' : 'var(--text-secondary)',
+            }}>{s}{s === '전체' ? ` ${totalSites}` : s === '분양중' ? ` ${allSubCount}` : ` ${allUnsoldCount}`}</button>
+          ))}
+        </div>
       </div>
 
-            {/* 검색은 상단 통합 검색창 사용 */}
-
-      {/* 정렬 + 상태 필터 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
-        {([['supply', '세대수순'], ['unsold', '미분양순'], ['price', '분양가순'], ['competition', '경쟁률순']] as const).map(([k, l]) => (
-          <button key={k} onClick={() => { setOngoingSort(k); setOngoingPage(1); }} style={{
-            padding: '3px 10px', borderRadius: 14, fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
-            border: `1px solid ${ongoingSort === k ? 'var(--brand)' : 'var(--border)'}`,
-            background: ongoingSort === k ? 'var(--brand)' : 'transparent',
-            color: ongoingSort === k ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-          }}>{l}</button>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-        {['전체', '분양중', '미분양'].map(s => pill(s, ongoingStatus, (v) => { setOngoingStatus(v); setOngoingPage(1); }))}
-      </div>
-
-      {/* 결과 수 */}
-      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 10 }}>
-        {ongoingRegion !== '전체' ? `${ongoingRegion} ` : '전체 '}{totalSites}곳{totalUnsoldUnits > 0 ? ` · 미분양 ${totalUnsoldUnits.toLocaleString()}호` : ''}
-      </div>
 
       {/* ⑥⑦ 카드 리스트 (borderLeft + 클릭 모달) */}
       {filtered.length === 0 && (

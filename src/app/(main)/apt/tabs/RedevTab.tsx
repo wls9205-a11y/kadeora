@@ -87,32 +87,12 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
   return (
     <>
           <div>
-            {/* 지역 필터 — 컴팩트 필 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>재개발 현황</span>
-              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {redevelopment.length}건</span>
+            {/* 재개발/재건축 현황 헤더 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>재개발·재건축 현황</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {filteredRedev.length}건 / {totalHouseholds.toLocaleString()}세대</span>
             </div>
-            <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-              <button onClick={() => { setRedevRegion('전체'); setRedevPage(1); }} style={{
-                padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: redevRegion === '전체' ? 700 : 500,
-                background: redevRegion === '전체' ? 'var(--brand)' : 'var(--bg-hover)',
-                color: redevRegion === '전체' ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-              }}>
-                전체 {redevelopment.length}
-              </button>
-              {redevRegionStats.filter(r => r.total > 0).map(r => (
-                <button key={r.name} onClick={() => { setRedevRegion(r.name === redevRegion ? '전체' : r.name); setRedevPage(1); }} style={{
-                  padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: redevRegion === r.name ? 700 : 500,
-                  background: redevRegion === r.name ? 'var(--brand)' : 'var(--bg-hover)',
-                  color: redevRegion === r.name ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                  border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-                }}>
-                  {r.name} {r.total}
-                </button>
-              ))}
-              <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
-            </div>
+
 
             {/* 현황 요약 */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>

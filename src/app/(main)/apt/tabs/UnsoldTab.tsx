@@ -65,32 +65,11 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
 
     return (
-    <div>
-      {/* 지역 필터 — 컴팩트 필 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+     <div>
+      {/* 미분양 현황 헤더 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>미분양 현황</span>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
-      </div>
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-        <button onClick={() => setUnsoldRegion('전체')} style={{
-          padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: unsoldRegion === '전체' ? 700 : 500,
-          background: unsoldRegion === '전체' ? 'var(--accent-red)' : 'var(--bg-hover)',
-          color: unsoldRegion === '전체' ? '#fff' : 'var(--text-secondary)',
-          border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-        }}>
-          전체 {unsold.length}곳
-        </button>
-        {unsoldRegionStats.filter(r => r.unitCount > 0).map(r => (
-          <button key={r.name} onClick={() => setUnsoldRegion(r.name === unsoldRegion ? '전체' : r.name)} style={{
-            padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: unsoldRegion === r.name ? 700 : 500,
-            background: unsoldRegion === r.name ? 'var(--accent-red)' : 'var(--bg-hover)',
-            color: unsoldRegion === r.name ? '#fff' : 'var(--text-secondary)',
-            border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
-          }}>
-            {r.name} {r.unitCount.toLocaleString()}
-          </button>
-        ))}
-        <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>
 
       {/* 미분양 급증 경고 배너 — 지역별 현황 아래 */}
