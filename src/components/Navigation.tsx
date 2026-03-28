@@ -128,6 +128,18 @@ export function Navigation() {
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', poll); };
   }, [userId]);
 
+  // '/' 키보드 단축키 → 검색 페이지 이동
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
+        e.preventDefault();
+        router.push('/search');
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [router]);
+
   const handleLogout = async () => {
     await createSupabaseBrowser().auth.signOut();
     router.push(`/login?redirect=${encodeURIComponent(pathname)}`); setMenuOpen(false);
@@ -175,20 +187,21 @@ export function Navigation() {
 
           {/* 검색바 (데스크탑) */}
           <Link href="/search" className="hidden md:flex" style={{
-            flex:1, maxWidth:340, minWidth:140, height:30,
+            flex:1, maxWidth:360, minWidth:160, height:34,
             background:'var(--bg-hover)',
             border:'1px solid var(--border)',
-            borderRadius:15, alignItems:'center', padding:'0 10px', gap:6,
+            borderRadius:17, alignItems:'center', padding:'0 14px', gap:8,
             textDecoration:'none', transition:'border-color 0.15s',
+            justifyContent:'space-between',
           }}
             onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
             onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
           >
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7" stroke="var(--text-tertiary)" strokeWidth="2"/>
-              <path d="M16.5 16.5L21 21" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>검색...</span>
+            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+              <Search size={13} color="var(--text-tertiary)" />
+              <span style={{ fontSize:12, color:'var(--text-tertiary)' }}>종목, 청약, 블로그 검색...</span>
+            </div>
+            <kbd style={{ fontSize:10, fontWeight:600, color:'var(--text-tertiary)', background:'var(--bg-base)', padding:'1px 5px', borderRadius:4, border:'1px solid var(--border)', fontFamily:'monospace', lineHeight:1.5 }}>/</kbd>
           </Link>
 
           {/* 데스크탑 네비 */}
