@@ -165,6 +165,8 @@ export default async function StockDetailPage({ params }: Props) {
           { '@type': 'Question', name: `${s.name} 시세를 어디서 확인하나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 차트, 수급 분석, AI 한줄평, 관련 뉴스를 무료로 확인할 수 있습니다. 카카오 로그인으로 관심종목 등록, 가격 알림도 설정 가능합니다.` } },
         ],
       })}} />
+      {/* JSON-LD: Dataset (가격 히스토리 — Google Dataset Search) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Dataset', name: `${s.name} (${symbol}) 주가 데이터`, description: `${s.name} ${s.market} 상장 종목의 실시간 시세, 시가총액, 등락률, 거래량 데이터`, url: `${SITE_URL}/stock/${encodeURIComponent(symbol)}`, creator: { '@type': 'Organization', name: '카더라', url: SITE_URL }, temporalCoverage: '2024/..', variableMeasured: [{ '@type': 'PropertyValue', name: 'price', value: s.price }, { '@type': 'PropertyValue', name: 'change_pct', value: changePct }, { '@type': 'PropertyValue', name: 'market_cap', value: s.market_cap }] }) }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)' }}>

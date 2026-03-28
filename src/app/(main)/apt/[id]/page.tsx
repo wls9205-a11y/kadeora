@@ -301,7 +301,10 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* JSON-LD 3: Breadcrumb */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` }, ...(region ? [{ '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}` }] : []), { '@type': 'ListItem', position: region ? 4 : 3, name }] }) }} />
 
-      {/* JSON-LD 4: Event */}
+      {/* JSON-LD 4: Place (Google Maps + 네이버 지도 연동) */}
+      {(site?.latitude || site?.address) && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Place', name, address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: site?.sigungu || site?.dong || '', addressCountry: 'KR', streetAddress: site?.address || '' }, ...(site?.latitude && site?.longitude ? { geo: { '@type': 'GeoCoordinates', latitude: site.latitude, longitude: site.longitude } } : {}), ...(site?.nearby_station ? { hasMap: `https://map.naver.com/v5/search/${encodeURIComponent(name)}` } : {}) }) }} />}
+
+      {/* JSON-LD 4b: Event */}
       {sub?.rcept_bgnde && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Event', name: `${name} 청약 접수`, startDate: sub.rcept_bgnde, endDate: sub.rcept_endde, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', location: { '@type': 'VirtualLocation', url: `${SITE_URL}/apt/${slug}` }, organizer: { '@type': 'Organization', name: site?.builder || sub.constructor_nm || '청약홈', url: sub.pblanc_url || SITE_URL }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent('청약 접수')}` }) }} />}
 
       {/* JSON-LD 5: Article + SpeakableSpecification (voice search, Google Discover) */}

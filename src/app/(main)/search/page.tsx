@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
-  other: { 'dg:plink': SITE_URL + '/search' },
+  other: { 'dg:plink': SITE_URL + '/search', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString() },
 };
 
 export default function SearchPage() {

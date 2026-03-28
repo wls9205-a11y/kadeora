@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   other: {
     'naver:written_time': '2026-01-15T00:00:00Z',
     'naver:updated_time': new Date().toISOString(),
+    'naver:author': '카더라',
+    'og:updated_time': new Date().toISOString(),
     'dg:plink': SITE_URL + '/feed',
     'article:section': '커뮤니티',
     'article:tag': '커뮤니티,주식,부동산,청약,토론,카더라',

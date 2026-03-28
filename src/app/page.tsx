@@ -21,6 +21,12 @@ export const metadata: Metadata = {
     locale: 'ko_KR',
     type: 'website',
   },
+  other: {
+    'naver:author': '카더라',
+    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:updated_time': new Date().toISOString(),
+    'og:updated_time': new Date().toISOString(),
+  },
 };
 
 const SECTIONS = [

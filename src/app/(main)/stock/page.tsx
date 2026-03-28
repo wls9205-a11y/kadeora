@@ -27,6 +27,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     other: {
       'naver:written_time': '2026-01-15T00:00:00Z',
       'naver:updated_time': new Date().toISOString(),
+      'naver:author': '카더라',
+      'og:updated_time': new Date().toISOString(),
       'dg:plink': SITE_URL + '/stock',
       'article:section': '주식',
       'article:tag': '주식,시세,KOSPI,KOSDAQ,실시간,등락률',
