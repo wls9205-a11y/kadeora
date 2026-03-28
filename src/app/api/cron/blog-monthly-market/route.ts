@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
           signal: AbortSignal.timeout(45000),
         });
         apiCalls = 1;
-        if (!res.ok) { if (res.status === 529 || res.status === 402) break; continue; }
+        if (!res.ok) { if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } }; return { processed: 0, created: 0, failed: 1, metadata: { reason: 'anthropic_error', status: res.status } }; }
       if (res.ok) {
           const data = await res.json();
           content = data.content?.[0]?.text || '';
