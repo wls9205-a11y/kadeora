@@ -296,7 +296,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             return (
               <span style={{ fontSize: 10, fontWeight: 700, color: ms.color, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: `${ms.color}12`, border: `1px solid ${ms.color}30` }}>
                 {ms.label.includes('장중') && (
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: ms.color, flexShrink: 0, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                  <span className="kd-pulse-dot" style={{ background: ms.color, flexShrink: 0 }} />
                 )}
                 {ms.label}
                 {lastUpdate && <span style={{ fontSize: 9, opacity: 0.65, fontWeight: 400, fontFamily: 'monospace' }}>{new Date(lastUpdate).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>}
