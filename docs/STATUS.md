@@ -1,5 +1,5 @@
-# 카더라 프로젝트 STATUS — 세션 48 (2026-03-28 KST)
-> 전수조사 기반 풀스택 23가지 강화 — 디자인/피드/부동산/블로그/보안/주식
+# 카더라 프로젝트 STATUS — 세션 49 (2026-03-28 KST)
+> SEO 전면 강화 + 사이트맵 복구 + 블로그 전수조사 + 풀스택 감사 + OG 폰트 수정
 > **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 프로덕션 현황 (실시간)
@@ -8,7 +8,7 @@
 |------|------|
 | **유저** | 120명 |
 | **게시글/댓글** | 4,083 / 2,607 |
-| **블로그** | 15,502편 (시드 49편 포함) |
+| **블로그** | 15,502편 (시드 80편 API 생성 완료, 실행 대기) |
 | **주식 종목** | 249개 |
 | **청약** | 2,692건 |
 | **apt_sites (active)** | 5,522 |
@@ -16,20 +16,151 @@
 | **미분양** | 180건 (68,264세대) |
 | **재개발** | 202건 |
 | **DB 크기** | 227 MB |
-| **프로덕션 에러** | 0건 |
+| **프로덕션 에러** | 0건 ✅ |
 
 ## 코드베이스
 
 | 지표 | 수치 |
 |------|------|
-| 파일 수 | 514개 |
-| 총 줄 수 | 34,710줄 (src/) |
+| 파일 수 | 516개 |
+| 총 줄 수 | 64,021줄 |
 | API 라우트 | 170개 |
-| 크론 | 73개 |
+| 크론 | 70개 |
 | DB 테이블 | 125개 |
 | `as any` | **0건** ✅ |
 | `ignoreBuildErrors` | **false** |
 | `tsc --noEmit` | 0건 에러 |
+
+---
+
+## 세션 49 완료 작업 (2026-03-28)
+
+### 1. SEO 전면 강화 [COMPLETED]
+- 주식 상세: NYSE/NASDAQ 뉴욕 좌표, article:published/modified_time, naver:written_time→updated_at
+- 주식 섹터: BreadcrumbList+ItemList(top10)+FAQPage JSON-LD, geo/twitter/naver 메타
+- 부동산 상세: apt_sites.latitude/longitude 동적 좌표 → 지역 코드 폴백
+- 부동산 지역: 17시도+13시군구 geo.position 좌표, ItemList JSON-LD
+- 블로그 상세: speakable + image 동적 OG URL
+- 블로그 목록: FAQPage JSON-LD 3개 Q&A
+- 전역: msvalidate.01 Bing 인증, RSS alternate 링크 추가
+- RSS 신규: /stock/feed(50종목), /apt/feed(청약+미분양), robots.txt 반영
+- OG 한글 폰트: Pretendard→NotoSansKR-Bold.otf (Vercel Edge Runtime 호환)
+
+### 2. SEO 2차 강화 [COMPLETED]
+- 홈페이지: WebSite+SearchAction JSON-LD (사이트링크 검색창)
+- Organization.sameAs 빈 배열 제거
+- /apt/diagnose: layout.tsx + WebApplication/FAQPage/BreadcrumbList JSON-LD
+- /stock/compare: canonical/OG/twitter/naver + BreadcrumbList
+- naver:written_time: 15개 정적 페이지 고정 날짜, 2개 동적 페이지 실제 데이터
+- IndexNow: blog-publish-queue에서 발행 후 submitIndexNow() 호출
+- manifest.json + llms.txt: 15,502편, 5,522현장
+
+### 3. 사이트맵 복구 [CRITICAL FIX]
+- /sitemap.xml 404 해결 — Next.js 15 generateSitemaps() 버그 회피
+- route handler 방식으로 전환: sitemap.xml/route.ts(인덱스) + sitemap/[id]/route.ts(개별)
+- 9개 세그먼트: 0~4(static/stock/apt/feed/discuss) + 10~13(blog 청크)
+- 모든 DB 호출 try-catch 방어
+
+### 4. robots.txt 통합 [COMPLETED]
+- public/robots.txt 삭제 (동적 라우트가 override)
+- 동적 robots.txt에 RSS Sitemap 5개 추가
+- apt/feed RSS: generateAptSlug()로 slug 기반 링크 생성
+
+### 5. 블로그 전수조사 19개 이슈 수정 [COMPLETED]
+- auto-link 데드링크 15개 제거 (BUILDER_KEYWORDS 전체, GUIDE_KEYWORDS 9개)
+- 탭 파라미터 한글→영문 (trade/unsold/redev)
+- relatedSites 경로 /apt/sites/ → /apt/
+- insertColorTags 비활성화 (태그 3중 중복 제거)
+- 관련 카드 2번 렌더링 → 하단만 유지
+- truncation clamp(400px,60vh,800px)
+- itemprop="articleBody" + BlogToc nav + aria-label
+- RSS pubDate Invalid Date 방어
+- insertCoverImage: 유효 cover_image → 사용, 없으면 OG 이미지 폴백 + onerror 방어
+
+### 6. 풀스택 전수조사 13개 이슈 수정 [COMPLETED]
+- AptClient /apt/sites/ → /apt/ 링크 수정
+- insertCoverImage alt HTML escape (XSS 방어)
+- autocomplete + blog/search ILIKE 인젝션 → sanitizeSearchQuery 적용
+- blog/helpful, blog/bookmark 유저+포스트당 2초 rate limit
+- Supabase 프로젝트 ID → 환경변수 폴백
+- encryption.ts → getKey() null 반환 + 빈 문자열 폴백
+- discuss revalidate 0→60
+- 크론 console.log 22개 제거
+- onerror HTML entity 안전 처리
+
+### 7. UI 개선 [COMPLETED]
+- 주식: 섹터 히트맵 상단 이동 (국내/해외 토글 아래, 탭 무관 항상 표시)
+- 부동산: 이번 주 청약 D-day → 탭 콘텐츠 하단으로 이동
+- 부동산: SubscriptionTab 내 중복 '이번 주 청약' 제거
+- 지역별 현황: 도넛 차트 + 컴팩트 타일 디자인 (3열, 5개 카테고리 전부 표시)
+- KPI/도넛 통계 불일치 수정 (tradeTotalCount 우선 사용)
+- 실거래/재개발 지역별 건수: fetchAllRows 페이지네이션 + region 정규화
+- apt/map 빌드 에러: ssr:false → MapWrapper 클라이언트 래퍼로 이동
+
+### 8. OG 이미지 폰트 에러 수정 [CRITICAL FIX]
+- Pretendard-Bold.woff2 → NotoSansKR-Bold.otf (Vercel Edge Runtime woff2 미지원)
+- Unsupported OpenType signature 에러 100건+ → 0건
+
+### 9. 블로그 시드 80편 API [COMPLETED]
+- /api/admin/seed-longtail-80/route.ts 생성
+- 2026 시의성 15편 + 부동산 가이드 20편 + 주식 가이드 20편 + 재테크 15편 + 지역 분석 10편
+- CRON_SECRET 인증, safeBlogInsert 사용
+
+---
+
+## 세션 49 커밋
+
+| SHA | 내용 |
+|-----|------|
+| `338ab0e` | apt/map 빌드 에러 수정 — ssr:false 클라이언트 래퍼 |
+| `04d6f8b` | OG 이미지 폰트 woff2→otf + region 정규화 |
+| `4f0d950` | 실거래/재개발 페이지네이션 수집 |
+| `5709261` | 전수조사 풀스택 23가지 강화 |
+| `7d9a481` | KPI/도넛 통계 불일치 수정 |
+| `0f6966b` | 도넛 타일 크기 + 블로그 시드 80편 API |
+| `70efcb0` | 전수조사 13개 이슈 일괄 수정 |
+| `3dc71d7` | 블로그 크래시 + 재개발/실거래 건수 |
+| `1c105d8` | 도넛 범례 5개 + 3열 + OG 커버이미지 복원 |
+| `093b11e` | 깨진 cover_image 빈 박스 제거 |
+| `4b686eb` | 블로그 접근성 개선 |
+| `ad1f693` | 블로그 전수조사 데드링크 15개 제거 |
+| `d90dd34` | UI 레이아웃 변경 (섹터/청약) |
+| `2e28c2a` | sitemap.xml 404 해결 |
+| `1cee8b8` | SEO 1차 강화 10가지 |
+| `cd9b9fc` | sitemap generateSitemaps 수정 |
+
+---
+
+## 🟡 PENDING 작업
+
+### 긴급 수동
+- [ ] **토스 정산 등록 (3/31 마감 D-3!)**
+- [ ] **구글 서치콘솔 사이트맵 재제출** (sitemap.xml 복구됨)
+- [ ] **네이버 서치어드바이저** RSS 4개 제출
+- [ ] **Bing 웹마스터** msvalidate.01 실제 인증코드 교체
+
+### 블로그
+- [ ] seed-longtail-80 API 실행 (80편 생성)
+- [ ] daily_create_limit 임시 상향 후 실행, 완료 후 원복
+
+### 수동 필수
+- [ ] GA stockcoin.net 데이터 스트림 제거
+- [ ] KIS_APP_KEY 발급 (주식 시세 99개 price=0)
+- [ ] 토스 라이브키 교체
+- [ ] 주린이.site DNS 복구
+
+### 코드
+- [ ] Supabase max_rows 설정 확인/변경 (현재 1000 → 10000 권장)
+- [ ] 블로그 cover_image DB 정리 (깨진 URL → null)
+
+## 주의사항 (다음 세션 필독)
+- **sitemap.xml**: route handler 방식으로 변경됨 (sitemap.ts 삭제됨)
+- **RegionStackedBar**: normalizeRegion() 함수로 지역명 정규화
+- **fetchAllRows**: apt/page.tsx에서 페이지네이션으로 전체 데이터 수집
+- **OG 폰트**: NotoSansKR-Bold.otf 사용 (woff2 금지)
+- **apt/map**: MapWrapper.tsx 클라이언트 래퍼 필수 (ssr:false는 서버 컴포넌트 금지)
+- **블로그 데이터**: 절대 삭제/수정 금지
+- **stockcoin.net**: 절대 카더라와 연결 금지
 
 ---
 
