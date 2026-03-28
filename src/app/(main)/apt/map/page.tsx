@@ -2,11 +2,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-const MapClient = dynamic(() => import('./MapClient'), {
-  ssr: false,
-  loading: () => <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>지도를 불러오는 중...</div>,
-});
+import MapWrapper from './MapWrapper';
 
 export const metadata: Metadata = {
   title: '부동산 지도',
@@ -91,7 +87,7 @@ export default async function AptMapPage() {
         </div>
       </div>
       <div style={{ marginTop: 20 }}>
-        <MapClient />
+        <MapWrapper />
       </div>
     </>
   );
