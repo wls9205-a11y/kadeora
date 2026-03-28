@@ -109,7 +109,7 @@ export default async function FeedDetailPage({ params }: Props) {
   let numId = 0;
   let relatedQuote: any = null;
   let relatedAptCount = 0;
-  let relatedBlogs: { slug: string; title: string; category: string; view_count: number }[] = [];
+  let relatedBlogs: { slug: string; title: string; category: string; view_count: number | null }[] = [];
 
   try {
     const sb = await createSupabaseServer();
