@@ -2,9 +2,9 @@
 import { useMemo } from 'react';
 
 interface PriceHistory { date: string; close_price: number; volume: number; change_pct?: number; }
-interface Props { data: PriceHistory[]; symbol: string; name: string; currency: string; isKR: boolean; }
+interface Props { data: PriceHistory[]; currency: string; isKR: boolean; }
 
-export default function StockTrendLine({ data, symbol, name, currency, isKR }: Props) {
+export default function StockTrendLine({ data, currency, isKR }: Props) {
   const W = 320, H = 120, PADDING = { top: 10, right: 10, bottom: 24, left: 42 };
 
   const sorted = useMemo(() => [...data].sort((a, b) => a.date.localeCompare(b.date)), [data]);

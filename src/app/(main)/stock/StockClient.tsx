@@ -6,6 +6,10 @@ import dynamic from 'next/dynamic';
 const PortfolioTab = dynamic(() => import('@/components/PortfolioTab'), { ssr: false });
 const SectorHeatmap = dynamic(() => import('@/components/SectorHeatmap'), { ssr: false });
 const StockDetailSheet = dynamic(() => import('./StockDetailSheet'), { ssr: false });
+const StockTreemap = dynamic(() => import('@/components/StockTreemap'), { ssr: false });
+const PortfolioSimulator = dynamic(() => import('@/components/PortfolioSimulator'), { ssr: false });
+const GlobalPanorama = dynamic(() => import('@/components/GlobalPanorama'), { ssr: false });
+const StockRadarChart = dynamic(() => import('@/components/StockRadarChart'), { ssr: false });
 import MiniSparkline from '@/components/MiniSparkline';
 import { fmtCap, stockColor, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
@@ -845,7 +849,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           <GlobalPanorama
             stocks={stocks}
             exchangeRate={exchangeRate}
-            briefingKR={briefing?.market === 'KR' ? briefing : null}
+            briefingKR={briefing || null}
             briefingUS={null}
           />
           {/* 포트폴리오 시뮬레이터 */}

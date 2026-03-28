@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 interface Stock { symbol: string; name: string; price: number; change_pct: number | null; market: string; currency?: string; }
-interface Props { stocks: Stock[]; exchangeRate: number; briefingKR?: { title: string; sentiment: string } | null; briefingUS?: { title: string; sentiment: string } | null; }
+interface Props { stocks: Stock[]; exchangeRate: number; briefingKR?: Record<string,any> | null; briefingUS?: Record<string,any> | null; }
 
 export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, briefingUS }: Props) {
   const [time, setTime] = useState('');

@@ -193,8 +193,6 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
       {slicedData.length >= 10 && (
         <StockTrendLine
           data={slicedData.map((d: any) => ({ date: d.date, close_price: Number(d.close_price), volume: Number(d.volume || 0), change_pct: Number(d.change_pct || 0) }))}
-          symbol=""
-          name=""
           currency={currency}
           isKR={currency !== 'USD'}
         />

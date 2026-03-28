@@ -39,7 +39,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       const base = Math.floor(100 / next.length);
       const rem = 100 - base * (next.length - 1);
       return next.map((h, i) => ({ ...h, alloc: i === 0 ? rem : base }));
-    }, );
+    });
   }, []);
 
   const setAlloc = useCallback((symbol: string, val: number) => {
