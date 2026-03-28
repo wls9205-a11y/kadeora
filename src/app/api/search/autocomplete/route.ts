@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
+  const rl = await checkRateLimit(req, 'search');
+  if (!rl.success) return rl.response;
+
   const q = sanitizeSearchQuery(req.nextUrl.searchParams.get('q') || '', 50);
   if (!q || q.length < 1) return NextResponse.json({ suggestions: [] });
 
@@ -20,7 +24,9 @@ export async function GET(req: NextRequest) {
       ...(blogsR.data || []).map((b: any) => ({ type: 'blog' as const, label: b.title, href: `/blog/${b.slug}` })),
     ];
 
-    return NextResponse.json({ suggestions });
+    return NextResponse.json({ suggestions }, {
+      headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120' },
+    });
   } catch {
     return NextResponse.json({ suggestions: [] });
   }

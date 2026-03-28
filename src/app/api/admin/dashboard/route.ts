@@ -39,16 +39,16 @@ export async function GET(req: Request) {
         sb.from('profiles').select('id', { count: 'exact', head: true }),
         sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
         sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
-        sb.from('stock_quotes').select('id', { count: 'exact', head: true }),
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }),
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }),
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true),
         sb.from('apt_site_interests').select('id', { count: 'exact', head: true }),
         sb.from('unsold_apts').select('id', { count: 'exact', head: true }),
         sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
         sb.from('apt_transactions').select('id', { count: 'exact', head: true }),
-        sb.from('payments').select('id, amount_krw, status, created_at').order('created_at', { ascending: false }).limit(10),
+        sb.from('payments').select('id, amount, status, created_at').order('created_at', { ascending: false }).limit(10),
         sb.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-        sb.from('daily_stats').select('*').order('date', { ascending: false }).limit(14),
+        sb.from('daily_stats').select('*').order('stat_date', { ascending: false }).limit(14),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
         sb.from('profiles').select('id', { count: 'exact', head: true }).gte('last_active_at', weekAgo),
         sb.from('discussion_topics').select('id', { count: 'exact', head: true }),
@@ -480,7 +480,7 @@ export async function GET(req: Request) {
 
     if (section === 'payments') {
       const { data } = await sb.from('payments')
-        .select('id, user_id, amount_krw, status, product_type, created_at, toss_order_id')
+        .select('id, user_id, amount, status, product_id, created_at, payment_key, order_id')
         .order('created_at', { ascending: false }).limit(100);
       return NextResponse.json({ payments: data ?? [] });
     }

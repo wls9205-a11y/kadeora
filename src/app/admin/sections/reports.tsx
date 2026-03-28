@@ -69,9 +69,9 @@ function PaymentsTab() {
   if (loading) return <Spinner />;
 
   const done = payments.filter(p => p.status === 'DONE');
-  const totalAmount = done.reduce((s: number, p: any) => s + (p.amount_krw || 0), 0);
+  const totalAmount = done.reduce((s: number, p: any) => s + (p.amount || 0), 0);
   const thisMonth = new Date().toISOString().slice(0, 7);
-  const monthAmount = done.filter(p => p.created_at?.startsWith(thisMonth)).reduce((s: number, p: any) => s + (p.amount_krw || 0), 0);
+  const monthAmount = done.filter(p => p.created_at?.startsWith(thisMonth)).reduce((s: number, p: any) => s + (p.amount || 0), 0);
 
   return (
     <div>
@@ -93,9 +93,9 @@ function PaymentsTab() {
         rows={payments.map(p => [
           p.created_at ? new Date(p.created_at).toLocaleDateString('ko-KR') : '—',
           p.user_id?.slice(0, 8) || '—',
-          p.product_type || '—',
-          <span key="a" style={{ fontWeight: 700 }}>{(p.amount_krw || 0).toLocaleString()}원</span>,
-          <span key="o" style={{ fontSize: 11, fontFamily: 'monospace' }}>{p.toss_order_id || '—'}</span>,
+          p.product_id || '—',
+          <span key="a" style={{ fontWeight: 700 }}>{(p.amount || 0).toLocaleString()}원</span>,
+          <span key="o" style={{ fontSize: 11, fontFamily: 'monospace' }}>{p.order_id || '—'}</span>,
           <Badge key="s" color={p.status === 'DONE' ? C.green : p.status === 'CANCELED' ? C.textDim : C.red}>{p.status}</Badge>,
         ])}
       />
