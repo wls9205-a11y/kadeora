@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('확성기 아이템')}&category=general`, width: 1200, height: 630, alt: '카더라 확성기' }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2'확성기 아이템')}&category=general`, width: 1200, height: 630, alt: '카더라 확성기' }],
   },
   twitter: { card: 'summary_large_image' },
   other: { 'dg:plink': SITE_URL + '/shop/megaphone' },

@@ -37,9 +37,9 @@ export async function generateMetadata({ params }: Props) {
       siteName: '카더라',
       locale: 'ko_KR',
       url: `${SITE}/discuss/${id}`,
-      images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(topic.title)}&category=${topic.category}`, width: 1200, height: 630 }],
+      images: [{ url: `${SITE}/api/og?title=${encodeURIComponent(topic.title&design=2)}&category=${topic.category}`, width: 1200, height: 630 }],
     },
-    twitter: { card: 'summary_large_image' as const, title: topic.title, description: desc, images: [`${SITE}/api/og?title=${encodeURIComponent(topic.title)}&category=${topic.category}`] },
+    twitter: { card: 'summary_large_image' as const, title: topic.title, description: desc, images: [`${SITE}/api/og?title=${encodeURIComponent(topic.title&design=2)}&category=${topic.category}`] },
     other: {
       'naver:written_time': topic.created_at || new Date().toISOString(),
       'naver:updated_time': topic.created_at || new Date().toISOString(),

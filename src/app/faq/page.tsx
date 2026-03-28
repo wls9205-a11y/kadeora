@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('자주 묻는 질문')}&category=blog`, width: 1200, height: 630, alt: '카더라 FAQ' }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2'자주 묻는 질문')}&category=blog`, width: 1200, height: 630, alt: '카더라 FAQ' }],
   },
   twitter: { card: 'summary_large_image', title: '자주 묻는 질문 | 카더라', description: '카더라 서비스 이용 FAQ' },
   other: {

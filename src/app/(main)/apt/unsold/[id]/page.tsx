@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description: desc,
-      images: [{ url: `https://kadeora.app/api/og?title=${encodeURIComponent(data.house_nm)}&category=unsold`, width: 1200, height: 630, alt: title }],
+      images: [{ url: `https://kadeora.app/api/og?title=${encodeURIComponent(data.house_nm&design=2)}&category=unsold`, width: 1200, height: 630, alt: title }],
     },
     twitter: { card: 'summary_large_image', title, description: desc },
     other: {

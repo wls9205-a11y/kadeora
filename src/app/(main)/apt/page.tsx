@@ -13,7 +13,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const s = section ? APT_SECTION_META[section] : null;
   const title = s?.title || '아파트 청약 일정 · 분양중 · 미분양 · 재개발';
   const desc = s?.desc || '2026년 전국 아파트 청약 일정, 현재 분양중인 아파트, 미분양 현황, 재개발·재건축 진행 현황을 한눈에 확인하세요. 실시간 경쟁률, 실거래가 분석까지.';
-  const ogImg = section ? `${SITE_URL}/api/og?section=${section}` : `${SITE_URL}/api/og?title=${encodeURIComponent('아파트 청약·분양·재개발')}&subtitle=${encodeURIComponent('전국 실시간 현황')}`;
+  const ogImg = section ? `${SITE_URL}/api/og?section=${section}&design=2` : `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2'아파트 청약·분양·재개발')}&subtitle=${encodeURIComponent('전국 실시간 현황')}`;
 
   return {
     title, description: desc,

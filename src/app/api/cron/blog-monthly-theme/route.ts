@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
           content: ensureMinLength(content, theme.category),
           excerpt: `${theme.title} — 카더라 월별 특집`,
           category: theme.category, tags, cron_type: 'monthly-theme',
-          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(theme.title)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(theme.title&design=2)}&type=blog`,
           image_alt: generateImageAlt(theme.category, theme.title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords(theme.category, tags),

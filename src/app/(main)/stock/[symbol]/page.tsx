@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` }],
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` }],
     },
     twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 실시간 시세 · 차트 · 수급 분석` },
     other: (() => {
@@ -133,7 +133,7 @@ export default async function StockDetailPage({ params }: Props) {
         dateModified: s.updated_at || new Date().toISOString(),
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png` } },
-        image: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`,
+        image: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2`${s.name} (${symbol})`)}&category=stock`,
         speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.stock-price-header'] },
       })}} />
       {/* JSON-LD 4: FAQ (검색결과 아코디언) */}

@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
       excerpt: `${t.title}. ${t.tags.join(', ')} 관련 정보.`,
       category: 'finance', tags: ['재테크', ...t.tags],
       source_type: 'seed', cron_type: 'seed-finance', is_published: true,
-      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(t.title)}&type=blog`,
+      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(t.title&design=2)}&type=blog`,
     });
     created++;
   }

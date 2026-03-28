@@ -216,7 +216,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
           tags,
           cron_type: 'investor-flow',
           is_published: true,
-          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title&design=2)}&type=blog`,
           image_alt: generateImageAlt('stock', title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('stock', tags),

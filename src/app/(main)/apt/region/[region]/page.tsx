@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'website',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded + ' 부동산')}&subtitle=${encodeURIComponent('청약·실거래·재개발·미분양')}`, width: 1200, height: 630, alt: `${decoded} 부동산 정보` }],
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded&design=2 + ' 부동산')}&subtitle=${encodeURIComponent('청약·실거래·재개발·미분양')}`, width: 1200, height: 630, alt: `${decoded} 부동산 정보` }],
     },
     twitter: { card: 'summary_large_image' as const, title: `${decoded} 부동산`, description: `청약·실거래·재개발·미분양 종합 정보` },
     other: {

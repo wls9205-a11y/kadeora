@@ -143,7 +143,7 @@ export async function GET(req: NextRequest) {
           content: ensureMinLength(content, cat),
           excerpt: seed.meta_description || `${seed.title} 완전 정리 2026`,
           category: cat, tags, cron_type: 'seed-guide',
-          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(seed.title)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(seed.title&design=2)}&type=blog`,
           image_alt: generateImageAlt(cat, seed.title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords(cat, tags),

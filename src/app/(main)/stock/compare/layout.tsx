@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('종목 비교')}&subtitle=${encodeURIComponent('시가총액·등락률·거래량 핵심 지표 비교')}&category=stock`, width: 1200, height: 630, alt: '카더라 종목 비교' }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2'종목 비교')}&subtitle=${encodeURIComponent('시가총액·등락률·거래량 핵심 지표 비교')}&category=stock`, width: 1200, height: 630, alt: '카더라 종목 비교' }],
   },
   twitter: { card: 'summary_large_image' as const, title: '종목 비교', description: '시가총액·등락률·거래량 핵심 지표 비교' },
   other: {
