@@ -111,6 +111,18 @@ Sitemap: https://kadeora.app/feed.xml
 Sitemap: https://kadeora.app/blog/feed
 Sitemap: https://kadeora.app/stock/feed
 Sitemap: https://kadeora.app/apt/feed
+Sitemap: https://kadeora.app/sitemap/0.xml
+Sitemap: https://kadeora.app/sitemap/1.xml
+Sitemap: https://kadeora.app/sitemap/2.xml
+Sitemap: https://kadeora.app/sitemap/3.xml
+Sitemap: https://kadeora.app/sitemap/4.xml
+Sitemap: https://kadeora.app/sitemap/10.xml
+Sitemap: https://kadeora.app/sitemap/11.xml
+Sitemap: https://kadeora.app/sitemap/12.xml
+Sitemap: https://kadeora.app/sitemap/13.xml
+Sitemap: https://kadeora.app/sitemap/14.xml
+Sitemap: https://kadeora.app/sitemap/15.xml
+Sitemap: https://kadeora.app/sitemap/16.xml
 Host: https://kadeora.app
 
 # ===== Daum Verification =====
