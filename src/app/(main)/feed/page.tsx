@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 피드' }],
   },
   other: {
-    'naver:written_time': new Date().toISOString(),
-    'naver:updated_time': new Date().toISOString(),
+    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:updated_time': '2026-03-01T00:00:00Z',
     'dg:plink': SITE_URL + '/feed',
     'article:section': '커뮤니티',
     'article:tag': '커뮤니티,주식,부동산,청약,토론,카더라',

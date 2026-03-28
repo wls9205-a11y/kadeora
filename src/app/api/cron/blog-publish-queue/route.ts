@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { sendPushBroadcast } from '@/lib/push-utils';
+import { submitIndexNow } from '@/lib/indexnow';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,8 @@ export async function GET(req: NextRequest) {
             url: `/blog/${post.slug}`,
             tag: 'blog-new-post',
           });
+          // IndexNow 즉시 색인 요청
+          try { await submitIndexNow([`/blog/${post.slug}`]); } catch {}
         }
       } catch { /* 푸시 실패해도 발행은 유지 */ }
     }

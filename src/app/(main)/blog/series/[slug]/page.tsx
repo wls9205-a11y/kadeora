@@ -11,7 +11,7 @@ const sb = () => getSupabaseAdmin();
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const { data: s } = await sb().from('blog_series').select('title,description').eq('slug', slug).single();
+  const { data: s } = await sb().from('blog_series').select('title,description,created_at').eq('slug', slug).single();
   if (!s) return { title: '시리즈' };
   return {
     title: `${s.title} — 시리즈`,
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image' as const },
     other: {
-      'naver:written_time': new Date().toISOString(),
+      'naver:written_time': s.created_at || '2026-01-15T00:00:00Z',
       'article:section': '블로그',
       'article:tag': `${s.title},시리즈,카더라`, 'dg:plink': `${SITE_URL}/blog/series/${slug}`,
     },

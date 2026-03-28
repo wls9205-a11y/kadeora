@@ -123,6 +123,17 @@ export default async function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: '카더라',
+        url: SITE,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: { '@type': 'EntryPoint', urlTemplate: `${SITE}/search?q={search_term_string}` },
+          'query-input': 'required name=search_term_string',
+        },
+      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
         '@type': 'ItemList',
         itemListElement: SECTIONS.map((s, i) => ({
           '@type': 'SiteNavigationElement',
@@ -194,7 +205,6 @@ export default async function HomePage() {
           postalCode: '47545',
           addressCountry: 'KR',
         },
-        sameAs: [],
       }) }} />
 
       <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>

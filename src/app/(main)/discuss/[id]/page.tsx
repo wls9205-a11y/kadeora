@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const sb = await createSupabaseServer();
   const { data: topic } = await sb.from('discussion_topics')
-    .select('title, description, category, option_a, option_b, vote_a, vote_b, comment_count, view_count')
+    .select('title, description, category, option_a, option_b, vote_a, vote_b, comment_count, view_count, created_at')
     .eq('id', parseInt(id, 10)).maybeSingle();
 
   if (!topic) return { title: '토론을 찾을 수 없습니다' };
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props) {
     },
     twitter: { card: 'summary_large_image' as const },
     other: {
-      'naver:written_time': new Date().toISOString(),
+      'naver:written_time': topic.created_at || '2026-01-15T00:00:00Z',
       'dg:plink': `${SITE}/discuss/${id}`,
       'article:section': catLabel,
       'article:tag': catLabel,

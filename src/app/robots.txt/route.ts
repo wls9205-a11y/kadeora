@@ -95,14 +95,11 @@ Disallow: /api/
 # ===== Sitemaps =====
 Sitemap: https://kadeora.app/sitemap.xml
 Sitemap: https://kadeora.app/image-sitemap.xml
+Sitemap: https://kadeora.app/feed.xml
+Sitemap: https://kadeora.app/blog/feed
+Sitemap: https://kadeora.app/stock/feed
+Sitemap: https://kadeora.app/apt/feed
 Host: https://kadeora.app
-
-# ===== RSS Feeds =====
-# Main: https://kadeora.app/feed.xml
-# Stock: https://kadeora.app/feed.xml?category=stock
-# Real Estate: https://kadeora.app/feed.xml?category=apt
-# Finance: https://kadeora.app/feed.xml?category=finance
-# Unsold: https://kadeora.app/feed.xml?category=unsold
 
 # ===== Daum Verification =====
 #DaumWebMasterTool:a1f328fa8487fd3f97d35c70ed840a8d8b26f74e27f5957b99540d4bb1956a83:cSy+fiTk3RyjyaVEHfCydQ==

@@ -25,7 +25,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       images: [{ url: ogImg, width: 1200, height: 630, alt: `카더라 ${title}` }],
     },
     twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
-    other: { 'article:section': '부동산', 'naver:written_time': new Date().toISOString() },
+    other: { 'article:section': '부동산', 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': '2026-03-01T00:00:00Z' },
   };
 }
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)

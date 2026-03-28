@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import { generateAptSlug } from '@/lib/apt-slug';
 
 export const revalidate = 3600;
 
@@ -18,25 +19,31 @@ export async function GET() {
       .limit(20),
   ]);
 
-  const subItems = (subsRes.data || []).map(s => `
+  const subItems = (subsRes.data || []).map(s => {
+    const slug = generateAptSlug(s.house_nm) || String(s.id);
+    return `
     <item>
       <title><![CDATA[${s.house_nm} — ${s.region_nm} 청약]]></title>
-      <link>${SITE_URL}/apt/${s.id}</link>
+      <link>${SITE_URL}/apt/${encodeURIComponent(slug)}</link>
       <description><![CDATA[${s.hssply_adres || s.region_nm}. ${s.tot_supply_hshld_co || ''}세대 공급. 접수기간 ${s.rcept_bgnde || ''} ~ ${s.rcept_endde || ''}]]></description>
       <pubDate>${new Date(s.fetched_at || s.rcept_bgnde || Date.now()).toUTCString()}</pubDate>
       <category>청약</category>
-      <guid isPermaLink="true">${SITE_URL}/apt/${s.id}</guid>
-    </item>`);
+      <guid isPermaLink="true">${SITE_URL}/apt/${encodeURIComponent(slug)}</guid>
+    </item>`;
+  });
 
-  const unsoldItems = (unsoldRes.data || []).map(u => `
+  const unsoldItems = (unsoldRes.data || []).map(u => {
+    const slug = generateAptSlug(u.house_nm) || `unsold-${u.id}`;
+    return `
     <item>
       <title><![CDATA[${u.house_nm} — ${u.region_nm} 미분양 ${u.tot_unsold_hshld_co}세대]]></title>
-      <link>${SITE_URL}/apt</link>
+      <link>${SITE_URL}/apt/${encodeURIComponent(slug)}</link>
       <description><![CDATA[${u.region_nm} ${u.house_nm} 미분양 ${u.tot_unsold_hshld_co}세대]]></description>
       <pubDate>${new Date(u.created_at || Date.now()).toUTCString()}</pubDate>
       <category>미분양</category>
-      <guid>${SITE_URL}/apt/unsold/${u.id}</guid>
-    </item>`);
+      <guid isPermaLink="true">${SITE_URL}/apt/${encodeURIComponent(slug)}</guid>
+    </item>`;
+  });
 
   const items = [...subItems, ...unsoldItems].join('\n');
 

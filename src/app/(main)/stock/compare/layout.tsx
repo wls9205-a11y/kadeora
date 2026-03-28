@@ -1,10 +1,41 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: '종목 비교',
-  description: '국내외 주식 종목을 나란히 비교해보세요. 시가총액, 등락률, 거래량 등 핵심 지표 비교.',
+  description: '국내외 주식 종목을 나란히 비교해보세요. 시가총액, 등락률, 거래량, PER, PBR 등 핵심 지표를 한눈에 비교 분석합니다.',
+  alternates: { canonical: `${SITE_URL}/stock/compare` },
+  openGraph: {
+    title: '종목 비교 — 카더라',
+    description: '국내외 주식 종목 핵심 지표 나란히 비교',
+    url: `${SITE_URL}/stock/compare`,
+    siteName: '카더라',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('종목 비교')}&subtitle=${encodeURIComponent('시가총액·등락률·거래량 핵심 지표 비교')}&category=stock`, width: 1200, height: 630, alt: '카더라 종목 비교' }],
+  },
+  twitter: { card: 'summary_large_image' as const, title: '종목 비교', description: '시가총액·등락률·거래량 핵심 지표 비교' },
+  other: {
+    'naver:written_time': '2026-01-15T00:00:00Z',
+    'naver:updated_time': '2026-03-01T00:00:00Z',
+    'dg:plink': `${SITE_URL}/stock/compare`,
+    'article:section': '주식',
+    'article:tag': '종목비교,주식,시가총액,등락률,거래량',
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` },
+          { '@type': 'ListItem', position: 3, name: '종목 비교' },
+        ],
+      })}} />
+      {children}
+    </>
+  );
 }

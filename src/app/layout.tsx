@@ -122,11 +122,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             },
             contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', telephone: '+82-10-5001-1382', availableLanguage: '한국어' },
             address: { '@type': 'PostalAddress', addressCountry: 'KR', addressRegion: '부산광역시', addressLocality: '연제구', streetAddress: '연동로 27, 405호' },
-            sameAs: [
-              'https://xn--zf0bv61a84di4cc7c4tay28c.com',
-              'https://xn--kj0bw8tr3a.com',
-              'https://xn--9i2by8fvyb69i.site',
-            ],
+            // sameAs removed — no active SNS profiles
           },
         }) }} />
         {/* WebSite schema — Google Sitelinks 검색 박스 */}
