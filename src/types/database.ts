@@ -6329,6 +6329,7 @@ export type Database = {
         Args: { p_listing_id: string }
         Returns: undefined
       }
+      increment_blog_view: { Args: { p_blog_id: number }; Returns: undefined }
       increment_post_view: { Args: { p_post_id: number }; Returns: undefined }
       increment_site_interest: {
         Args: { p_site_id: string }

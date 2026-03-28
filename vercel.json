@@ -54,7 +54,7 @@
       "schedule": "0 3 * * 0"
     },
     {
-      "path": "/api/stock-refresh",
+      "path": "/api/cron/stock-price",
       "schedule": "*/5 0-7 * * 1-5"
     },
     {
@@ -262,10 +262,6 @@
       "schedule": "30 6 * * *"
     },
     {
-      "path": "/api/indexnow",
-      "schedule": "0 7 * * *"
-    },
-    {
       "path": "/api/cron/blog-trade-trend",
       "schedule": "0 2 1 * *"
     },
@@ -320,6 +316,26 @@
     {
       "path": "/api/cron/blog-builder-analysis",
       "schedule": "0 2 14 * *"
+    },
+    {
+      "path": "/api/cron/blog-monthly",
+      "schedule": "0 4 1 * *"
+    },
+    {
+      "path": "/api/cron/blog-weekly",
+      "schedule": "0 5 * * 0"
+    },
+    {
+      "path": "/api/cron/blog-subscription-strategy",
+      "schedule": "0 8 * * 1,4"
+    },
+    {
+      "path": "/api/cron/blog-trade-analysis",
+      "schedule": "30 9 * * 1-5"
+    },
+    {
+      "path": "/api/cron/invite-reward",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
