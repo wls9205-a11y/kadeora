@@ -28,6 +28,7 @@ interface BlogInsertData {
   image_alt?: string;
   meta_description?: string;
   meta_keywords?: string;
+  is_published?: boolean;
 }
 
 interface SafeInsertResult {
@@ -113,8 +114,8 @@ export async function safeBlogInsert(
         image_alt: data.image_alt,
         meta_description: data.meta_description,
         meta_keywords: data.meta_keywords,
-        is_published: false,
-        published_at: null,
+        is_published: data.is_published ?? false,
+        published_at: data.is_published ? new Date().toISOString() : null,
       })
       .select('id')
       .single();
