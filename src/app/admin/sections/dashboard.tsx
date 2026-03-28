@@ -208,7 +208,7 @@ export default function DashboardSection() {
               { label: '가격 있음', val: fmt(stockKpi.active), color: C.green },
               { label: '시총 입력', val: fmt(stockKpi.withMarketCap), color: C.cyan },
               { label: 'price_history', val: fmt(stockKpi.priceHistory), color: C.purple },
-              { label: '뉴스 수', val: fmt(stockKpi.newsCount), color: C.orange || C.yellow },
+              { label: '뉴스 수', val: fmt(stockKpi.newsCount), color: C.yellow },
               { label: '활성률', val: `${Math.round((stockKpi.active / (stockKpi.total || 1)) * 100)}%`, color: stockKpi.active / (stockKpi.total || 1) > 0.95 ? C.green : C.red },
             ].map(item => (
               <div key={item.label} style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
