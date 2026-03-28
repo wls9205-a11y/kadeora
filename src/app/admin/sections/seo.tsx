@@ -23,15 +23,59 @@ export default function SEOSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { seo, kpi } = data;
+  const { seo, kpi, premiumKpi } = data;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const maxScore = 103;
+  const ixn = premiumKpi?.indexNow || { total: 0, done: 0, pending: 0, pct: 0 };
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: '0 0 8px' }}>🔍 SEO · 콘텐츠 점수</h1>
       <p style={{ fontSize: 12, color: C.textDim, margin: '0 0 24px' }}>5,420개 현장 페이지의 데이터 풍부도 현황</p>
+
+      {/* ── IndexNow + 포털 인덱싱 ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12, marginBottom: 20 }} className="mc-g2">
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>🔔 IndexNow 전송 현황</span>
+            <span style={{ fontSize: 11, color: C.textDim }}>블로그 {fmt(ixn.total)}편</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+            <StatBox icon="✅" label="전송완료" value={ixn.done} color={C.green} />
+            <StatBox icon="⏳" label="대기" value={ixn.pending} color={C.yellow} />
+            <StatBox icon="📊" label="진행률" value={`${ixn.pct}%`} color={ixn.pct > 80 ? C.green : ixn.pct > 30 ? C.yellow : C.red} accent />
+          </div>
+          <div style={{ height: 10, borderRadius: 5, background: C.border, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{ height: '100%', borderRadius: 5, background: `linear-gradient(90deg, ${C.green}, ${C.cyan})`, width: `${ixn.pct}%`, transition: 'width 0.6s ease' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: C.textDim }}>
+            <span>매 6시간 500편씩 전송 (indexnow-mass 크론)</span>
+            <span>예상 완료: ~{Math.ceil(ixn.pending / 2000)}일</span>
+          </div>
+        </div>
+
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 18px' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 12 }}>🌐 포털 인덱싱</div>
+          {[
+            { name: 'Google', status: '미노출', color: C.red, action: 'Search Console 사이트맵', href: 'https://search.google.com/search-console' },
+            { name: 'Naver', status: '대기', color: C.yellow, action: '서치어드바이저 RSS', href: 'https://searchadvisor.naver.com' },
+            { name: 'Bing', status: '대기', color: C.yellow, action: '웹마스터 사이트맵', href: 'https://www.bing.com/webmasters' },
+            { name: 'Daum', status: '미등록', color: C.red, action: '검색등록', href: 'https://register.search.daum.net' },
+          ].map(p => (
+            <div key={p.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: `1px solid ${C.border}08` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: p.color }} />
+                <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{p.name}</span>
+                <span style={{ fontSize: 10, color: p.color, fontWeight: 600 }}>{p.status}</span>
+              </div>
+              <a href={p.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: C.brand, textDecoration: 'none', fontWeight: 600, padding: '2px 6px', background: C.brandBg, borderRadius: 4 }}>
+                {p.action} →
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* ── Hero Stats ── */}
       <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
