@@ -45,9 +45,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'article:section': '부동산',
       'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양`,
       ...((() => {
-        const GEO: Record<string, string> = { '서울': 'KR-11', '부산': 'KR-26', '대구': 'KR-27', '인천': 'KR-28', '광주': 'KR-29', '대전': 'KR-30', '울산': 'KR-31', '세종': 'KR-36', '경기': 'KR-41', '강원': 'KR-42', '충북': 'KR-43', '충남': 'KR-44', '전북': 'KR-45', '전남': 'KR-46', '경북': 'KR-47', '경남': 'KR-48', '제주': 'KR-50' };
-        const g = Object.entries(GEO).find(([k]) => decoded.includes(k));
-        if (g) return { 'geo.region': g[1], 'geo.placename': decoded } as Record<string, string>;
+        const GEO: Record<string, { code: string; lat: string; lng: string }> = {
+          '서울': { code: 'KR-11', lat: '37.5665', lng: '126.9780' }, '부산': { code: 'KR-26', lat: '35.1796', lng: '129.0756' }, '대구': { code: 'KR-27', lat: '35.8714', lng: '128.6014' }, '인천': { code: 'KR-28', lat: '37.4563', lng: '126.7052' }, '광주': { code: 'KR-29', lat: '35.1595', lng: '126.8526' }, '대전': { code: 'KR-30', lat: '36.3504', lng: '127.3845' }, '울산': { code: 'KR-31', lat: '35.5384', lng: '129.3114' }, '세종': { code: 'KR-36', lat: '36.4800', lng: '127.2600' }, '경기': { code: 'KR-41', lat: '37.4138', lng: '127.5183' }, '강원': { code: 'KR-42', lat: '37.8228', lng: '128.1555' }, '충북': { code: 'KR-43', lat: '36.6357', lng: '127.4917' }, '충남': { code: 'KR-44', lat: '36.5184', lng: '126.8000' }, '전북': { code: 'KR-45', lat: '35.8203', lng: '127.1088' }, '전남': { code: 'KR-46', lat: '34.8161', lng: '126.4629' }, '경북': { code: 'KR-47', lat: '36.4919', lng: '128.8889' }, '경남': { code: 'KR-48', lat: '35.4606', lng: '128.2132' }, '제주': { code: 'KR-50', lat: '33.4996', lng: '126.5312' },
+          // 주요 시군구
+          '강남구': { code: 'KR-11', lat: '37.5172', lng: '127.0473' }, '서초구': { code: 'KR-11', lat: '37.4837', lng: '127.0324' }, '송파구': { code: 'KR-11', lat: '37.5145', lng: '127.1059' }, '마포구': { code: 'KR-11', lat: '37.5663', lng: '126.9014' }, '용산구': { code: 'KR-11', lat: '37.5326', lng: '126.9910' }, '성남시': { code: 'KR-41', lat: '37.4200', lng: '127.1267' }, '수원시': { code: 'KR-41', lat: '37.2636', lng: '127.0286' }, '고양시': { code: 'KR-41', lat: '37.6584', lng: '126.8320' }, '화성시': { code: 'KR-41', lat: '37.1995', lng: '126.8313' }, '평택시': { code: 'KR-41', lat: '36.9921', lng: '127.1126' }, '해운대구': { code: 'KR-26', lat: '35.1631', lng: '129.1636' }, '부산진구': { code: 'KR-26', lat: '35.1630', lng: '129.0532' }, '동래구': { code: 'KR-26', lat: '35.2050', lng: '129.0858' },
+        };
+        const g = Object.entries(GEO).find(([k]) => decoded === k || decoded.startsWith(k));
+        if (g) return {
+          'geo.region': g[1].code,
+          'geo.placename': decoded,
+          'geo.position': `${g[1].lat};${g[1].lng}`,
+          'ICBM': `${g[1].lat}, ${g[1].lng}`,
+        } as Record<string, string>;
         return {} as Record<string, string>;
       })()),
     },
@@ -108,6 +117,17 @@ export default async function RegionLandingPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}) }} />
       {/* JSON-LD: CollectionPage */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
+      {/* JSON-LD: ItemList (주요 단지) */}
+      {data.subscriptions.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'ItemList',
+        name: `${decoded} 주요 분양 단지`,
+        numberOfItems: Math.min(data.subscriptions.length, 10),
+        itemListElement: data.subscriptions.slice(0, 10).map((s: any, i: number) => ({
+          '@type': 'ListItem', position: i + 1,
+          url: `${SITE_URL}/apt/${s.id}`,
+          name: s.house_nm,
+        })),
+      })}} />}
       {/* JSON-LD: FAQ (지역 검색 SERP 아코디언) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
         {"@type":"Question","name":`${decoded} 아파트 청약 일정은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에는 현재 ${data.subscriptions.length}건의 청약이 진행 중입니다. 카더라에서 접수 일정, 경쟁률, 분양가를 실시간으로 확인하세요.`}},

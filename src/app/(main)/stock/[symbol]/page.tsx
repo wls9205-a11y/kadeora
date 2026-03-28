@@ -19,7 +19,7 @@ interface Props { params: Promise<{ symbol: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
-  const { data: s } = await sb.from('stock_quotes').select('name,market,price,currency,change_pct').eq('symbol', symbol).single();
+  const { data: s } = await sb.from('stock_quotes').select('name,market,price,currency,change_pct,updated_at').eq('symbol', symbol).single();
   if (!s) return { title: '카더라' };
   const p = fmtPrice(Number(s.price), s.currency ?? undefined);
   const ch = `${Number(s.change_pct) >= 0 ? '▲' : '▼'}${Math.abs(Number(s.change_pct)).toFixed(2)}%`;
@@ -37,17 +37,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` }],
     },
     twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 실시간 시세 · 차트 · 수급 분석` },
-    other: {
-      'geo.region': 'KR-11',
-      'geo.placename': '서울',
-      'geo.position': '37.5665;126.9780',
-      'ICBM': '37.5665, 126.9780',
-      'naver:written_time': new Date().toISOString(),
-      'naver:updated_time': new Date().toISOString(),
-      'article:section': '주식',
-      'article:tag': `${s.name},${symbol},${s.market},주식,시세,차트`,
-      'dg:plink': `${SITE_URL}/stock/${symbol}`,
-    },
+    other: (() => {
+      const isUS = s.market === 'NYSE' || s.market === 'NASDAQ';
+      const lat = isUS ? '40.7128' : '37.5665';
+      const lng = isUS ? '-74.0060' : '126.9780';
+      const region = isUS ? 'US-NY' : 'KR-11';
+      const placename = isUS ? 'New York' : '서울';
+      return {
+        'geo.region': region,
+        'geo.placename': placename,
+        'geo.position': `${lat};${lng}`,
+        'ICBM': `${lat}, ${lng}`,
+        'naver:written_time': s.updated_at || new Date().toISOString(),
+        'naver:updated_time': s.updated_at || new Date().toISOString(),
+        'article:published_time': s.updated_at || new Date().toISOString(),
+        'article:modified_time': s.updated_at || new Date().toISOString(),
+        'article:section': '주식',
+        'article:tag': `${s.name},${symbol},${s.market},주식,시세,차트`,
+        'dg:plink': `${SITE_URL}/stock/${symbol}`,
+      };
+    })(),
   };
 }
 

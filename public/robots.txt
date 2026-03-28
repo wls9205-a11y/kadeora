@@ -38,6 +38,8 @@ Host: https://kadeora.app
 Sitemap: https://kadeora.app/sitemap.xml
 Sitemap: https://kadeora.app/feed.xml
 Sitemap: https://kadeora.app/blog/feed
+Sitemap: https://kadeora.app/stock/feed
+Sitemap: https://kadeora.app/apt/feed
 
 # AI 크롤러 안내
 # https://kadeora.app/llms.txt

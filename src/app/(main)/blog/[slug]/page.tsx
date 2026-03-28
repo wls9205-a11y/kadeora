@@ -276,14 +276,14 @@ export default async function BlogDetailPage({ params }: Props) {
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${slug}` },
     url: `${SITE}/blog/${slug}`,
-    image: post.cover_image || `${SITE}/og-image.png`,
+    image: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}`,
     keywords: (post.tags ?? []).join(', '),
     inLanguage: 'ko-KR',
     isAccessibleForFree: true,
     articleSection: catSection[post.category] || '정보',
     speakable: {
       '@type': 'SpeakableSpecification',
-      cssSelector: ['h1', '.blog-excerpt', '.blog-content p:first-of-type'],
+      cssSelector: ['h1', 'article p:first-of-type'],
     },
     ...(comments.length > 0 ? {
       commentCount: comments.length,

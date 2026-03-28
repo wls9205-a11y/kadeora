@@ -21,6 +21,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${sector} 섹터 종목`,
       description: `${sector} 관련 주식 시세, 시총 순위, 등락률 비교`,
       url: `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`,
+      siteName: '카더라',
+      locale: 'ko_KR',
+      type: 'article',
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(sector + ' 섹터 종목')}&category=stock`, width: 1200, height: 630, alt: `${sector} 섹터 종목` }],
+    },
+    twitter: { card: 'summary_large_image' as const, title: `${sector} 섹터 종목`, description: `${sector} 관련 주식 시세, 시총 순위, 등락률 비교` },
+    other: {
+      'geo.region': 'KR-11',
+      'geo.placename': '서울',
+      'geo.position': '37.5665;126.9780',
+      'ICBM': '37.5665, 126.9780',
+      'naver:written_time': new Date().toISOString(),
+      'naver:updated_time': new Date().toISOString(),
+      'dg:plink': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`,
+      'article:section': '주식',
+      'article:tag': `${sector},섹터,주식,시세,등락률,시가총액`,
     },
   };
 }
@@ -44,8 +60,39 @@ export default async function SectorPage({ params }: Props) {
   const upCount = stocks.filter(s => (s.change_pct || 0) > 0).length;
   const downCount = stocks.filter(s => (s.change_pct || 0) < 0).length;
 
+  const top10 = stocks.slice(0, 10);
+
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      {/* JSON-LD: BreadcrumbList */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` },
+          { '@type': 'ListItem', position: 3, name: `${sector} 섹터` },
+        ],
+      })}} />
+      {/* JSON-LD: ItemList (상위 10종목) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'ItemList',
+        name: `${sector} 섹터 시총 상위 종목`,
+        numberOfItems: top10.length,
+        itemListElement: top10.map((s, i) => ({
+          '@type': 'ListItem', position: i + 1,
+          url: `${SITE_URL}/stock/${encodeURIComponent(s.symbol)}`,
+          name: `${s.name} (${s.symbol})`,
+        })),
+      })}} />
+      {/* JSON-LD: FAQPage */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: `${sector} 섹터에는 어떤 종목이 있나요?`, acceptedAnswer: { '@type': 'Answer', text: `${sector} 섹터에는 ${stocks.length}개 종목이 있으며, 시총 상위 종목으로 ${top10.slice(0, 3).map(s => s.name).join(', ')} 등이 있습니다.` } },
+          { '@type': 'Question', name: `${sector} 섹터 전체 시가총액은?`, acceptedAnswer: { '@type': 'Answer', text: `${sector} 섹터 전체 합산 시가총액은 ${fmtCap(totalCap, stocks[0]?.currency ?? undefined)}이며, ${stocks.length}개 종목 중 ${upCount}개 상승, ${downCount}개 하락입니다.` } },
+          { '@type': 'Question', name: `${sector} 섹터 시세를 어디서 확인하나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${sector} 섹터 전체 종목의 실시간 시세, 시총 순위, 등락률을 무료로 비교할 수 있습니다.` } },
+        ],
+      })}} />
       <div style={{ marginBottom: 16 }}>
         <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식</Link>
         <h1 style={{ margin: '8px 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{sector} 섹터</h1>

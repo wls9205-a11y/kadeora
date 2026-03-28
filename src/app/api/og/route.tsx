@@ -34,8 +34,23 @@ const FALLBACK_IMAGES: Record<string, string> = {
   default: `${SITE}/images/brand/kadeora-hero.png`,
 };
 
+// Pretendard 한글 폰트 (CDN에서 woff2 로드, 실패 시 시스템 폰트 폴백)
+let pretendardFont: ArrayBuffer | null = null;
+async function loadPretendard(): Promise<ArrayBuffer | null> {
+  if (pretendardFont) return pretendardFont;
+  try {
+    const res = await fetch('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/woff2/Pretendard-Bold.woff2');
+    if (res.ok) {
+      pretendardFont = await res.arrayBuffer();
+      return pretendardFont;
+    }
+  } catch {}
+  return null;
+}
+
 export async function GET(req: NextRequest) {
   try {
+  const fontData = await loadPretendard();
   const { searchParams } = new URL(req.url);
   const title = searchParams.get('title');
   const subtitle = searchParams.get('subtitle') ?? '';
@@ -94,7 +109,7 @@ export async function GET(req: NextRequest) {
           </div>
         </div>
       ),
-      { width: 1200, height: 630 }
+      { width: 1200, height: 630, ...(fontData ? { fonts: [{ name: 'Pretendard', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}) }
     );
   }
   const comments = searchParams.get('comments') ?? '0';
@@ -145,6 +160,7 @@ export async function GET(req: NextRequest) {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
         },
+        ...(fontData ? { fonts: [{ name: 'Pretendard', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}),
       },
     );
   }
@@ -248,6 +264,7 @@ export async function GET(req: NextRequest) {
       headers: {
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
       },
+      ...(fontData ? { fonts: [{ name: 'Pretendard', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}),
     },
   );
   } catch {
