@@ -76,6 +76,29 @@ export async function GET(req: Request) {
         withMarketCap: stockMarketCapR.count ?? 0,
       };
 
+      // 프리미엄 & 매출 KPI
+      const [premiumR, premiumExpiringR, revenueR, ordersR, indexNowTotalR, indexNowDoneR] = await Promise.all([
+        sb.from('profiles').select('id', { count: 'exact', head: true }).eq('is_premium', true),
+        sb.from('profiles').select('id', { count: 'exact', head: true }).eq('is_premium', true).lt('premium_expires_at', new Date(Date.now() + 7 * 86400000).toISOString()),
+        sb.from('shop_orders').select('amount').eq('status', 'DONE'),
+        sb.from('shop_orders').select('id', { count: 'exact', head: true }).eq('status', 'DONE'),
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true).not('indexed_at', 'is', null),
+      ]);
+      const totalRevenue = (revenueR.data || []).reduce((s: number, r: any) => s + (r.amount || 0), 0);
+      const premiumKpi = {
+        subscribers: premiumR.count ?? 0,
+        expiringSoon: premiumExpiringR.count ?? 0,
+        totalRevenue,
+        totalOrders: ordersR.count ?? 0,
+        indexNow: {
+          total: indexNowTotalR.count ?? 0,
+          done: indexNowDoneR.count ?? 0,
+          pending: (indexNowTotalR.count ?? 0) - (indexNowDoneR.count ?? 0),
+          pct: indexNowTotalR.count ? Math.round(((indexNowDoneR.count ?? 0) / indexNowTotalR.count) * 100) : 0,
+        },
+      };
+
       // 최근 가입 유저 5명
       const { data: recentUsers } = await sb.from('profiles')
         .select('id, nickname, provider, created_at, grade, is_seed, region_text')
@@ -268,6 +291,7 @@ export async function GET(req: Request) {
         dailyStats: dailyR.data ?? [],
         cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames, anthropicCreditWarning },
         stockKpi,
+        premiumKpi,
         seo: {
           siteTypeBreakdown,
           totalSites: scoreStats?.length || 0,

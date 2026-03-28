@@ -60,7 +60,7 @@ export default function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, blogProduction, commentStats, cronByCategory } = data as any;
+  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, premiumKpi, blogProduction, commentStats, cronByCategory } = data as any;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const totalSites = seo?.totalSites || 0;
@@ -162,6 +162,8 @@ export default function DashboardSection() {
         <HealthBadge label="댓글" value={`오늘 ${commentStats?.today ?? 0}개`} ok={(commentStats?.today ?? 0) > 0} />
         <HealthBadge label="24h 생산" value={fmt(totalRecordsCreated || 0) + '건'} ok={(totalRecordsCreated || 0) > 0} />
         <HealthBadge label="사이트맵" value={`${seo?.sitemapPct || 0}%`} ok={(seo?.sitemapPct || 0) > 80} />
+        <HealthBadge label="프리미엄" value={`${premiumKpi?.subscribers ?? 0}명`} ok={(premiumKpi?.subscribers ?? 0) > 0} />
+        <HealthBadge label="IndexNow" value={`${premiumKpi?.indexNow?.pct ?? 0}%`} ok={(premiumKpi?.indexNow?.pct ?? 0) > 50} />
         {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
       </div>
 
@@ -335,6 +337,64 @@ export default function DashboardSection() {
           </div>
         </div>
       )}
+
+      {/* ── Row 4.3: 프리미엄 매출 + IndexNow 진행률 ── */}
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        {/* 프리미엄 & 매출 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>👑 프리미엄 & 매출</span>
+            <a href="/premium" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: C.brand, textDecoration: 'none', fontWeight: 600 }}>페이지 →</a>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: (premiumKpi?.subscribers ?? 0) > 0 ? C.yellow : C.textDim }}>{premiumKpi?.subscribers ?? 0}</div>
+              <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>구독자</div>
+            </div>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: (premiumKpi?.totalRevenue ?? 0) > 0 ? C.green : C.textDim }}>₩{((premiumKpi?.totalRevenue ?? 0) / 1000).toFixed(0)}K</div>
+              <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>총 매출</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: C.textSec }}>
+            <span>결제 건수: <strong style={{ color: C.text }}>{premiumKpi?.totalOrders ?? 0}</strong>건</span>
+            <span>만료 예정: <strong style={{ color: (premiumKpi?.expiringSoon ?? 0) > 0 ? C.yellow : C.textDim }}>{premiumKpi?.expiringSoon ?? 0}</strong>명 (7일 내)</span>
+          </div>
+          {(premiumKpi?.totalOrders ?? 0) === 0 && (
+            <div style={{ marginTop: 8, padding: '6px 10px', background: C.yellow + '12', border: `1px solid ${C.yellow}30`, borderRadius: 6, fontSize: 10, color: C.yellow, fontWeight: 600 }}>
+              ⚠️ Toss 결제 키 미설정 — 결제 불가 상태
+            </div>
+          )}
+        </div>
+
+        {/* IndexNow 진행률 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🔍 IndexNow 전송 현황</span>
+            <span style={{ fontSize: 10, color: C.textDim }}>블로그 {fmt(premiumKpi?.indexNow?.total ?? 0)}편</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.green }}>{fmt(premiumKpi?.indexNow?.done ?? 0)}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>전송완료</div>
+            </div>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.yellow }}>{fmt(premiumKpi?.indexNow?.pending ?? 0)}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>대기</div>
+            </div>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: (premiumKpi?.indexNow?.pct ?? 0) > 80 ? C.green : (premiumKpi?.indexNow?.pct ?? 0) > 30 ? C.yellow : C.red }}>{premiumKpi?.indexNow?.pct ?? 0}%</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>진행률</div>
+            </div>
+          </div>
+          <div style={{ height: 8, borderRadius: 4, background: C.border, overflow: 'hidden', marginBottom: 6 }}>
+            <div style={{ height: '100%', borderRadius: 4, background: `linear-gradient(90deg, ${C.green}, ${C.cyan})`, width: `${premiumKpi?.indexNow?.pct ?? 0}%`, transition: 'width 0.6s ease' }} />
+          </div>
+          <div style={{ fontSize: 10, color: C.textDim }}>
+            매 6시간 500편 전송 · 예상 완료: ~{Math.ceil((premiumKpi?.indexNow?.pending ?? 0) / 2000)}일
+          </div>
+        </div>
+      </div>
 
       {/* ── Row 4.5: 블로그 생산 현황 + 댓글/크론 카테고리 ── */}
       <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
@@ -543,8 +603,11 @@ export default function DashboardSection() {
         <QuickAction label="💬 토론" href="/discuss" external />
         <QuickAction label="🔥 HOT" href="/hot" external />
         <QuickAction label="🛒 상점" href="/shop" external />
+        <QuickAction label="👑 프리미엄" href="/premium" external />
         <QuickAction label="🔑 Anthropic" href="https://console.anthropic.com" external />
         <QuickAction label="📊 Vercel" href="https://vercel.com/wls9205-5665s-projects/kadeora" external />
+        <QuickAction label="🔍 SearchConsole" href="https://search.google.com/search-console" external />
+        <QuickAction label="🇰🇷 서치어드바이저" href="https://searchadvisor.naver.com" external />
       </div>
 
       {/* ── Row 7: 실시간 활동 피드 ── */}
