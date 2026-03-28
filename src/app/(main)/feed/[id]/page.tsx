@@ -89,6 +89,8 @@ export async function generateMetadata({ params }: Props) {
         'article:tag': `${CATEGORY_MAP[post.category]?.label ?? '커뮤니티'},카더라`,
         'article:published_time': post.created_at,
         'article:author': author,
+        'naver:author': author,
+        'og:updated_time': post.created_at,
       },
     };
   } catch {
@@ -289,7 +291,12 @@ export default async function FeedDetailPage({ params }: Props) {
 
       {/* Back link */}
       <div style={{ marginBottom: 20 }}>
-        <Link href="/feed" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 피드</Link>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)' }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+          <span>›</span>
+          <Link href="/feed" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>피드</Link>
+          {post.category && <><span>›</span><span style={{ color: 'var(--text-tertiary)' }}>{CATEGORY_MAP[post.category]?.label || post.category}</span></>}
+        </nav>
       </div>
 
       {/* Post article */}

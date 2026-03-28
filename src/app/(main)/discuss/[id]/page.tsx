@@ -47,6 +47,8 @@ export async function generateMetadata({ params }: Props) {
       'dg:plink': `${SITE}/discuss/${id}`,
       'article:section': catLabel,
       'article:tag': catLabel,
+      'naver:author': '카더라',
+      'og:updated_time': topic.created_at || new Date().toISOString(),
     },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
   };

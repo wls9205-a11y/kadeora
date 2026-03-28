@@ -156,6 +156,7 @@ export async function generateMetadata({ params }: Props) {
         'og:updated_time': post.updated_at || post.published_at || post.created_at,
         'naver:written_time': post.published_at || post.created_at,
         'naver:updated_time': post.updated_at || post.published_at || post.created_at,
+        'naver:author': post.author_name || '카더라',
         'dg:plink': `${SITE}/blog/${slug}`,
         'article:section': section,
         'article:tag': (post.tags ?? []).slice(0, 5).join(',') || section,
@@ -386,14 +387,19 @@ export default async function BlogDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
-      <div style={{ marginBottom: 16 }}>
-        <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
-      </div>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 16, flexWrap: 'wrap' }}>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+        <span>›</span>
+        <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>블로그</Link>
+        {post.category && <><span>›</span><Link href={`/blog?category=${post.category}`} style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>{{ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' }[post.category] || post.category}</Link></>}
+        <span>›</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{post.title.slice(0, 30)}</span>
+      </nav>
 
       <article style={{ paddingBottom: 40 }}>
         <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px', wordBreak: 'keep-all' }}>{post.title}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</span>
+          <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
           <span>조회 {post.view_count ?? 0}</span>
           <span>·</span>
           <span>약 {readingTimeMin}분</span>
@@ -411,7 +417,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {(post.tags ?? []).length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-            {(post.tags ?? []).map((t: string) => <span key={t} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>#{t}</span>)}
+            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none' }}>#{t}</Link>)}
           </div>
         )}
 
