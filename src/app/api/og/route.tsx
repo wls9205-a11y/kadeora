@@ -16,20 +16,35 @@ const CAT: Record<string, { a: string; b: string; g: [string,string,string]; L: 
 };
 
 const SITE = 'https://kadeora.app';
+// @fontsource/noto-sans-kr@5.2.9 — woff1-TTF (Edge Runtime 호환 검증 완료)
+const FONT_VER = '5.2.9';
 
-/* ── 폰트 로더: 다중 URL fallback ── */
+/* ── 폰트 로더 ──
+   우선순위:
+   1) VERCEL_URL → 같은 배포 CDN (loopback 없음, 가장 빠름)
+   2) jsDelivr   → npm CDN (외부, 안정적, 정확한 버전)
+   3) unpkg      → npm CDN (외부, 백업)
+   4) SITE       → 프로덕션 fallback
+── */
 let _font: ArrayBuffer | null = null;
 async function loadFont(): Promise<ArrayBuffer | null> {
   if (_font) return _font;
+  const base = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : SITE;
   const urls = [
+    `${base}/fonts/NotoSansKR-Bold.woff`,
+    `https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
+    `https://unpkg.com/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
     `${SITE}/fonts/NotoSansKR-Bold.woff`,
-    'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-kr@5.0.21/files/noto-sans-kr-korean-700-normal.woff',
-    'https://fonts.gstatic.com/s/notosanskr/v36/PbyxFmXiEBPT4ITbgNA5Cgm20xz64px_1hVWr0wuPNGmlQNMEfD4.0.woff2',
   ];
   for (const url of urls) {
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-      if (res.ok) { _font = await res.arrayBuffer(); return _font; }
+      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const buf = await res.arrayBuffer();
+        if (buf.byteLength > 10000) { _font = buf; return _font; }
+      }
     } catch { /* 다음 URL 시도 */ }
   }
   return null;

@@ -29,15 +29,28 @@ const CAT_KPI: Record<string, { kw: string; kwv: string }> = {
   free:    { kw: '커뮤니티',   kwv: '실시간' },
 };
 
-const SITE = process.env.NEXT_PUBLIC_BASE_URL || 'https://kadeora.app';
+const SITE = 'https://kadeora.app';
+const FONT_VER = '5.2.9';
 
 let cachedFont: ArrayBuffer | null = null;
 async function loadFont(): Promise<ArrayBuffer | null> {
   if (cachedFont) return cachedFont;
-  try {
-    const res = await fetch(`${SITE}/fonts/NotoSansKR-Bold.woff`, { signal: AbortSignal.timeout(4000) });
-    if (res.ok) { cachedFont = await res.arrayBuffer(); return cachedFont; }
-  } catch { /* ignore */ }
+  const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : SITE;
+  const urls = [
+    `${base}/fonts/NotoSansKR-Bold.woff`,
+    `https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
+    `https://unpkg.com/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
+    `${SITE}/fonts/NotoSansKR-Bold.woff`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const buf = await res.arrayBuffer();
+        if (buf.byteLength > 10000) { cachedFont = buf; return cachedFont; }
+      }
+    } catch { /* 다음 URL 시도 */ }
+  }
   return null;
 }
 

@@ -29,10 +29,15 @@ const nextConfig: NextConfig = {
 
   experimental: {
     optimizePackageImports: ['@supabase/supabase-js', 'lucide-react', 'marked'],
+    outputFileTracingIncludes: {
+      '/api/og':        ['./public/fonts/**'],
+      '/api/og-square': ['./public/fonts/**'],
+    },
   },
 
   env: {
     NEXT_PUBLIC_KAKAO_JS_KEY: process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '',
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'https://kadeora.app',
   },
 
   async headers() {
