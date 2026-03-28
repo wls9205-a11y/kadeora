@@ -155,54 +155,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         ))}
       </div>
 
-      {/* 이번 주 청약 D-day */}
-      {(() => {
-        const now = new Date();
-        const nowStr = now.toISOString().slice(0, 10);
-        const weekLater = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10);
-        const ddayList = apts
-          .filter(a => {
-            const start = String(a.rcept_bgnde ?? '').slice(0, 10);
-            const end = String(a.rcept_endde ?? '').slice(0, 10);
-            // Currently accepting OR starting within 7 days
-            return (start <= nowStr && end >= nowStr) || (start > nowStr && start <= weekLater);
-          })
-          .map(a => {
-            const start = String(a.rcept_bgnde ?? '').slice(0, 10);
-            const end = String(a.rcept_endde ?? '').slice(0, 10);
-            const isOpen = start <= nowStr && end >= nowStr;
-            const targetDate = isOpen ? end : start;
-            const diff = Math.ceil((new Date(targetDate).getTime() - now.getTime()) / 86400000);
-            return { ...a, isOpen, dday: diff, targetDate };
-          })
-          .sort((a, b) => a.dday - b.dday)
-          .slice(0, 5);
-        if (ddayList.length === 0) return null;
-        return (
-          <div style={{ marginBottom: 10, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📅 이번 주 청약 D-day</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {ddayList.map((a: any) => (
-                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 6, borderBottom: '1px solid var(--border)' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.isOpen ? '접수중' : '접수예정'}</div>
-                  </div>
-                  <span style={{
-                    fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, marginLeft: 8,
-                    padding: '2px 10px', borderRadius: 6,
-                    color: a.dday <= 1 ? 'var(--accent-red)' : a.dday <= 3 ? 'var(--accent-orange)' : 'var(--brand)',
-                    background: a.dday <= 1 ? 'rgba(255,107,107,0.1)' : a.dday <= 3 ? 'rgba(255,159,67,0.1)' : 'var(--brand-bg)',
-                  }}>
-                    {a.dday === 0 ? 'D-Day' : a.dday > 0 ? `D-${a.dday}` : `D+${Math.abs(a.dday)}`}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
-
       {/* 지역별 스택바 현황 */}
       <RegionStackedBar
         apts={apts}
@@ -384,7 +336,53 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         />
       )}
 
-      {/* 실거래가 상세 모달 */}
+      {/* 이번 주 청약 D-day */}
+      {(() => {
+        const now = new Date();
+        const nowStr = now.toISOString().slice(0, 10);
+        const weekLater = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10);
+        const ddayList = apts
+          .filter(a => {
+            const start = String(a.rcept_bgnde ?? '').slice(0, 10);
+            const end = String(a.rcept_endde ?? '').slice(0, 10);
+            return (start <= nowStr && end >= nowStr) || (start > nowStr && start <= weekLater);
+          })
+          .map(a => {
+            const start = String(a.rcept_bgnde ?? '').slice(0, 10);
+            const end = String(a.rcept_endde ?? '').slice(0, 10);
+            const isOpen = start <= nowStr && end >= nowStr;
+            const targetDate = isOpen ? end : start;
+            const diff = Math.ceil((new Date(targetDate).getTime() - now.getTime()) / 86400000);
+            return { ...a, isOpen, dday: diff, targetDate };
+          })
+          .sort((a, b) => a.dday - b.dday)
+          .slice(0, 5);
+        if (ddayList.length === 0) return null;
+        return (
+          <div style={{ marginBottom: 10, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📅 이번 주 청약 D-day</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {ddayList.map((a: any) => (
+                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 6, borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.isOpen ? '접수중' : '접수예정'}</div>
+                  </div>
+                  <span style={{
+                    fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, marginLeft: 8,
+                    padding: '2px 10px', borderRadius: 6,
+                    color: a.dday <= 1 ? 'var(--accent-red)' : a.dday <= 3 ? 'var(--accent-orange)' : 'var(--brand)',
+                    background: a.dday <= 1 ? 'rgba(255,107,107,0.1)' : a.dday <= 3 ? 'rgba(255,159,67,0.1)' : 'var(--brand-bg)',
+                  }}>
+                    {a.dday === 0 ? 'D-Day' : a.dday > 0 ? `D-${a.dday}` : `D+${Math.abs(a.dday)}`}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 한줄평 바텀시트 */}
       {commentTarget && (
         <AptCommentSheet

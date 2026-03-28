@@ -351,6 +351,24 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         }}>🇺🇸 해외주식</button>
       </div>
 
+      {/* 섹터 히트맵 — 항상 표시 */}
+      {isDomestic && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+            <SectionShareButton section="stock-kr" label="주식 찾기 힘드시죠? 주식 종목 한눈에 보기!" pagePath="/stock" />
+          </div>
+          <SectorHeatmap stocks={stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')} isKR={true} />
+        </div>
+      )}
+      {!isDomestic && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+            <SectionShareButton section="stock-us" label="주식 찾기 힘드시죠? 주식 종목 한눈에 보기!" pagePath="/stock" />
+          </div>
+          <SectorHeatmap stocks={stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')} isKR={false} />
+        </div>
+      )}
+
       {/* 지수 + 시장 심리 통합 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         {indexStocks.filter(s => isDomestic ? (s.market === 'KOSPI' || s.market === 'KOSDAQ') : (s.market === 'NYSE' || s.market === 'NASDAQ')).slice(0, 3).map(s => {
@@ -592,24 +610,6 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         </div>
         );
       })()}
-
-      {/* 섹터 히트맵 (시총순위 탭) */}
-      {domesticTab === 'ranking' && isDomestic && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-            <SectionShareButton section="stock-kr" label="주식 찾기 힘드시죠? 주식 종목 한눈에 보기!" pagePath="/stock" />
-          </div>
-          <SectorHeatmap stocks={stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')} isKR={true} />
-        </div>
-      )}
-      {!isDomestic && globalTab === 'ranking' && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-            <SectionShareButton section="stock-us" label="주식 찾기 힘드시죠? 주식 종목 한눈에 보기!" pagePath="/stock" />
-          </div>
-          <SectorHeatmap stocks={stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')} isKR={false} />
-        </div>
-      )}
 
       {/* KOSPI/KOSDAQ 토글 (국내 시총 탭) */}
       {isDomestic && domesticTab === 'ranking' && (

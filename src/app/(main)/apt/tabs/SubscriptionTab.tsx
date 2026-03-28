@@ -115,47 +115,6 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             {pill('closed', statusFilter, setStatusFilter, '마감')}
           </div>
 
-          {/* 이번 주 청약 하이라이트 */}
-          {(() => {
-            const now = new Date();
-            const dayOfWeek = now.getDay();
-            const weekStart = new Date(now); weekStart.setDate(now.getDate() - dayOfWeek);
-            const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
-            const ws = weekStart.toISOString().slice(0, 10);
-            const we = weekEnd.toISOString().slice(0, 10);
-            const thisWeek = filtered.filter(a => {
-              const begin = String(a.rcept_bgnde || '').slice(0, 10);
-              const end = String(a.rcept_endde || '').slice(0, 10);
-              return begin <= we && end >= ws;
-            });
-            const opening = thisWeek.filter(a => getStatus(a) === 'open');
-            const upcoming = thisWeek.filter(a => getStatus(a) === 'upcoming');
-            if (thisWeek.length === 0) return null;
-            return (
-              <div style={{ background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.08))', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-blue)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  📅 이번 주 청약 ({thisWeek.length}건)
-                  {opening.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'var(--accent-green-bg)', color: 'var(--accent-green)', fontWeight: 700 }}>접수중 {opening.length}</span>}
-                  {upcoming.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)', fontWeight: 700 }}>예정 {upcoming.length}</span>}
-                </div>
-                {thisWeek.slice(0, 5).map(a => {
-                  const st = getStatus(a);
-                  const sb = SB[st];
-                  return (
-                    <a key={a.id} href={`/apt/${encodeURIComponent(generateAptSlug(a.house_nm) || a.house_manage_no || String(a.id))}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(96,165,250,0.1)', textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 8, background: sb.bg, color: sb.color, border: `1px solid ${sb.border}`, fontWeight: 700 }}>{sb.label}</span>
-                        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{a.house_nm}</span>
-                      </div>
-                      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{a.region_nm} · {a.tot_supply_hshld_co?.toLocaleString() || '-'}세대</span>
-                    </a>
-                  );
-                })}
-              </div>
-            );
-          })()}
-
-
           {/* 필터 결과 카운트 + 정렬 */}
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>총 <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong>건
