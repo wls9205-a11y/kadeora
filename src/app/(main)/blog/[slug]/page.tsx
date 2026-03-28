@@ -258,7 +258,8 @@ export default async function BlogDetailPage({ params }: Props) {
 
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
-    headline: post.title, description: post.meta_description || post.excerpt || '',
+    headline: post.title,
+    description: (post.meta_description || post.excerpt || '').slice(0, 160),
     datePublished: post.published_at || post.created_at,
     dateModified: post.updated_at || post.published_at || post.created_at,
     wordCount,
@@ -272,18 +273,24 @@ export default async function BlogDetailPage({ params }: Props) {
     },
     publisher: {
       '@type': 'Organization', name: '카더라', url: SITE,
-      logo: { '@type': 'ImageObject', url: `${SITE}/logo.svg` },
+      logo: { '@type': 'ImageObject', url: `${SITE}/icons/icon-192.png`, width: 192, height: 192 },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${slug}` },
     url: `${SITE}/blog/${slug}`,
-    image: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}`,
+    image: {
+      '@type': 'ImageObject',
+      url: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}`,
+      width: 1200,
+      height: 630,
+      caption: post.image_alt || post.title,
+    },
     keywords: (post.tags ?? []).join(', '),
     inLanguage: 'ko-KR',
     isAccessibleForFree: true,
     articleSection: catSection[post.category] || '정보',
     speakable: {
       '@type': 'SpeakableSpecification',
-      cssSelector: ['h1', 'article p:first-of-type'],
+      cssSelector: ['h1', '.blog-content p:first-of-type', '.blog-content h2:first-of-type'],
     },
     ...(comments.length > 0 ? {
       commentCount: comments.length,

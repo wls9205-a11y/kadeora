@@ -1,8 +1,8 @@
 /**
  * 블로그 본문 HTML에 자동 내부링크 삽입
  * - 키워드 → 카더라 내부 페이지 자동 연결
- * - SEO: 14,578개 블로그 → 주식/부동산/시리즈 페이지 교차 링크
- * - 1 키워드 = 1 링크만 (과도한 링크 방지), 최대 5개
+ * - SEO: 15,500개 블로그 → 주식/부동산/시리즈 페이지 교차 링크
+ * - 1 키워드 = 1 링크만 (과도한 링크 방지), 최대 7개
  */
 
 const STOCK_KEYWORDS: [string, string][] = [
@@ -74,6 +74,27 @@ const FEATURE_KEYWORDS: [string, string][] = [
   ['환율', '/stock'],
 ];
 
+// 재테크·금융 블로그 내부링크 (finance/general 카테고리)
+const FINANCE_KEYWORDS: [string, string][] = [
+  ['ISA 계좌', '/blog/isa-계좌-서민형-일반형-중개형-2026'],
+  ['연금저축', '/blog/연금저축펀드-vs-irp-2026-세액공제-완전-비교'],
+  ['IRP 계좌', '/blog/irp-중도-인출-조건-세금-완전-정리'],
+  ['청년도약계좌', '/blog/청년도약계좌-가입-조건-혜택-2026'],
+  ['실업급여', '/blog/실업급여-수급-조건-금액-기간-2026'],
+  ['종합소득세', '/blog/2026-종합소득세-신고-완전-가이드-프리랜서'],
+  ['건강보험료', '/blog/건강보험료-절약법-피부양자-조건-지역가입자-2026'],
+  ['연말정산', '/blog/연말정산-완전-가이드-공제-항목-환급'],
+  ['주택청약', '/blog/주택청약종합저축-1순위-청약-전략'],
+  ['디딤돌 대출', '/blog/디딤돌-대출-조건-금리-한도-2026-가이드'],
+  ['주택연금', '/blog/역모기지론-주택연금-집으로-연금받기'],
+  ['ETF 투자', '/blog/미국etf-완전가이드-qqq-spy-schd-2026'],
+  ['배당 재투자', '/blog/배당-재투자-drip-복리-전략'],
+  ['자산 배분', '/blog/자산-배분-원칙-주식-채권-현금'],
+  ['가상자산 세금', '/blog/가상자산-세금-과세-신고-방법-2026'],
+  ['FIRE 조기은퇴', '/blog/fire-조기은퇴-한국형-파이어족-가이드'],
+  ['퇴직연금', '/blog/퇴직연금-dc형-etf-운용-전략'],
+];
+
 const SERIES_KEYWORDS: [string, string][] = [
   ['블로그 시리즈', '/blog/series'],
 ];
@@ -82,7 +103,7 @@ const GUIDE_KEYWORDS: [string, string][] = [
   ['청약통장', '/apt/diagnose'],
 ];
 
-const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS];
+const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FINANCE_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS];
 
 export function injectInternalLinks(html: string): string {
   if (!html || html.length < 200) return html;
@@ -109,7 +130,7 @@ export function injectInternalLinks(html: string): string {
       linked.add(keyword);
     }
 
-    if (linked.size >= 5) break;
+    if (linked.size >= 7) break;
   }
 
   // External links (max 1, separate from internal limit)
