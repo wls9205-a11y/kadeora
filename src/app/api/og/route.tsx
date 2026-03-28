@@ -3,61 +3,64 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-const CAT: Record<string, { color: string; dim: string; bg: [string,string,string]; label: string; icon: string }> = {
-  apt:     { color: '#00E87A', dim: 'rgba(0,232,122,0.15)',   bg: ['#020E06','#041A0B','#072412'], label: '청약·분양',   icon: '🏢' },
-  stock:   { color: '#00D4FF', dim: 'rgba(0,212,255,0.15)',   bg: ['#020810','#041525','#071E38'], label: '주식·시세',   icon: '📈' },
-  finance: { color: '#FFD100', dim: 'rgba(255,209,0,0.15)',   bg: ['#080600','#160F00','#221600'], label: '재테크·절세', icon: '💰' },
-  unsold:  { color: '#FF6200', dim: 'rgba(255,98,0,0.15)',    bg: ['#080200','#180700','#260F00'], label: '미분양',      icon: '⚠️' },
-  general: { color: '#B47FFF', dim: 'rgba(180,127,255,0.15)', bg: ['#04020F','#0A0825','#100E38'], label: '생활정보',   icon: '📰' },
-  blog:    { color: '#B47FFF', dim: 'rgba(180,127,255,0.15)', bg: ['#04020F','#0A0825','#100E38'], label: '블로그',      icon: '✍️' },
-  local:   { color: '#FFD43B', dim: 'rgba(255,212,59,0.15)',  bg: ['#080700','#141000','#201800'], label: '우리동네',   icon: '📍' },
-  free:    { color: '#F472B6', dim: 'rgba(244,114,182,0.15)', bg: ['#080210','#130820','#1E0F30'], label: '자유',        icon: '💬' },
+const CAT: Record<string, { color: string; dim: string; bg: [string,string,string]; label: string; icon: string; en: string }> = {
+  apt:     { color: '#00FF87', dim: 'rgba(0,255,135,0.15)',   bg: ['#010804','#031509','#05230E'], label: '청약·분양',   icon: '🏢', en: 'APT' },
+  stock:   { color: '#00E5FF', dim: 'rgba(0,229,255,0.15)',   bg: ['#010508','#031020','#051830'], label: '주식·시세',   icon: '📈', en: 'STOCK' },
+  finance: { color: '#FFE000', dim: 'rgba(255,224,0,0.15)',   bg: ['#070500','#140E00','#201500'], label: '재테크·절세', icon: '💰', en: 'FINANCE' },
+  unsold:  { color: '#FF6B1A', dim: 'rgba(255,107,26,0.15)',  bg: ['#070100','#140500','#210900'], label: '미분양',      icon: '⚠️', en: 'UNSOLD' },
+  general: { color: '#C084FC', dim: 'rgba(192,132,252,0.15)', bg: ['#030108','#080518','#0D0825'], label: '생활정보',   icon: '📰', en: 'INFO' },
+  blog:    { color: '#C084FC', dim: 'rgba(192,132,252,0.15)', bg: ['#030108','#080518','#0D0825'], label: '블로그',      icon: '✍️', en: 'BLOG' },
+  local:   { color: '#FFD43B', dim: 'rgba(255,212,59,0.15)',  bg: ['#080700','#141000','#201800'], label: '우리동네',   icon: '📍', en: 'LOCAL' },
+  free:    { color: '#F472B6', dim: 'rgba(244,114,182,0.15)', bg: ['#080210','#130820','#1E0F30'], label: '자유',        icon: '💬', en: 'FREE' },
 };
 
 const SITE = process.env.NEXT_PUBLIC_BASE_URL || 'https://kadeora.app';
 
 let cachedFont: ArrayBuffer | null = null;
-let fontLoadAttempted = false;
-
 async function loadFont(): Promise<ArrayBuffer | null> {
   if (cachedFont) return cachedFont;
-  if (fontLoadAttempted) return null; // 이미 실패한 경우 재시도 안 함
-  fontLoadAttempted = true;
-  
-  // 1순위: Google Fonts subset API (한국어만, ~35KB)
-  const GOOGLE_FONT_URL = 'https://fonts.gstatic.com/s/notosanskr/v36/PbyxFmXiEBPT4ITbgNA5Cgm20xz64px_1hVWr0wuPNGmlQNMEfD4.0.woff2';
   try {
-    const res = await fetch(GOOGLE_FONT_URL, { signal: AbortSignal.timeout(5000) });
-    if (res.ok) {
-      const buf = await res.arrayBuffer();
-      // woff2 헤더 확인 (woff2 = satori 미지원, 건너뜀)
-      const header = new Uint8Array(buf.slice(0, 4));
-      const isWoff2 = header[0] === 0x77 && header[1] === 0x4F && header[2] === 0x46 && header[3] === 0x32;
-      if (!isWoff2) { cachedFont = buf; return cachedFont; }
-    }
+    const res = await fetch(`${SITE}/fonts/NotoSansKR-Bold.woff`, { signal: AbortSignal.timeout(4000) });
+    if (res.ok) { cachedFont = await res.arrayBuffer(); return cachedFont; }
   } catch { /* ignore */ }
+  return null;
+}
 
-  // 2순위: 로컬 woff 파일
-  try {
-    const res = await fetch(`${SITE}/fonts/NotoSansKR-Bold.woff`, { signal: AbortSignal.timeout(5000) });
-    if (res.ok) {
-      const buf = await res.arrayBuffer();
-      // woff2 여부 확인
-      const header = new Uint8Array(buf.slice(0, 4));
-      const isWoff2 = header[0] === 0x77 && header[1] === 0x4F && header[2] === 0x46 && header[3] === 0x32;
-      if (!isWoff2) { cachedFont = buf; return cachedFont; }
-    }
-  } catch { /* ignore */ }
+function fontOpts(data: ArrayBuffer | null) {
+  return data ? { fonts: [{ name: 'NK', data, style: 'normal' as const, weight: 700 as const }] } : {};
+}
 
-  return null; // 폰트 없어도 sans-serif 폴백으로 OG 생성
+const FALLBACK: Record<string, string> = {
+  stock:   `${SITE}/images/brand/kadeora-wide.png`,
+  apt:     `${SITE}/images/brand/kadeora-full.png`,
+  default: `${SITE}/images/brand/kadeora-hero.png`,
+};
+
+/* ─────────────────────────────────────────────
+   LogoSVG 컴포넌트
+───────────────────────────────────────────── */
+function LogoSVG({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 72 72">
+      <defs>
+        <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0F1B3E" />
+          <stop offset="100%" stopColor="#2563EB" />
+        </linearGradient>
+      </defs>
+      <rect width="72" height="72" rx="18" fill="url(#lg)" />
+      <circle cx="18" cy="36" r="7" fill="white" />
+      <circle cx="36" cy="36" r="7" fill="white" />
+      <circle cx="54" cy="36" r="7" fill="white" />
+    </svg>
+  );
 }
 
 export async function GET(req: NextRequest) {
   try {
-    let fontData: ArrayBuffer | null = null;
-    try { fontData = await loadFont(); } catch { /* 폰트 없어도 계속 */ }
-    const fonts = fontData ? [{ name: 'NK', data: fontData, style: 'normal' as const, weight: 700 as const }] : [];
+    const fontData = await loadFont();
     const ff = fontData ? 'NK, sans-serif' : 'sans-serif';
+    const opts = fontOpts(fontData);
     const CACHE = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };
 
     const sp       = new URL(req.url).searchParams;
@@ -72,189 +75,159 @@ export async function GET(req: NextRequest) {
     const C = CAT[category] ?? CAT.blog;
     const bg = `linear-gradient(160deg, ${C.bg[0]} 0%, ${C.bg[1]} 50%, ${C.bg[2]} 100%)`;
 
-    // ── 로고 컴포넌트 ──
-    const LogoSVG = (size: number) => (
-      <svg width={size} height={size} viewBox="0 0 72 72">
-        <defs>
-          <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#0F1B3E" />
-            <stop offset="100%" stopColor="#2563EB" />
-          </linearGradient>
-        </defs>
-        <rect width="72" height="72" rx="18" fill="url(#lg)" />
-        <circle cx="18" cy="36" r="7" fill="white" />
-        <circle cx="36" cy="36" r="7" fill="white" />
-        <circle cx="54" cy="36" r="7" fill="white" />
-      </svg>
-    );
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 1. 섹션 OG (주식·부동산 탭 페이지)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ── 섹션 OG ── */
     if (section) {
-      const SEC: Record<string, { title: string; sub: string; chips: string[] }> = {
-        'stock-kr':         { title: '국내 주식 시세',    sub: 'KOSPI · KOSDAQ 실시간 시세 · 종목별 수급 분석',     chips: ['삼성전자', 'SK하이닉스', 'POSCO'] },
-        'stock-us':         { title: '해외 주식 시세',    sub: 'NASDAQ · S&P 500 · 글로벌 주요 종목 시세',         chips: ['Apple', 'NVIDIA', 'Microsoft'] },
-        'stock-heatmap':    { title: '섹터 히트맵',       sub: '업종별 등락률 한눈에 — 반도체·금융·바이오·IT',     chips: ['반도체', '금융', '바이오'] },
-        'apt-region':       { title: '전국 부동산 현황',  sub: '지역별 청약·분양·미분양·재개발 실시간 현황',       chips: ['경기 625건', '서울 160건', '부산 150건'] },
-        'apt-calendar':     { title: '청약 캘린더',       sub: '이번 달 접수중·예정 청약 일정 모아보기',           chips: ['접수중 3건', '예정 7건'] },
-        'apt-subscription': { title: '전국 청약 현황',    sub: '접수중 · 예정 · 마감 청약 정보 전체',             chips: ['전체 1,000건+'] },
+      const SEC: Record<string, { title: string; sub: string; kw: string; kwv: string }> = {
+        'stock-kr':         { title: '국내 주식 시세',     sub: 'KOSPI · KOSDAQ 실시간 시세 · 종목별 수급 분석', kw: '종목수', kwv: '728+' },
+        'stock-us':         { title: '해외 주식 시세',     sub: 'NASDAQ · S&P 500 · 글로벌 주요 종목',         kw: '종목수', kwv: '588+' },
+        'stock-heatmap':    { title: '섹터 히트맵',        sub: '업종별 등락률 한눈에 — 반도체·금융·바이오',    kw: '업종수', kwv: '11개' },
+        'apt-region':       { title: '전국 부동산 현황',   sub: '지역별 청약·분양·미분양·재개발 현황',          kw: '데이터', kwv: '5,500건+' },
+        'apt-calendar':     { title: '청약 캘린더',        sub: '이번 달 접수중·예정 청약 일정 모아보기',        kw: '청약건수', kwv: '10건+' },
+        'apt-subscription': { title: '전국 청약 현황',     sub: '접수중 · 예정 · 마감 청약 정보 전체',          kw: '전체',  kwv: '1,000건+' },
       };
-      const s = SEC[section] ?? { title: '카더라', sub: '대한민국 소리소문 정보 커뮤니티', chips: [] };
+      const s = SEC[section] ?? { title: '카더라', sub: '대한민국 소리소문 정보 커뮤니티', kw: '블로그', kwv: '15,500편+' };
 
       return new ImageResponse(
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: bg, fontFamily: ff, padding: '48px 60px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            {LogoSVG(38)}
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#CBD5E1', marginLeft: 2 }}>카더라</span>
-            <div style={{ flex: 1 }} />
-            <span style={{ fontSize: 15, color: C.color, fontWeight: 700, padding: '6px 18px', borderRadius: 8, background: C.dim, border: `1px solid ${C.color}50` }}>
-              {C.icon}  {C.label}
-            </span>
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#050505', fontFamily: ff }}>
+          {/* 스트라이프 1: 컬러 헤더 */}
+          <div style={{ background: C.color, padding: '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <LogoSVG size={26} />
+              <span style={{ fontSize: 20, fontWeight: 900, color: '#000' }}>카더라</span>
+            </div>
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.label.toUpperCase()}</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 54, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-2px', lineHeight: 1.05 }}>{s.title}</div>
-            <div style={{ fontSize: 20, color: '#64748B', fontWeight: 500 }}>{s.sub}</div>
-            {s.chips.length > 0 && (
-              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                {s.chips.map((ch, i) => (
-                  <span key={i} style={{ fontSize: 16, fontWeight: 700, color: C.color, padding: '7px 18px', borderRadius: 8, background: C.dim, border: `1px solid ${C.color}40` }}>{ch}</span>
-                ))}
-              </div>
-            )}
+          {/* 스트라이프 2: 수치 */}
+          <div style={{ background: '#0D0D0D', padding: '18px 40px', display: 'flex', alignItems: 'center', gap: '5%', flexShrink: 0, borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: 11, color: C.color, fontWeight: 700, letterSpacing: 2 }}>{s.kw.toUpperCase()}</span>
+              <span style={{ fontSize: 58, fontWeight: 900, color: '#fff', lineHeight: 0.85, letterSpacing: -3 }}>{s.kwv}</span>
+            </div>
+            <div style={{ flex: 1, height: 2, background: `linear-gradient(90deg, ${C.color}80, transparent)`, borderRadius: 99 }} />
+            <span style={{ fontSize: 48 }}>{C.icon}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 18 }}>
-            <span style={{ fontSize: 14, color: '#334155', fontWeight: 700 }}>kadeora.app</span>
-            <span style={{ fontSize: 13, color: '#1E293B' }}>실시간 업데이트</span>
+          {/* 스트라이프 3: 제목 */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px' }}>
+            <div style={{ fontSize: 36, fontWeight: 900, color: '#f9fafb', lineHeight: 1.15, letterSpacing: -1, marginBottom: 10 }}>{s.title}</div>
+            <div style={{ fontSize: 16, color: '#374151', lineHeight: 1.55 }}>{s.sub}</div>
+          </div>
+          {/* 스트라이프 4: 하단 */}
+          <div style={{ background: `${C.dim}`, borderTop: `0.5px solid ${C.color}40`, padding: '12px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>kadeora.app</span>
+            <span style={{ fontSize: 12, color: C.color, fontWeight: 700 }}>실시간 업데이트</span>
           </div>
         </div>,
-        { width: 1200, height: 630, headers: CACHE, fonts }
+        { width: 1200, height: 630, headers: CACHE, ...opts }
       );
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 2. 홈 OG
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ── 홈 OG ── */
     if (!title) {
       return new ImageResponse(
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(160deg,#020810 0%,#050F1E 50%,#0A1830 100%)', fontFamily: ff }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28 }}>
-            {LogoSVG(64)}
-            <span style={{ fontSize: 62, fontWeight: 900, color: '#F1F5F9', letterSpacing: '-2px' }}>카더라</span>
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#050505', fontFamily: ff }}>
+          {/* 헤더 컬러 띠 */}
+          <div style={{ background: '#00FF87', padding: '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <LogoSVG size={28} />
+              <span style={{ fontSize: 22, fontWeight: 900, color: '#000' }}>카더라</span>
+            </div>
+            <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(0,0,0,0.5)', letterSpacing: 2 }}>KADEORA.APP</span>
           </div>
-          <div style={{ fontSize: 26, color: '#93C5FD', fontWeight: 700, marginBottom: 36 }}>아는 사람만 아는 그 정보</div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            {([['📈','주식·시세','#00D4FF'],['🏢','청약·분양','#00E87A'],['💰','재테크','#FFD100'],['💬','커뮤니티','#F472B6']] as const).map(([ic, lb, cl], i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
-                <span style={{ fontSize: 22 }}>{ic}</span>
-                <span style={{ fontSize: 17, fontWeight: 700, color: cl }}>{lb}</span>
+          {/* 수치 */}
+          <div style={{ background: '#0D0D0D', padding: '16px 40px', display: 'flex', alignItems: 'center', gap: '5%', flexShrink: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: 10, color: '#00FF87', fontWeight: 700, letterSpacing: 2 }}>블로그</span>
+              <span style={{ fontSize: 54, fontWeight: 900, color: '#fff', lineHeight: 0.85, letterSpacing: -3 }}>15,500편+</span>
+            </div>
+            <div style={{ flex: 1, height: 2, background: 'linear-gradient(90deg,rgba(0,255,135,0.6),transparent)', borderRadius: 99 }} />
+            <span style={{ fontSize: 44 }}>📊</span>
+          </div>
+          {/* 메인 */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px' }}>
+            <div style={{ fontSize: 40, fontWeight: 900, color: '#f9fafb', lineHeight: 1.15, letterSpacing: -1, marginBottom: 12 }}>아는 사람만 아는 그 정보</div>
+            <div style={{ fontSize: 16, color: '#374151' }}>주식 · 청약·분양 · 재테크 · 커뮤니티 · 15,500편+ 블로그</div>
+          </div>
+          {/* KPI */}
+          <div style={{ background: 'rgba(0,255,135,0.08)', borderTop: '0.5px solid rgba(0,255,135,0.2)', padding: '12px 40px', display: 'flex', gap: '6%', flexShrink: 0 }}>
+            {[{ n: '728+', l: '주식종목' }, { n: '5,500건+', l: '부동산 데이터' }, { n: '15,500편+', l: '블로그' }, { n: '실시간', l: '업데이트' }].map((k, i) => (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ fontSize: 20, fontWeight: 900, color: '#00FF87', lineHeight: 1 }}>{k.n}</span>
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, letterSpacing: 0.5 }}>{k.l}</span>
               </div>
             ))}
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'flex-end' }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.15)', fontWeight: 700 }}>kadeora.app</span>
+            </div>
           </div>
-          <div style={{ position: 'absolute', bottom: 36, fontSize: 14, color: '#1E293B', fontWeight: 700 }}>kadeora.app</div>
         </div>,
-        { width: 1200, height: 630, headers: CACHE, fonts }
+        { width: 1200, height: 630, headers: CACHE, ...opts }
       );
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 3. 포스트·블로그 OG
-    //
-    //  구조 (1200 × 630):
-    //  ┌────────────────────────────────────────────────────────┐
-    //  │  [로고]  카더라                     [🏢 청약·분양 뱃지] │ 72px
-    //  ├────────────────────────────────────────────────────────┤
-    //  │                                                        │
-    //  │  🏢  청약·분양 ─────────────────────────────           │
-    //  │                                                        │
-    //  │  강남구 개포동 신규 분양                                 │
-    //  │  청약 일정 분석 (52px / 900)                           │
-    //  │                                                        │
-    //  │  2026년 상반기 주요 청약 현황... (19px / #94A3B8)      │
-    //  │                                                        │
-    //  ├────────────────────────────────────────────────────────┤
-    //  │  카더라 데이터팀          ♥24  💬8  [kadeora.app]     │ 58px
-    //  └────────────────────────────────────────────────────────┘
-    //
-    //  네이버 뷰탭 크롭 대응:
-    //  - 전체 padding 56px → 핵심 콘텐츠가 중앙에 집중
-    //  - 카테고리 라벨이 헤더+메인 두 곳에 노출 (크롭 시 둘 중 하나는 반드시 보임)
-    //  - 제목 최대 52자 (2줄) → 1:1 크롭에도 잘림 없음
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    const titleTrim  = title.length > 52 ? title.slice(0, 51) + '…' : title;
-    const subTrim    = subtitle.length > 72 ? subtitle.slice(0, 71) + '…' : subtitle;
-    const titleFS    = title.length > 36 ? 40 : title.length > 22 ? 46 : 52;
+    /* ── 포스트 OG — 수평 스트라이프 (1200×630) ──
+       안전 영역: 핵심 정보를 좌우 40px 여백 안에 배치
+       네이버 PC 3:2 크롭(좌우 128px) → 40px 여백이 내부에 있어 전부 보임
+       네이버 모바일 1:1 → og-square 별도 이미지로 대응
+    ── */
+    const titleTrim  = title.length > 46 ? title.slice(0, 45) + '…' : title;
+    const subTrim    = subtitle.length > 60 ? subtitle.slice(0, 59) + '…' : subtitle;
     const hasLikes   = Number(likes) > 0;
     const hasCmts    = Number(comments) > 0;
 
     return new ImageResponse(
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: bg, fontFamily: ff, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#050505', fontFamily: ff }}>
 
-        {/* 배경 글로우 */}
-        <div style={{ position: 'absolute', top: -140, right: -140, width: 520, height: 520, borderRadius: '50%', background: `radial-gradient(circle, ${C.dim} 0%, transparent 65%)`, display: 'flex' }} />
-
-        {/* ── 헤더 ── */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '20px 56px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, height: 72 }}>
-          {LogoSVG(32)}
-          <span style={{ fontSize: 20, fontWeight: 700, color: '#CBD5E1', marginLeft: 10, letterSpacing: '-0.3px' }}>카더라</span>
-          <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 15, fontWeight: 700, color: C.color, padding: '6px 20px', borderRadius: 8, background: C.dim, border: `1px solid ${C.color}50` }}>
-            {C.icon}  {C.label}
-          </span>
+        {/* 스트라이프 1: 컬러 헤더 */}
+        <div style={{ background: C.color, padding: '12px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <LogoSVG size={24} />
+            <span style={{ fontSize: 18, fontWeight: 900, color: '#000' }}>카더라</span>
+          </div>
+          <span style={{ fontSize: 18, fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.label.toUpperCase()}</span>
         </div>
 
-        {/* ── 메인 ── */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 56px' }}>
-
-          {/* 카테고리 대형 라벨 (주제 즉시 인식) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
-            <span style={{ fontSize: 32, lineHeight: 1 }}>{C.icon}</span>
-            <span style={{ fontSize: 17, fontWeight: 700, color: C.color, letterSpacing: '2px' }}>
-              {C.label.toUpperCase()}
-            </span>
-            <div style={{ flex: 1, height: 2, background: `linear-gradient(90deg, ${C.color}70, transparent)`, borderRadius: 99 }} />
-          </div>
-
-          {/* 제목 */}
-          <div style={{ fontSize: titleFS, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, letterSpacing: '-1.5px', wordBreak: 'keep-all', maxWidth: 1088 }}>
-            {titleTrim}
-          </div>
-
-          {/* 부제 */}
-          {subTrim && (
-            <div style={{ fontSize: 19, fontWeight: 500, color: '#94A3B8', lineHeight: 1.55, marginTop: 20, maxWidth: 900, letterSpacing: '-0.2px' }}>
-              {subTrim}
-            </div>
-          )}
-        </div>
-
-        {/* ── 하단 ── */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '14px 56px 20px', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, height: 58 }}>
-          {/* 저자 */}
-          {author ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-              <div style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg, ${C.color}, #3B7BF6)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: '#fff' }}>
+        {/* 스트라이프 2: 핵심 수치 (카테고리 컬러 배경) */}
+        <div style={{ background: '#0D0D0D', padding: '16px 40px', display: 'flex', alignItems: 'center', gap: '4%', flexShrink: 0, borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+          {/* 저자 아바타 */}
+          {author && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg, ${C.color}, #2563EB)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, color: '#fff' }}>
                 {author[0].toUpperCase()}
               </div>
-              <span style={{ fontSize: 14, color: '#94A3B8', fontWeight: 600 }}>{author}</span>
+              <span style={{ fontSize: 13, color: '#6b7280', fontWeight: 600 }}>{author}</span>
             </div>
-          ) : (
-            <span style={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>카더라 데이터팀</span>
           )}
-          <div style={{ flex: 1 }} />
-          {hasLikes  && <span style={{ fontSize: 14, color: '#475569', marginRight: 12 }}>♥ {likes}</span>}
-          {hasCmts   && <span style={{ fontSize: 14, color: '#475569', marginRight: 16 }}>💬 {comments}</span>}
-          <span style={{ fontSize: 14, fontWeight: 700, color: C.color, padding: '5px 16px', borderRadius: 7, background: C.dim, border: `1px solid ${C.color}40` }}>kadeora.app</span>
+          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+          {hasLikes  && <span style={{ fontSize: 13, color: '#374151' }}>♥ {likes}</span>}
+          {hasCmts   && <span style={{ fontSize: 13, color: '#374151' }}>💬 {comments}</span>}
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.color, padding: '4px 14px', borderRadius: 6, background: C.dim, border: `0.5px solid ${C.color}50` }}>kadeora.app</span>
         </div>
 
+        {/* 스트라이프 3: 제목 메인 (flex:1) */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px' }}>
+          <div style={{ fontSize: 42, fontWeight: 900, color: '#ffffff', lineHeight: 1.18, letterSpacing: -1.5, marginBottom: subTrim ? 14 : 0, wordBreak: 'keep-all' }}>
+            {titleTrim}
+          </div>
+          {subTrim && (
+            <div style={{ fontSize: 18, color: '#6b7280', lineHeight: 1.55, letterSpacing: -0.2 }}>{subTrim}</div>
+          )}
+        </div>
+
+        {/* 스트라이프 4: KPI 하단 바 */}
+        <div style={{ background: C.dim, borderTop: `0.5px solid ${C.color}35`, padding: '11px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00FF87', boxShadow: '0 0 6px #00FF87' }} />
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: 0.5 }}>LIVE  2026</span>
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 900, color: C.color }}>{C.icon}  {C.label}</span>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 700 }}>kadeora.app</span>
+        </div>
       </div>,
-      { width: 1200, height: 630, headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800', 'X-Content-Type-Options': 'nosniff' }, fonts }
+      { width: 1200, height: 630, headers: { ...CACHE, 'X-Content-Type-Options': 'nosniff' }, ...opts }
     );
 
   } catch {
     const cat = new URL(req.url).searchParams.get('category') ?? 'default';
-    const fb: Record<string,string> = { stock:`${SITE}/images/brand/kadeora-wide.png`, apt:`${SITE}/images/brand/kadeora-full.png`, default:`${SITE}/images/brand/kadeora-hero.png` };
-    return Response.redirect(fb[cat] ?? fb.default, 302);
+    return Response.redirect(FALLBACK[cat] ?? FALLBACK.default, 302);
   }
 }

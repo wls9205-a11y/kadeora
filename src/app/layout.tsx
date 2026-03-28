@@ -30,7 +30,10 @@ export const metadata: Metadata = {
     description: '주식 시세, 아파트 청약, 우리동네 소식을 가장 빠르게. 소리소문 정보 커뮤니티.',
     url: SITE_URL,
     siteName: '카더라',
-    images: [{ url: SITE_URL + '/api/og', width: 1200, height: 630, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' }],
+    images: [
+      { url: SITE_URL + '/api/og', width: 1200, height: 630, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' },
+      { url: SITE_URL + '/api/og-square', width: 630, height: 630, alt: '카더라 - 대한민국 소리소문 정보 커뮤니티' },
+    ],
     locale: 'ko_KR',
     type: 'website',
   },

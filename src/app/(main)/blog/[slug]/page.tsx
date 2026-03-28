@@ -117,6 +117,7 @@ export async function generateMetadata({ params }: Props) {
   const { data: post } = await sb.from('blog_posts').select('title,excerpt,category,tags,created_at,published_at,updated_at,cover_image,image_alt,meta_description,meta_keywords,author_name').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return {};
     const ogImage = post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라 데이터팀')}`;
+    const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}`;
   return {
     title: `${post.title} | 블로그`,
     description: post.meta_description || post.excerpt || post.title,
@@ -131,7 +132,10 @@ export async function generateMetadata({ params }: Props) {
       tags: post.tags ?? [],
       section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
       url: `${SITE}/blog/${slug}`,
-      images: [{ url: ogImage, width: 1200, height: 630, alt: post.image_alt || `카더라 — ${post.title}` }],
+      images: [
+        { url: ogImage, width: 1200, height: 630, alt: post.image_alt || `카더라 — ${post.title}` },
+        { url: ogSquare, width: 630, height: 630, alt: post.image_alt || `카더라 — ${post.title}` },
+      ],
     },
     twitter: {
       card: 'summary_large_image' as const,
