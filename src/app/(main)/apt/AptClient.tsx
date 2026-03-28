@@ -133,6 +133,20 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         </div>
       </div>
 
+      {/* 지역별 스택바 현황 */}
+      <RegionStackedBar
+        apts={apts}
+        ongoingApts={ongoingApts}
+        unsold={lazyUnsold || unsold}
+        redevelopment={lazyRedev || redevelopment}
+        transactions={lazyTx || transactions}
+        redevTotalCount={redevTotalCount}
+        tradeTotalCount={tradeTotalCount}
+        onRegionClick={setSelectedRegion}
+        activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+        shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
+      />
+
       {/* 탭 세그먼트 — KPI 숫자 인라인 표시 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
@@ -162,20 +176,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           );
         })}
       </div>
-
-      {/* 지역별 스택바 현황 */}
-      <RegionStackedBar
-        apts={apts}
-        ongoingApts={ongoingApts}
-        unsold={lazyUnsold || unsold}
-        redevelopment={lazyRedev || redevelopment}
-        transactions={lazyTx || transactions}
-        redevTotalCount={redevTotalCount}
-        tradeTotalCount={tradeTotalCount}
-        onRegionClick={setSelectedRegion}
-        activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
-        shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
-      />
 
       {/* 지역 필터 활성 배지 */}
       {selectedRegion !== '전체' && (
