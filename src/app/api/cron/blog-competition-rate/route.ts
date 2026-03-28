@@ -193,7 +193,7 @@ ${strategyText}
       data_date: `${year}-${monthStr}-01`,
       source_ref: region.slug,
       is_published: true,
-      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title&design=2)}&type=blog`,
+      cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,
       image_alt: generateImageAlt('apt', title),
       meta_description: generateMetaDesc(finalContent),
       meta_keywords: generateMetaKeywords('apt', tags),

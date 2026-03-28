@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2'블로그 시리즈')}&category=blog`, width: 1200, height: 630, alt: '카더라 블로그 시리즈' }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('블로그 시리즈')}&design=2&category=blog`, width: 1200, height: 630, alt: '카더라 블로그 시리즈' }],
   },
   twitter: { card: 'summary_large_image' },
   other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/blog/series' },

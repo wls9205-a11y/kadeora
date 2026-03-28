@@ -192,7 +192,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
         data_date: now.toISOString().slice(0, 10),
         source_ref: `theme:${theme.id}`,
         is_published: true,
-        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title&design=2)}&type=blog`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,
         image_alt: generateImageAlt('stock', title),
         meta_description: generateMetaDesc(finalContent),
         meta_keywords: generateMetaKeywords('stock', tags),

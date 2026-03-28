@@ -40,7 +40,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
     const shareTitle = title;
     const shareDesc = content?.slice(0, 80) || '카더라에서 확인하세요';
     const ogImage = typeof window !== 'undefined'
-      ? `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}`
+      ? `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}&design=2`
       : '';
 
     switch (platform) {

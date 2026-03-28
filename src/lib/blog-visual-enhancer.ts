@@ -30,7 +30,7 @@ function insertCoverImage(html: string, opts: EnhanceOptions): string {
     imgUrl = opts.coverImage;
   } else if (opts.title) {
     const cat = opts.category || 'blog';
-    imgUrl = '/api/og?title=' + encodeURIComponent(opts.title.slice(0, 60)) + '&category=' + cat;
+    imgUrl = '/api/og?title=' + encodeURIComponent(opts.title.slice(0, 60)) + '&design=2&category=' + cat;
   }
   if (!imgUrl) return html;
 

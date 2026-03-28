@@ -16,48 +16,14 @@ const CAT: Record<string, { a: string; b: string; g: [string,string,string]; L: 
 };
 
 const SITE = 'https://kadeora.app';
-// @fontsource/noto-sans-kr@5.2.9 — woff1-TTF (Edge Runtime 호환 검증 완료)
-const FONT_VER = '5.2.9';
 
-/* ── 폰트 로더 ──
-   우선순위:
-   1) VERCEL_URL → 같은 배포 CDN (loopback 없음, 가장 빠름)
-   2) jsDelivr   → npm CDN (외부, 안정적, 정확한 버전)
-   3) unpkg      → npm CDN (외부, 백업)
-   4) SITE       → 프로덕션 fallback
+/* ── 폰트: 빌드타임 번들링 ──
+   import.meta.url 기반 → Edge Function에 woff 파일이 번들됨
+   런타임 HTTP fetch 0회, cold start 영향 0
 ── */
-let _font: ArrayBuffer | null = null;
-async function loadFont(): Promise<ArrayBuffer | null> {
-  if (_font) return _font;
-  const base = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : SITE;
-  const urls = [
-    `${base}/fonts/NotoSansKR-Bold.woff`,
-    `https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
-    `https://unpkg.com/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
-    `${SITE}/fonts/NotoSansKR-Bold.woff`,
-  ];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(10000) });
-      if (!res.ok) continue;
-      // woff2는 satori 미지원 → Content-Type 헤더로 사전 차단
-      const ct = res.headers.get('content-type') ?? '';
-      if (ct.includes('woff2') || ct.includes('font/woff2')) continue;
-      const buf = await res.arrayBuffer();
-      // 최소 크기 검증 (빈 응답 방지)
-      if (buf.byteLength > 10000) {
-        // 매직 바이트로 woff2 이중 검증: wOF2 = 0x774F4632
-        const view = new Uint8Array(buf.slice(0, 4));
-        if (view[0] === 0x77 && view[1] === 0x4F && view[2] === 0x46 && view[3] === 0x32) continue;
-        _font = buf;
-        return _font;
-      }
-    } catch { /* 다음 URL 시도 */ }
-  }
-  return null;
-}
+const fontPromise = fetch(
+  new URL('./NotoSansKR-Bold.woff', import.meta.url)
+).then(res => res.arrayBuffer()).catch(() => null);
 
 function fo(d: ArrayBuffer | null) {
   return d ? { fonts: [{ name: 'NK', data: d, style: 'normal' as const, weight: 700 as const }] } : {};
@@ -393,7 +359,7 @@ function D6(C: typeof CAT[string], title: string, sub: string, author: string, f
 /* ── GET handler ── */
 export async function GET(req: NextRequest) {
   try {
-    const fontData = await loadFont();
+    const fontData = await fontPromise;
     const ff = fontData ? 'NK, sans-serif' : 'sans-serif';
     const opts = fo(fontData);
     const CACHE = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };

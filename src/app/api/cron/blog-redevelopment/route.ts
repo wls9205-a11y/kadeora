@@ -143,7 +143,7 @@ export async function GET(req: NextRequest) {
           content: ensureMinLength(content, 'apt'),
           excerpt: `${zName} ${zType} ${zone.progress_stage || (zone as Record<string, any>).stage || ''} 시공사 분담금 투자전망 2026`,
           category: 'apt', tags, cron_type: 'redevelopment',
-          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title&design=2)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,
           image_alt: generateImageAlt('apt', title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('apt', tags),

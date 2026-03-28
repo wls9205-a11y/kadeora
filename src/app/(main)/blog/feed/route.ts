@@ -16,7 +16,7 @@ export async function GET() {
     const pubDate = new Date(dateStr);
     const pubDateStr = isNaN(pubDate.getTime()) ? new Date().toUTCString() : pubDate.toUTCString();
     const catLabel = p.category === 'stock' ? '주식' : p.category === 'apt' ? '부동산' : p.category === 'unsold' ? '미분양' : p.category === 'finance' ? '재테크' : '생활정보';
-    const imgUrl = p.cover_image || `${SITE_URL}/api/og?title=${encodeURIComponent((p.title&design=2 || '').slice(0, 60))}&category=${p.category || 'blog'}`;
+    const imgUrl = p.cover_image || `${SITE_URL}/api/og?title=${encodeURIComponent((p.title || '').slice(0, 60))}&design=2&category=${p.category || 'blog'}`;
     const tagItems = (p.tags || []).map((t: string) => `      <category>${t}</category>`).join('\n');
     return `
     <item>

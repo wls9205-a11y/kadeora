@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
         excerpt: `${today} ${t.title}. 카더라에서 확인하세요.`,
         category: t.cat, tags: t.tags,
         cron_type: 'afternoon', data_date: dateSlug,
-        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(fullTitle&design=2)}&type=blog`,
+        cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(fullTitle)}&design=2&type=blog`,
         image_alt: generateImageAlt(t.cat, fullTitle),
         meta_description: generateMetaDesc(content),
         meta_keywords: generateMetaKeywords(t.cat, t.tags),

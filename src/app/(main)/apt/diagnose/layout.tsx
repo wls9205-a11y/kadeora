@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2'청약 가점 계산기')}&subtitle=${encodeURIComponent('무주택·부양가족·통장 가점 자동 계산')}`, width: 1200, height: 630, alt: '카더라 청약 가점 계산기' }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('청약 가점 계산기')}&design=2&subtitle=${encodeURIComponent('무주택·부양가족·통장 가점 자동 계산')}`, width: 1200, height: 630, alt: '카더라 청약 가점 계산기' }],
   },
   twitter: { card: 'summary_large_image' as const, title: '청약 가점 계산기', description: '무주택기간·부양가족·청약통장 가점 자동 계산' },
   other: {

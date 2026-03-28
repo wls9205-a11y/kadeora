@@ -24,9 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(s.title&design=2)}&category=blog`, width: 1200, height: 630, alt: s.title }],
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&design=2&category=blog`, width: 1200, height: 630, alt: s.title }],
     },
-    twitter: { card: 'summary_large_image' as const, title: s.title, images: [`${SITE_URL}/api/og?title=${encodeURIComponent(s.title&design=2)}&category=blog`] },
+    twitter: { card: 'summary_large_image' as const, title: s.title, images: [`${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&design=2&category=blog`] },
     other: {
       'naver:written_time': s.created_at || '2026-01-15T00:00:00Z',
       'naver:updated_time': s.created_at || new Date().toISOString(),

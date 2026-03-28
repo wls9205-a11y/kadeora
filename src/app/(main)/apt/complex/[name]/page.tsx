@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded&design=2)}&subtitle=${encodeURIComponent('실거래가·시세 분석')}`, width: 1200, height: 630, alt: `${decoded} 실거래가` }],
+      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&subtitle=${encodeURIComponent('실거래가·시세 분석')}`, width: 1200, height: 630, alt: `${decoded} 실거래가` }],
     },
     twitter: { card: 'summary_large_image' as const, title: `${decoded} 실거래가`, description: `실거래 이력·평당가 추이·면적별 비교` },
     other: {

@@ -30,37 +30,11 @@ const CAT_KPI: Record<string, { kw: string; kwv: string }> = {
 };
 
 const SITE = 'https://kadeora.app';
-const FONT_VER = '5.2.9';
 
-let cachedFont: ArrayBuffer | null = null;
-async function loadFont(): Promise<ArrayBuffer | null> {
-  if (cachedFont) return cachedFont;
-  const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : SITE;
-  const urls = [
-    `${base}/fonts/NotoSansKR-Bold.woff`,
-    `https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
-    `https://unpkg.com/@fontsource/noto-sans-kr@${FONT_VER}/files/noto-sans-kr-korean-700-normal.woff`,
-    `${SITE}/fonts/NotoSansKR-Bold.woff`,
-  ];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(10000) });
-      if (!res.ok) continue;
-      // woff2는 satori 미지원 → Content-Type 헤더로 사전 차단
-      const ct = res.headers.get('content-type') ?? '';
-      if (ct.includes('woff2') || ct.includes('font/woff2')) continue;
-      const buf = await res.arrayBuffer();
-      if (buf.byteLength > 10000) {
-        // 매직 바이트로 woff2 이중 검증: wOF2 = 0x774F4632
-        const view = new Uint8Array(buf.slice(0, 4));
-        if (view[0] === 0x77 && view[1] === 0x4F && view[2] === 0x46 && view[3] === 0x32) continue;
-        cachedFont = buf;
-        return cachedFont;
-      }
-    } catch { /* 다음 URL 시도 */ }
-  }
-  return null;
-}
+/* ── 폰트: 빌드타임 번들링 ── */
+const fontPromise = fetch(
+  new URL('./NotoSansKR-Bold.woff', import.meta.url)
+).then(res => res.arrayBuffer()).catch(() => null);
 
 function LogoSVG({ size }: { size: number }) {
   return (
@@ -81,7 +55,7 @@ function LogoSVG({ size }: { size: number }) {
 
 export async function GET(req: NextRequest) {
   try {
-    const fontData = await loadFont();
+    const fontData = await fontPromise;
     const ff = fontData ? 'NK, sans-serif' : 'sans-serif';
     const opts = fontData ? { fonts: [{ name: 'NK', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {};
     const CACHE = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };

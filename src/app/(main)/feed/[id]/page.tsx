@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props) {
     if (!post) return {};
     const author = (post.profiles as { nickname?: string } | null)?.nickname ?? '익명';
     const description = post.content.slice(0, 160);
-    const ogImageUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title&design=2)}&author=${encodeURIComponent(author)}&category=${encodeURIComponent(post.category || '')}&likes=${post.likes_count ?? 0}&comments=${post.comments_count ?? 0}`;
+    const ogImageUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&design=2&author=${encodeURIComponent(author)}&category=${encodeURIComponent(post.category || '')}&likes=${post.likes_count ?? 0}&comments=${post.comments_count ?? 0}`;
     return {
       title: post.title,
       description,

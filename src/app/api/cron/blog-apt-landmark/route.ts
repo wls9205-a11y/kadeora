@@ -161,7 +161,7 @@ export async function GET(req: NextRequest) {
           excerpt: `${apt.name} ${apt.region} ${apt.district} 매매 전세 시세 학군 교통 투자전망 2026년 분석`,
           category: 'apt', tags,
           cron_type: 'apt-landmark',
-          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title&design=2)}&type=blog`,
+          cover_image: `${SITE_URL}/api/og?title=${encodeURIComponent(title)}&design=2&type=blog`,
           image_alt: generateImageAlt('apt', title),
           meta_description: generateMetaDesc(content),
           meta_keywords: generateMetaKeywords('apt', tags),

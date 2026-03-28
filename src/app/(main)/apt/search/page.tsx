@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(&design=2'실거래가 검색')}&subtitle=${encodeURIComponent('전국 아파트 단지별 조회')}`, width: 1200, height: 630, alt: '카더라 실거래가 검색' }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('실거래가 검색')}&design=2&subtitle=${encodeURIComponent('전국 아파트 단지별 조회')}`, width: 1200, height: 630, alt: '카더라 실거래가 검색' }],
   },
   twitter: { card: 'summary_large_image' },
   alternates: { canonical: SITE_URL + '/apt/search' },
