@@ -10,6 +10,7 @@ import ShareButtons from '@/components/ShareButtons';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import BlogToc from '@/components/BlogToc';
 import BlogTocSidebar from '@/components/BlogTocSidebar';
+import BlogActions from '@/components/BlogActions';
 import { getAvatarColor } from '@/lib/avatar';
 import { parseFaqFromContent } from '@/lib/blog-faq-parser';
 import { timeAgo } from '@/lib/format';
@@ -140,7 +141,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const slug = decodeURIComponent(rawSlug);
   const sb = await createSupabaseServer();
 
-  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
+  const { data: post } = await sb.from('blog_posts').select('id,title,slug,content,excerpt,category,sub_category,cover_image,image_alt,tags,meta_description,meta_keywords,author_name,author_role,reading_time_min,view_count,comment_count,helpful_count,published_at,created_at,updated_at,series_id,series_order,source_type,source_ref,data_date,rewritten_at').eq('slug', slug).eq('is_published', true).maybeSingle();
   if (!post) return notFound();
 
   sb.from('blog_posts').update({ view_count: (post.view_count ?? 0) + 1 }).eq('id', post.id).then(() => {});
@@ -227,6 +228,26 @@ export default async function BlogDetailPage({ params }: Props) {
           .eq('is_active', true).or(orQuery).gt('price', 0).limit(3);
         relatedStocks = data || [];
       }
+    } catch {}
+  }
+
+  // 이전/다음글 (같은 카테고리 내 시간순)
+  let prevPost: { slug: string; title: string } | null = null;
+  let nextPost: { slug: string; title: string } | null = null;
+  if (!post.series_id) {
+    try {
+      const [prevR, nextR] = await Promise.all([
+        sb.from('blog_posts').select('slug, title')
+          .eq('category', post.category).eq('is_published', true)
+          .lt('published_at', post.published_at || post.created_at)
+          .order('published_at', { ascending: false }).limit(1).maybeSingle(),
+        sb.from('blog_posts').select('slug, title')
+          .eq('category', post.category).eq('is_published', true)
+          .gt('published_at', post.published_at || post.created_at)
+          .order('published_at', { ascending: true }).limit(1).maybeSingle(),
+      ]);
+      prevPost = prevR.data;
+      nextPost = nextR.data;
     } catch {}
   }
 
@@ -332,11 +353,21 @@ export default async function BlogDetailPage({ params }: Props) {
 
       <article style={{ paddingBottom: 40 }}>
         <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px', wordBreak: 'keep-all' }}>{post.title}</h1>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 20, display: 'flex', gap: 8 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <span>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</span>
           <span>조회 {post.view_count ?? 0}</span>
           <span>·</span>
           <span>약 {readingTimeMin}분</span>
+          {post.rewritten_at && (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: '2px 8px', borderRadius: 6,
+              background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)',
+              fontSize: 'var(--fs-xs)', fontWeight: 600,
+            }}>
+              🔄 {new Date(post.rewritten_at).toLocaleDateString('ko-KR')} 업데이트
+            </span>
+          )}
         </div>
 
         {(post.tags ?? []).length > 0 && (
@@ -380,10 +411,13 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* 공유 */}
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* 공유 + 도움이됐어요 + 북마크 */}
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>공유하기</span>
           <ShareButtons title={post.title} postId={slug} />
+          <div style={{ marginLeft: 'auto' }}>
+            <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
+          </div>
         </div>
       </article>
 
@@ -471,6 +505,26 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         );
       })()}
+
+      {/* 이전/다음글 네비게이션 (시리즈가 없는 글) */}
+      {!post.series_id && (prevPost || nextPost) && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {prevPost && (
+              <Link href={`/blog/${prevPost.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
+                <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>← 이전글</div>
+                <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prevPost.title}</div>
+              </Link>
+            )}
+            {nextPost && (
+              <Link href={`/blog/${nextPost.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)', textAlign: 'right' }}>
+                <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>다음글 →</div>
+                <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nextPost.title}</div>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (

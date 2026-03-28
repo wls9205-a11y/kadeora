@@ -1089,6 +1089,42 @@ export type Database = {
           },
         ]
       }
+      blog_bookmarks: {
+        Row: {
+          blog_post_id: number | null
+          created_at: string | null
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          blog_post_id?: number | null
+          created_at?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Update: {
+          blog_post_id?: number | null
+          created_at?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_bookmarks_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_bookmarks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_builder_registry: {
         Row: {
           builder_name: string
@@ -1170,6 +1206,42 @@ export type Database = {
           },
         ]
       }
+      blog_helpful: {
+        Row: {
+          blog_post_id: number | null
+          created_at: string | null
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          blog_post_id?: number | null
+          created_at?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Update: {
+          blog_post_id?: number | null
+          created_at?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_helpful_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_helpful_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_name: string | null
@@ -1184,6 +1256,7 @@ export type Database = {
           data_date: string | null
           excerpt: string | null
           fts: unknown
+          helpful_count: number | null
           id: number
           image_alt: string | null
           is_published: boolean | null
@@ -1217,6 +1290,7 @@ export type Database = {
           data_date?: string | null
           excerpt?: string | null
           fts?: unknown
+          helpful_count?: number | null
           id?: number
           image_alt?: string | null
           is_published?: boolean | null
@@ -1250,6 +1324,7 @@ export type Database = {
           data_date?: string | null
           excerpt?: string | null
           fts?: unknown
+          helpful_count?: number | null
           id?: number
           image_alt?: string | null
           is_published?: boolean | null
@@ -5849,6 +5924,21 @@ export type Database = {
           cnt: number
         }[]
       }
+      blog_category_views: {
+        Args: never
+        Returns: {
+          category: string
+          post_count: number
+          total_views: number
+        }[]
+      }
+      blog_popular_tags: {
+        Args: { limit_count?: number }
+        Returns: {
+          cnt: number
+          tag: string
+        }[]
+      }
       blog_publish_from_queue: { Args: never; Returns: Json }
       blog_queue_status: { Args: never; Returns: Json }
       build_stock_daily_blog: { Args: { p_date?: string }; Returns: number }
@@ -6525,43 +6615,3 @@ export const Constants = {
     },
   },
 } as const
-
-
-// ─── Convenient type aliases ───
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Post = Database['public']['Tables']['posts']['Row']
-export type Comment = Database['public']['Tables']['comments']['Row']
-export type PostLike = Database['public']['Tables']['post_likes']['Row']
-export type TrendingKeyword = Database['public']['Tables']['trending_keywords']['Row']
-export type StockQuote = Database['public']['Tables']['stock_quotes']['Row']
-export type DiscussionRoom = Database['public']['Tables']['discussion_rooms']['Row']
-export type DiscussionMessage = Database['public']['Tables']['discussion_messages']['Row']
-export type MessageWithProfile = DiscussionMessage & {
-  profiles: Pick<Profile, 'id' | 'nickname' | 'avatar_url'> | null
-}
-export type ShopProduct = Database['public']['Tables']['shop_products']['Row']
-export type ShopOrder = Database['public']['Tables']['shop_orders']['Row']
-export type Notification = Database['public']['Tables']['notifications']['Row']
-export type GradeDefinition = Database['public']['Tables']['grade_definitions']['Row']
-export type SearchLog = Database['public']['Tables']['search_logs']['Row']
-export type ChatMessage = Database['public']['Tables']['chat_messages']['Row']
-export type AptCache = Database['public']['Tables']['apt_cache']['Row']
-export type AptSubscription = Database['public']['Tables']['apt_subscriptions']['Row']
-export type UnsoldApt = Database['public']['Tables']['unsold_apts']['Row']
-export type RedevelopmentProject = Database['public']['Tables']['redevelopment_projects']['Row']
-export type AptTransaction = Database['public']['Tables']['apt_transactions']['Row']
-export type BlogPost = Database['public']['Tables']['blog_posts']['Row']
-export type BlogSeries = Database['public']['Tables']['blog_series']['Row']
-export type PriceAlert = Database['public']['Tables']['price_alerts']['Row']
-export type PortfolioHolding = Database['public']['Tables']['portfolio_holdings']['Row']
-export type PortfolioSnapshot = Database['public']['Tables']['portfolio_snapshots']['Row']
-export type AptReview = Database['public']['Tables']['apt_reviews']['Row']
-export type AptReviewLike = Database['public']['Tables']['apt_review_likes']['Row']
-
-export type PostWithProfile = Post & {
-  profiles: Pick<Profile, 'id' | 'nickname' | 'avatar_url' | 'grade'> | null
-}
-
-export type CommentWithProfile = Comment & {
-  profiles: Pick<Profile, 'id' | 'nickname' | 'avatar_url' | 'grade'> | null
-}

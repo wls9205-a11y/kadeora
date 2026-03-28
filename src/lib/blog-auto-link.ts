@@ -64,6 +64,16 @@ const FEATURE_KEYWORDS: [string, string][] = [
   ['부동산 지도', '/apt/map'], ['블로그 시리즈', '/blog/series'],
   ['투자 캘린더', '/stock'], ['포트폴리오', '/stock'],
   ['부동산 진단', '/apt/diagnose'],
+  // 추가 내부 링크
+  ['실거래가', '/apt?tab=실거래'],
+  ['청약 경쟁률', '/apt/diagnose'],
+  ['청약 가점', '/apt/diagnose'],
+  ['청약 진단', '/apt/diagnose'],
+  ['미분양 현황', '/apt?tab=미분양'],
+  ['재개발 현황', '/apt?tab=재개발'],
+  ['테마주', '/stock'],
+  ['배당주', '/stock'],
+  ['환율', '/stock'],
 ];
 
 const SERIES_KEYWORDS: [string, string][] = [
@@ -77,7 +87,28 @@ const SERIES_KEYWORDS: [string, string][] = [
   ['부동산 세금', '/blog/series/real-estate-tax'],
 ];
 
-const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS];
+const GUIDE_KEYWORDS: [string, string][] = [
+  ['전세 사기', '/blog/jeonse-fraud-checklist-2026'],
+  ['청약통장', '/blog/housing-subscription-score'],
+  ['ISA 계좌', '/blog/isa-account-guide'],
+  ['연금저축', '/blog/pension-vs-irp'],
+  ['ETF 입문', '/blog/etf-beginner-guide'],
+  ['전세보증보험', '/blog/jeonse-insurance-guide'],
+  ['양도소득세', '/blog/capital-gains-tax'],
+  ['종합소득세', '/blog/income-tax-freelancer'],
+  ['DSR 규제', '/blog/dsr-regulation'],
+];
+
+const BUILDER_KEYWORDS: [string, string][] = [
+  ['래미안', '/blog/builder-래미안-2026'],
+  ['힐스테이트', '/blog/builder-힐스테이트-2026'],
+  ['자이', '/blog/builder-자이-2026'],
+  ['푸르지오', '/blog/builder-푸르지오-2026'],
+  ['더샵', '/blog/builder-더샵-2026'],
+  ['포레나', '/blog/builder-포레나-2026'],
+];
+
+const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS, ...BUILDER_KEYWORDS];
 
 export function injectInternalLinks(html: string): string {
   if (!html || html.length < 200) return html;

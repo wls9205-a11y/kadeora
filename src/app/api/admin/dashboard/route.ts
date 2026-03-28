@@ -348,12 +348,64 @@ export async function GET(req: Request) {
 
       // 최근 블로그 20건
       const { data: recent } = await sb.from('blog_posts')
-        .select('id, slug, title, category, view_count, is_published, rewritten_at, created_at')
+        .select('id, slug, title, category, view_count, comment_count, helpful_count, is_published, rewritten_at, created_at')
         .order('created_at', { ascending: false }).limit(20);
 
+      // 인기글 TOP 10
+      const { data: topPosts } = await sb.from('blog_posts')
+        .select('title, slug, view_count, comment_count, helpful_count, category')
+        .eq('is_published', true)
+        .order('view_count', { ascending: false })
+        .limit(10);
+
+      // 댓글 많은 글 TOP 5
+      const { data: topCommented } = await sb.from('blog_posts')
+        .select('title, slug, comment_count, category')
+        .eq('is_published', true).gt('comment_count', 0)
+        .order('comment_count', { ascending: false })
+        .limit(5);
+
+      // helpful 많은 글 TOP 5
+      const { data: topHelpful } = await sb.from('blog_posts')
+        .select('title, slug, helpful_count, category')
+        .eq('is_published', true).gt('helpful_count', 0)
+        .order('helpful_count', { ascending: false })
+        .limit(5);
+
+      // 카테고리별 조회수
+      let catViews: any[] = [];
+      try {
+        const { data: cv } = await sb.rpc('blog_category_views');
+        catViews = cv || [];
+      } catch {}
+
+      // 최근 7일 발행 건수
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+      const { data: recentPublished } = await sb.from('blog_posts')
+        .select('created_at')
+        .eq('is_published', true)
+        .gte('created_at', sevenDaysAgo);
+      const dailyCounts: Record<string, number> = {};
+      (recentPublished || []).forEach(p => {
+        const day = new Date(p.created_at!).toISOString().slice(0, 10);
+        dailyCounts[day] = (dailyCounts[day] || 0) + 1;
+      });
+
+      // 평균 읽기시간
+      const avgReadTime = posts.length > 0
+        ? Math.round(posts.reduce((s, p: any) => s + (p.reading_time_min || 3), 0) / posts.length)
+        : 0;
+
       return NextResponse.json({
-        blog: { total, rewritten, unrewritten: total - rewritten, byCat, totalViews },
+        blog: { total, rewritten, unrewritten: total - rewritten, byCat, totalViews, avgReadTime },
         recentBlogs: recent ?? [],
+        insights: {
+          topPosts: topPosts ?? [],
+          topCommented: topCommented ?? [],
+          topHelpful: topHelpful ?? [],
+          catViews,
+          dailyCounts,
+        },
       });
     }
 

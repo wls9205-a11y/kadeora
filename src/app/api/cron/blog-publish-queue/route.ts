@@ -2,6 +2,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { sendPushBroadcast } from '@/lib/push-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,24 @@ export async function GET(req: NextRequest) {
     if (publishError) {
       console.error('[blog-publish-queue] RPC error:', publishError.message);
       throw new Error(publishError.message);
+    }
+
+    // 발행 성공 시 푸시 알림
+    const publishedId = (publishResult as any)?.published_id;
+    if (publishedId) {
+      try {
+        const { data: post } = await admin.from('blog_posts')
+          .select('title, slug, category')
+          .eq('id', publishedId).single();
+        if (post) {
+          await sendPushBroadcast({
+            title: `📝 ${post.title}`,
+            body: '카더라 블로그에 새 글이 올라왔어요',
+            url: `/blog/${post.slug}`,
+            tag: 'blog-new-post',
+          });
+        }
+      } catch { /* 푸시 실패해도 발행은 유지 */ }
     }
 
     // 큐 상태도 조회 (로그용)

@@ -10,7 +10,7 @@ interface PostRow {
   view_count: number; likes_count: number; comments_count: number;
 }
 
-type TabType = 'posts' | 'bookmarks' | 'comments' | 'stocks' | 'apts';
+type TabType = 'posts' | 'bookmarks' | 'comments' | 'stocks' | 'apts' | 'blog_bookmarks';
 
 interface Props {
   profileId: string;
@@ -22,7 +22,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
   const searchParams = useSearchParams();
   const sb = useMemo(() => createSupabaseBrowser(), []);
   const paramTab = searchParams.get('tab');
-  const initialTab: TabType = paramTab === 'bookmarks' ? 'bookmarks' : paramTab === 'comments' ? 'comments' : paramTab === 'stocks' ? 'stocks' : paramTab === 'apts' ? 'apts' : 'posts';
+  const initialTab: TabType = paramTab === 'bookmarks' ? 'bookmarks' : paramTab === 'comments' ? 'comments' : paramTab === 'stocks' ? 'stocks' : paramTab === 'apts' ? 'apts' : paramTab === 'blog_bookmarks' ? 'blog_bookmarks' : 'posts';
 
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
@@ -47,6 +47,10 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
   // Watch apts state
   const [watchApts, setWatchApts] = useState<any[]>([]);
   const [watchAptsLoaded, setWatchAptsLoaded] = useState(false);
+
+  // Blog bookmarks state
+  const [blogBookmarks, setBlogBookmarks] = useState<any[]>([]);
+  const [blogBookmarksLoaded, setBlogBookmarksLoaded] = useState(false);
 
   const loadBookmarks = async () => {
     if (bookmarksLoaded) return;
@@ -92,6 +96,15 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
     setWatchAptsLoaded(true);
   };
 
+  const loadBlogBookmarks = async () => {
+    if (blogBookmarksLoaded) return;
+    try {
+      const res = await fetch('/api/blog/bookmark');
+      const data = await res.json();
+      setBlogBookmarks(data.bookmarks || []);
+    } catch {} finally { setBlogBookmarksLoaded(true); }
+  };
+
   const loadMorePosts = async () => {
     setLoadingMorePosts(true);
     try {
@@ -116,6 +129,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
     if (tab === 'comments') loadMyComments();
     if (tab === 'stocks') loadWatchStocks();
     if (tab === 'apts') loadWatchApts();
+    if (tab === 'blog_bookmarks') loadBlogBookmarks();
   };
 
   useEffect(() => {
@@ -123,12 +137,13 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
     if (initialTab === 'comments') loadMyComments();
     if (initialTab === 'stocks') loadWatchStocks();
     if (initialTab === 'apts') loadWatchApts();
+    if (initialTab === 'blog_bookmarks') loadBlogBookmarks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const tabs: TabType[] = ['posts', 'comments', ...(isOwner ? ['stocks', 'apts', 'bookmarks'] as TabType[] : [])];
+  const tabs: TabType[] = ['posts', 'comments', ...(isOwner ? ['stocks', 'apts', 'bookmarks', 'blog_bookmarks'] as TabType[] : [])];
   const tabLabels: Record<TabType, string> = {
-    posts: '📝 글', comments: '💬 댓글', stocks: '⭐ 관심종목', apts: '🏠 관심단지', bookmarks: '🔖 북마크',
+    posts: '📝 글', comments: '💬 댓글', stocks: '⭐ 관심종목', apts: '🏠 관심단지', bookmarks: '🔖 북마크', blog_bookmarks: '📑 저장한 글',
   };
 
   const Spinner = () => (
@@ -285,6 +300,30 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                   </Link>
                 );
               })}
+            </div>
+          )
+        )}
+
+        {/* 저장한 블로그 */}
+        {activeTab === 'blog_bookmarks' && (
+          !blogBookmarksLoaded ? <Spinner /> : blogBookmarks.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>📑 저장한 블로그 글이 없어요</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {blogBookmarks.map((post: any, i: number) => (
+                <Link key={post.id} href={`/blog/${post.slug}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ padding: '12px 0', borderBottom: i < blogBookmarks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{post.category}</span>
+                    <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                      <span>👀{post.view_count || 0}</span>
+                      <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           )
         )}

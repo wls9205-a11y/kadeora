@@ -28,6 +28,7 @@ export default function BlogSection() {
   if (loading) return <Spinner />;
 
   const blog = data?.blog ?? {};
+  const insights = data?.insights ?? {};
   const rewritePct = blog.total > 0 ? Math.round((blog.rewritten / blog.total) * 100) : 0;
 
   const CRON_BTNS = [
@@ -51,7 +52,93 @@ export default function BlogSection() {
         <KPICard icon="👁" label="총 조회수" value={blog.totalViews} color={C.cyan} />
         <KPICard icon="✨" label="리라이팅" value={`${rewritePct}%`} sub={`${blog.rewritten}/${blog.total}`} color={C.green} />
         <KPICard icon="📝" label="미리라이팅" value={blog.unrewritten} color={C.yellow} />
+        <KPICard icon="⏱" label="평균 읽기시간" value={`${blog.avgReadTime || 0}분`} color={C.purple} />
       </div>
+
+      {/* 블로그 성과 대시보드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+        {/* 인기글 TOP 10 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>🔥 인기글 TOP 10</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {(insights.topPosts || []).map((p: any, i: number) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                <span style={{ fontWeight: 800, color: i < 3 ? C.brand : C.textDim, minWidth: 18 }}>{i + 1}</span>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: C.text }}>{p.title}</span>
+                <Badge color={C.purple}>{p.category}</Badge>
+                <span style={{ color: C.textDim, flexShrink: 0 }}>👀{fmt(p.view_count)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 카테고리별 조회수 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>📊 카테고리별 성과</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {(insights.catViews || []).map((cv: any) => (
+              <div key={cv.category} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                <span style={{ fontWeight: 600, color: C.text }}>{cv.category}</span>
+                <span style={{ color: C.textDim }}>{fmt(cv.post_count)}편 · 👀{fmt(cv.total_views)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 댓글 많은 글 TOP 5 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>💬 댓글 많은 글</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {(insights.topCommented || []).map((p: any, i: number) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: C.text }}>{p.title}</span>
+                <span style={{ color: C.textDim, flexShrink: 0 }}>💬{p.comment_count}</span>
+              </div>
+            ))}
+            {(insights.topCommented || []).length === 0 && <span style={{ color: C.textDim, fontSize: 12 }}>아직 없음</span>}
+          </div>
+        </div>
+
+        {/* helpful 많은 글 TOP 5 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>👍 도움이 됐어요 TOP</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {(insights.topHelpful || []).map((p: any, i: number) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: C.text }}>{p.title}</span>
+                <span style={{ color: C.textDim, flexShrink: 0 }}>👍{p.helpful_count}</span>
+              </div>
+            ))}
+            {(insights.topHelpful || []).length === 0 && <span style={{ color: C.textDim, fontSize: 12 }}>아직 없음</span>}
+          </div>
+        </div>
+      </div>
+
+      {/* 최근 7일 발행 추이 */}
+      {insights.dailyCounts && Object.keys(insights.dailyCounts).length > 0 && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>📅 최근 7일 발행 추이</h3>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 80 }}>
+            {(() => {
+              const days: string[] = [];
+              for (let i = 6; i >= 0; i--) {
+                days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
+              }
+              const maxCnt = Math.max(1, ...days.map(d => insights.dailyCounts[d] || 0));
+              return days.map(d => {
+                const cnt = insights.dailyCounts[d] || 0;
+                return (
+                  <div key={d} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>{cnt}</span>
+                    <div style={{ width: '100%', borderRadius: 4, background: cnt > 0 ? C.brand : C.border, height: `${Math.max(4, (cnt / maxCnt) * 60)}px`, transition: 'height .3s' }} />
+                    <span style={{ fontSize: 9, color: C.textDim }}>{d.slice(5)}</span>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Category breakdown */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, marginBottom: 20 }}>

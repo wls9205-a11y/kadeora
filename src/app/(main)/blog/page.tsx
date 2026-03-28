@@ -17,7 +17,32 @@ const CAT_META: Record<string, { title: string; desc: string }> = {
   general: { title: '생활 정보 블로그 — 우리동네 소식', desc: '알아두면 유용한 생활 정보, 동네 소식, 정책 변경 사항을 안내합니다.' },
 };
 
-interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string }> }
+const SUB_CATS: Record<string, { key: string; label: string }[]> = {
+  stock: [
+    { key: 'market', label: '시황' },
+    { key: 'analysis', label: '종목분석' },
+    { key: 'theme', label: '테마' },
+    { key: 'weekly', label: '주간리뷰' },
+  ],
+  apt: [
+    { key: 'subscription', label: '청약' },
+    { key: 'trade', label: '실거래' },
+    { key: 'redev', label: '재개발' },
+    { key: 'competition', label: '경쟁률' },
+    { key: 'guide', label: '가이드' },
+  ],
+  unsold: [
+    { key: 'trend', label: '추이' },
+    { key: 'region', label: '지역별' },
+  ],
+  finance: [
+    { key: 'saving', label: '저축' },
+    { key: 'tax', label: '세금' },
+    { key: 'invest', label: '투자' },
+  ],
+};
+
+interface PageProps { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { category = 'all', page = '1', q } = await searchParams;
@@ -60,10 +85,10 @@ const CAT_COLORS: Record<string, string> = {
   stock: 'var(--accent-blue)', apt: 'var(--accent-green)', unsold: 'var(--accent-orange)', finance: 'var(--accent-purple)', general: 'var(--text-tertiary)',
 };
 
-interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string }> }
+interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string; sub?: string }> }
 
 export default async function BlogPage({ searchParams }: Props) {
-  const { category = 'all', sort = 'latest', q = '', page = '1' } = await searchParams;
+  const { category = 'all', sort = 'latest', q = '', page = '1', sub = '' } = await searchParams;
   const pageNum = Math.max(1, parseInt(page) || 1);
   const perPage = 20;
   const sb = await createSupabaseServer();
@@ -83,13 +108,23 @@ export default async function BlogPage({ searchParams }: Props) {
     .order('view_count', { ascending: false })
     .limit(5);
 
+  // 인기 태그
+  let popularTags: { tag: string; cnt: number }[] = [];
+  if (pageNum === 1 && !q) {
+    try {
+      const { data: tagData } = await sb.rpc('blog_popular_tags', { limit_count: 20 });
+      popularTags = tagData || [];
+    } catch {}
+  }
+
   // 메인 쿼리
   const now = new Date().toISOString();
   let q2 = sb.from('blog_posts')
-    .select('id, slug, title, excerpt, category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min, comment_count')
+    .select('id, slug, title, excerpt, category, sub_category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min, comment_count, helpful_count, rewritten_at')
     .eq('is_published', true)
     .or(`published_at.is.null,published_at.lte.${now}`);
   if (category !== 'all') q2 = q2.eq('category', category);
+  if (sub) q2 = q2.eq('sub_category', sub);
   if (q) { const sq = sanitizeSearchQuery(q, 100); if (sq) q2 = q2.or(`title.ilike.%${sq}%,excerpt.ilike.%${sq}%`); }
   if (sort === 'popular') {
     q2 = q2.order('view_count', { ascending: false });
@@ -183,6 +218,32 @@ export default async function BlogPage({ searchParams }: Props) {
         </Link>
       </div>
 
+      {/* 서브카테고리 칩 */}
+      {category !== 'all' && SUB_CATS[category] && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
+            style={{
+              padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: !sub ? 700 : 500,
+              background: !sub ? 'var(--brand)' : 'var(--bg-hover)',
+              color: !sub ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+              textDecoration: 'none', flexShrink: 0, border: 'none',
+            }}>
+            전체
+          </Link>
+          {SUB_CATS[category].map(sc => (
+            <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
+              style={{
+                padding: '4px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 700 : 500,
+                background: sub === sc.key ? 'var(--brand)' : 'var(--bg-hover)',
+                color: sub === sc.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+                textDecoration: 'none', flexShrink: 0, border: 'none',
+              }}>
+              {sc.label}
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* 정렬 토글 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
         {[
@@ -217,6 +278,23 @@ export default async function BlogPage({ searchParams }: Props) {
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 인기 태그 클라우드 */}
+      {popularTags.length > 0 && pageNum === 1 && !q && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+          {popularTags.map((t: any) => (
+            <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
+              style={{
+                padding: '3px 10px', borderRadius: 16,
+                background: 'var(--bg-hover)', border: '1px solid var(--border)',
+                color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)',
+                textDecoration: 'none', fontWeight: 500,
+              }}>
+              #{t.tag} <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{t.cnt}</span>
+            </Link>
+          ))}
         </div>
       )}
 
@@ -271,11 +349,15 @@ export default async function BlogPage({ searchParams }: Props) {
                   {/* 제목 */}
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.title}</div>
                   {/* 메타 */}
-                  <div style={{ display: 'flex', gap: 6, marginTop: 2, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                  <div style={{ display: 'flex', gap: 4, marginTop: 2, fontSize: 10, color: 'var(--text-tertiary)', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span>{new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
-                    <span>{readMin}분</span>
-                    {p.view_count > 0 && <span>{p.view_count.toLocaleString()}</span>}
-                    {(p.comment_count || 0) > 0 && <span>💬{p.comment_count}</span>}
+                    <span>·</span>
+                    <span>📖 {readMin}분</span>
+                    <span>·</span>
+                    <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
+                    {(p.comment_count || 0) > 0 && <><span>·</span><span>💬 {p.comment_count}</span></>}
+                    {(p.helpful_count || 0) > 0 && <><span>·</span><span>👍 {p.helpful_count}</span></>}
+                    {p.rewritten_at && <span style={{ padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)', fontSize: 9, fontWeight: 700 }}>UP</span>}
                   </div>
                 </div>
               </Link>
