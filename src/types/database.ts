@@ -6615,3 +6615,23 @@ export const Constants = {
     },
   },
 } as const
+
+// ─── Custom Types (Supabase 타입 재생성 시 유지 필요) ───
+
+export type PostWithProfile = Database['public']['Tables']['posts']['Row'] & {
+  profiles?: {
+    id?: string;
+    nickname: string | null;
+    avatar_url: string | null;
+    grade: number | null;
+  } | null;
+};
+
+export type CommentWithProfile = Database['public']['Tables']['comments']['Row'] & {
+  profiles?: {
+    id?: string;
+    nickname: string | null;
+    avatar_url: string | null;
+    grade: number | null;
+  } | null;
+};
