@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import HotClient from './HotClient';
+import SectionShareButton from '@/components/SectionShareButton';
 
 export const metadata: Metadata = {
   title: '오늘의 HOT',
@@ -100,7 +101,10 @@ export default async function HotPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"HOT 게시글","item":SITE_URL + "/hot"}]}) }} />
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
+          <SectionShareButton section="hot" label="이번 주 HOT 게시글 모음" pagePath="/hot" />
+        </div>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{dateRange}</p>
       </div>
 

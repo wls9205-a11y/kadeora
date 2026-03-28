@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: SITE_URL + '/api/og?title=&design=2' + encodeURIComponent('회원 등급 안내') + '&category=general', width: 1200, height: 630, alt: '카더라 등급 시스템' }],
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('회원 등급 안내')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 등급 시스템' }],
   },
   twitter: { card: 'summary_large_image' },
   other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/grades' },

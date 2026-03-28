@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import EmptyState from '@/components/EmptyState';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import SectionShareButton from '@/components/SectionShareButton';
 
 function highlightTitle(title: string, query: string): React.ReactNode {
   if (!query) return title;
@@ -232,7 +233,10 @@ export default async function BlogPage({ searchParams }: Props) {
       })}} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📝 블로그</h1>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{totalCount.toLocaleString()}편</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <SectionShareButton section="blog" label="투자 정보 블로그 19,000편+" pagePath="/blog" />
+          <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{totalCount.toLocaleString()}편</span>
+        </div>
       </div>
       <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '0 0 10px' }}>매일 업데이트되는 투자 정보</p>
 

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import SectionShareButton from '@/components/SectionShareButton';
 import { useToast } from '@/components/Toast';
 import type { User } from '@supabase/supabase-js';
 import ChatRoom from './ChatRoom';
@@ -164,7 +165,10 @@ export default function DiscussClient() {
   return (
     <div style={containerStyle}>
       <div style={{ flexShrink: 0, marginBottom: isChat ? 8 : 16 }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
+          <SectionShareButton section="discuss" label="실시간 토론 라운지 — 주식·부동산·경제 이슈" pagePath="/discuss" />
+        </div>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들
           {activeUsers > 0 && (
             <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 700, marginLeft: 8 }}>
