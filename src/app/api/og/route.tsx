@@ -40,10 +40,19 @@ async function loadFont(): Promise<ArrayBuffer | null> {
   ];
   for (const url of urls) {
     try {
-      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const buf = await res.arrayBuffer();
-        if (buf.byteLength > 10000) { _font = buf; return _font; }
+      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(10000) });
+      if (!res.ok) continue;
+      // woff2는 satori 미지원 → Content-Type 헤더로 사전 차단
+      const ct = res.headers.get('content-type') ?? '';
+      if (ct.includes('woff2') || ct.includes('font/woff2')) continue;
+      const buf = await res.arrayBuffer();
+      // 최소 크기 검증 (빈 응답 방지)
+      if (buf.byteLength > 10000) {
+        // 매직 바이트로 woff2 이중 검증: wOF2 = 0x774F4632
+        const view = new Uint8Array(buf.slice(0, 4));
+        if (view[0] === 0x77 && view[1] === 0x4F && view[2] === 0x46 && view[3] === 0x32) continue;
+        _font = buf;
+        return _font;
       }
     } catch { /* 다음 URL 시도 */ }
   }
@@ -394,7 +403,7 @@ export async function GET(req: NextRequest) {
     const subtitle = sp.get('subtitle') ?? '';
     const author   = sp.get('author') ?? '';
     const category = sp.get('category') ?? 'blog';
-    const design   = sp.get('design') ?? '1';   // 1~6
+    const design   = sp.get('design') ?? '2';   // 1~6 (기본: D2 풀컬러 좌측)
     const section  = sp.get('section');
     const likes    = sp.get('likes') ?? '0';
     const comments = sp.get('comments') ?? '0';

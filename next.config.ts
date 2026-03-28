@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
 
+  // Edge Runtime에서 /api/og, /api/og-square가 public/fonts/** 접근할 수 있도록 번들에 포함
+  outputFileTracingIncludes: {
+    '/api/og':        ['./public/fonts/**'],
+    '/api/og-square': ['./public/fonts/**'],
+  },
+
   images: {
     remotePatterns: [
       {
@@ -67,6 +73,19 @@ const nextConfig: NextConfig = {
         source: "/api/og",
         headers: [
           { key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=86400" },
+        ],
+      },
+      {
+        source: "/api/og-square",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=86400" },
+        ],
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
         ],
       },
       {

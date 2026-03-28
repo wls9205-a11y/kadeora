@@ -84,7 +84,11 @@ JSON만: {"title":"제목(40자이내)","content":"마크다운본문","excerpt"
           body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 3500, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(45000),
         });
-        if (!res.ok) continue;
+        if (!res.ok) {
+          // 529 크레딧 부족 → 나머지 반복 낭비 없이 즉시 종료
+          if (res.status === 529 || res.status === 402) break;
+          continue;
+        }
         const data = await res.json();
         const text = data.content?.[0]?.text || '';
         const match = text.match(/\{[\s\S]*\}/);

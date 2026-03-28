@@ -139,7 +139,7 @@ export async function generateMetadata({ params }: Props) {
     },
     twitter: {
       card: 'summary_large_image' as const,
-      images: [ogImage],
+      images: [ogImage, ogSquare],
     },
     other: (() => {
       const allText = `${post.title} ${(post.tags ?? []).join(' ')}`;

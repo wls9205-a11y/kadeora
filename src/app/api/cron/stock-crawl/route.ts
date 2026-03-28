@@ -18,14 +18,14 @@ export const maxDuration = 120;
 
 // 가장 최근 영업일 구하기 (주말/공휴일 제외)
 function getLatestBizDay(): string {
-  const d = new Date();
-  d.setHours(d.getHours() + 9); // KST
+  // UTC ms + 9시간 offset으로 KST 시간 기준 Date 생성
+  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
   // 오후 5시 이전이면 전날 기준 (당일 데이터 미제공)
-  if (d.getHours() < 17) d.setDate(d.getDate() - 1);
-  // 주말 제외
-  while (d.getDay() === 0) d.setDate(d.getDate() - 1); // 일요일
-  while (d.getDay() === 6) d.setDate(d.getDate() - 1); // 토요일
-  return d.toISOString().slice(0, 10).replace(/-/g, '');
+  if (kst.getUTCHours() < 17) kst.setUTCDate(kst.getUTCDate() - 1);
+  // 주말 제외 (getUTCDay 사용 — KST offset 반영된 Date이므로)
+  while (kst.getUTCDay() === 0) kst.setUTCDate(kst.getUTCDate() - 1); // 일요일
+  while (kst.getUTCDay() === 6) kst.setUTCDate(kst.getUTCDate() - 1); // 토요일
+  return kst.toISOString().slice(0, 10).replace(/-/g, '');
 }
 
 // data.go.kr 금융위원회 주식시세 API

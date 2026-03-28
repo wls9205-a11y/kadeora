@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
 
   const result = await withCronLogging('stock-price', async () => {
     const supabase = getSupabaseAdmin();
-    const today = new Date().toISOString().split('T')[0];
+    // KST 기준 날짜 (UTC+9)
+    const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     // KIS API 키가 있으면 실시간 시세 갱신 (향후 구현)
     // KIS_APP_KEY, KIS_APP_SECRET 환경변수 등록 후 구현 예정

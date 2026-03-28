@@ -44,10 +44,18 @@ async function loadFont(): Promise<ArrayBuffer | null> {
   ];
   for (const url of urls) {
     try {
-      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const buf = await res.arrayBuffer();
-        if (buf.byteLength > 10000) { cachedFont = buf; return cachedFont; }
+      const res = await fetch(url, { cache: 'force-cache', signal: AbortSignal.timeout(10000) });
+      if (!res.ok) continue;
+      // woff2는 satori 미지원 → Content-Type 헤더로 사전 차단
+      const ct = res.headers.get('content-type') ?? '';
+      if (ct.includes('woff2') || ct.includes('font/woff2')) continue;
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength > 10000) {
+        // 매직 바이트로 woff2 이중 검증: wOF2 = 0x774F4632
+        const view = new Uint8Array(buf.slice(0, 4));
+        if (view[0] === 0x77 && view[1] === 0x4F && view[2] === 0x46 && view[3] === 0x32) continue;
+        cachedFont = buf;
+        return cachedFont;
       }
     } catch { /* 다음 URL 시도 */ }
   }

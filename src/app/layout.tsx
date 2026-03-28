@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '카더라 - 대한민국 소리소문 정보 커뮤니티',
     description: '부동산 · 주식 · 청약 · 지역 소식',
-    images: [SITE_URL + '/images/brand/kadeora-wide.png'],
+    images: [SITE_URL + '/api/og', SITE_URL + '/api/og-square'],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   verification: {
