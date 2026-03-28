@@ -334,16 +334,18 @@ export default async function HomePage() {
           </div>
           {/* 실시간 프리뷰 */}
           {(indices.length > 0 || openApts.length > 0 || latestBlog) && (
-            <div style={{ marginTop: 16, marginBottom: 16 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, textAlign: 'center' }}>지금 카더라에서</div>
+            <div style={{ marginTop: 20, marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <span className="kd-pulse-dot" /> 지금 카더라에서
+              </div>
               <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', justifyContent: 'center', paddingBottom: 4 }}>
                 {indices.map((idx: any) => {
                   const pct = Number(idx.change_pct) || 0;
                   return (
-                    <Link key={idx.symbol} href="/stock" style={{ flexShrink: 0, minWidth: 160, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)' }}>{idx.name}</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{Number(idx.price).toLocaleString()}</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 2 }}>
+                    <Link key={idx.symbol} href="/stock" className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '0.03em' }}>{idx.name}</div>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', marginTop: 4, letterSpacing: '-0.5px' }}>{Number(idx.price).toLocaleString()}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 4, padding: '2px 8px', borderRadius: 6, background: pct > 0 ? 'rgba(255,107,107,0.08)' : pct < 0 ? 'rgba(108,180,255,0.08)' : 'transparent', display: 'inline-block' }}>
                         {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'}{pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                       </div>
                     </Link>
@@ -352,17 +354,19 @@ export default async function HomePage() {
                 {openApts.map((a: any) => {
                   const diff = Math.ceil((new Date(a.rcept_endde).getTime() - Date.now()) / 86400000);
                   return (
-                    <Link key={a.id} href={`/apt/${a.id}`} style={{ flexShrink: 0, minWidth: 160, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>접수중</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>{a.region_nm} · D-{diff}</div>
+                    <Link key={a.id} href={`/apt/${a.id}`} className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                        <span className="kd-pulse-dot" style={{ background: 'var(--accent-green)', width: 5, height: 5 }} /> 접수중
+                      </div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>{a.region_nm} · <span style={{ color: diff <= 3 ? 'var(--accent-red)' : 'var(--accent-orange)', fontWeight: 700 }}>D-{diff}</span></div>
                     </Link>
                   );
                 })}
                 {latestBlog && (
-                  <Link href={`/blog/${latestBlog.slug}`} style={{ flexShrink: 0, minWidth: 160, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-purple)' }}>최신 블로그</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{latestBlog.title}</div>
+                  <Link href={`/blog/${latestBlog.slug}`} className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-purple)' }}>📝 최신 블로그</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>{latestBlog.title}</div>
                   </Link>
                 )}
               </div>
@@ -374,7 +378,7 @@ export default async function HomePage() {
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 8, marginBottom: 8 }}>
               {todayActivity.posts > 0 && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 20, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-green)', animation: 'pulse 1.5s infinite' }} />
+                  <span className="kd-pulse-dot" style={{ width: 5, height: 5 }} />
                   오늘 {todayActivity.posts}개 글 · {todayActivity.comments}개 댓글
                 </div>
               )}
@@ -504,23 +508,23 @@ export default async function HomePage() {
 
         {/* ━━━ CTA 배너 ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
-          <div style={{
+          <div className="kd-card-glow" style={{
             background: 'linear-gradient(135deg, #152850 0%, #0A1225 100%)',
             borderRadius: 20, padding: 'clamp(32px, 5vw, 56px)', textAlign: 'center',
-            border: '1px solid var(--border-strong)',
           }}>
             <h2 style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, marginBottom: 12 }}>
               지금 바로 시작하세요
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 24, lineHeight: 1.7 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 28, lineHeight: 1.7 }}>
               카카오 계정으로 3초 만에 가입하고,<br />
               주식·부동산·커뮤니티 모든 기능을 무료로 이용하세요.
             </p>
             <Link href="/login" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '14px 36px', borderRadius: 14, fontSize: 16, fontWeight: 700,
+              padding: '15px 40px', borderRadius: 14, fontSize: 16, fontWeight: 700,
               background: '#FEE500', color: '#191919', textDecoration: 'none',
-              boxShadow: '0 4px 16px rgba(254,229,0,0.2)',
+              boxShadow: '0 4px 24px rgba(254,229,0,0.25)',
+              transition: 'transform 0.12s ease, box-shadow 0.2s ease',
             }}>
               <svg width={20} height={20} viewBox="0 0 24 24" fill="#191919"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.79 1.86 5.234 4.66 6.595-.145.524-.935 3.378-.967 3.595 0 0-.02.164.087.227.107.063.232.03.232.03.306-.043 3.55-2.318 4.107-2.715.59.083 1.2.127 1.82.127h.061c5.523 0 10-3.463 10-7.691 0-4.228-4.477-7.691-10-7.691V3z" /></svg>
               카카오로 시작하기

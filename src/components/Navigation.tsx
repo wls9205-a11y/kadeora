@@ -154,11 +154,12 @@ export function Navigation() {
     display: 'flex' as const,
     alignItems: 'center' as const,
     fontSize: 'var(--fs-base)',
-    fontWeight: 700,
+    fontWeight: active ? 800 : 600,
     color: active ? 'var(--brand)' : 'var(--nav-text)',
     textDecoration: 'none' as const,
-    borderBottom: active ? '1.5px solid var(--brand)' : '1.5px solid transparent',
-    transition: 'color 0.1s',
+    borderBottom: active ? '2px solid var(--brand)' : '2px solid transparent',
+    transition: 'color 0.15s, border-color 0.15s',
+    letterSpacing: '-0.2px',
   });
 
   // 토스 미니앱 모드: 네비게이션 전체 숨김 (토스 네이티브 내비바가 대체)
@@ -169,9 +170,9 @@ export function Navigation() {
       {/* ── 헤더 ── */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 200,
-        background: 'var(--nav-bg)',
+        background: 'rgba(12,21,40,0.88)',
+        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border)',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
       }}>
         <div style={{
           maxWidth: 1340, margin: '0 auto', padding: '0 14px',
