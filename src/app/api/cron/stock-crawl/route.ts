@@ -16,17 +16,33 @@ export const maxDuration = 120;
  *   - 무료, 합법, API 키: KIS_APP_KEY + KIS_APP_SECRET
  */
 
+// 가장 최근 영업일 구하기 (주말/공휴일 제외)
+function getLatestBizDay(): string {
+  const d = new Date();
+  d.setHours(d.getHours() + 9); // KST
+  // 오후 5시 이전이면 전날 기준 (당일 데이터 미제공)
+  if (d.getHours() < 17) d.setDate(d.getDate() - 1);
+  // 주말 제외
+  while (d.getDay() === 0) d.setDate(d.getDate() - 1); // 일요일
+  while (d.getDay() === 6) d.setDate(d.getDate() - 1); // 토요일
+  return d.toISOString().slice(0, 10).replace(/-/g, '');
+}
+
 // data.go.kr 금융위원회 주식시세 API
 async function fetchKRXStocks(apiKey: string): Promise<{ stocks: any[]; debug: string }> {
   const stocks: Record<string, any>[] = [];
   const debugLines: string[] = [];
+  const basDt = getLatestBizDay();
+  debugLines.push(`basDt=${basDt}`);
   
+  // mrktCls 없이 전체 조회 (KOSPI+KOSDAQ 한번에), 실패하면 시장별 개별 조회
   for (const marketCode of ['KOSPI', 'KOSDAQ']) {
     let pageNo = 1;
-    const numOfRows = 100; // 디버그용 소량 먼저
+    const numOfRows = 100;
     
     try {
-      const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&resultType=json&mrktCls=${marketCode}`;
+      // basDt 파라미터 추가 — 특정 날짜 기준 조회 (더 안정적)
+      const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&resultType=json&mrktCls=${marketCode}&basDt=${basDt}`;
       const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
       const httpStatus = res.status;
       const rawText = await res.text();
@@ -74,7 +90,7 @@ async function fetchKRXStocks(apiKey: string): Promise<{ stocks: any[]; debug: s
         const fullRows = 1000;
         while (pg * fullRows <= totalCount + fullRows) {
           try {
-            const u2 = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${fullRows}&pageNo=${pg}&resultType=json&mrktCls=${marketCode}`;
+            const u2 = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${fullRows}&pageNo=${pg}&resultType=json&mrktCls=${marketCode}&basDt=${basDt}`;
             const r2 = await fetch(u2, { signal: AbortSignal.timeout(15000) });
             if (!r2.ok) break;
             const d2 = await r2.json();
