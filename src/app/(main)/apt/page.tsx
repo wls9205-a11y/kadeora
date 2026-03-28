@@ -34,6 +34,22 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 
+async function fetchAllRows(sb: any, table: string, select: string, filter?: (q: any) => any) {
+  const rows: any[] = [];
+  let offset = 0;
+  const PAGE = 1000;
+  while (true) {
+    let q = sb.from(table).select(select).range(offset, offset + PAGE - 1);
+    if (filter) q = filter(q);
+    const { data } = await q;
+    if (!data || data.length === 0) break;
+    rows.push(...data);
+    if (data.length < PAGE) break;
+    offset += PAGE;
+  }
+  return rows;
+}
+
 async function fetchAptData() {
   let apts: Record<string, any>[] = [];
   let unsold: Record<string, any>[] = [];
@@ -62,7 +78,7 @@ async function fetchAptData() {
 
     // SSR: 청약 + 미분양(ongoingApts 생성용) + 알림 카운트만 로드
     // 실거래/재개발/월별통계는 클라이언트에서 탭 클릭 시 lazy fetch
-    const [aptsR, unsoldR, alertsR, redevCountR, tradeCountR, redevRegionsR, tradeRegionsR] = await Promise.all([
+    const [aptsR, unsoldR, alertsR, redevCountR, tradeCountR] = await Promise.all([
       sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(1000),
@@ -70,16 +86,18 @@ async function fetchAptData() {
       sb.from('apt_alerts').select('house_manage_no'),
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
       sb.from('apt_transactions').select('id', { count: 'exact', head: true }),
-      sb.from('redevelopment_projects').select('id, region').eq('is_active', true),
-      sb.from('apt_transactions').select('id, region_nm').limit(10000),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
     (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
     redevTotalCount = redevCountR.count ?? 0;
     tradeTotalCount = tradeCountR.count ?? 0;
-    redevelopment = redevRegionsR.data || [];
-    transactions = tradeRegionsR.data || [];
+
+    // 페이지네이션으로 전체 행 수집 (Supabase max_rows=1000 우회)
+    [redevelopment, transactions] = await Promise.all([
+      fetchAllRows(sb, 'redevelopment_projects', 'id, region', (q: any) => q.eq('is_active', true)),
+      fetchAllRows(sb, 'apt_transactions', 'id, region_nm'),
+    ]);
 
     // 지역별 평균가 (분양중 단지에 주입)
     try {
