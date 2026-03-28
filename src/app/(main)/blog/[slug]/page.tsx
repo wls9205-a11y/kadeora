@@ -57,6 +57,7 @@ function normalizeMarkdownHeadings(md: string): string {
 
 
 const GEO_CODES: Record<string, { code: string; lat: string; lng: string }> = {
+  // 광역시·도
   '서울': { code: 'KR-11', lat: '37.5665', lng: '126.9780' },
   '부산': { code: 'KR-26', lat: '35.1796', lng: '129.0756' },
   '대구': { code: 'KR-27', lat: '35.8714', lng: '128.6014' },
@@ -74,6 +75,30 @@ const GEO_CODES: Record<string, { code: string; lat: string; lng: string }> = {
   '경북': { code: 'KR-47', lat: '36.4919', lng: '128.8889' },
   '경남': { code: 'KR-48', lat: '35.4606', lng: '128.2132' },
   '제주': { code: 'KR-50', lat: '33.4996', lng: '126.5312' },
+  // 서울 주요 구
+  '강남구': { code: 'KR-11', lat: '37.5172', lng: '127.0473' },
+  '서초구': { code: 'KR-11', lat: '37.4837', lng: '127.0324' },
+  '송파구': { code: 'KR-11', lat: '37.5145', lng: '127.1059' },
+  '마포구': { code: 'KR-11', lat: '37.5663', lng: '126.9014' },
+  '용산구': { code: 'KR-11', lat: '37.5326', lng: '126.9905' },
+  '영등포구': { code: 'KR-11', lat: '37.5264', lng: '126.8962' },
+  '노원구': { code: 'KR-11', lat: '37.6542', lng: '127.0568' },
+  '강동구': { code: 'KR-11', lat: '37.5301', lng: '127.1238' },
+  '은평구': { code: 'KR-11', lat: '37.6026', lng: '126.9290' },
+  // 경기 주요 시
+  '성남시': { code: 'KR-41', lat: '37.4449', lng: '127.1388' },
+  '수원시': { code: 'KR-41', lat: '37.2636', lng: '127.0286' },
+  '고양시': { code: 'KR-41', lat: '37.6564', lng: '126.8350' },
+  '화성시': { code: 'KR-41', lat: '37.1996', lng: '126.8312' },
+  '용인시': { code: 'KR-41', lat: '37.2411', lng: '127.1776' },
+  '하남시': { code: 'KR-41', lat: '37.5397', lng: '127.2145' },
+  '과천시': { code: 'KR-41', lat: '37.4292', lng: '126.9876' },
+  '의정부시': { code: 'KR-41', lat: '37.7381', lng: '127.0337' },
+  // 부산 주요 구
+  '해운대구': { code: 'KR-26', lat: '35.1631', lng: '129.1635' },
+  '부산진구': { code: 'KR-26', lat: '35.1596', lng: '129.0532' },
+  '동래구': { code: 'KR-26', lat: '35.2063', lng: '129.0845' },
+  '남구': { code: 'KR-26', lat: '35.1357', lng: '129.0847' },
 };
 
 
@@ -124,12 +149,12 @@ export async function generateMetadata({ params }: Props) {
           'ICBM': `${geoEntry[1].lat}, ${geoEntry[1].lng}`,
         } : {}),
         'naver:written_time': post.published_at || post.created_at,
-        'naver:updated_time': (post as any).updated_at || post.published_at || post.created_at,
+        'naver:updated_time': post.updated_at || post.published_at || post.created_at,
         'dg:plink': `${SITE}/blog/${slug}`,
         'article:section': section,
         'article:tag': (post.tags ?? []).slice(0, 5).join(',') || section,
         'article:published_time': post.published_at || post.created_at,
-        'article:modified_time': (post as any).updated_at || post.published_at || post.created_at,
+        'article:modified_time': post.updated_at || post.published_at || post.created_at,
         'article:author': post.author_name || '카더라 데이터팀',
       };
     })(),
