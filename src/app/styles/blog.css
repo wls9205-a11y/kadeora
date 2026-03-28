@@ -29,21 +29,23 @@
 /* ========================================
    블로그 본문 마크다운
    ======================================== */
-.blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 28px 0 12px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; word-break: keep-all; }
-.blog-content h3 { font-size: var(--fs-lg); font-weight: 700; margin: 20px 0 8px; color: var(--text-primary); word-break: keep-all; }
-.blog-content p { margin: 10px 0; line-height: 1.8; overflow-wrap: break-word; word-break: break-word; }
+.blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 32px 0 14px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 10px; word-break: keep-all; letter-spacing: -0.3px; }
+.blog-content h3 { font-size: var(--fs-lg); font-weight: 700; margin: 24px 0 10px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.2px; }
+.blog-content p { margin: 12px 0; line-height: 1.85; overflow-wrap: break-word; word-break: break-word; color: var(--text-secondary); }
 .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: var(--fs-base); table-layout: auto; }
 .blog-content thead { background: var(--bg-surface); }
 .blog-content th { font-weight: 700; padding: 10px 12px; border: 1px solid var(--border); text-align: left; word-break: keep-all; }
 .blog-content td { padding: 10px 12px; border: 1px solid var(--border); word-break: break-word; }
 .blog-content tr:nth-child(even) { background: var(--bg-hover); }
-.blog-content a { color: var(--brand); text-decoration: none; font-weight: 600; }
-.blog-content a:hover { text-decoration: underline; }
-.blog-content hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
-.blog-content ul, .blog-content ol { padding-left: 20px; margin: 8px 0; }
-.blog-content li { margin: 4px 0; line-height: 1.7; }
+.blog-content a { color: var(--brand); text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(59,123,246,0.2); transition: border-color 0.15s; }
+.blog-content a:hover { border-color: var(--brand); }
+.blog-content hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+.blog-content ul, .blog-content ol { padding-left: 22px; margin: 10px 0; }
+.blog-content li { margin: 6px 0; line-height: 1.75; color: var(--text-secondary); }
+.blog-content li::marker { color: var(--brand); }
 .blog-content strong { color: var(--text-primary); font-weight: 700; }
 .blog-content p:empty { display: none; }
+.blog-content blockquote { margin: 16px 0; padding: 12px 16px; border-left: 3px solid var(--brand); background: var(--brand-bg); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); font-style: italic; }
 .blog-content > div:empty { display: none; }
 
 /* 코드 블록 */
