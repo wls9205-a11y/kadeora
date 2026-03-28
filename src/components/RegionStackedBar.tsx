@@ -159,24 +159,48 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         </svg>
 
         {/* Legend — show all 5 categories */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 80 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 80, flex: 1 }}>
+          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>
+            {new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })} 기준 · 총 {total.toLocaleString()}건
+          </div>
           {allEntries.map(e => (
             <div key={e.key} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)' }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: e.color, flexShrink: 0 }} />
               <span style={{ color: 'var(--text-tertiary)' }}>{LABELS[e.key]}</span>
               <span style={{ fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
                 {e.val.toLocaleString()}
-                {e.key === 'unsold' && <span style={{ fontWeight: 400, opacity: 0.6, fontSize: 9 }}>건</span>}
+                <span style={{ fontWeight: 400, opacity: 0.6, fontSize: 9, marginLeft: 1 }}>
+                  {e.key === 'unsold' ? '건' : e.key === 'trade' ? '건' : '건'}
+                </span>
               </span>
             </div>
           ))}
+          {/* 미분양 세대 별도 표시 */}
+          {cats.unsold > 0 && (() => {
+            const unsoldUnits = (activeRegion
+              ? (unsold as Record<string, any>[]).filter(u => {
+                  const r = (u.region_nm || '').replace(/특별시|광역시|특별자치시|특별자치도|도$/, '').trim();
+                  return r === activeRegion;
+                })
+              : (unsold as Record<string, any>[])
+            ).reduce((s: number, u: Record<string, any>) => s + (u.tot_unsold_hshld_co || 0), 0);
+            if (unsoldUnits === 0) return null;
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)', paddingLeft: 14 }}>
+                <span style={{ color: 'var(--text-tertiary)', fontSize: 9 }}>↳ 세대수</span>
+                <span style={{ fontWeight: 700, color: COLORS.unsold, fontVariantNumeric: 'tabular-nums', marginLeft: 'auto', fontSize: 11 }}>
+                  {unsoldUnits.toLocaleString()}<span style={{ fontWeight: 400, opacity: 0.6, fontSize: 9, marginLeft: 1 }}>세대</span>
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
-      {/* Compact tile grid — 4열 고정 */}
+      {/* Compact tile grid — 5열 고정 */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(5, 1fr)',
         gap: 5,
       }}>
         {regions.map((r, i) => {
@@ -187,10 +211,10 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               onClick={() => onRegionClick?.(isActive ? '전체' : r.name)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 3,
-                padding: '5px 6px',
+                padding: '4px 5px',
                 background: isActive ? 'var(--brand-bg, rgba(37,99,235,0.06))' : 'var(--bg-surface)',
                 border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
-                borderRadius: 8,
+                borderRadius: 7,
                 cursor: 'pointer',
                 textAlign: 'left',
                 fontFamily: 'inherit',
@@ -200,19 +224,19 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             >
               {/* Rank */}
               <span style={{
-                fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)',
-                width: 12, textAlign: 'center', flexShrink: 0,
+                fontSize: 8, fontWeight: 700, color: 'var(--text-tertiary)',
+                width: 10, textAlign: 'center', flexShrink: 0,
               }}>
                 {i + 1}
               </span>
 
               {/* Name + mini bar */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
-                  <span style={{ fontSize: 11, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1 }}>
+                  <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {r.name}
                   </span>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                     {r.total.toLocaleString()}
                   </span>
                 </div>

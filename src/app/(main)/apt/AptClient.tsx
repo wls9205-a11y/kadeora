@@ -136,9 +136,9 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {/* 탭 세그먼트 — KPI 숫자 인라인 표시 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
-          { k: 'sub' as const,     icon: '📅', label: '청약',   badge: `${openCount}접·${upcomingCount}예`,  badgeColor: 'var(--accent-green)' },
+          { k: 'sub' as const,     icon: '📅', label: '청약',   badge: `${openCount}·${upcomingCount}`,     badgeColor: 'var(--accent-green)' },
           { k: 'ongoing' as const, icon: '🏢', label: '분양중', badge: ongoingApts.length > 0 ? String(ongoingApts.length) : '',         badgeColor: 'var(--accent-purple)' },
-          { k: 'unsold' as const,  icon: '🏚️', label: '미분양', badge: unsoldTotal > 0 ? `${Math.round(unsoldTotal/1000)}k세대` : '',   badgeColor: 'var(--accent-red)' },
+          { k: 'unsold' as const,  icon: '🏚️', label: '미분양', badge: unsoldTotal > 0 ? `${Math.round(unsoldTotal/1000)}k` : '',        badgeColor: 'var(--accent-red)' },
           { k: 'redev' as const,   icon: '🏗️', label: '재개발', badge: redevCount > 0 ? String(redevCount) : '',                         badgeColor: 'var(--accent-orange)' },
           { k: 'trade' as const,   icon: '💰', label: '실거래', badge: tradeCount > 0 ? `${(tradeCount/1000).toFixed(1)}k` : '',          badgeColor: 'var(--accent-cyan)' },
         ].map(({ k, icon, label, badge, badgeColor }) => {
