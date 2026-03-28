@@ -80,6 +80,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
+        {/* Preconnect — 주요 외부 도메인 DNS/TLS 선행 연결 (LCP 개선) */}
+        <link rel="preconnect" href="https://tezftxakuwhsclarprlz.supabase.co" />
+        <link rel="dns-prefetch" href="https://tezftxakuwhsclarprlz.supabase.co" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://dapi.kakao.com" />
         <link rel="alternate" type="application/rss+xml" title="카더라 RSS" href="/feed.xml" />
         <link rel="alternate" type="application/rss+xml" title="카더라 주식 RSS" href="/feed.xml?category=stock" />
         <link rel="alternate" type="application/rss+xml" title="카더라 부동산 RSS" href="/feed.xml?category=apt" />

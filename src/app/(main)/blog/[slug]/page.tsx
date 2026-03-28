@@ -111,6 +111,27 @@ const CTA_BY_CAT: Record<string, string> = {
   finance: '여러분의 의견을 남겨주세요',
 };
 
+/**
+ * 빌드 타임 정적 생성 — 인기/최신 블로그 200편을 미리 HTML로 생성
+ * Google 크롤러가 즉시 접근 가능하도록 TTFB 0ms 수준으로 제공
+ */
+export async function generateStaticParams() {
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const sb = getSupabaseAdmin();
+    const { data } = await sb
+      .from('blog_posts')
+      .select('slug')
+      .eq('is_published', true)
+      .not('published_at', 'is', null)
+      .order('view_count', { ascending: false })
+      .limit(200);
+    return (data || []).map(p => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
@@ -128,7 +149,7 @@ export async function generateMetadata({ params }: Props) {
       title: post.title, description: post.excerpt || post.title, type: 'article',
       siteName: '카더라', locale: 'ko_KR',
       publishedTime: post.published_at || post.created_at,
-      modifiedTime: post.published_at || post.created_at,
+      modifiedTime: post.updated_at || post.rewritten_at || post.published_at || post.created_at,
       authors: [post.author_name || '카더라 데이터팀'],
       tags: post.tags ?? [],
       section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',

@@ -33,6 +33,9 @@
     "src/app/api/cron/crawl-*/*.ts": {
       "maxDuration": 300
     },
+    "src/app/api/cron/indexnow-mass/*.ts": {
+      "maxDuration": 120
+    },
     "src/app/(main)/**/*.tsx": {
       "maxDuration": 30
     },
@@ -348,6 +351,10 @@
     {
       "path": "/api/cron/invite-reward",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/indexnow-mass",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

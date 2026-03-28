@@ -16,6 +16,24 @@ import Disclaimer from '@/components/Disclaimer';
 
 interface Props { params: Promise<{ symbol: string }> }
 
+/**
+ * 빌드 타임 정적 생성 — 전 종목 페이지를 미리 생성
+ * 728종목이라 빌드 부담 적음 + 크롤러 TTFB 극소화
+ */
+export async function generateStaticParams() {
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const sb = getSupabaseAdmin();
+    const { data } = await sb
+      .from('stock_quotes')
+      .select('symbol')
+      .eq('is_active', true);
+    return (data || []).map(s => ({ symbol: s.symbol }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { symbol } = await params;
   const sb = await createSupabaseServer();
