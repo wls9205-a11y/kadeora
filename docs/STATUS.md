@@ -1,21 +1,21 @@
 # 카더라 프로젝트 STATUS — 세션 43 (2026-03-28 KST)
-> 호스팅어 전수조사 + 블로그 10가지 개선 + 309편 크론 + 블로그 전수조사
+> 블로그 시각화 v2 + SEO geo + 시드 49편 + KPI 수정 + 알림 이동 + 포인트 버그
 > **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 프로덕션 현황 (실시간)
 
 | 지표 | 수치 |
 |------|------|
-| **유저** | 119명 |
-| **게시글/댓글** | 4,082 / 2,604 |
-| **블로그** | 15,502편 |
-| **주식 종목** | 247개 |
-| **청약** | 2,685건 |
-| **apt_sites (active)** | 5,505 |
+| **유저** | 120명 |
+| **게시글/댓글** | 4,083 / 2,607 |
+| **블로그** | 15,502편 (시드 49편 포함) |
+| **주식 종목** | 249개 |
+| **청약** | 2,692건 |
+| **apt_sites (active)** | 5,522 |
 | **실거래** | 5,408건 |
-| **미분양** | 203건 |
+| **미분양** | 180건 (68,264세대) |
 | **재개발** | 202건 |
-| **토론** | 30개 |
+| **DB 크기** | 227 MB |
 | **프로덕션 에러** | 0건 |
 
 ## 코드베이스
@@ -23,9 +23,9 @@
 | 지표 | 수치 |
 |------|------|
 | 파일 수 | 506개 |
-| 총 줄 수 | 57,323줄 |
+| 총 줄 수 | 57,305줄 |
 | API 라우트 | 167개 |
-| 크론 | 73개 (57+14신규+2) |
+| 크론 | 73개 |
 | DB 테이블 | 125개 |
 | `as any` | 62건 |
 | `ignoreBuildErrors` | **false** |
@@ -86,12 +86,78 @@
 
 **전수조사 정상 확인:** SSR 15,502편, 카테고리 6개, 인기글, 태그 클라우드, 시리즈, OG 이미지, TOC, FAQ, 댓글, 관련글, 공유, 도움이됐어요/저장, JSON-LD 4종
 
+### 6. 블로그 시각화 v2 — 8가지 알록달록 요소 (b946de7) [COMPLETED]
+
+`src/lib/blog-visual-enhancer.ts` 전면 재작성 (167줄 → 216줄):
+1. OG 커버 이미지 히어로 (cover_image 배너 + alt 텍스트)
+2. 히어로 통계 카드 (테이블에서 평균가/최고가/평당가/건수 추출 → 4색 카드)
+3. 카테고리 컬러 태그 바 (tags → 8색 순환 칩)
+4. 가격 레인지 바 (최저~최고가 그라데이션+인디케이터)
+5. 체크포인트 아이콘 카드 (교통/학군/개발 키워드 감지)
+6. 그라데이션 구분선 (hr → 무지개 그라데이션)
+7. 인용 블록 (blockquote → 보라색 좌측 보더 카드)
+8. 숫자 컬러 뱃지 (단위별 색상: 만원=파랑, 억=보라, 건=주황)
+
+### 7. SEO geo 강화 + 프롬프트 다양화 (22cae1a) [COMPLETED]
+
+- 블로그 geo.position 좌표 17개 지역 추가 (위도/경도) + ICBM 메타태그
+- 주식 상세 페이지 geo 메타 4가지 추가 (KR-11 서울)
+- `blog-prompt-diversity.ts` 신규: 4차원 랜덤 조합 + 카테고리별 8가지 도입부
+- 적용 크론 6개 + blog-rewrite 스타일 5→8가지
+
+### 8. 부동산 KPI 수정 (794ab7f, 54bdf6a) [COMPLETED]
+
+- 실거래 KPI 0건 → tradeTotalCount SSR count 추가
+- 실거래 표시 형식 5.4k → 5,408 (toLocaleString 통일)
+- 모든 KPI 6개 표시 형식 통일 확인: 접수중 1, 예정 8, 분양중 670, 미분양 68,264, 재개발 202, 실거래 5,408
+
+### 9. 롱테일 시드 콘텐츠 49편 발행 [COMPLETED]
+
+| 유형 | 편수 | 대표 제목 |
+|------|------|-----------|
+| 입주 가이드 | 8편 | 체크리스트, 청소비용, 비용총정리, 하자보수, 꿀팁, 인테리어, 서류, 가스개통 |
+| 연령대별 | 6편 | 20대 첫청약, 30대 신혼부부, 40대 갈아타기, 50대 다운사이징, 20대 주식, 50대 배당주 |
+| 초보자 FAQ | 4편 | 청약FAQ, 전세vs월세, 갭투자, 부동산세금 |
+| 체크리스트 | 3편 | 매매계약, 전세계약, 모델하우스 |
+| 대출/세금 | 5편 | 생애최초주담대, 취득세, 양도세, DSR/LTV/DTI, 주담대비교 |
+| 주식 용어 | 8편 | PER/PBR/ROE, ETF, 공매도, 배당금, 차트, 시총, IPO, 섹터로테이션 |
+| 자산배분 | 3편 | 30대 자산배분, 40대 리밸런싱, 비상금 |
+| 지역 비교 | 8편 | 강남vs송파, 수원vs용인, 해운대vs수영, 마포vs영등포, 대전vs세종, 인천vs김포, 수성vs달서, 판교vs광교 |
+| 미분양/재건축 | 4편 | 미분양, 재건축, 재개발, 리츠 |
+
+- 모든 49편 품질 게이트 통과: 800자+, 내부링크, FAQ, 목차, 지도(apt/unsold)
+- 품질 게이트 제한 복원: 30건/일, 10건/시간 ✅
+
+### 10. 알림 클릭 시 댓글/게시글 이동 수정 (57ae098) [COMPLETED]
+
+**문제:** 알림 클릭 → 항상 /feed로 이동. 해당 게시글로 안 감.
+**원인:** notifications 테이블에 link 컬럼 없음 + select에서 미포함
+**수정:**
+- DB: `notifications.link` text 컬럼 추가
+- DB: `notify_on_comment` 트리거 → `/feed/{post_id}` link 저장
+- DB: `handle_post_like` 트리거 → `/feed/{post_id}` link 저장
+- 프론트: select에 link 컬럼 추가, getNotifLink()가 정확한 경로 반환
+
+### 11. 프로필 사진 포인트 무한 지급 버그 수정 (6857e37) [COMPLETED]
+
+**문제:** 아바타등록 30P가 같은 유저에게 4회 = 120P 중복 지급
+**원인:** `avatar_point_granted.user_id`에 UNIQUE 제약 없음 + API에서 포인트 지급 후 grant 기록 (race condition)
+**수정:**
+- DB: UNIQUE 제약 추가 → DB 레벨 중복 차단
+- DB: INSERT 정책 WITH CHECK (user_id = auth.uid())
+- DB: 중복 90P 차감 (관리자조정)
+- API: insert 먼저(UNIQUE 차단) → 성공 시에만 포인트 지급 패턴으로 전면 재작성
+- 포인트 지급 실패 시 grant 기록 롤백
+
 ---
 
-## 세션 43 커밋
+## 세션 43 커밋 (전체)
 
 | SHA | 내용 |
 |-----|------|
+| `6857e37` | 프로필 사진 포인트 무한 지급 버그 수정 |
+| `57ae098` | 알림 클릭 시 해당 댓글/게시글 이동 수정 |
+| `e9b36e1` | STATUS.md 업데이트 |
 | `4ab3230` | 블로그 전수조사 3가지 이슈 수정 |
 | `18af482` | 14개 대량 블로그 크론 (5,017줄) |
 | `23b6fae` | PostWithProfile 타입 복원 |
@@ -99,7 +165,7 @@
 | `c1fe899` | 블로그 10가지 개선 |
 | `794ab7f` | 부동산 실거래 KPI 0건 수정 |
 | `22cae1a` | SEO geo 강화 + 프롬프트 다양화 |
-| `b946de7` | 블로그 시각화 v2 |
+| `b946de7` | 블로그 시각화 v2 — 8가지 알록달록 요소 |
 | `d6b5c84` | 블로그 위치 정보 깨짐 수정 |
 
 ---
@@ -119,7 +185,18 @@
 - `src/app/(main)/blog/feed/route.ts` — 블로그 RSS
 - `src/components/BlogActions.tsx` — 도움이됐어요 + 북마크
 - `src/lib/blog-auto-link.ts` — 100+ 키워드
-- `src/lib/blog-visual-enhancer.ts` — 8가지 시각 요소
+- `src/lib/blog-visual-enhancer.ts` — 8가지 시각 요소 (216줄)
+- `src/lib/blog-prompt-diversity.ts` — 프롬프트 다양화 (108줄)
+
+### 부동산
+- `src/app/(main)/apt/AptClient.tsx` — KPI 6카드 (tradeTotalCount prop)
+- `src/app/(main)/apt/page.tsx` — SSR count 쿼리 (apt_transactions)
+
+### 알림
+- `src/app/(main)/notifications/page.tsx` — 알림 목록 + link 기반 이동
+
+### 포인트
+- `src/app/api/profile/avatar-point/route.ts` — insert-first 패턴 (UNIQUE 차단)
 
 ### 어드민
 - `src/app/admin/sections/system.tsx` — GOD MODE 73크론
@@ -152,7 +229,7 @@
 ### 기존 PENDING
 - [ ] /api/og 한글 폰트 포함 (Pretendard)
 - [ ] as any 62건 정리
-- [ ] 지역별 현황 디자인 변경
+- [ ] 나머지 시드 콘텐츠 ~27편 (추가 지역 비교, 체크리스트 등)
 
 ## 주의사항 (다음 세션 필독)
 - **PostWithProfile:** database.ts 끝 커스텀 타입 — Supabase 타입 재생성 시 유지
@@ -161,7 +238,10 @@
 - **blog_helpful RLS:** 로그인 유저만 INSERT/DELETE
 - **블로그 데이터:** 절대 삭제/수정 금지
 - **stockcoin.net:** 절대 카더라와 연결 금지
+- **avatar_point_granted:** UNIQUE(user_id) 제약 추가됨 — insert-first 패턴 필수
+- **notifications.link:** 신규 컬럼 — 알림 생성 시 link 필수 포함
+- **품질 게이트:** 30건/일, 10건/시간 복원 완료
 
 ## 트랜스크립트
-- 세션 43: `/mnt/transcripts/2026-03-28-01-13-33-2026-03-28-01-00-12-kadeora-session43-blog-hostinger-admin.txt`
+- 세션 43: `/mnt/transcripts/2026-03-28-01-22-36-kadeora-session43-fullstack.txt`
 - 세션 40~42: `/mnt/transcripts/2026-03-27-08-28-51-kadeora-session40-42-satellite-admin-blog.txt`
