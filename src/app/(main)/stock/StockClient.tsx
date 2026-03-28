@@ -60,6 +60,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
   const [showInactive, setShowInactive] = useState(false);
+  const [viewMode, setViewMode] = useState<'list'|'card'>('list');
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
@@ -840,6 +841,21 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               미제공 {inactiveCount}
             </label>
           )}
+          {/* 뷰 모드 토글 */}
+          {currentTab === 'ranking' && (
+            <button onClick={() => setViewMode(v => v === 'list' ? 'card' : 'list')} title={viewMode === 'list' ? '카드뷰' : '리스트뷰'} style={{
+              width: 32, height: 32, borderRadius: 8, border: '1px solid var(--border)',
+              background: 'var(--bg-surface)', color: 'var(--text-secondary)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              transition: 'border-color 0.15s',
+            }}>
+              {viewMode === 'list' ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              )}
+            </button>
+          )}
         </div>
       )}
 
@@ -942,7 +958,58 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                 </div>
               )}
             </div>
-          ) : displayStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
+          ) : viewMode === 'card' && currentTab === 'ranking' ? (
+              /* ── 카드뷰 ── */
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                {displayStocks.map((s) => {
+                  const pct = s.change_pct ?? 0;
+                  const isGlobal = s.currency === 'USD';
+                  const isWatched = watchlistSymbols.includes(s.symbol);
+                  const upColor = isGlobal ? 'var(--accent-green)' : 'var(--accent-red)';
+                  const downColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
+                  const priceColor = pct > 0 ? upColor : pct < 0 ? downColor : 'var(--text-tertiary)';
+                  const pts = sparklines[s.symbol];
+                  const sparkEl = pts?.length >= 2 ? (() => {
+                    const min = Math.min(...pts); const max = Math.max(...pts); const range = max - min || 1;
+                    const W = 60; const H = 24;
+                    const coords = pts.map((v, i) => [(i / (pts.length - 1)) * W, H - 2 - ((v - min) / range) * (H - 4)]);
+                    const line = coords.map(([x,y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+                    const fillPath = `M${coords[0][0].toFixed(1)},${H} ` + coords.map(([x,y]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + ` L${coords[coords.length-1][0].toFixed(1)},${H}Z`;
+                    const fillCol = pct > 0 ? (isGlobal ? 'rgba(46,232,165,0.12)' : 'rgba(255,107,107,0.12)') : pct < 0 ? (isGlobal ? 'rgba(248,113,113,0.12)' : 'rgba(108,180,255,0.12)') : 'rgba(148,163,184,0.08)';
+                    return (
+                      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', marginTop: 6 }}>
+                        <path d={fillPath} fill={fillCol} />
+                        <polyline points={line} fill="none" stroke={priceColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    );
+                  })() : null;
+                  return (
+                    <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} className="kd-section-card" style={{
+                      display: 'block', padding: '12px', background: 'var(--bg-surface)',
+                      border: '1px solid var(--border)', borderRadius: 12,
+                      textDecoration: 'none', color: 'inherit', position: 'relative',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, fontFamily: 'monospace' }}>{s.symbol}{s.sector ? ` · ${s.sector}` : ''}</div>
+                        </div>
+                        <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0 }}>
+                          {isWatched ? '★' : '☆'}
+                        </button>
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.5px' }}>
+                        {s.price === 0 ? '—' : isGlobal ? `$${s.price?.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2})}` : `₩${fmt(s.price)}`}
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: priceColor, display: 'inline-block', padding: '1px 6px', borderRadius: 4, background: pct > 0 ? `${priceColor}12` : pct < 0 ? `${priceColor}12` : 'transparent', marginTop: 2 }}>
+                        {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {Math.abs(pct).toFixed(2)}%
+                      </div>
+                      {sparkEl}
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : displayStocks.map((s, i) => <StockRow key={s.symbol} s={s} rank={i + 1} />)}
           {/* 관심종목 탭: 오늘 수익률 요약 + 비교 바로가기 */}
           {currentTab === 'watchlist' && displayStocks.length > 0 && (() => {
             const up = displayStocks.filter(s => (s.change_pct ?? 0) > 0).length;
