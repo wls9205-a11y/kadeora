@@ -163,6 +163,18 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>
 
+      {/* 히어로 이미지 (검색엔진 썸네일 소스) */}
+      <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${fmtPrice(Number(s.price), s.currency ?? undefined)} ${changePct >= 0 ? '▲' : '▼'}${Math.abs(changePct).toFixed(2)}%`)}&design=2&category=stock`}
+          alt={`${s.name} (${symbol}) 주가 시세 — ${s.market} 상장 ${s.sector || ''} 종목`}
+          width={1200} height={630}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          loading="eager"
+        />
+      </div>
+
       {/* 가격 헤더 */}
       <div style={{
         background: isUp ? 'linear-gradient(135deg, rgba(248,113,113,0.06), var(--bg-surface))' : isDown ? 'linear-gradient(135deg, rgba(96,165,250,0.06), var(--bg-surface))' : 'var(--bg-surface)',

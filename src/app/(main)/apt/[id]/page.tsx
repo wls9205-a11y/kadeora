@@ -350,6 +350,18 @@ export default async function AptUnifiedPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{name}</span>
       </nav>
 
+      {/* 히어로 이미지 (검색엔진 썸네일 소스) */}
+      <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', position: 'relative', aspectRatio: '1200/630' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/api/og?title=${encodeURIComponent(name)}&design=2&category=apt&subtitle=${encodeURIComponent(`${region} ${site?.sigungu || ''} · ${site?.builder || sub?.constructor_nm || ''}`.trim())}`}
+          alt={`${name} ${tLabel[sType]} 정보 — ${region} ${site?.sigungu || ''} ${site?.total_units || sub?.tot_supply_hshld_co || ''}세대`}
+          width={1200} height={630}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          loading="eager"
+        />
+      </div>
+
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>

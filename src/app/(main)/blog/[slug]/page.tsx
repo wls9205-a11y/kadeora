@@ -397,6 +397,19 @@ export default async function BlogDetailPage({ params }: Props) {
       </nav>
 
       <article style={{ paddingBottom: 40 }}>
+        {/* 커버 이미지 (검색엔진 썸네일 소스) */}
+        {post.cover_image && (
+          <div style={{ marginBottom: 16, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.cover_image}
+              alt={post.image_alt || `${post.title} — 카더라 블로그`}
+              width={1200} height={630}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+              loading="eager"
+            />
+          </div>
+        )}
         <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px', wordBreak: 'keep-all' }}>{post.title}</h1>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
