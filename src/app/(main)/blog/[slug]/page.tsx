@@ -201,9 +201,14 @@ export default async function BlogDetailPage({ params }: Props) {
   sb.rpc('increment_blog_view', { p_blog_id: post.id }).then(() => {});
 
   let isLoggedIn = false;
+  let isPremiumUser = false;
   try {
     const { data: { user } } = await sb.auth.getUser();
     isLoggedIn = !!user;
+    if (user) {
+      const { data: prof } = await sb.from('profiles').select('is_premium, premium_expires_at').eq('id', user.id).single();
+      isPremiumUser = !!(prof?.is_premium && prof?.premium_expires_at && new Date(prof.premium_expires_at) > new Date());
+    }
   } catch { /* 비로그인/만료 세션 */ }
 
   // 관련 글 추천 (태그 유사도 → 같은 카테고리 인기순 폴백)
@@ -601,7 +606,8 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
       {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
 
-      {/* 프리미엄 업셀 배너 */}
+      {/* 프리미엄 업셀 배너 — 프리미엄 유저에게는 숨김 */}
+      {!isPremiumUser && (
       <div className="kd-card-glow" style={{ padding: '18px 16px', margin: '16px 0', background: 'var(--bg-surface)', borderRadius: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>👑</div>
@@ -614,6 +620,7 @@ export default async function BlogDetailPage({ params }: Props) {
           </Link>
         </div>
       </div>
+      )}
 
       {/* 댓글 섹션 */}
       <BlogCommentCTA commentCount={comments.length} />

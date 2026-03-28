@@ -434,6 +434,20 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 면책고지 */}
       <Disclaimer type="stock" compact />
 
+      {/* 프리미엄 업셀 */}
+      <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 22 }}>🤖</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 {s.name} 리포트</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프리미엄 멤버십 · 매일 아침 브리핑</div>
+          </div>
+          <Link href="/premium" style={{ padding: '7px 14px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 700, textDecoration: 'none', flexShrink: 0 }}>
+            자세히
+          </Link>
+        </div>
+      </div>
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         <ShareButtons title={`${s.name} (${symbol}) 주가`} postId={symbol} />
       </div>

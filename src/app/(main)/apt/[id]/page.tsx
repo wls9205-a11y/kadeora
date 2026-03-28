@@ -620,6 +620,20 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       </div>
 
+      {/* 프리미엄 업셀 */}
+      <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 22 }}>🔔</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>청약 마감 알림 받아보세요</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프리미엄 멤버십 · D-3, D-1 자동 알림</div>
+          </div>
+          <Link href="/premium" style={{ padding: '7px 14px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 700, textDecoration: 'none', flexShrink: 0 }}>
+            자세히
+          </Link>
+        </div>
+      </div>
+
       <Disclaimer />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>📊 데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>
     </article>
