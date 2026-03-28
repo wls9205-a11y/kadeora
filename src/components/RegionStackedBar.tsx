@@ -22,12 +22,12 @@ interface Props {
   shareButton?: React.ReactNode;
 }
 
-const COLORS = {
-  sub: 'var(--accent-green)',
-  ongoing: 'var(--accent-purple)',
-  unsold: 'var(--accent-red)',
-  redev: 'var(--accent-orange)',
-  trade: 'var(--accent-blue)',
+const COLORS: Record<string, string> = {
+  sub: '#3B9B6B',
+  ongoing: '#7F77DD',
+  unsold: '#E24B4A',
+  redev: '#D85A30',
+  trade: '#378ADD',
 };
 
 const LABELS: Record<string, string> = {
@@ -37,6 +37,8 @@ const LABELS: Record<string, string> = {
   redev: '재개발',
   trade: '실거래',
 };
+
+const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
 export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, onRegionClick, activeRegion, shareButton }: Props) {
   const regions = useMemo(() => {
@@ -74,79 +76,158 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
   if (regions.length === 0) return null;
 
-  // 선택된 지역 데이터 또는 전체
   const sel = activeRegion ? regions.find(r => r.name === activeRegion) : null;
   const cats = sel ? { sub: sel.sub, ongoing: sel.ongoing, unsold: sel.unsold, redev: sel.redev, trade: sel.trade } : grandCats;
   const total = sel ? sel.total : grandTotal;
 
-  const entries = [
-    { key: 'sub', val: cats.sub, color: COLORS.sub },
-    { key: 'ongoing', val: cats.ongoing, color: COLORS.ongoing },
-    { key: 'unsold', val: cats.unsold, color: COLORS.unsold },
-    { key: 'redev', val: cats.redev, color: COLORS.redev },
-    { key: 'trade', val: cats.trade, color: COLORS.trade },
-  ].filter(c => c.val > 0);
+  const entries = CAT_KEYS
+    .map(key => ({ key, val: cats[key], color: COLORS[key] }))
+    .filter(c => c.val > 0);
+
+  // Donut geometry
+  const R = 42;
+  const CIRC = 2 * Math.PI * R;
+
+  let offset = 0;
+  const arcs = entries.map(e => {
+    const len = total > 0 ? (e.val / total) * CIRC : 0;
+    const arc = { ...e, dasharray: `${len} ${CIRC - len}`, dashoffset: -offset };
+    offset += len;
+    return arc;
+  });
 
   return (
     <div style={{ marginBottom: 8 }}>
-      {/* 헤더: 제목 + 드롭다운 + 공유 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
-          <select
-            value={activeRegion || '전체'}
-            onChange={e => onRegionClick?.(e.target.value)}
-            style={{
-              padding: '3px 24px 3px 8px', borderRadius: 8,
-              border: '1px solid var(--border)', background: 'var(--bg-surface)',
-              color: activeRegion ? 'var(--brand)' : 'var(--text-primary)',
-              fontSize: 'var(--fs-xs)', fontWeight: 600, fontFamily: 'inherit',
-              cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none',
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat', backgroundPosition: 'right 6px center',
-            }}
-          >
-            <option value="전체">전체 {grandTotal.toLocaleString()}건</option>
-            {regions.map(r => (
-              <option key={r.name} value={r.name}>{r.name} {r.total.toLocaleString()}건</option>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
+        {shareButton}
+      </div>
+
+      {/* Donut + Legend */}
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 6,
+      }}>
+        {/* Donut chart */}
+        <svg width={110} height={110} viewBox="0 0 110 110" style={{ flexShrink: 0 }}>
+          {/* Background ring */}
+          <circle cx={55} cy={55} r={R} fill="none" stroke="var(--border)" strokeWidth={16} opacity={0.4} />
+          {/* Category arcs */}
+          <g transform="rotate(-90 55 55)">
+            {arcs.map(a => (
+              <circle
+                key={a.key}
+                cx={55}
+                cy={55}
+                r={R}
+                fill="none"
+                stroke={a.color}
+                strokeWidth={16}
+                strokeDasharray={a.dasharray}
+                strokeDashoffset={a.dashoffset}
+                strokeLinecap="butt"
+                style={{ transition: 'stroke-dasharray 0.3s, stroke-dashoffset 0.3s' }}
+              />
             ))}
-          </select>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
-            {total.toLocaleString()}건
-          </span>
-          {shareButton}
+          </g>
+          {/* Center text */}
+          {sel ? (
+            <>
+              <text x={55} y={50} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 11, fontWeight: 600, fill: 'var(--text-secondary)' }}>
+                {sel.name}
+              </text>
+              <text x={55} y={66} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 14, fontWeight: 700, fill: 'var(--text-primary)' }}>
+                {total.toLocaleString()}
+              </text>
+            </>
+          ) : (
+            <text x={55} y={60} textAnchor="middle" dominantBaseline="central" style={{ fontSize: 15, fontWeight: 700, fill: 'var(--text-primary)' }}>
+              {total.toLocaleString()}
+            </text>
+          )}
+        </svg>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 80 }}>
+          {entries.map(e => (
+            <div key={e.key} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: e.color, flexShrink: 0 }} />
+              <span style={{ color: 'var(--text-tertiary)' }}>{LABELS[e.key]}</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
+                {e.val.toLocaleString()}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
+      {/* Compact tile grid */}
       <div style={{
-        background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '8px 10px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+        gap: 6,
       }}>
-        {/* 비율 바 */}
-        <div style={{ height: 20, borderRadius: 5, overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
-          {entries.map(cat => (
-            <div key={cat.key} style={{
-              width: `${(cat.val / total) * 100}%`, height: '100%',
-              background: cat.color, opacity: 0.85,
-              minWidth: cat.val > 0 ? 3 : 0, transition: 'width 0.3s',
-            }} title={`${LABELS[cat.key]}: ${cat.val.toLocaleString()}건 (${Math.round((cat.val / total) * 100)}%)`} />
-          ))}
-        </div>
-
-        {/* 범례 + 건수 */}
-        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-          {entries.map(cat => (
-            <span key={cat.key} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: 2, background: cat.color, flexShrink: 0 }} />
-              {LABELS[cat.key]}
-              <span style={{ fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                {cat.val.toLocaleString()}
+        {regions.map((r, i) => {
+          const isActive = activeRegion === r.name;
+          return (
+            <button
+              key={r.name}
+              onClick={() => onRegionClick?.(isActive ? '전체' : r.name)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '6px 8px',
+                background: 'var(--bg-surface)',
+                border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
+                borderRadius: 8,
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontFamily: 'inherit',
+                width: '100%',
+                transition: 'border-color 0.15s',
+              }}
+            >
+              {/* Rank */}
+              <span style={{
+                fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)',
+                width: 16, textAlign: 'center', flexShrink: 0,
+              }}>
+                {i + 1}
               </span>
-            </span>
-          ))}
-        </div>
+
+              {/* Name + mini bar */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {r.name}
+                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                    {r.total.toLocaleString()}
+                  </span>
+                </div>
+                {/* Mini stacked bar */}
+                <div style={{ display: 'flex', width: 40, height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
+                  {CAT_KEYS.map(k => {
+                    const v = r[k];
+                    if (v <= 0) return null;
+                    return (
+                      <div
+                        key={k}
+                        style={{
+                          width: `${(v / r.total) * 100}%`,
+                          height: '100%',
+                          background: COLORS[k],
+                          minWidth: v > 0 ? 1 : 0,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ function colorFor(unit: string): string { return UNIT_COLORS[unit.replace(/\s/g,
 
 // ── 1. OG 커버 이미지 히어로 ──
 function insertCoverImage(html: string, opts: EnhanceOptions): string {
-  if (!opts.coverImage) return html;
+  if (!opts.coverImage || !opts.coverImage.trim()) return html;
   const alt = opts.imageAlt || `${opts.title || '카더라 블로그'} — ${opts.category === 'stock' ? '주식 분석' : opts.category === 'apt' ? '부동산 분석' : '투자 정보'}`;
   const hero = `<div style="margin:0 0 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"><img src="${opts.coverImage}" alt="${alt}" loading="eager" decoding="async" style="width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover" /></div>`;
   return hero + html;
@@ -65,16 +65,8 @@ function insertHeroStats(html: string): string {
 }
 
 // ── 3. 카테고리 컬러 태그 바 ──
-function insertColorTags(html: string, opts: EnhanceOptions): string {
-  const tags = opts.tags;
-  if (!tags || tags.length === 0) return html;
-  const tagHtml = tags.slice(0, 6).map((t, i) => {
-    const c = COLORS[i % COLORS.length];
-    return `<span style="font-size:12px;padding:4px 12px;border-radius:14px;background:${c}15;color:${c};border:1px solid ${c}40;font-weight:600">#${t}</span>`;
-  }).join('');
-  const bar = `<div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0">${tagHtml}</div>`;
-  const h2Idx = html.indexOf('<h2');
-  return h2Idx > 0 ? html.slice(0, h2Idx) + bar + html.slice(h2Idx) : bar + html;
+function insertColorTags(html: string, _opts: EnhanceOptions): string {
+  return html;
 }
 
 // ── 4. 가격 레인지 바 ──
@@ -87,7 +79,7 @@ function insertPriceRange(html: string): string {
   const avg = parseFloat(avgM[1].replace(/,/g, ''));
   const min = parseFloat(minM[1].replace(/,/g, ''));
   const max = parseFloat(maxM[1].replace(/,/g, ''));
-  if (max <= min) return html;
+  if (max <= min || (avg === 0 && min === 0 && max === 0)) return html;
 
   const pct = Math.round(((avg - min) / (max - min)) * 100);
   const fmt = (v: number) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${v.toLocaleString()}만`;

@@ -55,60 +55,34 @@ const EXTERNAL_KEYWORDS: [string, string][] = [
   ['부산 부동산 급매물', 'https://xn--kj0bw8tr3a.com'],
   ['분양권 투자', 'https://xn--zf0bv61a84di4cc7c4tay28c.com'],
   ['분양권 실전투자', 'https://xn--zf0bv61a84di4cc7c4tay28c.com'],
-  ['주식 초보', 'https://xn--9i2by8fvyb69i.site'],
-  ['주린이 가이드', 'https://xn--9i2by8fvyb69i.site'],
 ];
 
 const FEATURE_KEYWORDS: [string, string][] = [
   ['종목 비교', '/stock/compare'], ['관심종목', '/stock'],
-  ['부동산 지도', '/apt/map'], ['블로그 시리즈', '/blog/series'],
+  ['부동산 지도', '/apt/map'],
   ['투자 캘린더', '/stock'], ['포트폴리오', '/stock'],
   ['부동산 진단', '/apt/diagnose'],
   // 추가 내부 링크
-  ['실거래가', '/apt?tab=실거래'],
+  ['실거래가', '/apt?tab=trade'],
   ['청약 경쟁률', '/apt/diagnose'],
   ['청약 가점', '/apt/diagnose'],
   ['청약 진단', '/apt/diagnose'],
-  ['미분양 현황', '/apt?tab=미분양'],
-  ['재개발 현황', '/apt?tab=재개발'],
+  ['미분양 현황', '/apt?tab=unsold'],
+  ['재개발 현황', '/apt?tab=redev'],
   ['테마주', '/stock'],
   ['배당주', '/stock'],
   ['환율', '/stock'],
 ];
 
 const SERIES_KEYWORDS: [string, string][] = [
-  ['실거래가 분석', '/blog/series/trade-analysis'],
-  ['청약 분석', '/blog/series/subscription-analysis'],
-  ['재개발 현황', '/blog/series/redevelopment-status'],
-  ['미분양 리포트', '/blog/series/unsold-report'],
-  ['종목 분석', '/blog/series/stock-analysis'],
-  ['배당주 투자', '/blog/series/dividend-investing'],
-  ['재테크 기본', '/blog/series/finance-basics'],
-  ['부동산 세금', '/blog/series/real-estate-tax'],
+  ['블로그 시리즈', '/blog/series'],
 ];
 
 const GUIDE_KEYWORDS: [string, string][] = [
-  ['전세 사기', '/blog/jeonse-fraud-checklist-2026'],
-  ['청약통장', '/blog/housing-subscription-score'],
-  ['ISA 계좌', '/blog/isa-account-guide'],
-  ['연금저축', '/blog/pension-vs-irp'],
-  ['ETF 입문', '/blog/etf-beginner-guide'],
-  ['전세보증보험', '/blog/jeonse-insurance-guide'],
-  ['양도소득세', '/blog/capital-gains-tax'],
-  ['종합소득세', '/blog/income-tax-freelancer'],
-  ['DSR 규제', '/blog/dsr-regulation'],
+  ['청약통장', '/apt/diagnose'],
 ];
 
-const BUILDER_KEYWORDS: [string, string][] = [
-  ['래미안', '/blog/builder-래미안-2026'],
-  ['힐스테이트', '/blog/builder-힐스테이트-2026'],
-  ['자이', '/blog/builder-자이-2026'],
-  ['푸르지오', '/blog/builder-푸르지오-2026'],
-  ['더샵', '/blog/builder-더샵-2026'],
-  ['포레나', '/blog/builder-포레나-2026'],
-];
-
-const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS, ...BUILDER_KEYWORDS];
+const ALL_KEYWORDS = [...STOCK_KEYWORDS, ...APT_KEYWORDS, ...FEATURE_KEYWORDS, ...SERIES_KEYWORDS, ...GUIDE_KEYWORDS];
 
 export function injectInternalLinks(html: string): string {
   if (!html || html.length < 200) return html;

@@ -13,12 +13,14 @@ export async function GET() {
 
   const items = (posts || []).map(p => {
     const dateStr = p.published_at || p.created_at || new Date().toISOString();
+    const pubDate = new Date(dateStr);
+    const pubDateStr = isNaN(pubDate.getTime()) ? new Date().toUTCString() : pubDate.toUTCString();
     return `
     <item>
       <title><![CDATA[${p.title}]]></title>
       <link>${SITE_URL}/blog/${p.slug}</link>
       <description><![CDATA[${p.excerpt || ''}]]></description>
-      <pubDate>${new Date(dateStr).toUTCString()}</pubDate>
+      <pubDate>${pubDateStr}</pubDate>
       <category>${p.category}</category>
       <author>${p.author_name || '카더라 데이터팀'}</author>
       <guid isPermaLink="true">${SITE_URL}/blog/${p.slug}</guid>

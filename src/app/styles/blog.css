@@ -43,6 +43,8 @@
 .blog-content ul, .blog-content ol { padding-left: 20px; margin: 8px 0; }
 .blog-content li { margin: 4px 0; line-height: 1.7; }
 .blog-content strong { color: var(--text-primary); font-weight: 700; }
+.blog-content p:empty { display: none; }
+.blog-content > div:empty { display: none; }
 
 /* 코드 블록 */
 .blog-content code {

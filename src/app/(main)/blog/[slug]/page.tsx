@@ -380,9 +380,10 @@ export default async function BlogDetailPage({ params }: Props) {
           const total = seriesInfo.posts.length;
           const currentIdx = seriesInfo.posts.findIndex((p: any) => p.id === post.id);
           const progress = total > 0 ? ((currentIdx + 1) / total) * 100 : 0;
+          const isNearEnd = total > 1 && currentIdx >= Math.floor(total * 0.7);
           return (
             <div style={{
-              marginBottom: 16, padding: 12, borderRadius: 10,
+              marginBottom: 12, padding: 12, borderRadius: 10,
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -390,7 +391,7 @@ export default async function BlogDetailPage({ params }: Props) {
                   📚 {seriesInfo.series.title}
                 </Link>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
-                  {currentIdx + 1} / {total}편
+                  {currentIdx + 1} / {total}편{isNearEnd && ' · 거의 다 읽었어요!'}
                 </span>
               </div>
               <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
@@ -407,14 +408,14 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 본문 — 마크다운 렌더링 */}
         {isLoggedIn ? (
-          <div className="blog-content" dangerouslySetInnerHTML={{ __html: htmlFull }} />
+          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlFull }} />
         ) : (
           <div style={{ position: 'relative' }}>
-            <div className="blog-content" style={{ maxHeight: 'clamp(280px, 40vh, 500px)', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(transparent, var(--bg-base))' }} />
-            <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -20, position: 'relative' }}>
+            <div className="blog-content" itemProp="articleBody" style={{ maxHeight: 'clamp(400px, 60vh, 800px)', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(transparent, var(--bg-base))' }} />
+            <div style={{ textAlign: 'center', padding: '20px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -8, position: 'relative' }}>
               <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>전체 글을 보려면 로그인하세요</div>
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>청약 마감 알림도 받을 수 있어요</div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 10 }}>청약 마감 알림도 받을 수 있어요</div>
               <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
                 카카오로 가입
               </Link>
@@ -425,7 +426,8 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* FAQ 아코디언 */}
         {showFaq && <BlogFaqAccordion items={faqItems} />}
 
-        {/* 읽기 완료 메시지 */}
+        {/* 읽기 완료 메시지 — 로그인 사용자만 */}
+        {isLoggedIn && (
         <div style={{
           textAlign: 'center', padding: '20px 16px', margin: '24px 0',
           background: 'linear-gradient(135deg, rgba(52,211,153,0.06), rgba(96,165,250,0.06))',
@@ -445,6 +447,7 @@ export default async function BlogDetailPage({ params }: Props) {
             </Link>
           )}
         </div>
+        )}
 
         {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
         {post.source_type === 'auto' && (
@@ -482,44 +485,7 @@ export default async function BlogDetailPage({ params }: Props) {
           );
         })()}
 
-        {/* 관련 실시간 데이터 */}
-        {relatedStocks.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
-            {relatedStocks.map((s: any) => {
-              const pct = Number(s.change_pct) || 0;
-              return (
-                <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{
-                  flexShrink: 0, padding: '10px 14px', borderRadius: 10, minWidth: 140,
-                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  textDecoration: 'none', color: 'inherit',
-                }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
-                    {s.currency === 'USD' ? `$${Number(s.price).toFixed(2)}` : `₩${Number(s.price).toLocaleString()}`}
-                  </div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 2 }}>
-                    {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-        {relatedSites.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
-            {relatedSites.map((s: any) => (
-              <Link key={s.slug} href={`/apt/sites/${s.slug}`} style={{
-                flexShrink: 0, padding: '10px 14px', borderRadius: 10, minWidth: 140,
-                background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                textDecoration: 'none', color: 'inherit',
-              }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu}</div>
-                <div style={{ fontSize: 10, marginTop: 4, padding: '2px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', display: 'inline-block', fontWeight: 600 }}>{s.site_type || '아파트'}</div>
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* 관련 종목/현장은 하단 섹션에서만 렌더링 (중복 제거) */}
 
         {/* 공유 + 도움이됐어요 + 북마크 */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -532,7 +498,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </article>
 
       {/* 댓글 섹션 */}
-      <BlogCommentCTA commentCount={comments.length} />
+      {isLoggedIn && <BlogCommentCTA commentCount={comments.length} />}
       <div id="blog-comments" style={{ marginBottom: 20 }}>
         <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
