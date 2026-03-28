@@ -409,7 +409,7 @@ export async function GET(req: NextRequest) {
     }
 
     /* 포스트 OG — design 파라미터로 선택 */
-    const designMap: Record<string, JSX.Element> = {
+    const designMap: Record<string, any> = {
       '1': D1(C, titleTrim, subTrim, author, ff),
       '2': D2(C, titleTrim, subTrim, author, ff),
       '3': D3(C, titleTrim, subTrim, author, ff),
