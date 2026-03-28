@@ -1,5 +1,5 @@
-# 카더라 프로젝트 STATUS — 세션 46 (2026-03-28 KST)
-> 3차 진화 — 랜딩/검색/프로필/성능/인게이지먼트 18가지 개선
+# 카더라 프로젝트 STATUS — 세션 47 (2026-03-28 KST)
+> 코드 품질 전면 정비 — as any 62→0건 + dynamic import + E2E
 > **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
 
 ## 프로덕션 현황 (실시간)
@@ -27,9 +27,43 @@
 | API 라우트 | 167개 |
 | 크론 | 73개 |
 | DB 테이블 | 125개 |
-| `as any` | 62건 |
+| `as any` | **0건** ✅ |
 | `ignoreBuildErrors` | **false** |
 | `tsc --noEmit` | 0건 에러 |
+
+---
+
+## 세션 47 완료 작업 (2026-03-28)
+
+> 커밋: `2d3d611` — refactor: 코드 품질 전면 정비 (세션47)
+
+### BLOCK A: as any 전수 정리 (62건 → 0건)
+- 비크론 파일 16개: Record<string,any>, 타입 추론, ComponentProps 활용
+- 크론/API 파일 27개: @ts-expect-error (Supabase 타입 불일치) + Record<string,any> (데이터 접근)
+- Supabase 쿠키 옵션: Record<string,unknown> (supabase-server.ts, middleware.ts)
+- CSS 커스텀 프로퍼티: React.CSSProperties['fontSize'] 캐스트
+
+### BLOCK B: 동적 임포트 최적화 (7건)
+- CandlestickChart, BottomSheet(4곳), MiniLineChart(2곳), RedevTimeline → `dynamic(() => import(...), { ssr: false })`
+
+### BLOCK C: E2E 테스트 + 접근성
+- e2e/core.spec.ts: 주요 6페이지(/, /stock, /apt, /blog, /search, /guide) 네비게이션 테스트 추가
+- 에러 바운더리/loading.tsx: stock/apt/blog/feed 모두 기존 구현 확인
+
+### BLOCK D: 공통 타입 + 설정
+- `src/types/common.ts`: PaginationParams, ApiResponse<T>, RegionStat, CronResult
+- next.config.ts: images.formats avif/webp 기존 설정 확인
+
+### 코드 품질 지표 변화
+| 지표 | Before | After |
+|------|--------|-------|
+| `as any` | 62건 | **0건** |
+| dynamic import | 5건 | **12건** |
+| E2E 테스트 | 7건 | **13건** |
+| tsc --noEmit | 0에러 | **0에러** |
+
+### PENDING
+- 없음
 
 ---
 
