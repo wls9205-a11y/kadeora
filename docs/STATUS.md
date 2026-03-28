@@ -1,4 +1,139 @@
-# 카더라 프로젝트 STATUS — 세션 49 (2026-03-28 KST)
+# 카더라 프로젝트 STATUS — 세션 50 (2026-03-28 KST)
+> 피드 전면 강화 (A~I) + OG 폰트 픽스 + 빌드에러 수정 + DB 마이그레이션
+> **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
+
+## 프로덕션 현황 (실시간)
+
+| 지표 | 수치 |
+|------|------|
+| **유저** | 120명 |
+| **게시글/댓글** | 4,083 / 2,607 |
+| **블로그** | 15,502편 |
+| **주식 종목** | 249개 |
+| **청약** | 2,692건 |
+| **apt_sites (active)** | 5,522 |
+| **실거래** | 5,408건 |
+| **미분양** | 180건 (68,264세대) |
+| **재개발** | 202건 |
+| **DB 크기** | 227 MB |
+| **프로덕션 에러** | 0건 ✅ |
+
+## 코드베이스
+
+| 지표 | 수치 |
+|------|------|
+| 파일 수 | 528개 |
+| API 라우트 | 173개 |
+| 크론 | 73개 |
+| DB 테이블 | 127개 (post_polls, post_poll_votes 추가) |
+| `as any` | **0건** ✅ |
+| `ignoreBuildErrors` | **false** |
+
+---
+
+## 세션 50 완료 작업 (2026-03-28)
+
+### 1. 피드 A~F 강화 [COMPLETED]
+- **A. 정렬 옵션**: 최신순/인기순(7일)/댓글순 — URL 파라미터 `?sort=` SSR 연동
+- **B. 해시태그 탐색**: 카드 하단 `#태그` 칩 + 클릭 필터 + 활성 태그 배너
+- **C. 팔로잉 피드 탭**: follows 테이블 활용, SSR, 비로그인 유도 UI
+- **D. 새 글 알림 바**: 30초 폴링 → N개 새 글 브랜드 배너 → 클릭 새로고침
+- **E. 읽기시간 뱃지**: content 길이/500 = N분 — 카드 메타라인 표시
+- **F. stock_tags/apt_tags 인라인 칩**: 종목/청약 태그 → 📈/🏢 칩 링크
+- **팔로우 힌트**: 인터랙션 바 우측 `<Users>팔로우` 링크
+
+### 2. 피드 G/H/I 강화 [COMPLETED]
+
+#### G. 투표(Poll) 시스템
+- DB: `post_polls` + `post_poll_votes` 테이블 신설, RLS 정책
+- API: `/api/polls` (GET/POST/PATCH) — 생성/조회/투표참여
+- UI: `PollWidget.tsx` — 낙관적 업데이트, 결과 바, 마감일 표시
+- 글쓰기(`WriteClient`): 투표 추가/제거 UI — 선택지 최대 6개, 마감일 설정
+- 상세 페이지(`/feed/[id]`): 좋아요/북마크 아래 PollWidget 렌더링
+
+#### H. 북마크 카운트
+- DB: `posts.bookmarks_count` 컬럼 추가 + 트리거 자동 관리 + 기존 데이터 동기화
+- 피드 카드 인터랙션 바에 🔖 N 표시 (0이면 숨김)
+
+#### I. 어드민 핀 글
+- DB: `posts.is_pinned` 컬럼 추가
+- API: `/api/admin/pin-post` — 어드민 인증, 핀 글 1개 제한
+- 피드: 핀 글 상단 고정 + 📌 고정 배지 + 브랜드 컬러 border
+- 어드민 콘텐츠 탭: 📌 고정/해제 버튼 추가
+
+### 3. OG 폰트 완전 해결 [CRITICAL FIX]
+- 문제: CDN(jsdelivr) fetch가 Edge Runtime에서 실패 → `Unsupported OpenType` 100건+
+- 해결: `NotoSansKR-Bold.woff` (283KB) → `public/fonts/` 로컬 배포
+  - woff(1) 포맷 — satori/Vercel Edge 공식 지원
+  - 외부 CDN 의존성 완전 제거
+
+### 4. 빌드에러 수정 [CRITICAL FIX]
+- `cronAuth` → 헤더 직접 체크로 교체 (pin-post API)
+- `bookmarks_count`/`is_pinned` → `database.ts` Row/Insert/Update 타입 추가
+- `PostWithProfile` 캐스팅 → `as unknown as PostWithProfile[]` 수정
+- GOD MODE `any[]` → `Record<string, unknown>[]` 타입 정리
+
+### 5. GOD MODE 특수 작업 섹션 추가 [COMPLETED]
+- 🗄️ 롱테일 80편 시드 생성 버튼 (seed-longtail-80 호출)
+- 🔢 블로그 생성 한도 원복 버튼 (daily_create_limit → 10)
+- `/api/admin/blog-limit-reset` API 신설
+
+### 6. DB 정리 [COMPLETED]
+- 블로그 cover_image generic URL 10건 → null 정리
+  (`/api/og?title=blog&type=blog` 패턴)
+- 인덱스 3개 추가: likes_count DESC, comments_count DESC, is_pinned
+
+---
+
+## 세션 50 커밋
+
+| SHA | 내용 |
+|-----|------|
+| `c4b1294` | 도넛 '전체' 레이블 + 미분양 단위 |
+| `98b0dcc` | 피드 A~F 강화 (정렬/해시태그/팔로잉/새글알림/읽기시간) |
+| `a0fc5dc` | 피드 G/H/I — Poll/북마크/핀글/어드민 |
+| `36d0f31` | OG 폰트 CDN→로컬 woff + 타입 정리 |
+| `518b1f4` | 빌드에러 수정 + GOD MODE 특수작업 섹션 |
+
+---
+
+## 🟡 PENDING 작업
+
+### 긴급 수동
+- [ ] **토스 정산 등록 (3/31 마감 D-3!)**
+- [ ] **구글 서치콘솔 사이트맵 재제출** (sitemap.xml 복구됨)
+- [ ] **네이버 서치어드바이저** RSS 4개 제출
+- [ ] **Bing 웹마스터** msvalidate.01 실제 인증코드 교체
+
+### 블로그
+- [ ] GOD MODE > 특수작업 > "롱테일 80편 시드 생성" 버튼 클릭 (80편 생성)
+- [ ] 완료 후 "블로그 생성 한도 원복" 버튼 클릭 (→ 10)
+
+### 수동 필수
+- [ ] GA stockcoin.net 데이터 스트림 제거
+- [ ] KIS_APP_KEY 발급 (주식 시세 99개 price=0)
+- [ ] 토스 라이브키 교체
+- [ ] 주린이.site DNS 복구
+- [ ] Supabase API 설정 > max_rows: 1000 → 10000 (대시보드 Settings > API)
+
+### 코드 (다음 세션)
+- [ ] 피드 글쓰기 해시태그 → `tags` 컬럼 저장 확인 (현재 `tags`로 저장 중, 피드는 `tags`로 읽음 ✅)
+- [ ] Poll 투표 결과 공유 기능
+- [ ] 북마크 카운트 노출 임계값 조정 (현재 >0이면 표시)
+
+## 주의사항 (다음 세션 필독)
+- **sitemap.xml**: route handler 방식 (sitemap.ts 삭제됨)
+- **OG 폰트**: `public/fonts/NotoSansKR-Bold.woff` — woff(1)만 사용 (woff2/otf/ttf 금지)
+- **posts 타입**: `bookmarks_count`, `is_pinned` 수동으로 database.ts에 추가됨 — Supabase 타입 재생성 시 유지 필요
+- **PostWithProfile**: `bookmarks_count?: number`, `is_pinned?: boolean`, `tags?`, `stock_tags?`, `apt_tags?` 포함
+- **Poll**: post_polls + post_poll_votes 테이블 — 글 작성자만 생성, 로그인 유저만 투표
+- **핀 글**: is_pinned — 어드민만 설정 가능, 동시에 1개만 핀 (자동 해제)
+- **블로그 데이터**: 절대 삭제/수정 금지
+- **stockcoin.net**: 절대 카더라와 연결 금지
+
+---
+
+
 > SEO 전면 강화 + 사이트맵 복구 + 블로그 전수조사 + 풀스택 감사 + OG 폰트 수정
 > **다음 세션 시작:** "docs/STATUS.md 읽고 작업 이어가자"
 
