@@ -402,13 +402,17 @@ export async function GET(req: NextRequest) {
         'apt-subscription': { title:'전국 청약 현황',    sub:'접수중 · 예정 · 마감 청약 정보 전체' },
       };
       const s = SEC[section] ?? { title:'카더라', sub:'대한민국 소리소문 정보 커뮤니티' };
-      return new ImageResponse(D1(C, s.title, s.sub, '', ff), { width:1200, height:630, headers:CACHE, ...opts });
+      const _secImg = new ImageResponse(D1(C, s.title, s.sub, '', ff), { width:1200, height:630, ...opts });
+      const _secBuf = await _secImg.arrayBuffer();
+      return new Response(_secBuf, { headers: { 'Content-Type':'image/png', ...CACHE } });
     }
 
     /* 홈 OG */
     if (!title) {
       const homeC = CAT.apt;
-      return new ImageResponse(D1(homeC, '아는 사람만 아는 그 정보', '주식 · 청약·분양 · 재테크 · 커뮤니티 · 19,000편+ 블로그', '카더라', ff), { width:1200, height:630, headers:CACHE, ...opts });
+      const _homeImg = new ImageResponse(D1(homeC, '아는 사람만 아는 그 정보', '주식 · 청약·분양 · 재테크 · 커뮤니티 · 19,000편+ 블로그', '카더라', ff), { width:1200, height:630, ...opts });
+      const _homeBuf = await _homeImg.arrayBuffer();
+      return new Response(_homeBuf, { headers: { 'Content-Type':'image/png', ...CACHE } });
     }
 
     /* 포스트 OG — design 파라미터로 선택 */
@@ -422,11 +426,9 @@ export async function GET(req: NextRequest) {
     };
     const el = designMap[design] ?? designMap['1'];
 
-    return new ImageResponse(el, {
-      width: 1200, height: 630,
-      headers: { ...CACHE, 'X-Content-Type-Options': 'nosniff' },
-      ...opts,
-    });
+    const _postImg = new ImageResponse(el, { width: 1200, height: 630, ...opts });
+    const _postBuf = await _postImg.arrayBuffer();
+    return new Response(_postBuf, { headers: { 'Content-Type':'image/png', 'X-Content-Type-Options':'nosniff', ...CACHE } });
 
   } catch {
     const cat = new URL(req.url).searchParams.get('category') ?? 'default';

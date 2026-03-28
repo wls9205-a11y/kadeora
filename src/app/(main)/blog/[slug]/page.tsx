@@ -153,6 +153,7 @@ export async function generateMetadata({ params }: Props) {
           'geo.position': `${geoEntry[1].lat};${geoEntry[1].lng}`,
           'ICBM': `${geoEntry[1].lat}, ${geoEntry[1].lng}`,
         } : {}),
+        'og:updated_time': post.updated_at || post.published_at || post.created_at,
         'naver:written_time': post.published_at || post.created_at,
         'naver:updated_time': post.updated_at || post.published_at || post.created_at,
         'dg:plink': `${SITE}/blog/${slug}`,

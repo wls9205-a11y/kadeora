@@ -17,17 +17,17 @@ const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a56
 async function handler(_req: NextRequest) {
   const sb = getSupabaseAdmin();
 
-  // 최근 24시간 내 업데이트된 URL 수집 (4종)
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  // 최근 7일 업데이트된 URL 수집 (4종) — IndexNow 최대한 활용
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const [sitesR, blogsR, discussR, stocksR] = await Promise.all([
     sb.from('apt_sites').select('slug')
       .eq('is_active', true).gte('content_score', 25).gte('updated_at', since).limit(100),
     sb.from('blog_posts').select('slug')
-      .eq('is_published', true).gte('updated_at', since).limit(50),
+      .eq('is_published', true).gte('updated_at', since).limit(100),
     sb.from('discussion_topics').select('id')
       .gte('created_at', since).limit(20),
     sb.from('stock_quotes').select('symbol')
-      .eq('is_active', true).gte('updated_at', since).limit(50),
+      .eq('is_active', true).gte('updated_at', since).limit(100),
   ]);
 
   const urls: string[] = [];

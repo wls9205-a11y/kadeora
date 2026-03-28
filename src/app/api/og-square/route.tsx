@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
     const titleLine1 = title.length > 18 ? title.slice(0, 18) : title;
     const titleLine2 = title.length > 18 ? (title.slice(18, 36).length > 18 ? title.slice(18, 35) + '…' : title.slice(18)) : '';
 
-    return new ImageResponse(
+    const _sqImg = new ImageResponse(
       /* ──────────────────────────────────────────────────────────
          630×630 수평 스트라이프 (1:1 전용)
          ┌──────────────────────────────────────┐
@@ -151,8 +151,10 @@ export async function GET(req: NextRequest) {
         </div>
 
       </div>,
-      { width: 630, height: 630, headers: { ...CACHE, 'X-Content-Type-Options': 'nosniff' }, ...opts }
+      { width: 630, height: 630, ...opts }
     );
+    const _sqBuf = await _sqImg.arrayBuffer();
+    return new Response(_sqBuf, { headers: { 'Content-Type': 'image/png', 'X-Content-Type-Options': 'nosniff', ...CACHE } });
 
   } catch {
     return Response.redirect(`${SITE}/images/brand/kadeora-hero.png`, 302);
