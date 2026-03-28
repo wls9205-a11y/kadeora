@@ -167,9 +167,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             <div key={e.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: e.color, flexShrink: 0 }} />
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{LABELS[e.key]}</span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
+              <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
                 {e.val.toLocaleString()}
-                <span style={{ fontSize: 10, fontWeight: 400, opacity: 0.5, marginLeft: 1 }}>건</span>
+                <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.5, marginLeft: 2 }}>건</span>
               </span>
             </div>
           ))}
@@ -186,8 +186,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 14 }}>
                 <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>↳ 세대수</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: COLORS.unsold, fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
-                  {unsoldUnits.toLocaleString()}<span style={{ fontSize: 10, fontWeight: 400, opacity: 0.5, marginLeft: 1 }}>세대</span>
+                <span style={{ fontSize: 17, fontWeight: 700, color: COLORS.unsold, fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
+                  {unsoldUnits.toLocaleString()}<span style={{ fontSize: 11, fontWeight: 400, opacity: 0.5, marginLeft: 2 }}>세대</span>
                 </span>
               </div>
             );
