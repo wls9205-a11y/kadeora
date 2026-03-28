@@ -601,6 +601,20 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
       {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
 
+      {/* 프리미엄 업셀 배너 */}
+      <div className="kd-card-glow" style={{ padding: '18px 16px', margin: '16px 0', background: 'var(--bg-surface)', borderRadius: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>👑</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 종목 리포트 받아보세요</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>프리미엄 멤버십 · 하루 330원</div>
+          </div>
+          <Link href="/premium" style={{ padding: '8px 16px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
+            자세히
+          </Link>
+        </div>
+      </div>
+
       {/* 댓글 섹션 */}
       <BlogCommentCTA commentCount={comments.length} />
       <div id="blog-comments" style={{ marginBottom: 20 }}>
