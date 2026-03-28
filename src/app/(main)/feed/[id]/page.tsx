@@ -18,6 +18,7 @@ import FontSizeControl from '@/components/FontSizeControl';
 import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ReadingProgress from '@/components/ReadingProgress';
+import PollWidget from '@/components/PollWidget';
 
 
 function parsePostId(param: string): { numId: number; isSlug: boolean } {
@@ -429,6 +430,9 @@ export default async function FeedDetailPage({ params }: Props) {
           <BookmarkButton postId={post.id} />
         </div>
       </div>
+
+      {/* 투표 위젯 */}
+      <PollWidget postId={post.id} />
 
       {/* Comments — 로그인 여부 상관없이 댓글 목록 표시, 입력만 분기 */}
       <div style={{ marginBottom: 16 }}>

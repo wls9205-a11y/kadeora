@@ -160,7 +160,7 @@ export default function FeedClient({
       const cursor = lastPost?.created_at;
       const orderCol = activeSort === 'popular' ? 'likes_count' : activeSort === 'comments' ? 'comments_count' : 'created_at';
       let q = sb.from('posts')
-        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images,slug,excerpt,hashtags,stock_tags,apt_tags,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images,slug,excerpt,tags,stock_tags,apt_tags,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
         .eq('is_deleted', false)
         .order(orderCol, { ascending: false })
         .limit(PAGE_SIZE);
@@ -201,11 +201,16 @@ export default function FeedClient({
   };
 
   const visiblePosts = useMemo(() => {
-    if (!activeTag) return posts;
-    return posts.filter(p => {
-      const tags = (p as PostWithProfile & { hashtags?: string[] }).hashtags;
-      return tags?.includes(activeTag);
-    });
+    let filtered = activeTag
+      ? posts.filter(p => {
+          const tags = (p as PostWithProfile & { tags?: string[] }).tags;
+          return tags?.includes(activeTag);
+        })
+      : posts;
+    // 핀 글 상단 고정
+    const pinned = filtered.filter(p => (p as PostWithProfile & { is_pinned?: boolean }).is_pinned);
+    const normal = filtered.filter(p => !(p as PostWithProfile & { is_pinned?: boolean }).is_pinned);
+    return [...pinned, ...normal];
   }, [posts, activeTag]);
 
   const categories = [
@@ -385,7 +390,7 @@ export default function FeedClient({
         {/* ━━━ 게시글 목록 ━━━ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {visiblePosts.map((post, i) => {
-            const postExt = post as PostWithProfile & { hashtags?: string[]; stock_tags?: string[]; apt_tags?: string[] };
+            const postExt = post as PostWithProfile & { tags?: string[]; stock_tags?: string[]; apt_tags?: string[]; is_pinned?: boolean; bookmarks_count?: number };
             const displayName = post.is_anonymous ? '익명' : (post.profiles?.nickname ?? '익명');
             const gradeEmoji = GRADE_EMOJI[post.profiles?.grade ?? 1] ?? '🌱';
             const displayLikes = likeCounts[post.id] ?? post.likes_count ?? 0;
@@ -394,13 +399,21 @@ export default function FeedClient({
             const cat = CAT_STYLE[post.category] ?? CAT_STYLE.free;
             const commentCount = post.comments_count ?? 0;
             const readMin = readingTime(post.excerpt || post.content || '');
-            const hashtags = (postExt.hashtags ?? []).filter(Boolean);
+            const postTags = (postExt.tags ?? []).filter(Boolean);
             const stockTags = (postExt.stock_tags ?? []).filter(Boolean);
             const aptTags = (postExt.apt_tags ?? []).filter(Boolean);
+            const isPinned = postExt.is_pinned ?? false;
+            const bookmarksCount = postExt.bookmarks_count ?? 0;
 
             const card = (
               <div key={post.id} className="animate-fadeIn kd-feed-card"
-                style={{ padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, transition: 'all var(--transition-fast)' }}>
+                style={{ padding: '12px 14px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 10, transition: 'all var(--transition-fast)', position: 'relative' }}>
+                {/* 핀 배지 */}
+                {isPinned && (
+                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 8px', borderRadius: '0 0 6px 6px' }}>
+                    📌 고정
+                  </div>
+                )}
 
                 {/* 상단: 아바타 + 메타 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
@@ -452,9 +465,9 @@ export default function FeedClient({
                 </Link>
 
                 {/* B: 해시태그 칩 */}
-                {hashtags.length > 0 && (
+                {postTags.length > 0 && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
-                    {hashtags.slice(0, 5).map(tag => (
+                    {postTags.slice(0, 5).map(tag => (
                       <button key={tag}
                         onClick={(e) => { e.preventDefault(); setActiveTag(activeTag === tag ? null : tag); }}
                         style={{
@@ -503,6 +516,12 @@ export default function FeedClient({
                     style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-hover)', border: 'none', borderRadius: 16, cursor: 'pointer', color: 'var(--text-tertiary)', padding: '4px 10px', fontSize: 11, fontWeight: 600, fontFamily: 'inherit' }}>
                     <Share2 size={14} /> 공유
                   </button>
+                  {/* 북마크 카운트 */}
+                  {bookmarksCount > 0 && (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px' }}>
+                      🔖 {numFmt(bookmarksCount)}
+                    </span>
+                  )}
                   {/* 팔로우 힌트 */}
                   {activeCategory !== 'following' && !post.is_anonymous && post.author_id && post.author_id !== currentUserId && (
                     <Link href={`/profile/${post.author_id}`}

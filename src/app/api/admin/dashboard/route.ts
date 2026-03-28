@@ -308,7 +308,7 @@ export async function GET(req: Request) {
 
       if (tab === 'posts') {
         const { data, count } = await sb.from('posts')
-          .select('id, title, content, category, created_at, view_count, likes_count, comments_count, is_deleted, slug, profiles!posts_author_id_fkey(nickname)', { count: 'exact' })
+          .select('id, title, content, category, created_at, view_count, likes_count, comments_count, is_deleted, is_pinned, slug, profiles!posts_author_id_fkey(nickname)', { count: 'exact' })
           .order('created_at', { ascending: false })
           .range((page - 1) * limit, page * limit - 1);
         return NextResponse.json({ posts: data ?? [], total: count ?? 0, ...totals });

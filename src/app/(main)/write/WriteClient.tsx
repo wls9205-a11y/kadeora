@@ -35,6 +35,11 @@ export default function WriteClient() {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [draftRestored, setDraftRestored] = useState(false);
+  // 투표
+  const [showPollForm, setShowPollForm] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
+  const [pollEndsAt, setPollEndsAt] = useState('');
 
   // 임시저장 키
   const DRAFT_KEY = 'kd_write_draft';
@@ -141,6 +146,19 @@ export default function WriteClient() {
         const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error((await res.json()).error ?? '작성 실패');
         const { post } = await res.json();
+        // 투표 생성
+        if (showPollForm && pollQuestion.trim() && pollOptions.filter(o => o.trim()).length >= 2) {
+          await fetch('/api/polls', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              post_id: post.id,
+              question: pollQuestion.trim(),
+              options: pollOptions.filter(o => o.trim()),
+              ends_at: pollEndsAt || null,
+            }),
+          }).catch(() => { /* 투표 실패는 무시 */ });
+        }
         success('작성되었습니다'); clearDraft(); router.push(`/feed/${post.slug || post.id}`);
       }
       router.refresh();
@@ -252,6 +270,66 @@ export default function WriteClient() {
 
       {/* 이미지 */}
       <ImageUpload images={images} onImagesChange={setImages} />
+
+      {/* 투표 추가 */}
+      {!editId && (
+        <div style={{ marginTop: 16 }}>
+          <button
+            onClick={() => setShowPollForm(p => !p)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px',
+              borderRadius: 999, border: `1px solid ${showPollForm ? 'var(--brand)' : 'var(--border)'}`,
+              background: showPollForm ? 'var(--brand-bg, rgba(37,99,235,0.08))' : 'transparent',
+              color: showPollForm ? 'var(--brand)' : 'var(--text-tertiary)',
+              cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600, fontFamily: 'inherit',
+              transition: 'all 0.15s',
+            }}>
+            🗳️ 투표 {showPollForm ? '제거' : '추가'}
+          </button>
+          {showPollForm && (
+            <div style={{ marginTop: 10, padding: '14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+              <input
+                value={pollQuestion}
+                onChange={e => setPollQuestion(e.target.value)}
+                placeholder="투표 질문을 입력하세요"
+                maxLength={100}
+                style={{ width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box', marginBottom: 8 }}
+              />
+              {pollOptions.map((opt, i) => (
+                <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+                  <input
+                    value={opt}
+                    onChange={e => setPollOptions(prev => { const n = [...prev]; n[i] = e.target.value; return n; })}
+                    placeholder={`선택지 ${i + 1}`}
+                    maxLength={50}
+                    style={{ flex: 1, padding: '7px 10px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
+                  />
+                  {pollOptions.length > 2 && (
+                    <button onClick={() => setPollOptions(prev => prev.filter((_, j) => j !== i))}
+                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 16, padding: '0 4px' }}>×</button>
+                  )}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
+                {pollOptions.length < 6 && (
+                  <button onClick={() => setPollOptions(prev => [...prev, ''])}
+                    style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+                    + 선택지 추가
+                  </button>
+                )}
+                <input
+                  type="date"
+                  value={pollEndsAt}
+                  onChange={e => setPollEndsAt(e.target.value)}
+                  min={new Date().toISOString().slice(0, 10)}
+                  style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', color: 'var(--text-primary)' }}
+                />
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>마감일(선택)</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 태그 */}
       <div style={{ marginTop: 16 }}>

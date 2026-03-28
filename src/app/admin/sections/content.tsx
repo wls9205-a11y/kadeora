@@ -22,6 +22,11 @@ export default function ContentSection() {
     load(tab, page);
   };
 
+  const pinPost = async (id: number, currentPin: boolean) => {
+    await fetch('/api/admin/pin-post', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: id, pin: !currentPin }) });
+    load(tab, page);
+  };
+
   const deleteComment = async (id: number) => {
     if (!confirm('삭제하시겠습니까?')) return;
     await fetch(`/api/admin/comments/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ is_deleted: true }) });
@@ -69,15 +74,16 @@ export default function ContentSection() {
         <>
           {tab === 'posts' && (
             <DataTable
-              headers={['제목', '카테고리', '작성자', '조회', '좋아요', '댓글', '작성일', '삭제']}
+              headers={['제목', '카테고리', '작성자', '조회', '좋아요', '댓글', '작성일', '핀', '삭제']}
               rows={(data?.posts ?? []).map((p: Record<string, any>) => [
-                <span key="t" style={{ fontWeight: 500, maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{p.title || '(제목 없음)'}</span>,
+                <span key="t" style={{ fontWeight: 500, maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{p.is_pinned ? '📌 ' : ''}{p.title || '(제목 없음)'}</span>,
                 <Badge key="c" color={C.cyan}>{p.category}</Badge>,
                 p.profiles?.nickname || '—',
                 p.view_count || 0,
                 p.likes_count || 0,
                 p.comments_count || 0,
                 ago(p.created_at),
+                <button key="pin" onClick={() => pinPost(p.id, p.is_pinned)} style={{ padding: '3px 8px', borderRadius: 4, border: 'none', background: p.is_pinned ? C.yellow : C.brandBg, color: p.is_pinned ? C.textInv : C.brand, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}>{p.is_pinned ? '📌 해제' : '📌 고정'}</button>,
                 p.is_deleted ? <Badge key="d" color={C.red}>삭제됨</Badge> : <button key="del" onClick={() => deletePost(p.id)} style={{ padding: '3px 8px', borderRadius: 4, border: 'none', background: C.redBg, color: C.red, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}>삭제</button>,
               ])}
             />
