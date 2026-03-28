@@ -58,6 +58,11 @@ export const metadata: Metadata = {
     'service-region': '대한민국',
     'service-language': 'ko',
     'contact-email': 'kadeora.app@gmail.com',
+    'naver:site_name': '카더라',
+    'daum:site_name': '카더라',
+    'mobile-web-app-title': '카더라',
+    'format-detection': 'telephone=no',
+    'google': 'notranslate',
   },
 };
 

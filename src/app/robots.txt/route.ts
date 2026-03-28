@@ -36,6 +36,7 @@ Disallow: /api/admin
 
 User-agent: Googlebot-Image
 Allow: /api/og
+Allow: /api/og-square
 Allow: /images/
 Allow: /image-sitemap.xml
 
@@ -46,6 +47,7 @@ Allow: /apt/
 Allow: /blog/
 Allow: /feed.xml
 Allow: /api/og
+Allow: /api/og-square
 Allow: /images/
 Crawl-delay: 1
 Disallow: /admin/
@@ -58,6 +60,7 @@ Allow: /
 Allow: /apt/
 Allow: /blog/
 Allow: /api/og
+Allow: /api/og-square
 Allow: /images/
 Crawl-delay: 0
 Disallow: /admin/

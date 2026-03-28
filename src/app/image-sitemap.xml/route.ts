@@ -66,12 +66,18 @@ ${imageXml}
   for (const b of blogsR.data || []) {
     if (!b.cover_image) continue;
     const catLabel = b.category === 'stock' ? '주식' : b.category === 'apt' ? '부동산' : b.category === 'unsold' ? '미분양' : '재테크';
+    const ogSquareUrl = `${BASE}/api/og-square?title=${encodeURIComponent(b.title)}&category=${b.category}&author=${encodeURIComponent(b.category === 'stock' ? '카더라 주식팀' : '카더라 부동산팀')}`;
     entries.push(`  <url>
     <loc>${BASE}/blog/${encodeURIComponent(b.slug)}</loc>
       <image:image>
         <image:loc>${escapeXml(b.cover_image)}</image:loc>
         <image:title>${escapeXml(b.image_alt || b.title)}</image:title>
         <image:caption>${escapeXml(`카더라 ${catLabel} 블로그 — ${b.title}`)}</image:caption>
+      </image:image>
+      <image:image>
+        <image:loc>${escapeXml(ogSquareUrl)}</image:loc>
+        <image:title>${escapeXml(b.title)}</image:title>
+        <image:caption>${escapeXml(`카더라 ${catLabel} — ${b.title} (1:1 이미지)`)}</image:caption>
       </image:image>
   </url>`);
   }
