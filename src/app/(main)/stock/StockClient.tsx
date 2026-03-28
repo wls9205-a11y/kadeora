@@ -24,6 +24,22 @@ function isIdx(s: Stock) { return ['KOSPI','KOSDAQ','NASDAQ','S&P 500','DOW','NI
 
 const M7 = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA'];
 
+function getMarketStatus(): { label: string; color: string } {
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const h = kst.getUTCHours();
+  const m = kst.getUTCMinutes();
+  const day = kst.getUTCDay();
+  const kstMin = h * 60 + m;
+  // Weekend
+  if (day === 0 || day === 6) return { label: '⏸ 휴장', color: 'var(--text-tertiary)' };
+  // KR market: 09:00~15:30 KST
+  if (kstMin >= 540 && kstMin <= 930) return { label: '🟢 장중', color: 'var(--accent-green)' };
+  // US market: 22:30~05:00 KST (next day)
+  if (kstMin >= 1350 || kstMin <= 300) return { label: '🟢 미국장중', color: 'var(--accent-green)' };
+  return { label: '🔴 장마감', color: 'var(--accent-red)' };
+}
+
 // 한국: 상승=빨강, 하락=파랑 / 해외: 상승=초록, 하락=빨강
 export default function StockClient({ initialStocks, briefing, exchangeHistory, themeHistory }: Props) {
   const [stocks, setStocks] = useState<Stock[]>(Array.isArray(initialStocks) ? initialStocks : []);
@@ -39,6 +55,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   const [themes, setThemes] = useState<Theme[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
+  const [showInactive, setShowInactive] = useState(false);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
@@ -105,6 +122,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
   // Filter and sort
   function getFilteredStocks() {
     let list = isDomestic ? domesticStocks : globalStocks;
+    if (!showInactive) list = list.filter(s => s.price > 0);
     if (isDomestic && domesticMarket !== 'ALL') list = list.filter(s => s.market === domesticMarket);
     if (sectorFilter !== 'all') list = list.filter(s => (s.sector || '').includes(sectorFilter));
     if (search) { const q = search.toLowerCase(); list = list.filter(s => s.name.toLowerCase().includes(q) || s.symbol.toLowerCase().includes(q)); }
@@ -125,6 +143,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
     });
   }
 
+  const inactiveCount = (isDomestic ? domesticStocks : globalStocks).filter(s => s.price === 0).length;
   const filteredStocks = getFilteredStocks();
   const currentTab = isDomestic ? domesticTab : globalTab;
   const displayStocks = currentTab === 'ranking' ? filteredStocks.slice(0, stockListLimit) : filteredStocks;
@@ -177,7 +196,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               <div className="stock-price-text" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                 {isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}
               </div>
-              {isGlobal && <div className="stock-krw-text text-xs-tertiary">≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
+              {isGlobal && <div className="stock-krw-text text-xs-tertiary" title={`적용 환율: $1 = ₩${exchangeRate.toLocaleString()}`}>≈₩{Math.round(s.price * exchangeRate).toLocaleString()}</div>}
               {isStale ? (
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>장 마감</div>
               ) : (
@@ -206,6 +225,16 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>📊 주식</h1>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {(() => {
+            const ms = getMarketStatus();
+            const lastUpdate = stocks.length > 0 ? stocks.reduce((latest, s) => s.updated_at > latest ? s.updated_at : latest, stocks[0].updated_at) : null;
+            return (
+              <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: 'var(--bg-surface)', border: '1px solid var(--border)', fontWeight: 600, color: ms.color, display: 'flex', alignItems: 'center', gap: 4 }}>
+                {ms.label}
+                {lastUpdate && <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 400 }}>{new Date(lastUpdate).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>}
+              </span>
+            );
+          })()}
           <Link href="/stock/compare" className="kd-action-link">⚔️ 비교</Link>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 3, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px' }}>
           <span style={{ color: 'var(--text-tertiary)' }}>$/₩</span>
@@ -556,6 +585,27 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           ))}
         </div>
       )}
+      {currentTab === 'ranking' && (() => {
+        const currentStocks = isDomestic ? domesticStocks : globalStocks;
+        const sectors = [...new Set(currentStocks.map(s => s.sector).filter(Boolean))].sort();
+        if (sectors.length === 0) return null;
+        return (
+          <div style={{ display: 'flex', gap: 4, marginBottom: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+            <button onClick={() => setSectorFilter('all')} style={{
+              padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
+              background: sectorFilter === 'all' ? 'var(--brand)' : 'var(--bg-hover)',
+              color: sectorFilter === 'all' ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+            }}>전체</button>
+            {sectors.map(sec => (
+              <button key={sec} onClick={() => setSectorFilter(sectorFilter === sec ? 'all' : sec!)} style={{
+                padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
+                background: sectorFilter === sec ? 'var(--brand)' : 'var(--bg-hover)',
+                color: sectorFilter === sec ? 'var(--text-inverse)' : 'var(--text-tertiary)',
+              }}>{sec}</button>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* 검색 */}
       {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && (
@@ -565,6 +615,16 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-sm)', padding: 4 }} aria-label="닫기">✕</button>}
           {search && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>🔍 &quot;{search}&quot; 검색 결과 {filteredStocks.length}건{sectorFilter !== 'all' ? ` (${sectorFilter} 필터)` : ''}</div>}
         </div>
+      )}
+      {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && inactiveCount > 0 && (
+        <button onClick={() => setShowInactive(!showInactive)} style={{
+          fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+          background: showInactive ? 'var(--brand-bg)' : 'var(--bg-hover)',
+          border: `1px solid ${showInactive ? 'var(--brand-border)' : 'var(--border)'}`,
+          color: showInactive ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: 600, marginBottom: 6,
+        }}>
+          {showInactive ? '✓' : ''} 시세 미제공 {inactiveCount}건 {showInactive ? '포함 중' : '포함하기'}
+        </button>
       )}
 
       {/* 포트폴리오 탭 */}

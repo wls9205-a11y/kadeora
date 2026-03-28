@@ -254,11 +254,11 @@ export default async function StockDetailPage({ params }: Props) {
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-        <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-          종목 비교
+        <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+          ⚔️ 다른 종목과 비교
         </Link>
-        <Link href="/discuss" style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 700, color: '#fff' }}>
-          라운지 입장
+        <Link href={`/discussion/stock/${symbol}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 700, color: '#fff' }}>
+          💬 {s.name} 토론방
         </Link>
       </div>
     </div>

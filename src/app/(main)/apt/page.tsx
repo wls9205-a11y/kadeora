@@ -41,6 +41,7 @@ async function fetchAptData() {
   let lastRefreshed: string | null = null;
   let redevTotalCount = 0;
   let tradeTotalCount = 0;
+  const regionAvgPriceMap: Record<string, number> = {};
 
   try {
     const sb = await createSupabaseServer();
@@ -73,6 +74,19 @@ async function fetchAptData() {
     (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
     redevTotalCount = redevCountR.count ?? 0;
     tradeTotalCount = tradeCountR.count ?? 0;
+
+    // 지역별 평균가 (분양중 단지에 주입)
+    try {
+      const { data: tradeStats } = await sb.from('apt_trade_monthly_stats')
+        .select('region, avg_price')
+        .order('stat_month', { ascending: false })
+        .limit(50);
+      (tradeStats || []).forEach((s: any) => {
+        if (s.region && s.avg_price && !regionAvgPriceMap[s.region]) {
+          regionAvgPriceMap[s.region] = Number(s.avg_price);
+        }
+      });
+    } catch {}
   } catch {}
 
   // 지역별 + 상태별 통계 계산
@@ -129,7 +143,7 @@ async function fetchAptData() {
       przwner_presnatn_de: a.przwner_presnatn_de || null,
       cntrct_cncls_bgnde: a.cntrct_cncls_bgnde || null,
       cntrct_cncls_endde: a.cntrct_cncls_endde || null,
-      nearby_avg_price: null as number | null,
+      nearby_avg_price: regionAvgPriceMap[a.region_nm?.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '') || ''] || null,
     }));
 
   // 소스2: 미분양 (준공 후 포함)
@@ -160,7 +174,7 @@ async function fetchAptData() {
     przwner_presnatn_de: null as string | null,
     cntrct_cncls_bgnde: null as string | null,
     cntrct_cncls_endde: null as string | null,
-    nearby_avg_price: null as number | null,
+    nearby_avg_price: regionAvgPriceMap[u.region_nm?.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '') || ''] || null,
   }));
 
   // 중복 제거: 같은 단지명+지역이면 unsold 우선 (미분양 세대수 정보가 더 정확)

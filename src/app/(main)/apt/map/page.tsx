@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
-import MapClient from './MapClient';
+import { createSupabaseServer } from '@/lib/supabase-server';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: '부동산 지도',
@@ -19,6 +20,64 @@ export const metadata: Metadata = {
   other: { 'naver:written_time': new Date().toISOString(), 'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/map' },
 };
 
-export default function AptMapPage() {
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '지도' }] }) }} /><MapClient /></>;
+const REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
+
+export default async function AptMapPage() {
+  const sb = await createSupabaseServer();
+
+  const [subR, unsoldR, redevR] = await Promise.all([
+    sb.from('apt_subscriptions').select('region_nm').gte('rcept_endde', new Date().toISOString().slice(0, 10)).limit(5000),
+    sb.from('unsold_apts').select('region_nm').eq('is_active', true).limit(5000),
+    sb.from('redevelopment_projects').select('region').eq('is_active', true).limit(5000),
+  ]);
+
+  // Count by region
+  const subByRegion: Record<string, number> = {};
+  const unsoldByRegion: Record<string, number> = {};
+  const redevByRegion: Record<string, number> = {};
+  (subR.data || []).forEach((r: any) => {
+    const key = REGIONS.find(reg => (r.region_nm || '').startsWith(reg));
+    if (key) subByRegion[key] = (subByRegion[key] || 0) + 1;
+  });
+  (unsoldR.data || []).forEach((r: any) => {
+    const key = REGIONS.find(reg => (r.region_nm || '').startsWith(reg));
+    if (key) unsoldByRegion[key] = (unsoldByRegion[key] || 0) + 1;
+  });
+  (redevR.data || []).forEach((r: any) => {
+    const key = REGIONS.find(reg => (r.region || '').startsWith(reg));
+    if (key) redevByRegion[key] = (redevByRegion[key] || 0) + 1;
+  });
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '지도' }] }) }} />
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🗺️ 지역별 부동산 현황</h1>
+          <Link href="/apt" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+          {REGIONS.map(r => {
+            const sub = subByRegion[r] || 0;
+            const unsold = unsoldByRegion[r] || 0;
+            const redev = redevByRegion[r] || 0;
+            return (
+              <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{
+                padding: 14, borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                textDecoration: 'none', color: 'inherit', transition: 'border-color var(--transition-fast)',
+              }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>{r}</div>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  {sub > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>청약 {sub}</span>}
+                  {unsold > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>미분양 {unsold}</span>}
+                  {redev > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,159,67,0.1)', color: 'var(--accent-orange)', fontWeight: 600 }}>재개발 {redev}</span>}
+                  {sub === 0 && unsold === 0 && redev === 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>데이터 준비 중</span>}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
 }

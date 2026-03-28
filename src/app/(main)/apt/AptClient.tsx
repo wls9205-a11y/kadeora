@@ -155,6 +155,54 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         ))}
       </div>
 
+      {/* 이번 주 청약 D-day */}
+      {(() => {
+        const now = new Date();
+        const nowStr = now.toISOString().slice(0, 10);
+        const weekLater = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10);
+        const ddayList = apts
+          .filter(a => {
+            const start = String(a.rcept_bgnde ?? '').slice(0, 10);
+            const end = String(a.rcept_endde ?? '').slice(0, 10);
+            // Currently accepting OR starting within 7 days
+            return (start <= nowStr && end >= nowStr) || (start > nowStr && start <= weekLater);
+          })
+          .map(a => {
+            const start = String(a.rcept_bgnde ?? '').slice(0, 10);
+            const end = String(a.rcept_endde ?? '').slice(0, 10);
+            const isOpen = start <= nowStr && end >= nowStr;
+            const targetDate = isOpen ? end : start;
+            const diff = Math.ceil((new Date(targetDate).getTime() - now.getTime()) / 86400000);
+            return { ...a, isOpen, dday: diff, targetDate };
+          })
+          .sort((a, b) => a.dday - b.dday)
+          .slice(0, 5);
+        if (ddayList.length === 0) return null;
+        return (
+          <div style={{ marginBottom: 10, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📅 이번 주 청약 D-day</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {ddayList.map((a: any) => (
+                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 6, borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.isOpen ? '접수중' : '접수예정'}</div>
+                  </div>
+                  <span style={{
+                    fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, marginLeft: 8,
+                    padding: '2px 10px', borderRadius: 6,
+                    color: a.dday <= 1 ? 'var(--accent-red)' : a.dday <= 3 ? 'var(--accent-orange)' : 'var(--brand)',
+                    background: a.dday <= 1 ? 'rgba(255,107,107,0.1)' : a.dday <= 3 ? 'rgba(255,159,67,0.1)' : 'var(--brand-bg)',
+                  }}>
+                    {a.dday === 0 ? 'D-Day' : a.dday > 0 ? `D-${a.dday}` : `D+${Math.abs(a.dday)}`}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 지역별 스택바 현황 */}
       <RegionStackedBar
         apts={apts}
@@ -183,23 +231,34 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       )}
 
       {/* 통합 검색창 */}
-      <div style={{ position: 'relative', marginBottom: 10 }}>
-        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
-        <input
-          value={globalSearch}
-          onChange={e => setGlobalSearch(e.target.value)}
-          placeholder="단지명, 지역, 시공사 통합 검색..."
-          className="kd-search-input"
-          style={{ paddingLeft: 34, width: '100%', boxSizing: 'border-box' }}
-        />
-        {globalSearch && (
-          <button onClick={() => setGlobalSearch('')} style={{
-            position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-            background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: '50%',
-            width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, lineHeight: 1,
-          }} aria-label="검색어 지우기">✕</button>
-        )}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+        <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)} style={{
+          padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+          background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
+        }}>
+          <option value="전체">전국</option>
+          {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
+          <input
+            value={globalSearch}
+            onChange={e => setGlobalSearch(e.target.value)}
+            placeholder="단지명, 시공사 검색..."
+            className="kd-search-input"
+            style={{ paddingLeft: 34, width: '100%', boxSizing: 'border-box' }}
+          />
+          {globalSearch && (
+            <button onClick={() => setGlobalSearch('')} style={{
+              position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+              background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: '50%',
+              width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, lineHeight: 1,
+            }} aria-label="검색어 지우기">✕</button>
+          )}
+        </div>
       </div>
       {globalSearch && (
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8, marginTop: -6 }}>
@@ -349,6 +408,29 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           ))}
         </div>
       </div>
+
+      {/* 인기 분양 현장 */}
+      {(() => {
+        const bigApts = apts.filter((a: any) => (a.tot_supply_hshld_co || 0) >= 300).slice(0, 12);
+        if (bigApts.length === 0) return null;
+        return (
+          <div style={{ marginTop: 12, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 인기 분양 현장</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {bigApts.map((a: any) => {
+                const slug = (a.house_nm || '').trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.id;
+                return (
+                  <Link key={a.id} href={`/apt/sites/${slug}`} style={{
+                    padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
+                    background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
+                    border: '1px solid var(--border)',
+                  }}>{a.house_nm} ({(a.tot_supply_hshld_co || 0).toLocaleString()}세대)</Link>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 토스트 알림 */}
       {toast && (

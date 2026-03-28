@@ -108,6 +108,23 @@ export default async function BlogPage({ searchParams }: Props) {
     .order('view_count', { ascending: false })
     .limit(5);
 
+  // 오늘의 추천 (카테고리별 최신 1편씩)
+  let todayPicks: any[] = [];
+  if (pageNum === 1 && !q && category === 'all') {
+    try {
+      const picks = await Promise.all(
+        ['stock', 'apt', 'unsold', 'finance'].map(async (cat) => {
+          const { data } = await sb.from('blog_posts')
+            .select('id, slug, title, category, view_count, created_at')
+            .eq('is_published', true).eq('category', cat)
+            .order('created_at', { ascending: false }).limit(1).maybeSingle();
+          return data;
+        })
+      );
+      todayPicks = picks.filter(Boolean);
+    } catch {}
+  }
+
   // 인기 태그
   let popularTags: { tag: string; cnt: number }[] = [];
   if (pageNum === 1 && !q) {
@@ -262,6 +279,30 @@ export default async function BlogPage({ searchParams }: Props) {
         ))}
       </div>
 
+      {/* 오늘의 추천 */}
+      {pageNum === 1 && !q && category === 'all' && todayPicks.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>✨ 오늘의 추천</div>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
+            {todayPicks.map((p: any) => {
+              const catEmoji: Record<string, string> = { stock: '📈', apt: '🏢', unsold: '🏚️', finance: '💰' };
+              const catLabel: Record<string, string> = { stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크' };
+              return (
+                <Link key={p.id} href={`/blog/${p.slug}`} style={{
+                  flexShrink: 0, width: 180, padding: '12px 14px', borderRadius: 12,
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  textDecoration: 'none', color: 'inherit',
+                }}>
+                  <div style={{ fontSize: 20, marginBottom: 6 }}>{catEmoji[p.category] || '📝'}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginBottom: 4 }}>{catLabel[p.category] || p.category}</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, lineHeight: 1.35 }}>{p.title}</div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* 인기글 하이라이트 (첫 페이지, 검색 아닐 때) */}
       {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, marginBottom: 12 }}>
@@ -327,11 +368,25 @@ export default async function BlogPage({ searchParams }: Props) {
                 {/* 썸네일 */}
                 <div style={{
                   width: 56, height: 56, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
-                  background: `${catColor}15`,
+                  background: (() => {
+                    const hash = p.title.split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
+                    const angle = hash % 360;
+                    const pairs: Record<string, [string, string]> = {
+                      stock: ['rgba(96,165,250,0.25)', 'rgba(167,139,250,0.25)'],
+                      apt: ['rgba(52,211,153,0.25)', 'rgba(34,211,238,0.25)'],
+                      unsold: ['rgba(251,191,36,0.25)', 'rgba(248,113,113,0.25)'],
+                      finance: ['rgba(167,139,250,0.25)', 'rgba(236,72,153,0.25)'],
+                    };
+                    const [c1, c2] = pairs[p.category] || ['rgba(148,163,184,0.2)', 'rgba(203,213,225,0.2)'];
+                    return `linear-gradient(${angle}deg, ${c1}, ${c2})`;
+                  })(),
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   position: 'relative',
                 }}>
                   <span style={{ fontSize: 24 }}>{catEmoji[p.category] || '📝'}</span>
+                  {p.view_count >= 50 && (
+                    <span style={{ position: 'absolute', top: 3, right: 3, width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-red)', border: '1px solid var(--bg-surface)' }} />
+                  )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {/* 카테고리 + HOT */}

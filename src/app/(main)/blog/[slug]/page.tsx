@@ -376,6 +376,30 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         )}
 
+        {seriesInfo && (() => {
+          const total = seriesInfo.posts.length;
+          const currentIdx = seriesInfo.posts.findIndex((p: any) => p.id === post.id);
+          const progress = total > 0 ? ((currentIdx + 1) / total) * 100 : 0;
+          return (
+            <div style={{
+              marginBottom: 16, padding: 12, borderRadius: 10,
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <Link href={`/blog/series/${seriesInfo.series.slug}`} style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>
+                  📚 {seriesInfo.series.title}
+                </Link>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                  {currentIdx + 1} / {total}편
+                </span>
+              </div>
+              <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: 'var(--brand)', borderRadius: 2, transition: 'width 0.3s' }} />
+              </div>
+            </div>
+          );
+        })()}
+
         {/* 목차 (모바일: 인라인, 데스크탑: 사이드바) */}
         <div className="blog-toc-inline">
           {toc.length >= 3 && <BlogToc toc={toc} />}
@@ -410,6 +434,32 @@ export default async function BlogDetailPage({ params }: Props) {
             <br />정확한 투자·거래 판단은 공식 자료를 직접 확인해주세요.
           </div>
         )}
+
+        {/* 동적 CTA */}
+        {(() => {
+          const ctaMap: Record<string, { href: string; icon: string; title: string; desc: string }> = {
+            stock: { href: '/stock', icon: '📈', title: '실시간 주식 시세 보기', desc: '코스피·코스닥·해외 주식 시세를 확인하세요' },
+            apt: { href: '/apt', icon: '🏢', title: '전국 청약 일정 확인', desc: '접수중·예정 청약 정보를 한눈에' },
+            unsold: { href: '/apt?tab=unsold', icon: '🏚️', title: '미분양 현황 보기', desc: '전국 미분양 아파트를 확인하세요' },
+            finance: { href: '/shop', icon: '💰', title: '재테크 상품 둘러보기', desc: '알뜰한 금융 상품을 비교하세요' },
+          };
+          const cta = ctaMap[post.category];
+          if (!cta) return null;
+          return (
+            <Link href={cta.href} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: 16, marginBottom: 16,
+              background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))',
+              border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit',
+            }}>
+              <span style={{ fontSize: 32, flexShrink: 0 }}>{cta.icon}</span>
+              <div>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{cta.title}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>{cta.desc}</div>
+              </div>
+              <span style={{ marginLeft: 'auto', fontSize: 16, color: 'var(--text-tertiary)', flexShrink: 0 }}>→</span>
+            </Link>
+          );
+        })()}
 
         {/* 공유 + 도움이됐어요 + 북마크 */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
