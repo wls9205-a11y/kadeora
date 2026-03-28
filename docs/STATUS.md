@@ -94,6 +94,10 @@
 | `a0fc5dc` | 피드 G/H/I — Poll/북마크/핀글/어드민 |
 | `36d0f31` | OG 폰트 CDN→로컬 woff + 타입 정리 |
 | `518b1f4` | 빌드에러 수정 + GOD MODE 특수작업 섹션 |
+| `5b22023` | STATUS.md 세션 50 업데이트 |
+| `8631b54` | polls API any 캐스팅 (post_polls 타입 우회) |
+| `1709b44` | polls POST rateLimit 'write'→'api' 수정 ✅ READY |
+| `32bff45` | FeedClient loadMore select 필드 보완 + 타입 정리 |
 
 ---
 
