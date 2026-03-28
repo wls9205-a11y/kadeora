@@ -382,12 +382,12 @@ export function Navigation() {
       {/* ── 모바일 하단 탭바 ── */}
       <nav style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex:200,
-        background:'var(--nav-bg)',
+        background:'rgba(12,21,40,0.92)',
+        backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
         borderTop:'1px solid var(--nav-border)',
         display:'flex', alignItems:'flex-end', justifyContent:'space-around',
         paddingBottom:'max(6px, env(safe-area-inset-bottom))',
         paddingTop:0,
-        boxShadow:'0 -1px 4px rgba(0,0,0,0.1)',
       }} className="md:hidden">
         {MOBILE_TABS.slice(0, 2).map(item => {
           const active = isActive(item.href);
@@ -395,21 +395,24 @@ export function Navigation() {
             <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
               display:'flex', flexDirection:'column', alignItems:'center', gap:2,
               padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
-              justifyContent:'center', flex:1,
+              justifyContent:'center', flex:1, position:'relative',
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
+              transition:'color 0.15s ease',
             }}>
-              <item.Icon size={18} />
+              {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
+              <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
               <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
-              {active && <span style={{ width:4, height:4, borderRadius:'50%', background:'var(--brand)', marginTop:1 }} />}
             </Link>
           );
         })}
         {/* 글쓰기 */}
         <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
           display:'flex', alignItems:'center', justifyContent:'center',
-          width:42, height:42, borderRadius:12,
+          width:44, height:44, borderRadius:14,
           background:'var(--brand)', color:'var(--text-inverse)',
-          marginTop:-6, flexShrink:0, textDecoration:'none',
+          marginTop:-8, flexShrink:0, textDecoration:'none',
+          boxShadow:'0 2px 12px rgba(59,123,246,0.35)',
+          transition:'transform 0.12s ease, box-shadow 0.2s ease',
         }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -421,12 +424,13 @@ export function Navigation() {
             <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
               display:'flex', flexDirection:'column', alignItems:'center', gap:2,
               padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
-              justifyContent:'center', flex:1,
+              justifyContent:'center', flex:1, position:'relative',
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
+              transition:'color 0.15s ease',
             }}>
-              <item.Icon size={18} />
+              {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
+              <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
               <span style={{ fontSize:10, fontWeight: active ? 700 : 500, lineHeight:1.2 }}>{item.label}</span>
-              {active && <span style={{ width:4, height:4, borderRadius:'50%', background:'var(--brand)', marginTop:1 }} />}
             </Link>
           );
         })}

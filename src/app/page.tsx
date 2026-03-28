@@ -293,29 +293,28 @@ export default async function HomePage() {
             투자 정보와 커뮤니티를 하나의 앱에서 만나보세요.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/feed" style={{
-              padding: '14px 32px', borderRadius: 14, fontSize: 16, fontWeight: 700,
-              background: 'var(--brand)', color: '#fff', textDecoration: 'none',
-              boxShadow: '0 4px 20px rgba(37,99,235,0.3)',
+            <Link href="/feed" className="kd-btn-glow" style={{
+              padding: '14px 32px', borderRadius: 14, fontSize: 16,
+              textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6,
             }}>
-              둘러보기
+              🔍 둘러보기
             </Link>
             <Link href="/login" style={{
               padding: '14px 32px', borderRadius: 14, fontSize: 16, fontWeight: 700,
-              background: 'var(--bg-surface)', color: 'var(--text-primary)', textDecoration: 'none',
-              border: '1px solid var(--border-strong)',
+              background: '#FEE500', color: '#191919', textDecoration: 'none',
+              border: 'none', display: 'inline-flex', alignItems: 'center', gap: 6,
+              transition: 'transform 0.12s ease, box-shadow 0.2s ease',
             }}>
-              카카오로 3초 가입
+              💬 카카오로 3초 가입
             </Link>
           </div>
         </section>
 
         {/* ━━━ 실시간 통계 ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto 36px', padding: '0 20px' }}>
-          <div style={{
+          <div className="kd-glass" style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8,
-            background: 'var(--bg-surface)', borderRadius: 12, padding: 'clamp(12px, 2vw, 18px)',
-            border: '1px solid var(--border)',
+            padding: 'clamp(14px, 2vw, 20px)',
           }}>
             {[
               { label: '블로그', value: fmtNum(stats.blogs), suffix: '편' },
@@ -325,7 +324,7 @@ export default async function HomePage() {
               { label: '커뮤니티', value: fmtNum(stats.posts), suffix: '건' },
               { label: '회원', value: String(stats.profiles), suffix: '명' },
             ].map(s => (
-              <div key={s.label} style={{ textAlign: 'center', padding: '6px 0' }}>
+              <div key={s.label} className="kd-counter" style={{ textAlign: 'center', padding: '6px 0' }}>
                 <div style={{ fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, color: 'var(--brand-hover)', letterSpacing: '-0.02em' }}>
                   {s.value}<span style={{ fontSize: '0.5em', fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: 2 }}>{s.suffix}</span>
                 </div>
@@ -405,10 +404,10 @@ export default async function HomePage() {
             gap: 12,
           }}>
             {SECTIONS.map((s, i) => (
-              <Link key={s.href} href={s.href} className="home-card" style={{
+              <Link key={s.href} href={s.href} className="home-card kd-section-card" style={{
                 display: 'block', textDecoration: 'none',
                 background: 'var(--bg-surface)', borderRadius: 12,
-                border: '1px solid var(--border)', transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
+                border: '1px solid var(--border)',
                 overflow: 'hidden',
               }}>
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }}>
