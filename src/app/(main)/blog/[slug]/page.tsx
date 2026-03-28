@@ -400,6 +400,9 @@ export default async function BlogDetailPage({ params }: Props) {
     })),
   } : null;
 
+  const catColorMap: Record<string, string> = { stock: '#38BDF8', apt: '#2EE8A5', unsold: '#FF9F43', finance: '#B794FF', general: '#94A8C4' };
+  const catColor = catColorMap[post.category] || '#94A8C4';
+
   return (
     <div className="blog-detail-layout">
       <div className="blog-detail-main">
@@ -437,22 +440,32 @@ export default async function BlogDetailPage({ params }: Props) {
             </>
           );
         })()}
-        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 12px', wordBreak: 'keep-all' }}>{post.title}</h1>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
-          <span>조회 {post.view_count ?? 0}</span>
-          <span>·</span>
-          <span>약 {readingTimeMin}분</span>
-          {post.rewritten_at && (
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '2px 8px', borderRadius: 6,
-              background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)',
-              fontSize: 'var(--fs-xs)', fontWeight: 600,
-            }}>
-              🔄 {new Date(post.rewritten_at).toLocaleDateString('ko-KR')} 업데이트
-            </span>
-          )}
+        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.3, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
+        {/* 저자 + 메타 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${catColor}30, ${catColor}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, border: `1px solid ${catColor}20` }}>
+            {{ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' }[post.category] || '📝'}
+          </div>
+          <div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{post.author_name || '카더라 데이터팀'}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
+              <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
+              <span>·</span>
+              <span>조회 {post.view_count ?? 0}</span>
+              <span>·</span>
+              <span>📖 {readingTimeMin}분</span>
+              {post.rewritten_at && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
+                  padding: '1px 6px', borderRadius: 4,
+                  background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)',
+                  fontSize: 10, fontWeight: 600,
+                }}>
+                  🔄 업데이트
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {(post.tags ?? []).length > 0 && (
