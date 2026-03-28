@@ -50,36 +50,36 @@ export default async function BlogSeriesPage() {
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 12 }}>
-          {seriesList.map(s => (
+          {seriesList.map(s => {
+            const catColor = s.category === 'stock' ? '#00E5FF' : s.category === 'apt' ? '#00FF87' : s.category === 'finance' ? '#FFE000' : '#C084FC';
+            return (
             <Link key={s.id} href={`/blog/series/${s.slug}`} className="kd-card-hover" style={{
               display: 'block', textDecoration: 'none',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
-              borderRadius: 12, padding: 16,
+              borderRadius: 14, overflow: 'hidden',
             }}>
-              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                {s.cover_image && (
-                  <div style={{ width: 80, height: 60, borderRadius: 8, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                    <Image src={s.cover_image} alt={s.title || ''} fill sizes="80px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!s.cover_image.includes('supabase.co')} />
-                  </div>
-                )}
+              {/* 매거진 커버 */}
+              <div style={{ height: 80, background: `linear-gradient(135deg, ${catColor}18 0%, ${catColor}08 100%)`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 14, position: 'relative' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: `${catColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
+                  {s.category === 'stock' ? '📈' : s.category === 'apt' ? '🏢' : s.category === 'finance' ? '💰' : '📝'}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{s.title}</h2>
-                  {s.description && (
-                    <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '4px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {s.description}
-                    </p>
-                  )}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>{s.post_count}편</span>
-                    {s.category && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 600, background: s.category === 'stock' ? 'rgba(96,165,250,0.1)' : s.category === 'apt' ? 'rgba(52,211,153,0.1)' : 'rgba(167,139,250,0.1)', color: s.category === 'stock' ? 'var(--accent-blue)' : s.category === 'apt' ? 'var(--accent-green)' : 'var(--accent-purple)' }}>{s.category === 'stock' ? '주식' : s.category === 'apt' ? '청약' : s.category === 'unsold' ? '미분양' : s.category === 'finance' ? '재테크' : s.category}</span>}
-                  </div>
-                  <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 6, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min((s.post_count / 50) * 100, 100)}%`, background: 'var(--brand)', borderRadius: 2 }} />
-                  </div>
+                  <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>{s.title}</h2>
+                  {s.description && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.description}</p>}
+                </div>
+                <div style={{ position: 'absolute', top: 10, right: 14, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: `${catColor}20`, color: catColor, border: `1px solid ${catColor}40` }}>
+                  {s.post_count}편
+                </div>
+              </div>
+              {/* 진행률 바 */}
+              <div style={{ padding: '0 20px 12px' }}>
+                <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 10, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min((s.post_count / 50) * 100, 100)}%`, background: `linear-gradient(90deg, ${catColor}, var(--brand))`, borderRadius: 2 }} />
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

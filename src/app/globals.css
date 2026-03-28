@@ -422,3 +422,29 @@ body {
   border-color: var(--border);
 }
 
+
+/* ━━━ 세션51: 진화 강화 ━━━ */
+
+/* 15. 카드 호버 시 좌측 카테고리 컬러 보더 */
+@media (hover: hover) {
+  .kd-feed-card { border-left: 3px solid transparent; transition: border-left-color 0.15s, background 0.15s; }
+  .kd-feed-card:hover { border-left-color: var(--brand) !important; }
+  .kd-feed-card[data-cat="stock"]:hover { border-left-color: #00E5FF !important; }
+  .kd-feed-card[data-cat="apt"]:hover { border-left-color: #00FF87 !important; }
+  .kd-feed-card[data-cat="local"]:hover { border-left-color: #FFD43B !important; }
+  .kd-feed-card[data-cat="free"]:hover { border-left-color: #F472B6 !important; }
+  .kd-card-hover { border-left: 3px solid transparent; transition: border-left-color 0.15s, transform 0.15s; }
+  .kd-card-hover:hover { border-left-color: var(--brand) !important; }
+}
+
+/* 8. 방문한 글 표시 */
+.kd-feed-card.visited { opacity: 0.7; }
+.kd-feed-card.visited .kd-card-title { color: var(--text-tertiary) !important; }
+
+/* 피드 카드 히어로 이미지 */
+.kd-hero-img { border-radius: 10px; overflow: hidden; margin-top: 8px; position: relative; aspect-ratio: 16/9; }
+.kd-hero-img img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 블로그 next-article 플로팅 카드 */
+@keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.kd-next-article { animation: slideUp 0.3s ease-out; }

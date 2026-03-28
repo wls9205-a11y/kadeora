@@ -31,6 +31,10 @@ function readingTime(text: string): number {
   return Math.max(1, Math.round((text || '').replace(/<[^>]+>/g, '').length / 500));
 }
 
+function stripHtml(text: string): string {
+  return (text || '').replace(/<[^>]*>/g, '').replace(/[#*_~`>]/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/\s+/g, ' ').trim();
+}
+
 const CAT_STYLE: Record<string, { label: string; color: string; bg: string }> = {
   apt:   { label: '부동산',  color: '#2EE8A5', bg: 'rgba(52,211,153,0.1)' },
   stock: { label: '주식',    color: '#38BDF8', bg: 'rgba(56,189,248,0.1)' },
@@ -407,6 +411,7 @@ export default function FeedClient({
 
             const card = (
               <div key={post.id} className="animate-fadeIn kd-feed-card"
+                data-cat={post.category}
                 style={{ padding: '12px 14px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 10, transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
@@ -446,9 +451,15 @@ export default function FeedClient({
                     </div>
                   )}
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                    {post.excerpt || post.content}
+                    {stripHtml(post.excerpt || post.content).slice(0, 200)}
                   </div>
-                  {post.images && post.images.length > 0 && (
+                  {/* 히어로 이미지 (1장) 또는 갤러리 (2장+) */}
+                  {post.images && post.images.length === 1 && (
+                    <div className="kd-hero-img">
+                      <Image src={(post.images as string[])[0]} alt="게시글 이미지" fill sizes="(max-width: 780px) 100vw, 600px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!(post.images as string[])[0].includes('supabase.co')} />
+                    </div>
+                  )}
+                  {post.images && post.images.length > 1 && (
                     <div style={{ marginTop: 10, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
                       {(post.images as string[]).slice(0, 3).map((img, idx) => (
                         <div key={idx} style={{ width: 90, height: 90, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>

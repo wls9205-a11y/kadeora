@@ -20,6 +20,7 @@ export const revalidate = 300;
 import { SITE_URL as SITE } from '@/lib/constants';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
+import NextArticleFloat from '@/components/NextArticleFloat';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -536,6 +537,9 @@ export default async function BlogDetailPage({ params }: Props) {
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
         </div>
       </article>
+
+      {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
+      {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
 
       {/* 댓글 섹션 */}
       <BlogCommentCTA commentCount={comments.length} />

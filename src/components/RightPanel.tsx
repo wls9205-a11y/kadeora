@@ -91,11 +91,13 @@ export default function RightPanel() {
 
       {/* 인기 검색어 (5개) */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>인기 검색어</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 인기 검색어</div>
         {display.map((item, i) => (
-          <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '4px 0' }}>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, minWidth: 14, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{i + 1}</span>
-            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.keyword}</span>
+          <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} className="kd-card-hover" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '5px 6px', borderRadius: 6, margin: '0 -6px' }}>
+            <span style={{ fontSize: 11, fontWeight: 800, minWidth: 18, textAlign: 'center', color: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text-tertiary)' }}>
+              {i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}
+            </span>
+            <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: i < 3 ? 700 : 500 }}>{item.keyword}</span>
           </Link>
         ))}
       </div>

@@ -214,12 +214,13 @@ export function Navigation() {
                 width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
                 borderRadius:'50%', background:'var(--bg-hover)', border:'1px solid var(--border)',
                 color: moreOpen ? 'var(--brand)' : 'var(--text-secondary)',
-                cursor:'pointer', transition:'border-color 0.12s',
+                cursor:'pointer', transition:'border-color 0.12s', position:'relative',
               }}
               onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
               onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              {(unread > 0) && <span style={{ position:'absolute', top:0, right:0, width:8, height:8, borderRadius:'50%', background:'var(--accent-red)', border:'2px solid var(--nav-bg)' }} />}
             </button>
 
             {userId ? (

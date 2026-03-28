@@ -304,6 +304,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             );
           })()}
           <Link href="/stock/compare" className="kd-action-link" style={{ fontSize: 11 }}>⚔️ 비교</Link>
+          <button onClick={() => refresh()} aria-label="새로고침" style={{ width: 30, height: 30, borderRadius: '50%', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontFamily: 'inherit', transition: 'border-color 0.15s' }} title="시세 새로고침">🔄</button>
         </div>
       </div>
 

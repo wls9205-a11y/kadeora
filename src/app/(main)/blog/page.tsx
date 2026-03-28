@@ -408,7 +408,7 @@ export default async function BlogPage({ searchParams }: Props) {
               }}>
                 {/* 썸네일 */}
                 <div style={{
-                  width: 56, height: 56, borderRadius: 8, flexShrink: 0, overflow: 'hidden',
+                  width: 72, height: 72, borderRadius: 10, flexShrink: 0, overflow: 'hidden',
                   background: (() => {
                     const hash = p.title.split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
                     const angle = hash % 360;
@@ -427,7 +427,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   {p.cover_image && !p.cover_image.includes('default-cover') && !p.cover_image.includes('generic') ? (
                     <img src={p.cover_image} alt={p.image_alt || p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
                   ) : (
-                    <span style={{ fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>{catEmoji[p.category] || '📝'}</span>
+                    <span style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>{catEmoji[p.category] || '📝'}</span>
                   )}
                   {p.view_count >= 50 && (
                     <span style={{ position: 'absolute', top: 3, right: 3, width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-red)', border: '1px solid var(--bg-surface)' }} />
