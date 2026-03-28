@@ -20,9 +20,20 @@ const UNIT_COLORS: Record<string, string> = {
 };
 function colorFor(unit: string): string { return UNIT_COLORS[unit.replace(/\s/g, '')] || '#60a5fa'; }
 
-// ── 1. OG 커버 이미지 히어로 (비활성화: 자동생성 블로그에 깨진 URL이 많아 빈 박스 렌더링 방지) ──
-function insertCoverImage(html: string, _opts: EnhanceOptions): string {
-  return html;
+// ── 1. OG 커버 이미지 히어로 ──
+function insertCoverImage(html: string, opts: EnhanceOptions): string {
+  let imgUrl = '';
+  if (opts.coverImage && opts.coverImage.trim() && !opts.coverImage.includes('default-cover') && !opts.coverImage.includes('generic')) {
+    imgUrl = opts.coverImage;
+  } else if (opts.title) {
+    const cat = opts.category || 'general';
+    imgUrl = '/api/og?title=' + encodeURIComponent(opts.title) + '&category=' + cat;
+  }
+  if (!imgUrl) return html;
+
+  const alt = opts.imageAlt || opts.title || '카더라 블로그';
+  const hero = '<div style="margin:0 0 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"><img src="' + imgUrl + '" alt="' + alt + '" loading="eager" decoding="async" style="width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover" onerror="this.parentElement.style.display=\'none\'" /></div>';
+  return hero + html;
 }
 
 // ── 2. 히어로 통계 카드 (알록달록) ──

@@ -80,9 +80,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   const cats = sel ? { sub: sel.sub, ongoing: sel.ongoing, unsold: sel.unsold, redev: sel.redev, trade: sel.trade } : grandCats;
   const total = sel ? sel.total : grandTotal;
 
-  const entries = CAT_KEYS
-    .map(key => ({ key, val: cats[key], color: COLORS[key] }))
-    .filter(c => c.val > 0);
+  // All 5 categories for legend (even if 0), filtered for arcs
+  const allEntries = CAT_KEYS.map(key => ({ key, val: cats[key], color: COLORS[key] }));
+  const entries = allEntries.filter(c => c.val > 0);
 
   // Donut geometry
   const R = 42;
@@ -149,9 +149,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
           )}
         </svg>
 
-        {/* Legend */}
+        {/* Legend — show all 5 categories */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 80 }}>
-          {entries.map(e => (
+          {allEntries.map(e => (
             <div key={e.key} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)' }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: e.color, flexShrink: 0 }} />
               <span style={{ color: 'var(--text-tertiary)' }}>{LABELS[e.key]}</span>
@@ -166,7 +166,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       {/* Compact tile grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(105px, 1fr))',
         gap: 6,
       }}>
         {regions.map((r, i) => {
@@ -176,8 +176,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               key={r.name}
               onClick={() => onRegionClick?.(isActive ? '전체' : r.name)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '6px 8px',
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '4px 6px',
                 background: 'var(--bg-surface)',
                 border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                 borderRadius: 8,
@@ -190,24 +190,24 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             >
               {/* Rank */}
               <span style={{
-                fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)',
-                width: 16, textAlign: 'center', flexShrink: 0,
+                fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)',
+                width: 14, textAlign: 'center', flexShrink: 0,
               }}>
                 {i + 1}
               </span>
 
               {/* Name + mini bar */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {r.name}
                   </span>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                     {r.total.toLocaleString()}
                   </span>
                 </div>
                 {/* Mini stacked bar */}
-                <div style={{ display: 'flex', width: 40, height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
+                <div style={{ display: 'flex', width: 32, height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
                   {CAT_KEYS.map(k => {
                     const v = r[k];
                     if (v <= 0) return null;
