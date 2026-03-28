@@ -288,6 +288,14 @@ export default async function FeedDetailPage({ params }: Props) {
           { '@type': 'ListItem', position: 3, name: post.title },
         ],
       }) }} />
+      {/* FAQ JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: `이 글은 어떤 내용인가요?`, acceptedAnswer: { '@type': 'Answer', text: post.content?.slice(0, 150) || post.title } },
+          { '@type': 'Question', name: `카더라 커뮤니티는 어떤 곳인가요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라는 주식, 부동산, 재테크 정보를 공유하는 투자 커뮤니티입니다. 누구나 무료로 글을 작성하고 토론에 참여할 수 있습니다.` } },
+        ],
+      }) }} />
 
       {/* Back link */}
       <div style={{ marginBottom: 20 }}>
@@ -306,7 +314,7 @@ export default async function FeedDetailPage({ params }: Props) {
         <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/api/og?title=${encodeURIComponent(post.title)}&design=2&category=${post.category || 'free'}&author=${encodeURIComponent(author)}`}
+            src={`/api/og?title=${encodeURIComponent(post.title)}&design=2&category=${post.category || 'free'}&author=${encodeURIComponent((post.profiles as any)?.nickname || '카더라')}`}
             alt={`${post.title} — 카더라 커뮤니티`}
             width={1200} height={630}
             style={{ width: '100%', height: 'auto', display: 'block' }}
@@ -334,7 +342,7 @@ export default async function FeedDetailPage({ params }: Props) {
             </span>
             <span style={{ marginLeft: 4 }}>{GRADE_EMOJI[post.profiles?.grade as number] || '🌱'}</span>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
-              {timeAgo(post.created_at)} · 조회 {(post.view_count ?? 0).toLocaleString()}
+              <time dateTime={post.created_at}>{timeAgo(post.created_at)}</time> · 조회 {(post.view_count ?? 0).toLocaleString()}
             </div>
             {post.content && post.content.length > 500 && (
               <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
@@ -519,7 +527,7 @@ export default async function FeedDetailPage({ params }: Props) {
       {relatedBlogs.length > 0 && (
         <div style={{ marginBottom: 20, padding: 16, background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(167,139,250,0.04) 100%)', borderRadius: 14, border: '1px solid rgba(37,99,235,0.12)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>📰 관련 분석 글</h3>
+            <h2 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>📰 관련 분석 글</h2>
             <Link href="/blog" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>더보기 →</Link>
           </div>
           {relatedBlogs.map(b => (

@@ -114,7 +114,7 @@ export default async function RegionLandingPage({ params }: Props) {
   const data = await fetchRegionData(decoded);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* JSON-LD: BreadcrumbList */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}) }} />
       {/* JSON-LD: CollectionPage */}
@@ -276,6 +276,6 @@ export default async function RegionLandingPage({ params }: Props) {
         url: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,
         isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
       })}} />
-    </div>
+    </article>
   );
 }

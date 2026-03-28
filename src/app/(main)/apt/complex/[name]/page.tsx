@@ -108,7 +108,7 @@ export default async function ComplexDetailPage({ params }: Props) {
   const card = 'kd-card';
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* JSON-LD */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Place',
@@ -165,7 +165,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* 면적별 비교 */}
       {areaStats.length > 1 && (
         <div className={card}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📐 면적별 비교</div>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, margin: '0 0 12px' }}>📐 면적별 비교</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
             {areaStats.slice(0, 8).map(a => (
               <div key={a.area} style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 12px' }}>
@@ -244,6 +244,6 @@ export default async function ComplexDetailPage({ params }: Props) {
       }}>
         🏗️ 이 현장의 전체 정보 보기 (청약 · 재개발 · 리뷰) →
       </Link>
-    </div>
+    </article>
   );
 }

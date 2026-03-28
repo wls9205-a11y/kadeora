@@ -99,7 +99,8 @@ export default async function HotPage() {
   return (
     <HotClient>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"HOT 게시글","item":SITE_URL + "/hot"}]}) }} />
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"HOT 게시글은 어떤 기준으로 선정되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 HOT 게시글은 최근 7일간 좋아요, 댓글, 조회수를 종합하여 가장 인기 있는 글을 자동으로 선정합니다."}},{"@type":"Question","name":"카더라 커뮤니티에서 어떤 글을 쓸 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"주식 종목 분석, 부동산 청약 후기, 재테크 정보, 자유 토론 등 투자와 관련된 다양한 주제의 글을 자유롭게 작성할 수 있습니다."}}]}) }} />
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
@@ -107,6 +108,8 @@ export default async function HotPage() {
             <span>›</span>
             <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>HOT</span>
           </nav>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/api/og?title=${encodeURIComponent('이번 주 HOT 게시글')}&design=2&category=free&subtitle=${encodeURIComponent('카더라 커뮤니티 인기글 TOP')}`} alt="카더라 이번 주 HOT 인기 게시글 — 주식 부동산 커뮤니티" width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
           <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
           <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
           <SectionShareButton section="hot" label="이번 주 HOT 게시글 모음" pagePath="/hot" />
@@ -196,7 +199,7 @@ export default async function HotPage() {
           })}
         </div>
       )}
-    </div>
+    </article>
     </HotClient>
   );
 }

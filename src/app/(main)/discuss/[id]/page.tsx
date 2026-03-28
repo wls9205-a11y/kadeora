@@ -133,11 +133,26 @@ export default async function DiscussDetailPage({ params }: Props) {
     <article itemScope itemType="https://schema.org/DiscussionForumPosting" style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {/* FAQ JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: `${topic.title}에서 어떤 의견이 많나요?`, acceptedAnswer: { '@type': 'Answer', text: `${topic.option_a} ${total > 0 ? Math.round(((topic.vote_a || 0) / total) * 100) : 50}% vs ${topic.option_b} ${total > 0 ? Math.round(((topic.vote_b || 0) / total) * 100) : 50}% (${total}명 참여)` } },
+          { '@type': 'Question', name: `카더라 토론방은 어떤 곳인가요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라 토론방은 주식, 부동산, 경제 이슈를 실시간으로 투표하고 토론하는 공간입니다. 누구나 무료로 참여 가능합니다.` } },
+        ],
+      }) }} />
 
       {/* Back */}
-      <Link href="/discuss" style={{ color: 'var(--text-tertiary)', fontSize: 12, padding: '6px 0', marginBottom: 6, display: 'inline-block', textDecoration: 'none' }}>
-        ← 돌아가기
-      </Link>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+        <span>›</span>
+        <Link href="/discuss" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>토론</Link>
+        <span>›</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{CAT_LABEL[topic.category] || '토론'}</span>
+      </nav>
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/api/og?title=${encodeURIComponent(topic.title)}&design=2&category=${topic.category}&subtitle=${encodeURIComponent(topic.option_a + ' vs ' + topic.option_b)}`} alt={`${topic.title} — 카더라 토론`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
 
       {/* Topic Header — SSR rendered for crawlers */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
@@ -168,6 +183,7 @@ export default async function DiscussDetailPage({ params }: Props) {
       </div>
 
       {/* Client interactive part (투표 + 댓글) */}
+      <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '12px 0 8px' }}>💬 실시간 투표 & 댓글</h2>
       <DiscussDetailClient initialTopic={topic as React.ComponentProps<typeof DiscussDetailClient>['initialTopic']} initialComments={comments as React.ComponentProps<typeof DiscussDetailClient>['initialComments']} />
 
       {/* 관련 블로그 (내부 링크 SEO) */}

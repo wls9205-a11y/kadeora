@@ -696,7 +696,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 관련 글 */}
       {(related ?? []).length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📚 관련 글</div>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10, margin: '0 0 10px' }}>📚 관련 글</h2>
           {related!.map((r: any) => (
             <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 4px', borderBottom: '1px solid var(--border)', textDecoration: 'none', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
               <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</span>
