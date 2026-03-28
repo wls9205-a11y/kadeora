@@ -44,6 +44,10 @@ JSON 배열만 응답. 각 항목: {"title":"이벤트명","description":"설명
           signal: AbortSignal.timeout(30000),
         });
 
+        if (!res.ok) {
+          if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } };
+          return { processed: 0, created: 0, failed: 1, metadata: { reason: 'anthropic_error', status: res.status } };
+        }
         if (res.ok) {
           const data = await res.json();
           const text = data.content?.[0]?.text || '';

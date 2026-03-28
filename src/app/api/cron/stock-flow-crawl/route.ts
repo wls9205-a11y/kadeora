@@ -68,6 +68,7 @@ JSON 배열만 응답:
       });
 
       if (!res.ok) {
+        if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } };
         const errText = await res.text().catch(() => '');
         return { processed: 0, created: 0, failed: 1, metadata: { reason: 'api_error', status: res.status, detail: errText.slice(0, 200) } };
       }

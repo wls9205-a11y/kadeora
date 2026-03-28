@@ -100,7 +100,9 @@ export async function GET(req: NextRequest) {
     const postCount = randInt(1, 3);
     const results: { title: string; comments: number; likes: number }[] = [];
 
+    let creditExhausted = false;
     for (let i = 0; i < postCount; i++) {
+      if (creditExhausted) break;
       const userId = pick(seedUsers).id;
       const category = pick(CATEGORIES);
       const regionId = pick(REGIONS);
@@ -124,6 +126,11 @@ export async function GET(req: NextRequest) {
               }),
               signal: AbortSignal.timeout(8000),
             });
+            if (!res.ok && (res.status === 529 || res.status === 402)) {
+              // 크레딧 부족 → 외부 for 루프까지 탈출
+              creditExhausted = true;
+              break;
+            }
             if (res.ok) {
               const data = await res.json();
               const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
