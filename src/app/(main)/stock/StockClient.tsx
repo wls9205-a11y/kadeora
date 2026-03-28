@@ -214,7 +214,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         {/* 좌측 컬러 바 */}
         <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, background: barColor, flexShrink: 0, minHeight: 36 }} />
         {/* 순위 */}
-        <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', minWidth: 14, textAlign: 'center', fontFamily: "'IBM Plex Mono', monospace" }}>{rank}</span>
+        <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)', minWidth: 14, textAlign: 'center', fontFamily: 'monospace' }}>{rank}</span>
         {/* 관심 */}
         <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} className={isWatched ? 'animate-like' : ''} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, lineHeight: 1, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0 }}>
           {isWatched ? '★' : '☆'}
@@ -236,7 +236,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
-            <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0, fontFamily: "'IBM Plex Mono', monospace" }}>{s.symbol}</span>
+            <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0, fontFamily: 'monospace' }}>{s.symbol}</span>
             {s.sector && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 5px', borderRadius: 3 }}>{s.sector}</span>}
             {s.market_cap > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{fmtCap(s.market_cap, s.currency)}</span>}
           </div>
@@ -299,7 +299,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: ms.color, flexShrink: 0, animation: 'pulse 1.5s ease-in-out infinite' }} />
                 )}
                 {ms.label}
-                {lastUpdate && <span style={{ fontSize: 9, opacity: 0.65, fontWeight: 400, fontFamily: "'IBM Plex Mono', monospace" }}>{new Date(lastUpdate).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>}
+                {lastUpdate && <span style={{ fontSize: 9, opacity: 0.65, fontWeight: 400, fontFamily: 'monospace' }}>{new Date(lastUpdate).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>}
               </span>
             );
           })()}
@@ -323,7 +323,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             {/* 헤더 */}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, cursor: 'pointer' }} onClick={() => setBriefingOpen(v => !v)}>
               <div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--brand)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 4, fontFamily: "'IBM Plex Mono', monospace" }}>AI 시황 분석</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--brand)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 4, fontFamily: 'monospace' }}>AI 시황 분석</div>
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#E8F2FF', lineHeight: 1.25, letterSpacing: '-0.4px' }}>{briefing.title}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8, background: bull ? 'rgba(46,232,165,0.1)' : bear ? 'rgba(248,113,113,0.1)' : 'rgba(148,163,184,0.1)', border: `1px solid ${bull ? 'rgba(46,232,165,0.25)' : bear ? 'rgba(248,113,113,0.25)' : 'rgba(148,163,184,0.2)'}`, flexShrink: 0 }}>
@@ -342,7 +342,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                   { label: 'USD/KRW', val: exchangeRate.toLocaleString('ko-KR', {maximumFractionDigits:0}), chg: 0, chgStr: '원', color: 'var(--text-tertiary)' },
                 ].map(kpi => (
                   <div key={kpi.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '7px 8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.5px', marginBottom: 3, fontFamily: "'IBM Plex Mono', monospace" }}>{kpi.label}</div>
+                    <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.5px', marginBottom: 3, fontFamily: 'monospace' }}>{kpi.label}</div>
                     <div style={{ fontSize: 14, fontWeight: 900, color: '#D8E8FF', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.3px' }}>{kpi.val}</div>
                     <div style={{ fontSize: 9, fontWeight: 700, marginTop: 1, color: kpi.color }}>{kpi.chgStr}</div>
                   </div>
@@ -384,7 +384,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 <div style={{ width: `${(flat/total)*100}%`, background: 'var(--border)' }} />
                 <div style={{ width: `${(dn/total)*100}%`, background: dnColor, transition: 'width 0.5s', borderRadius: '0 3px 3px 0' }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 700, fontFamily: 'monospace' }}>
                 <span style={{ color: upColor }}>▲{up}</span>
                 <span style={{ color: 'var(--text-tertiary)' }}>—{flat}</span>
                 <span style={{ color: dnColor }}>▼{dn}</span>
@@ -414,7 +414,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ textDecoration: 'none' }}>
               <div style={{ background: 'var(--bg-surface)', borderRadius: 10, padding: '10px 10px 8px', borderLeft: `3px solid ${ac}`, border: `1px solid var(--border)`, borderLeftWidth: 3, borderLeftColor: ac, transition: 'all 0.15s' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.5px', fontFamily: "'IBM Plex Mono', monospace" }}>{s.name}</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.5px', fontFamily: 'monospace' }}>{s.name}</div>
                   {sparkPath && (
                     <svg width="40" height="16" viewBox="0 0 70 20" style={{ flexShrink: 0 }}>
                       <path d={sparkPath.fill} fill={`${ac === 'var(--accent-red)' ? 'rgba(255,107,107' : ac === 'var(--accent-green)' ? 'rgba(46,232,165' : 'rgba(108,180,255'},0.1)`} />
@@ -440,7 +440,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           <div style={{ background: 'var(--bg-surface)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', background: 'var(--bg-hover)', borderBottom: '1px solid var(--border)' }}>
               <span style={{ fontSize: 11 }}>⚡</span>
-              <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--accent-yellow)', letterSpacing: '1.5px', fontFamily: "'IBM Plex Mono', monospace" }}>이슈 종목</span>
+              <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--accent-yellow)', letterSpacing: '1.5px', fontFamily: 'monospace' }}>이슈 종목</span>
             </div>
             {bigMovers.map((s, idx) => {
               const pct = s.change_pct ?? 0;
@@ -457,7 +457,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                       {s.name}
                       {Math.abs(pct) >= 10 && <span style={{ fontSize: 8, fontWeight: 800, padding: '1px 4px', borderRadius: 3, marginLeft: 5, background: isUp ? upColor : dnColor, color: '#fff' }}>{isUp ? '급등' : '급락'}</span>}
                     </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, fontFamily: "'IBM Plex Mono', monospace" }}>{s.symbol} · {s.sector}</div>
+                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, fontFamily: 'monospace' }}>{s.symbol} · {s.sector}</div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}</div>
@@ -510,7 +510,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             const downC = isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)';
             return (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 12px', marginBottom: 10 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>섹터 등락률</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>섹터 등락률</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {sectorRanking.map(sec => {
                     const isUp = sec.avg > 0;
@@ -527,8 +527,8 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                           }
                           <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--border)' }} />
                         </div>
-                        <span style={{ fontSize: 10, fontWeight: 700, color, minWidth: 40, textAlign: 'left', flexShrink: 0, fontFamily: "'IBM Plex Mono', monospace" }}>{isUp?'+':''}{sec.avg.toFixed(2)}%</span>
-                        <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0, fontFamily: "'IBM Plex Mono', monospace" }}>{sec.count}종</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color, minWidth: 40, textAlign: 'left', flexShrink: 0, fontFamily: 'monospace' }}>{isUp?'+':''}{sec.avg.toFixed(2)}%</span>
+                        <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0, fontFamily: 'monospace' }}>{sec.count}종</span>
                       </button>
                     );
                   })}
@@ -853,7 +853,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
             briefingUS={null}
           />
           {/* 포트폴리오 시뮬레이터 */}
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8, marginTop: 12 }}>포트폴리오 시뮬레이터</div>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8, marginTop: 12 }}>포트폴리오 시뮬레이터</div>
           <PortfolioSimulator stocks={stocks} isKR={isDomestic} />
           {/* 레이더 비교 */}
           <div style={{ marginTop: 8 }}>

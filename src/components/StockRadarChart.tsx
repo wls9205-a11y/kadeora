@@ -50,7 +50,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
 
   return (
     <div style={{ marginBottom: 12 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>
+      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
         종목 레이더 비교 (최대 3개)
       </div>
 

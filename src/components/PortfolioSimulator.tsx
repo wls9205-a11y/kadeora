@@ -70,7 +70,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
           { label: '평균 등락', val: holdings.length ? `${weightedPct > 0 ? '+' : ''}${weightedPct.toFixed(2)}%` : '—', color: profitColor },
         ].map(kpi => (
           <div key={kpi.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: "'IBM Plex Mono', monospace", marginBottom: 3 }}>{kpi.label}</div>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 3 }}>{kpi.label}</div>
             <div style={{ fontSize: 16, fontWeight: 900, color: kpi.color, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.3px' }}>{kpi.val}</div>
           </div>
         ))}
@@ -78,10 +78,10 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
 
       {/* 원금 슬라이더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: "'IBM Plex Mono', monospace", flexShrink: 0 }}>원금</span>
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace', flexShrink: 0 }}>원금</span>
         <input type="range" min={100} max={10000} step={100} value={amount} onChange={e => setAmount(+e.target.value)}
           style={{ flex: 1, accentColor: 'var(--brand)', height: 4, cursor: 'pointer' }} />
-        <span style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: 'var(--text-primary)', minWidth: 52, textAlign: 'right' }}>{amount.toLocaleString()}만</span>
+        <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-primary)', minWidth: 52, textAlign: 'right' }}>{amount.toLocaleString()}만</span>
       </div>
 
       {/* 검색 */}
@@ -104,7 +104,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       {/* 빠른 추가 */}
       {!holdings.length && (
         <div style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: "'IBM Plex Mono', monospace", marginBottom: 5 }}>시총 상위 빠른 추가</div>
+          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 5 }}>시총 상위 빠른 추가</div>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {quickStocks.map(s => (
               <button key={s.symbol} onClick={() => addHolding(s)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 6, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
@@ -141,8 +141,8 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
                     <div style={{ width: 8, height: 8, borderRadius: 2, background: seg, flexShrink: 0 }} />
                     <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{h.stock.name}</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: c, fontFamily: "'IBM Plex Mono', monospace" }}>{h.stock.pct > 0 ? '+' : ''}{h.stock.pct.toFixed(2)}%</span>
-                    <span style={{ fontSize: 10, color: c, fontFamily: "'IBM Plex Mono', monospace" }}>→{itemProfit > 0 ? '+' : ''}{fmtAmt(Math.abs(itemProfit / 10000))}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: c, fontFamily: 'monospace' }}>{h.stock.pct > 0 ? '+' : ''}{h.stock.pct.toFixed(2)}%</span>
+                    <span style={{ fontSize: 10, color: c, fontFamily: 'monospace' }}>→{itemProfit > 0 ? '+' : ''}{fmtAmt(Math.abs(itemProfit / 10000))}</span>
                     <button onClick={() => removeHolding(h.stock.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 2px' }}>×</button>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
