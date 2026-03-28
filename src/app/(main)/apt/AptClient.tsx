@@ -17,7 +17,7 @@ import { isNew } from './tabs/apt-utils';
 import { useToast } from '@/components/Toast';
 import SectionShareButton from '@/components/SectionShareButton';
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number }) {
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number }) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const validTabs = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
@@ -122,7 +122,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   }).length;
   const unsoldTotal = (lazyUnsold || unsold).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
   const redevCount = (lazyRedev || []).length || redevTotalCount;
-  const tradeCount = (lazyTx || transactions).length;
+  const tradeCount = lazyTx ? lazyTx.length : tradeTotalCount;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
