@@ -29,7 +29,7 @@ export default function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo } = data;
+  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi } = data as any;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const totalSites = seo?.totalSites || 0;
@@ -194,6 +194,49 @@ export default function DashboardSection() {
           </div>
         </div>
       </div>
+
+      {/* ── 주식 상세 KPI 패널 ── */}
+      {stockKpi && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>📈 주식 데이터 현황</span>
+            <span style={{ fontSize: 10, color: C.textDim }}>stock_quotes · price_history</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
+            {[
+              { label: '전체 종목', val: fmt(stockKpi.total), color: C.yellow },
+              { label: '가격 있음', val: fmt(stockKpi.active), color: C.green },
+              { label: '시총 입력', val: fmt(stockKpi.withMarketCap), color: C.cyan },
+              { label: 'price_history', val: fmt(stockKpi.priceHistory), color: C.purple },
+              { label: '뉴스 수', val: fmt(stockKpi.newsCount), color: C.orange || C.yellow },
+              { label: '활성률', val: `${Math.round((stockKpi.active / (stockKpi.total || 1)) * 100)}%`, color: stockKpi.active / (stockKpi.total || 1) > 0.95 ? C.green : C.red },
+            ].map(item => (
+              <div key={item.label} style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>
+                <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: C.textSec }}>🇰🇷 KR 브리핑 최신</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: stockKpi.lastKRBriefing === new Date().toISOString().slice(0,10) ? C.green : C.red }}>
+                {stockKpi.lastKRBriefing || '없음'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: C.textSec }}>🇺🇸 US 브리핑 최신</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: stockKpi.lastUSBriefing ? C.cyan : C.red }}>
+                {stockKpi.lastUSBriefing || '없음'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: C.textSec }}>시세 크롤 상태</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: C.red }}>API키 미등록 (수집 0건)</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Row 5: 페이지 타입 분포 + 카테고리 분포 ── */}
       <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>

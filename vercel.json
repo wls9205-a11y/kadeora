@@ -270,6 +270,18 @@
       "schedule": "0 2 2 * *"
     },
     {
+      "path": "/api/cron/blog-etf-compare",
+      "schedule": "0 3 2 * *"
+    },
+    {
+      "path": "/api/cron/blog-adr-compare",
+      "schedule": "0 4 2 * *"
+    },
+    {
+      "path": "/api/cron/blog-sector-rotation",
+      "schedule": "0 2 * * 1"
+    },
+    {
       "path": "/api/cron/blog-redev-summary",
       "schedule": "0 2 3 * *"
     },

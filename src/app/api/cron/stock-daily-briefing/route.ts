@@ -94,7 +94,58 @@ ${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${Num
       sector_analysis: sectorAnalysis,
     }, { onConflict: 'briefing_date,market' });
 
-    return { processed: allStocks.length, created: 1, failed: 0, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
+    // ── US 브리핑 생성 ──
+    const { data: usStocks } = await supabase.from('stock_quotes')
+      .select('symbol, name, price, change_pct, sector, market')
+      .in('market', ['NYSE', 'NASDAQ'])
+      .order('change_pct', { ascending: false });
+    const usAll = usStocks || [];
+    if (usAll.length > 0) {
+      const usGainers = usAll.slice(0, 5);
+      const usLosers = [...usAll].sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 5);
+      const usSectorMap: Record<string, { total: number; count: number }> = {};
+      for (const s of usAll) {
+        const sec = s.sector || '기타'; if (!usSectorMap[sec]) usSectorMap[sec] = { total: 0, count: 0 };
+        usSectorMap[sec].total += s.change_pct || 0; usSectorMap[sec].count++;
+      }
+      const usSectorPerf = Object.entries(usSectorMap).map(([name, v]) => ({ name, avg_pct: +(v.total / v.count).toFixed(2) })).sort((a, b) => b.avg_pct - a.avg_pct);
+      let usTitle = 'US Market Today'; let usSummary = ''; let usSentiment = 'neutral';
+      if (process.env.ANTHROPIC_API_KEY) {
+        try {
+          const usPrompt = `US stock market data today:
+Top gainers: ${usGainers.map(s => `${s.name}(${Number(s.change_pct??0)>0?'+':''}${Number(s.change_pct??0).toFixed(1)}%)`).join(', ')}
+Top losers: ${usLosers.map(s => `${s.name}(${Number(s.change_pct??0).toFixed(1)}%)`).join(', ')}
+Sectors: ${usSectorPerf.slice(0,5).map(s=>`${s.name}(${s.avg_pct>0?'+':''}${s.avg_pct}%)`).join(', ')}
+
+한국어로 200자 이내 미국 증시 요약. JSON만: {"title":"제목(20자이내)","summary":"요약","sentiment":"bullish|neutral|bearish"}`;
+          const usRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': '2023-06-01' },
+            body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 300, messages: [{ role: 'user', content: usPrompt }] }),
+            signal: AbortSignal.timeout(15000),
+          });
+          if (usRes.ok) {
+            const d = await usRes.json();
+            const m = (d.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
+            if (m) { const p = JSON.parse(m[0]); if (p.title) usTitle = p.title; if (p.summary) usSummary = p.summary; if (p.sentiment) usSentiment = p.sentiment; }
+          }
+        } catch {}
+      }
+      if (!usSummary) {
+        const usUp = usAll.filter(s => Number(s.change_pct??0) > 0).length / (usAll.length||1) * 100;
+        usSentiment = usUp > 55 ? 'bullish' : usUp < 45 ? 'bearish' : 'neutral';
+        usTitle = usSentiment === 'bullish' ? '미국 증시 강세' : usSentiment === 'bearish' ? '미국 증시 약세' : '미국 증시 혼조';
+        usSummary = `상승 ${usAll.filter(s=>Number(s.change_pct??0)>0).length}종목, 하락 ${usAll.filter(s=>Number(s.change_pct??0)<0).length}종목.`;
+      }
+      await supabase.from('stock_daily_briefing').upsert({
+        briefing_date: today, market: 'US', title: usTitle, summary: usSummary, sentiment: usSentiment,
+        key_movers: { gainers: usGainers.map(s=>({symbol:s.symbol,name:s.name,change_pct:s.change_pct})), losers: usLosers.map(s=>({symbol:s.symbol,name:s.name,change_pct:s.change_pct})) },
+        sector_analysis: usSectorPerf.slice(0, 6),
+      }, { onConflict: 'briefing_date,market' });
+      apiCalls += 1;
+    }
+
+    return { processed: allStocks.length + usAll.length, created: 2, failed: 0, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
   });
 
   if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });

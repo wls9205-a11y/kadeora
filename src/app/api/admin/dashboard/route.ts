@@ -223,6 +223,7 @@ export async function GET(req: Request) {
         payments: paymentsR.data ?? [],
         dailyStats: dailyR.data ?? [],
         cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames },
+        stockKpi,
         seo: {
           siteTypeBreakdown,
           totalSites: scoreStats?.length || 0,
