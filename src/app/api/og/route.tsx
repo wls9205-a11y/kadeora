@@ -34,15 +34,15 @@ const FALLBACK_IMAGES: Record<string, string> = {
   default: `${SITE}/images/brand/kadeora-hero.png`,
 };
 
-// Pretendard 한글 폰트 (CDN에서 woff2 로드, 실패 시 시스템 폰트 폴백)
-let pretendardFont: ArrayBuffer | null = null;
-async function loadPretendard(): Promise<ArrayBuffer | null> {
-  if (pretendardFont) return pretendardFont;
+// Noto Sans KR Bold OTF (Vercel Edge Runtime은 woff2 미지원, otf/ttf만 지원)
+let cachedFont: ArrayBuffer | null = null;
+async function loadFont(): Promise<ArrayBuffer | null> {
+  if (cachedFont) return cachedFont;
   try {
-    const res = await fetch('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/woff2/Pretendard-Bold.woff2');
+    const res = await fetch('https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/SubsetOTF/KR/NotoSansKR-Bold.otf');
     if (res.ok) {
-      pretendardFont = await res.arrayBuffer();
-      return pretendardFont;
+      cachedFont = await res.arrayBuffer();
+      return cachedFont;
     }
   } catch {}
   return null;
@@ -50,7 +50,7 @@ async function loadPretendard(): Promise<ArrayBuffer | null> {
 
 export async function GET(req: NextRequest) {
   try {
-  const fontData = await loadPretendard();
+  const fontData = await loadFont();
   const { searchParams } = new URL(req.url);
   const title = searchParams.get('title');
   const subtitle = searchParams.get('subtitle') ?? '';
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 
     return new ImageResponse(
       (
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', padding: '48px 56px' }}>
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)', fontFamily: 'NotoSansKR, sans-serif', padding: '48px 56px' }}>
           {/* 상단: 로고 + 섹션 라벨 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
             <svg width="36" height="36" viewBox="0 0 72 72"><defs><linearGradient id="slg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E" /><stop offset="100%" stopColor="#2563EB" /></linearGradient></defs><rect width="72" height="72" rx="18" fill="url(#slg)" /><circle cx="18" cy="36" r="7" fill="white" /><circle cx="36" cy="36" r="7" fill="white" /><circle cx="54" cy="36" r="7" fill="white" /></svg>
@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
           </div>
         </div>
       ),
-      { width: 1200, height: 630, ...(fontData ? { fonts: [{ name: 'Pretendard', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}) }
+      { width: 1200, height: 630, ...(fontData ? { fonts: [{ name: 'NotoSansKR', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}) }
     );
   }
   const comments = searchParams.get('comments') ?? '0';
@@ -130,7 +130,7 @@ export async function GET(req: NextRequest) {
             alignItems: 'center',
             justifyContent: 'center',
             background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontFamily: 'NotoSansKR, sans-serif',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
@@ -160,7 +160,7 @@ export async function GET(req: NextRequest) {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
         },
-        ...(fontData ? { fonts: [{ name: 'Pretendard', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}),
+        ...(fontData ? { fonts: [{ name: 'NotoSansKR', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}),
       },
     );
   }
@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
           justifyContent: 'space-between',
           background: 'linear-gradient(135deg, #050A18 0%, #0C1528 50%, #1A2A4A 100%)',
           padding: '56px 64px',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontFamily: 'NotoSansKR, sans-serif',
         }}
       >
         {/* Top: logo + category */}
@@ -264,7 +264,7 @@ export async function GET(req: NextRequest) {
       headers: {
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
       },
-      ...(fontData ? { fonts: [{ name: 'Pretendard', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}),
+      ...(fontData ? { fonts: [{ name: 'NotoSansKR', data: fontData, style: 'normal' as const, weight: 700 as const }] } : {}),
     },
   );
   } catch {

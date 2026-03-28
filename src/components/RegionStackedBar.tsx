@@ -50,10 +50,10 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       if (!map[name]) map[name] = { name, sub: 0, ongoing: 0, unsold: 0, redev: 0, trade: 0, total: 0 };
     };
 
-    apts.forEach((a: Record<string, any>) => { const r = a.region_nm; if (!r) return; ensure(r); if (map[r]) { map[r].sub++; map[r].total++; } });
-    ongoingApts.forEach((a: Record<string, any>) => { const r = a.region_nm; if (!r) return; ensure(r); if (map[r]) { map[r].ongoing++; map[r].total++; } });
-    unsold.forEach((u: Record<string, any>) => { const r = u.region_nm; if (!r) return; ensure(r); if (map[r]) { map[r].unsold++; map[r].total++; } });
     const normalizeRegion = (name: string) => name.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '').trim();
+    apts.forEach((a: Record<string, any>) => { const r = normalizeRegion(a.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].sub++; map[r].total++; } });
+    ongoingApts.forEach((a: Record<string, any>) => { const r = normalizeRegion(a.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].ongoing++; map[r].total++; } });
+    unsold.forEach((u: Record<string, any>) => { const r = normalizeRegion(u.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].unsold++; map[r].total++; } });
     redevelopment.forEach((rd: Record<string, any>) => { const r = normalizeRegion(rd.region || rd.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].redev++; map[r].total++; } });
 
     const tradeRegionSet: Record<string, Set<string>> = {};

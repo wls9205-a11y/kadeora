@@ -46,6 +46,7 @@ async function fetchAllRows(sb: any, table: string, select: string, filter?: (q:
     rows.push(...data);
     if (data.length < PAGE) break;
     offset += PAGE;
+    if (offset > 50000) break;
   }
   return rows;
 }
