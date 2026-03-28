@@ -19,6 +19,7 @@ import { timeAgo } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ReadingProgress from '@/components/ReadingProgress';
 import PollWidget from '@/components/PollWidget';
+import { renderContent } from '@/lib/content-renderer';
 
 
 function parsePostId(param: string): { numId: number; isSlug: boolean } {
@@ -337,12 +338,12 @@ export default async function FeedDetailPage({ params }: Props) {
         {/* Content body */}
         {currentUserId ? (
           <div className="feed-detail-content" style={{ fontSize: 'var(--content-font-size, 16px)' as React.CSSProperties['fontSize'], color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 24px' }}>
-            {post.content}
+            {renderContent(post.content)}
           </div>
         ) : (
           <div style={{ position: 'relative', margin: '0 0 24px' }}>
             <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 'clamp(200px, 35vh, 400px)', overflow: 'hidden' }}>
-              {post.content}
+              {renderContent(post.content)}
             </div>
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 100, background: 'linear-gradient(transparent, var(--bg-base))' }} />
           </div>

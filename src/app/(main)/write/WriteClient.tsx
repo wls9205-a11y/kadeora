@@ -11,10 +11,10 @@ import { filterContent } from '@/lib/filter';
 import { REGIONS } from '@/lib/constants';
 
 const CATEGORIES = [
-  { value: 'free', label: '자유' },
-  { value: 'stock', label: '주식' },
-  { value: 'apt', label: '부동산' },
-  { value: 'local', label: '우리동네' },
+  { value: 'free', label: '💬 자유' },
+  { value: 'stock', label: '📊 주식' },
+  { value: 'apt', label: '🏢 부동산' },
+  { value: 'local', label: '📍 우리동네' },
 ];
 
 export default function WriteClient() {
