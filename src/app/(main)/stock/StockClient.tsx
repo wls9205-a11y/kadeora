@@ -532,6 +532,13 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
               </div>
             );
           })()}
+          {/* 시총 트리맵 */}
+          <StockTreemap
+            stocks={isDomestic
+              ? stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')
+              : stocks.filter(s => s.market === 'NASDAQ' || s.market === 'NYSE')}
+            isKR={isDomestic}
+          />
           <SectorHeatmap
             stocks={isDomestic
               ? stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE')
@@ -832,7 +839,25 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       )}
 
       {/* 포트폴리오 탭 */}
-      {currentTab === 'portfolio' && <PortfolioTab />}
+      {currentTab === 'portfolio' && (
+        <div>
+          {/* 글로벌 파노라마 */}
+          <GlobalPanorama
+            stocks={stocks}
+            exchangeRate={exchangeRate}
+            briefingKR={briefing?.market === 'KR' ? briefing : null}
+            briefingUS={null}
+          />
+          {/* 포트폴리오 시뮬레이터 */}
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8, marginTop: 12 }}>포트폴리오 시뮬레이터</div>
+          <PortfolioSimulator stocks={stocks} isKR={isDomestic} />
+          {/* 레이더 비교 */}
+          <div style={{ marginTop: 8 }}>
+            <StockRadarChart stocks={isDomestic ? domesticStocks : globalStocks} isKR={isDomestic} />
+          </div>
+          <PortfolioTab />
+        </div>
+      )}
 
       {/* 시총 탭 — TOP3 하이라이트 카드 */}
       {currentTab === 'ranking' && filteredStocks.length >= 3 && (

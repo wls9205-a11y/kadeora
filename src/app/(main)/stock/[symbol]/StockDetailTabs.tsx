@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { timeAgo } from '@/lib/format';
 
 const CandlestickChart = dynamic(() => import('@/components/charts/CandlestickChart'), { ssr: false });
+const StockTrendLine = dynamic(() => import('@/components/StockTrendLine'), { ssr: false });
 
 
 
@@ -187,6 +188,17 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           </div>
         );
       })()}
+
+      {/* 트렌드라인 오버레이 */}
+      {slicedData.length >= 10 && (
+        <StockTrendLine
+          data={slicedData.map((d: any) => ({ date: d.date, close_price: Number(d.close_price), volume: Number(d.volume || 0), change_pct: Number(d.change_pct || 0) }))}
+          symbol=""
+          name=""
+          currency={currency}
+          isKR={currency !== 'USD'}
+        />
+      )}
     </div>
   );
 }
