@@ -368,7 +368,7 @@ export default async function BlogDetailPage({ params }: Props) {
   // FAQ 파싱
   const faqItems = parseFaqFromContent(post.content);
   const isFaq = (post.tags ?? []).some((t: string) => t.toLowerCase().includes('faq') || t === '자주묻는질문');
-  const showFaq = isFaq || faqItems.length >= 3;
+  const showFaq = faqItems.length >= 1;  // 1개 이상이면 FAQ 스키마 출력 (JSON-LD 리치스니펫 극대화)
   const faqSchema = showFaq && faqItems.length > 0 ? {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: faqItems.map(f => ({

@@ -72,13 +72,19 @@ const nextConfig: NextConfig = {
       {
         source: "/api/og",
         headers: [
-          { key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=86400" },
+          { key: "Cache-Control", value: "public, s-maxage=86400, stale-while-revalidate=604800" },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
       {
         source: "/api/og-square",
         headers: [
-          { key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=86400" },
+          { key: "Cache-Control", value: "public, s-maxage=86400, stale-while-revalidate=604800" },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
       {

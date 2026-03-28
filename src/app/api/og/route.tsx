@@ -371,7 +371,11 @@ export async function GET(req: NextRequest) {
     const fontData = loadFont();
     const ff = fontData ? 'NK, sans-serif' : 'sans-serif';
     const opts = fo(fontData);
-    const CACHE = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };
+    const CACHE = {
+      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Access-Control-Allow-Origin': '*',
+    };
 
     const sp       = new URL(req.url).searchParams;
     const title    = sp.get('title') ?? '';
