@@ -280,7 +280,6 @@ export default async function StockDetailPage({ params }: Props) {
       <Disclaimer type="stock" compact />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>공유</span>
         <ShareButtons title={`${s.name} (${symbol}) 주가`} postId={symbol} />
       </div>
 

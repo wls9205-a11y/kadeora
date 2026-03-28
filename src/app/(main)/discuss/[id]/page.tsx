@@ -4,6 +4,7 @@ import { timeAgo } from '@/lib/format';
 import { SITE_URL as SITE } from '@/lib/constants';
 import DiscussDetailClient from './DiscussDetailClient';
 import Link from 'next/link';
+import ShareButtons from '@/components/ShareButtons';
 
 export const revalidate = 60; // ISR 1분
 
@@ -156,6 +157,11 @@ export default async function DiscussDetailPage({ params }: Props) {
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
           <time itemProp="datePublished" dateTime={topic.created_at ?? undefined}>{timeAgo(topic.created_at)}</time>
           {' · '}{topic.view_count || 0}뷰
+        </div>
+        {/* 공유 */}
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ShareButtons title={topic.title} postId={id} />
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>투표 {total}명 · 의견 {topic.comment_count || 0}개</span>
         </div>
       </div>
 

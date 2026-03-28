@@ -395,7 +395,7 @@ export async function GET(req: NextRequest) {
     /* 홈 OG */
     if (!title) {
       const homeC = CAT.apt;
-      return new ImageResponse(D1(homeC, '아는 사람만 아는 그 정보', '주식 · 청약·분양 · 재테크 · 커뮤니티 · 15,500편+ 블로그', '카더라', ff), { width:1200, height:630, headers:CACHE, ...opts });
+      return new ImageResponse(D1(homeC, '아는 사람만 아는 그 정보', '주식 · 청약·분양 · 재테크 · 커뮤니티 · 19,000편+ 블로그', '카더라', ff), { width:1200, height:630, headers:CACHE, ...opts });
     }
 
     /* 포스트 OG — design 파라미터로 선택 */
