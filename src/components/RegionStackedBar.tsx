@@ -147,9 +147,14 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               </text>
             </>
           ) : (
-            <text x={55} y={60} textAnchor="middle" dominantBaseline="central" style={{ fontSize: 15, fontWeight: 700, fill: 'var(--text-primary)' }}>
-              {total.toLocaleString()}
-            </text>
+            <>
+              <text x={55} y={50} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 11, fontWeight: 600, fill: 'var(--text-secondary)' }}>
+                전체
+              </text>
+              <text x={55} y={66} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 14, fontWeight: 700, fill: 'var(--text-primary)' }}>
+                {total.toLocaleString()}
+              </text>
+            </>
           )}
         </svg>
 
@@ -161,6 +166,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               <span style={{ color: 'var(--text-tertiary)' }}>{LABELS[e.key]}</span>
               <span style={{ fontWeight: 700, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
                 {e.val.toLocaleString()}
+                {e.key === 'unsold' && <span style={{ fontWeight: 400, opacity: 0.6, fontSize: 9 }}>건</span>}
               </span>
             </div>
           ))}
