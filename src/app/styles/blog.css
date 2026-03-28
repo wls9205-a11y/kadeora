@@ -81,6 +81,12 @@
   border-radius: var(--radius-md);
   margin: 16px 0;
 }
+/* 깨진 이미지 숨김 */
+.blog-content img[alt]:not([src]),
+.blog-content img[src=''],
+.blog-content img:not([src]) {
+  display: none;
+}
 .blog-content figure {
   margin: 20px 0;
   text-align: center;

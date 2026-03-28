@@ -92,3 +92,9 @@
 
 ### 11. manifest.json + llms.txt 수치 업데이트
 - [x] 15,502편, 5,522현장으로 업데이트
+
+---
+
+## TODO
+
+- [ ] Supabase blog_posts 테이블에서 깨진/무효한 cover_image URL 정리 (NULL로 업데이트 또는 유효한 이미지로 교체)
