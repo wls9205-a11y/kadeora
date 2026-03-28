@@ -37,6 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'dg:plink': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`,
       'article:section': '주식',
       'article:tag': `${sector},섹터,주식,시세,등락률,시가총액`,
+      'naver:author': '카더라',
+      'og:updated_time': new Date().toISOString(),
     },
   };
 }
@@ -63,7 +65,7 @@ export default async function SectorPage({ params }: Props) {
   const top10 = stocks.slice(0, 10);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* JSON-LD: BreadcrumbList */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -93,12 +95,35 @@ export default async function SectorPage({ params }: Props) {
           { '@type': 'Question', name: `${sector} 섹터 시세를 어디서 확인하나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${sector} 섹터 전체 종목의 실시간 시세, 시총 순위, 등락률을 무료로 비교할 수 있습니다.` } },
         ],
       })}} />
+      {/* 가시적 브레드크럼 */}
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+        <span>›</span>
+        <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>
+        <span>›</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{sector} 섹터</span>
+      </nav>
+
+      {/* 히어로 이미지 */}
+      <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/api/og?title=${encodeURIComponent(sector + ' 섹터 종목')}&design=2&category=stock&subtitle=${encodeURIComponent(stocks.length + '종목 · 시총 ' + fmtCap(totalCap, stocks[0]?.currency ?? undefined))}`}
+          alt={`${sector} 섹터 주식 종목 — ${stocks.length}종목 시총 순위 비교`}
+          width={1200} height={630}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          loading="eager"
+        />
+      </div>
+
       <div style={{ marginBottom: 16 }}>
-        <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식</Link>
-        <h1 style={{ margin: '8px 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{sector} 섹터</h1>
+        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{sector} 섹터</h1>
         <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
           {stocks.length}종목 · 합산 시총 {fmtCap(totalCap, stocks[0]?.currency ?? undefined)} · 평균 등락 {avgPct >= 0 ? '+' : ''}{avgPct.toFixed(2)}%
         </p>
+        <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+          {new Date().toLocaleDateString('ko-KR')} 기준
+        </time>
       </div>
 
       {/* 섹터 요약 */}
@@ -118,6 +143,7 @@ export default async function SectorPage({ params }: Props) {
       </div>
 
       {/* 종목 리스트 */}
+      <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📊 {sector} 섹터 시총 순위</h2>
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px' }}>
         {stocks.map((s, i) => {
           const pct = s.change_pct ?? 0;
@@ -161,6 +187,6 @@ export default async function SectorPage({ params }: Props) {
       </div>
 
       <Disclaimer type="stock" compact />
-    </div>
+    </article>
   );
 }

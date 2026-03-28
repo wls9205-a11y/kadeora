@@ -302,6 +302,18 @@ export default async function FeedDetailPage({ params }: Props) {
       {/* Post article */}
       <article style={{ marginBottom: 0 }}>
         {/* Title */}
+        {/* 히어로 이미지 (검색엔진 썸네일) */}
+        <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/og?title=${encodeURIComponent(post.title)}&design=2&category=${post.category || 'free'}&author=${encodeURIComponent(author)}`}
+            alt={`${post.title} — 카더라 커뮤니티`}
+            width={1200} height={630}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+            loading="eager"
+          />
+        </div>
+
         <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.35, wordBreak: 'keep-all' }}>
           {post.title}
         </h1>

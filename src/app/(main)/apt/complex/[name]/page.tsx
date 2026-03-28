@@ -35,6 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     other: {
       'naver:written_time': new Date(Date.now() - 86400000 * 7).toISOString(),
       'naver:updated_time': new Date().toISOString(),
+      'naver:author': '카더라',
+      'og:updated_time': new Date().toISOString(),
       'article:section': '부동산',
       'article:tag': `${decoded},실거래가,시세,아파트,부동산`, 'dg:plink': `${SITE_URL}/apt/complex/${name}`,
     },
@@ -130,8 +132,19 @@ export default async function ComplexDetailPage({ params }: Props) {
         ],
       })}} />
 
-      <Link href="/apt/search" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 실거래 검색</Link>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '8px 0 4px' }}>{decoded}</h1>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+        <a href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</a>
+        <span>›</span>
+        <a href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</a>
+        <span>›</span>
+        <a href="/apt/search" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>실거래</a>
+        <span>›</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{decoded}</span>
+      </nav>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/api/og?title=${encodeURIComponent(decoded + ' 실거래')}&design=2&category=apt&subtitle=${encodeURIComponent('실거래가 시세 추이')}`} alt={`${decoded} 아파트 실거래가 시세`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
+      <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 거래 {trades.length}건</p>
 
       {/* 요약 카드 */}

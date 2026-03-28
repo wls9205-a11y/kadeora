@@ -41,6 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     other: {
       'naver:written_time': '2026-01-15T00:00:00Z',
       'naver:updated_time': new Date().toISOString(),
+      'naver:author': '카더라',
+      'og:updated_time': new Date().toISOString(),
       'dg:plink': `${SITE_URL}/apt/region/${decoded}`,
       'article:section': '부동산',
       'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양`,
@@ -137,8 +139,17 @@ export default async function RegionLandingPage({ params }: Props) {
       ]}) }} />
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
-        <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
-        <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🏙️ {decoded} 부동산 종합</h1>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
+          <span>›</span>
+          <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
+          <span>›</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{decoded}</span>
+        </nav>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/api/og?title=${encodeURIComponent(decoded + ' 부동산')}&design=2&category=apt&subtitle=${encodeURIComponent('청약·실거래·재개발·미분양')}`} alt={`${decoded} 부동산 정보 — 청약 실거래 재개발 미분양 종합`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
+        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🏙️ {decoded} 부동산 종합</h1>
+        <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
           청약 {data.subscriptions.length}건 · 실거래 {data.transactions.length}건 · 재개발 {data.redevelopments.length}건 · 미분양 {data.unsolds.length}건
         </p>

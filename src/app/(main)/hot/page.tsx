@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('오늘의 HOT')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 HOT' }],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/hot' },
+  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/hot', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString() },
 };
 
 export const revalidate = 60;
@@ -102,7 +102,13 @@ export default async function HotPage() {
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+            <a href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</a>
+            <span>›</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>HOT</span>
+          </nav>
           <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
+          <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
           <SectionShareButton section="hot" label="이번 주 HOT 게시글 모음" pagePath="/hot" />
         </div>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{dateRange}</p>
