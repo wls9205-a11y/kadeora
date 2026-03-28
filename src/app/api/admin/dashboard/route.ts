@@ -57,6 +57,25 @@ export async function GET(req: Request) {
           .order('created_at', { ascending: false }).limit(200),
       ]);
 
+      // 주식 상세 KPI (추가)
+      const [stockActiveR, stockPriceHistR, stockBriefingKR, stockBriefingUS, stockNewsR, stockMarketCapR] = await Promise.all([
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).gt('price', 0),
+        sb.from('stock_price_history').select('symbol', { count: 'exact', head: true }),
+        sb.from('stock_daily_briefing').select('briefing_date').eq('market', 'KR').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
+        sb.from('stock_daily_briefing').select('briefing_date').eq('market', 'US').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
+        sb.from('stock_news').select('id', { count: 'exact', head: true }),
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).gt('market_cap', 0),
+      ]);
+      const stockKpi = {
+        total: stockR.count ?? 0,
+        active: stockActiveR.count ?? 0,
+        priceHistory: stockPriceHistR.count ?? 0,
+        lastKRBriefing: stockBriefingKR.data?.briefing_date ?? null,
+        lastUSBriefing: stockBriefingUS.data?.briefing_date ?? null,
+        newsCount: stockNewsR.count ?? 0,
+        withMarketCap: stockMarketCapR.count ?? 0,
+      };
+
       // 최근 가입 유저 5명
       const { data: recentUsers } = await sb.from('profiles')
         .select('id, nickname, provider, created_at, grade, is_seed, region_text')
