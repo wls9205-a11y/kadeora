@@ -7,6 +7,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import AptCommentSheet from '@/components/AptCommentSheet';
 import { haptic } from '@/lib/haptic';
 import RegionStackedBar from '@/components/RegionStackedBar';
+import KoreaMap from '@/components/KoreaMap';
 import SubscriptionTab from './tabs/SubscriptionTab';
 const TransactionTab = dynamic(() => import('./tabs/TransactionTab'), { ssr: false });
 const RedevTab = dynamic(() => import('./tabs/RedevTab'), { ssr: false });
@@ -146,6 +147,21 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
       />
+
+      {/* 지역별 히트맵 */}
+      <div className="hidden md:block" style={{ marginBottom: 12 }}>
+        <KoreaMap
+          stats={(() => {
+            const s: Record<string, number> = {};
+            apts.forEach((a: any) => {
+              const r = (a.region_nm || '').split(' ')[0];
+              if (r) s[r] = (s[r] || 0) + 1;
+            });
+            return s;
+          })()}
+          onSelect={(r) => setSelectedRegion(r === selectedRegion ? '전체' : r)}
+        />
+      </div>
 
       {/* 탭 세그먼트 — KPI 숫자 인라인 표시 */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>

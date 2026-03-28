@@ -23,6 +23,7 @@ export default function AttendanceBanner() {
       const res = await fetch('/api/attendance', { method: 'POST' })
       if (res.ok) {
         setDone(true)
+        setStreak(s => s + 1)
         setTimeout(() => setShow(false), 3000)
       }
     } catch {}
@@ -31,61 +32,51 @@ export default function AttendanceBanner() {
 
   if (!show) return null
 
+  const weekDay = streak % 7 || 7
+  const REWARDS = ['', '10P', '10P', '10P', '15P', '15P', '20P', '50P']
+
   return (
     <div style={{
-      background: 'linear-gradient(90deg, var(--brand-bg), var(--brand-bg))',
-      borderBottom: '1px solid rgba(37,99,235,0.2)',
-      padding: '10px 16px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 10,
-      borderRadius: 4,
+      background: 'linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(52,211,153,0.06) 100%)',
+      border: '1px solid rgba(37,99,235,0.15)',
+      padding: '12px 16px',
+      display: 'flex', flexDirection: 'column', gap: 10,
+      marginBottom: 10, borderRadius: 12,
     }}>
-      <div>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 600 }}>
-          {done ? '✅ 출석 완료 +10P' : '🗓 오늘 출석체크 하셨나요?'}
-        </div>
-        {!done && (
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', marginTop: 2 }}>+10P 적립</div>
-        )}
-      </div>
-      {!done && (
-        <button
-          onClick={handleCheckIn}
-          disabled={loading}
-          style={{
-            padding: '6px 14px',
-            borderRadius: 8,
-            border: 'none',
-            background: 'var(--brand)',
-            color: 'var(--text-inverse)',
-            fontSize: 'var(--fs-sm)',
-            fontWeight: 700,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
-          {loading ? '...' : '출석하기'}
-        </button>
-      )}
-      {streak > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-orange)' }}>🔥 {streak}일 연속</span>
-          <div style={{ display: 'flex', gap: 2, marginLeft: 4 }}>
-            {[1,2,3,4,5,6,7].map(d => (
-              <div key={d} style={{
-                width: 14, height: 14, borderRadius: 3, fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: d <= (streak % 7 || 7) ? 'var(--accent-green)' : 'var(--bg-hover)',
-                color: d <= (streak % 7 || 7) ? '#fff' : 'var(--text-tertiary)',
-                fontWeight: 700,
-              }}>
-                {d <= (streak % 7 || 7) ? '✓' : d}
-              </div>
-            ))}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 700 }}>
+            {done ? '\u2705 출석 완료!' : '\ud83d\udcc5 오늘 출석체크'}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--brand)', marginTop: 2, fontWeight: 600 }}>
+            {done ? `+${REWARDS[weekDay]}P 적립` : `오늘 +${REWARDS[Math.min(weekDay + 1, 7)]}P`}
+            {streak > 0 && <span style={{ marginLeft: 6, color: 'var(--accent-orange)' }}>\ud83d\udd25 {streak}일 연속</span>}
           </div>
         </div>
-      )}
+        {!done && (
+          <button onClick={handleCheckIn} disabled={loading} style={{
+            padding: '8px 18px', borderRadius: 20, border: 'none',
+            background: 'var(--brand)', color: '#fff',
+            fontSize: 13, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.7 : 1, transition: 'all 0.15s',
+          }}>
+            {loading ? '...' : '\u2728 출석'}
+          </button>
+        )}
+      </div>
+      {/* 7일 진행률 */}
+      <div style={{ display: 'flex', gap: 3 }}>
+        {[1,2,3,4,5,6,7].map(d => {
+          const filled = d <= weekDay
+          return (
+            <div key={d} style={{
+              flex: 1, height: 6, borderRadius: 3,
+              background: filled ? (d === 7 ? 'var(--accent-orange)' : 'var(--accent-green)') : 'var(--bg-hover)',
+              transition: 'background 0.2s',
+            }} />
+          )
+        })}
+      </div>
     </div>
   )
 }
