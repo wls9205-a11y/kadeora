@@ -34,6 +34,7 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
   });
   const [showHotBanner, setShowHotBanner] = useState(false);
   const [hotPosts, setHotPosts] = useState<any[]>([]);
+  const [hotBlog, setHotBlog] = useState<{slug:string;title:string;view_count:number}|null>(null);
 
   // Reset when initialPosts change (category/region switch)
   useEffect(() => {
@@ -59,6 +60,10 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
       .order('likes_count', { ascending: false })
       .limit(3)
       .then(({ data }) => { if (data && data.length > 0) setHotPosts(data); });
+    // Hot blog post
+    sb.from('blog_posts').select('slug, title, view_count').eq('is_published', true)
+      .order('view_count', { ascending: false }).limit(1).maybeSingle()
+      .then(({data}) => { if (data) setHotBlog({slug: data.slug, title: data.title, view_count: data.view_count ?? 0}); });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize like counts from posts data
@@ -266,6 +271,16 @@ export default function FeedClient({ posts: initialPosts, activeCategory, active
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>♥ {hp.likes_count}</span>
             </Link>
           ))}
+          {hotBlog && (
+            <Link href={`/blog/${hotBlog.slug}`} style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8,
+              background: 'var(--bg-hover)', textDecoration: 'none', color: 'inherit', marginTop: 4,
+            }}>
+              <span style={{ fontSize: 12 }}>📰</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hotBlog.title}</span>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>👀 {hotBlog.view_count}</span>
+            </Link>
+          )}
           <Link href="/hot" style={{ display: 'block', textAlign: 'center', padding: '6px 0', fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, marginTop: 4 }}>전체 보기 →</Link>
         </div>
       )}

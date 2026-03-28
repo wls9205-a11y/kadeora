@@ -152,7 +152,11 @@ export default function PersonalDashboard() {
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 청약</span>
                 <Link href="/apt" style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>더보기 →</Link>
               </div>
-              {favApts.map(a => (
+              {[...favApts].sort((a, b) => {
+                const da = Math.ceil((new Date(a.rcept_endde).getTime() - Date.now()) / 86400000);
+                const db = Math.ceil((new Date(b.rcept_endde).getTime() - Date.now()) / 86400000);
+                return da - db;
+              }).map(a => (
                 <Link key={a.id} href={`/apt/${a.id}`} style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   padding: '5px 0', textDecoration: 'none', borderBottom: '1px solid var(--border)',
@@ -170,6 +174,19 @@ export default function PersonalDashboard() {
                   </span>
                 </Link>
               ))}
+            </div>
+          )}
+
+          {/* 관심 청약 빈 상태 */}
+          {favApts.length === 0 && watchStocks.length > 0 && (
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                <Building2 size={14} color="var(--accent-green)" />
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 청약</span>
+              </div>
+              <Link href="/apt" style={{ display: 'block', textAlign: 'center', padding: '12px 8px', fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
+                관심 청약을 등록해보세요 →
+              </Link>
             </div>
           )}
 

@@ -287,6 +287,13 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                     }}>
                       <div style={{ color: c.apts.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: c.apts.length > 0 ? 700 : 400 }}>{c.day}</div>
                       {c.apts.length > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue)', fontWeight: 700 }}>{c.apts.length}건</div>}
+                      {c.apts.length > 0 && (
+                        <div style={{ display: 'flex', gap: 2, justifyContent: 'center', marginTop: 1 }}>
+                          {c.apts.some(a => getStatus(a) === 'open') && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-green)', display: 'inline-block' }} />}
+                          {c.apts.some(a => getStatus(a) === 'upcoming') && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent-blue)', display: 'inline-block' }} />}
+                          {c.apts.some(a => getStatus(a) === 'closed') && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--text-tertiary)', display: 'inline-block' }} />}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -15,7 +15,7 @@ interface Props extends SharedTabProps {
 export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch }: Props) {
   const [unsoldRegion, setUnsoldRegion] = useState(globalRegion || '전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
-  const [surgeAlerts, setSurgeAlerts] = useState<{ region_nm: string; current_count: number; change_pct: number }[]>([]);
+  const [surgeAlerts, setSurgeAlerts] = useState<{ region_nm: string; current_count: number; prev_count: number; change_pct: number }[]>([]);
   const effectiveSearch = globalSearch || unsoldSearch;
 
   useEffect(() => {
@@ -110,7 +110,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
                 color: unsoldRegion === a.region_nm ? 'var(--text-inverse)' : 'var(--accent-red)',
                 border: 'none', cursor: 'pointer',
               }}>
-                {a.region_nm} <span style={{ fontWeight: 800 }}>+{a.change_pct}%</span> ({a.current_count.toLocaleString()}세대)
+                {a.region_nm} <span style={{ fontWeight: 800 }}>+{a.change_pct}%</span> <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.8 }}>{(a.prev_count || 0).toLocaleString()} <span style={{ color: a.change_pct > 0 ? 'var(--accent-red)' : 'var(--accent-green)' }}>→</span> {a.current_count.toLocaleString()}세대</span>
               </button>
             ))}
           </div>

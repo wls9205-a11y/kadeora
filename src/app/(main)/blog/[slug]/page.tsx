@@ -425,6 +425,27 @@ export default async function BlogDetailPage({ params }: Props) {
         {/* FAQ 아코디언 */}
         {showFaq && <BlogFaqAccordion items={faqItems} />}
 
+        {/* 읽기 완료 메시지 */}
+        <div style={{
+          textAlign: 'center', padding: '20px 16px', margin: '24px 0',
+          background: 'linear-gradient(135deg, rgba(52,211,153,0.06), rgba(96,165,250,0.06))',
+          borderRadius: 12, border: '1px dashed rgba(52,211,153,0.2)',
+        }}>
+          <div style={{ fontSize: 24, marginBottom: 6 }}>🎉</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
+            약 {readingTimeMin}분 분량을 읽으셨어요!
+          </div>
+          {related.length > 0 && (
+            <Link href={`/blog/${related[0].slug}`} style={{
+              display: 'inline-block', marginTop: 8, padding: '6px 16px', borderRadius: 8,
+              background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 12,
+              fontWeight: 700, textDecoration: 'none',
+            }}>
+              다음 추천: {related[0].title?.slice(0, 30)}...
+            </Link>
+          )}
+        </div>
+
         {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
         {post.source_type === 'auto' && (
           <div style={{ marginTop: 24, padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
@@ -460,6 +481,45 @@ export default async function BlogDetailPage({ params }: Props) {
             </Link>
           );
         })()}
+
+        {/* 관련 실시간 데이터 */}
+        {relatedStocks.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {relatedStocks.map((s: any) => {
+              const pct = Number(s.change_pct) || 0;
+              return (
+                <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{
+                  flexShrink: 0, padding: '10px 14px', borderRadius: 10, minWidth: 140,
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  textDecoration: 'none', color: 'inherit',
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
+                    {s.currency === 'USD' ? `$${Number(s.price).toFixed(2)}` : `₩${Number(s.price).toLocaleString()}`}
+                  </div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 2 }}>
+                    {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+        {relatedSites.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {relatedSites.map((s: any) => (
+              <Link key={s.slug} href={`/apt/sites/${s.slug}`} style={{
+                flexShrink: 0, padding: '10px 14px', borderRadius: 10, minWidth: 140,
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                textDecoration: 'none', color: 'inherit',
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu}</div>
+                <div style={{ fontSize: 10, marginTop: 4, padding: '2px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', display: 'inline-block', fontWeight: 600 }}>{s.site_type || '아파트'}</div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* 공유 + 도움이됐어요 + 북마크 */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

@@ -426,13 +426,23 @@ export function Navigation() {
                 <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
                   display:'flex', flexDirection:'column', alignItems:'center', gap:4,
                   padding:'12px 0', borderRadius:12, textDecoration:'none',
-                  color:'var(--text-primary)',
+                  color:'var(--text-primary)', position:'relative',
                 }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   <span style={{ fontSize:24 }}>{item.emoji}</span>
                   <span style={{ fontSize:'var(--fs-xs)', fontWeight:600 }}>{item.label}</span>
+                  {item.emoji === '🔔' && unread > 0 && (
+                    <span style={{
+                      position: 'absolute', top: -2, right: -2,
+                      minWidth: 16, height: 16, borderRadius: 8,
+                      background: 'var(--accent-red)', color: '#fff',
+                      fontSize: 10, fontWeight: 800, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                      padding: '0 4px',
+                    }}>{unread > 9 ? '9+' : unread}</span>
+                  )}
                 </Link>
               ))}
             </div>

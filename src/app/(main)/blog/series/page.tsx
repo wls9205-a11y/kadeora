@@ -70,12 +70,11 @@ export default async function BlogSeriesPage() {
                     </p>
                   )}
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>
-                      {s.post_count}편
-                    </span>
-                    <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>
-                      {s.category}
-                    </span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>{s.post_count}편</span>
+                    {s.category && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 600, background: s.category === 'stock' ? 'rgba(96,165,250,0.1)' : s.category === 'apt' ? 'rgba(52,211,153,0.1)' : 'rgba(167,139,250,0.1)', color: s.category === 'stock' ? 'var(--accent-blue)' : s.category === 'apt' ? 'var(--accent-green)' : 'var(--accent-purple)' }}>{s.category === 'stock' ? '주식' : s.category === 'apt' ? '청약' : s.category === 'unsold' ? '미분양' : s.category === 'finance' ? '재테크' : s.category}</span>}
+                  </div>
+                  <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 6, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min((s.post_count / 50) * 100, 100)}%`, background: 'var(--brand)', borderRadius: 2 }} />
                   </div>
                 </div>
               </div>

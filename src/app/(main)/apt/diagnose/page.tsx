@@ -144,6 +144,30 @@ export default function DiagnosePage() {
         )}
       </div>
 
+      {/* 노릴 수 있는 청약 */}
+      {total > 0 && (
+        <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🎯 내 가점으로 노릴 수 있는 청약</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {CUTLINES.filter(c => total >= c.avg).map(c => (
+              <Link key={c.region} href={`/apt?tab=sub`} style={{
+                padding: '6px 12px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 600,
+                background: total >= c.max ? 'rgba(52,211,153,0.1)' : total >= c.avg ? 'rgba(96,165,250,0.1)' : 'var(--bg-hover)',
+                color: total >= c.max ? 'var(--accent-green)' : total >= c.avg ? 'var(--accent-blue)' : 'var(--text-tertiary)',
+                border: `1px solid ${total >= c.max ? 'rgba(52,211,153,0.3)' : total >= c.avg ? 'rgba(96,165,250,0.3)' : 'var(--border)'}`,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                {c.region}
+                <span style={{ fontSize: 10, opacity: 0.7 }}>{total >= c.max ? '높음' : '보통'}</span>
+              </Link>
+            ))}
+          </div>
+          {CUTLINES.filter(c => total >= c.avg).length === 0 && (
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: 8 }}>가점을 더 쌓으면 더 많은 지역에 도전할 수 있어요</div>
+          )}
+        </div>
+      )}
+
       {/* 팁 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>💡 가점 올리는 팁</div>

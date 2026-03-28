@@ -22,6 +22,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
   const [search, setSearch] = useState('');
   const [chartRegion, setChartRegion] = useState('');
   const [selected, setSelected] = useState<any>(null);
+  const [showTop10, setShowTop10] = useState(false);
   const effectiveSearch = globalSearch || search;
 
   useEffect(() => {
@@ -165,6 +166,43 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           ))}
         </div>
       </div>
+
+      {/* 평당가 TOP10 */}
+      {(() => {
+        const withPP = filtered.filter((t: any) => t.deal_amount > 0 && t.exclusive_area > 0)
+          .map((t: any) => ({ ...t, pp: Math.round(t.deal_amount / t.exclusive_area * 3.3058) }))
+          .sort((a: any, b: any) => b.pp - a.pp).slice(0, 10);
+        if (withPP.length === 0) return null;
+        const maxPP = withPP[0].pp;
+        return (
+          <div style={{ marginBottom: 12 }}>
+            <button onClick={() => setShowTop10(!showTop10)} style={{
+              width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <span>📊 평당가 TOP 10</span>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{showTop10 ? '접기 ▲' : '펼치기 ▼'}</span>
+            </button>
+            {showTop10 && (
+              <div style={{ padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderTop: 'none', borderRadius: '0 0 8px 8px' }}>
+                {withPP.map((t: any, i: number) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, fontSize: 12 }}>
+                    <span style={{ minWidth: 16, fontWeight: 700, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{i + 1}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.apt_name}</div>
+                      <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 2 }}>
+                        <div style={{ height: '100%', width: `${(t.pp / maxPP) * 100}%`, borderRadius: 2, background: 'var(--brand)' }} />
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', flexShrink: 0 }}>{t.pp.toLocaleString()}만/평</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* 카드 리스트 */}
       {filtered.length === 0 && (

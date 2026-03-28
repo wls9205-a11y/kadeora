@@ -53,6 +53,20 @@ export default async function AptSearchPage({ searchParams }: Props) {
     regionStats = rs || [];
   } catch {}
 
+  // 관련 블로그
+  let relatedBlogs: any[] = [];
+  if (q && q.length >= 2) {
+    try {
+      const { data } = await sb.from('blog_posts')
+        .select('slug, title, category, view_count')
+        .eq('is_published', true)
+        .ilike('title', `%${q}%`)
+        .order('view_count', { ascending: false })
+        .limit(3);
+      relatedBlogs = data || [];
+    } catch {}
+  }
+
   const totalCount = count || 0;
   const hasMore = (trades?.length || 0) === perPage;
 
@@ -165,6 +179,23 @@ export default async function AptSearchPage({ searchParams }: Props) {
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '20px 0' }}>
         📊 국토교통부 실거래가 공개시스템 기준
       </p>
+
+      {/* 관련 블로그 */}
+      {relatedBlogs.length > 0 && (
+        <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>📰 관련 분석 글</div>
+          {relatedBlogs.map((b: any) => (
+            <Link key={b.slug} href={`/blog/${b.slug}`} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '8px 4px', borderBottom: '1px solid var(--border)',
+              textDecoration: 'none', color: 'inherit', fontSize: 13,
+            }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{b.title}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>👀 {b.view_count}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* 지역별 부동산 내부 링크 (SEO) */}
       <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 20 }}>

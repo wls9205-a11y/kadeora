@@ -38,6 +38,7 @@ const withTimeout = <T,>(p: PromiseLike<T>, ms = 5000): Promise<T | null> =>
 
 export default async function HotPage() {
   let topPosts: any[] | null = null;
+  let hotBlogs: any[] | null = null;
   const regionPosts: Record<string, any[]> = {};
 
   try {
@@ -78,6 +79,16 @@ export default async function HotPage() {
       const data = r.status === 'fulfilled' ? (r.value as { data: any })?.data : null;
       if (data && data.length > 0) regionPosts[region] = data;
     });
+    // 블로그 HOT 5
+    const blogResult = await withTimeout(
+      sb.from('blog_posts')
+        .select('slug, title, category, view_count')
+        .eq('is_published', true)
+        .gte('created_at', weekAgo)
+        .order('view_count', { ascending: false })
+        .limit(5)
+    );
+    hotBlogs = (blogResult as { data: any })?.data ?? null;
   } catch { }
 
   const now = new Date();
@@ -152,6 +163,29 @@ export default async function HotPage() {
           </div>
         );
       })}
+      {/* 블로그 HOT 5 */}
+      {(hotBlogs ?? []).length > 0 && (
+        <div style={{ marginTop: 24, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
+          <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>📰 블로그 HOT 5</h2>
+          {(hotBlogs ?? []).map((b: any, i: number) => {
+            const catLabel: Record<string, string> = { stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' };
+            return (
+              <Link key={b.slug} href={`/blog/${b.slug}`} style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px',
+                borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit',
+              }}>
+                <span style={{ fontSize: 16, minWidth: 24, textAlign: 'center' }}>{MEDAL[i + 1] || `${i + 1}`}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                    {catLabel[b.category] || b.category} · 👀 {b.view_count}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
     </HotClient>
   );

@@ -373,6 +373,32 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
         })}
       </div>
 
+      {/* 급등/급락 알림 배너 */}
+      {(() => {
+        const bigMovers = sentimentStocks.filter(s => Math.abs(s.change_pct ?? 0) >= 5).sort((a, b) => Math.abs(b.change_pct ?? 0) - Math.abs(a.change_pct ?? 0)).slice(0, 3);
+        if (bigMovers.length === 0) return null;
+        return (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+            {bigMovers.map(s => {
+              const pct = s.change_pct ?? 0;
+              const isUp = pct > 0;
+              return (
+                <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{
+                  flexShrink: 0, padding: '6px 12px', borderRadius: 8,
+                  background: isUp ? 'rgba(248,113,113,0.1)' : 'rgba(96,165,250,0.1)',
+                  border: `1px solid ${isUp ? 'rgba(248,113,113,0.3)' : 'rgba(96,165,250,0.3)'}`,
+                  textDecoration: 'none', fontSize: 12, fontWeight: 700,
+                  color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                  {isUp ? '🚨' : '📉'} {s.name} {isUp ? '+' : ''}{pct.toFixed(1)}%
+                </Link>
+              );
+            })}
+          </div>
+        );
+      })()}
+
       {/* 서브 탭 */}
       <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '3px' }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
@@ -435,6 +461,16 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: stockColor(t.change_pct??0, true) }}>{(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%</span>
               </div>
               {t.description && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>{t.description}</div>}
+              {/* Related stocks mini list */}
+              {t.related_symbols?.slice(0, 3).map(sym => {
+                const rs = stocks.find(s => s.symbol === sym);
+                if (!rs) return null;
+                return (
+                  <Link key={sym} href={`/stock/${sym}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 4, background: 'var(--bg-hover)', fontSize: 11, textDecoration: 'none', color: 'var(--text-secondary)', marginRight: 4 }}>
+                    {rs.name} <span style={{ color: stockColor(rs.change_pct ?? 0, isDomestic), fontWeight: 700 }}>{(rs.change_pct ?? 0) > 0 ? '+' : ''}{(rs.change_pct ?? 0).toFixed(1)}%</span>
+                  </Link>
+                );
+              })}
               {/* 테마 추이 스파크라인 */}
               {th?.history && Array.isArray(th.history) && th.history.length >= 2 && (() => {
                 const vals = th.history.map((h: Record<string, any>) => Number(h.change_pct || h.avg_change_rate || 0));

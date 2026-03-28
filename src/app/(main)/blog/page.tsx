@@ -151,6 +151,22 @@ export default async function BlogPage({ searchParams }: Props) {
   q2 = q2.range((pageNum - 1) * perPage, pageNum * perPage - 1);
   const { data: posts, count: filteredCount } = await q2;
 
+  // 다음 페이지 미리보기
+  let nextPagePosts: any[] = [];
+  try {
+    let nq = sb.from('blog_posts')
+      .select('id, slug, title, category')
+      .eq('is_published', true)
+      .or(`published_at.is.null,published_at.lte.${now}`);
+    if (category !== 'all') nq = nq.eq('category', category);
+    if (sub) nq = nq.eq('sub_category', sub);
+    if (sort === 'popular') nq = nq.order('view_count', { ascending: false });
+    else nq = nq.order('created_at', { ascending: false });
+    nq = nq.range(pageNum * perPage, pageNum * perPage + 4);
+    const { data: np } = await nq;
+    nextPagePosts = np || [];
+  } catch {}
+
   const hasMore = (posts ?? []).length === perPage;
 
   // 인기 시리즈 (1페이지, 카테고리 전체일 때만)
@@ -392,7 +408,11 @@ export default async function BlogPage({ searchParams }: Props) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   position: 'relative',
                 }}>
-                  <span style={{ fontSize: 24 }}>{catEmoji[p.category] || '📝'}</span>
+                  {p.cover_image ? (
+                    <img src={p.cover_image} alt={p.image_alt || p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                  ) : (
+                    <span style={{ fontSize: 24 }}>{catEmoji[p.category] || '📝'}</span>
+                  )}
                   {p.view_count >= 50 && (
                     <span style={{ position: 'absolute', top: 3, right: 3, width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-red)', border: '1px solid var(--bg-surface)' }} />
                   )}
@@ -412,6 +432,9 @@ export default async function BlogPage({ searchParams }: Props) {
                   </div>
                   {/* 제목 */}
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.title}</div>
+                  {p.excerpt && (
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>
+                  )}
                   {/* 메타 */}
                   <div style={{ display: 'flex', gap: 4, marginTop: 2, fontSize: 10, color: 'var(--text-tertiary)', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span>{new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
@@ -449,6 +472,22 @@ export default async function BlogPage({ searchParams }: Props) {
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 다음 페이지 미리보기 */}
+      {nextPagePosts.length > 0 && (
+        <div style={{ marginTop: 16, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8 }}>다음 페이지 미리보기</div>
+          {nextPagePosts.map((p: any) => (
+            <Link key={p.id} href={`/blog/${p.slug}`} style={{
+              display: 'block', padding: '4px 0', fontSize: 13, color: 'var(--text-secondary)',
+              textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              <span style={{ color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginRight: 4, fontSize: 11 }}>●</span>
+              {p.title}
+            </Link>
+          ))}
         </div>
       )}
 

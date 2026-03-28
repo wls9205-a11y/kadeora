@@ -19,7 +19,7 @@ interface Props {
   currency: string;
 }
 
-function MiniChart({ data }: { data: { date: string; close_price: number }[] }) {
+function MiniChart({ data }: { data: { date: string; close_price: number; open_price?: number | null; volume?: number | null }[] }) {
   if (!data || data.length < 2) return null;
   const prices = data.map(d => Number(d.close_price));
   const min = Math.min(...prices); const max = Math.max(...prices);
@@ -58,6 +58,17 @@ function MiniChart({ data }: { data: { date: string; close_price: number }[] }) 
           </div>
         );
       })()}
+      {/* Volume bars */}
+      {data.some(d => (d.volume ?? 0) > 0) && (
+        <svg viewBox={`0 0 ${data.length * 6} 40`} style={{ width: '100%', height: 40, display: 'block', marginTop: 2 }}>
+          {data.map((d, i) => {
+            const maxVol = Math.max(...data.map(v => v.volume || 0)) || 1;
+            const h = ((d.volume || 0) / maxVol) * 36;
+            const isUp = (d.close_price || 0) >= (d.open_price || 0);
+            return <rect key={i} x={i * 6} y={40 - h} width={5} height={h} fill={isUp ? 'var(--accent-red)' : 'var(--accent-blue)'} opacity={0.5} rx={1} />;
+          })}
+        </svg>
+      )}
     </div>
   );
 }
@@ -215,11 +226,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           {aiComment && (() => {
             const signalColor = aiComment.signal === 'bullish' ? '#059669' : aiComment.signal === 'bearish' ? 'var(--accent-red)' : 'var(--text-tertiary)';
             const signalLabel = aiComment.signal === 'bullish' ? '🟢 매수 우위' : aiComment.signal === 'bearish' ? '🔴 매도 우위' : '🟡 중립';
+            const signalBg = aiComment.signal === 'bullish' ? 'linear-gradient(135deg, rgba(5,150,105,0.08), rgba(5,150,105,0.02))' : aiComment.signal === 'bearish' ? 'linear-gradient(135deg, rgba(248,113,113,0.08), rgba(248,113,113,0.02))' : 'var(--bg-surface)';
+            const signalBorder = aiComment.signal === 'bullish' ? '1px solid rgba(5,150,105,0.2)' : aiComment.signal === 'bearish' ? '1px solid rgba(248,113,113,0.2)' : '1px solid var(--border)';
             return (
-              <div className="kd-card">
+              <div className="kd-card" style={{ background: signalBg, border: signalBorder }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: signalColor }}>{signalLabel}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: signalColor, padding: '2px 10px', borderRadius: 999, background: aiComment.signal === 'bullish' ? 'rgba(5,150,105,0.12)' : aiComment.signal === 'bearish' ? 'rgba(248,113,113,0.12)' : 'var(--bg-hover)' }}>{signalLabel}</span>
                 </div>
                 <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>

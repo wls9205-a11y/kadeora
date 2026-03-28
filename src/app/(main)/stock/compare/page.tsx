@@ -20,6 +20,8 @@ export default function StockComparePage() {
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
   const [, setLoading] = useState(true);
+  const [histA, setHistA] = useState<{date:string;close:number}[]>([]);
+  const [histB, setHistB] = useState<{date:string;close:number}[]>([]);
 
   useEffect(() => {
     const sb = createSupabaseBrowser();
@@ -36,6 +38,20 @@ export default function StockComparePage() {
         setLoading(false);
       });
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!stockA) return;
+    const sb = createSupabaseBrowser();
+    sb.from('stock_price_history').select('date, close_price').eq('symbol', stockA.symbol).order('date', { ascending: true }).limit(30)
+      .then(({data}) => setHistA((data || []).map((d:any) => ({date: d.date, close: Number(d.close_price)}))));
+  }, [stockA]);
+
+  useEffect(() => {
+    if (!stockB) return;
+    const sb = createSupabaseBrowser();
+    sb.from('stock_price_history').select('date, close_price').eq('symbol', stockB.symbol).order('date', { ascending: true }).limit(30)
+      .then(({data}) => setHistB((data || []).map((d:any) => ({date: d.date, close: Number(d.close_price)}))));
+  }, [stockB]);
 
   const filterStocks = (q: string) => {
     if (!q) return [];
@@ -149,6 +165,37 @@ export default function StockComparePage() {
               <Link href={`/stock/${stockB.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{stockB.name} 상세 →</Link>
             </div>
           </div>
+
+          {/* 30일 가격 추이 오버레이 */}
+          {histA.length > 1 && histB.length > 1 && stockA && stockB && (() => {
+            const normalize = (data: {close:number}[]) => {
+              const base = data[0].close || 1;
+              return data.map(d => ((d.close - base) / base) * 100);
+            };
+            const nA = normalize(histA);
+            const nB = normalize(histB);
+            const all = [...nA, ...nB];
+            const min = Math.min(...all);
+            const max = Math.max(...all);
+            const range = max - min || 1;
+            const w = 300;
+            const h = 120;
+            const toPoints = (vals: number[]) => vals.map((v, i) => `${(i / (vals.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
+            return (
+              <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📈 30일 수익률 비교 (%)</div>
+                <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: h }}>
+                  <polyline points={toPoints(nA)} fill="none" stroke="var(--brand)" strokeWidth="2" />
+                  <polyline points={toPoints(nB)} fill="none" stroke="var(--accent-orange)" strokeWidth="2" />
+                  <line x1="0" y1={h - ((0 - min) / range) * h} x2={w} y2={h - ((0 - min) / range) * h} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4" />
+                </svg>
+                <div style={{ display: 'flex', gap: 16, marginTop: 6, fontSize: 11 }}>
+                  <span style={{ color: 'var(--brand)', fontWeight: 700 }}>● {stockA.name}</span>
+                  <span style={{ color: 'var(--accent-orange)', fontWeight: 700 }}>● {stockB.name}</span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-tertiary)' }}>

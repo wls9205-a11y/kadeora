@@ -22,6 +22,7 @@ export default function RightPanel() {
   const { userId, profile: authProfile } = useAuth();
   const pathname = usePathname();
   const [recBlogs, setRecBlogs] = useState<{ slug: string; title: string }[]>([]);
+  const [indices, setIndices] = useState<{name:string;price:number;pct:number}[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1200) return;
@@ -35,6 +36,10 @@ export default function RightPanel() {
       .order('view_count', { ascending: false })
       .limit(3)
       .then(({ data }) => { if (data?.length) setRecBlogs(data); })
+
+    sb.from('stock_quotes').select('name, price, change_pct').in('name', ['KOSPI', 'KOSDAQ']).then(({data}) => {
+      if (data) setIndices(data.map((d:any) => ({name: d.name, price: Number(d.price), pct: Number(d.change_pct) || 0})));
+    });
   }, []);
 
   const display = trending.length > 0 ? trending : FALLBACK.map(k => ({ keyword: k }));
@@ -94,6 +99,24 @@ export default function RightPanel() {
           </Link>
         ))}
       </div>
+
+      {/* 미니 시황 */}
+      {indices.length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginTop: 8 }}>
+          <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8, display: 'block', textDecoration: 'none' }}>📊 시장 현황</Link>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {indices.map(idx => (
+              <div key={idx.name} style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{idx.name}</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>{idx.price.toLocaleString()}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: idx.pct > 0 ? 'var(--accent-red)' : idx.pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+                  {idx.pct > 0 ? '▲' : idx.pct < 0 ? '▼' : '━'}{Math.abs(idx.pct).toFixed(2)}%
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 추천 읽을거리 */}
       {recBlogs.length > 0 && (
