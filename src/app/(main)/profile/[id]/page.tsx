@@ -46,6 +46,22 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <>
+    {/* 활동 통계 */}
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+        {[
+          { label: '게시글', value: profile?.posts_count || posts?.length || 0 },
+          { label: '댓글', value: commentCount || 0 },
+          { label: '좋아요', value: profile?.likes_count || 0 },
+          { label: '출석', value: profile?.streak_days || 0 },
+        ].map(s => (
+          <div key={s.label} style={{ textAlign: 'center', padding: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
     <ProfileClient
       profile={profile as any}
       posts={posts ?? []}

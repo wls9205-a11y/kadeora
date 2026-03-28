@@ -29,6 +29,15 @@ export default async function GradesPage() {
     .select('grade,title,emoji,color_hex,description,min_score')
     .order('grade');
 
+  let userPoints: number | null = null;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
+      userPoints = profile?.points || 0;
+    }
+  } catch {}
+
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '등급 안내' }] }) }} />
@@ -51,6 +60,34 @@ export default async function GradesPage() {
           게시글 작성, 댓글, 좋아요를 받을수록 더 빠르게 성장해요!
         </p>
       </div>
+
+      {/* 내 등급 진행률 */}
+      {userPoints !== null && grades && grades.length > 0 && (() => {
+        const sorted = [...(grades || [])].sort((a: any, b: any) => a.min_score - b.min_score);
+        const current = sorted.filter((g: any) => userPoints! >= g.min_score).pop();
+        const next = sorted.find((g: any) => g.min_score > userPoints!);
+        if (!current) return null;
+        const remaining = next ? next.min_score - userPoints! : 0;
+        const progress = next ? ((userPoints! - current.min_score) / (next.min_score - current.min_score)) * 100 : 100;
+        return (
+          <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{current.emoji} {current.title} (Lv.{current.grade})</span>
+              <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{userPoints}P</span>
+            </div>
+            <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 6 }}>
+              <div style={{ height: '100%', width: `${Math.min(progress, 100)}%`, background: 'var(--brand)', borderRadius: 3, transition: 'width 0.3s' }} />
+            </div>
+            {next ? (
+              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                다음 등급 {next.emoji} {next.title}까지 <span style={{ fontWeight: 700, color: 'var(--brand)' }}>{remaining}P</span> 남았어요!
+              </div>
+            ) : (
+              <div style={{ fontSize: 12, color: 'var(--accent-green)', textAlign: 'center', fontWeight: 700 }}>🎉 최고 등급 달성!</div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* 점수 획득 방법 */}
       <div

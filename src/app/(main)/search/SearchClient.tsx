@@ -357,6 +357,9 @@ export default function SearchClient() {
                       </div>
                     </div>
                   );
+                })}
+              </div>
+            )}
 
             {/* Blog section */}
             {acBlogs.length > 0 && (
@@ -440,16 +443,13 @@ export default function SearchClient() {
                 ))}
               </div>
             )}
-                })}
-              </div>
-            )}
           </div>
         )}
       </div>
 
       {/* Category filter */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
-        {[['all', '전체'], ['stock', '주식'], ['apt', '청약'], ['free', '자유']].map(([k, l]) => (
+        {[['all', '전체'], ['stock', '주식'], ['apt', '청약'], ['discuss', '토론'], ['free', '자유']].map(([k, l]) => (
           <button key={k} onClick={() => { setCategory(k); setPage(0); }}
             style={{
               padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,

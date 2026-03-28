@@ -647,7 +647,7 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
       {currentTab !== 'calendar' && currentTab !== 'themes' && currentTab !== 'm7' && (
         <div style={{ position: 'relative', marginBottom: 10 }}>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="종목명 또는 코드 검색"
-            className="kd-search-input" style={{ paddingRight: 36 }} />
+            aria-label="종목 검색" className="kd-search-input" style={{ paddingRight: 36 }} />
           {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-sm)', padding: 4 }} aria-label="닫기">✕</button>}
           {search && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>🔍 &quot;{search}&quot; 검색 결과 {filteredStocks.length}건{sectorFilter !== 'all' ? ` (${sectorFilter} 필터)` : ''}</div>}
         </div>

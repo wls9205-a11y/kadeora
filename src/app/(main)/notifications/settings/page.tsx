@@ -138,6 +138,24 @@ export default function NotificationSettingsPage() {
           >
             {loading ? '처리 중...' : '알림 끄기'}
           </button>
+          <div style={{ marginTop: 16, padding: 12, background: 'var(--bg-hover)', borderRadius: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>활성화된 알림</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {[
+                { label: '💬 댓글', group: '커뮤니티' },
+                { label: '❤️ 좋아요', group: '커뮤니티' },
+                { label: '👥 팔로우', group: '커뮤니티' },
+                { label: '🏢 청약마감', group: '부동산' },
+                { label: '🔥 인기글', group: '시스템' },
+                { label: '📈 주식알림', group: '주식' },
+                { label: '📅 출석', group: '시스템' },
+              ].map(n => (
+                <span key={n.label} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
+                  {n.label}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

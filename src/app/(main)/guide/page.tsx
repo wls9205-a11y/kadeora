@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import GuideInstallButton from '@/components/GuideInstallButton';
+import Link from 'next/link';
 
 export const revalidate = 3600;
 
@@ -66,6 +67,37 @@ export default function GuidePage() {
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>
+      </div>
+
+      {/* 빠른 시작 3단계 */}
+      <div style={{ marginBottom: 20, padding: 16, background: 'linear-gradient(135deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06))', border: '1px solid var(--border)', borderRadius: 12 }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>🚀 빠른 시작 3단계</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>1</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>카카오 로그인</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>3초면 가입 완료, 별도 회원가입 불필요</div>
+            </div>
+            <Link href="/login" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontWeight: 700, flexShrink: 0 }}>시작 →</Link>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>2</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>관심 종목·지역 등록</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>주식 ⭐ 관심종목, 부동산 ❤️ 관심단지</div>
+            </div>
+            <Link href="/stock" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>등록 →</Link>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>3</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>첫 글 작성</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>의견을 나누고 포인트도 적립하세요</div>
+            </div>
+            <Link href="/write" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>작성 →</Link>
+          </div>
+        </div>
       </div>
 
       {/* 앱 설치 — 원버튼 */}

@@ -5,12 +5,14 @@ export default function AttendanceBanner() {
   const [show, setShow] = useState(false)
   const [done, setDone] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [streak, setStreak] = useState(0)
 
   useEffect(() => {
     fetch('/api/attendance')
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d && !d.already_today && !d.error) setShow(true)
+        if (d && d.current_streak) setStreak(d.current_streak)
       })
       .catch(() => {})
   }, [])
@@ -66,6 +68,23 @@ export default function AttendanceBanner() {
         >
           {loading ? '...' : '출석하기'}
         </button>
+      )}
+      {streak > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-orange)' }}>🔥 {streak}일 연속</span>
+          <div style={{ display: 'flex', gap: 2, marginLeft: 4 }}>
+            {[1,2,3,4,5,6,7].map(d => (
+              <div key={d} style={{
+                width: 14, height: 14, borderRadius: 3, fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: d <= (streak % 7 || 7) ? 'var(--accent-green)' : 'var(--bg-hover)',
+                color: d <= (streak % 7 || 7) ? '#fff' : 'var(--text-tertiary)',
+                fontWeight: 700,
+              }}>
+                {d <= (streak % 7 || 7) ? '✓' : d}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )

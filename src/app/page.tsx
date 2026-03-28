@@ -97,15 +97,21 @@ export default async function HomePage() {
   if (hasSession) redirect('/feed');
 
   let stats = { blogs: 15453, stocks: 150, apts: 5454, posts: 3900, profiles: 112, redev: 202 };
+  let indices: any[] = [];
+  let openApts: any[] = [];
+  let latestBlog: any = null;
   try {
     const sb = getSupabaseAdmin();
-    const [blogR, stockR, aptR, postR, profileR, redevR] = await Promise.all([
+    const [blogR, stockR, aptR, postR, profileR, redevR, indicesR, openAptsR, latestBlogR] = await Promise.all([
       sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', true),
       sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }),
       sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }),
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
       sb.from('profiles').select('id', { count: 'exact', head: true }),
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      sb.from('stock_quotes').select('symbol,name,price,change_pct').or('name.ilike.%KOSPI%,name.ilike.%KOSDAQ%').limit(2),
+      sb.from('apt_subscriptions').select('id,house_nm,region_nm,rcept_endde').lte('rcept_bgnde', new Date().toISOString().slice(0, 10)).gte('rcept_endde', new Date().toISOString().slice(0, 10)).order('rcept_endde', { ascending: true }).limit(2),
+      sb.from('blog_posts').select('title,slug,category').eq('is_published', true).order('published_at', { ascending: false }).limit(1).maybeSingle(),
     ]);
     stats = {
       blogs: blogR.count ?? stats.blogs,
@@ -115,6 +121,9 @@ export default async function HomePage() {
       profiles: profileR.count ?? stats.profiles,
       redev: redevR.count ?? stats.redev,
     };
+    indices = indicesR?.data || [];
+    openApts = openAptsR?.data || [];
+    latestBlog = latestBlogR?.data || null;
   } catch {}
 
   const fmtNum = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}만` : n >= 1000 ? `${(n / 1000).toFixed(1)}천` : String(n);
@@ -310,6 +319,42 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+          {/* 실시간 프리뷰 */}
+          {(indices.length > 0 || openApts.length > 0 || latestBlog) && (
+            <div style={{ marginTop: 16, marginBottom: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, textAlign: 'center' }}>지금 카더라에서</div>
+              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', justifyContent: 'center', paddingBottom: 4 }}>
+                {indices.map((idx: any) => {
+                  const pct = Number(idx.change_pct) || 0;
+                  return (
+                    <Link key={idx.symbol} href="/stock" style={{ flexShrink: 0, minWidth: 160, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)' }}>{idx.name}</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{Number(idx.price).toLocaleString()}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 2 }}>
+                        {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'}{pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                      </div>
+                    </Link>
+                  );
+                })}
+                {openApts.map((a: any) => {
+                  const diff = Math.ceil((new Date(a.rcept_endde).getTime() - Date.now()) / 86400000);
+                  return (
+                    <Link key={a.id} href={`/apt/${a.id}`} style={{ flexShrink: 0, minWidth: 160, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>접수중</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>{a.region_nm} · D-{diff}</div>
+                    </Link>
+                  );
+                })}
+                {latestBlog && (
+                  <Link href={`/blog/${latestBlog.slug}`} style={{ flexShrink: 0, minWidth: 160, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-purple)' }}>최신 블로그</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{latestBlog.title}</div>
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* ━━━ 주요 서비스 ━━━ */}

@@ -224,6 +224,13 @@ export function Navigation() {
 
             {userId ? (
               <>
+                {/* 모바일 검색 (로그인) */}
+                <Link href="/search" className="md:hidden" aria-label="검색" style={{
+                  width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
+                  borderRadius:'50%', color:'var(--text-secondary)', textDecoration:'none', fontSize:16,
+                  background:'var(--bg-hover)', border:'1px solid var(--border)',
+                }}><Search size={18} /></Link>
+
                 {/* 알림 */}
                 <Link href="/notifications" aria-label="알림" style={{
                   position:'relative', width:40, height:40,
@@ -371,7 +378,7 @@ export function Navigation() {
         {MOBILE_TABS.slice(0, 2).map(item => {
           const active = isActive(item.href);
           return (
-            <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
+            <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
               display:'flex', flexDirection:'column', alignItems:'center', gap:2,
               padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
               justifyContent:'center', flex:1,
@@ -397,7 +404,7 @@ export function Navigation() {
         {MOBILE_TABS.slice(2).map(item => {
           const active = isActive(item.href);
           return (
-            <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} style={{
+            <Link key={item.href} href={item.href} aria-label={item.label} aria-current={active ? 'page' : undefined} style={{
               display:'flex', flexDirection:'column', alignItems:'center', gap:2,
               padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
               justifyContent:'center', flex:1,

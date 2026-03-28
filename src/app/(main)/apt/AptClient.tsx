@@ -247,6 +247,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             value={globalSearch}
             onChange={e => setGlobalSearch(e.target.value)}
             placeholder="단지명, 시공사 검색..."
+            aria-label="부동산 검색"
             className="kd-search-input"
             style={{ paddingLeft: 34, width: '100%', boxSizing: 'border-box' }}
           />

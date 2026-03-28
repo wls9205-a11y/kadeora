@@ -97,6 +97,7 @@ export default function DiscussClient() {
   const [pollCat, setPollCat] = useState('all');
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [activeUsers, setActiveUsers] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
   const { error, success } = useToast();
@@ -105,6 +106,9 @@ export default function DiscussClient() {
     const sb = createSupabaseBrowser();
     sb.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
     const { data: { subscription } } = sb.auth.onAuthStateChange((_, s) => setUser(s?.user ?? null));
+    // Active users (messages in last 5 min)
+    sb.from('discussion_messages').select('user_id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 5 * 60000).toISOString())
+      .then(({ count }) => setActiveUsers(count || 0));
     return () => subscription.unsubscribe();
   }, []);
 
@@ -161,7 +165,13 @@ export default function DiscussClient() {
     <div style={containerStyle}>
       <div style={{ flexShrink: 0, marginBottom: isChat ? 8 : 16 }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
-        <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들</p>
+        <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들
+          {activeUsers > 0 && (
+            <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 700, marginLeft: 8 }}>
+              🟢 {activeUsers}명 참여중
+            </span>
+          )}
+        </p>
       </div>
 
       {/* 탭 */}

@@ -106,6 +106,8 @@ export default async function FeedDetailPage({ params }: Props) {
   let related: any[] = [];
   let currentUserId: string | null = null;
   let numId = 0;
+  let relatedQuote: any = null;
+  let relatedAptCount = 0;
 
   try {
     const sb = await createSupabaseServer();
@@ -168,6 +170,27 @@ export default async function FeedDetailPage({ params }: Props) {
             const { data: stocksData } = await sb.from('stock_quotes').select('symbol, name, market, price, change_pct, currency')
               .eq('is_active', true).or(orQuery).gt('price', 0).limit(3);
             if (stocksData?.length) related = [...related, ...stocksData.map((s: Record<string, any>) => ({ ...s, _type: 'stock' }))];
+          }
+        } catch {}
+      }
+
+      // Related stock/apt data for category-specific display
+      if (postData?.category === 'stock') {
+        try {
+          const stockKeywords = (postData.title || '').match(/[가-힣]{2,}/g)?.slice(0, 3) || [];
+          for (const kw of stockKeywords) {
+            const { data } = await sb.from('stock_quotes').select('symbol,name,price,change_pct,currency').ilike('name', `%${kw}%`).gt('price', 0).limit(1).maybeSingle();
+            if (data) { relatedQuote = data; break; }
+          }
+        } catch {}
+      }
+      if (postData?.category === 'apt') {
+        try {
+          const regionKeywords = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
+          const foundRegion = regionKeywords.find(r => (postData.title || '').includes(r));
+          if (foundRegion) {
+            const { count } = await sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).ilike('region_nm', `${foundRegion}%`).gte('rcept_endde', new Date().toISOString().slice(0, 10));
+            relatedAptCount = count || 0;
           }
         } catch {}
       }
@@ -349,6 +372,38 @@ export default async function FeedDetailPage({ params }: Props) {
         )}
 
       </article>
+
+      {/* 관련 실시간 데이터 */}
+      {relatedQuote && (
+        <Link href={`/stock/${relatedQuote.symbol}`} style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: 12, marginBottom: 12,
+          background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10,
+          textDecoration: 'none', color: 'inherit',
+        }}>
+          <span style={{ fontSize: 20 }}>📈</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{relatedQuote.name}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{relatedQuote.currency === 'USD' ? `$${Number(relatedQuote.price).toFixed(2)}` : `₩${Number(relatedQuote.price).toLocaleString()}`}</div>
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: Number(relatedQuote.change_pct) > 0 ? 'var(--accent-red)' : Number(relatedQuote.change_pct) < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+            {Number(relatedQuote.change_pct) > 0 ? '+' : ''}{Number(relatedQuote.change_pct).toFixed(2)}%
+          </span>
+        </Link>
+      )}
+      {relatedAptCount > 0 && (
+        <Link href="/apt" style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: 12, marginBottom: 12,
+          background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10,
+          textDecoration: 'none', color: 'inherit',
+        }}>
+          <span style={{ fontSize: 20 }}>🏢</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>관련 청약 정보</div>
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>현재 {relatedAptCount}건 접수중</div>
+          </div>
+          <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600 }}>보기 →</span>
+        </Link>
+      )}
 
       {/* 액션 바 — 본문과 댓글 사이 (인라인) */}
       <div style={{
