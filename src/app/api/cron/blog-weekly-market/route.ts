@@ -1,3 +1,4 @@
+import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 export const maxDuration = 60;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const now = new Date();
     const weekAgo = new Date(Date.now() - 7 * 86400000);
-    const weekStr = `${now.getFullYear()}-W${String(Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0')}`;
+    const weekStr = `${now.getFullYear()}-W${String(Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)).padStart(2, '0')}`;;
     const slug = `weekly-market-review-${weekStr}`;
 
     // Check if already exists
@@ -47,11 +48,11 @@ export async function GET(req: NextRequest) {
 
     if (process.env.ANTHROPIC_API_KEY) {
       try {
-        const prompt = `한국 투자 시장 주간 리뷰를 작성하세요.
+        const prompt = diversifyPrompt(`한국 투자 시장 주간 리뷰를 작성하세요.
 데이터: 주식 ${stocks.length}종목 중 상승 ${upCount}개, 평균등락 ${avgPct}%
 신규 청약 ${newApts.length}건, 미분양 ${unsoldCount}건
 마크다운 형식, 1500자 이상. 제목은 별도로 주지 마세요.
-섹션: ## 주식 시장, ## 부동산 시장, ## 투자 전략, ## 다음 주 전망`;
+섹션: ## 주식 시장, ## 부동산 시장, ## 투자 전략, ## 다음 주 전망`);
 
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',

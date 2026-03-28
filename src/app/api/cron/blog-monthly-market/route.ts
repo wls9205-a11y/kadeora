@@ -1,3 +1,4 @@
+import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 export const maxDuration = 60;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const now = new Date();
     const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const monthKey = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
+    const monthKey = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;;
     const slug = `monthly-market-review-${monthKey}`;
 
     const { data: exists } = await supabase.from('blog_posts').select('id').eq('slug', slug).maybeSingle();
@@ -46,10 +47,10 @@ export async function GET(req: NextRequest) {
 
     if (process.env.ANTHROPIC_API_KEY) {
       try {
-        const prompt = `${monthKey} 한국 투자 시장 월간 종합 리뷰를 작성하세요.
+        const prompt = diversifyPrompt(`${monthKey} 한국 투자 시장 월간 종합 리뷰를 작성하세요.
 데이터: 주식 ${stocks.length}종목, 실거래 ${totalTrades}건, 미분양 ${totalUnsold}건
 마크다운 형식, 2000자 이상. 제목 별도 X.
-섹션: ## 주식 시장 월간 동향, ## 부동산 시장 월간 동향, ## 미분양 현황, ## 투자 시사점, ## 다음 달 전망`;
+섹션: ## 주식 시장 월간 동향, ## 부동산 시장 월간 동향, ## 미분양 현황, ## 투자 시사점, ## 다음 달 전망`);
 
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',

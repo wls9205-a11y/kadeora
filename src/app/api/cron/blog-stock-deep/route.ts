@@ -1,3 +1,4 @@
+import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { ensureMinLength } from '@/lib/blog-padding';
@@ -49,11 +50,11 @@ export async function GET(req: NextRequest) {
       const fmtPrice = (stock.price ?? 0).toLocaleString();
       const pct = (stock.change_pct ?? 0).toFixed(2);
 
-      const prompt = `한국 주식 투자 정보 플랫폼 '카더라'의 종목 심층 분석 블로그를 작성하세요.
+      const prompt = diversifyPrompt(`한국 주식 투자 정보 플랫폼 '카더라'의 종목 심층 분석 블로그를 작성하세요.
 종목: ${stock.name} (${stock.symbol}), 현재가 ${fmtPrice}원 (${Number(pct) > 0 ? '+' : ''}${pct}%), 시총 ${fmtCap}, 섹터 ${stock.sector || '기타'}, ${stock.market}, 거래량 ${(stock.volume || 0).toLocaleString()}주
 
 규칙: 위 실제 데이터 본문에 포함, 1800자 이상, h2 4개(기업개요/최근동향/투자포인트/리스크), "본 글은 투자 추천이 아닙니다" 문구 포함, 마크다운.
-JSON만: {"title":"제목(40자이내)","content":"마크다운본문","excerpt":"요약(100자이내)","tags":["태그1","태그2"]}`;
+JSON만: {"title":"제목(40자이내)","content":"마크다운본문","excerpt":"요약(100자이내)","tags":["태그1","태그2"]}`);
 
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {

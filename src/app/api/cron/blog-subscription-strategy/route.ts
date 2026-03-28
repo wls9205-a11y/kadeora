@@ -1,3 +1,4 @@
+import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { ensureMinLength } from '@/lib/blog-padding';
@@ -45,13 +46,13 @@ export async function GET(req: NextRequest) {
       `- ${a.house_nm} (${a.region_nm}): ${a.tot_supply_hshld_co}세대, 접수 ${a.rcept_bgnde}~${a.rcept_endde}, 시공 ${a.constructor_nm || '미정'}`
     ).join('\n');
 
-    const prompt = `한국 부동산 투자 정보 플랫폼 '카더라'의 청약 전략 가이드 블로그를 작성하세요.
+    const prompt = diversifyPrompt(`한국 부동산 투자 정보 플랫폼 '카더라'의 청약 전략 가이드 블로그를 작성하세요.
 ${monthWeek} 청약 현황:
 ${aptList}
 접수 예정 ${(upcoming || []).length}건, 접수 중 ${(ongoing || []).length}건
 
 규칙: 위 현장명/세대수/일정 본문에 포함, 2000자 이상, h2 4개(이번 주 일정/주목 현장/당첨 전략/주의사항), 가점제/추첨제 팁 포함, ✅📌⚠️ 이모지 활용, 마크다운.
-JSON만: {"title":"제목(40자이내)","content":"마크다운본문","excerpt":"요약(100자이내)","tags":["태그1","태그2"]}`;
+JSON만: {"title":"제목(40자이내)","content":"마크다운본문","excerpt":"요약(100자이내)","tags":["태그1","태그2"]}`);
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {

@@ -1,3 +1,4 @@
+import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { ensureMinLength } from '@/lib/blog-padding';
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
         .ilike('title', `%${region}%실거래%${month}월%`).limit(1);
       if (existing?.length) continue;
 
-      const prompt = `한국 부동산 투자 정보 플랫폼 '카더라'의 블로그 글을 작성하세요.
+      const prompt = diversifyPrompt(`한국 부동산 투자 정보 플랫폼 '카더라'의 블로그 글을 작성하세요.
 주제: ${region} ${month}월 아파트 실거래가 분석
 실제 데이터:
 - 이번 달 거래 ${trades.length}건, 평균 ${(avgPrice / 10000).toFixed(1)}억원
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
 - 활발 거래 지역: ${topAreas.join(', ')}
 
 작성 규칙: 실제 데이터 수치 본문에 반드시 포함, 1500자 이상, h2 3개 이상(## 형식), 투자 주의문구 포함, 마크다운.
-JSON만 출력: {"title":"제목(40자이내)","content":"마크다운본문","excerpt":"요약(100자이내)","tags":["태그1","태그2"]}`;
+JSON만 출력: {"title":"제목(40자이내)","content":"마크다운본문","excerpt":"요약(100자이내)","tags":["태그1","태그2"]}`);
 
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {

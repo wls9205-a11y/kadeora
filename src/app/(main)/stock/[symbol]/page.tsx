@@ -38,6 +38,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 실시간 시세 · 차트 · 수급 분석` },
     other: {
+      'geo.region': 'KR-11',
+      'geo.placename': '서울',
+      'geo.position': '37.5665;126.9780',
+      'ICBM': '37.5665, 126.9780',
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
       'article:section': '주식',

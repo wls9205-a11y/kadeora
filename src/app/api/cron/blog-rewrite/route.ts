@@ -13,12 +13,17 @@ export const maxDuration = 300;
  * 어드민에서 수동으로 추가 실행 가능
  */
 
+import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
+
 const STYLES = [
   '전문가 칼럼 스타일. 증권사 애널리스트처럼 분석적이고 객관적인 톤.',
   '친근한 해설자 스타일. 어려운 용어를 쉽게 풀어 독자에게 말을 거는 톤.',
   '데이터 저널리스트 스타일. 숫자 중심 팩트 위주, 건조하지만 신뢰감 있는 톤.',
   '경험 많은 투자자가 후배에게 조언하는 스타일. 실전 팁과 주의사항 중심.',
   '경제 유튜버 대본 스타일. 핵심을 간결하게, 비유와 예시로 이해하기 쉽게.',
+  '비교 분석가 스타일. 장단점을 균형있게, 표와 수치를 적극 활용.',
+  '현장 리포트 스타일. 실제 방문/조사한 것처럼 생생하고 구체적인 묘사.',
+  'Q&A 스타일. 독자가 궁금해할 질문을 먼저 던지고 답하는 형식.',
 ];
 
 export async function GET(req: NextRequest) {
@@ -55,7 +60,7 @@ export async function GET(req: NextRequest) {
             max_tokens: 4096,
             messages: [{
               role: 'user',
-              content: `한국 금융·부동산 전문 블로그 작가로서 아래 글을 리라이팅하세요.
+              content: diversifyPrompt(`한국 금융·부동산 전문 블로그 작가로서 아래 글을 리라이팅하세요.
 
 스타일: ${style}
 
@@ -69,7 +74,7 @@ export async function GET(req: NextRequest) {
 
 카테고리: ${post.category}
 
-${post.content}`
+${post.content}`)
             }],
           }),
         });
