@@ -117,9 +117,10 @@ async function fetchAptData() {
   // 지역별 + 상태별 통계 계산
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10); // KST
   const thisMonth = today.slice(0, 7).replace('-', ''); // KST 기준 YYYYMM // 202603
+  const normalizeRegion = (name: string) => name.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '').trim();
   const regionDetail: Record<string, { total: number; open: number; upcoming: number; closed: number }> = {};
   apts.forEach((a: Record<string, any>) => {
-    const r = a.region_nm || '기타';
+    const r = normalizeRegion(a.region_nm || '') || '기타';
     if (!regionDetail[r]) regionDetail[r] = { total: 0, open: 0, upcoming: 0, closed: 0 };
     regionDetail[r].total++;
     if (String(a.rcept_endde ?? '') < today) regionDetail[r].closed++;
@@ -148,8 +149,7 @@ async function fetchAptData() {
       id: `sub_${a.id}`,
       source: 'subscription' as const,
       house_nm: a.house_nm || '',
-      region_nm: a.region_nm || '기타',
-      address: a.hssply_adres || a.supply_addr || '',
+      region_nm: normalizeRegion(a.region_nm || '') || '기타',
       total_supply: a.tot_supply_hshld_co || 0,
       unsold_count: null as number | null,
       mvn_prearnge_ym: a.mvn_prearnge_ym || null,
@@ -168,7 +168,7 @@ async function fetchAptData() {
       przwner_presnatn_de: a.przwner_presnatn_de || null,
       cntrct_cncls_bgnde: a.cntrct_cncls_bgnde || null,
       cntrct_cncls_endde: a.cntrct_cncls_endde || null,
-      nearby_avg_price: regionAvgPriceMap[a.region_nm?.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '') || ''] || null,
+      nearby_avg_price: regionAvgPriceMap[normalizeRegion(a.region_nm || '')] || null,
     }));
 
   // 소스2: 미분양 (준공 후 포함)
@@ -179,7 +179,7 @@ async function fetchAptData() {
     id: `unsold_${u.id}`,
     source: 'unsold' as const,
     house_nm: u.house_nm || '',
-    region_nm: u.region_nm || '기타',
+    region_nm: normalizeRegion(u.region_nm || '') || '기타',
     address: u.supply_addr || u.hssply_adres || '',
     total_supply: u.tot_supply_hshld_co || 0,
     unsold_count: u.tot_unsold_hshld_co || 0,
@@ -199,7 +199,7 @@ async function fetchAptData() {
     przwner_presnatn_de: null as string | null,
     cntrct_cncls_bgnde: null as string | null,
     cntrct_cncls_endde: null as string | null,
-    nearby_avg_price: regionAvgPriceMap[u.region_nm?.replace(/특별시|광역시|특별자치시|특별자치도|도$/, '') || ''] || null,
+    nearby_avg_price: regionAvgPriceMap[normalizeRegion(u.region_nm || '')] || null,
   }));
 
   // 중복 제거: 같은 단지명+지역이면 unsold 우선 (미분양 세대수 정보가 더 정확)
