@@ -15,7 +15,7 @@ export const revalidate = 3600; // 1시간 캐시
 export async function GET() {
   const sb = getSupabaseAdmin();
 
-  const [sitesR, blogsR] = await Promise.all([
+  const [sitesR, blogsR, stocksR] = await Promise.all([
     sb.from('apt_sites')
       .select('slug, name, images, region, sigungu')
       .eq('is_active', true)
@@ -29,6 +29,10 @@ export async function GET() {
       // /api/og 동적 URL도 포함 (Googlebot-Image, Yeti가 렌더링 가능)
       .order('published_at', { ascending: false })
       .limit(50000),
+    sb.from('stock_quotes')
+      .select('symbol, name, market, sector, price, change_pct, currency')
+      .gt('price', 0)
+      .limit(1000),
   ]);
 
   const entries: string[] = [];
@@ -78,6 +82,23 @@ ${imageXml}
         <image:loc>${escapeXml(ogSquareUrl)}</image:loc>
         <image:title>${escapeXml(b.title)}</image:title>
         <image:caption>${escapeXml(`카더라 ${catLabel} — ${b.title} (1:1 이미지)`)}</image:caption>
+      </image:image>
+  </url>`);
+  }
+
+  // ━━━ 주식 종목 이미지 ━━━
+  for (const s of stocksR.data || []) {
+    const pct = Number(s.change_pct) || 0;
+    const arrow = pct >= 0 ? '▲' : '▼';
+    const priceStr = s.currency === 'USD' ? `$${Number(s.price).toFixed(2)}` : `₩${Number(s.price).toLocaleString()}`;
+    const titleText = escapeXml(`${s.name} (${s.symbol}) ${priceStr} ${arrow}${Math.abs(pct).toFixed(2)}%`);
+    const ogUrl = `${BASE}/api/og?title=${encodeURIComponent(`${s.name} (${s.symbol}) ${priceStr} ${arrow}${Math.abs(pct).toFixed(2)}%`)}&design=2&category=stock`;
+    entries.push(`  <url>
+    <loc>${BASE}/stock/${encodeURIComponent(s.symbol)}</loc>
+      <image:image>
+        <image:loc>${escapeXml(ogUrl)}</image:loc>
+        <image:title>${titleText}</image:title>
+        <image:caption>${escapeXml(`${s.name} ${s.market} 상장 ${s.sector || ''} 종목 주가 시세`)}</image:caption>
       </image:image>
   </url>`);
   }

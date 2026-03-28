@@ -350,17 +350,44 @@ export default async function AptUnifiedPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{name}</span>
       </nav>
 
-      {/* 히어로 이미지 (검색엔진 썸네일 소스) */}
-      <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', position: 'relative', aspectRatio: '1200/630' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/api/og?title=${encodeURIComponent(name)}&design=2&category=apt&subtitle=${encodeURIComponent(`${region} ${site?.sigungu || ''} · ${site?.builder || sub?.constructor_nm || ''}`.trim())}`}
-          alt={`${name} ${tLabel[sType]} 정보 — ${region} ${site?.sigungu || ''} ${site?.total_units || sub?.tot_supply_hshld_co || ''}세대`}
-          width={1200} height={630}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-          loading="eager"
-        />
-      </div>
+      {/* 이미지 캐러셀 (포털 이미지 검색 노출 + 이미지탭 캐러셀) */}
+      {(() => {
+        const dbImages = Array.isArray(site?.images) ? site.images.slice(0, 4).map((img: any) => typeof img === 'string' ? img : img?.link || img?.url).filter(Boolean) : [];
+        const ogBase = `/api/og?design=2&category=apt`;
+        const ogImages = [
+          { src: `${ogBase}&title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(`${region} ${site?.sigungu || ''} · ${site?.builder || sub?.constructor_nm || ''}`.trim())}`, alt: `${name} ${tLabel[sType]} 정보 — ${region} ${site?.sigungu || ''} ${site?.total_units || sub?.tot_supply_hshld_co || ''}세대` },
+          { src: `/api/og?design=3&category=apt&title=${encodeURIComponent(`${name} 분양가`)}&subtitle=${encodeURIComponent((site?.price_min || site?.price_max) ? `${site?.price_min ? Math.round(site.price_min/10000).toLocaleString()+'만' : ''}~${site?.price_max ? Math.round(site.price_max/10000).toLocaleString()+'만원' : ''}` : `${region} ${site?.sigungu || ''}`)}`, alt: `${name} 분양가 정보 — ${region} 아파트 가격` },
+          { src: `/api/og?design=4&category=apt&title=${encodeURIComponent(`${name} 청약 일정`)}&subtitle=${encodeURIComponent(sub?.rcept_bgnde ? `접수 ${sub.rcept_bgnde}` : `${tLabel[sType]} · ${region}`)}`, alt: `${name} 청약 접수 일정 — ${region} ${site?.builder || sub?.constructor_nm || ''}` },
+        ];
+        const allImages = dbImages.length >= 2
+          ? [...dbImages.slice(0, 2).map((url: string, i: number) => ({ src: url, alt: `${name} 현장 사진 ${i + 1} — ${region} ${site?.sigungu || ''}` })), ogImages[0]]
+          : ogImages;
+        return (
+          <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${name} ${tLabel[sType]} 이미지`,
+              about: { '@type': 'ApartmentComplex', name, address: { '@type': 'PostalAddress', addressRegion: region } },
+              image: allImages.map((img, i) => ({ '@type': 'ImageObject', url: img.src.startsWith('/') ? `${SITE_URL}${img.src}` : img.src, name: img.alt, width: 1200, height: 630, position: i + 1 })),
+            })}} />
+            <div style={{ display: 'grid', gridTemplateColumns: allImages.length >= 3 ? '2fr 1fr' : '1fr', gap: 6, marginBottom: 12 }}>
+              <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={allImages[0].src} alt={allImages[0].alt} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block' }} loading="eager" />
+              </div>
+              {allImages.length >= 3 && (
+                <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 6 }}>
+                  {allImages.slice(1, 3).map((img, i) => (
+                    <div key={i} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img.src} alt={img.alt} width={1200} height={630} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Header */}
       <div style={{ marginBottom: 16 }}>

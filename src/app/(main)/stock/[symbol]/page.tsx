@@ -181,17 +181,37 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* 히어로 이미지 (검색엔진 썸네일 소스) */}
-      <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${fmtPrice(Number(s.price), s.currency ?? undefined)} ${changePct >= 0 ? '▲' : '▼'}${Math.abs(changePct).toFixed(2)}%`)}&design=2&category=stock`}
-          alt={`${s.name} (${symbol}) 주가 시세 — ${s.market} 상장 ${s.sector || ''} 종목`}
-          width={1200} height={630}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-          loading="eager"
-        />
-      </div>
+      {/* 이미지 캐러셀 (포털 이미지 검색 노출 + 이미지탭 캐러셀) */}
+      {(() => {
+        const images = [
+          { src: `/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${fmtPrice(Number(s.price), s.currency ?? undefined)} ${changePct >= 0 ? '▲' : '▼'}${Math.abs(changePct).toFixed(2)}%`)}&design=2&category=stock`, alt: `${s.name} (${symbol}) 주가 시세 — ${s.market} 상장 ${s.sector || ''} 종목` },
+          { src: `/api/og?title=${encodeURIComponent(`${s.name} 차트 분석`)}&design=3&category=stock&subtitle=${encodeURIComponent(`${s.market} · ${s.sector || ''} · 시가총액 ${fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}`)}`, alt: `${s.name} 주가 차트 분석 — ${s.sector || s.market} 섹터` },
+          { src: `/api/og?title=${encodeURIComponent(`${s.name} 투자 분석`)}&design=4&category=stock&subtitle=${encodeURIComponent(`AI 한줄평 · 수급 · 뉴스 · 공시`)}`, alt: `${s.name} 투자 분석 — AI 한줄평 수급 뉴스 공시 종합` },
+        ];
+        return (
+          <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${s.name} (${symbol}) 주식 이미지`,
+              about: { '@type': 'FinancialProduct', name: s.name, identifier: symbol },
+              image: images.map((img, i) => ({ '@type': 'ImageObject', url: `${SITE_URL}${img.src}`, name: img.alt, width: 1200, height: 630, position: i + 1 })),
+            })}} />
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 6, marginBottom: 12 }}>
+              <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={images[0].src} alt={images[0].alt} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block' }} loading="eager" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 6 }}>
+                {images.slice(1).map((img, i) => (
+                  <div key={i} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.src} alt={img.alt} width={1200} height={630} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* 가격 헤더 */}
       <div style={{
