@@ -68,6 +68,7 @@ export default function FeedClient({
   const [newCount, setNewCount] = useState(0);
   const newCheckTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [visitedIds, setVisitedIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     setPosts(initialPosts);
@@ -79,6 +80,14 @@ export default function FeedClient({
     initialPosts.forEach(p => { c[p.id] = p.likes_count ?? 0; });
     setLikeCounts(c);
   }, [initialPosts]);
+
+  // 읽은 글 추적 (localStorage)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('kd_visited');
+      if (stored) setVisitedIds(new Set(JSON.parse(stored)));
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -410,7 +419,7 @@ export default function FeedClient({
             const bookmarksCount = postExt.bookmarks_count ?? 0;
 
             const card = (
-              <div key={post.id} className="animate-fadeIn kd-feed-card"
+              <div key={post.id} className={`animate-fadeIn kd-feed-card${visitedIds.has(post.id) ? ' visited' : ''}`}
                 data-cat={post.category}
                 style={{ padding: '12px 14px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 10, transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
@@ -444,7 +453,10 @@ export default function FeedClient({
                   </div>
                 </div>
 
-                <Link href={postHref} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                <Link href={postHref} onClick={() => {
+                  const nv = new Set(visitedIds); nv.add(post.id); setVisitedIds(nv);
+                  try { const arr = Array.from(nv).slice(-200); localStorage.setItem('kd_visited', JSON.stringify(arr)); } catch {}
+                }} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                   {post.title && (
                     <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.45, marginBottom: 4 }}>
                       {post.title}

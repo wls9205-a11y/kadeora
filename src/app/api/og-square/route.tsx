@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 export const runtime = 'nodejs';
+export const maxDuration = 30;
 
 // og-square: 630×630 — 네이버 모바일 1:1 크롭 전용
 // 모든 핵심 정보가 중앙 100%에 집중 → 크롭 손실 없음

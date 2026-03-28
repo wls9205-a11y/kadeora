@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 export const runtime = 'nodejs';
+export const maxDuration = 30;
 
 /* ── 카테고리 설정 ── */
 const CAT: Record<string, { a: string; b: string; g: [string,string,string]; L: string; I: string; E: string }> = {
