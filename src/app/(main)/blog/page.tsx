@@ -408,12 +408,11 @@ export default async function BlogPage({ searchParams }: Props) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   position: 'relative',
                 }}>
-                  {(() => {
-                    const validCover = p.cover_image && !p.cover_image.includes('default-cover') && !p.cover_image.includes('generic');
-                    const thumbUrl = validCover ? p.cover_image : `/api/og?title=${encodeURIComponent(p.title)}&category=${p.category || 'general'}`;
-                    return <img src={thumbUrl} alt={p.image_alt || p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.querySelector('span')!.style.display = 'flex'; }} />;
-                  })()}
-                  <span style={{ fontSize: 24, display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>{catEmoji[p.category] || '📝'}</span>
+                  {p.cover_image && !p.cover_image.includes('default-cover') && !p.cover_image.includes('generic') ? (
+                    <img src={p.cover_image} alt={p.image_alt || p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                  ) : (
+                    <span style={{ fontSize: 24 }}>{catEmoji[p.category] || '📝'}</span>
+                  )}
                   {p.view_count >= 50 && (
                     <span style={{ position: 'absolute', top: 3, right: 3, width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-red)', border: '1px solid var(--bg-surface)' }} />
                   )}
