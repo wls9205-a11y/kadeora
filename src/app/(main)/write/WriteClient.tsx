@@ -147,14 +147,14 @@ export default function WriteClient() {
         if (!res.ok) throw new Error((await res.json()).error ?? '작성 실패');
         const { post } = await res.json();
         // 투표 생성
-        if (showPollForm && pollQuestion.trim() && pollOptions.filter(o => o.trim()).length >= 2) {
+        if (showPollForm && pollQuestion.trim() && pollOptions.filter((o: string) => o.trim()).length >= 2) {
           await fetch('/api/polls', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               post_id: post.id,
               question: pollQuestion.trim(),
-              options: pollOptions.filter(o => o.trim()),
+              options: pollOptions.filter((o: string) => o.trim()),
               ends_at: pollEndsAt || null,
             }),
           }).catch(() => { /* 투표 실패는 무시 */ });

@@ -160,7 +160,7 @@ export default function FeedClient({
       const cursor = lastPost?.created_at;
       const orderCol = activeSort === 'popular' ? 'likes_count' : activeSort === 'comments' ? 'comments_count' : 'created_at';
       let q = sb.from('posts')
-        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,is_anonymous,author_id,region_id,images,slug,excerpt,tags,stock_tags,apt_tags,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+        .select('id,title,content,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,slug,excerpt,tags,stock_tags,apt_tags,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
         .eq('is_deleted', false)
         .order(orderCol, { ascending: false })
         .limit(PAGE_SIZE);
@@ -202,14 +202,14 @@ export default function FeedClient({
 
   const visiblePosts = useMemo(() => {
     let filtered = activeTag
-      ? posts.filter(p => {
+      ? posts.filter((p: PostWithProfile) => {
           const tags = p.tags;
           return tags?.includes(activeTag);
         })
       : posts;
     // 핀 글 상단 고정
-    const pinned = filtered.filter(p => p.is_pinned);
-    const normal = filtered.filter(p => !p.is_pinned);
+    const pinned = filtered.filter((p: PostWithProfile) => p.is_pinned);
+    const normal = filtered.filter((p: PostWithProfile) => !p.is_pinned);
     return [...pinned, ...normal];
   }, [posts, activeTag]);
 
