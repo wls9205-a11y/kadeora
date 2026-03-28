@@ -600,17 +600,23 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {themes.filter(t => !selectedTheme || t.theme_name === selectedTheme).map(t => {
             const th = themeHistory?.find((h: Record<string, any>) => h.theme_name === t.theme_name);
             return (
-            <div key={t.id} style={{ padding: 16, background: 'var(--bg-surface)', border: selectedTheme === t.theme_name ? '2px solid var(--brand)' : '1px solid var(--border)', borderRadius: 12, marginBottom: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot&&'🔥 '}{t.theme_name}</span>
+            <div key={t.id} style={{ padding: 14, background: 'var(--bg-surface)', border: selectedTheme === t.theme_name ? '2px solid var(--brand)' : '1px solid var(--border)', borderRadius: 12, marginBottom: 8, overflow: 'hidden', position: 'relative' }}>
+              {/* 등락 배경 */}
+              <div style={{ position: 'absolute', inset: 0, background: (t.change_pct??0) > 0 ? 'linear-gradient(135deg, rgba(248,113,113,0.04), transparent)' : (t.change_pct??0) < 0 ? 'linear-gradient(135deg, rgba(96,165,250,0.04), transparent)' : 'transparent', pointerEvents: 'none' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, position: 'relative' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t.is_hot&&'🔥 '}{t.theme_name}</span>
+                    {selectedTheme === t.theme_name && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--brand)', color: '#fff', fontWeight: 700 }}>선택</span>}
+                  </div>
                   {(th?.avg_change_rate != null || th?.prev_change_pct != null) && (
-                    <span className="text-xs-tertiary">
-                      전일 {(Number(th.avg_change_rate ?? th.prev_change_pct) > 0 ? '+' : '')}{Number(th.avg_change_rate ?? th.prev_change_pct).toFixed(1)}%
-                    </span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전일 {(Number(th.avg_change_rate ?? th.prev_change_pct) > 0 ? '+' : '')}{Number(th.avg_change_rate ?? th.prev_change_pct).toFixed(1)}%</span>
                   )}
                 </div>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: stockColor(t.change_pct??0, true) }}>{(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%</span>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: stockColor(t.change_pct??0, true), fontVariantNumeric: 'tabular-nums' }}>{(t.change_pct??0)>0?'+':''}{(t.change_pct??0).toFixed(1)}%</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{t.related_symbols?.length ?? 0}종목</div>
+                </div>
               </div>
               {t.description && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>{t.description}</div>}
               {/* Related stocks mini list */}
@@ -842,17 +848,36 @@ export default function StockClient({ initialStocks, briefing, exchangeHistory, 
           {displayStocks.length === 0 ? (
             <div style={{ padding: 40, textAlign: 'center' }}>
               {currentTab === 'watchlist' ? (
-                <div>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>⭐</div>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>관심종목을 추가해보세요</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 16 }}>종목 목록에서 ☆ 버튼을 눌러 추가할 수 있어요</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>🔥 인기 종목</div>
-                  <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    {(isDomestic ? domesticStocks : globalStocks).slice(0, 5).map(s => (
-                      <button key={s.symbol} onClick={() => toggleWatchlist(s.symbol)} style={{ fontSize: 'var(--fs-xs)', padding: '6px 12px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
-                        ☆ {s.name}
-                      </button>
-                    ))}
+                <div style={{ padding: '8px 0' }}>
+                  <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                    <div style={{ fontSize: 36, marginBottom: 8 }}>⭐</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>관심종목을 추가해보세요</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>종목 목록에서 ☆ 버튼을 눌러 추가</div>
+                  </div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+                    🔥 {isDomestic ? '국내 시총 TOP' : '해외 인기'}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {(isDomestic ? domesticStocks : globalStocks).filter(s => s.price > 0).slice(0, 5).map(s => {
+                      const pct = s.change_pct ?? 0;
+                      const isGlobal = s.currency === 'USD';
+                      const color = pct > 0 ? (isGlobal ? 'var(--accent-green)' : 'var(--accent-red)') : pct < 0 ? (isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)') : 'var(--text-tertiary)';
+                      return (
+                        <div key={s.symbol} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px', borderBottom: '1px solid var(--border)' }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.symbol}</div>
+                          </div>
+                          <div style={{ textAlign: 'right', marginRight: 8 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}</div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</div>
+                          </div>
+                          <button onClick={() => toggleWatchlist(s.symbol)} style={{ fontSize: 13, padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600, flexShrink: 0 }}>
+                            ☆ 추가
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
