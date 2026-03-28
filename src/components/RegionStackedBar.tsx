@@ -17,6 +17,8 @@ interface Props {
   unsold: Record<string, any>[];
   redevelopment: Record<string, any>[];
   transactions: Record<string, any>[];
+  redevTotalCount?: number;
+  tradeTotalCount?: number;
   onRegionClick?: (region: string) => void;
   activeRegion?: string;
   shareButton?: React.ReactNode;
@@ -31,7 +33,7 @@ const COLORS: Record<string, string> = {
 };
 
 const LABELS: Record<string, string> = {
-  sub: '청약',
+  sub: '청약정보',
   ongoing: '분양',
   unsold: '미분양',
   redev: '재개발',
@@ -40,7 +42,7 @@ const LABELS: Record<string, string> = {
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, onRegionClick, activeRegion, shareButton }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, onRegionClick, activeRegion, shareButton }: Props) {
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
     const ensure = (name: string) => {
@@ -70,8 +72,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
     sub: regions.reduce((s, r) => s + r.sub, 0),
     ongoing: regions.reduce((s, r) => s + r.ongoing, 0),
     unsold: regions.reduce((s, r) => s + r.unsold, 0),
-    redev: regions.reduce((s, r) => s + r.redev, 0),
-    trade: regions.reduce((s, r) => s + r.trade, 0),
+    redev: redevTotalCount || regions.reduce((s, r) => s + r.redev, 0),
+    trade: tradeTotalCount || regions.reduce((s, r) => s + r.trade, 0),
   };
 
   if (regions.length === 0) return null;

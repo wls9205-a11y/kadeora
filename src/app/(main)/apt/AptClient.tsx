@@ -31,8 +31,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
   // ━━━ Lazy fetch state ━━━
   const [lazyUnsold, setLazyUnsold] = useState<any[] | null>(unsold.length > 0 ? unsold : null);
-  const [lazyRedev, setLazyRedev] = useState<any[] | null>(redevelopment.length > 0 ? redevelopment : null);
-  const [lazyTx, setLazyTx] = useState<any[] | null>(transactions.length > 0 ? transactions : null);
+  const [lazyRedev, setLazyRedev] = useState<any[] | null>(null);
+  const [lazyTx, setLazyTx] = useState<any[] | null>(null);
   const [lazyTradeMonthly, setLazyTradeMonthly] = useState<any[]>(tradeMonthly);
   const [lazyUnsoldMonthly, setLazyUnsoldMonthly] = useState<any[]>(unsoldMonthly);
   const [lazyUnsoldSummary, setLazyUnsoldSummary] = useState<any>(unsoldSummary);
@@ -121,8 +121,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
     return a.rcept_bgnde && now < String(a.rcept_bgnde).slice(0, 10);
   }).length;
   const unsoldTotal = (lazyUnsold || unsold).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
-  const redevCount = (lazyRedev || []).length || redevTotalCount;
-  const tradeCount = lazyTx ? lazyTx.length : tradeTotalCount;
+  const redevCount = redevTotalCount || (lazyRedev || []).length;
+  const tradeCount = tradeTotalCount || (lazyTx ? lazyTx.length : 0);
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
@@ -160,8 +160,10 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         apts={apts}
         ongoingApts={ongoingApts}
         unsold={lazyUnsold || unsold}
-        redevelopment={lazyRedev || []}
-        transactions={lazyTx || []}
+        redevelopment={lazyRedev || redevelopment}
+        transactions={lazyTx || transactions}
+        redevTotalCount={redevTotalCount}
+        tradeTotalCount={tradeTotalCount}
         onRegionClick={setSelectedRegion}
         activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
