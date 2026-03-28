@@ -83,7 +83,7 @@ async function fetchThemeHistory() {
 }
 
 // Cache: 300s — 주식 목록 (시세 크론 5분 주기)
-const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v4'], { revalidate: 300 });
+const getCachedStocks = unstable_cache(fetchStocks, ['stock-quotes', 'v5'], { revalidate: 300 });
 const getCachedBriefing = unstable_cache(fetchBriefing, ['stock-briefing', 'v1'], { revalidate: 600 });
 const getCachedExchangeHistory = unstable_cache(fetchExchangeHistory, ['exchange-history', 'v1'], { revalidate: 3600 });
 const getCachedThemeHistory = unstable_cache(fetchThemeHistory, ['theme-history', 'v1'], { revalidate: 600 });
