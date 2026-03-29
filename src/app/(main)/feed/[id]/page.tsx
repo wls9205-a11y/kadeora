@@ -452,6 +452,24 @@ export default async function FeedDetailPage({ params }: Props) {
       )}
 
       {/* 액션 바 — 본문과 댓글 사이 (인라인) */}
+      {/* 인게이지먼트 미니 대시보드 */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+        {[
+          { icon: '👁', label: '조회', value: post.view_count ?? 0, max: 1000, color: '#60A5FA' },
+          { icon: '🤍', label: '좋아요', value: post.likes_count ?? 0, max: 100, color: '#F87171' },
+          { icon: '💬', label: '댓글', value: comments.length, max: 50, color: '#34D399' },
+        ].map(s => (
+          <div key={s.label} style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', textAlign: 'center' }}>
+            <div style={{ fontSize: 14 }}>{s.icon}</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: s.value > 0 ? s.color : 'var(--text-tertiary)' }}>{s.value.toLocaleString()}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.label}</div>
+            <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 3, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 2, background: s.color }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div style={{
         display: 'flex', alignItems: 'center',
         padding: '12px 0', borderTop: '1px solid var(--border)',

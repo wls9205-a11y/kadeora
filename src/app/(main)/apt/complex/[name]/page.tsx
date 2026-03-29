@@ -163,9 +163,25 @@ export default async function ComplexDetailPage({ params }: Props) {
       </div>
 
       {/* 면적별 비교 */}
-      {areaStats.length > 1 && (
+      {areaStats.length > 1 && (() => {
+        const maxAvg = Math.max(...areaStats.map(a => a.avg));
+        return (
         <div className={card}>
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, margin: '0 0 12px' }}>📐 면적별 비교</h2>
+          {/* 수평 바 차트 */}
+          <div style={{ marginBottom: 12 }}>
+            {areaStats.slice(0, 6).map((a, i) => (
+              <div key={a.area} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', minWidth: 42 }}>{a.area}</span>
+                <div style={{ flex: 1, height: 18, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ height: '100%', width: `${maxAvg > 0 ? (a.avg / maxAvg) * 100 : 0}%`, borderRadius: 4, background: `hsl(${210 + i * 15}, 65%, ${55 + i * 3}%)` }} />
+                  <span style={{ position: 'absolute', right: 6, top: 2, fontSize: 10, fontWeight: 600, color: 'var(--text-primary)' }}>{fmtAmount(a.avg)}</span>
+                </div>
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 24, textAlign: 'right' }}>{a.count}건</span>
+              </div>
+            ))}
+          </div>
+          {/* 카드 그리드 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
             {areaStats.slice(0, 8).map(a => (
               <div key={a.area} style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 12px' }}>
@@ -180,7 +196,8 @@ export default async function ComplexDetailPage({ params }: Props) {
               </div>
             ))}
           </div>
-        </div>
+        </div>);
+      })()}
       )}
 
       {/* 가격 추이 차트 */}

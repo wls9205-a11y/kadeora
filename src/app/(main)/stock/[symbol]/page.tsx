@@ -90,6 +90,7 @@ export default async function StockDetailPage({ params }: Props) {
   const isUp = changePct > 0;
   const isDown = changePct < 0;
   const isStale = !s.updated_at || s.updated_at.startsWith('2000-01-01');
+  const isKR = s.market === 'KOSPI' || s.market === 'KOSDAQ' || (s.currency !== 'USD');
 
   // Parallel fetch all data (필요 컬럼만 select)
   const [histR, aiR, newsR, flowR, discR, similarR, relatedBlogsR, sectorCountR] = await Promise.all([
