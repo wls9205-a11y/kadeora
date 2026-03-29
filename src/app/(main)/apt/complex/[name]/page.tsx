@@ -15,38 +15,86 @@ export const revalidate = 3600;
 
 interface Props { params: Promise<{ name: string }> }
 
+async function getProfile(decoded: string) {
+  const sb = await createSupabaseServer();
+  const { data } = await (sb as any).from('apt_complex_profiles')
+    .select('*')
+    .eq('apt_name', decoded)
+    .limit(1)
+    .maybeSingle();
+  return data;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
   const decoded = decodeURIComponent(name);
-  return {
-    title: `${decoded} 실거래가·시세 분석 | 아파트 매매`,
-    description: `${decoded} 아파트 실거래가 이력, 평당가 추이, 면적별 비교. 최근 거래 내역과 시세 변동을 카더라에서 확인하세요. 분양가 대비 시세도 비교 가능합니다.`,
+  const p = await getProfile(decoded);
+
+  const region = p?.region_nm || '';
+  const sigungu = p?.sigungu || '';
+  const ageGroup = p?.age_group || '';
+  const salePrice = p?.latest_sale_price ? fmtAmount(p.latest_sale_price) : '';
+  const jeonsePrice = p?.latest_jeonse_price ? fmtAmount(p.latest_jeonse_price) : '';
+
+  const title = p?.seo_title || `${decoded} 실거래가·전세·월세 시세 | ${region} ${sigungu} | 카더라`;
+  const description = p?.seo_description || `${decoded} 아파트 실거래가 이력, 전세·월세 시세, 평당가 추이, 면적별 비교. 카더라에서 확인하세요.`;
+  const ogSubtitle = salePrice ? `매매 ${salePrice}${jeonsePrice ? ` · 전세 ${jeonsePrice}` : ''}` : '실거래가·시세 분석';
+  const ogUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}&author=${encodeURIComponent('카더라 부동산팀')}`;
+  const ogSquareUrl = `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt&subtitle=${encodeURIComponent(ogSubtitle)}`;
+  const keywords = [decoded, '실거래가', '시세', '아파트', region, sigungu, ageGroup, '전세', '월세', '매매', '시세조회', '평당가'].filter(Boolean);
+
+  const meta: Metadata = {
+    title,
+    description,
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
     openGraph: {
-      title: `${decoded} 실거래가·시세`,
-      description: `실거래 이력, 평당가 추이, 면적별 비교 분석`,
+      title: `${decoded} 실거래가·시세 | 카더라`,
+      description: ogSubtitle + ` — ${region} ${sigungu}`,
       url: `${SITE_URL}/apt/complex/${name}`,
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&subtitle=${encodeURIComponent('실거래가·시세 분석')}`, width: 1200, height: 630, alt: `${decoded} 실거래가` }],
+      images: [
+        { url: ogUrl, width: 1200, height: 630, alt: `${decoded} 아파트 실거래가 시세` },
+        { url: ogSquareUrl, width: 630, height: 630, alt: `${decoded} 실거래가` },
+      ],
     },
-    twitter: { card: 'summary_large_image' as const, title: `${decoded} 실거래가`, description: `실거래 이력·평당가 추이·면적별 비교` },
+    twitter: { card: 'summary_large_image', title: `${decoded} 실거래가·시세`, description: ogSubtitle },
     other: {
-      'naver:written_time': new Date(Date.now() - 86400000 * 7).toISOString(),
-      'naver:updated_time': new Date().toISOString(),
-      'naver:author': '카더라',
-      'og:updated_time': new Date().toISOString(),
+      'naver:written_time': p?.created_at || new Date(Date.now() - 86400000 * 7).toISOString(),
+      'naver:updated_time': p?.updated_at || new Date().toISOString(),
+      'naver:author': '카더라 부동산팀',
+      'naver:site_name': '카더라',
+      'og:updated_time': p?.updated_at || new Date().toISOString(),
       'article:section': '부동산',
-      'article:tag': `${decoded},실거래가,시세,아파트,부동산,평당가,매매,시세조회`, 'dg:plink': `${SITE_URL}/apt/complex/${name}`,
+      'article:tag': keywords.join(','),
+      'article:published_time': p?.created_at || new Date(Date.now() - 86400000 * 30).toISOString(),
+      'article:modified_time': p?.updated_at || new Date().toISOString(),
+      'dg:plink': `${SITE_URL}/apt/complex/${name}`,
     },
   };
+
+  // Geo 메타 (좌표 있을 때)
+  if (p?.latitude && p?.longitude) {
+    meta.other = {
+      ...meta.other,
+      'geo.position': `${p.latitude};${p.longitude}`,
+      'geo.placename': `${decoded} 아파트`,
+      'geo.region': 'KR',
+      'ICBM': `${p.latitude}, ${p.longitude}`,
+    } as Record<string, string>;
+  }
+
+  return meta;
 }
 
 export default async function ComplexDetailPage({ params }: Props) {
   const { name } = await params;
   const decoded = decodeURIComponent(name);
   const sb = await createSupabaseServer();
+
+  // 프로필 조회 (좌표, SEO 데이터 포함)
+  const profile = await getProfile(decoded);
 
   const { data: trades } = await sb.from('apt_transactions')
     .select('id, apt_name, region_nm, sigungu, dong, deal_date, deal_amount, exclusive_area, floor, built_year, trade_type')
@@ -124,53 +172,90 @@ export default async function ComplexDetailPage({ params }: Props) {
 
   const card = 'kd-card';
 
+  const builtYear = trades[0]?.built_year || profile?.built_year || 0;
+  const hasCoords = profile?.latitude && profile?.longitude;
+
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      {/* JSON-LD */}
+      {/* JSON-LD: Place + GeoCoordinates */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Place',
         name: `${decoded} 아파트`,
+        description: `${region} ${sigungu} ${dong} 소재 아파트${builtYear ? ` (${builtYear}년 준공)` : ''}`,
         address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: `${sigungu} ${dong}`, addressCountry: 'KR' },
+        ...(hasCoords ? {
+          geo: { '@type': 'GeoCoordinates', latitude: Number(profile.latitude), longitude: Number(profile.longitude) },
+          hasMap: `https://map.kakao.com/?q=${encodeURIComponent(decoded + ' 아파트')}`,
+        } : {}),
+        ...(builtYear ? { foundingDate: `${builtYear}` } : {}),
       })}} />
+
+      {/* JSON-LD: Dataset (실거래 데이터셋) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'Dataset',
+        name: `${decoded} 아파트 실거래가 데이터`,
+        description: `${decoded} 아파트의 매매·전세·월세 실거래 데이터 ${trades.length + rentTrades.length}건`,
+        url: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`,
+        keywords: [decoded, '실거래가', '아파트 시세', region, sigungu],
+        creator: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+        dateModified: new Date().toISOString(),
+        spatialCoverage: { '@type': 'Place', name: `${region} ${sigungu}` },
+        temporalCoverage: trades.length > 0 ? `${trades[trades.length-1]?.deal_date || ''}/${trades[0]?.deal_date || ''}` : '',
+        distribution: { '@type': 'DataDownload', contentUrl: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`, encodingFormat: 'text/html' },
+      })}} />
+
+      {/* JSON-LD: BreadcrumbList */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
-          { '@type': 'ListItem', position: 2, name: '실거래 검색', item: `${SITE_URL}/apt/search` },
-          { '@type': 'ListItem', position: 3, name: decoded },
-        ],
-      })}} />
-      {/* FAQ JSON-LD (SERP 아코디언) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context': 'https://schema.org', '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: `${decoded} 최근 실거래가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 ${trades.length}건 실거래 내역을 카더라에서 확인할 수 있습니다. ${region} ${sigungu} ${dong} 소재이며, ${avgPrice > 0 ? `평균 거래가 ${fmtAmount(avgPrice)}, 최고가 ${fmtAmount(maxPrice)}입니다.` : '상세 내역을 확인하세요.'}` } },
-          { '@type': 'Question', name: `${decoded} 시세 조회 방법은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${decoded}의 면적별, 기간별 실거래 내역과 평당가 추이를 무료로 조회할 수 있습니다.` } },
-          { '@type': 'Question', name: `${decoded} 평당가(3.3㎡)는 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 면적별 평당가를 카더라에서 비교할 수 있습니다. ${areaStats.length > 0 ? `${areaStats.length}개 면적 타입의 거래 내역이 있으며, 면적별 평당가 추이를 확인하세요.` : '상세 내역을 확인하세요.'}` } },
+          { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` },
+          { '@type': 'ListItem', position: 3, name: '단지백과', item: `${SITE_URL}/apt/complex` },
+          { '@type': 'ListItem', position: 4, name: `${region} ${sigungu}`, item: `${SITE_URL}/apt/complex?region=${encodeURIComponent(region)}` },
+          { '@type': 'ListItem', position: 5, name: decoded },
         ],
       })}} />
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
-        <a href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</a>
+      {/* JSON-LD: FAQPage (SERP 아코디언) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: `${decoded} 최근 실거래가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 매매가는 ${latestPrice > 0 ? fmtAmount(latestPrice) : '정보 없음'}이며, 평균 ${fmtAmount(avgPrice)}입니다. ${region} ${sigungu} ${dong} 소재${builtYear ? `, ${builtYear}년 준공` : ''}입니다.` } },
+          { '@type': 'Question', name: `${decoded} 전세·월세 시세는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 전세가는 ${latestJeonse ? fmtAmount(latestJeonse.deposit) : '정보 없음'}${jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}이며, 월세는 ${latestMonthly ? `보증금 ${fmtAmount(latestMonthly.deposit)}/월 ${latestMonthly.monthly_rent}만원` : '정보 없음'}입니다.` } },
+          { '@type': 'Question', name: `${decoded} 면적별 평당가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}에는 ${areaStats.length}개 면적 타입이 있으며, 면적별 평당가와 거래 이력을 카더라에서 비교 분석할 수 있습니다.` } },
+          { '@type': 'Question', name: `${decoded} 입주 연차는?`, acceptedAnswer: { '@type': 'Answer', text: builtYear ? `${decoded}은 ${builtYear}년 준공으로 현재 ${2026 - builtYear}년차(${profile?.age_group || ''})입니다.` : `${decoded}의 준공 연도 정보는 확인되지 않았습니다.` } },
+        ],
+      })}} />
+
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, flexWrap: 'wrap' }}>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
-        <a href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</a>
+        <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
         <span>›</span>
-        <a href="/apt/search" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>실거래</a>
+        <Link href="/apt/complex" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>단지백과</Link>
+        <span>›</span>
+        <Link href={`/apt/complex?region=${encodeURIComponent(region)}`} style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>{region}</Link>
         <span>›</span>
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{decoded}</span>
       </nav>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent(decoded + ' 실거래')}&design=2&category=apt&subtitle=${encodeURIComponent('실거래가 시세 추이')}`} alt={`${decoded} 아파트 실거래가 시세`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
+      <img src={`/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라 부동산팀')}`} alt={`${decoded} 아파트 ${region} ${sigungu} 실거래가 시세 ${latestPrice > 0 ? fmtAmount(latestPrice) : ''}`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
-      <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
-      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 거래 {trades.length}건</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+        <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
+        {profile?.age_group && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: profile.age_group === '신축' ? 'rgba(59,123,246,0.1)' : 'var(--bg-hover)', color: profile.age_group === '신축' ? 'var(--brand)' : 'var(--text-secondary)' }}>{profile.age_group}</span>}
+        {builtYear > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{builtYear}년 준공</span>}
+      </div>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 매매 {trades.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
 
-      {/* SEO 가시적 텍스트 */}
+      {/* SEO 가시적 텍스트 (확장) */}
       <section className="site-description" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 14 }}>
         <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
-          {decoded}의 실거래가 정보를 제공합니다. {region} {sigungu} {dong} 소재이며, 최근 {trades.length}건의 거래가 확인됩니다.
-          {avgPrice > 0 && <> 평균 거래가는 {fmtAmount(avgPrice)}, 최고가는 {fmtAmount(maxPrice)}, 최저가는 {fmtAmount(minPrice)}입니다.</>}
-          {areaStats.length > 0 && <> {areaStats.length}개 면적 타입의 거래 내역을 면적별로 비교 분석할 수 있습니다.</>}
+          {decoded}은 {region} {sigungu} {dong} 소재{builtYear ? ` ${builtYear}년 준공 (${profile?.age_group || ''})` : ''} 아파트입니다.
+          {avgPrice > 0 && <> 최근 매매 평균가 {fmtAmount(avgPrice)}, 최고가 {fmtAmount(maxPrice)}, 최저가 {fmtAmount(minPrice)}.</>}
+          {latestJeonse && <> 전세가 {fmtAmount(latestJeonse.deposit)}{jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}.</>}
+          {latestMonthly && <> 월세 보증금 {fmtAmount(latestMonthly.deposit)}/월 {latestMonthly.monthly_rent}만원.</>}
+          {areaStats.length > 0 && <> {areaStats.length}개 면적 타입에서 {trades.length}건의 거래가 확인됩니다.</>}
         </p>
       </section>
 

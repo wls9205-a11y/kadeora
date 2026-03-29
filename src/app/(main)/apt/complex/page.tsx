@@ -8,17 +8,28 @@ import ComplexClient from './ComplexClient';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: '단지백과 — 입주 연차별 아파트 종합 가이드 | 카더라',
-  description: '전국 아파트를 입주 연차별로 비교하세요. 신축부터 30년+ 구축까지, 매매·전세·월세 실거래가와 시세 추이를 한눈에.',
+  title: '단지백과 — 전국 34,000+ 아파트 연차별 실거래가·전세·월세 비교 | 카더라',
+  description: '전국 34,000여 아파트를 입주 연차별로 비교하세요. 신축부터 30년+ 구축까지, 매매·전세·월세 실거래가와 전세가율, 평당가 추이를 한눈에 확인. 지역별·연차별 필터와 검색 기능 제공.',
+  keywords: '단지백과,아파트 비교,실거래가,전세가율,아파트 시세,연차별,신축 아파트,구축 아파트,아파트 검색,전세,월세,매매,카더라',
   alternates: { canonical: `${SITE_URL}/apt/complex` },
   openGraph: {
-    title: '단지백과 | 카더라',
-    description: '입주 연차별 아파트 종합 가이드 — 매매·전세·월세 시세 비교',
+    title: '단지백과 — 전국 아파트 연차별 비교 | 카더라',
+    description: '34,000+ 아파트 매매·전세·월세 실거래 데이터 기반 비교 분석',
     url: `${SITE_URL}/apt/complex`,
     siteName: '카더라', locale: 'ko_KR', type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('단지백과')}&category=apt&design=2&subtitle=${encodeURIComponent('입주 연차별 아파트 가이드')}`, width: 1200, height: 630 }],
+    images: [
+      { url: `${SITE_URL}/api/og?title=${encodeURIComponent('단지백과')}&category=apt&design=2&subtitle=${encodeURIComponent('전국 34,000+ 아파트 연차별 비교')}&author=${encodeURIComponent('카더라 부동산팀')}`, width: 1200, height: 630 },
+      { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('단지백과')}&category=apt&subtitle=${encodeURIComponent('연차별 아파트 비교')}`, width: 630, height: 630 },
+    ],
   },
-  other: { 'naver:author': '카더라 부동산팀', 'og:updated_time': new Date().toISOString() },
+  twitter: { card: 'summary_large_image', title: '단지백과 | 카더라', description: '전국 아파트 연차별 실거래가·전세·월세 비교' },
+  other: {
+    'naver:author': '카더라 부동산팀',
+    'naver:site_name': '카더라',
+    'og:updated_time': new Date().toISOString(),
+    'article:section': '부동산',
+    'article:tag': '단지백과,아파트,실거래가,전세,월세,시세,비교,연차별,카더라',
+  },
 };
 
 const AGE_GROUPS = ['신축', '5년차', '10년차', '15년차', '20년차', '25년차', '30년+'];
@@ -75,12 +86,45 @@ export default async function ComplexPage() {
 
   return (
     <article style={{ maxWidth: 960, margin: '0 auto', padding: '0 14px 80px' }}>
+      {/* JSON-LD: CollectionPage */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'CollectionPage',
-        name: '단지백과 — 입주 연차별 아파트 가이드',
-        description: '전국 아파트를 입주 연차별로 비교하는 종합 가이드',
+        name: '단지백과 — 전국 아파트 연차별 비교',
+        description: `전국 ${totalProfiles.toLocaleString()}개 아파트를 입주 연차별로 비교하는 종합 가이드`,
         url: `${SITE_URL}/apt/complex`,
         isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
+        numberOfItems: totalProfiles,
+        provider: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+      })}} />
+      {/* JSON-LD: Dataset */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'Dataset',
+        name: '전국 아파트 실거래가 데이터셋',
+        description: `전국 ${totalProfiles.toLocaleString()}개 아파트 단지의 매매·전세·월세 실거래 데이터`,
+        url: `${SITE_URL}/apt/complex`,
+        creator: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+        keywords: ['아파트', '실거래가', '전세', '월세', '시세', '전세가율'],
+        spatialCoverage: { '@type': 'Place', name: '대한민국' },
+        temporalCoverage: '2023/2026',
+        dateModified: new Date().toISOString(),
+      })}} />
+      {/* JSON-LD: BreadcrumbList */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` },
+          { '@type': 'ListItem', position: 3, name: '단지백과' },
+        ],
+      })}} />
+      {/* JSON-LD: FAQPage */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: '단지백과란 무엇인가요?', acceptedAnswer: { '@type': 'Answer', text: `카더라 단지백과는 전국 ${totalProfiles.toLocaleString()}개 아파트 단지의 매매·전세·월세 시세를 입주 연차별로 비교할 수 있는 서비스입니다. 신축부터 30년+ 구축까지 7개 연차 그룹으로 분류합니다.` } },
+          { '@type': 'Question', name: '아파트 전세가율이란?', acceptedAnswer: { '@type': 'Answer', text: '전세가율은 아파트 매매가 대비 전세가의 비율입니다. 전세가율이 높을수록 갭투자 리스크가 높고, 낮을수록 매매 대비 전세가 저렴합니다. 일반적으로 50~70%가 안정적인 수준으로 봅니다.' } },
+          { '@type': 'Question', name: '입주 연차별 시세 차이는?', acceptedAnswer: { '@type': 'Answer', text: '일반적으로 15~20년차 아파트가 리모델링 기대감으로 시세가 높은 경우가 많고, 신축은 프리미엄이 붙어 높은 편입니다. 30년+ 구축은 재건축 기대감에 따라 시세가 크게 달라집니다.' } },
+        ],
       })}} />
 
       {/* 헤더 */}
@@ -92,7 +136,7 @@ export default async function ComplexPage() {
         </nav>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>🏢 단지백과</h1>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: 0 }}>
-          입주 연차별 아파트 종합 가이드 — {totalProfiles.toLocaleString()}개 단지 · {regionData.length}개 지역
+          전국 아파트 연차별 종합 가이드 — {totalProfiles.toLocaleString()}개 단지 · {regionData.length}개 지역
         </p>
       </div>
 
