@@ -203,6 +203,10 @@
 /* 가로 스크롤 스크롤바 숨기기 */
 .apt-pill-scroll::-webkit-scrollbar { display: none; }
 .apt-pill-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+/* 반응형 2단 그리드 */
+@media (max-width: 640px) {
+  .mc-g2 { grid-template-columns: 1fr !important; }
+}
 :root {
   --fs-xs: 13px;
   --fs-sm: 15px;

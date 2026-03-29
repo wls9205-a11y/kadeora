@@ -100,105 +100,143 @@ export default async function HotPage() {
     <HotClient>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"HOT 게시글","item":SITE_URL + "/hot"}]}) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"HOT 게시글은 어떤 기준으로 선정되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 HOT 게시글은 최근 7일간 좋아요, 댓글, 조회수를 종합하여 가장 인기 있는 글을 자동으로 선정합니다."}},{"@type":"Question","name":"카더라 커뮤니티에서 어떤 글을 쓸 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"주식 종목 분석, 부동산 청약 후기, 재테크 정보, 자유 토론 등 투자와 관련된 다양한 주제의 글을 자유롭게 작성할 수 있습니다."}}]}) }} />
+    {/* SEO 전용 히어로 이미지 — 시각적으로 숨김, 크롤러 인식용 */}
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    <img src={`/api/og?title=${encodeURIComponent('이번 주 HOT 게시글')}&design=2&category=free&subtitle=${encodeURIComponent('카더라 커뮤니티 인기글 TOP')}`} alt="카더라 이번 주 HOT 인기 게시글 — 주식 부동산 커뮤니티" width={1200} height={630} style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }} loading="lazy" />
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-          <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
-            <a href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</a>
-            <span>›</span>
-            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>HOT</span>
-          </nav>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/api/og?title=${encodeURIComponent('이번 주 HOT 게시글')}&design=2&category=free&subtitle=${encodeURIComponent('카더라 커뮤니티 인기글 TOP')}`} alt="카더라 이번 주 HOT 인기 게시글 — 주식 부동산 커뮤니티" width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
-          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔥 HOT 게시글</h1>
-          <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
+
+      {/* ── 헤더 ── */}
+      <div style={{ marginBottom: 14 }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+          <a href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</a>
+          <span>›</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>HOT</span>
+        </nav>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>🔥 이번 주 HOT</h1>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+              <time dateTime={new Date().toISOString()}>{dateRange}</time> · 좋아요 기준
+            </div>
+          </div>
           <SectionShareButton section="hot" label="이번 주 HOT 게시글 모음" pagePath="/hot" />
         </div>
-        <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{dateRange}</p>
       </div>
 
-      {/* 전국 TOP 5 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>전국 TOP 5</h2>
-        {(topPosts ?? []).length === 0 ? (
-          <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 20 }}>이번 주 데이터가 아직 없어요</p>
-        ) : (
-          (topPosts ?? []).map((post: any, i: number) => {
-              const isTop3 = i < 3;
-              return (
+      {/* ── 이번 주 요약 칩 ── */}
+      {(() => {
+        const totalLikes = (topPosts ?? []).reduce((s: number, p: any) => s + (p.likes_count ?? 0), 0);
+        const totalComments = (topPosts ?? []).reduce((s: number, p: any) => s + (p.comments_count ?? 0), 0);
+        return (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {[
+              { label: '게시글', value: `${(topPosts ?? []).length}편`, color: 'var(--brand)' },
+              { label: '총 좋아요', value: `${totalLikes}`, color: 'var(--accent-red)' },
+              { label: '총 댓글', value: `${totalComments}`, color: 'var(--accent-green)' },
+              { label: '블로그', value: `${(hotBlogs ?? []).length}편`, color: 'var(--accent-purple)' },
+            ].map(s => (
+              <div key={s.label} style={{ padding: '6px 12px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', flexShrink: 0, textAlign: 'center' }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
+      {/* ── 커뮤니티 TOP 5 + 블로그 HOT 5 — 2단 그리드 ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }} className="mc-g2">
+
+        {/* 커뮤니티 TOP 5 */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+          <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>💬 커뮤니티 TOP</h2>
+          {(topPosts ?? []).length === 0 ? (
+            <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 12, fontSize: 12 }}>이번 주 데이터가 아직 없어요</p>
+          ) : (
+            (topPosts ?? []).map((post: any, i: number) => (
               <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{
-                textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12,
-                padding: isTop3 ? '14px 12px' : '10px 4px',
+                textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6,
+                padding: '5px 0',
                 borderBottom: i < (topPosts?.length ?? 0) - 1 ? '1px solid var(--border)' : 'none',
-                background: isTop3 ? 'var(--brand-bg)' : 'transparent',
-                borderRadius: isTop3 ? 10 : 6,
-                marginBottom: isTop3 ? 4 : 0,
-                transition: 'background var(--transition-fast)',
               }}>
-                <span style={{ fontSize: isTop3 ? 24 : 18, width: 32, textAlign: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: i < 3 ? 15 : 12, width: 20, textAlign: 'center', flexShrink: 0 }}>
                   {MEDAL[i + 1] ?? `${i + 1}`}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: isTop3 ? 15 : 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                    {CATEGORY_LABEL[post.category] ?? ''} · {post.profiles?.nickname ?? '익명'}
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                    {post.profiles?.nickname ?? '익명'} · ❤{post.likes_count ?? 0} · 💬{post.comments_count ?? 0}
                   </div>
                 </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: isTop3 ? 14 : 12, color: 'var(--brand)', fontWeight: 700 }}>❤ {post.likes_count ?? 0}</div>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>💬 {post.comments_count ?? 0} · 👁 {post.view_count ?? 0}</div>
-                </div>
               </Link>
+            ))
+          )}
+        </div>
+
+        {/* 블로그 HOT 5 */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+          <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>📰 블로그 HOT</h2>
+          {(hotBlogs ?? []).length === 0 ? (
+            <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 12, fontSize: 12 }}>블로그 데이터 없음</p>
+          ) : (
+            (hotBlogs ?? []).map((b: any, i: number) => {
+              const catLabel: Record<string, string> = { stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' };
+              return (
+                <Link key={b.slug} href={`/blog/${b.slug}`} className="kd-feed-card" style={{
+                  textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '5px 0', color: 'inherit',
+                  borderBottom: i < (hotBlogs?.length ?? 0) - 1 ? '1px solid var(--border)' : 'none',
+                }}>
+                  <span style={{ fontSize: i < 3 ? 15 : 12, width: 20, textAlign: 'center', flexShrink: 0 }}>{MEDAL[i + 1] || `${i + 1}`}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                      {catLabel[b.category] || b.category} · 👀{b.view_count}
+                    </div>
+                  </div>
+                </Link>
               );
             })
-        )}
+          )}
+        </div>
       </div>
 
-      {/* 지역별 TOP 3 */}
-      {REGION_SECTIONS.map(region => {
-        const posts = regionPosts[region];
-        if (!posts || posts.length === 0) return null;
-        return (
-          <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📍 {region} TOP 3</h2>
-            {posts.map((post: any, i: number) => (
-                <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 4px', borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
-                  <span style={{ fontSize: 'var(--fs-xl)', width: 28, textAlign: 'center', flexShrink: 0 }}>
-                    {MEDAL[i + 1] ?? `${i + 1}`}
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{post.profiles?.nickname ?? '익명'}</div>
-                  </div>
-                  <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤ {post.likes_count ?? 0}</span>
-                </Link>
-              ))}
-          </div>
-        );
-      })}
-      {/* 블로그 HOT 5 */}
-      {(hotBlogs ?? []).length > 0 && (
-        <div style={{ marginTop: 24, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-          <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>📰 블로그 HOT 5</h2>
-          {(hotBlogs ?? []).map((b: any, i: number) => {
-            const catLabel: Record<string, string> = { stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' };
-            return (
-              <Link key={b.slug} href={`/blog/${b.slug}`} style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px',
-                borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit',
-              }}>
-                <span style={{ fontSize: 16, minWidth: 24, textAlign: 'center' }}>{MEDAL[i + 1] || `${i + 1}`}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                    {catLabel[b.category] || b.category} · 👀 {b.view_count}
-                  </div>
+      {/* ── 지역별 HOT (데이터 있는 지역만, 가로 스크롤) ── */}
+      {Object.keys(regionPosts).length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📍 지역별 HOT</h2>
+          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+            {REGION_SECTIONS.map(region => {
+              const posts = regionPosts[region];
+              if (!posts || posts.length === 0) return null;
+              return (
+                <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', minWidth: 220, flexShrink: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📍 {region}</div>
+                  {posts.map((post: any, i: number) => (
+                    <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{
+                      textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5,
+                      padding: '4px 0', color: 'inherit',
+                      borderBottom: i < posts.length - 1 ? '1px solid var(--border)' : 'none',
+                    }}>
+                      <span style={{ fontSize: 12, width: 18, textAlign: 'center', flexShrink: 0 }}>{MEDAL[i + 1]}</span>
+                      <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
+                      <span style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 700, flexShrink: 0 }}>❤{post.likes_count ?? 0}</span>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
+
+      {/* ── 하단 CTA ── */}
+      <div style={{ textAlign: 'center', padding: '16px 0 32px' }}>
+        <Link href="/feed" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+          📝 커뮤니티 전체 보기
+        </Link>
+      </div>
+
     </article>
     </HotClient>
   );
