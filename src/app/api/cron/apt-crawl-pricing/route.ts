@@ -31,7 +31,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
 
   const result = await withCronLogging('apt-crawl-pricing', async () => {
     const sb = getSupabaseAdmin();
-    const BATCH_SIZE = 50;
+    const BATCH_SIZE = 120;
 
     // 1. house_type_info가 비어있는 청약 레코드 조회
     const { data: targets } = await sb.from('apt_subscriptions')
@@ -129,8 +129,8 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         await sb.from('apt_subscriptions').update(updateData).eq('id', apt.id);
         updated++;
 
-        // API 부하 방지
-        await new Promise(r => setTimeout(r, 200));
+        // API 부하 방지 (최소 딜레이)
+        await new Promise(r => setTimeout(r, 50));
       } catch (e) {
         failed++;
         errors.push(`${apt.house_nm}: ${e instanceof Error ? e.message : 'unknown'}`);
