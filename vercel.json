@@ -218,7 +218,7 @@
     },
     {
       "path": "/api/cron/apt-backfill-details",
-      "schedule": "0 5 * * 3"
+      "schedule": "30 4 * * *"
     },
     {
       "path": "/api/cron/apt-crawl-pricing",
