@@ -1008,8 +1008,51 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* Transactions */}
       {trades.length > 0 && (
         <div className="apt-card"><h2 style={ct}>💰 실거래 이력 ({trades.length}건)</h2>
+          {/* 서버 렌더링 통계 요약 (차트 로드 전 즉시 표시) */}
+          {(() => {
+            const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
+            if (amounts.length < 2) return null;
+            const avg = Math.round(amounts.reduce((s: number, a: number) => s + a, 0) / amounts.length);
+            const mx = Math.max(...amounts);
+            const mn = Math.min(...amounts);
+            const latest = amounts[0] || 0;
+            const trend = latest > avg ? '↑' : latest < avg ? '↓' : '→';
+            const tColor = latest > avg ? '#34D399' : latest < avg ? '#F87171' : 'var(--text-tertiary)';
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 4, marginBottom: 10 }}>
+                {[
+                  { label: '최근', value: fmtAmount(latest), color: tColor, sub: trend },
+                  { label: '평균', value: fmtAmount(avg), color: 'var(--brand)', sub: '' },
+                  { label: '최저', value: fmtAmount(mn), color: '#34D399', sub: '' },
+                  { label: '최고', value: fmtAmount(mx), color: '#F87171', sub: '' },
+                ].map(s => (
+                  <div key={s.label} style={{ background: 'var(--bg-hover)', borderRadius: 6, padding: '5px 6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: s.color }}>{s.value}{s.sub && <span style={{ marginLeft: 2 }}>{s.sub}</span>}</div>
+                    <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
           <AptPriceTrendChart aptName={name} region={region} />
-          {trades.slice(0, 10).map((t: Record<string, any>, i: number) => <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: i < Math.min(trades.length, 10) - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)', gap: 6 }}><div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span style={{ color: 'var(--text-tertiary)' }}>{t.deal_date}</span><span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{t.exclusive_area}㎡ · {t.floor}층</span></div><span style={{ fontWeight: 700, flexShrink: 0, color: t.deal_amount >= 100000 ? 'var(--accent-red)' : t.deal_amount >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)' }}>{fmtAmount(t.deal_amount)}</span></div>)}
+          {(() => {
+            const tradeAmts = trades.slice(0, 10).map((t: any) => Number(t.deal_amount));
+            const tradeMax = Math.max(...tradeAmts.filter((a: number) => a > 0), 1);
+            return trades.slice(0, 10).map((t: Record<string, any>, i: number) => (
+              <div key={t.id || i} style={{ display: 'flex', alignItems: 'center', padding: '6px 0', borderBottom: i < Math.min(trades.length, 10) - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)', gap: 6 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 2 }}>
+                    <span style={{ color: 'var(--text-tertiary)', fontSize: 11 }}>{t.deal_date}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>{t.exclusive_area}㎡ · {t.floor}층</span>
+                  </div>
+                  <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${tradeMax > 0 ? (Number(t.deal_amount) / tradeMax) * 100 : 0}%`, borderRadius: 2, background: t.deal_amount >= 100000 ? 'rgba(248,113,113,0.5)' : t.deal_amount >= 50000 ? 'rgba(251,146,60,0.5)' : 'rgba(52,211,153,0.5)' }} />
+                  </div>
+                </div>
+                <span style={{ fontWeight: 700, flexShrink: 0, color: t.deal_amount >= 100000 ? 'var(--accent-red)' : t.deal_amount >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)', minWidth: 48, textAlign: 'right' }}>{fmtAmount(t.deal_amount)}</span>
+              </div>
+            ));
+          })()}
           <Link href={`/apt/complex/${encodeURIComponent(name)}`} style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px 0', borderRadius: 8, background: 'var(--brand-bg)', color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>전체 실거래 내역 보기 →</Link>
         </div>
       )}
