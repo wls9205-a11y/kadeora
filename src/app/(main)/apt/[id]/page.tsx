@@ -182,11 +182,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const units = d.site?.total_units || d.sub?.tot_supply_hshld_co;
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
-    const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 청약일정, 실거래가, 주민리뷰까지 한눈에.`.trim();
+    const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 청약일정, 분양가, 실거래가, 주민리뷰까지 한눈에.`.trim();
     const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent(d.name)}&design=2&subtitle=${encodeURIComponent(`${d.region} ${d.site?.sigungu || ''} · ${uStr} ${builder}`.trim())}`;
 
     return {
-      title, description: desc,
+      title: `${title} | 모집공고 요약`, description: desc,
       alternates: { canonical: `${SITE_URL}/apt/${resolved.slug}` },
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
       openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }] },
@@ -195,7 +195,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',
         'article:modified_time': d.site?.updated_at || new Date().toISOString(),
         'article:section': '부동산',
-        'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가,아파트`,
+        'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가,아파트,모집공고,입주자모집공고`,
         // Kakao/Facebook price display
         ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min), 'og:price:currency': 'KRW' } : {}),
         // Naver specific
@@ -273,6 +273,8 @@ export default async function AptUnifiedPage({ params }: Props) {
     ...(sub?.rcept_bgnde ? [{ q: `${name} 청약 일정은 언제인가요?`, a: `${name}의 청약 접수 기간은 ${sub.rcept_bgnde} ~ ${sub.rcept_endde || ''}입니다. ${sub.przwner_presnatn_de ? `당첨자 발표일은 ${sub.przwner_presnatn_de}입니다.` : ''} ${sub.mvn_prearnge_ym ? `입주 예정은 ${fmtYM(sub.mvn_prearnge_ym)}입니다.` : ''}` }] : []),
     { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} 총 ${site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대 규모입니다.` },
     ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다. 타입별 상세 분양가는 청약홈에서 확인할 수 있습니다.` }] : []),
+    ...(sub ? [{ q: `${name} 모집공고 핵심 내용은 무엇인가요?`, a: `${name}의 입주자모집공고 핵심 내용: ${sub.is_price_limit ? '분양가상한제 적용, ' : ''}${sub.constructor_nm || site?.builder ? `시공사 ${sub.constructor_nm || site?.builder}, ` : ''}총 ${sub.tot_supply_hshld_co || site?.total_units || '미정'}세대 공급. ${sub.mvn_prearnge_ym ? `입주 예정 ${fmtYM(sub.mvn_prearnge_ym)}.` : ''} 카더라에서 모집공고 핵심 요약을 확인하세요.` }] : []),
+    ...(sub?.is_price_limit !== undefined ? [{ q: `${name}은 분양가상한제 적용 현장인가요?`, a: `${name}은(는) 분양가상한제 ${sub.is_price_limit ? '적용 현장입니다. 분양가상한제 적용 시 전매제한 및 거주의무 등의 규제가 적용될 수 있습니다.' : '미적용 현장입니다.'}` }] : []),
   ].filter(f => f.a.trim().length > 10);
   const redevStage = (site?.source_ids as Record<string, string>)?.redev_stage || redev?.stage;
   const noindex = site ? (site.content_score ?? 0) < 40 : false;
@@ -418,8 +420,10 @@ export default async function AptUnifiedPage({ params }: Props) {
           {sub?.rcept_bgnde && <> 청약 접수일은 {sub.rcept_bgnde}이며,</>}
           {sub?.mvn_prearnge_ym && <> 입주 예정일은 {fmtYM(sub.mvn_prearnge_ym)}입니다.</>}
           {(site?.price_min || site?.price_max) && <> 분양가는 {site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}{site?.price_min && site?.price_max ? ' ~ ' : ''}{site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다.</>}
+          {sub?.is_price_limit && <> 본 현장은 분양가상한제 적용 현장입니다.</>}
           {(site?.nearby_station || sub?.nearest_station) && <> 최근접 역은 {site?.nearby_station || sub?.nearest_station}입니다.</>}
           {(site?.school_district || sub?.nearest_school) && <> 학군은 {site?.school_district || sub?.nearest_school} 인근입니다.</>}
+          {sub && <> 입주자모집공고 핵심 요약, 청약 자격 조건, 분양 일정을 카더라에서 확인하세요.</>}
         </p>
         {site?.description && site.description !== `${region} ${name}` && (
           <p style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.65, margin: '8px 0 0', wordBreak: 'keep-all' }}>
