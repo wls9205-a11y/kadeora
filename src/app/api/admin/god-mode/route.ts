@@ -5,14 +5,20 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 export const maxDuration = 300; // 5분
 
 /* ═══════════════════════════════════════════════════════════
-   🚀 GOD MODE API - 모든 크론을 최대 병렬로 실행
+   🚀 GOD MODE API v2 — Phase 순차 + Fire-and-Forget
    POST /api/admin/god-mode
-   body: { mode: 'full' | 'data' | 'content' | 'system' | 'failed' }
+   body: { mode: 'full' | 'data' | 'process' | 'ai' | 'content' | 'system' | 'failed' | 'single' }
+   
+   full 모드 실행 전략:
+   - Phase 1~2 (data/process): 병렬 + 응답 대기 (30s)
+   - Phase 3~4 (ai/content): Fire-and-Forget (요청만 보내고 응답 안 기다림)
+   - Phase 5 (system): 병렬 + 응답 대기 (30s)
+   
+   이유: Sonnet 크론은 180s 소요 → 300s GOD MODE 안에 대기 불가
+   cron_logs DB에 결과가 기록되므로 응답 대기 불필요
 ═══════════════════════════════════════════════════════════ */
 
-// 크론 그룹별 정의 (의존성 고려한 실행 순서)
 const CRON_GROUPS = {
-  // Phase 1: 데이터 수집 (가장 먼저, 독립적)
   data: [
     '/api/cron/crawl-apt-subscription',
     '/api/cron/crawl-apt-trade',
@@ -23,15 +29,14 @@ const CRON_GROUPS = {
     '/api/cron/crawl-busan-redev',
     '/api/cron/crawl-gyeonggi-redev',
     '/api/cron/crawl-nationwide-redev',
-    '/api/stock-refresh',           // ⚠️ /api/cron 아님 — Naver/Yahoo 시세
-    '/api/cron/stock-crawl',        // data.go.kr 종가 수집
+    '/api/stock-refresh',
+    '/api/cron/stock-crawl',
     '/api/cron/exchange-rate',
     '/api/cron/stock-news-crawl',
     '/api/cron/stock-flow-crawl',
     '/api/cron/stock-price',
     '/api/cron/invest-calendar-refresh',
   ],
-  // Phase 2: 데이터 가공 (수집 후)
   process: [
     '/api/cron/aggregate-trade-stats',
     '/api/cron/sync-apt-sites',
@@ -42,7 +47,6 @@ const CRON_GROUPS = {
     '/api/cron/apt-crawl-pricing',
     '/api/cron/apt-price-sync',
   ],
-  // Phase 3: AI 생성 (가공 후)
   ai: [
     '/api/cron/apt-ai-summary',
     '/api/cron/stock-daily-briefing',
@@ -52,7 +56,6 @@ const CRON_GROUPS = {
     '/api/cron/collect-site-facilities',
     '/api/cron/blog-rewrite',
   ],
-  // Phase 4: 콘텐츠 생성
   content: [
     '/api/cron/seed-posts',
     '/api/cron/seed-comments',
@@ -91,7 +94,6 @@ const CRON_GROUPS = {
     '/api/cron/blog-unsold-trend',
     '/api/cron/blog-builder-analysis',
   ],
-  // Phase 5: 시스템 작업 (마지막)
   system: [
     '/api/cron/health-check',
     '/api/cron/daily-stats',
@@ -100,7 +102,7 @@ const CRON_GROUPS = {
     '/api/cron/cleanup',
     '/api/cron/cleanup-pageviews',
     '/api/cron/purge-withdrawn-consents',
-    '/api/indexnow',                // ⚠️ /api/cron 아님
+    '/api/indexnow',
     '/api/cron/expire-listings',
     '/api/cron/refresh-trending',
     '/api/cron/check-price-alerts',
@@ -111,7 +113,6 @@ const CRON_GROUPS = {
   ],
 };
 
-// 전체 크론 리스트
 const ALL_CRONS = [
   ...CRON_GROUPS.data,
   ...CRON_GROUPS.process,
@@ -120,187 +121,199 @@ const ALL_CRONS = [
   ...CRON_GROUPS.system,
 ];
 
+// Fire-and-forget 대상 phase (Sonnet AI 호출 → 180s+ 소요)
+const FIRE_AND_FORGET_PHASES = new Set(['ai', 'content']);
+
 interface CronResult {
   endpoint: string;
   name: string;
   ok: boolean;
   status: number;
   duration: number;
+  phase: string;
   error?: string;
 }
 
-// 크론 이름 추출
 const getName = (ep: string) => ep.split('/').pop() || ep;
 
-// 단일 크론 실행
-async function runCron(endpoint: string, baseUrl: string, cronSecret: string | undefined, timeoutMs = 60000): Promise<CronResult> {
+// 단일 크론 실행 (응답 대기)
+async function runCron(
+  endpoint: string, baseUrl: string, cronSecret: string | undefined, 
+  timeoutMs: number, phase: string
+): Promise<CronResult> {
   const start = Date.now();
   const name = getName(endpoint);
-  
   try {
     const res = await fetch(`${baseUrl}${endpoint}`, {
       method: 'GET',
       headers: cronSecret ? { 'Authorization': `Bearer ${cronSecret}` } : {},
       signal: AbortSignal.timeout(timeoutMs),
     });
-    
-    return {
-      endpoint,
-      name,
-      ok: res.ok,
-      status: res.status,
-      duration: Date.now() - start,
-    };
+    return { endpoint, name, ok: res.ok, status: res.status, duration: Date.now() - start, phase };
   } catch (e: unknown) {
-    const error = e instanceof Error ? errMsg(e) : 'Unknown error';
-    return {
-      endpoint,
-      name,
-      ok: false,
-      status: 0,
-      duration: Date.now() - start,
-      error,
-    };
+    return { endpoint, name, ok: false, status: 0, duration: Date.now() - start, phase, error: errMsg(e) };
   }
 }
 
-// 배치 병렬 실행 (동시 20개, 타임아웃 단축)
-async function runBatch(
+// Fire-and-forget: 요청만 보내고 즉시 반환 (Vercel 함수는 백그라운드 실행)
+function fireAndForget(
+  endpoint: string, baseUrl: string, cronSecret: string | undefined, phase: string
+): CronResult {
+  // fetch를 보내되 await 하지 않음 — Vercel serverless는 caller와 독립 실행
+  fetch(`${baseUrl}${endpoint}`, {
+    method: 'GET',
+    headers: cronSecret ? { 'Authorization': `Bearer ${cronSecret}` } : {},
+  }).catch(() => { /* fire-and-forget: 에러 무시 */ });
+
+  return {
+    endpoint,
+    name: getName(endpoint),
+    ok: true,
+    status: 202, // Accepted (dispatched)
+    duration: 0,
+    phase,
+  };
+}
+
+// Phase별 타임아웃 설정
+const PHASE_TIMEOUTS: Record<string, number> = {
+  data: 30000,     // 30s — 외부 API 호출
+  process: 120000, // 120s — geocode, pricing 등 오래 걸림
+  ai: 0,           // fire-and-forget
+  content: 0,      // fire-and-forget
+  system: 30000,   // 30s — 내부 작업
+};
+
+// Phase 실행 (대기 또는 fire-and-forget)
+async function runPhase(
+  phaseName: string,
   endpoints: string[],
   baseUrl: string,
   cronSecret: string | undefined,
-  batchSize = 20,
-  timeoutMs = 60000
+  isFireAndForget: boolean,
 ): Promise<CronResult[]> {
+  if (isFireAndForget) {
+    // Fire-and-forget: 모든 요청을 즉시 발사
+    return endpoints.map(ep => fireAndForget(ep, baseUrl, cronSecret, phaseName));
+  }
+
+  // 대기 모드: 배치 병렬 (20개씩)
   const results: CronResult[] = [];
-  
+  const timeoutMs = PHASE_TIMEOUTS[phaseName] || 45000;
+  const batchSize = 20;
+
   for (let i = 0; i < endpoints.length; i += batchSize) {
     const batch = endpoints.slice(i, i + batchSize);
     const batchResults = await Promise.allSettled(
-      batch.map(ep => runCron(ep, baseUrl, cronSecret, timeoutMs))
+      batch.map(ep => runCron(ep, baseUrl, cronSecret, timeoutMs, phaseName))
     );
-    
     for (let j = 0; j < batchResults.length; j++) {
       const r = batchResults[j];
       if (r.status === 'fulfilled') {
         results.push(r.value);
       } else {
         results.push({
-          endpoint: batch[j] || '',
-          name: getName(batch[j] || ''),
-          ok: false,
-          status: 0,
-          duration: 0,
+          endpoint: batch[j] || '', name: getName(batch[j] || ''),
+          ok: false, status: 0, duration: 0, phase: phaseName,
           error: r.reason?.message || 'Promise rejected',
         });
       }
     }
   }
-  
   return results;
 }
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
-    // 1. 관리자 인증
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
     if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-    // 2. 모드 파싱
     const { mode = 'full', failedOnly = [], endpoint = '' } = await req.json();
-    
     const requestUrl = new URL(req.url);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${requestUrl.protocol}//${requestUrl.host}`;
     const cronSecret = process.env.CRON_SECRET;
 
-    let endpoints: string[] = [];
-    
-    switch (mode) {
-      case 'single':
-        // 단일 크론 실행
-        if (endpoint && typeof endpoint === 'string') endpoints = [endpoint];
-        break;
-      case 'data':
-        endpoints = CRON_GROUPS.data;
-        break;
-      case 'process':
-        endpoints = CRON_GROUPS.process;
-        break;
-      case 'ai':
-        endpoints = CRON_GROUPS.ai;
-        break;
-      case 'content':
-        endpoints = CRON_GROUPS.content;
-        break;
-      case 'system':
-        endpoints = CRON_GROUPS.system;
-        break;
-      case 'failed':
-        // 실패한 것만 재실행
-        endpoints = failedOnly.filter((ep: string) => ALL_CRONS.includes(ep));
-        break;
-      case 'full':
-      default:
-        endpoints = ALL_CRONS;
-        break;
+    let allResults: CronResult[] = [];
+
+    if (mode === 'single' && endpoint) {
+      // 단일 크론
+      const result = await runCron(endpoint, baseUrl, cronSecret, 180000, 'single');
+      allResults = [result];
+    } else if (mode === 'failed' && failedOnly.length > 0) {
+      // 실패 재시도
+      const valid = failedOnly.filter((ep: string) => ALL_CRONS.includes(ep));
+      const results = await Promise.allSettled(
+        valid.map((ep: string) => runCron(ep, baseUrl, cronSecret, 120000, 'retry'))
+      );
+      allResults = results.map((r, i) =>
+        r.status === 'fulfilled' ? r.value : {
+          endpoint: valid[i], name: getName(valid[i]),
+          ok: false, status: 0, duration: 0, phase: 'retry',
+          error: r.reason?.message,
+        }
+      );
+    } else if (mode === 'full') {
+      // ★ 전체 실행: Phase 순차 (data→process→[ai+content fire]→system)
+      const phases: [string, string[]][] = [
+        ['data', CRON_GROUPS.data],
+        ['process', CRON_GROUPS.process],
+        ['ai', CRON_GROUPS.ai],
+        ['content', CRON_GROUPS.content],
+        ['system', CRON_GROUPS.system],
+      ];
+
+      for (const [phaseName, endpoints] of phases) {
+        const isFF = FIRE_AND_FORGET_PHASES.has(phaseName);
+        const results = await runPhase(phaseName, endpoints, baseUrl, cronSecret, isFF);
+        allResults.push(...results);
+      }
+    } else {
+      // 개별 phase
+      const phaseEndpoints = CRON_GROUPS[mode as keyof typeof CRON_GROUPS];
+      if (phaseEndpoints) {
+        const isFF = FIRE_AND_FORGET_PHASES.has(mode);
+        allResults = await runPhase(mode, phaseEndpoints, baseUrl, cronSecret, isFF);
+      }
     }
 
-    if (endpoints.length === 0) {
-      return NextResponse.json({ 
-        ok: true, 
-        mode, 
-        results: [], 
-        summary: { total: 0, success: 0, failed: 0 },
-        duration: Date.now() - startTime 
-      });
-    }
-
-    // 3. 병렬 실행 (20개씩, 전체실행 시 빠른 타임아웃)
-    const batchSize = mode === 'full' ? 20 : 15;
-    const timeoutMs = mode === 'full' ? 45000 : 60000;
-    const results = await runBatch(endpoints, baseUrl, cronSecret, batchSize, timeoutMs);
-
-    // 4. 결과 집계
-    const success = results.filter(r => r.ok).length;
-    const failed = results.filter(r => !r.ok).length;
-    const failedList = results.filter(r => !r.ok).map(r => r.endpoint);
+    const success = allResults.filter(r => r.ok).length;
+    const failed = allResults.filter(r => !r.ok).length;
+    const dispatched = allResults.filter(r => r.status === 202).length;
+    const failedList = allResults.filter(r => !r.ok).map(r => r.endpoint);
     const totalDuration = Date.now() - startTime;
-    const avgDuration = Math.round(results.reduce((sum, r) => sum + r.duration, 0) / results.length);
 
-    // 5. 로그 기록
+    // 로그 기록
     await supabase.from('admin_alerts').insert({
       type: 'god_mode',
       severity: failed > 0 ? 'warning' : 'info',
-      title: `🚀 GOD MODE: ${success}/${results.length} 성공`,
-      message: `모드: ${mode}, 총 ${totalDuration}ms (평균 ${avgDuration}ms/건)`,
+      title: `🚀 GOD MODE: ${success}/${allResults.length} (${dispatched} dispatched)`,
+      message: `모드: ${mode}, 총 ${totalDuration}ms`,
       is_read: false,
-    });
+    }).catch(() => {});
 
     return NextResponse.json({
       ok: failed === 0,
       mode,
       summary: {
-        total: results.length,
+        total: allResults.length,
         success,
         failed,
+        dispatched,  // fire-and-forget로 보낸 건수
         duration: totalDuration,
-        avgDuration,
       },
-      results,
+      results: allResults,
       failedList,
     });
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ 
-      error: message,
-      duration: Date.now() - startTime 
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+      duration: Date.now() - startTime,
     }, { status: 500 });
   }
 }
@@ -311,18 +324,15 @@ export async function GET(req: NextRequest) {
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
     if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-    // 최근 크론 상태 조회
     const { data: recentLogs } = await supabase
       .from('cron_logs')
       .select('cron_name, status, started_at, duration_ms, error_message')
       .order('started_at', { ascending: false })
       .limit(200);
 
-    // 크론별 최신 상태 집계
     const cronStatus = new Map<string, { status: string; lastRun: string; duration: number; error?: string }>();
     for (const log of recentLogs || []) {
       if (!cronStatus.has(log.cron_name)) {
@@ -335,29 +345,20 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 건강 상태 계산
     const total = ALL_CRONS.length;
     const healthy = Array.from(cronStatus.values()).filter(s => s.status === 'success').length;
     const failed = Array.from(cronStatus.values()).filter(s => s.status === 'failed' || s.status === 'error').length;
-    const stale = total - cronStatus.size; // 실행 기록 없음
+    const stale = total - cronStatus.size;
 
     return NextResponse.json({
       ok: true,
-      health: {
-        total,
-        healthy,
-        failed,
-        stale,
-        score: Math.round((healthy / total) * 100),
-      },
+      health: { total, healthy, failed, stale, score: Math.round((healthy / total) * 100) },
       cronStatus: Object.fromEntries(cronStatus),
       failedCrons: Array.from(cronStatus.entries())
         .filter(([, s]) => s.status === 'failed' || s.status === 'error')
         .map(([name, s]) => ({ name, ...s })),
     });
-
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

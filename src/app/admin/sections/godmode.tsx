@@ -61,22 +61,23 @@ export default function GodModeSection() {
   };
 
   const modes = [
-    { key: 'full', label: '⚡ 전체 실행', desc: '57개 전 크론', color: C.brand },
-    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식/재개발 15개', color: C.green },
-    { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/테마/검증 6개', color: C.cyan },
-    { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드/리라이트 6개', color: C.purple },
-    { key: 'content', label: '📝 콘텐츠', desc: '시드/블로그/채팅 17개', color: C.yellow },
+    { key: 'full', label: '⚡ 전체 실행', desc: 'Phase 순차 — 80개 전 크론', color: C.brand },
+    { key: 'data', label: '📊 데이터 수집', desc: '청약/실거래/주식/재개발 16개', color: C.green },
+    { key: 'process', label: '⚙️ 데이터 가공', desc: '집계/싱크/테마/검증/좌표 8개', color: C.cyan },
+    { key: 'ai', label: '🤖 AI 생성', desc: '요약/이미지/트렌드 7개 (fire&forget)', color: C.purple },
+    { key: 'content', label: '📝 콘텐츠', desc: '블로그/시드 34개 (fire&forget)', color: C.yellow },
     { key: 'system', label: '🔧 시스템', desc: '헬스/통계/알림/정리 15개', color: C.textSec },
     { key: 'failed', label: '🔴 실패 재시도', desc: '실패한 것만', color: C.red },
   ];
 
   const successCount = results.filter(r => r.ok).length;
   const failCount = results.filter(r => !r.ok).length;
+  const dispatchedCount = results.filter(r => (r.status as number) === 202).length;
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 8px' }}>⚡ GOD MODE</h1>
-      <p style={{ fontSize: 13, color: C.textDim, margin: '0 0 24px' }}>병렬 10x 실행 — 전체 시스템을 원클릭으로 갱신</p>
+      <p style={{ fontSize: 13, color: C.textDim, margin: '0 0 24px' }}>Phase 순차 실행 — AI/콘텐츠는 Fire&amp;Forget (백그라운드 실행)</p>
 
       {/* Mode Buttons */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 24 }}>
@@ -107,16 +108,20 @@ export default function GodModeSection() {
       {results.length > 0 && (
         <>
           <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-            <KPICard icon="✅" label="성공" value={successCount} color={C.green} />
+            <KPICard icon="✅" label="성공" value={successCount - dispatchedCount} color={C.green} />
+            <KPICard icon="🚀" label="Dispatched" value={dispatchedCount} color={C.purple} />
             <KPICard icon="❌" label="실패" value={failCount} color={C.red} />
             <KPICard icon="⏱" label="소요시간" value={`${(elapsed / 1000).toFixed(1)}s`} color={C.brand} />
           </div>
           <DataTable
-            headers={['크론', '상태', 'HTTP', '소요시간', '에러']}
+            headers={['크론', 'Phase', '상태', 'HTTP', '소요시간', '에러']}
             rows={results.map(r => [
               <span key="n" style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{r.name as string}</span>,
-              r.ok ? <Badge key="s" color={C.green}>✓ OK</Badge> : <Badge key="s" color={C.red}>✗ FAIL</Badge>,
-              r.status ? <span key="h" style={{ color: (r.status as number) >= 400 ? C.red : (r.status as number) >= 200 ? C.green : C.textDim, fontFamily: 'monospace', fontSize: 12 }}>{r.status as number}</span> : '—',
+              <span key="p" style={{ fontSize: 11, color: C.textDim }}>{(r as Record<string, unknown>).phase as string || '—'}</span>,
+              (r.status as number) === 202
+                ? <Badge key="s" color={C.purple}>🚀 SENT</Badge>
+                : r.ok ? <Badge key="s" color={C.green}>✓ OK</Badge> : <Badge key="s" color={C.red}>✗ FAIL</Badge>,
+              r.status ? <span key="h" style={{ color: (r.status as number) === 202 ? C.purple : (r.status as number) >= 400 ? C.red : (r.status as number) >= 200 ? C.green : C.textDim, fontFamily: 'monospace', fontSize: 12 }}>{r.status as number}</span> : '—',
               r.duration ? `${((r.duration as number) / 1000).toFixed(1)}s` : '—',
               r.error ? <span key="e" style={{ color: C.red, fontSize: 11, maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block' }}>{r.error as string}</span> : '—',
             ])}
