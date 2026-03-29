@@ -170,8 +170,6 @@ export default async function ComplexDetailPage({ params }: Props) {
   });
   const monthlyTrend = [...yearMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([ym, d]) => ({ ym, avg: Math.round(d.sum / d.cnt), cnt: d.cnt }));
 
-  const card = 'kd-card';
-
   const builtYear = trades[0]?.built_year || profile?.built_year || 0;
   const hasCoords = profile?.latitude && profile?.longitude;
 
@@ -259,24 +257,64 @@ export default async function ComplexDetailPage({ params }: Props) {
         </p>
       </section>
 
-      {/* 요약 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
-        {[
-          { label: '최근 매매', value: fmtAmount(latestPrice), color: 'var(--text-primary)' },
-          { label: '평균 매매', value: fmtAmount(avgPrice), color: 'var(--brand)' },
-          { label: '전세', value: latestJeonse ? fmtAmount(latestJeonse.deposit) : '—', color: 'var(--accent-blue)' },
-          { label: '월세', value: latestMonthly ? `${fmtAmount(latestMonthly.deposit)}/${latestMonthly.monthly_rent}만` : '—', color: 'var(--accent-orange)' },
-          { label: '전세가율', value: jeonseRatio ? `${jeonseRatio}%` : '—', color: jeonseRatio && jeonseRatio > 70 ? 'var(--accent-red)' : 'var(--accent-green)' },
-          { label: '최고가', value: fmtAmount(maxPrice), color: 'var(--accent-red)' },
-        ].map(s => (
-          <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.label}</div>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: s.color }}>{s.value}</div>
+      {/* ═══ 핵심 시세 요약 — 히어로 카드 ═══ */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16,
+      }}>
+        {/* 매매 메인 카드 */}
+        <div style={{
+          gridColumn: '1 / -1', borderRadius: 14, padding: '18px 20px',
+          background: 'linear-gradient(135deg, rgba(15,27,62,0.95) 0%, rgba(37,99,235,0.85) 100%)',
+          border: '1px solid rgba(59,123,246,0.2)', position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position: 'absolute', top: -30, right: -30, width: 100, height: 100, borderRadius: '50%', background: 'rgba(59,123,246,0.15)' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+            <div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: 4 }}>최근 매매가</div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', lineHeight: 1.1 }}>{fmtAmount(latestPrice)}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>평균 {fmtAmount(avgPrice)} · 최고 {fmtAmount(maxPrice)}</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              {jeonseRatio && (
+                <div style={{
+                  background: jeonseRatio > 80 ? 'rgba(239,68,68,0.2)' : jeonseRatio > 60 ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)',
+                  color: jeonseRatio > 80 ? '#fca5a5' : jeonseRatio > 60 ? '#fde047' : '#86efac',
+                  padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 800, display: 'inline-block',
+                }}>전세가율 {jeonseRatio}%</div>
+              )}
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>거래 {trades.length}건</div>
+            </div>
           </div>
-        ))}
+        </div>
+
+        {/* 전세 카드 */}
+        <div style={{
+          borderRadius: 12, padding: '14px 16px',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderLeft: '3px solid #3b82f6',
+        }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>💙 전세</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#3b82f6' }}>
+            {latestJeonse ? fmtAmount(latestJeonse.deposit) : '—'}
+          </div>
+          {latestJeonse && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{latestJeonse.exclusive_area}㎡ · {latestJeonse.deal_date}</div>}
+        </div>
+
+        {/* 월세 카드 */}
+        <div style={{
+          borderRadius: 12, padding: '14px 16px',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderLeft: '3px solid #f97316',
+        }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>🧡 월세</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#f97316' }}>
+            {latestMonthly ? `${latestMonthly.monthly_rent}만` : '—'}
+          </div>
+          {latestMonthly && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>보증 {fmtAmount(latestMonthly.deposit)}</div>}
+        </div>
       </div>
 
-      {/* 📈 월별 평균 시세 추이 — 서버 렌더링 SVG */}
+      {/* 📈 월별 시세 추이 — 향상된 SVG */}
       {monthlyTrend.length >= 3 && (() => {
         const data = monthlyTrend.slice(-12);
         const maxVal = Math.max(...data.map(d => d.avg));
@@ -287,61 +325,91 @@ export default async function ComplexDetailPage({ params }: Props) {
         const lastAvg = data[data.length - 1].avg;
         const firstAvg = data[0].avg;
         const trendPct = Math.round(((lastAvg - firstAvg) / firstAvg) * 100);
+        const isUp = trendPct >= 0;
+        const color = isUp ? '#ef4444' : '#3b82f6';
         return (
-          <div className={card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: trendPct > 0 ? '#F87171' : trendPct < 0 ? '#60A5FA' : 'var(--text-tertiary)', background: trendPct > 0 ? 'rgba(248,113,113,0.1)' : trendPct < 0 ? 'rgba(96,165,250,0.1)' : 'var(--bg-hover)', padding: '2px 8px', borderRadius: 6 }}>
-                {trendPct > 0 ? '▲' : trendPct < 0 ? '▼' : '━'} {Math.abs(trendPct)}% ({data.length}개월)
-              </span>
+          <div style={{
+            borderRadius: 14, padding: '18px 20px', marginBottom: 16,
+            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
+              <div style={{
+                fontSize: 12, fontWeight: 800, color,
+                background: `${color}15`, padding: '4px 12px', borderRadius: 8,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                <span style={{ fontSize: 14 }}>{isUp ? '▲' : '▼'}</span>
+                {Math.abs(trendPct)}%
+                <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.7 }}>({data.length}개월)</span>
+              </div>
             </div>
-            <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 80 }} preserveAspectRatio="none">
-              <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={trendPct >= 0 ? '#F87171' : '#60A5FA'} stopOpacity="0.2" /><stop offset="100%" stopColor={trendPct >= 0 ? '#F87171' : '#60A5FA'} stopOpacity="0" /></linearGradient></defs>
+            <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 100 }} preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                  <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+                </linearGradient>
+              </defs>
               <polygon points={`0,${h} ${pts} ${w},${h}`} fill="url(#trendFill)" />
-              <polyline points={pts} fill="none" stroke={trendPct >= 0 ? '#F87171' : '#60A5FA'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              {/* 최근값 점 */}
+              {(() => {
+                const lastPt = pts.split(' ').pop()?.split(',') || ['100','20'];
+                return <circle cx={lastPt[0]} cy={lastPt[1]} r="2.5" fill={color} stroke="#fff" strokeWidth="1" />;
+              })()}
             </svg>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
-              <span>{data[0].ym}</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>최근 {fmtAmount(lastAvg)}</span>
-              <span>{data[data.length - 1].ym}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, marginTop: 6 }}>
+              <span style={{ color: 'var(--text-tertiary)' }}>{data[0].ym}</span>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <span style={{ color: 'var(--text-tertiary)' }}>최저 {fmtAmount(minVal)}</span>
+                <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>최근 {fmtAmount(lastAvg)}</span>
+              </div>
+              <span style={{ color: 'var(--text-tertiary)' }}>{data[data.length - 1].ym}</span>
             </div>
           </div>
         );
       })()}
 
-      {/* 면적별 비교 */}
+      {/* 📐 면적별 비교 — 그라데이션 바 + 카드 */}
       {areaStats.length > 1 && (() => {
         const maxAvg = Math.max(...areaStats.map(a => a.avg));
+        const colors = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#ec4899','#10b981','#6366f1'];
         return (
-        <div className={card}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, margin: '0 0 12px' }}>📐 면적별 비교</h2>
-          {/* 수평 바 차트 */}
-          <div style={{ marginBottom: 12 }}>
-            {areaStats.slice(0, 6).map((a, i) => (
-              <div key={a.area} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', minWidth: 42 }}>{a.area}</span>
-                <div style={{ flex: 1, height: 18, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
-                  <div style={{ height: '100%', width: `${maxAvg > 0 ? (a.avg / maxAvg) * 100 : 0}%`, borderRadius: 4, background: `hsl(${210 + i * 15}, 65%, ${55 + i * 3}%)` }} />
-                  <span style={{ position: 'absolute', right: 6, top: 2, fontSize: 10, fontWeight: 600, color: 'var(--text-primary)' }}>{fmtAmount(a.avg)}</span>
-                </div>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 24, textAlign: 'right' }}>{a.count}건</span>
-              </div>
-            ))}
-          </div>
-          {/* 카드 그리드 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
-            {areaStats.slice(0, 8).map(a => (
-              <div key={a.area} style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 12px' }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{a.area}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>평균 {fmtAmount(a.avg)}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.count}건</div>
-                {a.trades[0]?.exclusive_area > 0 && a.avg > 0 && (
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue)', fontWeight: 600, marginTop: 2 }}>
-                    평당 {fmtAmount(Math.round(a.avg / (a.trades[0].exclusive_area / 3.3058)))}
+        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 14px' }}>📐 면적별 비교</h2>
+          <div style={{ marginBottom: 14 }}>
+            {areaStats.slice(0, 6).map((a, i) => {
+              const pct = maxAvg > 0 ? (a.avg / maxAvg) * 100 : 0;
+              const c = colors[i % colors.length];
+              return (
+                <div key={a.area} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: c, minWidth: 48, textAlign: 'right' }}>{a.area}</span>
+                  <div style={{ flex: 1, height: 24, borderRadius: 8, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, borderRadius: 8, background: `linear-gradient(90deg, ${c}, ${c}80)`, boxShadow: `0 2px 6px ${c}30`, transition: 'width 0.6s ease' }} />
+                    {a.avg > 0 && <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 800, color: pct > 50 ? '#fff' : 'var(--text-primary)' }}>{fmtAmount(a.avg)}</span>}
                   </div>
-                )}
-              </div>
-            ))}
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 28, textAlign: 'right', fontWeight: 600 }}>{a.count}건</span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+            {areaStats.slice(0, 8).map((a, i) => {
+              const c = colors[i % colors.length];
+              return (
+                <div key={a.area} style={{ background: 'var(--bg-hover)', borderRadius: 10, padding: '12px 14px', borderLeft: `3px solid ${c}` }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{a.area}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>평균 <span style={{ fontWeight: 700, color: c }}>{fmtAmount(a.avg)}</span></div>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{a.count}건 거래</div>
+                  {a.trades[0]?.exclusive_area > 0 && a.avg > 0 && (
+                    <div style={{ fontSize: 11, color: 'var(--accent-blue)', fontWeight: 700, marginTop: 3 }}>
+                      평당 {fmtAmount(Math.round(a.avg / (a.trades[0].exclusive_area / 3.3058)))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>);
       })()}
@@ -349,56 +417,79 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* 가격 추이 차트 */}
       <AptPriceTrendChart aptName={decoded} region={region} />
 
-      {/* 거래 이력 */}
-      <div className={card}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📋 거래 이력 ({trades.length}건)</div>
+      {/* 📋 매매 거래 이력 — 테이블 스타일 */}
+      <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📋 매매 거래 이력</span>
+          <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{trades.length}건</span>
+        </div>
+        {/* 헤더 */}
+        <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 70px', gap: 8, padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+          <span>날짜</span><span>면적 · 층</span><span style={{ textAlign: 'right' }}>금액</span>
+        </div>
         {trades.slice(0, 50).map((t, i) => {
           const amt = t.deal_amount || 0;
-          const color = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)';
+          const color = amt >= 100000 ? '#ef4444' : amt >= 50000 ? '#f97316' : amt >= 30000 ? '#3b82f6' : '#22c55e';
           return (
-            <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
-              <div>
-                <span style={{ color: 'var(--text-tertiary)' }}>{t.deal_date}</span>
-                <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{t.exclusive_area}㎡ · {t.floor}층</span>
-              </div>
-              <span style={{ fontWeight: 700, color }}>{fmtAmount(amt)}</span>
+            <div key={t.id || i} style={{
+              display: 'grid', gridTemplateColumns: '90px 1fr 70px', gap: 8,
+              padding: '10px 0', borderBottom: '1px solid var(--border)',
+              fontSize: 13, alignItems: 'center',
+            }}>
+              <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>{t.deal_date}</span>
+              <span style={{ color: 'var(--text-secondary)' }}>
+                {Math.round(t.exclusive_area)}㎡
+                <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>({Math.round(t.exclusive_area / 3.3058)}평)</span>
+                <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>· {t.floor}층</span>
+              </span>
+              <span style={{ fontWeight: 800, color, textAlign: 'right' }}>{fmtAmount(amt)}</span>
             </div>
           );
         })}
         {trades.length > 50 && (
-          <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+          <div style={{ textAlign: 'center', padding: '14px 0', color: 'var(--text-tertiary)', fontSize: 12, fontWeight: 600 }}>
             +{trades.length - 50}건 더 있음
           </div>
         )}
       </div>
 
-      {/* 전월세 거래 이력 */}
+      {/* 🏠 전월세 거래 이력 */}
       {rentTrades.length > 0 && (
-        <div className={card}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏠 전월세 이력 ({rentTrades.length}건)</div>
+        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>🏠 전월세 이력</span>
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{rentTrades.length}건</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr auto', gap: 8, padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)' }}>
+            <span>날짜</span><span>면적 · 층</span><span style={{ textAlign: 'right' }}>유형 · 금액</span>
+          </div>
           {rentTrades.slice(0, 30).map((r, i) => {
             const isJeonse = r.rent_type === 'jeonse';
             return (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
-                <div>
-                  <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>
-                  <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{r.exclusive_area}㎡ · {r.floor}층</span>
-                </div>
+              <div key={i} style={{
+                display: 'grid', gridTemplateColumns: '90px 1fr auto', gap: 8,
+                padding: '10px 0', borderBottom: '1px solid var(--border)',
+                fontSize: 13, alignItems: 'center',
+              }}>
+                <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>{r.deal_date}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  {Math.round(r.exclusive_area)}㎡ · {r.floor}층
+                </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{
-                    padding: '1px 6px', borderRadius: 3, fontSize: 10, fontWeight: 700,
-                    background: isJeonse ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)',
-                    color: isJeonse ? '#60A5FA' : '#FB923C',
+                    padding: '2px 8px', borderRadius: 6, fontSize: 10, fontWeight: 800,
+                    background: isJeonse ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)',
+                    color: isJeonse ? '#3b82f6' : '#f97316',
                   }}>{isJeonse ? '전세' : '월세'}</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {fmtAmount(r.deposit)}{!isJeonse && r.monthly_rent > 0 ? `/${r.monthly_rent}만` : ''}
+                  <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {fmtAmount(r.deposit)}{!isJeonse && r.monthly_rent > 0 ? <span style={{ color: '#f97316' }}>/{r.monthly_rent}만</span> : ''}
                   </span>
                 </div>
               </div>
             );
           })}
           {rentTrades.length > 30 && (
-            <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+            <div style={{ textAlign: 'center', padding: '14px 0', color: 'var(--text-tertiary)', fontSize: 12, fontWeight: 600 }}>
               +{rentTrades.length - 30}건 더 있음
             </div>
           )}
@@ -408,35 +499,58 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* 주민 리뷰 */}
       <AptReviewSection aptName={decoded} region={region} />
 
-      {/* 외부 링크 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <a href={`https://map.kakao.com/?q=${encodeURIComponent(decoded + ' ' + dong)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
-        <a href={`https://map.naver.com/p/search/${encodeURIComponent(decoded + ' ' + dong)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
-        <Link href={`/apt/search?q=${encodeURIComponent(decoded)}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🔍 실거래 검색</Link>
+      {/* 🔗 외부 링크 — 아이콘 카드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
+        {[
+          { emoji: '🗺️', label: '카카오맵', href: `https://map.kakao.com/?q=${encodeURIComponent(decoded + ' ' + dong)}`, ext: true },
+          { emoji: '🗺️', label: '네이버지도', href: `https://map.naver.com/p/search/${encodeURIComponent(decoded + ' ' + dong)}`, ext: true },
+          { emoji: '🔍', label: '실거래 검색', href: `/apt/search?q=${encodeURIComponent(decoded)}`, ext: false },
+        ].map(l => {
+          const Tag = l.ext ? 'a' : Link;
+          const extraProps = l.ext ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+          return (
+            <Tag key={l.label} href={l.href} {...(extraProps as any)} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              padding: '14px 8px', borderRadius: 12,
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              color: 'var(--text-primary)', textDecoration: 'none',
+              transition: 'border-color 0.12s',
+            }}>
+              <span style={{ fontSize: 24 }}>{l.emoji}</span>
+              <span style={{ fontSize: 12, fontWeight: 700 }}>{l.label}</span>
+            </Tag>
+          );
+        })}
       </div>
 
-      {/* 관련 블로그 */}
+      {/* 📰 관련 분석 */}
       {relatedBlogs.length > 0 && (
-        <div className={card}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 분석</div>
+        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📰 관련 분석</div>
           {relatedBlogs.map((b: Record<string, any>) => (
-            <Link key={b.slug} href={`/blog/${b.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 4px', borderRadius: 6, transition: 'background var(--transition-fast)', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span>
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>👀 {b.view_count || 0}</span>
+            <Link key={b.slug} href={`/blog/${b.slug}`} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '10px 0', borderBottom: '1px solid var(--border)',
+              textDecoration: 'none', color: 'inherit', transition: 'opacity 0.12s',
+            }}>
+              <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>{b.title}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8, background: 'var(--bg-hover)', padding: '2px 8px', borderRadius: 4 }}>👀 {b.view_count || 0}</span>
             </Link>
           ))}
         </div>
       )}
 
-      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 8px' }}>
-        📊 국토교통부 실거래가 공개시스템 기준
+      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', margin: '16px 0 8px' }}>
+        📊 국토교통부 실거래가 공개시스템 기준 · 카더라 자체 분석
       </p>
 
-      {/* 현장 허브 페이지 링크 */}
+      {/* CTA */}
       <Link href={`/apt/search?q=${encodeURIComponent(decoded)}`} style={{
-        display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40,
-        borderRadius: 12, background: 'var(--brand-bg)', border: '1px solid var(--brand-border)',
-        color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none',
+        display: 'block', textAlign: 'center', padding: '16px', marginBottom: 40,
+        borderRadius: 14, fontWeight: 800, textDecoration: 'none', fontSize: 14,
+        background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)',
+        color: '#fff', boxShadow: '0 4px 16px rgba(37,99,235,0.3)',
+        transition: 'transform 0.15s ease',
       }}>
         🏗️ 이 현장의 전체 정보 보기 (청약 · 재개발 · 리뷰) →
       </Link>
