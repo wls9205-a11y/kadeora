@@ -17,7 +17,7 @@ const SB = STATUS_BADGE;
 export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [statusFilter, setStatusFilter] = useState('전체');
-  const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'>('date');
+  const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'|'price'>('date');
   const [subSearch, setSubSearch] = useState('');
   const [calOffset, setCalOffset] = useState(0);
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
@@ -54,6 +54,14 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
     if (aptSort === 'supply') f.sort((a, b) => (b.tot_supply_hshld_co || 0) - (a.tot_supply_hshld_co || 0));
     if (aptSort === 'deadline') f.sort((a, b) => String(a.rcept_endde || '9999').localeCompare(String(b.rcept_endde || '9999')));
     if (aptSort === 'competition') f.sort((a, b) => (Number(b.competition_rate_1st) || 0) - (Number(a.competition_rate_1st) || 0));
+    if (aptSort === 'price') f.sort((a, b) => {
+      const getMax = (apt: any) => {
+        const hti = apt.house_type_info;
+        if (!hti || !Array.isArray(hti) || hti.length === 0) return 0;
+        return Math.max(...hti.map((t: any) => t.lttot_top_amount || 0));
+      };
+      return getMax(b) - getMax(a);
+    });
     return f;
   }, [apts, region, statusFilter, aptSort, effectiveSearch]);
 
@@ -83,6 +91,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               <option value="deadline">마감임박</option>
               <option value="supply">세대수</option>
               <option value="competition">경쟁률</option>
+              <option value="price">분양가순</option>
             </select>
             <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
               {(['전체', 'open', 'upcoming', 'closed'] as const).map(v => {
