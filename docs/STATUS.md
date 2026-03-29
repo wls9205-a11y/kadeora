@@ -1,6 +1,9 @@
 # 카더라 STATUS.md — 세션 58 (2026-03-30 06:30 KST)
 
 ## 최신 커밋
+- `8dcd46a` — safeBlogInsert 7개 크론 에러 해결 (TOC 폴백 + h3→h2 승격)
+- `38f78d9` — DB 컬럼명 에러 2건 (unsold_apts, redevelopment_projects)
+- `66ed128` — 워터마크 2중 + 라이트박스 + 알림설정 + 504 + 프리미엄 UI
 - `c007cc0` — 워터마크 선명도 recommended (35%/60%) 적용
 - `4356b8a` — 타사 워터마크 차단 + 카더라 워터마크 베이킹 프록시 API
 - `f3cadce` — collect-site-images 중괄호 누락 수정
