@@ -537,8 +537,8 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-        <ShareButtons title={`${s.name} (${symbol}) 주가`} postId={symbol} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, padding: '6px 10px', borderRadius: 8, background: 'rgba(59,123,246,0.03)', border: '1px solid rgba(59,123,246,0.08)' }}>
+        <ShareButtons title={`${s.name} (${symbol}) 주가 — 실시간 시세·차트·섹터 분석`} postId={symbol} />
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
