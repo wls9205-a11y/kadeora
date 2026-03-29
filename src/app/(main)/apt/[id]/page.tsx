@@ -812,8 +812,8 @@ export default async function AptUnifiedPage({ params }: Props) {
             const isEstimate = !sub.payment_schedule;
 
             // 옵션/확장 비용
-            const optionCosts = sub.option_costs || site?.option_costs;
-            const extCost = sub.extension_cost || site?.extension_cost || 0;
+            const optionCosts = sub.option_costs || (site as any)?.option_costs;
+            const extCost = sub.extension_cost || (site as any)?.extension_cost || 0;
             const optTotal = optionCosts ? Object.values(optionCosts).reduce((s: number, v: any) => s + (Number(v) || 0), 0) as number : 0;
 
             const fmtM = (v: number) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${v.toLocaleString()}만`;
