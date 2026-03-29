@@ -1,6 +1,7 @@
 # 카더라 STATUS.md — 세션 58 (2026-03-30 06:30 KST)
 
 ## 최신 커밋
+- `c007cc0` — 워터마크 선명도 recommended (35%/60%) 적용
 - `4356b8a` — 타사 워터마크 차단 + 카더라 워터마크 베이킹 프록시 API
 - `f3cadce` — collect-site-images 중괄호 누락 수정
 - `98bfd4e` — 단지백과 Phase 1+2 전체 구현 + latestPrice 수정
