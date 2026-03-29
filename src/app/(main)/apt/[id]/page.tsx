@@ -442,9 +442,10 @@ export default async function AptUnifiedPage({ params }: Props) {
         )}
       </section>
 
-      {/* Share + Bookmark — 액션 바 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-        <ShareButtons title={`${name} ${tLabel[sType]}`} postId={slug} />
+      {/* Share + Bookmark — 바이럴 액션 바 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, padding: '8px 12px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.1)' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginRight: 2 }}>📢</span>
+        <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
         {sub && <AptBookmarkButton aptId={sub.id} isLoggedIn={!!aptUser} />}
       </div>
 
@@ -633,7 +634,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <h2 style={{ ...ct, margin: 0 }}>📄 모집공고 핵심 요약</h2>
-            {sub.pblanc_url && <a href={sub.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', textDecoration: 'none', fontWeight: 600, border: '1px solid rgba(96,165,250,0.15)' }}>원문 보기 →</a>}
           </div>
 
           {/* AI 분석 요약 */}
@@ -890,14 +890,6 @@ export default async function AptUnifiedPage({ params }: Props) {
                   </Link>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* 공급 위치 지도 바로가기 */}
-          {sub.hssply_adres && (
-            <div style={{ marginTop: 8, display: 'flex', gap: 4 }}>
-              <a href={`https://map.kakao.com/?q=${encodeURIComponent(sub.hssply_adres)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '6px', borderRadius: 6, background: 'var(--bg-hover)', border: '1px solid var(--border)', textDecoration: 'none', fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600 }}>📍 카카오맵</a>
-              <a href={`https://map.naver.com/p/search/${encodeURIComponent(sub.hssply_adres)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '6px', borderRadius: 6, background: 'var(--bg-hover)', border: '1px solid var(--border)', textDecoration: 'none', fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600 }}>📍 네이버지도</a>
             </div>
           )}
 

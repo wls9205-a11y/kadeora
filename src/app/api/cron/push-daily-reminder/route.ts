@@ -16,6 +16,16 @@ export async function GET(req: NextRequest) {
     const admin = getSupabaseAdmin();
     const today = new Date().toISOString().slice(0, 10);
 
+    // ★ 중복 방지: 오늘 이미 출석 리마인더 발송했으면 스킵
+    const { count: alreadySent } = await admin.from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('type', 'system')
+      .gte('created_at', `${today}T00:00:00Z`)
+      .ilike('content', '%출석체크%');
+    if ((alreadySent ?? 0) > 0) {
+      return NextResponse.json({ sent: 0, message: `Already sent ${alreadySent} reminders today — skipping` });
+    }
+
     // 오늘 출석 안 한 유저 중 마케팅 동의자
     const { data: checkedUsers } = await admin.from('attendance')
       .select('user_id')
