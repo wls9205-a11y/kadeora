@@ -236,8 +236,8 @@ export async function GET(req: Request) {
         sb.from('blog_posts').select('category').eq('is_published', true),
         sb.from('comments').select('id', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', todayStart),
         sb.from('comments').select('id', { count: 'exact', head: true }).not('parent_id', 'is', null),
-        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false).eq('is_deleted', false),
-        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false).gte('content_length', 1200),
+        sb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('is_published', false),
+        sb.from('blog_posts').select('id, content', { count: 'exact' }).eq('is_published', false).limit(500),
       ]);
 
       // 블로그 카테고리 분포
@@ -316,7 +316,7 @@ export async function GET(req: Request) {
         blogProduction: {
           today: blogTodayR.count ?? 0,
           queue: blogQueueR.count ?? 0,
-          readyToPublish: blogUnpubR.count ?? 0,
+          readyToPublish: (blogUnpubR.data || []).filter((b: any) => (b.content?.length ?? 0) >= 1200).length,
           categoryBreakdown: blogCatMap,
         },
         commentStats: {

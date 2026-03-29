@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     // Get theme data
     const { data: themeHistory } = await supabase.from('stock_theme_history')
       .select('theme_name, avg_change_rate')
-      .eq('history_date', new Date().toISOString().slice(0, 10));
+      .eq('recorded_date', new Date().toISOString().slice(0, 10));
 
     // Calculate sector performance
     const sectorMap: Record<string, { total: number; count: number }> = {};

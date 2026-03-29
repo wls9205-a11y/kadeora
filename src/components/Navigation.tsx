@@ -24,15 +24,18 @@ const MOBILE_TABS = [
 ];
 
 const MORE_ITEMS = [
-  { href: '/premium',      emoji: '👑', label: '프리미엄' },
-  { href: '/discuss',       emoji: '💬', label: '라운지 토론' },
-  { href: '/hot',           emoji: '🔥', label: '이번주 HOT' },
-  { href: '/shop',          emoji: '🛒', label: '상점' },
+  { href: '/blog',            emoji: '📰', label: '블로그' },
+  { href: '/discuss',         emoji: '💬', label: '라운지 토론' },
+  { href: '/hot',             emoji: '🔥', label: '이번주 HOT' },
+  { href: '/premium',         emoji: '👑', label: '프리미엄' },
+  { href: '/apt/search',      emoji: '🔍', label: '실거래 검색' },
+  { href: '/stock/compare',   emoji: '⚖️', label: '종목 비교' },
+  { href: '/apt/map',         emoji: '🗺️', label: '부동산 지도' },
+  { href: '/apt/diagnose',    emoji: '🎯', label: '가점 진단' },
+  { href: '/shop',            emoji: '🛒', label: '상점' },
   { href: '/notifications/settings', emoji: '🔔', label: '알림 설정' },
-  { href: '/apt/map',  emoji: '🗺️', label: '부동산 지도' },
-  { href: '/apt/diagnose',  emoji: '🎯', label: '가점 진단' },
-  { href: '/guide',         emoji: '📖', label: '가이드북' },
-  { href: '/grades',        emoji: '🏅', label: '등급 안내' },
+  { href: '/guide',           emoji: '📖', label: '가이드북' },
+  { href: '/grades',          emoji: '🏅', label: '등급 안내' },
 ];
 
 const KadeoraLogo = ({ size = 28 }: { size?: number }) => (
@@ -465,7 +468,7 @@ export function Navigation() {
             background:'var(--bg-surface)', border:'1px solid var(--border)',
             borderRadius:16, padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
           }}>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:8 }}>
               {MORE_ITEMS.map(item => (
                 <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
                   display:'flex', flexDirection:'column', alignItems:'center', gap:4,

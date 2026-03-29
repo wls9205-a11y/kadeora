@@ -39,6 +39,9 @@
     "src/app/api/cron/crawl-*/*.ts": {
       "maxDuration": 300
     },
+    "src/app/api/cron/collect-site-*/*.ts": {
+      "maxDuration": 120
+    },
     "src/app/api/cron/indexnow-mass/*.ts": {
       "maxDuration": 120
     },

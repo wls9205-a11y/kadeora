@@ -43,7 +43,9 @@ export async function GET(req: NextRequest) {
       const res = await fetch(
         `${BASE_URL}?serviceKey=${encodeURIComponent(apiKey)}&pageNo=${page}&numOfRows=100&resultType=json`
       );
-      const data = await res.json();
+      const resText = await res.text();
+      let data;
+      try { data = JSON.parse(resText); } catch { continue; }
       const items = data?.response?.body?.items?.item ||
                     data?.getMaintenanceBusiness1?.body?.items?.item || [];
       const rows = Array.isArray(items) ? items : items ? [items] : [];
