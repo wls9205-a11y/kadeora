@@ -6,28 +6,68 @@ import { withCronAuth } from '@/lib/cron-auth';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
-const BATCH_SIZE = 350; // 네이버 API 25,000/일 → 350건×3쿼리×6회=6,300/일 (한도 내)
+const KAKAO_REST_KEY = process.env.KAKAO_REST_API_KEY;
+const BATCH_SIZE = 400;
 
-async function searchNaverImages(query: string, display = 3): Promise<{ title: string; link: string; thumbnail: string }[]> {
+interface ImageResult { title: string; url: string; thumbnail: string; source: string }
+
+/** 네이버 이미지 검색 */
+async function searchNaver(query: string, display = 3): Promise<ImageResult[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const url = `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${display}&sort=sim`;
-    const res = await fetch(url, {
-      headers: {
-        'X-Naver-Client-Id': NAVER_CLIENT_ID,
-        'X-Naver-Client-Secret': NAVER_CLIENT_SECRET,
-      },
-    });
+    const res = await fetch(
+      `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${display}&sort=sim`,
+      { headers: { 'X-Naver-Client-Id': NAVER_CLIENT_ID, 'X-Naver-Client-Secret': NAVER_CLIENT_SECRET } }
+    );
     if (!res.ok) return [];
     const data = await res.json();
     return (data.items || []).map((item: any) => ({
       title: (item.title || '').replace(/<[^>]*>/g, ''),
-      link: item.link,
+      url: item.link,
       thumbnail: item.thumbnail,
+      source: 'naver',
     }));
-  } catch {
-    return [];
+  } catch { return []; }
+}
+
+/** 카카오 이미지 검색 (Daum) — 월 30만건 무료 */
+async function searchKakao(query: string, size = 3): Promise<ImageResult[]> {
+  if (!KAKAO_REST_KEY) return [];
+  try {
+    const res = await fetch(
+      `https://dapi.kakao.com/v2/search/image?query=${encodeURIComponent(query)}&size=${size}&sort=accuracy`,
+      { headers: { Authorization: `KakaoAK ${KAKAO_REST_KEY}` } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.documents || []).map((doc: any) => ({
+      title: (doc.display_sitename || doc.collection || '').replace(/<[^>]*>/g, ''),
+      url: doc.image_url,
+      thumbnail: doc.thumbnail_url,
+      source: 'kakao',
+    }));
+  } catch { return []; }
+}
+
+/** 단지 하나에 대해 네이버+카카오 병렬로 이미지 수집 */
+async function collectForSite(name: string): Promise<ImageResult[]> {
+  const queries = [`${name} 아파트 조감도`, `${name} 투시도`, `${name} 분양`];
+
+  // 네이버 3개 + 카카오 3개 = 6개 쿼리 병렬 실행
+  const promises = queries.flatMap(q => [searchNaver(q, 2), searchKakao(q, 2)]);
+  const results = await Promise.allSettled(promises);
+  const allImages: ImageResult[] = [];
+  for (const r of results) {
+    if (r.status === 'fulfilled') allImages.push(...r.value);
   }
+
+  // URL 중복 제거 + 최대 6장
+  const seen = new Set<string>();
+  return allImages.filter(img => {
+    if (!img.url || seen.has(img.url)) return false;
+    seen.add(img.url);
+    return true;
+  }).slice(0, 6);
 }
 
 async function handler(_req: NextRequest) {
@@ -37,11 +77,12 @@ async function handler(_req: NextRequest) {
   let skipped = 0;
   const errors: string[] = [];
 
-  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
-    return NextResponse.json({ error: 'NAVER_CLIENT_ID/SECRET not set' }, { status: 200 });
+  const hasApi = !!(NAVER_CLIENT_ID && NAVER_CLIENT_SECRET) || !!KAKAO_REST_KEY;
+  if (!hasApi) {
+    return NextResponse.json({ error: 'No search API keys set (NAVER or KAKAO)' }, { status: 200 });
   }
 
-  // 이미지가 없는 현장 조회 (빈 배열 = 미수집)
+  // 이미지 없는 현장 조회
   const { data: sites } = await sb.from('apt_sites')
     .select('id, name, region, sigungu, site_type, images')
     .eq('is_active', true)
@@ -57,68 +98,50 @@ async function handler(_req: NextRequest) {
     return NextResponse.json({ success: true, collected: 0, message: 'All sites have images' });
   }
 
-  for (const site of targets) {
-    try {
-      const queries = [
-        `${site.name} 투시도`,
-        `${site.name} 조감도`,
-        `${site.name} 아파트`,
-      ];
+  // 5건씩 병렬 처리 (API 부하 분산)
+  const PARALLEL = 5;
+  for (let i = 0; i < targets.length; i += PARALLEL) {
+    // 타임아웃 방어 (270초 넘으면 중단)
+    if (Date.now() - start > 270_000) break;
 
-      const allImages: Record<string, any>[] = [];
-      for (const q of queries) {
-        const results = await searchNaverImages(q, 2);
-        allImages.push(...results);
-        // API 부하 방지 (최소 딜레이)
-        await new Promise(r => setTimeout(r, 50));
-      }
+    const batch = targets.slice(i, i + PARALLEL);
+    const results = await Promise.allSettled(
+      batch.map(async (site: Record<string, any>) => {
+        const images = await collectForSite(site.name);
+        if (images.length === 0) { skipped++; return; }
 
-      // 중복 제거 (URL 기준)
-      const seen = new Set<string>();
-      const unique = allImages.filter(img => {
-        if (seen.has(img.link)) return false;
-        seen.add(img.link);
-        return true;
-      }).slice(0, 5); // 최대 5장
+        const imageData = images.map(img => ({
+          url: img.url,
+          thumbnail: img.thumbnail,
+          source: img.source,
+          caption: img.title,
+          collected_at: new Date().toISOString(),
+        }));
 
-      if (unique.length === 0) {
-        skipped++;
-        continue;
-      }
+        await sb.from('apt_sites').update({
+          images: imageData,
+          updated_at: new Date().toISOString(),
+        }).eq('id', site.id);
 
-      const imageData = unique.map(img => ({
-        url: img.link,
-        thumbnail: img.thumbnail,
-        source: 'naver_search',
-        caption: img.title,
-        collected_at: new Date().toISOString(),
-      }));
+        collected++;
+      })
+    );
 
-      await sb.from('apt_sites').update({
-        images: imageData,
-        updated_at: new Date().toISOString(),
-      }).eq('id', site.id);
-
-      collected++;
-    } catch (e: unknown) {
-      errors.push(`${site.name}: ${errMsg(e)}`);
+    for (const r of results) {
+      if (r.status === 'rejected') errors.push(errMsg(r.reason));
     }
-  }
 
-  // content_score 재계산 (수집 완료된 것만, 최대 50건 — 시간 절약)
-  const recalcTargets = targets.filter((_: any, i: number) => i < 50);
-  for (const site of recalcTargets) {
-    try {
-      await sb.rpc('calculate_site_content_score', { p_site_id: site.id });
-    } catch {}
+    // 배치 간 최소 딜레이
+    await new Promise(r => setTimeout(r, 30));
   }
 
   return NextResponse.json({
     success: true,
     collected,
     skipped,
-    total_checked: targets.length,
+    total_checked: Math.min(targets.length, Math.ceil((Date.now() - start) / 200)),
     elapsed: `${Date.now() - start}ms`,
+    sources: { naver: !!NAVER_CLIENT_ID, kakao: !!KAKAO_REST_KEY },
     errors: errors.length ? errors.slice(0, 5) : undefined,
   });
 }
