@@ -6,6 +6,9 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { GRADE_EMOJI, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
 import { useAuth } from '@/components/AuthProvider';
+import dynamic from 'next/dynamic';
+
+const MiniLounge = dynamic(() => import('@/components/MiniLounge'), { ssr: false });
 
 const GRADES = [
   { emoji: '🌱', title: '새싹', pts: '0' }, { emoji: '📡', title: '정보통', pts: '100' },
@@ -88,6 +91,9 @@ export default function RightPanel() {
           }}>로그인 / 회원가입</Link>
         </div>
       )}
+
+      {/* 실시간 라운지 채팅 */}
+      <MiniLounge />
 
       {/* 인기 검색어 (5개) */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
