@@ -84,13 +84,13 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
     return Object.values(map).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
   }, [apts, ongoingApts, unsold, redevelopment, transactions, tradeByRegion, redevByRegion]);
 
-  const grandTotal = regions.reduce((s, r) => s + r.total, 0);
+  const grandTotal = regions.reduce((s: number, r: RegionData) => s + r.total, 0);
   const grandCats = {
-    sub: regions.reduce((s, r) => s + r.sub, 0),
-    ongoing: regions.reduce((s, r) => s + r.ongoing, 0),
-    unsold: regions.reduce((s, r) => s + r.unsold, 0),
-    redev: redevTotalCount || regions.reduce((s, r) => s + r.redev, 0),
-    trade: tradeTotalCount || regions.reduce((s, r) => s + r.trade, 0),
+    sub: regions.reduce((s: number, r: RegionData) => s + r.sub, 0),
+    ongoing: regions.reduce((s: number, r: RegionData) => s + r.ongoing, 0),
+    unsold: regions.reduce((s: number, r: RegionData) => s + r.unsold, 0),
+    redev: redevTotalCount || regions.reduce((s: number, r: RegionData) => s + r.redev, 0),
+    trade: tradeTotalCount || regions.reduce((s: number, r: RegionData) => s + r.trade, 0),
   };
 
   if (regions.length === 0) return null;
