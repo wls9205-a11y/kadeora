@@ -468,6 +468,87 @@ export async function GET(req: NextRequest) {
       .lt('updated_at', sevenDaysAgo);
   } catch {}
 
+  // Stale 종목 개별 재시도 (3일 이상 미갱신 — Yahoo 배치에서 누락된 종목)
+  let staleRetried = 0;
+  try {
+    const threeDaysAgo = new Date(Date.now() - 3 * 86400000).toISOString();
+    const { data: staleStocks } = await supabase
+      .from('stock_quotes')
+      .select('symbol, market')
+      .eq('is_active', true)
+      .lt('updated_at', threeDaysAgo)
+      .limit(20);
+
+    if (staleStocks?.length) {
+      // 소규모 배치로 Yahoo Finance 개별 조회
+      const staleTickers = staleStocks.map(s => s.symbol).join(',');
+      try {
+        const staleRes = await fetch(
+          `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${staleTickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketPreviousClose,regularMarketVolume,marketCap`,
+          {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': 'application/json',
+            },
+            signal: AbortSignal.timeout(10000),
+          }
+        );
+        if (staleRes.ok) {
+          const staleJson = await staleRes.json();
+          const staleQuotes = staleJson?.quoteResponse?.result ?? [];
+          for (const q of staleQuotes) {
+            if (q.regularMarketPrice && q.symbol) {
+              const price = q.regularMarketPrice;
+              const prevClose = q.regularMarketPreviousClose;
+              const change_amt = q.regularMarketChange != null
+                ? Math.round(q.regularMarketChange * 100) / 100
+                : (prevClose ? Math.round((price - prevClose) * 100) / 100 : 0);
+              const change_pct = q.regularMarketChangePercent != null
+                ? +(q.regularMarketChangePercent.toFixed(2))
+                : (prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0);
+              await supabase.from('stock_quotes')
+                .update({
+                  price, change_amt, change_pct,
+                  volume: q.regularMarketVolume ?? 0,
+                  market_cap: q.marketCap ?? 0,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('symbol', q.symbol);
+              staleRetried++;
+            }
+          }
+        }
+        // Yahoo에서도 못 가져온 국내 stale 종목 → Naver 개별 시도
+        const krStale = staleStocks.filter(s => s.market === 'KOSPI' || s.market === 'KOSDAQ');
+        for (const ks of krStale) {
+          try {
+            const nRes = await fetch(`https://m.stock.naver.com/api/stock/${ks.symbol}/basic`, {
+              headers: { 'User-Agent': 'Mozilla/5.0' },
+              signal: AbortSignal.timeout(5000),
+            });
+            if (nRes.ok) {
+              const nJson = await nRes.json();
+              const cp = Number(nJson.closePrice?.replace(/,/g, ''));
+              if (cp > 0) {
+                const prevClose = Number(nJson.compareToPreviousClosePrice?.replace(/,/g, '') || '0');
+                await supabase.from('stock_quotes')
+                  .update({
+                    price: cp,
+                    change_amt: prevClose ? cp - prevClose : 0,
+                    change_pct: prevClose ? +((((cp - prevClose) / prevClose) * 100).toFixed(2)) : 0,
+                    volume: Number(nJson.accumulatedTradingVolume?.replace(/,/g, '') || '0'),
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('symbol', ks.symbol);
+                staleRetried++;
+              }
+            }
+          } catch { /* 개별 실패 무시 */ }
+        }
+      } catch { /* stale retry 전체 실패 무시 */ }
+    }
+  } catch {}
+
   // 최종 DB 조회
   const { data } = await supabase
     .from('stock_quotes')
