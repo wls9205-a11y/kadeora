@@ -225,6 +225,10 @@
       "schedule": "0 */6 * * *"
     },
     {
+      "path": "/api/cron/apt-price-sync",
+      "schedule": "0 3 * * *"
+    },
+    {
       "path": "/api/cron/crawl-nationwide-redev",
       "schedule": "0 7 * * 1"
     },

@@ -40,6 +40,7 @@ const CRON_GROUPS = {
     '/api/cron/redev-geocode',
     '/api/cron/apt-backfill-details',
     '/api/cron/apt-crawl-pricing',
+    '/api/cron/apt-price-sync',
   ],
   // Phase 3: AI 생성 (가공 후)
   ai: [
