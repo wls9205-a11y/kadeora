@@ -17,22 +17,22 @@ function toProxyUrl(url: string): string {
 }
 
 const Watermark = () => (
-  <svg width="80" height="80" viewBox="0 0 72 72" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.25, pointerEvents: 'none', zIndex: 1 }}>
-    <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
-    <circle cx="18" cy="36" r="6" fill="rgba(255,255,255,0.45)" />
-    <circle cx="36" cy="36" r="6" fill="rgba(255,255,255,0.45)" />
-    <circle cx="54" cy="36" r="6" fill="rgba(255,255,255,0.45)" />
+  <svg width="100" height="100" viewBox="0 0 72 72" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.35, pointerEvents: 'none', zIndex: 1 }}>
+    <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
+    <circle cx="18" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
+    <circle cx="36" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
+    <circle cx="54" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
   </svg>
 );
 
 const WatermarkSm = () => (
-  <div style={{ position: 'absolute', bottom: 6, right: 42, opacity: 0.45, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 3, zIndex: 1 }}>
-    <svg width="12" height="12" viewBox="0 0 72 72">
-      <circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.6)" />
-      <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.6)" />
-      <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.6)" />
+  <div style={{ position: 'absolute', bottom: 8, right: 42, opacity: 0.6, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 4, zIndex: 1 }}>
+    <svg width="14" height="14" viewBox="0 0 72 72">
+      <circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
+      <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
+      <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
     </svg>
-    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>kadeora.app</span>
+    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>kadeora.app</span>
   </div>
 );
 

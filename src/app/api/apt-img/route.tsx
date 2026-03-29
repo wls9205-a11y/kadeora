@@ -51,14 +51,14 @@ export async function GET(req: NextRequest) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              opacity: 0.2,
+              opacity: 0.35,
             }}
           >
-            <svg width="90" height="90" viewBox="0 0 72 72">
-              <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
-              <circle cx="18" cy="36" r="6.5" fill="rgba(255,255,255,0.6)" />
-              <circle cx="36" cy="36" r="6.5" fill="rgba(255,255,255,0.6)" />
-              <circle cx="54" cy="36" r="6.5" fill="rgba(255,255,255,0.6)" />
+            <svg width="100" height="100" viewBox="0 0 72 72">
+              <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
+              <circle cx="18" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
+              <circle cx="36" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
+              <circle cx="54" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
             </svg>
           </div>
 
@@ -71,15 +71,15 @@ export async function GET(req: NextRequest) {
               display: 'flex',
               alignItems: 'center',
               gap: 5,
-              opacity: 0.5,
+              opacity: 0.6,
             }}
           >
             <svg width="16" height="16" viewBox="0 0 72 72">
-              <circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.7)" />
-              <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.7)" />
-              <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.7)" />
+              <circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
+              <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
+              <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
             </svg>
-            <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: 600 }}>
+            <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 600 }}>
               kadeora.app
             </span>
           </div>
