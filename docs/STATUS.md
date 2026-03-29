@@ -1,57 +1,41 @@
-# 카더라 STATUS.md — 세션 54 마지막 업데이트 (2026-03-29)
+# 카더라 STATUS.md — 세션 55 (2026-03-30)
 
 ## 최신 커밋
-- `f833f3c` — 알림 UX 개선 (읽은 알림 삭제 + 설정 링크)
-- `a33df04` — 알림 link 누락 5건 수정
-- `73582cc` — 알림 중복 방지 + apt 중복 UI 제거 + 공유 바이럴 강화
-- `e3c6ee8` — 실거래 통계 요약 + 미니 가격 바
-- `b270e38` — 지역 분양가 현황 카드
-- `ba252bc` — 분양가 시각 강화 + 납부 시뮬레이터 (빌드 에러 수정)
+- `526d06a` — 가격 데이터 자동 싱크 크론 (apt-price-sync)
+- `329ff10` — 청약/미분양 리스트 카드 가격 시각화 강화
+- `64ee429` — 아파트 단지 월별 시세 추이 SVG 차트
+- `d87e040` — 지역 시세 비교 + 미공개 참고 시세
 
-## 이번 세션 주요 작업 (세션 54)
+## 이번 세션 주요 작업
 
-### 분양가 시각화 대폭 강화
-- 분양가 범위 바: 가격 등급 배지(💎🏅✨🏠🌱) + 평당가 + 글로우 마커
-- 납부 시뮬레이터: 계약금/중도금/잔금 3색 비율 바 + 금액 자동 계산
-- 실입주 예상 비용: 분양가+옵션가+확장비=총비용
-- 분양가 vs 실거래가 비교 차트: 프리미엄/저평가 % + 범위 겹침 바
-- 평형별 평당가 표시
-- 핵심 지표: 규모 등급/입주까지/시행사 유형
+### 가격 시각화 대폭 강화
+1. **📍 지역 시세 비교 포지션 바** (apt/[id])
+   - 이 현장이 지역 내 어디에 위치하는지 3색 바에 마커
+   - 지역 평균 대비 +/-% 배지 (고가/저가/평균)
+2. **💰 분양가 미공개 참고 시세** (apt/[id])
+   - 가격 없는 현장에도 지역 참고 시세 점선 카드
+3. **📈 월별 시세 추이 차트** (apt/complex/[name])
+   - 서버 렌더링 SVG (JS 불필요)
+   - 그라디언트 에리어 필 + 등락률 배지
+4. **청약 카드 분양가 표시** (SubscriptionTab)
+   - house_type_info에서 최저~최고 분양가 + 평당가
+5. **미분양 카드 가격 범위 바** (UnsoldTab)
+   - sale_price 그라디언트 바 + 중앙 마커
 
-### 모집공고 활용 강화
-- 같은 시공사 다른 현장 (내부 링크)
-- 공급 위치 지도 (카카오맵/네이버지도)
-- 지역 분양가 현황 카드
+### 가격 데이터 자동화 크론 (2개 신규)
+1. **apt-crawl-pricing** — 청약홈 API에서 평형별 분양가 자동 수집
+   - 매 6시간, 50건/배치, APT_DATA_API_KEY 필요
+2. **apt-price-sync** — 3개 소스에서 apt_sites 가격 자동 채움
+   - 매일 03시, apt_subscriptions + apt_transactions + unsold_apts
 
-### 알림 시스템 대수술
-- 중복 방지: push-apt-deadline, push-daily-reminder 하루 1회 제한
-- DB 정리: 중복 알림 726건 삭제 (847→121)
-- link 누락 5건 수정 (알림 클릭 시 정확한 페이지 이동)
-- 읽은 알림 삭제 기능 + DELETE API 추가
-- 알림 설정 ⚙️ 링크 추가
+### DB 백필
+- 실거래 데이터 → apt_sites price: 46건 자동 채움
+- 현재 가격 커버리지: 2,296/5,512 (42%)
 
-### 중복 UI 제거
-- apt/[id] 원문 보기 2→1, 지도 2→1
-- 공유 바이럴 최적화 (그라디언트 배경 + 바이럴 문구)
+## PENDING — 수동 작업 (Node님)
+- [ ] APT_DATA_API_KEY 설정 → apt-crawl-pricing + apt-backfill-details 활성화
+- [ ] Anthropic 크레딧 충전 (블로그 크론 0건 생성 중)
+- [ ] STOCK_DATA_API_KEY 갱신
 
-### SEO
-- article:tag: premium, hot, search 추가 (전 페이지 완료)
-- 실거래 통계 서버 렌더링 (차트 로드 전 즉시 표시)
-
-## DB 마이그레이션
-- option_costs JSONB, extension_cost INT, payment_schedule JSONB, price_per_pyeong_avg INT
-- price_per_pyeong_avg 5건 자동 계산 (house_type_info 기반)
-
-## PENDING — 수동 작업
-- [ ] 토스 정산 등록 (3/31 마감!)
-- [ ] Anthropic 크레딧 충전
-- [ ] Supabase 타입 재생성 (npx supabase gen types)
-- [ ] STOCK_DATA_API_KEY 갱신 (63자 → 80~100자)
-- [ ] 구글 서치콘솔 URL 색인 요청
-
-## PENDING — 다음 세션 작업
-- [ ] 옵션가/확장비/중도금 데이터 수집 크론
-- [ ] nearby_facilities 데이터 수집 (5,522건 빈 {})
-- [ ] APT_DATA_API_KEY → apt-backfill-details 크론 실행
-- [ ] 알림 설정 개별 토글 (현재 일괄 ON/OFF)
-- [ ] /apt/[id]/announcement 전용 하위 페이지 (롱테일 SEO)
+## 크론 현황 (79개 → 81개)
+- 신규: apt-crawl-pricing (6시간), apt-price-sync (매일)
