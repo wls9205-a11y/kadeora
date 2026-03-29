@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region } = await params;
   const decoded = decodeURIComponent(region);
   return {
-    title: `${decoded} 부동산 정보 — 청약·실거래·재개발·미분양`,
-    description: `${decoded} 지역 아파트 청약 일정, 실거래가, 재개발 현황, 미분양 정보를 한눈에. 카더라에서 ${decoded} 부동산 정보를 확인하세요.`,
+    title: `${decoded} 부동산 정보 — 청약·모집공고·실거래·재개발·미분양`,
+    description: `${decoded} 지역 아파트 청약 일정, 모집공고 요약, 실거래가, 재개발 현황, 미분양 정보를 한눈에. 카더라에서 ${decoded} 부동산 정보를 확인하세요.`,
     alternates: { canonical: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}` },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: {
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'og:updated_time': new Date().toISOString(),
       'dg:plink': `${SITE_URL}/apt/region/${decoded}`,
       'article:section': '부동산',
-      'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양`,
+      'article:tag': `${decoded},부동산,청약,실거래,재개발,미분양,모집공고,분양가`,
       ...((() => {
         const GEO: Record<string, { code: string; lat: string; lng: string }> = {
           '서울': { code: 'KR-11', lat: '37.5665', lng: '126.9780' }, '부산': { code: 'KR-26', lat: '35.1796', lng: '129.0756' }, '대구': { code: 'KR-27', lat: '35.8714', lng: '128.6014' }, '인천': { code: 'KR-28', lat: '37.4563', lng: '126.7052' }, '광주': { code: 'KR-29', lat: '35.1595', lng: '126.8526' }, '대전': { code: 'KR-30', lat: '36.3504', lng: '127.3845' }, '울산': { code: 'KR-31', lat: '35.5384', lng: '129.3114' }, '세종': { code: 'KR-36', lat: '36.4800', lng: '127.2600' }, '경기': { code: 'KR-41', lat: '37.4138', lng: '127.5183' }, '강원': { code: 'KR-42', lat: '37.8228', lng: '128.1555' }, '충북': { code: 'KR-43', lat: '36.6357', lng: '127.4917' }, '충남': { code: 'KR-44', lat: '36.5184', lng: '126.8000' }, '전북': { code: 'KR-45', lat: '35.8203', lng: '127.1088' }, '전남': { code: 'KR-46', lat: '34.8161', lng: '126.4629' }, '경북': { code: 'KR-47', lat: '36.4919', lng: '128.8889' }, '경남': { code: 'KR-48', lat: '35.4606', lng: '128.2132' }, '제주': { code: 'KR-50', lat: '33.4996', lng: '126.5312' },
@@ -135,6 +135,7 @@ export default async function RegionLandingPage({ params }: Props) {
         {"@type":"Question","name":`${decoded} 아파트 청약 일정은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에는 현재 ${data.subscriptions.length}건의 청약이 진행 중입니다. 카더라에서 접수 일정, 경쟁률, 분양가를 실시간으로 확인하세요.`}},
         {"@type":"Question","name":`${decoded} 미분양 아파트 현황은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에는 ${data.unsolds.length}건의 미분양 현장이 있습니다. 할인 분양, 중도금 혜택 등을 비교해보세요.`}},
         {"@type":"Question","name":`${decoded} 재개발 진행 현황은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에서 ${data.redevelopments.length}건의 재개발·재건축 사업이 진행 중입니다. 사업 단계, 조합 현황, 예상 분양 시기를 확인하세요.`}},
+        {"@type":"Question","name":`${decoded} 모집공고 확인 방법은?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 아파트 입주자모집공고 핵심 요약, 분양 조건(분양가상한제·전매제한·거주의무), 평형별 공급 정보를 확인할 수 있습니다. 각 현장 상세 페이지에서 모집공고 요약을 제공합니다.`}},
         {"@type":"Question","name":`${decoded} 실거래가 조회 방법은?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 ${data.transactions.length}건의 아파트 실거래가를 조회할 수 있습니다. 단지별, 면적별, 기간별 필터로 원하는 정보를 찾아보세요.`}},
       ]}) }} />
       {/* 헤더 */}
@@ -152,8 +153,15 @@ export default async function RegionLandingPage({ params }: Props) {
         <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
           청약 {data.subscriptions.length}건 · 실거래 {data.transactions.length}건 · 재개발 {data.redevelopments.length}건 · 미분양 {data.unsolds.length}건
+          {(() => { const plc = data.subscriptions.filter((s: any) => s.is_price_limit).length; return plc > 0 ? ` · 분양가상한제 ${plc}건` : ''; })()}
         </p>
       </div>
+
+      {/* SEO 가시적 텍스트 */}
+      <p className="site-description" style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '0 0 14px', wordBreak: 'keep-all' }}>
+        {decoded} 지역의 최신 부동산 정보를 종합 제공합니다. 아파트 청약 모집공고 요약, 실거래가 시세, 재개발·재건축 진행 현황, 미분양 현황을 한눈에 확인하세요.
+        {data.subscriptions.length > 0 && ` 현재 ${data.subscriptions.length}건의 청약이 진행 중이며, 입주자모집공고 핵심 정보를 카더라에서 확인할 수 있습니다.`}
+      </p>
 
       {/* 요약 카드 — 시각 대시보드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 8, marginBottom: 20 }}>
@@ -212,17 +220,21 @@ export default async function RegionLandingPage({ params }: Props) {
       {/* 청약 섹션 */}
       {data.subscriptions.length > 0 && (
         <section style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📋 최근 청약</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📋 최근 청약 {(() => { const plCount = data.subscriptions.filter((s: any) => s.is_price_limit).length; return plCount > 0 ? <span style={{ fontSize: 11, fontWeight: 600, color: '#8B5CF6', marginLeft: 6 }}>분양가상한제 {plCount}건</span> : null; })()}</h2>
           {data.subscriptions.map((s: any) => (
             <Link key={s.id} href={`/apt/${s.id}`} style={{
               display: 'block', textDecoration: 'none', padding: '10px 14px',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 10, marginBottom: 6,
             }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{s.house_nm}</div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                {s.hssply_adres} · {s.tot_supply_hshld_co}세대 · ~{s.rcept_endde?.slice(5)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
+                {s.is_price_limit && <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', flexShrink: 0 }}>상한제</span>}
               </div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                {s.constructor_nm ? `${s.constructor_nm} · ` : ''}{s.tot_supply_hshld_co}세대 · ~{s.rcept_endde?.slice(5)}
+              </div>
+              {s.ai_summary && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {s.ai_summary}</div>}
             </Link>
           ))}
         </section>
