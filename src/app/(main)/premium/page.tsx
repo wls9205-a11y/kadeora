@@ -20,6 +20,8 @@ export const metadata: Metadata = {
     'naver:written_time': '2026-01-15T00:00:00Z',
     'naver:updated_time': new Date().toISOString(),
     'og:updated_time': new Date().toISOString(),
+    'article:section': '프리미엄',
+    'article:tag': '프리미엄,멤버십,AI분석,청약알림,주식분석,부동산',
   },
 };
 
