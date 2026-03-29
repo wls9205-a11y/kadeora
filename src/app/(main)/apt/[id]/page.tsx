@@ -543,18 +543,97 @@ export default async function AptUnifiedPage({ params }: Props) {
         ); 
       })()}
 
-      {/* Overview */}
-      {sub && (() => { const rows = [['시공사', sub.constructor_nm || site?.builder], ['시행사', sub.developer_nm || site?.developer], ['일반분양', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대` : null], ['동수', sub.total_dong_co ? `${sub.total_dong_co}개 동` : null], ['최고 층수', sub.max_floor ? `지상 ${sub.max_floor}층` : null], ['주차대수', sub.parking_co ? `${Number(sub.parking_co).toLocaleString()}대` : null], ['난방방식', sub.heating_type]].filter(r => r[1]); if (!rows.length) return null; return (<div className="apt-card"><h2 style={ct}>🏗️ 단지 개요</h2>{rows.map(([l, v], i) => <div key={l as string} style={{ ...rw, borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}><span style={rl}>{l}</span><span style={rv}>{v}</span></div>)}</div>); })()}
-
-      {/* Conditions */}
-      {sub && (sub.is_price_limit || sub.transfer_limit || sub.residence_obligation || sub.model_house_addr) && (
-        <div className="apt-card"><h2 style={ct}>📋 분양 조건</h2>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-            {sub.is_price_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>✓ 분양가상한제</span>}
-            {sub.transfer_limit && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)' }}>전매제한 {sub.transfer_limit}</span>}
-            {sub.residence_obligation && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>거주의무 {sub.residence_obligation}</span>}
+      {/* 📄 모집공고 핵심 요약 — 통합 카드 */}
+      {sub && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <h2 style={{ ...ct, margin: 0 }}>📄 모집공고 핵심 요약</h2>
+            {sub.pblanc_url && <a href={sub.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', textDecoration: 'none', fontWeight: 600, border: '1px solid rgba(96,165,250,0.15)' }}>원문 보기 →</a>}
           </div>
-          {sub.model_house_addr && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '8px 0', borderTop: '1px solid var(--border)', wordBreak: 'keep-all', overflowWrap: 'break-word' }}>🏠 견본주택: {sub.model_house_addr}</div>}
+
+          {/* AI 분석 요약 */}
+          {sub.ai_summary && (
+            <div style={{ padding: '10px 12px', borderRadius: 8, background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(52,211,153,0.04))', border: '1px solid rgba(99,102,241,0.12)', marginBottom: 12 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#8B5CF6', marginBottom: 4 }}>🤖 AI 분석</div>
+              <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub.ai_summary}</div>
+            </div>
+          )}
+
+          {/* 분양 조건 체크리스트 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 6, marginBottom: 12 }}>
+            <div style={{ padding: '8px 10px', borderRadius: 8, background: sub.is_price_limit ? 'rgba(139,92,246,0.08)' : 'var(--bg-hover)', textAlign: 'center', border: `1px solid ${sub.is_price_limit ? 'rgba(139,92,246,0.2)' : 'var(--border)'}` }}>
+              <div style={{ fontSize: 16, marginBottom: 2 }}>{sub.is_price_limit ? '✓' : '✗'}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: sub.is_price_limit ? '#8B5CF6' : 'var(--text-tertiary)' }}>분양가상한제</div>
+            </div>
+            <div style={{ padding: '8px 10px', borderRadius: 8, background: sub.transfer_limit ? 'rgba(251,191,36,0.08)' : 'var(--bg-hover)', textAlign: 'center', border: `1px solid ${sub.transfer_limit ? 'rgba(251,191,36,0.2)' : 'var(--border)'}` }}>
+              <div style={{ fontSize: 16, marginBottom: 2 }}>{sub.transfer_limit ? '✓' : '✗'}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: sub.transfer_limit ? '#FBBF24' : 'var(--text-tertiary)' }}>전매제한</div>
+              {sub.transfer_limit && <div style={{ fontSize: 9, color: '#FBBF24', marginTop: 1 }}>{sub.transfer_limit}</div>}
+            </div>
+            <div style={{ padding: '8px 10px', borderRadius: 8, background: sub.residence_obligation ? 'rgba(248,113,113,0.08)' : 'var(--bg-hover)', textAlign: 'center', border: `1px solid ${sub.residence_obligation ? 'rgba(248,113,113,0.2)' : 'var(--border)'}` }}>
+              <div style={{ fontSize: 16, marginBottom: 2 }}>{sub.residence_obligation ? '✓' : '✗'}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: sub.residence_obligation ? '#F87171' : 'var(--text-tertiary)' }}>거주의무</div>
+              {sub.residence_obligation && <div style={{ fontSize: 9, color: '#F87171', marginTop: 1 }}>{sub.residence_obligation}</div>}
+            </div>
+          </div>
+
+          {/* 단지 개요 행 */}
+          {(() => {
+            const rows = [
+              ['시공사', sub.constructor_nm || site?.builder],
+              ['시행사', sub.developer_nm || site?.developer],
+              ['총 공급', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대` : null],
+              ['동수', sub.total_dong_co ? `${sub.total_dong_co}개 동` : null],
+              ['최고 층수', sub.max_floor ? `지상 ${sub.max_floor}층` : null],
+              ['주차', sub.parking_co ? `${Number(sub.parking_co).toLocaleString()}대` : null],
+              ['난방', sub.heating_type],
+            ].filter(r => r[1]);
+            if (!rows.length) return null;
+            return (
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+                {rows.map(([l, v], i) => (
+                  <div key={l as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 13 }}>
+                    <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+
+          {/* 견본주택 */}
+          {sub.model_house_addr && (
+            <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: 'var(--bg-hover)', fontSize: 12, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+              🏠 견본주택: {sub.model_house_addr}
+            </div>
+          )}
+
+          {/* 평형별 공급 정보 (house_type_info) */}
+          {sub.house_type_info && (() => {
+            const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
+            if (!types.length) return null;
+            const maxSupply = Math.max(...types.map((t: any) => Number(t.supply_count || t.suply_hshldco || 0)));
+            return (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>📐 평형별 공급</div>
+                {types.slice(0, 6).map((t: any, i: number) => {
+                  const area = t.exclusive_area || t.suply_ar || t.area || '?';
+                  const supply = Number(t.supply_count || t.suply_hshldco || 0);
+                  const price = t.supply_price || t.lttot_top_amount;
+                  return (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', minWidth: 45 }}>{area}㎡</span>
+                      <div style={{ flex: 1, height: 14, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ height: '100%', width: `${maxSupply > 0 ? (supply / maxSupply) * 100 : 0}%`, borderRadius: 4, background: `hsl(${220 + i * 18}, 60%, 55%)` }} />
+                        <span style={{ position: 'absolute', left: 6, top: 0, fontSize: 10, lineHeight: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>{supply}세대</span>
+                      </div>
+                      {price && <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600, minWidth: 45, textAlign: 'right' }}>{Number(price) > 10000 ? `${Math.round(Number(price) / 10000).toLocaleString()}만` : Number(price).toLocaleString()}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       )}
 
