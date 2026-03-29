@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        // 평형별 정보도 저장
+        // 평형별 정보도 저장 (분양가 포함)
         if (items.length > 0) {
           const typeInfo = items.map((item: any) => ({
             type: item.HOUSE_TY || item.houseTy || '',
@@ -81,6 +81,8 @@ export async function GET(req: NextRequest) {
               const a = parseInt(item.RCEPT_CNT || item.rceptCnt || '0') || 0;
               return s > 0 ? Math.round((a / s) * 10) / 10 : 0;
             })(),
+            lttot_top_amount: parseInt(item.LTTOT_TOP_AMOUNT || item.lttotTopAmount || '0') || 0,
+            spsply_hshldco: parseInt(item.SPSPLY_HSHLDCO || item.spsplyHshldco || '0') || 0,
           }));
           await supabase.from('apt_subscriptions').update({
             house_type_info: typeInfo,

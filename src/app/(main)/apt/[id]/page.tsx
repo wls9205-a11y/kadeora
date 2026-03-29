@@ -182,11 +182,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const units = d.site?.total_units || d.sub?.tot_supply_hshld_co;
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
-    const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 청약일정, 분양가, 실거래가, 주민리뷰까지 한눈에.`.trim();
+    const desc = d.site?.seo_description || `${d.region} ${d.site?.sigungu || ''} ${d.name} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.trim();
     const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent(d.name)}&design=2&subtitle=${encodeURIComponent(`${d.region} ${d.site?.sigungu || ''} · ${uStr} ${builder}`.trim())}`;
 
+    const priceStr = d.site?.price_min && d.site?.price_max
+      ? ` ${d.site.price_min >= 10000 ? `${(d.site.price_min/10000).toFixed(1)}억` : `${d.site.price_min.toLocaleString()}만`}~${d.site.price_max >= 10000 ? `${(d.site.price_max/10000).toFixed(1)}억` : `${d.site.price_max.toLocaleString()}만`}`
+      : '';
     return {
-      title: `${title} | 모집공고 요약`, description: desc,
+      title: `${title}${priceStr} | 모집공고 요약`, description: desc,
       alternates: { canonical: `${SITE_URL}/apt/${resolved.slug}` },
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
       openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }] },
@@ -195,7 +198,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',
         'article:modified_time': d.site?.updated_at || new Date().toISOString(),
         'article:section': '부동산',
-        'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가,아파트,모집공고,입주자모집공고`,
+        'article:tag': `${d.name},${d.region},${tl[st] || '분양'},청약,분양가,분양가격,아파트,모집공고,입주자모집공고,견본주택,모델하우스`,
         // Kakao/Facebook price display
         ...(d.site?.price_min ? { 'og:price:amount': String(d.site.price_min), 'og:price:currency': 'KRW' } : {}),
         // Naver specific
@@ -275,6 +278,7 @@ export default async function AptUnifiedPage({ params }: Props) {
     ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다. 타입별 상세 분양가는 청약홈에서 확인할 수 있습니다.` }] : []),
     ...(sub ? [{ q: `${name} 모집공고 핵심 내용은 무엇인가요?`, a: `${name}의 입주자모집공고 핵심 내용: ${sub.is_price_limit ? '분양가상한제 적용, ' : ''}${sub.constructor_nm || site?.builder ? `시공사 ${sub.constructor_nm || site?.builder}, ` : ''}총 ${sub.tot_supply_hshld_co || site?.total_units || '미정'}세대 공급. ${sub.mvn_prearnge_ym ? `입주 예정 ${fmtYM(sub.mvn_prearnge_ym)}.` : ''} 카더라에서 모집공고 핵심 요약을 확인하세요.` }] : []),
     ...(sub?.is_price_limit !== undefined ? [{ q: `${name}은 분양가상한제 적용 현장인가요?`, a: `${name}은(는) 분양가상한제 ${sub.is_price_limit ? '적용 현장입니다. 분양가상한제 적용 시 전매제한 및 거주의무 등의 규제가 적용될 수 있습니다.' : '미적용 현장입니다.'}` }] : []),
+    ...(sub ? [{ q: `${name} 견본주택(모델하우스) 위치는 어디인가요?`, a: `${name}의 견본주택(모델하우스) ${sub.model_house_addr ? `주소는 ${sub.model_house_addr}입니다.` : '위치는 입주자모집공고문에서 확인할 수 있습니다.'} 청약홈에서 모집공고 원문을 확인하세요.` }] : []),
   ].filter(f => f.a.trim().length > 10);
   const redevStage = (site?.source_ids as Record<string, string>)?.redev_stage || redev?.stage;
   const noindex = site ? (site.content_score ?? 0) < 40 : false;
@@ -363,6 +367,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           { src: `${ogBase}&title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(`${region} ${site?.sigungu || ''} · ${site?.builder || sub?.constructor_nm || ''}`.trim())}`, alt: `${name} ${tLabel[sType]} 정보 — ${region} ${site?.sigungu || ''} ${site?.total_units || sub?.tot_supply_hshld_co || ''}세대` },
           { src: `/api/og?design=3&category=apt&title=${encodeURIComponent(`${name} 분양가`)}&subtitle=${encodeURIComponent((site?.price_min || site?.price_max) ? `${site?.price_min ? Math.round(site.price_min/10000).toLocaleString()+'만' : ''}~${site?.price_max ? Math.round(site.price_max/10000).toLocaleString()+'만원' : ''}` : `${region} ${site?.sigungu || ''}`)}`, alt: `${name} 분양가 정보 — ${region} 아파트 가격` },
           { src: `/api/og?design=4&category=apt&title=${encodeURIComponent(`${name} 청약 일정`)}&subtitle=${encodeURIComponent(sub?.rcept_bgnde ? `접수 ${sub.rcept_bgnde}` : `${tLabel[sType]} · ${region}`)}`, alt: `${name} 청약 접수 일정 — ${region} ${site?.builder || sub?.constructor_nm || ''}` },
+          { src: `/api/og?design=5&category=apt&title=${encodeURIComponent(`${name} 모집공고 요약`)}&subtitle=${encodeURIComponent(`${sub?.is_price_limit ? '분양가상한제 · ' : ''}${site?.builder || sub?.constructor_nm || region}`)}`, alt: `${name} 입주자모집공고 핵심 요약 — 분양가 견본주택 청약 자격` },
         ];
         const allImages = dbImages.length >= 2
           ? [...dbImages.slice(0, 2).map((url: string, i: number) => ({ src: url, alt: `${name} 현장 사진 ${i + 1} — ${region} ${site?.sigungu || ''}` })), ogImages[0]]
@@ -423,7 +428,8 @@ export default async function AptUnifiedPage({ params }: Props) {
           {sub?.is_price_limit && <> 본 현장은 분양가상한제 적용 현장입니다.</>}
           {(site?.nearby_station || sub?.nearest_station) && <> 최근접 역은 {site?.nearby_station || sub?.nearest_station}입니다.</>}
           {(site?.school_district || sub?.nearest_school) && <> 학군은 {site?.school_district || sub?.nearest_school} 인근입니다.</>}
-          {sub && <> 입주자모집공고 핵심 요약, 청약 자격 조건, 분양 일정을 카더라에서 확인하세요.</>}
+          {sub && <> 입주자모집공고 핵심 요약, 분양가격, 청약 자격 조건, 견본주택 정보를 카더라에서 확인하세요.</>}
+          {sub?.model_house_addr && <> 견본주택(모델하우스) 주소: {sub.model_house_addr}.</>}
         </p>
         {site?.description && site.description !== `${region} ${name}` && (
           <p style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.65, margin: '8px 0 0', wordBreak: 'keep-all' }}>
@@ -611,26 +617,40 @@ export default async function AptUnifiedPage({ params }: Props) {
             </div>
           )}
 
-          {/* 평형별 공급 정보 (house_type_info) */}
+          {/* 평형별 공급 정보 (house_type_info) — 분양가격 포함 */}
           {sub.house_type_info && (() => {
             const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
             if (!types.length) return null;
-            const maxSupply = Math.max(...types.map((t: any) => Number(t.supply_count || t.suply_hshldco || 0)));
+            const maxSupply = Math.max(...types.map((t: any) => Number(t.supply || t.supply_count || t.suply_hshldco || 0)));
+            const hasPrice = types.some((t: any) => Number(t.lttot_top_amount || t.supply_price || 0) > 0);
             return (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>📐 평형별 공급</div>
-                {types.slice(0, 6).map((t: any, i: number) => {
-                  const area = t.exclusive_area || t.suply_ar || t.area || '?';
-                  const supply = Number(t.supply_count || t.suply_hshldco || 0);
-                  const price = t.supply_price || t.lttot_top_amount;
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>📐 평형별 공급{hasPrice ? ' · 분양가' : ''}</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총 {types.length}개 타입</span>
+                </div>
+                {types.slice(0, 8).map((t: any, i: number) => {
+                  const typeLabel = t.type || '';
+                  const area = t.area || t.exclusive_area || t.suply_ar || '?';
+                  const areaNum = parseFloat(area);
+                  const pyeong = areaNum > 0 ? Math.round(areaNum / 3.3058) : 0;
+                  const supply = Number(t.supply || t.supply_count || t.suply_hshldco || 0);
+                  const spsply = Number(t.spsply_hshldco || 0);
+                  const price = Number(t.lttot_top_amount || t.supply_price || 0);
                   return (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', minWidth: 45 }}>{area}㎡</span>
-                      <div style={{ flex: 1, height: 14, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
-                        <div style={{ height: '100%', width: `${maxSupply > 0 ? (supply / maxSupply) * 100 : 0}%`, borderRadius: 4, background: `hsl(${220 + i * 18}, 60%, 55%)` }} />
-                        <span style={{ position: 'absolute', left: 6, top: 0, fontSize: 10, lineHeight: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>{supply}세대</span>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                      <div style={{ minWidth: 55 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{pyeong > 0 ? `${pyeong}평` : `${area}㎡`}</span>
+                        {typeLabel && <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{typeLabel}</div>}
                       </div>
-                      {price && <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600, minWidth: 45, textAlign: 'right' }}>{Number(price) > 10000 ? `${Math.round(Number(price) / 10000).toLocaleString()}만` : Number(price).toLocaleString()}</span>}
+                      <div style={{ flex: 1, height: 16, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ height: '100%', width: `${maxSupply > 0 ? (supply / maxSupply) * 100 : 0}%`, borderRadius: 4, background: `hsl(${220 + i * 18}, 60%, 55%)` }} />
+                        <span style={{ position: 'absolute', left: 6, top: 1, fontSize: 10, lineHeight: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>{supply}세대{spsply > 0 ? ` (특${spsply})` : ''}</span>
+                      </div>
+                      {price > 0 && <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 700, minWidth: 52, textAlign: 'right' }}>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</span>}
+                    </div>
+                  );
+                })}
                     </div>
                   );
                 })}
