@@ -283,7 +283,7 @@
     },
     {
       "path": "/api/cron/collect-site-images",
-      "schedule": "30 4 * * *"
+      "schedule": "30 0,4,8,12,16,20 * * *"
     },
     {
       "path": "/api/cron/collect-site-trends",

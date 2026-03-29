@@ -1,12 +1,12 @@
 import { errMsg } from '@/lib/error-utils';
-export const maxDuration = 60;
+export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
-const BATCH_SIZE = 200; // 네이버 API 25,000/일 → 200건/배치로 확대 // 네이버 API 호출 제한 고려 (25,000/일)
+const BATCH_SIZE = 350; // 네이버 API 25,000/일 → 350건×3쿼리×6회=6,300/일 (한도 내)
 
 async function searchNaverImages(query: string, display = 3): Promise<{ title: string; link: string; thumbnail: string }[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
@@ -41,18 +41,21 @@ async function handler(_req: NextRequest) {
     return NextResponse.json({ error: 'NAVER_CLIENT_ID/SECRET not set' }, { status: 200 });
   }
 
-  // 이미지가 없는 현장 중 score 40+ 우선
+  // 이미지가 없는 현장 조회 (빈 배열 = 미수집)
   const { data: sites } = await sb.from('apt_sites')
     .select('id, name, region, sigungu, site_type, images')
     .eq('is_active', true)
-    .gte('content_score', 25)
     .order('interest_count', { ascending: false })
-    .limit(BATCH_SIZE * 2); // 여유있게 가져와서 이미지 없는 것만 필터
+    .limit(BATCH_SIZE * 3);
 
   const targets = (sites || []).filter((s: Record<string, any>) => {
     const imgs = s.images;
     return !imgs || !Array.isArray(imgs) || imgs.length === 0;
   }).slice(0, BATCH_SIZE);
+
+  if (!targets || targets.length === 0) {
+    return NextResponse.json({ success: true, collected: 0, message: 'All sites have images' });
+  }
 
   for (const site of targets) {
     try {
@@ -66,8 +69,8 @@ async function handler(_req: NextRequest) {
       for (const q of queries) {
         const results = await searchNaverImages(q, 2);
         allImages.push(...results);
-        // API 부하 방지
-        await new Promise(r => setTimeout(r, 100));
+        // API 부하 방지 (최소 딜레이)
+        await new Promise(r => setTimeout(r, 50));
       }
 
       // 중복 제거 (URL 기준)
@@ -102,8 +105,9 @@ async function handler(_req: NextRequest) {
     }
   }
 
-  // content_score 재계산 (이미지 추가분)
-  for (const site of targets) {
+  // content_score 재계산 (수집 완료된 것만, 최대 50건 — 시간 절약)
+  const recalcTargets = targets.filter((_: any, i: number) => i < 50);
+  for (const site of recalcTargets) {
     try {
       await sb.rpc('calculate_site_content_score', { p_site_id: site.id });
     } catch {}
