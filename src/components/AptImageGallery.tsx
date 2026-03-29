@@ -9,32 +9,10 @@ interface AptImage {
 
 /** 외부 이미지 → 카더라 워터마크 프록시 URL 변환 */
 function toProxyUrl(url: string): string {
-  // 이미 프록시 URL이면 그대로
   if (url.startsWith('/api/apt-img')) return url;
-  // kadeora 자체 이미지면 프록시 불필요
   if (url.startsWith('/api/og') || url.includes('kadeora.app/api/')) return url;
   return `/api/apt-img?src=${encodeURIComponent(url)}`;
 }
-
-const Watermark = () => (
-  <svg width="100" height="100" viewBox="0 0 72 72" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.35, pointerEvents: 'none', zIndex: 1 }}>
-    <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
-    <circle cx="18" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
-    <circle cx="36" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
-    <circle cx="54" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
-  </svg>
-);
-
-const WatermarkSm = () => (
-  <div style={{ position: 'absolute', bottom: 8, right: 42, opacity: 0.6, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 4, zIndex: 1 }}>
-    <svg width="14" height="14" viewBox="0 0 72 72">
-      <circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
-      <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
-      <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
-    </svg>
-    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>kadeora.app</span>
-  </div>
-);
 
 export default function AptImageGallery({ images, name, region, badges }: {
   images: AptImage[];
@@ -96,8 +74,6 @@ export default function AptImageGallery({ images, name, region, badges }: {
                     referrerPolicy="no-referrer"
                     onError={() => handleImgError(images.findIndex(o => toProxyUrl(o.url) === img.url))}
                   />
-                  <Watermark />
-                  <WatermarkSm />
                   {i === 0 && badges}
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
@@ -150,8 +126,6 @@ export default function AptImageGallery({ images, name, region, badges }: {
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 loading="eager" referrerPolicy="no-referrer"
               />
-              <Watermark />
-              <WatermarkSm />
               {badges}
             </div>
             {visibleImages.slice(1, 3).map((img, i) => (
@@ -166,7 +140,6 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   loading="lazy" referrerPolicy="no-referrer"
                 />
-                <WatermarkSm />
                 {i === 1 && total > 3 && (
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
@@ -180,12 +153,12 @@ export default function AptImageGallery({ images, name, region, badges }: {
         </div>
       </div>
 
-      {/* 라이트박스 — 클릭 시 전체화면 이미지 뷰어 */}
+      {/* 라이트박스 — 클릭 시 전체화면 뷰어 */}
       {lightbox !== null && (
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.92)',
+            background: '#000',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           }}
           onClick={() => setLightbox(null)}
@@ -195,7 +168,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
             style={{
               position: 'absolute', top: 16, right: 16, zIndex: 10,
               width: 40, height: 40, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.1)', border: 'none',
+              background: 'rgba(255,255,255,0.15)', border: 'none',
               color: '#fff', fontSize: 20, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
@@ -213,8 +186,6 @@ export default function AptImageGallery({ images, name, region, badges }: {
               style={{ maxWidth: '90vw', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }}
               referrerPolicy="no-referrer"
             />
-            <Watermark />
-            <WatermarkSm />
           </div>
 
           {visibleImages[lightbox]?.caption && (
@@ -229,7 +200,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
               style={{
                 position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)', border: 'none',
+                background: 'rgba(255,255,255,0.15)', border: 'none',
                 color: '#fff', fontSize: 22, cursor: 'pointer',
               }}
             >‹</button>
@@ -240,7 +211,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
               style={{
                 position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)', border: 'none',
+                background: 'rgba(255,255,255,0.15)', border: 'none',
                 color: '#fff', fontSize: 22, cursor: 'pointer',
               }}
             >›</button>

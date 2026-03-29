@@ -57,7 +57,7 @@ export default function PremiumPage() {
 
       {/* OG 히어로 이미지 (검색엔진 썸네일) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general&subtitle=${encodeURIComponent('AI 분석 · 청약 알림 · 광고 없는 피드')}`} alt="카더라 프리미엄 멤버십 — AI 종목 분석 청약 알림 광고 없는 피드" width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
+      <img src={`/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general&subtitle=${encodeURIComponent('AI 분석 · 청약 알림 · 광고 없는 피드')}`} alt="카더라 프리미엄 멤버십 — AI 종목 분석 청약 알림 광고 없는 피드" width={1200} height={630} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
 
       <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'block', marginBottom: 12 }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
 

@@ -23,9 +23,15 @@ export default function NotificationSettingsPage() {
       return;
     }
 
+    // serviceWorker.ready는 SW가 없으면 영원히 resolve 안 됨 → 3초 타임아웃
+    const timeout = setTimeout(() => setPushState('off'), 3000);
     navigator.serviceWorker?.ready?.then(reg =>
-      reg.pushManager.getSubscription().then(sub => setPushState(sub ? 'on' : 'off'))
-    ).catch(() => setPushState('off'));
+      reg.pushManager.getSubscription().then(sub => {
+        clearTimeout(timeout);
+        setPushState(sub ? 'on' : 'off');
+      })
+    ).catch(() => { clearTimeout(timeout); setPushState('off'); });
+    return () => clearTimeout(timeout);
   }, []);
 
   const handleEnable = async () => {
