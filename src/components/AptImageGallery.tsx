@@ -7,9 +7,13 @@ interface AptImage {
   caption?: string;
 }
 
-/** http:// → https:// 강제 변환 (Mixed Content 방지) */
-function toHttps(url: string): string {
-  return url.replace(/^http:\/\//, 'https://');
+/** 외부 이미지 → 카더라 워터마크 프록시 URL 변환 */
+function toProxyUrl(url: string): string {
+  // 이미 프록시 URL이면 그대로
+  if (url.startsWith('/api/apt-img')) return url;
+  // kadeora 자체 이미지면 프록시 불필요
+  if (url.startsWith('/api/og') || url.includes('kadeora.app/api/')) return url;
+  return `/api/apt-img?src=${encodeURIComponent(url)}`;
 }
 
 const Watermark = () => (
@@ -43,7 +47,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
   const [loadFails, setLoadFails] = useState<Set<number>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const safeImages = images.map(img => ({ ...img, url: toHttps(img.url) }));
+  const safeImages = images.map(img => ({ ...img, url: toProxyUrl(img.url) }));
   const visibleImages = safeImages.filter((_, i) => !loadFails.has(i));
   const total = visibleImages.length;
 
@@ -90,7 +94,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     loading={i === 0 ? 'eager' : 'lazy'}
                     referrerPolicy="no-referrer"
-                    onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === img.url))}
+                    onError={() => handleImgError(images.findIndex(o => toProxyUrl(o.url) === img.url))}
                   />
                   <Watermark />
                   <WatermarkSm />

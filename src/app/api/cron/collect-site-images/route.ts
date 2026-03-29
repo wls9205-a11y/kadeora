@@ -71,17 +71,36 @@ async function collectForSite(name: string): Promise<ImageResult[]> {
   }).slice(0, 6);
 }
 
-/** 아파트 관련 이미지인지 판별 */
+/** 아파트 관련 이미지인지 판별 + 타사 워터마크 차단 */
 function isRelevantImage(img: ImageResult, aptName: string): boolean {
   const caption = (img.title || '').toLowerCase();
   const url = (img.url || '').toLowerCase();
+
+  // 0) 타사 워터마크가 포함된 이미지 차단
+  const WATERMARK_DOMAINS = [
+    'hogangnono', 'zigbang', 'kbland', 'land.naver', 'landthumb',
+    'r114.co.kr', 'drapt.com', 'apt2you', 'peterpanz',
+    'dabangapp', 'station3', // 다방
+    'realestate.daum', 'soomgo', 'ppomppu',
+    'chosun.com', 'hankyung.com', // 언론사 (워터마크 있음)
+    'mk.co.kr', 'sedaily.com', 'fnnews.com',
+  ];
+  if (WATERMARK_DOMAINS.some(d => url.includes(d))) return false;
+
+  // 0-b) 캡션에 타사 서비스명 (워터마크 소스)
+  const WATERMARK_CAPTIONS = [
+    '호갱노노', '직방', 'kb부동산', '네이버부동산', '다방',
+    '피터팬', '부동산114', '한경', '매경', '조선일보',
+  ];
+  if (WATERMARK_CAPTIONS.some(w => caption.includes(w))) return false;
 
   // 1) URL 차단 — 스톡사이트, 위키, 무관 도메인
   const BAD_DOMAINS = [
     'utoimage', 'freepik', 'shutterstock', 'clipart', 'istockphoto',
     'namu.wiki', 'wikipedia', 'pixabay', 'unsplash', 'pexels',
     'youtube.com', 'youtu.be', 'tiktok.com',
-    'ohousecdn', 'ohou.se', // 오늘의집 (인테리어, 무관)
+    'ohousecdn', 'ohou.se',
+    'pinimg.com', // Pinterest
   ];
   if (BAD_DOMAINS.some(d => url.includes(d))) return false;
 
@@ -91,16 +110,19 @@ function isRelevantImage(img: ImageResult, aptName: string): boolean {
     '의학과', '병원', '치과', '의원', '약국', '한의원',
     '맛집', '카페', '식당', '레스토랑', '호텔', '펜션', '모텔',
     '유튜브', '게임', '영화', '드라마', '웹툰',
-    'kb부동산', '호갱노노', '시세', '매물', '실거래가',
+    '시세', '매물', '실거래가', '시세표',
     '스포츠', '야구', '축구', '농구',
   ];
   if (BAD_CAPTIONS.some(w => caption.includes(w))) return false;
 
-  // 3) 아파트 이름이 캡션에 포함 → 높은 관련성
+  // 3) 이미지가 너무 작으면 제외 (썸네일/아이콘)
+  if (/\b(icon|favicon|logo|badge|button)\b/i.test(url)) return false;
+
+  // 4) 아파트 이름이 캡션에 포함 → 높은 관련성
   const nameCore = aptName.replace(/\s+/g, '').slice(0, 6).toLowerCase();
   if (nameCore.length >= 3 && caption.replace(/\s+/g, '').includes(nameCore)) return true;
 
-  // 4) 긍정 키워드 — 아파트/부동산 관련
+  // 5) 긍정 키워드 — 아파트/부동산 관련
   const GOOD_WORDS = [
     '조감도', '투시도', '배치도', '분양', '착공', '준공',
     '아파트', '단지', '외관', '견본주택', '모델하우스',
@@ -109,10 +131,12 @@ function isRelevantImage(img: ImageResult, aptName: string): boolean {
   ];
   if (GOOD_WORDS.some(w => caption.includes(w))) return true;
 
-  // 5) 이미지 URL에 아파트 관련 패턴
+  // 6) 이미지 URL에 아파트 관련 패턴
   if (/apt|apart|danji|villa|tower|block/i.test(url)) return true;
 
-  // 캡션이 비어있거나 매칭 안 되면 제외
+  // 뉴스 이미지는 보도용 사진일 가능성 높음 (조감도/현장)
+  if (url.includes('imgnews.naver.net') && caption.length > 5) return true;
+
   return false;
 }
 
