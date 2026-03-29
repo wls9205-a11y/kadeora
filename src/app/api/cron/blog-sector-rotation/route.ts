@@ -5,7 +5,7 @@ import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');

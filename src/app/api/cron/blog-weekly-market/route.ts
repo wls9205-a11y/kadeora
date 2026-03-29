@@ -1,5 +1,5 @@
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
-export const maxDuration = 60;
+export const maxDuration = 300;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';

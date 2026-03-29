@@ -5,7 +5,7 @@ import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const ADR_THEMES = [
   { title: '인도 주식 직접 투자 방법 — INFY vs WIT vs HDB ADR 2026', symbols: ['INFY','WIT','HDB'], region: '인도' },

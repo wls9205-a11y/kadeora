@@ -1,5 +1,5 @@
 import { errMsg } from '@/lib/error-utils';
-export const maxDuration = 60;
+export const maxDuration = 300;
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';

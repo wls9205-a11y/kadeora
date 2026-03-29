@@ -6,7 +6,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');

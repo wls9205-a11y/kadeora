@@ -5,7 +5,7 @@ import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { ensureMinLength } from '@/lib/blog-padding';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // ETF 비교 테마 목록
 const ETF_THEMES = [
