@@ -346,37 +346,38 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* 인기글 하이라이트 (첫 페이지, 검색 아닐 때) */}
+      {/* 인기글 + 인기태그 — 컴팩트 한 줄 */}
       {pageNum === 1 && !q && category === 'all' && (popularPosts ?? []).length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, marginBottom: 12 }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🔥 인기 글</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {(popularPosts ?? []).map((p: any, i: number) => (
-              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 22 }}>{i + 1}</span>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>
-                  {CATS.find(c => c.key === p.category)?.label || p.category}
-                </span>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>👀 {p.view_count}</span>
-              </Link>
-            ))}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>🔥 인기 글</span>
+            <Link href="/blog?sort=popular" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 600 }}>전체보기 →</Link>
           </div>
+          {(popularPosts ?? []).slice(0, 3).map((p: any, i: number) => (
+            <Link key={p.id} href={`/blog/${p.slug}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', color: 'inherit', padding: '4px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+              <span style={{ fontSize: 10, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', fontWeight: 700, flexShrink: 0 }}>
+                {CATS.find(c => c.key === p.category)?.label || p.category}
+              </span>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>👀{p.view_count}</span>
+            </Link>
+          ))}
         </div>
       )}
 
-      {/* 인기 태그 클라우드 */}
+      {/* 인기 태그 — 가로 스크롤 1줄 */}
       {popularTags.length > 0 && pageNum === 1 && !q && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-          {popularTags.map((t: any) => (
+        <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+          {popularTags.slice(0, 12).map((t: any) => (
             <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
               style={{
-                padding: '3px 10px', borderRadius: 16,
+                padding: '3px 10px', borderRadius: 14, flexShrink: 0,
                 background: 'var(--bg-hover)', border: '1px solid var(--border)',
-                color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)',
-                textDecoration: 'none', fontWeight: 500,
+                color: 'var(--text-secondary)', fontSize: 11,
+                textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap',
               }}>
-              #{t.tag} <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{t.cnt}</span>
+              #{t.tag} <span style={{ color: 'var(--text-tertiary)', fontSize: 9 }}>{t.cnt}</span>
             </Link>
           ))}
         </div>

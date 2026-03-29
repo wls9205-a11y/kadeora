@@ -200,6 +200,9 @@
   animation: shimmer-enhanced 1.8s ease-in-out infinite;
   border-radius: var(--radius-sm);
 }
+/* 가로 스크롤 스크롤바 숨기기 */
+.apt-pill-scroll::-webkit-scrollbar { display: none; }
+.apt-pill-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 :root {
   --fs-xs: 13px;
   --fs-sm: 15px;
