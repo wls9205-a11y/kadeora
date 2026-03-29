@@ -185,7 +185,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             if (unsoldUnits === 0) return null;
             return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 14 }}>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>↳ 세대수</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>↳ 미분양 세대수</span>
                 <span style={{ fontSize: 17, fontWeight: 700, color: COLORS.unsold, fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
                   {unsoldUnits.toLocaleString()}<span style={{ fontSize: 11, fontWeight: 400, opacity: 0.5, marginLeft: 2 }}>세대</span>
                 </span>

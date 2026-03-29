@@ -407,7 +407,14 @@ export default async function AptUnifiedPage({ params }: Props) {
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 18px' }}>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>{region} {site?.sigungu || ''}</div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{site?.builder || sub?.constructor_nm || ''}{site?.total_units ? ` · ${site.total_units}세대` : sub?.tot_supply_hshld_co ? ` · ${sub.tot_supply_hshld_co}세대` : ''}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{site?.builder || sub?.constructor_nm || ''}{(() => {
+                    const total = site?.total_units || sub?.tot_supply_hshld_co;
+                    if (!total) return '';
+                    const types = Array.isArray(sub?.house_type_info) ? sub.house_type_info : [];
+                    const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
+                    const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
+                    return gen > 0 ? ` · 총 ${total}세대(일반${gen}·특별${spe})` : ` · 총 ${total}세대`;
+                  })()}</div>
                 </div>
               )}
               {/* 오버레이 배지 */}
@@ -444,6 +451,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📋 {name} 분양 요약</h2>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
           {region} {site?.sigungu || ''} {name}은(는) {site?.builder || sub?.constructor_nm || ''}{site?.builder || sub?.constructor_nm ? ' 시공, ' : ''}총 {site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대 규모의 {tLabel[sType] || '분양'} 현장입니다.
+          {(() => { const t = Array.isArray(sub?.house_type_info) ? sub.house_type_info : []; const g = t.reduce((s: number, x: any) => s + (x.supply || 0), 0); return g > 0 ? ` 일반분양 ${g}세대, 특별공급 ${t.reduce((s: number, x: any) => s + (x.spsply_hshldco || 0), 0)}세대입니다.` : ''; })()}
           {sub?.rcept_bgnde && <> 청약 접수일은 {sub.rcept_bgnde}이며,</>}
           {sub?.mvn_prearnge_ym && <> 입주 예정일은 {fmtYM(sub.mvn_prearnge_ym)}입니다.</>}
           {(site?.price_min || site?.price_max) && <> 분양가는 {site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}{site?.price_min && site?.price_max ? ' ~ ' : ''}{site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다.</>}
@@ -468,21 +476,34 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* Key metrics — 시각 강화 대시보드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 6, marginBottom: 14 }}>
-        {[
-          { l: '세대수', v: (site?.total_units || sub?.tot_supply_hshld_co) ? `${Number(site?.total_units || sub?.tot_supply_hshld_co).toLocaleString()}` : '-', c: 'var(--text-primary)', icon: '🏢', bar: Math.min((Number(site?.total_units || sub?.tot_supply_hshld_co || 0) / 5000) * 100, 100), barColor: 'var(--brand)' },
-          { l: sub ? '분양가' : '시세', v: (site?.price_min || site?.price_max) ? `${fmtAmount(site?.price_min)}~${fmtAmount(site?.price_max)}` : unsold?.sale_price_min ? `${fmtAmount(unsold.sale_price_min)}~` : '-', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)' },
-          { l: '입주예정', v: (site?.move_in_date || sub?.mvn_prearnge_ym) ? (site?.move_in_date || sub?.mvn_prearnge_ym || '').slice(0, 7).replace('-', '.') : '-', c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)' },
-          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B' },
-        ].map(s => (
-          <div key={s.l} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
-            <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2 }}>{s.v}</div>
-            {s.bar > 0 && <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}><div style={{ height: '100%', width: `${s.bar}%`, borderRadius: 2, background: s.barColor }} /></div>}
+      {(() => {
+        const totalUnits = Number(site?.total_units || sub?.tot_supply_hshld_co || 0);
+        const types = Array.isArray(sub?.house_type_info) ? sub.house_type_info : [];
+        const generalSupply = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
+        const specialSupply = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
+        const hasBreakdown = generalSupply > 0 || specialSupply > 0;
+
+        const cards = [
+          { l: '총 공급', v: totalUnits > 0 ? `${totalUnits.toLocaleString()}` : '-', sub: hasBreakdown ? `일반 ${generalSupply} · 특별 ${specialSupply}` : '', c: 'var(--text-primary)', icon: '🏢', bar: Math.min((totalUnits / 5000) * 100, 100), barColor: 'var(--brand)' },
+          { l: sub ? '분양가' : '시세', v: (site?.price_min || site?.price_max) ? `${fmtAmount(site?.price_min)}~${fmtAmount(site?.price_max)}` : unsold?.sale_price_min ? `${fmtAmount(unsold.sale_price_min)}~` : '-', sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)' },
+          { l: '입주예정', v: (site?.move_in_date || sub?.mvn_prearnge_ym) ? (site?.move_in_date || sub?.mvn_prearnge_ym || '').slice(0, 7).replace('-', '.') : '-', sub: '', c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)' },
+          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, sub: '', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B' },
+        ];
+
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 6, marginBottom: 14 }}>
+            {cards.map(s => (
+              <div key={s.l} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2 }}>{s.v}</div>
+                {s.sub && <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3 }}>{s.sub}</div>}
+                {s.bar > 0 && <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}><div style={{ height: '100%', width: `${s.bar}%`, borderRadius: 2, background: s.barColor }} /></div>}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        );
+      })()}
 
       {/* Features */}
       {features.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>{features.map((f, i: number) => <span key={i} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(59,123,246,0.1)', color: '#6CB4FF', border: '1px solid rgba(59,123,246,0.15)' }}>{String(f)}</span>)}</div>}
@@ -605,7 +626,11 @@ export default async function AptUnifiedPage({ params }: Props) {
         const now = new Date().toISOString().slice(0, 10);
         const currentIdx = steps.findIndex(s => s.date && s.date >= now);
         const activeIdx = currentIdx >= 0 ? currentIdx : steps.length;
-        const rows = [['분양유형', sub.mdatrgbn_nm], ['청약접수', sub.rcept_bgnde && sub.rcept_endde ? `${sub.rcept_bgnde} ~ ${sub.rcept_endde}` : null], ['특별공급', sub.spsply_rcept_bgnde ? `${sub.spsply_rcept_bgnde} ~ ${sub.spsply_rcept_endde}` : null], ['당첨자발표', sub.przwner_presnatn_de], ['계약', sub.cntrct_cncls_bgnde ? `${sub.cntrct_cncls_bgnde} ~ ${sub.cntrct_cncls_endde}` : null], ['입주예정', fmtYM(sub.mvn_prearnge_ym)], ['총공급', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대` : null]].filter(r => r[1]);
+        const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
+        const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
+        const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
+        const supplyStr = sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대${gen > 0 ? ` (일반 ${gen} · 특별 ${spe})` : ''}` : null;
+        const rows = [['분양유형', sub.mdatrgbn_nm], ['청약접수', sub.rcept_bgnde && sub.rcept_endde ? `${sub.rcept_bgnde} ~ ${sub.rcept_endde}` : null], ['특별공급', sub.spsply_rcept_bgnde ? `${sub.spsply_rcept_bgnde} ~ ${sub.spsply_rcept_endde}` : null], ['당첨자발표', sub.przwner_presnatn_de], ['계약', sub.cntrct_cncls_bgnde ? `${sub.cntrct_cncls_bgnde} ~ ${sub.cntrct_cncls_endde}` : null], ['입주예정', fmtYM(sub.mvn_prearnge_ym)], ['총공급', supplyStr]].filter(r => r[1]);
         return (
           <div className="apt-card">
             <h2 style={ct}>📅 분양 일정</h2>
