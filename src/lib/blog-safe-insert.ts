@@ -67,7 +67,7 @@ function enrichContent(content: string, category: string, title: string): string
   }
 
   // 3. FAQ 자동 삽입 — FAQ 섹션이 없는 경우
-  const hasFAQ = /FAQ|자주 묻는 질문|Q\..+A\./s.test(enriched);
+  const hasFAQ = /FAQ|자주 묻는 질문|Q\.[^]*A\./.test(enriched);
   if (!hasFAQ) {
     const faqMap: Record<string, string> = {
       stock: `\n\n## 자주 묻는 질문\n\n**Q. 이 종목의 투자 전망은?**\n\nA. 시장 상황과 기업 실적에 따라 달라질 수 있으므로, 최신 재무제표와 업종 동향을 함께 확인하시기 바랍니다.\n\n**Q. 적정 매수 시점은 언제인가요?**\n\nA. 기술적 분석과 펀더멘털 분석을 병행하여 본인의 투자 성향에 맞는 진입 시점을 결정하시길 권장합니다.\n\n**Q. 배당 정보는 어디서 확인하나요?**\n\nA. [카더라 주식 페이지](/stock)에서 종목별 배당 이력과 배당수익률을 확인하실 수 있습니다.`,
@@ -79,8 +79,6 @@ function enrichContent(content: string, category: string, title: string): string
   // 4. 지도 링크 자동 삽입 — 부동산 카테고리 필수
   if ((category === 'apt' || category === 'unsold') && !enriched.includes('map.kakao') && !enriched.includes('map.naver')) {
     // 제목에서 지역명 추출 시도
-    const regionMatch = title.match(/(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)/);
-    const region = regionMatch ? regionMatch[1] : '서울';
     const mapLink = `\n\n> 🗺️ [네이버 지도에서 위치 확인](https://map.naver.com/v5/search/${encodeURIComponent(title.replace(/\d{4}|추천|분석|현황|리포트/g, '').trim())})`;
     const faqIdx = enriched.indexOf('## 자주 묻는 질문');
     if (faqIdx > 0) {
