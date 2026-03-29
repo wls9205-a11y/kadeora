@@ -71,7 +71,7 @@ export const revalidate = 3600;
 async function fetchRegionData(region: string) {
   const s = sb();
 
-  const [subsRes, tradesRes, redevRes, unsoldRes] = await Promise.all([
+  const [subsRes, tradesRes, redevRes, unsoldRes, priceRes] = await Promise.all([
     s.from('apt_subscriptions')
       .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary')
       .ilike('region_nm', `%${region}%`)
@@ -88,13 +88,29 @@ async function fetchRegionData(region: string) {
       .select('id,complex_name,region,unsold_count')
       .ilike('region', `%${region}%`).eq('is_active', true)
       .order('unsold_count', { ascending: false }).limit(10) as unknown as Promise<any>,
+    // 지역 분양가 통계
+    s.from('apt_sites')
+      .select('price_min,price_max')
+      .ilike('region', `%${region}%`).eq('is_active', true)
+      .gt('price_min', 0).gt('price_max', 0)
+      .limit(50) as unknown as Promise<any>,
   ]);
+
+  const priceData = priceRes?.data || [];
+  const priceStats = priceData.length > 0 ? {
+    count: priceData.length,
+    avgMin: Math.round(priceData.reduce((s: number, p: any) => s + p.price_min, 0) / priceData.length),
+    avgMax: Math.round(priceData.reduce((s: number, p: any) => s + p.price_max, 0) / priceData.length),
+    lowestMin: Math.min(...priceData.map((p: any) => p.price_min)),
+    highestMax: Math.max(...priceData.map((p: any) => p.price_max)),
+  } : null;
 
   return {
     subscriptions: subsRes?.data || [],
     transactions: tradesRes?.data || [],
     redevelopments: redevRes?.data || [],
     unsolds: unsoldRes?.data || [],
+    priceStats,
   };
 }
 
@@ -216,6 +232,39 @@ export default async function RegionLandingPage({ params }: Props) {
           ))}
         </div>
       </div>
+
+      {/* 💰 지역 분양가 현황 */}
+      {data.priceStats && (() => {
+        const ps = data.priceStats;
+        const fmtA = (n: number) => n >= 100000000 ? `${(n / 100000000).toFixed(1)}억` : `${Math.round(n / 10000).toLocaleString()}만`;
+        const tradeAmts = data.transactions.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
+        const tradeAvg = tradeAmts.length > 0 ? Math.round(tradeAmts.reduce((s: number, a: number) => s + a, 0) / tradeAmts.length) : 0;
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px', marginBottom: 16 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>💰 {decoded} 분양가 현황 <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)' }}>{ps.count}개 현장 기준</span></div>
+            <div style={{ display: 'grid', gridTemplateColumns: tradeAvg > 0 ? 'repeat(3, minmax(0,1fr))' : 'repeat(2, minmax(0,1fr))', gap: 6 }}>
+              <div style={{ background: 'rgba(59,123,246,0.05)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>{fmtA(ps.avgMin)}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평균 최저 분양가</div>
+              </div>
+              <div style={{ background: 'rgba(248,113,113,0.05)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-red)' }}>{fmtA(ps.avgMax)}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평균 최고 분양가</div>
+              </div>
+              {tradeAvg > 0 && (
+                <div style={{ background: 'rgba(52,211,153,0.05)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#34D399' }}>{fmtA(tradeAvg)}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>실거래 평균 ({tradeAmts.length}건)</div>
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--border)' }}>
+              <span>최저 {fmtA(ps.lowestMin)}</span>
+              <span>최고 {fmtA(ps.highestMax)}</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 청약 섹션 */}
       {data.subscriptions.length > 0 && (
