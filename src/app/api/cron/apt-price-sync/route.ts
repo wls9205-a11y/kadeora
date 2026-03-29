@@ -69,13 +69,15 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           .limit(50);
 
         if (trades && trades.length >= 2) {
-          const amounts = trades.map(t => t.deal_amount);
-          const pMin = Math.min(...amounts);
-          const pMax = Math.max(...amounts);
-          await sb.from('apt_sites').update({
-            price_min: pMin, price_max: pMax, updated_at: new Date().toISOString(),
-          }).eq('id', site.id);
-          synced++;
+          const amounts = trades.map(t => t.deal_amount).filter((v): v is number => v != null && v > 0);
+          if (amounts.length >= 2) {
+            const pMin = Math.min(...amounts);
+            const pMax = Math.max(...amounts);
+            await sb.from('apt_sites').update({
+              price_min: pMin, price_max: pMax, updated_at: new Date().toISOString(),
+            }).eq('id', site.id);
+            synced++;
+          }
         }
       }
     }
