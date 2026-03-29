@@ -36,6 +36,7 @@ const CRON_GROUPS = {
     '/api/cron/stock-flow-crawl',
     '/api/cron/stock-price',
     '/api/cron/invest-calendar-refresh',
+    '/api/cron/crawl-apt-rent',
   ],
   process: [
     '/api/cron/aggregate-trade-stats',

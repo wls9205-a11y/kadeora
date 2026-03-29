@@ -130,6 +130,10 @@
       "schedule": "0 8 * * 1-5"
     },
     {
+      "path": "/api/cron/crawl-apt-rent",
+      "schedule": "0 9 * * 1-5"
+    },
+    {
       "path": "/api/cron/crawl-apt-resale",
       "schedule": "0 9 * * 1"
     },
