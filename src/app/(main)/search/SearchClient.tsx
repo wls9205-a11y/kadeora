@@ -548,18 +548,19 @@ export default function SearchClient() {
 
           {/* Popular searches */}
           <div>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>인기 검색어</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🔥 인기 검색어</div>
+            <div className="apt-pill-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
               {POPULAR.map((s, i) => (
                 <button
                   key={s}
                   onClick={() => { setInputVal(s); handleInputChange(s); }}
                   style={{
-                    padding: '6px 14px', borderRadius: 20, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
-                    background: 'var(--bg-surface)', color: 'var(--text-secondary)',
-                    border: '1px solid var(--border)', transition: 'all 0.15s',
+                    padding: '6px 12px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    background: i === 0 ? 'var(--brand-bg)' : 'var(--bg-surface)', color: i === 0 ? 'var(--brand)' : 'var(--text-secondary)',
+                    border: `1px solid ${i === 0 ? 'var(--brand-border, rgba(59,123,246,0.3))' : 'var(--border)'}`,
+                    flexShrink: 0, whiteSpace: 'nowrap',
                   }}
-                ><span style={{ color: 'var(--brand)', fontWeight: 700, marginRight: 4 }}>{i + 1}.</span>{s}</button>
+                ><span style={{ color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: 700, marginRight: 3, fontSize: 11 }}>{i + 1}</span>{s}</button>
               ))}
             </div>
           </div>

@@ -7,25 +7,26 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 export async function GET() {
   try {
     const sb = getSupabaseAdmin();
-    const { data } = await sb.from('trending_keywords').select('keyword, heat_score').order('heat_score', { ascending: false }).limit(10);
+    const { data } = await sb.from('trending_keywords').select('keyword, heat_score, rank').order('heat_score', { ascending: false }).limit(10);
     
-    // 데이터가 없을 때 기본 인기 검색어
-    if (!data || data.length === 0) {
-      const defaults = [
-        { keyword: '삼성전자', heat_score: 100 },
-        { keyword: 'SK하이닉스', heat_score: 95 },
-        { keyword: 'AI 반도체', heat_score: 90 },
-        { keyword: '청약 경쟁률', heat_score: 85 },
-        { keyword: '엔비디아', heat_score: 80 },
-        { keyword: '기준금리 인하', heat_score: 75 },
-        { keyword: '미분양 현황', heat_score: 70 },
-        { keyword: 'ETF 추천', heat_score: 65 },
-        { keyword: '재개발 투자', heat_score: 60 },
-        { keyword: '배당주 TOP', heat_score: 55 },
-      ];
-      return NextResponse.json(defaults, { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } });
+    if (data && data.length > 0) {
+      return cachedJson(data.map((d: any, i: number) => ({ keyword: d.keyword, heat_score: d.heat_score, rank: d.rank || i + 1 })), 300);
     }
-    return NextResponse.json(data, { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } });
+
+    // 동적 폴백: 인기 블로그 태그에서 생성
+    let tagFallback: any[] | null = null;
+    try {
+      const { data: tagData } = await sb.rpc('blog_popular_tags', { limit_count: 10 });
+      tagFallback = tagData;
+    } catch { /* silent */ }
+    if (tagFallback && tagFallback.length > 0) {
+      return cachedJson(tagFallback.map((t: any, i: number) => ({ keyword: t.tag, heat_score: 100 - i * 5, rank: i + 1 })), 300);
+    }
+
+    // 최종 폴백: 인기 종목
+    const { data: stocks } = await sb.from('stock_quotes').select('name').gt('price', 0).order('change_pct', { ascending: false }).limit(8);
+    const fallback = (stocks || []).map((s: any, i: number) => ({ keyword: s.name, heat_score: 80 - i * 5, rank: i + 1 }));
+    return cachedJson(fallback, 300);
   } catch {
     return NextResponse.json([]);
   }

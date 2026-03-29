@@ -98,6 +98,7 @@ const CRON_GROUPS = {
     '/api/cron/purge-withdrawn-consents',
     '/api/indexnow',                // ⚠️ /api/cron 아님
     '/api/cron/expire-listings',
+    '/api/cron/refresh-trending',
     '/api/cron/check-price-alerts',
     '/api/cron/portfolio-snapshot',
     '/api/cron/push-apt-deadline',

@@ -90,14 +90,17 @@ export default function RightPanel() {
       )}
 
       {/* 인기 검색어 (5개) */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 인기 검색어</div>
-        {display.map((item, i) => (
-          <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} className="kd-card-hover" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '5px 6px', borderRadius: 6, margin: '0 -6px' }}>
-            <span style={{ fontSize: 11, fontWeight: 800, minWidth: 18, textAlign: 'center', color: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text-tertiary)' }}>
-              {i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>🔥 인기 검색어</span>
+          <Link href="/search" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none' }}>더보기</Link>
+        </div>
+        {display.slice(0, 5).map((item, i) => (
+          <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} className="kd-card-hover" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', padding: '4px 4px', borderRadius: 6, margin: '0 -4px' }}>
+            <span style={{ fontSize: 10, fontWeight: 800, width: 16, textAlign: 'center', color: i === 0 ? 'var(--brand)' : i < 3 ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>
+              {i + 1}
             </span>
-            <span style={{ fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: i < 3 ? 700 : 500 }}>{item.keyword}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: i < 3 ? 600 : 400 }}>{item.keyword}</span>
           </Link>
         ))}
       </div>

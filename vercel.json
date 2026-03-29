@@ -359,6 +359,10 @@
     {
       "path": "/api/cron/premium-expire",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-trending",
+      "schedule": "0 */6 * * *"
     }
   ]
 }
