@@ -202,10 +202,10 @@ export async function GET(req: NextRequest) {
     }
 
     // === 2단계: 공공데이터 API (종가, 키가 있을 때) ===
-    const stockKey = process.env.STOCK_DATA_API_KEY;
+    const stockKeyRaw = process.env.STOCK_DATA_API_KEY;
     const busanKey = process.env.BUSAN_DATA_API_KEY;
-    const stockApiKey = stockKey || busanKey;
-    const keySource = stockKey ? 'STOCK_DATA_API_KEY' : (busanKey ? 'BUSAN_DATA_API_KEY' : 'none');
+    const stockApiKey = (stockKeyRaw || busanKey || '').trim();
+    const keySource = stockKeyRaw ? 'STOCK_DATA_API_KEY' : (busanKey ? 'BUSAN_DATA_API_KEY' : 'none');
     let krxDebug = '';
     if (stockApiKey && totalCreated === 0) {
       const { stocks: krxStocks, debug } = await fetchKRXStocks(stockApiKey);
@@ -240,6 +240,8 @@ export async function GET(req: NextRequest) {
         kis_available: !!(kisKey && kisSecret),
         public_api_available: !!stockApiKey,
         key_source: keySource,
+        key_raw_len: stockKeyRaw?.length ?? 0,
+        key_trimmed_len: stockApiKey.length,
         key_preview: stockApiKey ? `${stockApiKey.slice(0, 8)}...${stockApiKey.slice(-4)} (len=${stockApiKey.length})` : 'none',
         krx_debug: krxDebug.slice(0, 800),
       },
