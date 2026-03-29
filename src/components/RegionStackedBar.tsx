@@ -19,6 +19,8 @@ interface Props {
   transactions: Record<string, any>[];
   redevTotalCount?: number;
   tradeTotalCount?: number;
+  tradeByRegion?: Record<string, number>;
+  redevByRegion?: Record<string, number>;
   onRegionClick?: (region: string) => void;
   activeRegion?: string;
   shareButton?: React.ReactNode;
@@ -42,7 +44,7 @@ const LABELS: Record<string, string> = {
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, onRegionClick, activeRegion, shareButton }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, onRegionClick, activeRegion, shareButton }: Props) {
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
     const ensure = (name: string) => {
@@ -54,20 +56,33 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
     apts.forEach((a: Record<string, any>) => { const r = normalizeRegion(a.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].sub++; map[r].total++; } });
     ongoingApts.forEach((a: Record<string, any>) => { const r = normalizeRegion(a.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].ongoing++; map[r].total++; } });
     unsold.forEach((u: Record<string, any>) => { const r = normalizeRegion(u.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].unsold++; map[r].total++; } });
-    redevelopment.forEach((rd: Record<string, any>) => { const r = normalizeRegion(rd.region || rd.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].redev++; map[r].total++; } });
 
-    const tradeRegionSet: Record<string, Set<string>> = {};
-    transactions.forEach((t: Record<string, any>) => {
-      let r = normalizeRegion(t.region_nm || '');
-      if (!r) r = (t.sigungu_nm || '').slice(0, 2);
-      if (!r) return; ensure(r);
-      if (!tradeRegionSet[r]) tradeRegionSet[r] = new Set();
-      tradeRegionSet[r].add(t.apt_name || t.id);
-    });
-    Object.entries(tradeRegionSet).forEach(([r, s]) => { if (map[r]) { map[r].trade = s.size; map[r].total += s.size; } });
+    // 재개발: 맵 우선, 없으면 배열 순회
+    const hasRedevMap = Object.keys(redevByRegion).length > 0;
+    if (hasRedevMap) {
+      Object.entries(redevByRegion).forEach(([r, count]) => { ensure(r); if (map[r]) { map[r].redev = count; map[r].total += count; } });
+    } else {
+      redevelopment.forEach((rd: Record<string, any>) => { const r = normalizeRegion(rd.region || rd.region_nm || ''); if (!r) return; ensure(r); if (map[r]) { map[r].redev++; map[r].total++; } });
+    }
+
+    // 실거래: 맵 우선, 없으면 배열 순회
+    const hasTradeMap = Object.keys(tradeByRegion).length > 0;
+    if (hasTradeMap) {
+      Object.entries(tradeByRegion).forEach(([r, count]) => { ensure(r); if (map[r]) { map[r].trade = count; map[r].total += count; } });
+    } else {
+      const tradeRegionSet: Record<string, Set<string>> = {};
+      transactions.forEach((t: Record<string, any>) => {
+        let r = normalizeRegion(t.region_nm || '');
+        if (!r) r = (t.sigungu_nm || '').slice(0, 2);
+        if (!r) return; ensure(r);
+        if (!tradeRegionSet[r]) tradeRegionSet[r] = new Set();
+        tradeRegionSet[r].add(t.apt_name || t.id);
+      });
+      Object.entries(tradeRegionSet).forEach(([r, s]) => { if (map[r]) { map[r].trade = s.size; map[r].total += s.size; } });
+    }
 
     return Object.values(map).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
-  }, [apts, ongoingApts, unsold, redevelopment, transactions]);
+  }, [apts, ongoingApts, unsold, redevelopment, transactions, tradeByRegion, redevByRegion]);
 
   const grandTotal = regions.reduce((s, r) => s + r.total, 0);
   const grandCats = {

@@ -41,6 +41,8 @@ async function fetchAptData() {
   let lastRefreshed: string | null = null;
   let redevTotalCount = 0;
   let tradeTotalCount = 0;
+  let tradeByRegion: Record<string, number> = {};
+  let redevByRegion: Record<string, number> = {};
   const regionAvgPriceMap: Record<string, number> = {};
 
   try {
@@ -58,9 +60,8 @@ async function fetchAptData() {
       }
     } catch {}
 
-    // SSR: 청약 + 미분양(ongoingApts 생성용) + 알림 카운트만 로드
-    // 실거래/재개발/월별통계는 클라이언트에서 탭 클릭 시 lazy fetch
-    const [aptsR, unsoldR, alertsR, redevCountR, tradeCountR] = await Promise.all([
+    // SSR: 청약 + 미분양 + 알림 카운트 + 지역별 실거래/재개발 건수
+    const [aptsR, unsoldR, alertsR, redevCountR, tradeCountR, tradeByRegionR, redevByRegionR] = await Promise.all([
       sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm, is_price_limit, ai_summary, house_type_info, price_per_pyeong_avg')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(1000),
@@ -68,12 +69,20 @@ async function fetchAptData() {
       sb.from('apt_alerts').select('house_manage_no'),
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
       sb.from('apt_transactions').select('id', { count: 'exact', head: true }),
+      // 지역별 실거래 건수 (15행) — 497K건 로드 대신 GROUP BY
+      sb.rpc('get_trade_count_by_region'),
+      // 지역별 재개발 건수 (11행)
+      sb.rpc('get_redev_count_by_region'),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
     (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
     redevTotalCount = redevCountR.count ?? 0;
     tradeTotalCount = tradeCountR.count ?? 0;
+
+    // 지역별 실거래/재개발 건수 맵 (RegionStackedBar 즉시 표시용)
+    (tradeByRegionR.data || []).forEach((r: any) => { if (r.region) tradeByRegion[r.region] = Number(r.trade_count) || 0; });
+    (redevByRegionR.data || []).forEach((r: any) => { if (r.region) redevByRegion[r.region] = Number(r.redev_count) || 0; });
 
     // 지역별 평균가 (분양중 단지에 주입)
     try {
@@ -182,11 +191,11 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount } = await fetchAptData();
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
@@ -202,7 +211,7 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"전국 아파트 청약 일정","numberOfItems":apts.length,"itemListElement":itemList}) }} />
     {/* CollectionPage → search engine context */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":"아파트 청약·분양·미분양·재개발","description":`전국 ${apts.length}건 청약, ${ongoingApts.length}건 분양중, ${unsold.length}건 미분양 현황`,"url":SITE_URL+"/apt","isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
-    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} />
+    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} />
     <Disclaimer />
   </Suspense>;
 }
