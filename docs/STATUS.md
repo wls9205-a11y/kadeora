@@ -1,41 +1,37 @@
-# 카더라 STATUS.md — 세션 55 (2026-03-30)
+# 카더라 STATUS.md — 세션 55 후반 (2026-03-30 04:00 KST)
 
-## 최신 커밋
-- `526d06a` — 가격 데이터 자동 싱크 크론 (apt-price-sync)
-- `329ff10` — 청약/미분양 리스트 카드 가격 시각화 강화
-- `64ee429` — 아파트 단지 월별 시세 추이 SVG 차트
-- `d87e040` — 지역 시세 비교 + 미공개 참고 시세
+## 최신 HEAD
+- `74244d5` — 공공데이터 API JSON 파싱 에러 방어
+- `1b77ea2` — apt-crawl-pricing maxDuration 300초 + 배치 250건
+- `0f58fe2` — 가격 단위 버그 수정 (만원 단위 통일)
 
-## 이번 세션 주요 작업
+## 분양가 자동 수집 현황
+- **347/2,692건 (12.9%)** 수집 완료
+- **매시간 250건** 자동 수집 (maxDuration 300초)
+- **약 10시간 후 전체 완료** 예상 (2026-03-30 14:00 KST)
+- 평당가: 175건 보유 (자동 계산)
 
-### 가격 시각화 대폭 강화
-1. **📍 지역 시세 비교 포지션 바** (apt/[id])
-   - 이 현장이 지역 내 어디에 위치하는지 3색 바에 마커
-   - 지역 평균 대비 +/-% 배지 (고가/저가/평균)
-2. **💰 분양가 미공개 참고 시세** (apt/[id])
-   - 가격 없는 현장에도 지역 참고 시세 점선 카드
-3. **📈 월별 시세 추이 차트** (apt/complex/[name])
-   - 서버 렌더링 SVG (JS 불필요)
-   - 그라디언트 에리어 필 + 등락률 배지
-4. **청약 카드 분양가 표시** (SubscriptionTab)
-   - house_type_info에서 최저~최고 분양가 + 평당가
-5. **미분양 카드 가격 범위 바** (UnsoldTab)
-   - sale_price 그라디언트 바 + 중앙 마커
+## 이번 세션 핵심 작업
 
-### 가격 데이터 자동화 크론 (2개 신규)
-1. **apt-crawl-pricing** — 청약홈 API에서 평형별 분양가 자동 수집
-   - 매 6시간, 50건/배치, APT_DATA_API_KEY 필요
-2. **apt-price-sync** — 3개 소스에서 apt_sites 가격 자동 채움
-   - 매일 03시, apt_subscriptions + apt_transactions + unsold_apts
+### 가격 시각화 (8개 페이지 강화)
+- apt/[id]: 지역 시세 비교 포지션 바 + 미공개 참고 시세
+- apt/complex/[name]: 월별 시세 추이 SVG 차트
+- apt/region/[region]: 청약 분양가 + 실거래 평당가
+- apt/search: 미니 가격 바
+- SubscriptionTab/UnsoldTab/OngoingTab: 분양가 범위 바
 
-### DB 백필
-- 실거래 데이터 → apt_sites price: 46건 자동 채움
-- 현재 가격 커버리지: 2,296/5,512 (42%)
+### 가격 단위 버그 수정 (심각)
+- tier 기준: 원→만원 (12억 현장이 "3억 미만" 표시 → 수정)
+- fmtA 인라인 2개 제거 → fmtAmount 통일
+- 납부 시뮬레이터 basePrice 단위 혼재 수정
 
-## PENDING — 수동 작업 (Node님)
-- [ ] APT_DATA_API_KEY 설정 → apt-crawl-pricing + apt-backfill-details 활성화
-- [ ] Anthropic 크레딧 충전 (블로그 크론 0건 생성 중)
-- [ ] STOCK_DATA_API_KEY 갱신
+### 크론 개선 (3개 신규, 3개 강화)
+- apt-crawl-pricing: 매시간 250건, maxDuration 300초
+- apt-price-sync: 매일 03시, 3개 소스 싱크
+- apt-backfill-details: 주1→매일 04:30
+- 3개 크론 JSON 파싱 방어 강화 (busan-redev, crawl-pricing, backfill-details)
 
-## 크론 현황 (79개 → 81개)
-- 신규: apt-crawl-pricing (6시간), apt-price-sync (매일)
+## PENDING
+- [ ] Anthropic 크레딧 충전 (블로그 크론 0건)
+- [ ] 분양가 수집 완료 후 크론 스케줄 6시간으로 복원
+- [ ] nearby_facilities 데이터 (카카오/네이버 API 필요)
