@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User as UserIcon, PenSquare, BookOpen, LogOut, FileText } from 'lucide-react';
+import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User as UserIcon, PenSquare, BookOpen, LogOut, FileText, MoreHorizontal } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
@@ -21,7 +21,6 @@ const MOBILE_TABS = [
   { href: '/feed',    label: '피드',   Icon: Home },
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/apt',     label: '부동산', Icon: Building2 },
-  { href: '/blog',    label: '블로그', Icon: FileText },
 ];
 
 const MORE_ITEMS = [
@@ -437,6 +436,23 @@ export function Navigation() {
             </Link>
           );
         })}
+        {/* 더보기 탭 */}
+        <button
+          aria-label="더보기"
+          onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); setMenuOpen(false); haptic('light'); }}
+          style={{
+            display:'flex', flexDirection:'column', alignItems:'center', gap:2,
+            padding:'10px 8px 6px', minHeight:56,
+            justifyContent:'center', flex:1, position:'relative',
+            color: moreOpen ? 'var(--brand)' : 'var(--text-tertiary)',
+            transition:'color 0.15s ease',
+            background:'none', border:'none', cursor:'pointer',
+          }}
+        >
+          {moreOpen && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
+          <MoreHorizontal size={18} strokeWidth={moreOpen ? 2.5 : 1.8} />
+          <span style={{ fontSize:10, fontWeight: moreOpen ? 700 : 500, lineHeight:1.2 }}>더보기</span>
+        </button>
       </nav>
 
       {/* 더보기 시트 */}

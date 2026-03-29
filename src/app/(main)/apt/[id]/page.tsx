@@ -307,6 +307,7 @@ export default async function AptUnifiedPage({ params }: Props) {
 
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const subSt = sub ? (!sub.rcept_bgnde ? 'upcoming' : today >= sub.rcept_bgnde && today <= sub.rcept_endde ? 'open' : today < sub.rcept_bgnde ? 'upcoming' : 'closed') : null;
+  const dDay = sub?.rcept_endde ? Math.ceil((new Date(sub.rcept_endde).getTime() - new Date(today).getTime()) / 86400000) : null;
   const SB: Record<string, { label: string; bg: string; color: string; border: string }> = {
     open: { label: '접수중', bg: 'rgba(52,211,153,0.2)', color: 'var(--accent-green)', border: 'var(--accent-green)' },
     upcoming: { label: '접수예정', bg: 'var(--accent-yellow-bg)', color: 'var(--accent-yellow)', border: 'var(--accent-yellow)' },
@@ -381,41 +382,40 @@ export default async function AptUnifiedPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{name}</span>
       </nav>
 
-      {/* 이미지 캐러셀 (포털 이미지 검색 노출 + 이미지탭 캐러셀) */}
+      {/* 히어로 이미지 영역 — DB 이미지가 있으면 실제 이미지, 없으면 그라디언트 */}
       {(() => {
         const dbImages = Array.isArray(site?.images) ? site.images.slice(0, 4).map((img: any) => typeof img === 'string' ? img : img?.link || img?.url).filter(Boolean) : [];
-        const ogBase = `/api/og?design=2&category=apt`;
-        const ogImages = [
-          { src: `${ogBase}&title=${encodeURIComponent(name)}&subtitle=${encodeURIComponent(`${region} ${site?.sigungu || ''} · ${site?.builder || sub?.constructor_nm || ''}`.trim())}`, alt: `${name} ${tLabel[sType]} 정보 — ${region} ${site?.sigungu || ''} ${site?.total_units || sub?.tot_supply_hshld_co || ''}세대` },
-          { src: `/api/og?design=3&category=apt&title=${encodeURIComponent(`${name} 분양가`)}&subtitle=${encodeURIComponent((site?.price_min || site?.price_max) ? `${site?.price_min ? Math.round(site.price_min/10000).toLocaleString()+'만' : ''}~${site?.price_max ? Math.round(site.price_max/10000).toLocaleString()+'만원' : ''}` : `${region} ${site?.sigungu || ''}`)}`, alt: `${name} 분양가 정보 — ${region} 아파트 가격` },
-          { src: `/api/og?design=4&category=apt&title=${encodeURIComponent(`${name} 청약 일정`)}&subtitle=${encodeURIComponent(sub?.rcept_bgnde ? `접수 ${sub.rcept_bgnde}` : `${tLabel[sType]} · ${region}`)}`, alt: `${name} 청약 접수 일정 — ${region} ${site?.builder || sub?.constructor_nm || ''}` },
-          { src: `/api/og?design=5&category=apt&title=${encodeURIComponent(`${name} 모집공고 요약`)}&subtitle=${encodeURIComponent(`${sub?.is_price_limit ? '분양가상한제 · ' : ''}${site?.builder || sub?.constructor_nm || region}`)}`, alt: `${name} 입주자모집공고 핵심 요약 — 분양가 견본주택 청약 자격` },
-        ];
-        const allImages = dbImages.length >= 2
-          ? [...dbImages.slice(0, 2).map((url: string, i: number) => ({ src: url, alt: `${name} 현장 사진 ${i + 1} — ${region} ${site?.sigungu || ''}` })), ogImages[0]]
-          : ogImages;
+        const heroImage = dbImages.length > 0 ? dbImages[0] : null;
+        const ogUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&category=apt&subtitle=${encodeURIComponent(region)}`;
         return (
           <>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${name} ${tLabel[sType]} 이미지`,
               about: { '@type': 'ApartmentComplex', name, address: { '@type': 'PostalAddress', addressRegion: region } },
-              image: allImages.map((img, i) => ({ '@type': 'ImageObject', url: img.src.startsWith('/') ? `${SITE_URL}${img.src}` : img.src, name: img.alt, width: 1200, height: 630, position: i + 1 })),
+              image: [{ '@type': 'ImageObject', url: heroImage || ogUrl, name: `${name} — ${region}`, width: 1200, height: 630, position: 1 }],
             })}} />
-            <div style={{ display: 'grid', gridTemplateColumns: allImages.length >= 3 ? '2fr 1fr' : '1fr', gap: 6, marginBottom: 12 }}>
-              <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={allImages[0].src} alt={allImages[0].alt} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block' }} loading="eager" />
-              </div>
-              {allImages.length >= 3 && (
-                <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 6 }}>
-                  {allImages.slice(1, 3).map((img, i) => (
-                    <div key={i} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img.src} alt={img.alt} width={1200} height={630} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
-                    </div>
-                  ))}
+            <div style={{
+              position: 'relative', borderRadius: 14, overflow: 'hidden', marginBottom: 14,
+              height: heroImage ? 200 : 140,
+              background: heroImage ? undefined : 'linear-gradient(135deg, #0c1629 0%, #1a3050 50%, #1e3a8a 100%)',
+            }}>
+              {heroImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={heroImage} alt={`${name} 대표 이미지 — ${region}`} width={720} height={400}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="eager" />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 18px' }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>{region} {site?.sigungu || ''}</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{site?.builder || sub?.constructor_nm || ''}{site?.total_units ? ` · ${site.total_units}세대` : sub?.tot_supply_hshld_co ? ` · ${sub.tot_supply_hshld_co}세대` : ''}</div>
                 </div>
               )}
+              {/* 오버레이 배지 */}
+              <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {subSt && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: SB[subSt].bg.replace('0.15', '0.85'), color: '#fff', fontWeight: 700 }}>{SB[subSt].label}{dDay !== null ? ` D${dDay > 0 ? '-' + dDay : dDay === 0 ? '-Day' : '+' + Math.abs(dDay)}` : ''}</span>}
+                {sub?.is_price_limit && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: 'rgba(139,92,246,0.85)', color: '#fff', fontWeight: 700 }}>상한제</span>}
+                {redevStage && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: 'rgba(251,191,36,0.85)', color: '#fff', fontWeight: 700 }}>{redevStage}</span>}
+              </div>
             </div>
           </>
         );

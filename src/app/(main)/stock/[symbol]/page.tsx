@@ -191,45 +191,20 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* 이미지 캐러셀 (포털 이미지 검색 노출 + 이미지탭 캐러셀) */}
-      {(() => {
-        const images = [
-          { src: `/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${fmtPrice(Number(s.price), s.currency ?? undefined)} ${changePct >= 0 ? '▲' : '▼'}${Math.abs(changePct).toFixed(2)}%`)}&design=2&category=stock`, alt: `${s.name} (${symbol}) 주가 시세 — ${s.market} 상장 ${s.sector || ''} 종목` },
-          { src: `/api/og?title=${encodeURIComponent(`${s.name} 차트 분석`)}&design=3&category=stock&subtitle=${encodeURIComponent(`${s.market} · ${s.sector || ''} · 시가총액 ${fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}`)}`, alt: `${s.name} 주가 차트 분석 — ${s.sector || s.market} 섹터` },
-          { src: `/api/og?title=${encodeURIComponent(`${s.name} 투자 분석`)}&design=4&category=stock&subtitle=${encodeURIComponent(`AI 한줄평 · 수급 · 뉴스 · 공시`)}`, alt: `${s.name} 투자 분석 — AI 한줄평 수급 뉴스 공시 종합` },
-        ];
-        return (
-          <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${s.name} (${symbol}) 주식 이미지`,
-              about: { '@type': 'FinancialProduct', name: s.name, identifier: symbol },
-              image: images.map((img, i) => ({ '@type': 'ImageObject', url: `${SITE_URL}${img.src}`, name: img.alt, width: 1200, height: 630, position: i + 1 })),
-            })}} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 6, marginBottom: 12 }}>
-              <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={images[0].src} alt={images[0].alt} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block' }} loading="eager" />
-              </div>
-              <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 6 }}>
-                {images.slice(1).map((img, i) => (
-                  <div key={i} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.src} alt={img.alt} width={1200} height={630} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        );
-      })()}
+      {/* SEO: ImageGallery JSON-LD (시각적 캐러셀 제거, 메타데이터만 유지) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${s.name} (${symbol}) 주식 이미지`,
+        about: { '@type': 'FinancialProduct', name: s.name, identifier: symbol },
+        image: [{ '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`, name: `${s.name} 주가 시세`, width: 1200, height: 630 }],
+      })}} />
 
-      {/* 가격 헤더 */}
-      <div style={{
+      {/* 히어로 시세 카드 */}
+      <div className="stock-price-header" style={{
         background: isUp ? 'linear-gradient(135deg, rgba(248,113,113,0.06), var(--bg-surface))' : isDown ? 'linear-gradient(135deg, rgba(96,165,250,0.06), var(--bg-surface))' : 'var(--bg-surface)',
-        border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 12,
+        border: '1px solid var(--border)', borderRadius: 14, padding: '18px 16px', marginBottom: 12,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
           <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{symbol}</span>
           <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{s.market}</span>
           {sectorRank > 0 && sectorTotal > 0 && s.sector && (
@@ -238,40 +213,42 @@ export default async function StockDetailPage({ params }: Props) {
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 'clamp(22px, 6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+          <span style={{ fontSize: 'clamp(28px, 8vw, 36px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
           {!isStale && (
-            <span style={{ fontSize: 18, fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
           )}
         </div>
-        {/* 30일 스파크라인 */}
+        {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+            {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준 · 시총 {fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}
+          </div>
+        )}
+        {/* 통합 스파크라인 차트 (90px) */}
         {priceHist.length >= 5 && (
-          <div style={{ marginTop: 6, height: 32 }}>
-            <svg viewBox={`0 0 ${priceHist.length} 32`} style={{ width: '100%', height: 32 }} preserveAspectRatio="none">
+          <div style={{ height: 90, position: 'relative' }}>
+            <svg viewBox={`0 0 ${priceHist.length} 72`} style={{ width: '100%', height: '100%' }} preserveAspectRatio="none">
               {(() => {
                 const min = Math.min(...priceHist);
                 const max = Math.max(...priceHist);
                 const range = max - min || 1;
-                const points = priceHist.map((p, i) => `${i},${30 - ((p - min) / range) * 28}`).join(' ');
-                const fillPoints = `0,30 ${points} ${priceHist.length - 1},30`;
+                const points = priceHist.map((p, i) => `${i},${68 - ((p - min) / range) * 64}`).join(' ');
+                const fillPoints = `0,72 ${points} ${priceHist.length - 1},72`;
                 const lineColor = priceHist[priceHist.length - 1] >= priceHist[0] ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)');
-                const fillColor = priceHist[priceHist.length - 1] >= priceHist[0] ? (isKR ? 'rgba(248,113,113,0.1)' : 'rgba(52,211,153,0.1)') : (isKR ? 'rgba(96,165,250,0.1)' : 'rgba(248,113,113,0.1)');
+                const fillColor = priceHist[priceHist.length - 1] >= priceHist[0] ? (isKR ? 'rgba(248,113,113,0.08)' : 'rgba(52,211,153,0.08)') : (isKR ? 'rgba(96,165,250,0.08)' : 'rgba(248,113,113,0.08)');
                 return (<>
                   <polygon points={fillPoints} fill={fillColor} />
-                  <polyline points={points} fill="none" stroke={lineColor} strokeWidth="1.5" strokeLinejoin="round" />
+                  <polyline points={points} fill="none" stroke={lineColor} strokeWidth="1.8" strokeLinejoin="round" />
                 </>);
               })()}
             </svg>
+            <div style={{ position: 'absolute', bottom: 4, left: 0, fontSize: 10, color: 'var(--text-tertiary)' }}>30일 전</div>
+            <div style={{ position: 'absolute', bottom: 4, right: 0, fontSize: 10, color: 'var(--text-tertiary)' }}>오늘</div>
           </div>
         )}
         {isStale && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6 }}>시세 정보 준비 중</div>}
-        {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>
-            {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준
-          </div>
-        )}
       </div>
 
       {/* 기본 정보 그리드 */}
