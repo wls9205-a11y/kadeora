@@ -171,6 +171,26 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                     🤖 {(apt as Record<string, any>).ai_summary}
                   </div>
                 )}
+                {/* 💰 분양가 (house_type_info에서 추출) */}
+                {(() => {
+                  const hti = (apt as Record<string, any>).house_type_info;
+                  if (!hti || !Array.isArray(hti) || hti.length === 0) return null;
+                  const prices = hti.map((t: any) => t.lttot_top_amount).filter((p: number) => p > 0);
+                  if (prices.length === 0) return null;
+                  const pMin = Math.min(...prices);
+                  const pMax = Math.max(...prices);
+                  const fmtP = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
+                  const ppyeong = (apt as Record<string, any>).price_per_pyeong_avg;
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>💰 {fmtP(pMin)}{pMax !== pMin ? `~${fmtP(pMax)}` : ''}</span>
+                      {ppyeong > 0 && <span style={{ fontSize: 10, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만</span>}
+                      <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', maxWidth: 80 }}>
+                        <div style={{ height: '100%', width: `${Math.min(pMax / 200000 * 100, 100)}%`, borderRadius: 2, background: 'var(--brand)' }} />
+                      </div>
+                    </div>
+                  );
+                })()}
                 {/* 타임라인 바 */}
                 <div style={{ display: 'flex', gap: 2, fontSize: '9px', color: 'var(--text-tertiary)' }}>
                   {apt.spsply_rcept_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'var(--accent-purple-bg)' }}>특별 {fmtD(apt.spsply_rcept_bgnde)}</div>}

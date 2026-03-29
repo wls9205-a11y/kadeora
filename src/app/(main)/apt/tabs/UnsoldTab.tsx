@@ -234,6 +234,17 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               </div>
             )}
 
+            {/* 분양가 범위 바 (가격 정보 있으면) */}
+            {pMin && pMax && pMin !== pMax && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8 }}>
+                <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
+                <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: -1, left: '50%', width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', border: '1.5px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
+                </div>
+                <span style={{ fontSize: 10, color: 'var(--accent-red)', fontWeight: 600 }}>{pMax}억</span>
+              </div>
+            )}
+
             {/* 줄3: pill 버튼 */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <button onClick={() => setCommentTarget({ houseKey: `unsold_${u.id}`, houseNm: u.house_nm || '미분양', houseType: 'unsold' })}
