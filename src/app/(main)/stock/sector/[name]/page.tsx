@@ -126,21 +126,89 @@ export default async function SectorPage({ params }: Props) {
         </time>
       </div>
 
-      {/* 섹터 요약 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-        <div style={{ flex: 1, padding: '12px 14px', background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: isKR ? 'var(--accent-red)' : 'var(--accent-green)' }}>{upCount}</div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>상승</div>
+      {/* 섹터 요약 — 시각 대시보드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 8, marginBottom: 16 }}>
+        {/* 상승/하락 도넛 차트 */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <svg viewBox="0 0 80 80" style={{ width: 70, height: 70 }}>
+            {(() => {
+              const flat = stocks.length - upCount - downCount;
+              const total = stocks.length || 1;
+              const upDeg = (upCount / total) * 360;
+              const flatDeg = (flat / total) * 360;
+              const downDeg = (downCount / total) * 360;
+              const r = 30, cx = 40, cy = 40;
+              const arc = (start: number, sweep: number) => {
+                const s = (start - 90) * Math.PI / 180;
+                const e = (start + sweep - 90) * Math.PI / 180;
+                const large = sweep > 180 ? 1 : 0;
+                return `M${cx + r * Math.cos(s)},${cy + r * Math.sin(s)} A${r},${r} 0 ${large} 1 ${cx + r * Math.cos(e)},${cy + r * Math.sin(e)}`;
+              };
+              return (<>
+                {upCount > 0 && <path d={arc(0, upDeg)} fill="none" stroke={isKR ? 'var(--accent-red)' : 'var(--accent-green)'} strokeWidth="10" strokeLinecap="round" />}
+                {flat > 0 && <path d={arc(upDeg, flatDeg)} fill="none" stroke="var(--border)" strokeWidth="10" strokeLinecap="round" />}
+                {downCount > 0 && <path d={arc(upDeg + flatDeg, downDeg)} fill="none" stroke={isKR ? 'var(--accent-blue)' : 'var(--accent-red)'} strokeWidth="10" strokeLinecap="round" />}
+                <text x="40" y="37" textAnchor="middle" style={{ fontSize: 14, fontWeight: 800, fill: 'var(--text-primary)' }}>{stocks.length}</text>
+                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 8, fill: 'var(--text-tertiary)' }}>종목</text>
+              </>);
+            })()}
+          </svg>
+          <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 10 }}>
+            <span style={{ color: isKR ? 'var(--accent-red)' : 'var(--accent-green)' }}>▲{upCount}</span>
+            <span style={{ color: 'var(--text-tertiary)' }}>━{stocks.length - upCount - downCount}</span>
+            <span style={{ color: isKR ? 'var(--accent-blue)' : 'var(--accent-red)' }}>▼{downCount}</span>
+          </div>
         </div>
-        <div style={{ flex: 1, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-tertiary)' }}>{stocks.length - upCount - downCount}</div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>보합</div>
-        </div>
-        <div style={{ flex: 1, padding: '12px 14px', background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: isKR ? 'var(--accent-blue)' : 'var(--accent-red)' }}>{downCount}</div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>하락</div>
+        {/* KPI 그리드 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 6 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>합산 시총</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtCap(totalCap, stocks[0]?.currency ?? undefined)}</div>
+          </div>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 등락률</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: avgPct >= 0 ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)') }}>
+              {avgPct >= 0 ? '+' : ''}{avgPct.toFixed(2)}%
+            </div>
+          </div>
+          {/* Top Gainer */}
+          {stocks.length > 0 && (() => {
+            const gainer = stocks.reduce((a, b) => (a.change_pct || 0) > (b.change_pct || 0) ? a : b);
+            const loser = stocks.reduce((a, b) => (a.change_pct || 0) < (b.change_pct || 0) ? a : b);
+            return (<>
+              <div style={{ background: isKR ? 'rgba(248,113,113,0.06)' : 'rgba(52,211,153,0.06)', border: `1px solid ${isKR ? 'rgba(248,113,113,0.2)' : 'rgba(52,211,153,0.2)'}`, borderRadius: 10, padding: '10px 12px' }}>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>🔥 최고 상승</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gainer.name}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: isKR ? 'var(--accent-red)' : 'var(--accent-green)' }}>+{(gainer.change_pct || 0).toFixed(2)}%</div>
+              </div>
+              <div style={{ background: isKR ? 'rgba(96,165,250,0.06)' : 'rgba(248,113,113,0.06)', border: `1px solid ${isKR ? 'rgba(96,165,250,0.2)' : 'rgba(248,113,113,0.2)'}`, borderRadius: 10, padding: '10px 12px' }}>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>❄️ 최고 하락</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{loser.name}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: isKR ? 'var(--accent-blue)' : 'var(--accent-red)' }}>{(loser.change_pct || 0).toFixed(2)}%</div>
+              </div>
+            </>);
+          })()}
         </div>
       </div>
+
+      {/* 시총 분포 바 (Top 5) */}
+      {stocks.length >= 3 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>시총 비중 TOP5</div>
+          {stocks.slice(0, 5).map((s, i) => {
+            const pct = totalCap > 0 ? ((s.market_cap || 0) / totalCap) * 100 : 0;
+            return (
+              <div key={s.symbol} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 50, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+                <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, borderRadius: 3, background: `hsl(${220 - i * 20}, 70%, ${50 + i * 5}%)` }} />
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)', minWidth: 32, textAlign: 'right' }}>{pct.toFixed(1)}%</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* 종목 리스트 */}
       <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📊 {sector} 섹터 시총 순위</h2>
@@ -164,6 +232,9 @@ export default async function SectorPage({ params }: Props) {
                 </div>
                 <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: stockColor(pct, isKR) }}>
                   {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                </div>
+                <div style={{ width: 30, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(Math.abs(pct) * 10, 100)}%`, borderRadius: 2, background: stockColor(pct, isKR) }} />
                 </div>
               </div>
             </Link>

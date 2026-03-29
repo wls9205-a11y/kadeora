@@ -182,6 +182,45 @@ export default async function DiscussDetailPage({ params }: Props) {
         </div>
       </div>
 
+      {/* A vs B 시각적 비교 */}
+      {topic.option_a && topic.option_b && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 12px', alignItems: 'center' }}>
+          {/* A */}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 24, fontWeight: 900, color: '#60A5FA' }}>
+              {total > 0 ? Math.round(((topic.vote_a || 0) / total) * 100) : 50}%
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 4 }}>{topic.option_a}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{topic.vote_a || 0}표</div>
+          </div>
+          {/* VS 도넛 */}
+          <div style={{ padding: '0 8px' }}>
+            <svg viewBox="0 0 60 60" style={{ width: 56, height: 56 }}>
+              {(() => {
+                const pctA = total > 0 ? ((topic.vote_a || 0) / total) : 0.5;
+                const dashA = pctA * (2 * Math.PI * 22);
+                const dashB = (1 - pctA) * (2 * Math.PI * 22);
+                const gap = (2 * Math.PI * 22);
+                return (<>
+                  <circle cx="30" cy="30" r="22" fill="none" stroke="#60A5FA" strokeWidth="7" strokeDasharray={`${dashA} ${gap - dashA}`} transform="rotate(-90 30 30)" />
+                  <circle cx="30" cy="30" r="22" fill="none" stroke="#F87171" strokeWidth="7" strokeDasharray={`${dashB} ${gap - dashB}`} strokeDashoffset={`-${dashA}`} transform="rotate(-90 30 30)" />
+                  <text x="30" y="29" textAnchor="middle" style={{ fontSize: 10, fontWeight: 800, fill: 'var(--text-primary)' }}>VS</text>
+                  <text x="30" y="40" textAnchor="middle" style={{ fontSize: 7, fill: 'var(--text-tertiary)' }}>{total}명</text>
+                </>);
+              })()}
+            </svg>
+          </div>
+          {/* B */}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 24, fontWeight: 900, color: '#F87171' }}>
+              {total > 0 ? Math.round(((topic.vote_b || 0) / total) * 100) : 50}%
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 4 }}>{topic.option_b}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{topic.vote_b || 0}표</div>
+          </div>
+        </div>
+      )}
+
       {/* Client interactive part (투표 + 댓글) */}
       <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '12px 0 8px' }}>💬 실시간 투표 & 댓글</h2>
       <DiscussDetailClient initialTopic={topic as React.ComponentProps<typeof DiscussDetailClient>['initialTopic']} initialComments={comments as React.ComponentProps<typeof DiscussDetailClient>['initialComments']} />

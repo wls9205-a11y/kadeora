@@ -155,23 +155,58 @@ export default async function RegionLandingPage({ params }: Props) {
         </p>
       </div>
 
-      {/* 요약 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 20 }}>
-        {[
-          { icon: '📋', label: '청약', count: data.subscriptions.length, href: '/apt', color: 'var(--accent-blue)' },
-          { icon: '💰', label: '실거래', count: data.transactions.length, href: '/apt', color: 'var(--accent-green)' },
-          { icon: '🏗️', label: '재개발', count: data.redevelopments.length, href: '/apt', color: 'var(--accent-orange)' },
-          { icon: '🏚️', label: '미분양', count: data.unsolds.length, href: '/apt', color: 'var(--accent-red)' },
-        ].map(s => (
-          <div key={s.label} className="kd-card-hover" style={{
-            background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderRadius: 10, padding: '12px 14px', textAlign: 'center', cursor: 'pointer',
-          }}>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>{s.icon}</div>
-            <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: s.color }}>{s.count}</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
-          </div>
-        ))}
+      {/* 요약 카드 — 시각 대시보드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 8, marginBottom: 20 }}>
+        {/* 현장 유형별 도넛 */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {(() => {
+            const items = [
+              { label: '청약', count: data.subscriptions.length, color: '#60A5FA' },
+              { label: '실거래', count: data.transactions.length, color: '#34D399' },
+              { label: '재개발', count: data.redevelopments.length, color: '#FB923C' },
+              { label: '미분양', count: data.unsolds.length, color: '#F87171' },
+            ];
+            const total = items.reduce((s, i) => s + i.count, 0) || 1;
+            let offset = 0;
+            return (<>
+              <svg viewBox="0 0 80 80" style={{ width: 70, height: 70 }}>
+                {items.filter(i => i.count > 0).map((item) => {
+                  const pct = (item.count / total) * 100;
+                  const dash = (pct / 100) * (2 * Math.PI * 30);
+                  const gap = (2 * Math.PI * 30) - dash;
+                  const rotation = (offset / 100) * 360 - 90;
+                  offset += pct;
+                  return <circle key={item.label} cx="40" cy="40" r="30" fill="none" stroke={item.color} strokeWidth="10" strokeDasharray={`${dash} ${gap}`} transform={`rotate(${rotation} 40 40)`} />;
+                })}
+                <text x="40" y="37" textAnchor="middle" style={{ fontSize: 14, fontWeight: 800, fill: 'var(--text-primary)' }}>{total}</text>
+                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 8, fill: 'var(--text-tertiary)' }}>현장</text>
+              </svg>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px', marginTop: 6, justifyContent: 'center' }}>
+                {items.filter(i => i.count > 0).map(i => (
+                  <span key={i.label} style={{ fontSize: 10, color: i.color }}>● {i.label} {i.count}</span>
+                ))}
+              </div>
+            </>);
+          })()}
+        </div>
+        {/* KPI 그리드 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 6 }}>
+          {[
+            { icon: '📋', label: '청약', count: data.subscriptions.length, max: 500, color: '#60A5FA' },
+            { icon: '💰', label: '실거래', count: data.transactions.length, max: 1000, color: '#34D399' },
+            { icon: '🏗️', label: '재개발', count: data.redevelopments.length, max: 50, color: '#FB923C' },
+            { icon: '🏚️', label: '미분양', count: data.unsolds.length, max: 50, color: '#F87171' },
+          ].map(s => (
+            <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: s.count > 0 ? s.color : 'var(--text-tertiary)' }}>{s.count}</div>
+              <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min((s.count / s.max) * 100, 100)}%`, borderRadius: 2, background: s.color }} />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 청약 섹션 */}

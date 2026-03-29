@@ -455,6 +455,50 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* Features */}
       {features.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>{features.map((f, i: number) => <span key={i} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(59,123,246,0.1)', color: '#6CB4FF', border: '1px solid rgba(59,123,246,0.15)' }}>{String(f)}</span>)}</div>}
 
+      {/* 분양가 범위 바 + D-day 위젯 */}
+      {((site?.price_min && site?.price_max) || sub) && (
+        <div style={{ display: 'grid', gridTemplateColumns: (site?.price_min && site?.price_max && sub) ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 6, marginBottom: 14 }}>
+          {/* 분양가 범위 바 */}
+          {site?.price_min && site?.price_max && (
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>💰 분양가 범위</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11, color: 'var(--accent-blue)', fontWeight: 600, minWidth: 40 }}>{Math.round(site.price_min / 10000).toLocaleString()}만</span>
+                <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: -2, left: '50%', width: 12, height: 12, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
+                </div>
+                <span style={{ fontSize: 11, color: 'var(--accent-red)', fontWeight: 600, minWidth: 40, textAlign: 'right' }}>{Math.round(site.price_max / 10000).toLocaleString()}만</span>
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4, textAlign: 'center' }}>
+                평균 {Math.round((site.price_min + site.price_max) / 2 / 10000).toLocaleString()}만원
+              </div>
+            </div>
+          )}
+          {/* D-day 카운트다운 */}
+          {sub && (() => {
+            const now = new Date();
+            const milestones = [
+              { label: '청약접수', date: sub.rcept_bgnde },
+              { label: '당첨발표', date: sub.przwner_presnatn_de },
+              { label: '계약시작', date: sub.cntrct_cncls_bgnde },
+              { label: '입주예정', date: sub.mvn_prearnge_ym ? sub.mvn_prearnge_ym + '-01' : null },
+            ].filter(m => m.date);
+            const next = milestones.find(m => m.date && new Date(m.date) >= now) || milestones[milestones.length - 1];
+            if (!next?.date) return null;
+            const dday = Math.ceil((new Date(next.date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return (
+              <div style={{ background: dday <= 7 ? 'rgba(248,113,113,0.06)' : dday <= 30 ? 'rgba(251,191,36,0.06)' : 'var(--bg-surface)', border: `1px solid ${dday <= 7 ? 'rgba(248,113,113,0.2)' : dday <= 30 ? 'rgba(251,191,36,0.2)' : 'var(--border)'}`, borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>📅 {next.label}까지</div>
+                <div style={{ fontSize: 24, fontWeight: 900, color: dday <= 0 ? 'var(--accent-green)' : dday <= 7 ? 'var(--accent-red)' : dday <= 30 ? '#FBBF24' : 'var(--brand)' }}>
+                  {dday <= 0 ? '진행중' : `D-${dday}`}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{next.date}</div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
       {/* Schedule — 비주얼 타임라인 */}
       {sub && (() => { 
         const steps = [

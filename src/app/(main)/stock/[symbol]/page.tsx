@@ -92,7 +92,7 @@ export default async function StockDetailPage({ params }: Props) {
   const isStale = !s.updated_at || s.updated_at.startsWith('2000-01-01');
 
   // Parallel fetch all data (필요 컬럼만 select)
-  const [histR, aiR, newsR, flowR, discR, similarR, relatedBlogsR] = await Promise.all([
+  const [histR, aiR, newsR, flowR, discR, similarR, relatedBlogsR, sectorCountR] = await Promise.all([
     sb.from('stock_price_history').select('date, close_price, open_price, high_price, low_price, volume, change_pct').eq('symbol', symbol).order('date', { ascending: true }).limit(60),
     sb.from('stock_ai_comments').select('id, symbol, comment, signal, created_at').eq('symbol', symbol).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('stock_news').select('id, title, url, source, published_at, sentiment, sentiment_label, sentiment_score, ai_summary').eq('symbol', symbol).order('published_at', { ascending: false }).limit(10),
@@ -101,7 +101,13 @@ export default async function StockDetailPage({ params }: Props) {
     s.sector ? sb.from('stock_quotes').select('symbol, name, price, change_pct, market_cap, currency').eq('sector', s.sector).neq('symbol', symbol).gt('price', 0).order('market_cap', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
     // 관련 블로그 (종목명으로 검색)
     sb.from('blog_posts').select('slug, title, category, view_count, published_at').eq('is_published', true).or(`title.ilike.%${s.name}%,title.ilike.%${symbol}%`).order('published_at', { ascending: false }).limit(5),
+    // 섹터 내 순위 계산
+    s.sector ? sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).eq('sector', s.sector).gt('price', 0) : Promise.resolve({ count: 0 }),
   ]);
+
+  // 섹터 내 순위 (시총 기준)
+  const sectorTotal = (sectorCountR as any)?.count ?? 0;
+  const sectorRank = s.sector && s.market_cap ? ((similarR.data ?? []).filter((sim: any) => Number(sim.market_cap) > Number(s.market_cap)).length + 1) : 0;
 
   // 52주 최고/최저 (price_history에서 계산)
   const priceHist = (histR.data || []).map((d: any) => Number(d.close_price)).filter((p: number) => p > 0);
@@ -220,10 +226,15 @@ export default async function StockDetailPage({ params }: Props) {
         background: isUp ? 'linear-gradient(135deg, rgba(248,113,113,0.06), var(--bg-surface))' : isDown ? 'linear-gradient(135deg, rgba(96,165,250,0.06), var(--bg-surface))' : 'var(--bg-surface)',
         border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 12,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
           <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{symbol}</span>
           <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 4 }}>{s.market}</span>
+          {sectorRank > 0 && sectorTotal > 0 && s.sector && (
+            <span style={{ fontSize: 10, background: 'rgba(99,102,241,0.1)', color: '#8B5CF6', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
+              {s.sector} #{sectorRank}/{sectorTotal}
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 'clamp(22px, 6vw, 32px)', fontWeight: 900, color: 'var(--text-primary)' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
@@ -233,6 +244,26 @@ export default async function StockDetailPage({ params }: Props) {
             </span>
           )}
         </div>
+        {/* 30일 스파크라인 */}
+        {priceHist.length >= 5 && (
+          <div style={{ marginTop: 6, height: 32 }}>
+            <svg viewBox={`0 0 ${priceHist.length} 32`} style={{ width: '100%', height: 32 }} preserveAspectRatio="none">
+              {(() => {
+                const min = Math.min(...priceHist);
+                const max = Math.max(...priceHist);
+                const range = max - min || 1;
+                const points = priceHist.map((p, i) => `${i},${30 - ((p - min) / range) * 28}`).join(' ');
+                const fillPoints = `0,30 ${points} ${priceHist.length - 1},30`;
+                const lineColor = priceHist[priceHist.length - 1] >= priceHist[0] ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)');
+                const fillColor = priceHist[priceHist.length - 1] >= priceHist[0] ? (isKR ? 'rgba(248,113,113,0.1)' : 'rgba(52,211,153,0.1)') : (isKR ? 'rgba(96,165,250,0.1)' : 'rgba(248,113,113,0.1)');
+                return (<>
+                  <polygon points={fillPoints} fill={fillColor} />
+                  <polyline points={points} fill="none" stroke={lineColor} strokeWidth="1.5" strokeLinejoin="round" />
+                </>);
+              })()}
+            </svg>
+          </div>
+        )}
         {isStale && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6 }}>시세 정보 준비 중</div>}
         {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>
