@@ -46,6 +46,7 @@ const CRON_GROUPS = {
   ai: [
     '/api/cron/apt-ai-summary',
     '/api/cron/stock-daily-briefing',
+    '/api/cron/stock-desc-gen',
     '/api/cron/collect-site-images',
     '/api/cron/collect-site-trends',
     '/api/cron/collect-site-facilities',

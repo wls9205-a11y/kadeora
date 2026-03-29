@@ -31,7 +31,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
 
   const result = await withCronLogging('apt-crawl-pricing', async () => {
     const sb = getSupabaseAdmin();
-    const BATCH_SIZE = 250;
+    const BATCH_SIZE = 120;
 
     // 1. house_type_info가 비어있는 청약 레코드 조회
     const { data: targets } = await sb.from('apt_subscriptions')

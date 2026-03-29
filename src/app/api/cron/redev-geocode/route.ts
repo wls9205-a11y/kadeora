@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export const maxDuration = 120;
+export const maxDuration = 180;
 
 /**
  * 재개발 프로젝트 좌표 자동 수집 크론
@@ -43,6 +43,30 @@ async function geocodeKeyword(query: string): Promise<{ lat: number; lng: number
     const doc = data?.documents?.[0];
     if (!doc) return null;
     return { lat: parseFloat(doc.y), lng: parseFloat(doc.x) };
+  } catch { return null; }
+}
+
+// Naver Local Search 폴백 (카카오 실패 시)
+async function geocodeNaver(query: string): Promise<{ lat: number; lng: number } | null> {
+  const cid = process.env.NAVER_CLIENT_ID;
+  const csec = process.env.NAVER_CLIENT_SECRET;
+  if (!cid || !csec || !query) return null;
+  try {
+    const url = `https://openapi.naver.com/v1/search/local.json?query=${encodeURIComponent(query)}&display=1`;
+    const res = await fetch(url, {
+      headers: { 'X-Naver-Client-Id': cid, 'X-Naver-Client-Secret': csec },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const item = data?.items?.[0];
+    if (!item?.mapx || !item?.mapy) return null;
+    // Naver Local Search returns KATEC coords → need to convert
+    // Actually mapx/mapy are in 1/10,000,000 format of longitude/latitude
+    const lng = parseInt(item.mapx) / 10000000;
+    const lat = parseInt(item.mapy) / 10000000;
+    if (lat > 33 && lat < 39 && lng > 124 && lng < 132) return { lat, lng };
+    return null;
   } catch { return null; }
 }
 
@@ -98,16 +122,22 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     .eq('is_active', true)
     .is('latitude', null)
     .order('content_score', { ascending: false })
-    .limit(150);
+    .limit(300);
 
   for (const s of (sites || [])) {
-    // 1차: 주소로 지오코딩
+    // 1차: 주소로 카카오 지오코딩
     let coords = s.address ? await geocodeKakao(s.address) : null;
 
-    // 2차: 이름 + 지역으로 키워드 검색
+    // 2차: 이름 + 지역으로 카카오 키워드 검색
     if (!coords) {
       const query = `${s.region || ''} ${s.sigungu || ''} ${s.name} 아파트`;
       coords = await geocodeKeyword(query.trim());
+    }
+
+    // 3차: 네이버 로컬 검색 (카카오 실패 시)
+    if (!coords) {
+      const query = `${s.region || ''} ${s.sigungu || ''} ${s.name}`;
+      coords = await geocodeNaver(query.trim());
     }
 
     if (coords && coords.lat > 33 && coords.lat < 39 && coords.lng > 124 && coords.lng < 132) {

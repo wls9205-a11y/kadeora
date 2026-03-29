@@ -24,6 +24,12 @@
     "src/app/api/cron/stock-news-crawl/*.ts": {
       "maxDuration": 120
     },
+    "src/app/api/cron/stock-desc-gen/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/cron/redev-geocode/*.ts": {
+      "maxDuration": 180
+    },
     "src/app/api/admin/blog-rewrite/*.ts": {
       "maxDuration": 300
     },
@@ -110,7 +116,7 @@
     },
     {
       "path": "/api/cron/redev-geocode",
-      "schedule": "15 5 * * *"
+      "schedule": "15 5,17 * * *"
     },
     {
       "path": "/api/cron/crawl-unsold-molit",
@@ -183,6 +189,10 @@
     {
       "path": "/api/stock-refresh",
       "schedule": "0 14,16,18,20,22 * * 1-5"
+    },
+    {
+      "path": "/api/cron/stock-desc-gen",
+      "schedule": "30 0,6,12,18 * * *"
     },
     {
       "path": "/api/cron/blog-afternoon",
