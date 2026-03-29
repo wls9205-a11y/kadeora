@@ -34,23 +34,6 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';
 
-async function fetchAllRows(sb: any, table: string, select: string, filter?: (q: any) => any) {
-  const rows: any[] = [];
-  let offset = 0;
-  const PAGE = 1000;
-  while (true) {
-    let q = sb.from(table).select(select).range(offset, offset + PAGE - 1);
-    if (filter) q = filter(q);
-    const { data } = await q;
-    if (!data || data.length === 0) break;
-    rows.push(...data);
-    if (data.length < PAGE) break;
-    offset += PAGE;
-    if (offset > 50000) break;
-  }
-  return rows;
-}
-
 async function fetchAptData() {
   let apts: Record<string, any>[] = [];
   let unsold: Record<string, any>[] = [];
@@ -58,8 +41,6 @@ async function fetchAptData() {
   let lastRefreshed: string | null = null;
   let redevTotalCount = 0;
   let tradeTotalCount = 0;
-  let redevelopment: Record<string, any>[] = [];
-  let transactions: Record<string, any>[] = [];
   const regionAvgPriceMap: Record<string, number> = {};
 
   try {
@@ -93,12 +74,6 @@ async function fetchAptData() {
     (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
     redevTotalCount = redevCountR.count ?? 0;
     tradeTotalCount = tradeCountR.count ?? 0;
-
-    // 페이지네이션으로 전체 행 수집 (Supabase max_rows=1000 우회)
-    [redevelopment, transactions] = await Promise.all([
-      fetchAllRows(sb, 'redevelopment_projects', 'id, region', (q: any) => q.eq('is_active', true)),
-      fetchAllRows(sb, 'apt_transactions', 'id, region_nm'),
-    ]);
 
     // 지역별 평균가 (분양중 단지에 주입)
     try {
