@@ -64,10 +64,10 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
   const filtered = useMemo(() => {
     let result = displayData;
     if (!searchResults) {
-      if (selectedAge) result = result.filter(c => c.ageGroup === selectedAge);
-      if (selectedRegion) result = result.filter(c => c.region === selectedRegion);
+      if (selectedAge) result = result.filter((c: any) => c.ageGroup === selectedAge);
+      if (selectedRegion) result = result.filter((c: any) => c.region === selectedRegion);
     }
-    return result.sort((a, b) => {
+    return result.sort((a: any, b: any) => {
       if (sortBy === 'lastPrice') return (b.lastPrice || 0) - (a.lastPrice || 0);
       if (sortBy === 'jeonseRatio') return (b.jeonseRatio || 0) - (a.jeonseRatio || 0);
       return b.saleCount - a.saleCount;
@@ -88,7 +88,7 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
           borderRadius: 14, border: '1px solid rgba(59,123,246,0.15)',
           backdropFilter: 'blur(8px)',
         }}>
-          <input type="text" value={searchQuery} onChange={e => handleSearch(e.target.value)}
+          <input type="text" value={searchQuery} onChange={(e: any) => handleSearch(e.target.value)}
             placeholder="🔍 아파트 이름으로 검색 (예: 래미안, 자이, 힐스테이트...)"
             style={{
               width: '100%', padding: '14px 16px 14px 16px', borderRadius: 14,
@@ -139,14 +139,14 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
 
       {/* 지역 + 정렬 + 카운트 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-        <select value={selectedRegion || ''} onChange={e => setSelectedRegion(e.target.value || null)} style={{
+        <select value={selectedRegion || ''} onChange={(e: any) => setSelectedRegion(e.target.value || null)} style={{
           padding: '8px 12px', borderRadius: 10, fontSize: 12, fontWeight: 600,
           border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer',
         }}>
           <option value="">📍 전체 지역</option>
           {regions.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
-        <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{
+        <select value={sortBy} onChange={(e: any) => setSortBy(e.target.value as any)} style={{
           padding: '8px 12px', borderRadius: 10, fontSize: 12, fontWeight: 600,
           border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer',
         }}>
@@ -162,7 +162,7 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
 
       {/* 📦 카드 그리드 — 글래스 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-        {filtered.map((c, i) => {
+        {filtered.map((c: any, i: any) => {
           const borderColor = ageColors[c.ageGroup] || 'var(--border)';
           return (
             <Link key={`${c.aptName}__${c.sigungu}`} href={`/apt/complex/${encodeURIComponent(c.aptName)}`} style={{
@@ -174,8 +174,8 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
               transition: 'transform 0.15s ease, box-shadow 0.15s ease',
               position: 'relative', overflow: 'hidden',
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${borderColor}20`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+              onMouseEnter={(e: any) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${borderColor}20`; }}
+              onMouseLeave={(e: any) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
             >
               {/* 순위 뱃지 (TOP 3) */}
               {i < 3 && !searchResults && !selectedAge && !selectedRegion && (
