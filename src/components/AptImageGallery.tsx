@@ -7,12 +7,32 @@ interface AptImage {
   caption?: string;
 }
 
-/** 외부 이미지 → 카더라 워터마크 프록시 URL 변환 */
-function toProxyUrl(url: string): string {
-  if (url.startsWith('/api/apt-img')) return url;
-  if (url.startsWith('/api/og') || url.includes('kadeora.app/api/')) return url;
-  return `/api/apt-img?src=${encodeURIComponent(url)}`;
+/** http:// → https:// 강제 변환 (Mixed Content 방지) */
+function toHttps(url: string): string {
+  return url.replace(/^http:\/\//, 'https://');
 }
+
+/** CSS 오버레이 워터마크 — 중앙 로고 (recommended 35%) */
+const Watermark = () => (
+  <svg width="100" height="100" viewBox="0 0 72 72" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.35, pointerEvents: 'none', zIndex: 1 }}>
+    <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
+    <circle cx="18" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
+    <circle cx="36" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
+    <circle cx="54" cy="36" r="6.5" fill="rgba(255,255,255,0.7)" />
+  </svg>
+);
+
+/** CSS 오버레이 워터마크 — 우하단 텍스트 (recommended 60%) */
+const WatermarkSm = () => (
+  <div style={{ position: 'absolute', bottom: 8, right: 42, opacity: 0.6, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 4, zIndex: 1 }}>
+    <svg width="14" height="14" viewBox="0 0 72 72">
+      <circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
+      <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
+      <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
+    </svg>
+    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>kadeora.app</span>
+  </div>
+);
 
 export default function AptImageGallery({ images, name, region, badges }: {
   images: AptImage[];
@@ -25,7 +45,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
   const [loadFails, setLoadFails] = useState<Set<number>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const safeImages = images.map(img => ({ ...img, url: toProxyUrl(img.url) }));
+  const safeImages = images.map(img => ({ ...img, url: toHttps(img.url) }));
   const visibleImages = safeImages.filter((_, i) => !loadFails.has(i));
   const total = visibleImages.length;
 
@@ -72,8 +92,10 @@ export default function AptImageGallery({ images, name, region, badges }: {
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     loading={i === 0 ? 'eager' : 'lazy'}
                     referrerPolicy="no-referrer"
-                    onError={() => handleImgError(images.findIndex(o => toProxyUrl(o.url) === img.url))}
+                    onError={() => handleImgError(images.findIndex(o => toHttps(o.url) === img.url))}
                   />
+                  <Watermark />
+                  <WatermarkSm />
                   {i === 0 && badges}
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
@@ -126,6 +148,8 @@ export default function AptImageGallery({ images, name, region, badges }: {
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 loading="eager" referrerPolicy="no-referrer"
               />
+              <Watermark />
+              <WatermarkSm />
               {badges}
             </div>
             {visibleImages.slice(1, 3).map((img, i) => (
@@ -140,6 +164,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   loading="lazy" referrerPolicy="no-referrer"
                 />
+                <WatermarkSm />
                 {i === 1 && total > 3 && (
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
@@ -186,6 +211,8 @@ export default function AptImageGallery({ images, name, region, badges }: {
               style={{ maxWidth: '90vw', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }}
               referrerPolicy="no-referrer"
             />
+            <Watermark />
+            <WatermarkSm />
           </div>
 
           {visibleImages[lightbox]?.caption && (
