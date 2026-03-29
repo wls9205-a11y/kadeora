@@ -29,6 +29,7 @@ export default function Avatar({ src, nickname, size = 32, isAnonymous = false }
         src={src} alt={nickname ?? '유저'} width={size} height={size}
         style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
         onError={() => setImgError(true)}
+        unoptimized={src.startsWith('http://')}
       />
     );
   }

@@ -112,7 +112,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
       {/* 아바타 */}
       <div style={{ position: 'relative', flexShrink: 0 }}>
         {avatarUrl ? (
-          <Image src={`${avatarUrl}?width=80&height=80`} alt={`${displayName} 프로필 사진`} width={72} height={72} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)' }} />
+          <Image src={avatarUrl} alt={`${displayName} 프로필 사진`} width={80} height={80} style={{ borderRadius: '50%', objectFit: 'cover', width: 80, height: 80, border: '2px solid var(--border)' }} unoptimized={avatarUrl.startsWith('http://')} />
         ) : (
           <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-2xl)' }}>
             {GRADE_EMOJI[profile.grade ?? 1] ?? '🌱'}
