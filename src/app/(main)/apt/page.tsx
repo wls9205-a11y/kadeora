@@ -80,7 +80,7 @@ async function fetchAptData() {
     // SSR: 청약 + 미분양(ongoingApts 생성용) + 알림 카운트만 로드
     // 실거래/재개발/월별통계는 클라이언트에서 탭 클릭 시 lazy fetch
     const [aptsR, unsoldR, alertsR, redevCountR, tradeCountR] = await Promise.all([
-      sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm')
+      sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm, is_price_limit, ai_summary')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(1000),
       sb.from('unsold_apts').select('id, house_nm, region_nm, sigungu_nm, tot_supply_hshld_co, tot_unsold_hshld_co, supply_addr, completion_ym, sale_price_min, sale_price_max, pblanc_url, contact_tel, source, created_at, is_active').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),

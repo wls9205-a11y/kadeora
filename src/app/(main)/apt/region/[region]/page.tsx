@@ -73,7 +73,7 @@ async function fetchRegionData(region: string) {
 
   const [subsRes, tradesRes, redevRes, unsoldRes] = await Promise.all([
     s.from('apt_subscriptions')
-      .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres')
+      .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary')
       .ilike('region_nm', `%${region}%`)
       .order('rcept_endde', { ascending: false }).limit(10) as unknown as Promise<any>,
     s.from('apt_transactions')

@@ -140,7 +140,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                       {st === 'open' ? (dday === 0 ? '🔴 오늘 마감' : `⏰ D-${dday}`) : `D-${dday}`}
                     </span>
                   )}
-                  {(apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>분양가상한</span>}
+                  {(apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit ? <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>분양가상한</span> : null}
                   {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>투기과열</span>}
                   {(apt as Record<string, any>)['MDAT_TRGET_AREA_SECD'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange-light)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{apt.region_nm}</span>
@@ -165,6 +165,12 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
                   {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · 일반분양 ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}
                 </div>
+                {/* AI 요약 (있으면) */}
+                {(apt as Record<string, any>).ai_summary && (
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    🤖 {(apt as Record<string, any>).ai_summary}
+                  </div>
+                )}
                 {/* 타임라인 바 */}
                 <div style={{ display: 'flex', gap: 2, fontSize: '9px', color: 'var(--text-tertiary)' }}>
                   {apt.spsply_rcept_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'var(--accent-purple-bg)' }}>특별 {fmtD(apt.spsply_rcept_bgnde)}</div>}
