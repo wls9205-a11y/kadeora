@@ -3,7 +3,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 /**
  * 분양가 상세 자동 수집 크론
@@ -31,7 +31,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
 
   const result = await withCronLogging('apt-crawl-pricing', async () => {
     const sb = getSupabaseAdmin();
-    const BATCH_SIZE = 120;
+    const BATCH_SIZE = 250;
 
     // 1. house_type_info가 비어있는 청약 레코드 조회
     const { data: targets } = await sb.from('apt_subscriptions')
