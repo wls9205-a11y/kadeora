@@ -181,6 +181,16 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                   {o.constructor_nm ? ` · ${o.constructor_nm}` : ''}
                   {priceStr ? ` · ${priceStr}` : ''}
                 </div>
+                {/* 분양가 범위 바 */}
+                {pMin && pMax && pMin !== pMax && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
+                    <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative', maxWidth: 120 }}>
+                      <div style={{ position: 'absolute', top: -1, left: '50%', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', border: '1px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
+                    </div>
+                    <span style={{ fontSize: 10, color: 'var(--accent-red)', fontWeight: 600 }}>{pMax}억</span>
+                  </div>
+                )}
                 {/* 미분양률 바 */}
                 {isUnsold && (o.unsold_count ?? 0) > 0 && (o.total_supply ?? 0) > 0 && (() => {
                   const rate = Math.round(((o.unsold_count ?? 0) / (o.total_supply ?? 1)) * 100);

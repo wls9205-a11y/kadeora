@@ -73,7 +73,7 @@ async function fetchRegionData(region: string) {
 
   const [subsRes, tradesRes, redevRes, unsoldRes, priceRes] = await Promise.all([
     s.from('apt_subscriptions')
-      .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary')
+      .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary,house_type_info,price_per_pyeong_avg')
       .ilike('region_nm', `%${region}%`)
       .order('rcept_endde', { ascending: false }).limit(10) as unknown as Promise<any>,
     s.from('apt_transactions')
@@ -284,6 +284,21 @@ export default async function RegionLandingPage({ params }: Props) {
                 {s.constructor_nm ? `${s.constructor_nm} · ` : ''}{s.tot_supply_hshld_co}세대 · ~{s.rcept_endde?.slice(5)}
               </div>
               {s.ai_summary && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {s.ai_summary}</div>}
+              {/* 분양가 (house_type_info에서 추출) */}
+              {(() => {
+                const hti = s.house_type_info;
+                if (!hti || !Array.isArray(hti) || hti.length === 0) return null;
+                const prices = hti.map((t: any) => t.lttot_top_amount).filter((p: number) => p > 0);
+                if (prices.length === 0) return null;
+                const pMin = Math.min(...prices);
+                const pMax = Math.max(...prices);
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)' }}>💰 {fmtPrice(pMin)}{pMax !== pMin ? `~${fmtPrice(pMax)}` : ''}</span>
+                    {s.price_per_pyeong_avg > 0 && <span style={{ fontSize: 9, color: '#8B5CF6' }}>평당 {s.price_per_pyeong_avg.toLocaleString()}만</span>}
+                  </div>
+                );
+              })()}
             </Link>
           ))}
         </section>
@@ -303,8 +318,11 @@ export default async function RegionLandingPage({ params }: Props) {
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{t.apt_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{t.deal_date} · {t.exclusive_area}㎡</div>
               </div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', textAlign: 'right' }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', textAlign: 'right', minWidth: 50 }}>
                 {fmtPrice(t.deal_amount)}
+                {t.exclusive_area > 0 && t.deal_amount > 0 && (
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 500 }}>평당 {fmtPrice(Math.round(t.deal_amount / (t.exclusive_area / 3.3058)))}</div>
+                )}
               </div>
             </div>
           ))}

@@ -141,8 +141,11 @@ export default async function AptSearchPage({ searchParams }: Props) {
                   )}
                 </div>
               </div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', paddingTop: 4, borderTop: '1px solid var(--border)' }}>
-                📅 {t.deal_date} · {t.trade_type || '매매'}
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', paddingTop: 4, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>📅 {t.deal_date} · {t.trade_type || '매매'}</span>
+                <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', maxWidth: 100 }}>
+                  <div style={{ height: '100%', width: `${Math.min(amt / 1500 , 100)}%`, borderRadius: 2, background: color, opacity: 0.6 }} />
+                </div>
               </div>
             </Link>
           );
