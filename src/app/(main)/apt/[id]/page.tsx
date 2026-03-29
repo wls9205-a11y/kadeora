@@ -428,10 +428,9 @@ export default async function AptUnifiedPage({ params }: Props) {
         )}
       </section>
 
-      {/* Share + Bookmark */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+      {/* Share + Bookmark — 액션 바 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
         <ShareButtons title={`${name} ${tLabel[sType]}`} postId={slug} />
-        {sub?.pblanc_url && <a href={sub.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(96,165,250,0.2)' }}>🏠 청약홈</a>}
         {sub && <AptBookmarkButton aptId={sub.id} isLoggedIn={!!aptUser} />}
       </div>
 
