@@ -211,13 +211,13 @@ export async function safeBlogInsert(
       .single();
 
     if (error) {
-      console.error(`[safeBlogInsert] Insert error:`, error.message);
+      console.error(`[safeBlogInsert] Insert error for "${data.title}" (${data.category}, ${enrichedContent.length}자):`, error.message);
       return { success: false, reason: 'error' };
     }
 
     return { success: true, id: inserted?.id };
   } catch (err: any) {
-    console.error(`[safeBlogInsert] Error:`, err.message);
+    console.error(`[safeBlogInsert] Exception for "${data.title}":`, err.message);
     return { success: false, reason: 'error' };
   }
 }
