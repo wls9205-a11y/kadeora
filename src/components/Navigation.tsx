@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Flame, MessageCircle, Search, Bell, User as UserIcon, PenSquare, BookOpen, LogOut, FileText, MoreHorizontal } from 'lucide-react';
+import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
@@ -13,8 +13,6 @@ const NAV_ITEMS = [
   { href: '/stock',   label: '주식',   Icon: TrendingUp },
   { href: '/apt',     label: '부동산', Icon: Building2 },
   { href: '/blog',    label: '블로그', Icon: FileText },
-  { href: '/discuss', label: '토론',   Icon: MessageCircle },
-  { href: '/hot',     label: 'HOT',    Icon: Flame },
 ];
 
 const MOBILE_TABS = [
@@ -223,12 +221,13 @@ export function Navigation() {
           {/* 우측 액션 */}
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6 }}>
 
-            {/* 더보기 */}
+            {/* 더보기 (데스크탑 전용 — 모바일은 하단 탭바에 있음) */}
             <button
               onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); setMenuOpen(false); }}
               aria-label="더보기"
+              className="hidden md:flex"
               style={{
-                width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center',
+                width:36, height:36, alignItems:'center', justifyContent:'center',
                 borderRadius:'50%', background:'var(--bg-hover)', border:'1px solid var(--border)',
                 color: moreOpen ? 'var(--brand)' : 'var(--text-secondary)',
                 cursor:'pointer', transition:'border-color 0.12s', position:'relative',
@@ -249,10 +248,10 @@ export function Navigation() {
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
                 }}><Search size={18} /></Link>
 
-                {/* 알림 */}
-                <Link href="/notifications" aria-label="알림" style={{
+                {/* 알림 (데스크탑 전용 — 모바일은 더보기 시트 + 아바타 뱃지) */}
+                <Link href="/notifications" aria-label="알림" className="hidden md:flex" style={{
                   position:'relative', width:40, height:40,
-                  display:'flex', alignItems:'center', justifyContent:'center',
+                  alignItems:'center', justifyContent:'center',
                   borderRadius:'50%',
                   background:'var(--bg-hover)', border:'1px solid var(--border)',
                   color:'var(--text-primary)', textDecoration:'none', fontSize:16,
@@ -283,7 +282,7 @@ export function Navigation() {
                     height:34, padding:'0 10px', borderRadius:17,
                     background:'var(--bg-hover)', border:'1px solid var(--border)',
                     color:'var(--text-primary)', fontSize:13, cursor:'pointer',
-                    transition:'border-color 0.12s',
+                    transition:'border-color 0.12s', position:'relative',
                   }}
                     onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
                     onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
@@ -300,6 +299,19 @@ export function Navigation() {
                     </span>
                     {profile?.isPremium && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000', fontWeight: 800, lineHeight: 1.2 }}>P</span>}
                     <span style={{ fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)' }}>▼</span>
+                    {/* 모바일 알림 뱃지 (아바타에 통합) */}
+                    {unread > 0 && (
+                      <span className="md:hidden" style={{
+                        position:'absolute', top:-4, right:-4,
+                        minWidth:16, height:16, borderRadius:8,
+                        background:'var(--accent-red)', color:'#fff',
+                        fontSize:10, fontWeight:800,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        padding:'0 4px', border:'2px solid var(--nav-bg)',
+                      }}>
+                        {unread > 9 ? '9+' : unread}
+                      </span>
+                    )}
                   </button>
 
                   {menuOpen && (
@@ -310,12 +322,9 @@ export function Navigation() {
                       boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex:300,
                     }}>
                       {[
-                        { href:'/search',             label:'검색', LIcon: Search },
                         { href:`/profile/${userId}`, label:'내 프로필', LIcon: UserIcon },
                         { href:'/write',              label:'글쓰기', LIcon: PenSquare },
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
-                        { href:'/hot',                label:'이번주 HOT', LIcon: Flame },
-                        { href:'/guide',              label:'가이드북', LIcon: BookOpen },
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
                           display:'flex', alignItems:'center', gap:8, padding:'11px 16px',
@@ -462,7 +471,8 @@ export function Navigation() {
       {moreOpen && (
         <div style={{ position:'fixed', inset:0, zIndex:201 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
-          <div style={{
+          {/* 모바일: 바텀 시트 */}
+          <div className="md:hidden" style={{
             position:'absolute', bottom:60, left:12, right:12,
             maxWidth: 400, marginLeft: 'auto', marginRight: 'auto',
             background:'var(--bg-surface)', border:'1px solid var(--border)',
@@ -507,6 +517,39 @@ export function Navigation() {
                 }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
               </div>
             )}
+          </div>
+          {/* 데스크탑: 상단 드롭다운 */}
+          <div className="hidden md:block" style={{
+            position:'absolute', top:52, right:16,
+            width: 400,
+            background:'var(--bg-surface)', border:'1px solid var(--border)',
+            borderRadius:12, padding:16, boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
+          }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:8 }}>
+              {MORE_ITEMS.map(item => (
+                <Link key={item.href + '-d'} href={item.href} onClick={() => setMoreOpen(false)} style={{
+                  display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+                  padding:'12px 0', borderRadius:12, textDecoration:'none',
+                  color:'var(--text-primary)', position:'relative',
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span style={{ fontSize:24 }}>{item.emoji}</span>
+                  <span style={{ fontSize:'var(--fs-xs)', fontWeight:600 }}>{item.label}</span>
+                  {item.emoji === '🔔' && unread > 0 && (
+                    <span style={{
+                      position: 'absolute', top: -2, right: -2,
+                      minWidth: 16, height: 16, borderRadius: 8,
+                      background: 'var(--accent-red)', color: '#fff',
+                      fontSize: 10, fontWeight: 800, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                      padding: '0 4px',
+                    }}>{unread > 9 ? '9+' : unread}</span>
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       )}
