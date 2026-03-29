@@ -731,12 +731,17 @@ export default async function BlogDetailPage({ params }: Props) {
       {(related ?? []).length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10, margin: '0 0 10px' }}>📚 관련 글</h2>
-          {related!.map((r: any) => (
-            <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 4px', borderBottom: '1px solid var(--border)', textDecoration: 'none', borderRadius: 6, transition: 'background var(--transition-fast)' }}>
-              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</span>
-              {r.view_count > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>👀 {r.view_count}</span>}
-            </Link>
-          ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 8 }}>
+            {related!.slice(0, 4).map((r: any) => (
+              <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'block', padding: '12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden', lineHeight: 1.4 }}>{r.title}</span>
+                <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                  {r.view_count > 0 && <span>👀 {r.view_count.toLocaleString()}</span>}
+                  <span>{r.category === 'stock' ? '📈' : r.category === 'apt' ? '🏠' : '📝'}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 

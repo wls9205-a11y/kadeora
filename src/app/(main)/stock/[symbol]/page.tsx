@@ -456,6 +456,9 @@ export default async function StockDetailPage({ params }: Props) {
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, minWidth: 52, textAlign: 'right', color: isKR ? (simPct > 0 ? 'var(--accent-red)' : simPct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)') : (simPct > 0 ? 'var(--accent-green)' : simPct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)') }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
+                    <div style={{ width: 24, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(Math.abs(simPct) * 10, 100)}%`, borderRadius: 2, background: isKR ? (simPct > 0 ? 'var(--accent-red)' : simPct < 0 ? 'var(--accent-blue)' : 'var(--border)') : (simPct > 0 ? 'var(--accent-green)' : simPct < 0 ? 'var(--accent-red)' : 'var(--border)') }} />
+                    </div>
                   </div>
                 </Link>
               );

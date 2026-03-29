@@ -198,7 +198,6 @@ export default async function ComplexDetailPage({ params }: Props) {
           </div>
         </div>);
       })()}
-      )}
 
       {/* 가격 추이 차트 */}
       <AptPriceTrendChart aptName={decoded} region={region} />
