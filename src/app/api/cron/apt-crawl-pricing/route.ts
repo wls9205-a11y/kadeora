@@ -129,6 +129,16 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
         await sb.from('apt_subscriptions').update(updateData).eq('id', apt.id);
         updated++;
 
+        // 7. apt_sites에도 가격 자동 싱크 (이름 매칭)
+        const prices = typeInfo.map((t: any) => t.lttot_top_amount).filter((p: number) => p > 0);
+        if (prices.length > 0) {
+          const siteMin = Math.min(...prices);
+          const siteMax = Math.max(...prices);
+          await sb.from('apt_sites').update({
+            price_min: siteMin, price_max: siteMax, updated_at: new Date().toISOString(),
+          }).eq('name', apt.house_nm).or('price_min.is.null,price_min.eq.0');
+        }
+
         // API 부하 방지 (최소 딜레이)
         await new Promise(r => setTimeout(r, 50));
       } catch (e) {
