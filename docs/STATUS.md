@@ -1,18 +1,16 @@
-# 카더라 STATUS.md — 세션 58 (2026-03-30 07:30 KST)
+# 카더라 STATUS.md — 세션 58 (2026-03-30 08:00 KST)
 
 ## 최신 커밋
-- `7fd0593` — 이미지 프록시 제거 → 속도 복원 + CSS 워터마크 복귀
-- `8dcd46a` — safeBlogInsert 7개 크론 에러 해결 (TOC 폴백 + h3→h2 승격)
-- `38f78d9` — DB 컬럼명 에러 2건 (unsold_apts, redevelopment_projects)
-- `66ed128` — 워터마크 2중 + 라이트박스 + 알림설정 + 504 + 프리미엄 UI
-- `c007cc0` — 워터마크 선명도 recommended (35%/60%) 적용
-- `4356b8a` — 타사 워터마크 차단 + 카더라 워터마크 베이킹 프록시 API
-- `ca3df09` — 이미지 수집 관련성 필터 (무관 이미지 차단)
-- `d11d47d` — 이미지 수집 네이버+카카오 듀얼소스 병렬
-- `90ac016` — 이미지 수집 최대 속도 350건×6회/일
-- `dfe30c2` — 이미지 갤러리 CSP/Mixed Content 해결 + 라이트박스
-- `49e832c` — PWA 설치 직접 실행 + 이미지 갤러리 워터마크
-- `43f9939` — 프로모 바텀시트 V1(회원가입) + V2(PWA설치)
+- `add062c` — /apt 페이지 타임아웃 수정 (미사용 fetchAllRows 49만건 제거)
+- `9f2e21d` — 단지백과 연차별/지역별 통계 DB 뷰 기반 전환
+- `8b60c71` — 단지백과 메인 apt_complex_profiles 기반 전환
+- `9377bc8` — STATUS.md 데이터 대폭 확장 반영 (250만건)
+- `01a720a` — sync-complex-profiles limit 200K+500K
+- `406a5c2` — 매매 벌크 insert → upsert
+- `4728d54` — 매매 벌크 엔드포인트 수정
+- `7308d5e` — backfill-trades 인증 수정
+- `f3cadce` — collect-site-images 중괄호 누락 수정
+- `98bfd4e` — 단지백과 Phase 1+2 전체 구현
 
 ## 세션 58 작업 내역
 
