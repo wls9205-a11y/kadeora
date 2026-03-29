@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
       user_id: u.id,
       type: 'system',
       content: '오늘 출석체크 잊지 마세요! +10P',
+      link: '/feed',
     }));
 
     // 배치 INSERT

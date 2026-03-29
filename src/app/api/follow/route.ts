@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
         await admin.from('notifications').insert({
           user_id: targetId, type: 'follow',
           content: `${profile?.nickname ?? '누군가'}님이 팔로우했어요`,
+          link: `/profile/${user.id}`,
         });
       } catch (e) { console.error(`[${new URL(request.url).pathname}]`, e); }
 

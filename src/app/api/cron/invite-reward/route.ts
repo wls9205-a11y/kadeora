@@ -75,7 +75,8 @@ export async function GET(req: Request) {
     await sb.from('notifications').insert({
       user_id: winnerId,
       type: 'system',
-      content: `🎉 어제 친구 초대 1등! 100P 지급됐어요. (${winnerData.count}명 초대)`
+      content: `🎉 어제 친구 초대 1등! 100P 지급됐어요. (${winnerData.count}명 초대)`,
+      link: '/profile',
     })
   }
 

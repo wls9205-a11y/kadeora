@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
         : `내일 마감! ${apt.house_nm} 접수가 내일까지에요.`;
 
       for (const u of users) {
-        notifications.push({ user_id: u.id, type: 'system', content });
+        notifications.push({ user_id: u.id, type: 'system', content, link: '/apt' });
       }
     }
 
@@ -93,6 +93,7 @@ export async function GET(req: NextRequest) {
             content: isToday
               ? `🧡 관심단지 ${apt.house_nm} 접수 오늘 마감!`
               : `🧡 관심단지 ${apt.house_nm} 접수가 내일까지에요.`,
+            link: `/apt/${apt.id}`,
           });
         }
       }

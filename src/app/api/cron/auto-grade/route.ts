@@ -131,6 +131,7 @@ export async function GET(req: NextRequest) {
             user_id: profile.id,
             type: 'badge',
             content: `🎉 ${GRADE_TITLES[newGrade]} 등급으로 승급! 축하합니다!`,
+            link: '/profile',
           }).then(() => {});
         }
       } else {
