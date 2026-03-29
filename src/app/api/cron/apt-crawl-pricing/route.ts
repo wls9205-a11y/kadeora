@@ -65,7 +65,9 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           continue;
         }
 
-        const json = await res.json();
+        const resText = await res.text();
+        let json;
+        try { json = JSON.parse(resText); } catch { failed++; continue; }
         const items = json?.data || [];
 
         if (!Array.isArray(items) || items.length === 0) {

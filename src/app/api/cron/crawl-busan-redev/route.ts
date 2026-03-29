@@ -22,7 +22,11 @@ export async function GET(req: NextRequest) {
     const firstRes = await fetch(
       `${BASE_URL}?serviceKey=${encodeURIComponent(apiKey)}&pageNo=1&numOfRows=1&resultType=json`
     );
-    const firstData = await firstRes.json();
+    const firstText = await firstRes.text();
+    let firstData;
+    try { firstData = JSON.parse(firstText); } catch { 
+      return { processed: 0, created: 0, updated: 0, failed: 1, metadata: { error: `API 응답 파싱 실패: ${firstText.slice(0, 100)}` } };
+    }
     const totalCount = firstData?.response?.body?.totalCount ||
                        firstData?.getMaintenanceBusiness1?.body?.totalCount || 0;
 

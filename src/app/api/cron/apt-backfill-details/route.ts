@@ -58,7 +58,9 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       const url = `https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail?serviceKey=${encodeURIComponent(APT_API_KEY)}&page=${page}&perPage=500`;
       const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
       if (!res.ok) break;
-      const json = await res.json();
+      const resText = await res.text();
+      let json;
+      try { json = JSON.parse(resText); } catch { break; }
       const items = json?.data || [];
       if (!Array.isArray(items) || items.length === 0) break;
 
