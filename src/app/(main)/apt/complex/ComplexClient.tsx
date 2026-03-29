@@ -39,7 +39,7 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Complex[] | null>(null);
   const [searching, setSearching] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const doSearch = useCallback(async (q: string) => {
     if (q.length < 2) { setSearchResults(null); return; }
