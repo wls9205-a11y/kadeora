@@ -101,15 +101,27 @@ export default function MiniLounge() {
     }}>
       {/* 헤더 */}
       <div style={{
-        padding: '7px 12px',
-        borderBottom: '1px solid var(--border)',
+        padding: '8px 12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        borderBottom: '1px solid var(--border)',
+        background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, transparent 100%)',
       }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>💬 라운지</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%', background: '#22C55E',
+            boxShadow: '0 0 6px rgba(34,197,94,0.5)',
+            display: 'inline-block',
+          }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>라운지</span>
+          {msgs.length > 0 && (
+            <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{msgs.length}</span>
+          )}
+        </div>
         <Link href="/discuss" style={{
           fontSize: 9, color: 'var(--text-tertiary)', textDecoration: 'none',
+          padding: '2px 6px', borderRadius: 4, background: 'var(--bg-hover)',
         }}>
           전체화면 →
         </Link>
@@ -119,34 +131,59 @@ export default function MiniLounge() {
       <div
         ref={scrollRef}
         style={{
-          height: 200,
+          height: 210,
           overflowY: 'auto',
-          padding: '4px 8px',
+          padding: '6px 8px',
           display: 'flex',
           flexDirection: 'column',
-          gap: 1,
+          gap: 4,
           scrollbarWidth: 'thin',
         }}
       >
         {msgs.length === 0 && (
           <div style={{
-            textAlign: 'center', padding: '30px 0',
-            color: 'var(--text-tertiary)', fontSize: 11, lineHeight: 1.6,
+            textAlign: 'center', padding: '40px 10px',
+            color: 'var(--text-tertiary)', fontSize: 11, lineHeight: 1.8,
           }}>
-            아직 대화가 없어요<br />첫 메시지를 남겨보세요 👋
+            <div style={{ fontSize: 24, marginBottom: 6 }}>💬</div>
+            아직 대화가 없어요<br />첫 메시지를 남겨보세요
           </div>
         )}
         {msgs.map((m) => (
-          <div key={m.id} style={{ fontSize: 11, lineHeight: 1.45, padding: '2px 0' }}>
-            <span style={{
-              fontWeight: 700,
-              color: m.is_mine ? 'var(--brand)' : 'var(--text-secondary)',
-              marginRight: 3, fontSize: 10,
+          <div key={m.id} style={{
+            display: 'flex', gap: 6, alignItems: 'flex-start',
+            padding: '3px 4px', borderRadius: 6,
+          }}>
+            {/* 아바타 이니셜 */}
+            <div style={{
+              width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+              background: m.is_mine
+                ? 'linear-gradient(135deg, #2563EB, #3B82F6)'
+                : 'linear-gradient(135deg, #334155, #475569)',
+              color: '#fff', fontSize: 9, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginTop: 1,
             }}>
-              {m.is_mine ? '나' : m.nickname}
-            </span>
-            <span style={{ color: 'var(--text-primary)', wordBreak: 'break-word' }}>{m.content}</span>
-            <span style={{ color: 'var(--text-tertiary)', fontSize: 9, marginLeft: 3 }}>{timeAgo(m.created_at)}</span>
+              {(m.is_mine ? '나' : m.nickname)[0]}
+            </div>
+            {/* 내용 */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 1 }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700,
+                  color: m.is_mine ? 'var(--brand)' : 'var(--text-secondary)',
+                }}>
+                  {m.is_mine ? '나' : m.nickname}
+                </span>
+                <span style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{timeAgo(m.created_at)}</span>
+              </div>
+              <div style={{
+                fontSize: 11, lineHeight: 1.4, color: 'var(--text-primary)',
+                wordBreak: 'break-word',
+              }}>
+                {m.content}
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -155,21 +192,22 @@ export default function MiniLounge() {
       {userId ? (
         <div style={{
           borderTop: '1px solid var(--border)',
-          padding: '5px 6px',
+          padding: '6px 8px',
           display: 'flex',
-          gap: 4,
+          gap: 5,
           alignItems: 'center',
+          background: 'var(--bg-hover)',
         }}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) send(); }}
-            placeholder="메시지..."
+            placeholder="메시지를 입력하세요"
             maxLength={200}
             style={{
-              flex: 1, border: 'none', outline: 'none',
-              background: 'var(--bg-hover)',
-              borderRadius: 6, padding: '5px 8px',
+              flex: 1, border: '1px solid var(--border)', outline: 'none',
+              background: 'var(--bg-surface)',
+              borderRadius: 8, padding: '6px 10px',
               fontSize: 11, color: 'var(--text-primary)',
               minWidth: 0,
             }}
@@ -178,11 +216,13 @@ export default function MiniLounge() {
             onClick={send}
             disabled={!input.trim() || sending}
             style={{
-              padding: '4px 8px', borderRadius: 6, border: 'none',
-              background: input.trim() ? 'var(--brand)' : 'var(--bg-hover)',
+              width: 28, height: 28, borderRadius: 8, border: 'none',
+              background: input.trim() ? 'var(--brand)' : 'var(--bg-surface)',
               color: input.trim() ? '#fff' : 'var(--text-tertiary)',
-              fontSize: 10, fontWeight: 700, cursor: input.trim() ? 'pointer' : 'default',
-              flexShrink: 0, lineHeight: 1.4,
+              fontSize: 13, fontWeight: 700, cursor: input.trim() ? 'pointer' : 'default',
+              flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.15s',
             }}
           >
             ↑
@@ -191,7 +231,8 @@ export default function MiniLounge() {
       ) : (
         <div style={{
           borderTop: '1px solid var(--border)',
-          padding: '8px 10px', textAlign: 'center',
+          padding: '10px 12px', textAlign: 'center',
+          background: 'var(--bg-hover)',
         }}>
           <Link href="/login?redirect=/discuss" style={{
             fontSize: 10, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600,
