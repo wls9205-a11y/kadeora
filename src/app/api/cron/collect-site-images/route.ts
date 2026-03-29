@@ -114,6 +114,7 @@ function isRelevantImage(img: ImageResult, aptName: string): boolean {
 
   // 캡션이 비어있거나 매칭 안 되면 제외
   return false;
+}
 
 async function handler(_req: NextRequest) {
   const start = Date.now();
