@@ -96,7 +96,16 @@ export async function safeBlogInsert(
       return { success: false, reason: 'daily_limit' };
     }
 
-    // 5. INSERT (큐 대기 상태)
+    // 5. 커버 이미지 자동 생성 (미제공 시)
+    const authorMap: Record<string, string> = {
+      stock: '카더라+주식팀', apt: '카더라+부동산팀', unsold: '카더라+부동산팀',
+      finance: '카더라+재테크팀', general: '카더라+편집팀',
+    };
+    const author = authorMap[data.category] || '카더라';
+    const coverImage = data.cover_image || `/api/og?title=${encodeURIComponent(data.title)}&category=${data.category}&author=${author}&design=2`;
+    const imageAlt = data.image_alt || `${data.title} — 카더라 ${data.category === 'stock' ? '주식' : data.category === 'apt' ? '부동산' : '정보'} 분석`;
+
+    // 6. INSERT (큐 대기 상태)
     const { data: inserted, error } = await admin
       .from('blog_posts')
       .insert({
@@ -110,8 +119,8 @@ export async function safeBlogInsert(
         cron_type: data.cron_type,
         data_date: data.data_date,
         source_ref: data.source_ref,
-        cover_image: data.cover_image,
-        image_alt: data.image_alt,
+        cover_image: coverImage,
+        image_alt: imageAlt,
         meta_description: data.meta_description,
         meta_keywords: data.meta_keywords,
         is_published: data.is_published ?? false,
