@@ -35,6 +35,13 @@
 - ✅ 상세 디자인 V1, 탭바 더보기 적용
 - ✅ 전 배포 READY
 
+## 분양가 자동 수집 현황 (세션 55에서 설정)
+- **347/2,692건 (12.9%)** 수집 완료 — 매시간 250건 자동 수집 중
+- apt-crawl-pricing: maxDuration 300초, 매시간 크론
+- apt-price-sync: 매일 03시, 3개 소스→apt_sites 싱크
+- apt-backfill-details: 매일 04:30 (견본주택/주차/난방)
+- **수집 완료 후** apt-crawl-pricing 스케줄 6시간으로 복원 필요
+
 ## PENDING
 - [ ] blog Sonnet 품질 확인 (GOD MODE 실행)
 - [ ] 종목 description 513개 (77% 누락)
