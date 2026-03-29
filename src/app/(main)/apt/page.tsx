@@ -136,6 +136,7 @@ async function fetchAptData() {
       house_nm: a.house_nm || '',
       region_nm: normalizeRegion(a.region_nm || '') || '기타',
       total_supply: a.tot_supply_hshld_co || 0,
+      house_type_info: a.house_type_info || null,
       unsold_count: null as number | null,
       mvn_prearnge_ym: a.mvn_prearnge_ym || null,
       sale_price_min: null as number | null,

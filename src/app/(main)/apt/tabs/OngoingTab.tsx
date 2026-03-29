@@ -177,7 +177,12 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                   {o.address ? o.address.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : ''}
-                  {(o.total_supply ?? 0) > 0 ? ` · 일반분양 ${(o.total_supply ?? 0).toLocaleString()}세대` : ''}
+                  {(o.total_supply ?? 0) > 0 ? (() => {
+                    const types = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];
+                    const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
+                    const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
+                    return gen > 0 ? ` · 총 ${(o.total_supply ?? 0).toLocaleString()}세대(일반${gen}·특별${spe})` : ` · 총 ${(o.total_supply ?? 0).toLocaleString()}세대`;
+                  })() : ''}
                   {o.constructor_nm ? ` · ${o.constructor_nm}` : ''}
                   {priceStr ? ` · ${priceStr}` : ''}
                 </div>
@@ -377,7 +382,12 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 16 }}>
                 {[
-                  ['공급 세대수', (o.total_supply ?? 0) > 0 ? `${(o.total_supply ?? 0).toLocaleString()}세대 (일반분양)` : '-'],
+                  ['공급 세대수', (o.total_supply ?? 0) > 0 ? (() => {
+                    const types = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];
+                    const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
+                    const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
+                    return gen > 0 ? `총 ${(o.total_supply ?? 0).toLocaleString()}세대\n(일반${gen}·특별${spe})` : `총 ${(o.total_supply ?? 0).toLocaleString()}세대`;
+                  })() : '-'],
                   ['미분양', o.unsold_count ? `${(o.unsold_count ?? 0).toLocaleString()}호` : '-'],
                   ['분양가', pMin ? `${pMin}${pMax && pMax !== pMin ? `~${pMax}` : ''}억` : '-'],
                   ['입주예정', mvn || '-'],

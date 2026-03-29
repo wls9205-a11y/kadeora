@@ -172,7 +172,12 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3 }}>{apt.house_nm}</div>
                 {/* 주소 + 세대수 + 시공사 */}
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
-                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}
+                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? (() => {
+                    const types = Array.isArray((apt as any).house_type_info) ? (apt as any).house_type_info : [];
+                    const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
+                    const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
+                    return gen > 0 ? ` · 총 ${apt.tot_supply_hshld_co.toLocaleString()}세대(일반${gen}·특별${spe})` : ` · 총 ${apt.tot_supply_hshld_co.toLocaleString()}세대`;
+                  })() : ''}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}
                 </div>
                 {/* AI 요약 (있으면) */}
                 {(apt as Record<string, any>).ai_summary && (
@@ -273,7 +278,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   {dayApts.map(a => (
                     <a key={a.id} href={`/apt/${encodeURIComponent(generateAptSlug(a.house_nm) || a.house_manage_no || String(a.id))}`} style={{ display: 'block', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', padding: '6px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', cursor: 'pointer' }}>
                       <span style={{ fontWeight: 600, color: 'var(--text-link, #58a6ff)' }}>{a.house_nm}</span>
-                      <span style={{ marginLeft: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.tot_supply_hshld_co?.toLocaleString() || '-'}세대</span>
+                      <span style={{ marginLeft: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · 총 {a.tot_supply_hshld_co?.toLocaleString() || '-'}세대</span>
                     </a>
                   ))}
                 </div>
