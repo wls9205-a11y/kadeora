@@ -76,13 +76,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Geo 메타 (좌표 있을 때)
   if (p?.latitude && p?.longitude) {
-    meta.other = {
-      ...meta.other,
-      'geo.position': `${p.latitude};${p.longitude}`,
-      'geo.placename': `${decoded} 아파트`,
-      'geo.region': 'KR',
-      'ICBM': `${p.latitude}, ${p.longitude}`,
-    } as Record<string, string>;
+    (meta.other as any)['geo.position'] = `${p.latitude};${p.longitude}`;
+    (meta.other as any)['geo.placename'] = `${decoded} 아파트`;
+    (meta.other as any)['geo.region'] = 'KR';
+    (meta.other as any)['ICBM'] = `${p.latitude}, ${p.longitude}`;
   }
 
   return meta;

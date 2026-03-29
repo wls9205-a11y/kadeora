@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { fmtAmount } from '@/lib/format';
 
