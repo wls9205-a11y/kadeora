@@ -60,7 +60,7 @@ export default function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, premiumKpi, blogProduction, commentStats, cronByCategory } = data as any;
+  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, premiumKpi, blogProduction, commentStats, cronByCategory, dataCoverage } = data as any;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const totalSites = seo?.totalSites || 0;
@@ -165,6 +165,9 @@ export default function DashboardSection() {
         <HealthBadge label="프리미엄" value={`${premiumKpi?.subscribers ?? 0}명`} ok={(premiumKpi?.subscribers ?? 0) > 0} />
         <HealthBadge label="IndexNow" value={`${premiumKpi?.indexNow?.pct ?? 0}%`} ok={(premiumKpi?.indexNow?.pct ?? 0) > 50} />
         {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
+        {dataCoverage && <HealthBadge label="분양가" value={`${dataCoverage.aptPrice.pct}%`} ok={dataCoverage.aptPrice.pct > 30} />}
+        {dataCoverage && <HealthBadge label="좌표" value={`${dataCoverage.aptCoords.pct}%`} ok={dataCoverage.aptCoords.pct > 30} />}
+        {dataCoverage && <HealthBadge label="종목설명" value={`${dataCoverage.stockDesc.pct}%`} ok={dataCoverage.stockDesc.pct > 50} />}
       </div>
 
       {/* ── Row 2: 핵심 KPI 8카드 + 어제 대비 ── */}
@@ -333,6 +336,58 @@ export default function DashboardSection() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>시세 크롤 상태</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: C.red }}>API키 미등록 (수집 0건)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Row 4.2: 데이터 커버리지 현황 ── */}
+      {dataCoverage && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>📊 데이터 커버리지</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {/* 분양가 수집 */}
+            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>🏷️ 분양가 수집</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.aptPrice.pct > 80 ? C.green : dataCoverage.aptPrice.pct > 30 ? C.yellow : C.red }}>{dataCoverage.aptPrice.pct}%</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+                <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.aptPrice.pct > 80 ? C.green : dataCoverage.aptPrice.pct > 30 ? C.yellow : C.red, width: `${dataCoverage.aptPrice.pct}%`, transition: 'width 0.6s' }} />
+              </div>
+              <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.aptPrice.done)}/{fmt(dataCoverage.aptPrice.total)}건</div>
+              {dataCoverage.aptCrawlRecent?.length > 0 && (
+                <div style={{ marginTop: 4, display: 'flex', gap: 2 }}>
+                  {dataCoverage.aptCrawlRecent.map((r: any, i: number) => (
+                    <div key={i} style={{ width: 8, height: 8, borderRadius: 2, background: r.ok ? C.green : C.red }} title={`${r.at?.slice(11,16)} ${r.ok ? '✅' : '❌'} +${r.created}건${r.err ? ' ' + r.err : ''}`} />
+                  ))}
+                  <span style={{ fontSize: 8, color: C.textDim, marginLeft: 4 }}>최근 크론</span>
+                </div>
+              )}
+            </div>
+            {/* apt_sites 좌표 */}
+            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>📍 사이트 좌표</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.aptCoords.pct > 80 ? C.green : dataCoverage.aptCoords.pct > 30 ? C.yellow : C.red }}>{dataCoverage.aptCoords.pct}%</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+                <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.aptCoords.pct > 80 ? C.green : dataCoverage.aptCoords.pct > 30 ? C.yellow : C.red, width: `${Math.max(dataCoverage.aptCoords.pct, 1)}%`, transition: 'width 0.6s' }} />
+              </div>
+              <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.aptCoords.done)}/{fmt(dataCoverage.aptCoords.total)}건</div>
+              {dataCoverage.aptCoords.pct === 0 && <div style={{ marginTop: 4, fontSize: 8, color: C.red, fontWeight: 600 }}>⚠️ 미착수</div>}
+            </div>
+            {/* 종목 description */}
+            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>📝 종목 설명</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.stockDesc.pct > 80 ? C.green : dataCoverage.stockDesc.pct > 30 ? C.yellow : C.red }}>{dataCoverage.stockDesc.pct}%</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+                <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.stockDesc.pct > 80 ? C.green : dataCoverage.stockDesc.pct > 30 ? C.yellow : C.red, width: `${dataCoverage.stockDesc.pct}%`, transition: 'width 0.6s' }} />
+              </div>
+              <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.stockDesc.done)}/{fmt(dataCoverage.stockDesc.total)}개</div>
+              <div style={{ marginTop: 4, fontSize: 8, color: C.yellow, fontWeight: 600 }}>{fmt(dataCoverage.stockDesc.total - dataCoverage.stockDesc.done)}개 누락</div>
             </div>
           </div>
         </div>
