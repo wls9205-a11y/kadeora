@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { fmtAmount } from '@/lib/format';
 
@@ -21,20 +21,67 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'saleCount' | 'lastPrice' | 'jeonseRatio'>('saleCount');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Complex[] | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  const doSearch = useCallback(async (q: string) => {
+    if (q.length < 2) { setSearchResults(null); return; }
+    setSearching(true);
+    try {
+      const res = await fetch(`/api/complex-search?q=${encodeURIComponent(q)}`);
+      const { results } = await res.json();
+      setSearchResults(results);
+    } catch { setSearchResults(null); }
+    setSearching(false);
+  }, []);
+
+  // 디바운스 검색
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+    if (value.length < 2) { setSearchResults(null); return; }
+    const timer = setTimeout(() => doSearch(value), 300);
+    return () => clearTimeout(timer);
+  }, [doSearch]);
+
+  const displayData = searchResults || complexes;
 
   const filtered = useMemo(() => {
-    let result = complexes;
-    if (selectedAge) result = result.filter(c => c.ageGroup === selectedAge);
-    if (selectedRegion) result = result.filter(c => c.region === selectedRegion);
+    let result = displayData;
+    if (!searchResults) {
+      if (selectedAge) result = result.filter(c => c.ageGroup === selectedAge);
+      if (selectedRegion) result = result.filter(c => c.region === selectedRegion);
+    }
     return result.sort((a, b) => {
       if (sortBy === 'lastPrice') return (b.lastPrice || 0) - (a.lastPrice || 0);
       if (sortBy === 'jeonseRatio') return (b.jeonseRatio || 0) - (a.jeonseRatio || 0);
       return b.saleCount - a.saleCount;
     });
-  }, [complexes, selectedAge, selectedRegion, sortBy]);
+  }, [displayData, searchResults, selectedAge, selectedRegion, sortBy]);
 
   return (
     <>
+      {/* 검색 */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ position: 'relative' }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => handleSearch(e.target.value)}
+            placeholder="단지명 검색 (예: 래미안, 자이, 힐스테이트...)"
+            style={{
+              width: '100%', padding: '10px 14px 10px 36px', borderRadius: 10,
+              border: '1px solid var(--border)', background: 'var(--bg-surface)',
+              color: 'var(--text-primary)', fontSize: 13, outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+          <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
+          {searching && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: 'var(--text-tertiary)' }}>검색중...</span>}
+          {searchResults && !searching && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: 'var(--brand)', cursor: 'pointer' }} onClick={() => { setSearchQuery(''); setSearchResults(null); }}>✕ 초기화</span>}
+        </div>
+      </div>
+
       {/* 필터 바 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         {/* 연차 필터 */}
