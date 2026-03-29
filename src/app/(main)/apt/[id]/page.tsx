@@ -572,6 +572,62 @@ export default async function AptUnifiedPage({ params }: Props) {
         ); 
       })()}
 
+      {/* 💰 분양가 vs 실거래가 비교 (두 데이터 모두 있을 때) */}
+      {site?.price_min && site?.price_max && trades.length > 0 && (() => {
+        const amounts = trades.map((t: any) => Number(t.deal_amount)).filter((a: number) => a > 0);
+        if (amounts.length < 2) return null;
+        const tradeAvg = Math.round(amounts.reduce((s: number, a: number) => s + a, 0) / amounts.length);
+        const tradeMax = Math.max(...amounts);
+        const tradeMin = Math.min(...amounts);
+        const supplyAvg = Math.round((site.price_min + site.price_max) / 2);
+        const premium = tradeAvg > 0 && supplyAvg > 0 ? Math.round(((tradeAvg - supplyAvg) / supplyAvg) * 100) : 0;
+        const allValues = [site.price_min, site.price_max, tradeMin, tradeMax];
+        const chartMax = Math.max(...allValues);
+        const chartMin = Math.min(...allValues);
+        const range = chartMax - chartMin || 1;
+        const pct = (v: number) => ((v - chartMin) / range * 80 + 10);
+        const fmtA = (n: number) => n >= 100000000 ? `${(n / 100000000).toFixed(1)}억` : `${Math.round(n / 10000).toLocaleString()}만`;
+
+        return (
+          <div className="apt-card" style={{ background: premium > 0 ? 'rgba(248,113,113,0.03)' : 'rgba(52,211,153,0.03)', border: `1px solid ${premium > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)'}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <h2 style={{ ...ct, margin: 0 }}>📊 분양가 vs 실거래가</h2>
+              <span style={{ fontSize: 12, fontWeight: 800, color: premium > 0 ? 'var(--accent-red)' : '#34D399', background: premium > 0 ? 'rgba(248,113,113,0.1)' : 'rgba(52,211,153,0.1)', padding: '2px 8px', borderRadius: 6 }}>
+                {premium > 0 ? `+${premium}% 프리미엄` : premium < 0 ? `${premium}% 저평가` : '시세 동일'}
+              </span>
+            </div>
+            {/* 비교 바 차트 */}
+            <div style={{ position: 'relative', height: 80, marginBottom: 8 }}>
+              {/* 분양가 범위 */}
+              <div style={{ position: 'absolute', top: 8, left: `${pct(site.price_min)}%`, width: `${pct(site.price_max) - pct(site.price_min)}%`, height: 20, borderRadius: 6, background: 'rgba(59,123,246,0.2)', border: '1.5px solid var(--brand)' }}>
+                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 700, color: 'var(--brand)', whiteSpace: 'nowrap' }}>분양가</div>
+              </div>
+              {/* 실거래 범위 */}
+              <div style={{ position: 'absolute', top: 44, left: `${pct(tradeMin)}%`, width: `${pct(tradeMax) - pct(tradeMin)}%`, height: 20, borderRadius: 6, background: premium > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)', border: `1.5px solid ${premium > 0 ? '#F87171' : '#34D399'}` }}>
+                <div style={{ position: 'absolute', bottom: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 700, color: premium > 0 ? '#F87171' : '#34D399', whiteSpace: 'nowrap' }}>실거래가</div>
+              </div>
+              {/* 분양 평균 마커 */}
+              <div style={{ position: 'absolute', top: 4, left: `${pct(supplyAvg)}%`, width: 2, height: 28, background: 'var(--brand)', transform: 'translateX(-50%)' }} />
+              {/* 실거래 평균 마커 */}
+              <div style={{ position: 'absolute', top: 40, left: `${pct(tradeAvg)}%`, width: 2, height: 28, background: premium > 0 ? '#F87171' : '#34D399', transform: 'translateX(-50%)' }} />
+            </div>
+            {/* 수치 비교 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 6 }}>
+              <div style={{ background: 'rgba(59,123,246,0.05)', borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
+                <div style={{ fontSize: 9, color: 'var(--brand)', fontWeight: 600, marginBottom: 2 }}>분양가 평균</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>{fmtA(supplyAvg)}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{fmtA(site.price_min)} ~ {fmtA(site.price_max)}</div>
+              </div>
+              <div style={{ background: premium > 0 ? 'rgba(248,113,113,0.05)' : 'rgba(52,211,153,0.05)', borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
+                <div style={{ fontSize: 9, color: premium > 0 ? '#F87171' : '#34D399', fontWeight: 600, marginBottom: 2 }}>실거래 평균 ({amounts.length}건)</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: premium > 0 ? '#F87171' : '#34D399' }}>{fmtA(tradeAvg)}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{fmtA(tradeMin)} ~ {fmtA(tradeMax)}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 📄 모집공고 핵심 요약 — 통합 카드 */}
       {sub && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px', marginBottom: 12 }}>
@@ -713,6 +769,8 @@ export default async function AptUnifiedPage({ params }: Props) {
                   const supply = Number(t.supply || t.supply_count || t.suply_hshldco || 0);
                   const spsply = Number(t.spsply_hshldco || 0);
                   const price = Number(t.lttot_top_amount || t.supply_price || 0);
+                  const exclusiveArea = parseFloat((typeLabel || '0').replace(/[A-Za-z]/g, ''));
+                  const ppyeong = price > 0 && exclusiveArea > 10 ? Math.round(price / (exclusiveArea / 3.3058)) : 0;
                   return (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
                       <div style={{ minWidth: 55 }}>
@@ -723,7 +781,12 @@ export default async function AptUnifiedPage({ params }: Props) {
                         <div style={{ height: '100%', width: `${maxSupply > 0 ? (supply / maxSupply) * 100 : 0}%`, borderRadius: 4, background: `hsl(${220 + i * 18}, 60%, 55%)` }} />
                         <span style={{ position: 'absolute', left: 6, top: 1, fontSize: 10, lineHeight: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>{supply}세대{spsply > 0 ? ` (특${spsply})` : ''}</span>
                       </div>
-                      {price > 0 && <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 700, minWidth: 52, textAlign: 'right' }}>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</span>}
+                      {price > 0 && (
+                        <div style={{ minWidth: 55, textAlign: 'right' }}>
+                          <div style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 700 }}>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
+                          {ppyeong > 0 && <div style={{ fontSize: 8, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만</div>}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
