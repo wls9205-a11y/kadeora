@@ -86,9 +86,9 @@ export default async function ComplexDetailPage({ params }: Props) {
   const avgPrice = amounts.length ? Math.round(amounts.reduce((s, a) => s + a, 0) / amounts.length) : 0;
   const maxPrice = amounts.length ? Math.max(...amounts) : 0;
   const minPrice = amounts.length ? Math.min(...amounts) : 0;
-  const latestPrice = trades[0].deal_amount || 0;
+  const latestPrice = trades.length > 0 ? (trades[0]?.deal_amount || 0) : 0;
 
-  // 전월세 요약 (latestPrice 이후)
+  // 전월세 요약
   const latestJeonse = rentTrades.find(r => r.rent_type === 'jeonse');
   const latestMonthly = rentTrades.find(r => r.rent_type === 'monthly');
   const jeonseRatio = latestJeonse && latestPrice > 0 ? Math.round((latestJeonse.deposit / latestPrice) * 100) : null;
