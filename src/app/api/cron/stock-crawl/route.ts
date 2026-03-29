@@ -43,6 +43,7 @@ async function fetchKRXStocks(apiKey: string): Promise<{ stocks: any[]; debug: s
     try {
       // basDt 파라미터 추가 — 특정 날짜 기준 조회 (더 안정적)
       const url = `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&resultType=json&mrktCls=${marketCode}&basDt=${basDt}`;
+      debugLines.push(`url_key_part=${encodeURIComponent(apiKey).slice(0, 20)}...`);
       const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
       const httpStatus = res.status;
       const rawText = await res.text();
@@ -201,7 +202,10 @@ export async function GET(req: NextRequest) {
     }
 
     // === 2단계: 공공데이터 API (종가, 키가 있을 때) ===
-    const stockApiKey = process.env.STOCK_DATA_API_KEY || process.env.BUSAN_DATA_API_KEY;
+    const stockKey = process.env.STOCK_DATA_API_KEY;
+    const busanKey = process.env.BUSAN_DATA_API_KEY;
+    const stockApiKey = stockKey || busanKey;
+    const keySource = stockKey ? 'STOCK_DATA_API_KEY' : (busanKey ? 'BUSAN_DATA_API_KEY' : 'none');
     let krxDebug = '';
     if (stockApiKey && totalCreated === 0) {
       const { stocks: krxStocks, debug } = await fetchKRXStocks(stockApiKey);
@@ -235,6 +239,8 @@ export async function GET(req: NextRequest) {
         source,
         kis_available: !!(kisKey && kisSecret),
         public_api_available: !!stockApiKey,
+        key_source: keySource,
+        key_preview: stockApiKey ? `${stockApiKey.slice(0, 8)}...${stockApiKey.slice(-4)} (len=${stockApiKey.length})` : 'none',
         krx_debug: krxDebug.slice(0, 800),
       },
     };
