@@ -7,7 +7,6 @@ import './styles/blog.css';
 import './styles/responsive.css';
 import OfflineBanner from '@/components/OfflineBanner';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import GuestWelcome from '@/components/GuestWelcome';
 import { VercelAnalytics } from '@/components/common/Analytics';
 import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
@@ -166,7 +165,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OfflineBanner />
         <KakaoInit />
         {children}
-        <GuestWelcome />
         </ThemeProvider>
         {/* GA4 */}
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-VP4F6TH2GD" strategy="afterInteractive" />
