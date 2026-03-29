@@ -70,9 +70,9 @@ async function fetchAptData() {
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
       sb.from('apt_transactions').select('id', { count: 'exact', head: true }),
       // 지역별 실거래 건수 (15행) — 497K건 로드 대신 GROUP BY
-      sb.rpc('get_trade_count_by_region'),
+      (sb as any).rpc('get_trade_count_by_region'),
       // 지역별 재개발 건수 (11행)
-      sb.rpc('get_redev_count_by_region'),
+      (sb as any).rpc('get_redev_count_by_region'),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
