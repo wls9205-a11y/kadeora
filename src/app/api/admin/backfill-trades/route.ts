@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
               if (!error) { inserted += data?.length || 0; skipped += rows.length - (data?.length || 0); }
             }
           } else {
-            // 매매 INSERT
+            // 매매 UPSERT
             const rows = items.map(it => ({
               apt_name: it.apt_name || '미상', region_nm: region, sigungu, dong: it.dong || null,
               exclusive_area: parseFloat(it.exclusive_area || '0'),
@@ -107,8 +107,10 @@ export async function POST(req: NextRequest) {
             })).filter(r => r.deal_amount > 0 && r.deal_date);
 
             if (rows.length > 0) {
-              const { error } = await supabase.from('apt_transactions').insert(rows);
-              if (!error) inserted += rows.length;
+              const { data, error } = await supabase.from('apt_transactions')
+                .upsert(rows, { onConflict: 'apt_name,dong,exclusive_area,deal_date,floor,trade_type', ignoreDuplicates: true })
+                .select('id');
+              if (!error) { inserted += data?.length || 0; skipped += rows.length - (data?.length || 0); }
               else skipped += rows.length;
             }
           }
