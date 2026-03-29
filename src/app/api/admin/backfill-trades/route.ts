@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     // API 엔드포인트 분기
     const endpoint = type === 'rent'
       ? 'https://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent'
-      : 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev';
+      : 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade';
 
     async function fetchOneRegion(label: string, lawdCd: string): Promise<{ inserted: number; skipped: number; calls: number }> {
       const { region, sigungu } = parseRegionSigungu(label);
