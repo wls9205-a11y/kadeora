@@ -651,9 +651,6 @@ export default async function AptUnifiedPage({ params }: Props) {
                     </div>
                   );
                 })}
-                    </div>
-                  );
-                })}
               </div>
             );
           })()}
