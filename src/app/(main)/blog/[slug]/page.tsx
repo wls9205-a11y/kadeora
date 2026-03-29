@@ -56,6 +56,16 @@ function normalizeMarkdownHeadings(md: string): string {
   );
 }
 
+// 블로그 본문 전처리: 이스케이프된 문자열 정리
+function sanitizeBlogContent(raw: string): string {
+  return raw
+    .replace(/\\n/g, '\n')     // 리터럴 \\n → 실제 줄바꿈
+    .replace(/\\t/g, '\t')     // 리터럴 \\t → 실제 탭
+    .replace(/\\r/g, '')       // 리터럴 \\r 제거
+    .replace(/\r\n/g, '\n')   // Windows 줄바꿈 통일
+    .replace(/\n{4,}/g, '\n\n\n'); // 과도한 빈줄(4+) → 3줄로 축소
+}
+
 
 const GEO_CODES: Record<string, { code: string; lat: string; lng: string }> = {
   // 광역시·도
@@ -377,8 +387,9 @@ export default async function BlogDetailPage({ params }: Props) {
     ],
   };
 
-  // 마크다운 → HTML (볼드 소제목 → h2 정규화 포함)
-  const htmlRaw = injectInternalLinks(sanitizeHtml(marked(normalizeMarkdownHeadings(post.content)) as string));
+  // 본문 전처리 (\\n 리터럴 등 정리) → 마크다운 → HTML
+  const cleanContent = sanitizeBlogContent(post.content);
+  const htmlRaw = injectInternalLinks(sanitizeHtml(marked(normalizeMarkdownHeadings(cleanContent)) as string));
   const htmlFull = enhanceBlogVisuals(htmlRaw, {
     excerpt: post.excerpt,
     coverImage: post.cover_image,
@@ -394,7 +405,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const toc = extractToc(htmlFull);
 
   // FAQ 파싱
-  const faqItems = parseFaqFromContent(post.content);
+  const faqItems = parseFaqFromContent(cleanContent);
   const isFaq = (post.tags ?? []).some((t: string) => t.toLowerCase().includes('faq') || t === '자주묻는질문');
   const showFaq = faqItems.length >= 1;  // 1개 이상이면 FAQ 스키마 출력 (JSON-LD 리치스니펫 극대화)
   const faqSchema = showFaq && faqItems.length > 0 ? {

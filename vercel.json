@@ -177,6 +177,14 @@
       "schedule": "0 22 * * 1-5"
     },
     {
+      "path": "/api/stock-refresh",
+      "schedule": "*/30 0-7 * * 1-5"
+    },
+    {
+      "path": "/api/stock-refresh",
+      "schedule": "0 14,16,18,20,22 * * 1-5"
+    },
+    {
       "path": "/api/cron/blog-afternoon",
       "schedule": "0 14 * * 1-5"
     },
