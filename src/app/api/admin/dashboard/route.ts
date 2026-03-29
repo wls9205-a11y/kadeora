@@ -296,7 +296,7 @@ export async function GET(req: Request) {
         categoryDistribution,
         cronDetail: cronSummary,
         totalRecordsCreated,
-        dbSize: '226 MB',
+        dbSize: '333 MB',
         recentUsers: recentUsers ?? [],
         recentPosts: recentPosts ?? [],
         recentComments: recentCommentsR.data ?? [],

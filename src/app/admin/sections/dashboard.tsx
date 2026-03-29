@@ -334,8 +334,10 @@ export default function DashboardSection() {
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: C.textSec }}>시세 크롤 상태</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: C.red }}>API키 미등록 (수집 0건)</span>
+              <span style={{ fontSize: 11, color: C.textSec }}>시세 수집 상태</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: stockKpi.active > stockKpi.total * 0.9 ? C.green : C.yellow }}>
+                {stockKpi.active}/{stockKpi.total} 활성 ({Math.round((stockKpi.active / (stockKpi.total || 1)) * 100)}%)
+              </span>
             </div>
           </div>
         </div>
