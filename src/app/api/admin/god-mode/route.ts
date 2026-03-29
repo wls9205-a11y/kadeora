@@ -23,7 +23,8 @@ const CRON_GROUPS = {
     '/api/cron/crawl-busan-redev',
     '/api/cron/crawl-gyeonggi-redev',
     '/api/cron/crawl-nationwide-redev',
-    '/api/stock-refresh',           // ⚠️ /api/cron 아님
+    '/api/stock-refresh',           // ⚠️ /api/cron 아님 — Naver/Yahoo 시세
+    '/api/cron/stock-crawl',        // data.go.kr 종가 수집
     '/api/cron/exchange-rate',
     '/api/cron/stock-news-crawl',
     '/api/cron/stock-flow-crawl',
@@ -104,7 +105,6 @@ const CRON_GROUPS = {
     '/api/cron/push-apt-deadline',
     '/api/cron/push-daily-reminder',
     '/api/cron/invite-reward',
-    '/api/cron/stock-crawl',
   ],
 };
 
@@ -130,7 +130,7 @@ interface CronResult {
 const getName = (ep: string) => ep.split('/').pop() || ep;
 
 // 단일 크론 실행
-async function runCron(endpoint: string, baseUrl: string, cronSecret: string | undefined): Promise<CronResult> {
+async function runCron(endpoint: string, baseUrl: string, cronSecret: string | undefined, timeoutMs = 60000): Promise<CronResult> {
   const start = Date.now();
   const name = getName(endpoint);
   
@@ -138,7 +138,7 @@ async function runCron(endpoint: string, baseUrl: string, cronSecret: string | u
     const res = await fetch(`${baseUrl}${endpoint}`, {
       method: 'GET',
       headers: cronSecret ? { 'Authorization': `Bearer ${cronSecret}` } : {},
-      signal: AbortSignal.timeout(120000), // 2분 타임아웃
+      signal: AbortSignal.timeout(timeoutMs),
     });
     
     return {
@@ -161,19 +161,20 @@ async function runCron(endpoint: string, baseUrl: string, cronSecret: string | u
   }
 }
 
-// 배치 병렬 실행 (동시 10개)
+// 배치 병렬 실행 (동시 20개, 타임아웃 단축)
 async function runBatch(
   endpoints: string[],
   baseUrl: string,
   cronSecret: string | undefined,
-  batchSize = 10
+  batchSize = 20,
+  timeoutMs = 60000
 ): Promise<CronResult[]> {
   const results: CronResult[] = [];
   
   for (let i = 0; i < endpoints.length; i += batchSize) {
     const batch = endpoints.slice(i, i + batchSize);
     const batchResults = await Promise.allSettled(
-      batch.map(ep => runCron(ep, baseUrl, cronSecret))
+      batch.map(ep => runCron(ep, baseUrl, cronSecret, timeoutMs))
     );
     
     for (let j = 0; j < batchResults.length; j++) {
@@ -257,8 +258,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 3. 병렬 실행 (10개씩)
-    const results = await runBatch(endpoints, baseUrl, cronSecret, 10);
+    // 3. 병렬 실행 (20개씩, 전체실행 시 빠른 타임아웃)
+    const batchSize = mode === 'full' ? 20 : 15;
+    const timeoutMs = mode === 'full' ? 45000 : 60000;
+    const results = await runBatch(endpoints, baseUrl, cronSecret, batchSize, timeoutMs);
 
     // 4. 결과 집계
     const success = results.filter(r => r.ok).length;
