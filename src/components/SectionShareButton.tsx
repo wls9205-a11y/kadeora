@@ -19,7 +19,6 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
       try {
         await navigator.share({
           title: label || '카더라',
-          text: text || label || '카더라에서 확인하세요',
           url,
         });
         return;

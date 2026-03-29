@@ -38,7 +38,6 @@ export default function ShareButtons({ title, postId, content }: Props) {
   const share = async (platform: string) => {
     const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
     const shareTitle = title;
-    const shareDesc = content?.slice(0, 80) || '카더라에서 확인하세요';
     const ogImage = typeof window !== 'undefined'
       ? `${window.location.origin}/api/og?title=${encodeURIComponent(shareTitle)}&design=2`
       : '';
@@ -47,7 +46,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
       case 'native':
         if (navigator.share) {
           try {
-            await navigator.share({ title: shareTitle, text: shareDesc, url: shareUrl });
+            await navigator.share({ title: shareTitle, url: shareUrl });
           } catch { /* 사용자가 취소 */ }
           setOpen(false);
           return;
@@ -60,7 +59,6 @@ export default function ShareButtons({ title, postId, content }: Props) {
               objectType: 'feed',
               content: {
                 title: shareTitle,
-                description: shareDesc,
                 imageUrl: ogImage,
                 link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
               },
