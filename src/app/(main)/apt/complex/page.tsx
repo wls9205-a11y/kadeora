@@ -36,34 +36,28 @@ export default async function ComplexPage() {
 
   const allProfiles: any[] = profiles || [];
 
-  // 연차별 집계 (프로필 기반 — 즉시 계산)
-  const ageStats = new Map<string, { cnt: number; totalPrice: number }>();
-  AGE_GROUPS.forEach(g => ageStats.set(g, { cnt: 0, totalPrice: 0 }));
-
-  for (const p of allProfiles) {
-    if (p.age_group && p.latest_sale_price > 0) {
-      const s = ageStats.get(p.age_group);
-      if (s) { s.cnt++; s.totalPrice += p.latest_sale_price; }
-    }
-  }
+  // 연차별 통계 (DB 뷰 — 전체 34,000+ 프로필 기반)
+  const { data: ageRows } = await (sb as any).from('v_complex_age_stats').select('*');
+  const ageMap = new Map<string, any>();
+  for (const r of (ageRows || [])) ageMap.set(r.age_group, r);
 
   const ageChartData = AGE_GROUPS.map(g => {
-    const s = ageStats.get(g)!;
-    return { group: g, avg: s.cnt > 0 ? Math.round(s.totalPrice / s.cnt) : 0, count: s.cnt };
+    const s = ageMap.get(g);
+    return { group: g, avg: s?.avg_sale_price || 0, count: s?.profile_count || 0 };
   });
 
-  // 지역별 통계 (프로필 기반)
-  const regionStats = new Map<string, number>();
-  for (const p of allProfiles) {
-    const r = p.region_nm;
-    if (r) regionStats.set(r, (regionStats.get(r) || 0) + 1);
-  }
-
+  // 지역별 통계 (DB 뷰 — 전체 프로필 기반)
+  const { data: regionRows } = await (sb as any).from('v_complex_region_stats').select('*');
   const regionData = REGIONS
-    .map(r => ({ region: r, count: regionStats.get(r) || 0 }))
+    .map(r => {
+      const row = (regionRows || []).find((x: any) => x.region_nm === r);
+      return { region: r, count: row?.profile_count || 0 };
+    })
     .filter(r => r.count > 0);
 
-  // TOP 단지 (거래 많은 순, 100개)
+  const totalProfiles = (regionRows || []).reduce((s: number, r: any) => s + (r.profile_count || 0), 0);
+
+  // TOP 단지 (거래 많은 순, 100개 — Supabase 1,000 limit 내)
   const topComplexes = allProfiles.slice(0, 100).map((p: any) => ({
     aptName: p.apt_name,
     sigungu: p.sigungu,
@@ -78,7 +72,6 @@ export default async function ComplexPage() {
     jeonseRatio: p.jeonse_ratio || null,
   }));
 
-  const totalProfiles = allProfiles.length;
 
   return (
     <article style={{ maxWidth: 960, margin: '0 auto', padding: '0 14px 80px' }}>
