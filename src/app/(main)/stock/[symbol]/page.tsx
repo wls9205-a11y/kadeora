@@ -243,12 +243,44 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 기본 정보 그리드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 12 }}>
+      {/* 기본 정보 그리드 — 시각 강화 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 12 }}>
         {items.map(({ label, value }) => (
           <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
           </div>
         ))}
+      </div>
+
+      {/* 투자 지표 대시보드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 12 }}>
+        {/* 등락률 게이지 */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>일간 등락</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+              {isUp ? '▲' : isDown ? '▼' : '━'}
+            </div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+                {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.change_amt ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : ''}</div>
+            </div>
+          </div>
+        </div>
+        {/* 시총 위치 */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>시가총액</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}</div>
+          <div style={{ marginTop: 4, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', borderRadius: 2, background: 'var(--brand)', width: `${s.market_cap ? Math.min(Math.log10(Number(s.market_cap) / 1e8) * 15, 100) : 10}%` }} />
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+            {Number(s.market_cap) >= 1e13 ? '초대형주' : Number(s.market_cap) >= 1e12 ? '대형주' : Number(s.market_cap) >= 1e11 ? '중형주' : '소형주'}
+          </div>
+        </div>
       </div>
 
       {/* 52주 가격 범위 바 */}
@@ -310,13 +342,35 @@ export default async function StockDetailPage({ params }: Props) {
       {(newsR.data ?? []).length > 0 && (
         <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📰 {s.name} 최신 뉴스</h2>
+          {/* 감성 분석 요약 바 */}
+          {(() => {
+            const all = (newsR.data ?? []) as any[];
+            const pos = all.filter(n => n.sentiment_label === 'positive').length;
+            const neg = all.filter(n => n.sentiment_label === 'negative').length;
+            const neu = all.length - pos - neg;
+            const total = all.length || 1;
+            return total > 1 ? (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', gap: 1 }}>
+                  {pos > 0 && <div style={{ flex: pos, background: 'var(--accent-green)', borderRadius: 3 }} />}
+                  {neu > 0 && <div style={{ flex: neu, background: 'var(--border)', borderRadius: 3 }} />}
+                  {neg > 0 && <div style={{ flex: neg, background: 'var(--accent-red)', borderRadius: 3 }} />}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
+                  <span style={{ color: 'var(--accent-green)' }}>긍정 {pos}</span>
+                  <span>중립 {neu}</span>
+                  <span style={{ color: 'var(--accent-red)' }}>부정 {neg}</span>
+                </div>
+              </div>
+            ) : null;
+          })()}
           {(newsR.data ?? []).slice(0, 5).map((n: any) => (
             <div key={n.id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.5 }}>{n.title}</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2, display: 'flex', gap: 8 }}>
                 <span>{n.source || '뉴스'}</span>
                 <span>{n.published_at?.slice(0, 10)}</span>
-                {n.sentiment_label && <span style={{ color: n.sentiment_label === 'positive' ? 'var(--accent-green)' : n.sentiment_label === 'negative' ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{n.sentiment_label === 'positive' ? '긍정' : n.sentiment_label === 'negative' ? '부정' : '중립'}</span>}
+                {n.sentiment_label && <span style={{ padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 600, background: n.sentiment_label === 'positive' ? 'rgba(52,211,153,0.15)' : n.sentiment_label === 'negative' ? 'rgba(248,113,113,0.15)' : 'rgba(148,163,184,0.1)', color: n.sentiment_label === 'positive' ? 'var(--accent-green)' : n.sentiment_label === 'negative' ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{n.sentiment_label === 'positive' ? '긍정' : n.sentiment_label === 'negative' ? '부정' : '중립'}</span>}
               </div>
               {n.ai_summary && <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '4px 0 0', wordBreak: 'keep-all' }}>{n.ai_summary.slice(0, 100)}</p>}
             </div>
