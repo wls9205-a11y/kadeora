@@ -182,11 +182,11 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, redevelopment, transactions };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, redevelopment, transactions } = await fetchAptData();
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
@@ -202,7 +202,7 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"전국 아파트 청약 일정","numberOfItems":apts.length,"itemListElement":itemList}) }} />
     {/* CollectionPage → search engine context */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":"아파트 청약·분양·미분양·재개발","description":`전국 ${apts.length}건 청약, ${ongoingApts.length}건 분양중, ${unsold.length}건 미분양 현황`,"url":SITE_URL+"/apt","isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
-    <AptClient apts={apts} unsold={unsold} redevelopment={redevelopment} transactions={transactions} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} />
+    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} />
     <Disclaimer />
   </Suspense>;
 }
