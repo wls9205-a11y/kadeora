@@ -116,7 +116,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   });
 
   return (
-    <div style={{ marginBottom: 8 }}>
+    <div style={{ marginBottom: 8, maxWidth: '100%', overflow: 'hidden' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>
@@ -128,6 +128,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 6,
+        overflow: 'hidden',
       }}>
         {/* Donut chart */}
         <svg width={110} height={110} viewBox="0 0 110 110" style={{ flexShrink: 0 }}>
@@ -213,8 +214,10 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       {/* Compact tile grid — 5열 고정 */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
+        gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
         gap: 5,
+        maxWidth: '100%',
+        overflow: 'hidden',
       }}>
         {regions.map((r, i) => {
           const isActive = activeRegion === r.name;

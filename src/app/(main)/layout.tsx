@@ -40,6 +40,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           minHeight: 'calc(100vh - 48px)',
           backgroundColor: 'var(--bg-base)',
           color: 'var(--text-primary)',
+          overflowX: 'hidden',
         }}>
           <ErrorBoundary>
             <GuestGate isLoggedIn={isLoggedIn}>
