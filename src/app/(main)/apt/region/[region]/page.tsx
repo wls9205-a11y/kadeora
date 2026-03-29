@@ -81,7 +81,7 @@ async function fetchRegionData(region: string) {
       .ilike('region_nm', `%${region}%`)
       .order('deal_date', { ascending: false }).limit(10) as unknown as Promise<any>,
     s.from('redevelopment_projects')
-      .select('id,project_name,region,stage,total_households')
+      .select('id,district_name,region,stage,total_households')
       .ilike('region', `%${region}%`).eq('is_active', true)
       .order('created_at', { ascending: false }).limit(10) as unknown as Promise<any>,
     s.from('unsold_apts')
@@ -340,7 +340,7 @@ export default async function RegionLandingPage({ params }: Props) {
               borderRadius: 10, marginBottom: 4,
             }}>
               <div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.project_name}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.district_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.region}</div>
               </div>
               <span style={{

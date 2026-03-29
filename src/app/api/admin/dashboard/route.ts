@@ -529,7 +529,7 @@ export async function GET(req: Request) {
           .eq('is_active', true).order('interest_count', { ascending: false }).limit(100),
         sb.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co')
           .order('rcept_bgnde', { ascending: false }).limit(50),
-        sb.from('unsold_apts').select('id, complex_name, region, unsold_count, total_units')
+        sb.from('unsold_apts').select('id, house_nm, region_nm, tot_unsold_hshld_co, tot_supply_hshld_co')
           .order('unsold_count', { ascending: false }).limit(50),
         sb.from('redevelopment_projects').select('id, district_name, region, stage, total_households')
           .eq('is_active', true).limit(50),
