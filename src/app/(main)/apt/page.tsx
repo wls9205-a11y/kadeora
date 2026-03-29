@@ -30,6 +30,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 }
 // Cache: 3600s — 청약 정보 (하루 1회 갱신)
 export const revalidate = 60;
+export const maxDuration = 30;
 import { createSupabaseServer } from '@/lib/supabase-server';
 import AptClient from './AptClient';
 import Disclaimer from '@/components/Disclaimer';

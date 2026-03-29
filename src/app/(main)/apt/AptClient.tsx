@@ -162,7 +162,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           return (
             <button key={k} onClick={() => handleTabChange(k)} aria-pressed={isActive} style={{
               flex: '1 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              padding: '7px 4px', borderRadius: 7, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+              padding: '8px 6px', borderRadius: 7, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
               background: isActive ? 'var(--brand)' : 'transparent',
               color: isActive ? '#fff' : 'var(--text-tertiary)',
               transition: 'all 0.15s',
@@ -170,7 +170,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             }}>
               <span style={{ fontSize: 12, lineHeight: 1 }}>{icon} <span style={{ fontWeight: 700, fontSize: 12 }}>{label}</span></span>
               {badge && (
-                <span style={{ fontSize: 9, marginTop: 2, opacity: isActive ? 0.85 : 0.7, color: isActive ? '#fff' : badgeColor, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: 10, marginTop: 2, opacity: isActive ? 0.85 : 0.7, color: isActive ? '#fff' : badgeColor, fontWeight: 600, whiteSpace: 'nowrap' }}>
                   {badge}
                 </span>
               )}

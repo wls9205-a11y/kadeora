@@ -196,7 +196,7 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
                   </div>
                 </div>
                 <span style={{
-                  padding: '3px 10px', borderRadius: 6, fontSize: 10, fontWeight: 800, flexShrink: 0, marginLeft: 8,
+                  padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800, flexShrink: 0, marginLeft: 8,
                   background: `${borderColor}15`, color: borderColor,
                 }}>{c.ageGroup}</span>
               </div>
@@ -204,19 +204,19 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
               {/* 가격 그리드 */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4, marginBottom: 10 }}>
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 600 }}>매매</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 600 }}>매매</div>
                   <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
                     {c.lastPrice > 0 ? fmtAmount(c.lastPrice) : '—'}
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 600 }}>전세</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 600 }}>전세</div>
                   <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-blue)' }}>
                     {c.jeonse > 0 ? fmtAmount(c.jeonse) : '—'}
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 600 }}>월세</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2, fontWeight: 600 }}>월세</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-orange, #f97316)' }}>
                     {c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—'}
                   </div>

@@ -211,15 +211,13 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         </div>
       </div>
 
-      {/* Compact tile grid — 5열 고정 */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+      {/* Compact tile grid — 모바일 3열 / 데스크탑 5열 */}
+      <div className="grid grid-cols-3 md:grid-cols-5" style={{
         gap: 5,
         maxWidth: '100%',
         overflow: 'hidden',
       }}>
-        {regions.map((r, i) => {
+        {regions.map((r) => {
           const isActive = activeRegion === r.name;
           return (
             <button
@@ -227,7 +225,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               onClick={() => onRegionClick?.(isActive ? '전체' : r.name)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                padding: '5px 6px',
+                padding: '6px 8px',
                 background: isActive ? 'var(--brand-bg, rgba(37,99,235,0.06))' : 'var(--bg-surface)',
                 border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                 borderRadius: 7,
@@ -240,8 +238,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             >
               {/* Name + mini bar */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
-                  <span style={{ fontSize: 14, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 }}>
+                  <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                     {r.name}
                   </span>
                   <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>

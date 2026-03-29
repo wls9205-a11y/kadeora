@@ -400,6 +400,10 @@
     {
       "path": "/api/cron/refresh-trending",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-mv",
+      "schedule": "0 * * * *"
     }
   ]
 }
