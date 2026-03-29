@@ -127,61 +127,124 @@ export default async function ComplexPage() {
         ],
       })}} />
 
-      {/* 헤더 */}
-      <div style={{ marginBottom: 20 }}>
-        <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8, display: 'flex', gap: 4 }}>
+      {/* ═══ 히어로 섹션 — 그라데이션 배경 ═══ */}
+      <div style={{
+        borderRadius: 16, padding: '28px 24px 20px', marginBottom: 20,
+        background: 'linear-gradient(135deg, rgba(15,27,62,0.95) 0%, rgba(37,99,235,0.85) 100%)',
+        border: '1px solid rgba(59,123,246,0.2)', position: 'relative', overflow: 'hidden',
+      }}>
+        {/* 데코 원형 */}
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(59,123,246,0.15)' }} />
+        <div style={{ position: 'absolute', bottom: -30, left: -30, width: 100, height: 100, borderRadius: '50%', background: 'rgba(59,123,246,0.1)' }} />
+
+        <nav style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 12, display: 'flex', gap: 4, position: 'relative' }}>
           <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link><span>›</span>
           <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>부동산</Link><span>›</span>
-          <span style={{ color: 'var(--text-primary)' }}>단지백과</span>
+          <span style={{ color: 'rgba(255,255,255,0.9)' }}>단지백과</span>
         </nav>
-        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>🏢 단지백과</h1>
-        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: 0 }}>
-          전국 아파트 연차별 종합 가이드 — {totalProfiles.toLocaleString()}개 단지 · {regionData.length}개 지역
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.5px', position: 'relative' }}>
+          🏢 단지백과
+        </h1>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: '0 0 20px', position: 'relative' }}>
+          전국 아파트 연차별 종합 가이드 — 매매·전세·월세 실거래 데이터 기반
         </p>
+
+        {/* 핵심 수치 카운터 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, position: 'relative' }}>
+          {[
+            { label: '분석 단지', value: totalProfiles.toLocaleString(), unit: '개', icon: '🏘️' },
+            { label: '커버 지역', value: String(regionData.length), unit: '개', icon: '📍' },
+            { label: '연차 그룹', value: '7', unit: '개', icon: '📊' },
+            { label: '데이터 기간', value: '4', unit: '년', icon: '📅' },
+          ].map(s => (
+            <div key={s.label} style={{
+              background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 8px', textAlign: 'center',
+              backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.08)',
+            }}>
+              <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#fff', lineHeight: 1.1 }}>
+                {s.value}<span style={{ fontSize: 11, fontWeight: 600, opacity: 0.7 }}>{s.unit}</span>
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* 연차별 시세 비교 */}
-      <div className="kd-card" style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 연차별 평균 매매가</div>
-        {ageChartData.map(d => {
+      {/* ═══ 연차별 시세 비교 — 향상된 차트 ═══ */}
+      <div style={{
+        borderRadius: 14, padding: '18px 20px', marginBottom: 16,
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📊 연차별 평균 매매가</div>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>만원 기준</span>
+        </div>
+        {ageChartData.map((d, i) => {
           const maxAvg = Math.max(...ageChartData.map(x => x.avg));
           const pct = maxAvg > 0 ? (d.avg / maxAvg) * 100 : 0;
+          const colors: Record<string, [string, string]> = {
+            '신축': ['#3b7bf6', '#60a5fa'], '5년차': ['#06b6d4', '#22d3ee'],
+            '10년차': ['#8b5cf6', '#a78bfa'], '15년차': ['#f59e0b', '#fbbf24'],
+            '20년차': ['#f97316', '#fb923c'], '25년차': ['#ef4444', '#f87171'],
+            '30년+': ['#dc2626', '#ef4444'],
+          };
+          const [c1, c2] = colors[d.group] || ['#666', '#888'];
           return (
-            <div key={d.group} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', minWidth: 48 }}>{d.group}</span>
-              <div style={{ flex: 1, height: 22, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
-                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: d.group === '신축' ? 'var(--brand)' : d.group.includes('30') ? 'var(--accent-red)' : 'var(--accent-blue)', transition: 'width 0.3s' }} />
+            <div key={d.group} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: c1, minWidth: 48, textAlign: 'right' }}>{d.group}</span>
+              <div style={{ flex: 1, height: 28, borderRadius: 8, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
+                <div style={{
+                  height: '100%', width: `${pct}%`, borderRadius: 8,
+                  background: `linear-gradient(90deg, ${c1}, ${c2})`,
+                  transition: 'width 0.6s ease',
+                  boxShadow: `0 2px 8px ${c1}30`,
+                }} />
                 {d.avg > 0 && (
-                  <span style={{ position: 'absolute', right: 8, top: 3, fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <span style={{
+                    position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                    fontSize: 12, fontWeight: 800, color: pct > 50 ? '#fff' : 'var(--text-primary)',
+                    textShadow: pct > 50 ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
+                  }}>
                     {fmtAmount(d.avg)}
                   </span>
                 )}
               </div>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', minWidth: 60, textAlign: 'right' }}>{d.count.toLocaleString()}개</span>
+              <span style={{
+                fontSize: 11, fontWeight: 600, minWidth: 56, textAlign: 'right',
+                color: 'var(--text-tertiary)',
+              }}>{d.count.toLocaleString()}개</span>
             </div>
           );
         })}
       </div>
 
-      {/* 지역별 현황 */}
-      <div className="kd-card" style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🗺️ 지역별 현황</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {regionData.map(r => (
-            <Link key={r.region} href={`/apt/complex?region=${r.region}`} style={{
-              padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-              background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              color: 'var(--text-primary)', textDecoration: 'none',
-              display: 'flex', alignItems: 'center', gap: 4,
-            }}>
-              {r.region}
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{r.count.toLocaleString()}</span>
-            </Link>
-          ))}
+      {/* ═══ 지역별 현황 — 카드 그리드 ═══ */}
+      <div style={{
+        borderRadius: 14, padding: '18px 20px', marginBottom: 20,
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+      }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>🗺️ 지역별 현황</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 8 }}>
+          {regionData.map((r, i) => {
+            const isTop = i < 3;
+            return (
+              <Link key={r.region} href={`/apt/complex?region=${r.region}`} style={{
+                padding: '10px 8px', borderRadius: 10, textDecoration: 'none', textAlign: 'center',
+                background: isTop ? 'rgba(59,123,246,0.08)' : 'var(--bg-hover)',
+                border: isTop ? '1px solid rgba(59,123,246,0.2)' : '1px solid var(--border)',
+                transition: 'transform 0.12s ease',
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: isTop ? 'var(--brand)' : 'var(--text-primary)' }}>{r.region}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', marginTop: 2 }}>{r.count.toLocaleString()}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>단지</div>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
-      {/* 클라이언트 필터 + 카드 그리드 */}
+      {/* ═══ 클라이언트 필터 + 카드 그리드 ═══ */}
       <ComplexClient complexes={topComplexes} ageGroups={AGE_GROUPS} regions={regionData.map(r => r.region)} />
     </article>
   );
