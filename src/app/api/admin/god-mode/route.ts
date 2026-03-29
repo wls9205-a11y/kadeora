@@ -288,13 +288,15 @@ export async function POST(req: NextRequest) {
     const totalDuration = Date.now() - startTime;
 
     // 로그 기록
-    await supabase.from('admin_alerts').insert({
-      type: 'god_mode',
-      severity: failed > 0 ? 'warning' : 'info',
-      title: `🚀 GOD MODE: ${success}/${allResults.length} (${dispatched} dispatched)`,
-      message: `모드: ${mode}, 총 ${totalDuration}ms`,
-      is_read: false,
-    }).catch(() => {});
+    try {
+      await supabase.from('admin_alerts').insert({
+        type: 'god_mode',
+        severity: failed > 0 ? 'warning' : 'info',
+        title: `🚀 GOD MODE: ${success}/${allResults.length} (${dispatched} dispatched)`,
+        message: `모드: ${mode}, 총 ${totalDuration}ms`,
+        is_read: false,
+      });
+    } catch { /* 로그 실패 무시 */ }
 
     return NextResponse.json({
       ok: failed === 0,
