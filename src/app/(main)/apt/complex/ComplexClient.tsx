@@ -114,7 +114,7 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
       {/* 🏷️ 연차 필터 — 컬러 칩 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap', overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
         <button onClick={() => setSelectedAge(null)} style={{
-          padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
+          padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: 'pointer',
           background: !selectedAge ? 'var(--brand)' : 'var(--bg-surface)',
           color: !selectedAge ? '#fff' : 'var(--text-secondary)',
           boxShadow: !selectedAge ? '0 2px 8px rgba(59,123,246,0.3)' : 'none',
