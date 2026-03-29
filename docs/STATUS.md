@@ -1,18 +1,53 @@
-# 카더라 STATUS.md — 세션 58 (2026-03-30 08:00 KST)
+# 카더라 STATUS.md — 세션 58 (2026-03-30 08:30 KST)
 
 ## 최신 커밋
-- `add062c` — /apt 페이지 타임아웃 수정 (미사용 fetchAllRows 49만건 제거)
-- `9f2e21d` — 단지백과 연차별/지역별 통계 DB 뷰 기반 전환
-- `8b60c71` — 단지백과 메인 apt_complex_profiles 기반 전환
-- `9377bc8` — STATUS.md 데이터 대폭 확장 반영 (250만건)
-- `01a720a` — sync-complex-profiles limit 200K+500K
-- `406a5c2` — 매매 벌크 insert → upsert
-- `4728d54` — 매매 벌크 엔드포인트 수정
-- `7308d5e` — backfill-trades 인증 수정
-- `f3cadce` — collect-site-images 중괄호 누락 수정
-- `98bfd4e` — 단지백과 Phase 1+2 전체 구현
+- `f58a046` — ComplexClient implicit any 타입 11개 수정
+- `e90c4f2` — geo meta 타입 에러 + 미사용 useEffect 제거
+- `5929d4a` — ComplexClient 버튼 border 속성 중복 제거
+- `ce5aeda` — 단지백과 상세 페이지 시각 전면 리디자인
+- `2c46d6f` — 단지백과 메인+클라이언트 시각 전면 리디자인
+- `886a7b5` — SEO 대폭 강화 (geo, JSON-LD, OG, naver:author)
+- `7e2b149` — 사이트맵 34,495개 단지 추가
+- `d36c90c` — 단지백과 검색 기능
+- `add062c` — /apt 타임아웃 수정 (fetchAllRows 제거)
+- `9f2e21d` — 단지백과 DB 뷰 기반 전환
+- `8b60c71` — 단지백과 메인 apt_complex_profiles 전환
 
 ## 세션 58 작업 내역
+
+### 단지백과 시각 디자인 전면 리디자인 (신규)
+- 메인 히어로: 그라데이션 navy→blue + 데코 원형 + 4열 수치 카운터
+- 연차별 차트: 7색 그라데이션 28px 바 + box-shadow
+- 지역별 현황: 카드 그리드 + TOP 3 하이라이트
+- ComplexClient: 글래스모피즘 검색, 컬러 칩 필터, 전세가율 게이지 바
+- 카드: 상단 컬러 보더 + 3열 가격 + TOP 3 뱃지 + hover 애니메이션
+- 상세 요약: 매매 히어로 카드 (그라데이션) + 전세/월세 사이드 카드
+- 시세 차트: 2px 선 + 최근값 점 + 향상된 그라데이션 채우기
+- 면적별: 8색 그라데이션 바 + 좌측 컬러 보더 카드 + 평당가
+- 거래 이력: 3열 그리드 테이블 + 헤더 + 금액 색상 코딩 + ㎡→평 변환
+- CTA: 그라데이션 navy→blue + box-shadow
+
+### 단지백과 SEO 대폭 강화 (신규)
+- 상세: Place+GeoCoordinates JSON-LD (1,762개 좌표)
+- 상세: Dataset JSON-LD (실거래 데이터셋 스키마)
+- 상세: BreadcrumbList 5단계 + FAQPage 4Q
+- 상세: DB프로필 기반 metadata (seo_title/description)
+- 상세: geo.position/ICBM/geo.placename 메타
+- 상세: OG 이미지에 실제 시세 데이터 + 630x630 네이버용
+- 상세: naver:author, article:published_time/modified_time
+- 메인: CollectionPage+numberOfItems, Dataset, BreadcrumbList, FAQPage 3Q
+- DB: 34,495개 SEO title/description 대량 생성
+
+### 단지백과 기능 구현 (신규)
+- /apt/complex 메인: apt_complex_profiles DB 기반 전환
+- v_complex_age_stats + v_complex_region_stats DB 뷰
+- /api/complex-search: trigram GIN 인덱스 검색 API
+- ComplexClient: 디바운스 300ms 검색 + 초기화
+- 사이트맵 5~7: 34,495개 단지 페이지 (12,000개/청크)
+
+### /apt 페이지 타임아웃 수정
+- 미사용 fetchAllRows 49만건 순차 로드 제거
+- 에러 반복 발생 → 0건 해소
 
 ### 이미지 갤러리 시스템 (신규)
 - AptImageGallery.tsx: 모바일 스와이프(5장) + 데스크탑 1+2 그리드
