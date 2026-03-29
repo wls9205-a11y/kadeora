@@ -128,7 +128,7 @@ export default function OnboardingClient() {
           <div>
             <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>관심 분야를 선택해주세요 📊</h1>
             <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>최대 5개 선택 ({selectedInterests.length}/5)</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 24 }}>
               {INTERESTS.map(({ key, label }) => {
                 const sel = selectedInterests.includes(key);
                 return (
@@ -156,7 +156,7 @@ export default function OnboardingClient() {
             <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>
               맞춤 콘텐츠와 화면 설정에 활용됩니다.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 24 }}>
               {AGE_GROUPS.map(({ value, label }) => {
                 const sel = ageGroup === value;
                 return (

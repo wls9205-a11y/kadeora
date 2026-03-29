@@ -356,7 +356,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       })()}
 
       {/* ─ 국내/해외 토글 (평균등락 + 비율바 + 수치) ─ */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 12 }}>
         {[
           { active: isDomestic, flag: '🇰🇷', label: '국내주식', sub: 'KOSPI · KOSDAQ', stocks: domesticStocks, onClick: () => { setMode('domestic'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }, activeBorder: 'var(--brand)', activeBg: 'rgba(59,123,246,0.06)', activeShadow: '0 0 16px rgba(59,123,246,0.12)', upColor: 'var(--accent-red)', dnColor: 'var(--accent-blue)' },
           { active: !isDomestic, flag: '🇺🇸', label: '해외주식', sub: 'NYSE · NASDAQ', stocks: globalStocks, onClick: () => { setMode('global'); setSearch(''); setSectorFilter('all'); setStockListLimit(30); }, activeBorder: 'var(--brand)', activeBg: 'rgba(59,123,246,0.06)', activeShadow: '0 0 16px rgba(59,123,246,0.12)', upColor: 'var(--accent-green)', dnColor: 'var(--accent-red)' },
@@ -882,7 +882,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
 
       {/* 시총 탭 — TOP3 하이라이트 카드 */}
       {currentTab === 'ranking' && filteredStocks.length >= 3 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6, marginBottom: 10 }}>
           {filteredStocks.slice(0, 3).map((s, i) => {
             const pct = s.change_pct ?? 0;
             const isGlobal = s.currency === 'USD';

@@ -148,7 +148,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 거래 {trades.length}건</p>
 
       {/* 요약 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 16 }}>
         {[
           { label: '최근 거래가', value: fmtAmount(latestPrice), color: 'var(--text-primary)' },
           { label: '평균', value: fmtAmount(avgPrice), color: 'var(--brand)' },

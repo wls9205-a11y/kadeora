@@ -365,7 +365,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 16 }}>
                 {[
                   ['공급 세대수', (o.total_supply ?? 0) > 0 ? `${(o.total_supply ?? 0).toLocaleString()}세대 (일반분양)` : '-'],
                   ['미분양', o.unsold_count ? `${(o.unsold_count ?? 0).toLocaleString()}호` : '-'],

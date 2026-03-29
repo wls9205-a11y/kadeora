@@ -100,7 +100,7 @@ export default function PremiumPage() {
       <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14, letterSpacing: '-0.3px' }}>
         프리미엄에서만 가능한 것들
       </h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 28 }}>
         {PREMIUM_FEATURES.map(f => (
           <div key={f.title} className="kd-section-card" style={{
             padding: '14px 12px', background: 'var(--bg-surface)',

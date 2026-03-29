@@ -569,7 +569,7 @@ export default function FeedClient({
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>투자자들의 실시간 대화에 참여</div>
                       </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 16 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 16 }}>
                       {[
                         { icon: '📈', text: '관심 종목 알림' },
                         { icon: '🏠', text: '청약 마감 알림' },
