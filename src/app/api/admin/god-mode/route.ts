@@ -47,6 +47,7 @@ const CRON_GROUPS = {
     '/api/cron/apt-backfill-details',
     '/api/cron/apt-crawl-pricing',
     '/api/cron/apt-price-sync',
+    '/api/cron/sync-complex-profiles',
   ],
   ai: [
     '/api/cron/apt-ai-summary',

@@ -145,6 +145,25 @@ export default function GodModeSection() {
             🔢 블로그 생성 한도 원복 (→10)
           </button>
         </div>
+        {/* 벌크 수집 */}
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 20, marginBottom: 8 }}>📦 실거래 벌크 수집</div>
+        <div style={{ fontSize: 11, color: C.textDim, marginBottom: 10 }}>연도별 매매/전월세 과거 데이터 수집 (API 일일 10,000건 한도)</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {[2023, 2024, 2025].map(y => (
+            <div key={y} style={{ display: 'flex', gap: 4 }}>
+              <button onClick={() => runSpecial('/api/admin/backfill-trades', `매매 ${y}`, { type: 'sale', year: y })}
+                disabled={specialRunning}
+                style={{ padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+                📊 매매 {y}
+              </button>
+              <button onClick={() => runSpecial('/api/admin/backfill-trades', `전월세 ${y}`, { type: 'rent', year: y })}
+                disabled={specialRunning}
+                style={{ padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.purple}40`, background: C.card, color: C.purple, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+                🏠 전월세 {y}
+              </button>
+            </div>
+          ))}
+        </div>
         {specialLog && (
           <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 8, background: C.card, border: `1px solid ${C.border}`, fontSize: 12, color: specialLog.startsWith('✅') ? C.green : specialLog.startsWith('❌') ? C.red : C.textSec, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
             {specialLog}

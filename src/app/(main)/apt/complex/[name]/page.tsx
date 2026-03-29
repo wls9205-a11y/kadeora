@@ -70,6 +70,21 @@ export default async function ComplexDetailPage({ params }: Props) {
     relatedBlogs = rb || [];
   } catch {}
 
+  // 전월세 데이터
+  let rentTrades: Record<string, any>[] = [];
+  try {
+    const { data: rt } = await (sb as any).from('apt_rent_transactions')
+      .select('rent_type, deposit, monthly_rent, deal_date, exclusive_area, floor')
+      .eq('apt_name', decoded)
+      .order('deal_date', { ascending: false })
+      .limit(100);
+    rentTrades = rt || [];
+  } catch {}
+
+  const latestJeonse = rentTrades.find(r => r.rent_type === 'jeonse');
+  const latestMonthly = rentTrades.find(r => r.rent_type === 'monthly');
+  const jeonseRatio = latestJeonse && latestPrice > 0 ? Math.round((latestJeonse.deposit / latestPrice) * 100) : null;
+
   // 통계 계산
   const amounts = trades.filter(t => t.deal_amount > 0).map(t => t.deal_amount);
   const avgPrice = amounts.length ? Math.round(amounts.reduce((s, a) => s + a, 0) / amounts.length) : 0;
@@ -159,12 +174,14 @@ export default async function ComplexDetailPage({ params }: Props) {
       </section>
 
       {/* 요약 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
         {[
-          { label: '최근 거래가', value: fmtAmount(latestPrice), color: 'var(--text-primary)' },
-          { label: '평균', value: fmtAmount(avgPrice), color: 'var(--brand)' },
+          { label: '최근 매매', value: fmtAmount(latestPrice), color: 'var(--text-primary)' },
+          { label: '평균 매매', value: fmtAmount(avgPrice), color: 'var(--brand)' },
+          { label: '전세', value: latestJeonse ? fmtAmount(latestJeonse.deposit) : '—', color: 'var(--accent-blue)' },
+          { label: '월세', value: latestMonthly ? `${fmtAmount(latestMonthly.deposit)}/${latestMonthly.monthly_rent}만` : '—', color: 'var(--accent-orange)' },
+          { label: '전세가율', value: jeonseRatio ? `${jeonseRatio}%` : '—', color: jeonseRatio && jeonseRatio > 70 ? 'var(--accent-red)' : 'var(--accent-green)' },
           { label: '최고가', value: fmtAmount(maxPrice), color: 'var(--accent-red)' },
-          { label: '최저가', value: fmtAmount(minPrice), color: 'var(--accent-blue)' },
         ].map(s => (
           <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.label}</div>
@@ -268,6 +285,39 @@ export default async function ComplexDetailPage({ params }: Props) {
           </div>
         )}
       </div>
+
+      {/* 전월세 거래 이력 */}
+      {rentTrades.length > 0 && (
+        <div className={card}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏠 전월세 이력 ({rentTrades.length}건)</div>
+          {rentTrades.slice(0, 30).map((r, i) => {
+            const isJeonse = r.rent_type === 'jeonse';
+            return (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
+                <div>
+                  <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>
+                  <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{r.exclusive_area}㎡ · {r.floor}층</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{
+                    padding: '1px 6px', borderRadius: 3, fontSize: 10, fontWeight: 700,
+                    background: isJeonse ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)',
+                    color: isJeonse ? '#60A5FA' : '#FB923C',
+                  }}>{isJeonse ? '전세' : '월세'}</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {fmtAmount(r.deposit)}{!isJeonse && r.monthly_rent > 0 ? `/${r.monthly_rent}만` : ''}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+          {rentTrades.length > 30 && (
+            <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
+              +{rentTrades.length - 30}건 더 있음
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 주민 리뷰 */}
       <AptReviewSection aptName={decoded} region={region} />

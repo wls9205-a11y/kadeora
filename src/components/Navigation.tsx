@@ -22,6 +22,7 @@ const MOBILE_TABS = [
 ];
 
 const MORE_ITEMS = [
+  { href: '/apt/complex',    emoji: '🏢', label: '단지백과' },
   { href: '/blog',            emoji: '📰', label: '블로그' },
   { href: '/discuss',         emoji: '💬', label: '라운지 토론' },
   { href: '/hot',             emoji: '🔥', label: '이번주 HOT' },
