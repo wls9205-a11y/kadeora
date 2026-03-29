@@ -76,6 +76,23 @@ export async function GET(req: Request) {
         withMarketCap: stockMarketCapR.count ?? 0,
       };
 
+      // 단지백과 KPI
+      const [complexTotalR, complexWithSaleR, complexWithJeonseR, complexWithCoordsR, rentTotalR] = await Promise.all([
+        (sb as any).from('apt_complex_profiles').select('id', { count: 'exact', head: true }),
+        (sb as any).from('apt_complex_profiles').select('id', { count: 'exact', head: true }).gt('latest_sale_price', 0),
+        (sb as any).from('apt_complex_profiles').select('id', { count: 'exact', head: true }).gt('latest_jeonse_price', 0),
+        (sb as any).from('apt_complex_profiles').select('id', { count: 'exact', head: true }).not('latitude', 'is', null),
+        (sb as any).from('apt_rent_transactions').select('id', { count: 'exact', head: true }),
+      ]);
+      const complexKpi = {
+        totalProfiles: complexTotalR.count ?? 0,
+        withSale: complexWithSaleR.count ?? 0,
+        withJeonse: complexWithJeonseR.count ?? 0,
+        withCoords: complexWithCoordsR.count ?? 0,
+        rentTransactions: rentTotalR.count ?? 0,
+        saleTransactions: tradeR.count ?? 0,
+      };
+
       // 프리미엄 & 매출 KPI
       const [premiumR, premiumExpiringR, revenueR, ordersR, indexNowTotalR, indexNowDoneR] = await Promise.all([
         sb.from('profiles').select('id', { count: 'exact', head: true }).eq('is_premium', true),
@@ -305,6 +322,7 @@ export async function GET(req: Request) {
         dailyStats: dailyR.data ?? [],
         cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames, anthropicCreditWarning },
         stockKpi,
+        complexKpi,
         premiumKpi,
         seo: {
           siteTypeBreakdown,

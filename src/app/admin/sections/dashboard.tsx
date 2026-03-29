@@ -60,7 +60,7 @@ export default function DashboardSection() {
   if (loading) return <Spinner />;
   if (!data) return <div style={{ color: C.red }}>로드 실패</div>;
 
-  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, premiumKpi, blogProduction, commentStats, cronByCategory, dataCoverage } = data as any;
+  const { kpi, visitors, yesterday, topPages, categoryDistribution, cronDetail, totalRecordsCreated, recentUsers, recentPosts, recentComments, recentReports, dailyStats, cron, seo, stockKpi, complexKpi, premiumKpi, blogProduction, commentStats, cronByCategory, dataCoverage } = data as any;
   const typeColors: Record<string, string> = { subscription: C.green, trade: C.yellow, redevelopment: C.purple, unsold: C.red, landmark: C.cyan };
   const typeLabels: Record<string, string> = { subscription: '청약', trade: '실거래', redevelopment: '재개발', unsold: '미분양', landmark: '대장' };
   const totalSites = seo?.totalSites || 0;
@@ -337,6 +337,51 @@ export default function DashboardSection() {
               <span style={{ fontSize: 11, color: C.textSec }}>시세 수집 상태</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: stockKpi.active > stockKpi.total * 0.9 ? C.green : C.yellow }}>
                 {stockKpi.active}/{stockKpi.total} 활성 ({Math.round((stockKpi.active / (stockKpi.total || 1)) * 100)}%)
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 단지백과 KPI 패널 ── */}
+      {complexKpi && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🏢 단지백과 데이터 현황</span>
+            <span style={{ fontSize: 10, color: C.textDim }}>apt_complex_profiles · rent_transactions</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
+            {[
+              { label: '총 단지 프로필', val: fmt(complexKpi.totalProfiles), color: C.cyan },
+              { label: '매매 보유', val: fmt(complexKpi.withSale), color: C.green },
+              { label: '전세 보유', val: fmt(complexKpi.withJeonse), color: C.purple },
+              { label: '좌표 매핑', val: fmt(complexKpi.withCoords), color: C.yellow },
+              { label: '매매 거래', val: fmt(complexKpi.saleTransactions), color: C.text },
+              { label: '전월세 거래', val: fmt(complexKpi.rentTransactions), color: C.text },
+            ].map(item => (
+              <div key={item.label} style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>
+                <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: C.textSec }}>📊 매매 커버율</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: complexKpi.withSale / (complexKpi.totalProfiles || 1) > 0.7 ? C.green : C.yellow }}>
+                {complexKpi.withSale}/{complexKpi.totalProfiles} ({Math.round((complexKpi.withSale / (complexKpi.totalProfiles || 1)) * 100)}%)
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: C.textSec }}>📍 좌표 커버율</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: complexKpi.withCoords / (complexKpi.totalProfiles || 1) > 0.3 ? C.yellow : C.red }}>
+                {complexKpi.withCoords}/{complexKpi.totalProfiles} ({Math.round((complexKpi.withCoords / (complexKpi.totalProfiles || 1)) * 100)}%)
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: C.textSec }}>📈 총 실거래 데이터</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: C.cyan }}>
+                {fmt(complexKpi.saleTransactions + complexKpi.rentTransactions)}건
               </span>
             </div>
           </div>

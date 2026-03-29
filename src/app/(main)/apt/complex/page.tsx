@@ -171,9 +171,34 @@ export default async function ComplexPage() {
         </div>
       </div>
 
-      {/* ═══ 연차별 시세 비교 — 향상된 차트 ═══ */}
+      {/* ═══ 지역별 현황 — 카드 그리드 (지역 셀렉 우선) ═══ */}
       <div style={{
         borderRadius: 14, padding: '18px 20px', marginBottom: 16,
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+      }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>🗺️ 지역별 현황</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 8 }}>
+          {regionData.map((r, i) => {
+            const isTop = i < 3;
+            return (
+              <Link key={r.region} href={`/apt/complex?region=${r.region}`} style={{
+                padding: '10px 8px', borderRadius: 10, textDecoration: 'none', textAlign: 'center',
+                background: isTop ? 'rgba(59,123,246,0.08)' : 'var(--bg-hover)',
+                border: isTop ? '1px solid rgba(59,123,246,0.2)' : '1px solid var(--border)',
+                transition: 'transform 0.12s ease',
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: isTop ? 'var(--brand)' : 'var(--text-primary)' }}>{r.region}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', marginTop: 2 }}>{r.count.toLocaleString()}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>단지</div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ═══ 연차별 시세 비교 — 향상된 차트 ═══ */}
+      <div style={{
+        borderRadius: 14, padding: '18px 20px', marginBottom: 20,
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -217,31 +242,6 @@ export default async function ComplexPage() {
             </div>
           );
         })}
-      </div>
-
-      {/* ═══ 지역별 현황 — 카드 그리드 ═══ */}
-      <div style={{
-        borderRadius: 14, padding: '18px 20px', marginBottom: 20,
-        background: 'var(--bg-surface)', border: '1px solid var(--border)',
-      }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>🗺️ 지역별 현황</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 8 }}>
-          {regionData.map((r, i) => {
-            const isTop = i < 3;
-            return (
-              <Link key={r.region} href={`/apt/complex?region=${r.region}`} style={{
-                padding: '10px 8px', borderRadius: 10, textDecoration: 'none', textAlign: 'center',
-                background: isTop ? 'rgba(59,123,246,0.08)' : 'var(--bg-hover)',
-                border: isTop ? '1px solid rgba(59,123,246,0.2)' : '1px solid var(--border)',
-                transition: 'transform 0.12s ease',
-              }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: isTop ? 'var(--brand)' : 'var(--text-primary)' }}>{r.region}</div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', marginTop: 2 }}>{r.count.toLocaleString()}</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>단지</div>
-              </Link>
-            );
-          })}
-        </div>
       </div>
 
       {/* ═══ 클라이언트 필터 + 카드 그리드 ═══ */}
