@@ -32,8 +32,9 @@ function RatioGauge({ ratio }: { ratio: number | null }) {
   );
 }
 
-export default function ComplexClient({ complexes, ageGroups, regions }: { complexes: Complex[]; ageGroups: string[]; regions: string[] }) {
+export default function ComplexClient({ complexes, ageGroups, regions, initialRegion }: { complexes: Complex[]; ageGroups: string[]; regions: string[]; initialRegion?: string | null }) {
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
+  // 서버에서 이미 region 필터링됨 → 클라이언트 region 필터 불필요 (initialRegion이 있을 때)
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'saleCount' | 'lastPrice' | 'jeonseRatio'>('saleCount');
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,14 +66,15 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
     let result = displayData;
     if (!searchResults) {
       if (selectedAge) result = result.filter((c: any) => c.ageGroup === selectedAge);
-      if (selectedRegion) result = result.filter((c: any) => c.region === selectedRegion);
+      // initialRegion이 있으면 서버에서 이미 필터링됨 → 클라이언트 region 필터 스킵
+      if (!initialRegion && selectedRegion) result = result.filter((c: any) => c.region === selectedRegion);
     }
     return result.sort((a: any, b: any) => {
       if (sortBy === 'lastPrice') return (b.lastPrice || 0) - (a.lastPrice || 0);
       if (sortBy === 'jeonseRatio') return (b.jeonseRatio || 0) - (a.jeonseRatio || 0);
       return b.saleCount - a.saleCount;
     });
-  }, [displayData, searchResults, selectedAge, selectedRegion, sortBy]);
+  }, [displayData, searchResults, selectedAge, selectedRegion, sortBy, initialRegion]);
 
   const ageColors: Record<string, string> = {
     '신축': '#3b7bf6', '5년차': '#06b6d4', '10년차': '#8b5cf6',
@@ -139,13 +141,24 @@ export default function ComplexClient({ complexes, ageGroups, regions }: { compl
 
       {/* 지역 + 정렬 + 카운트 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-        <select value={selectedRegion || ''} onChange={(e: any) => setSelectedRegion(e.target.value || null)} style={{
-          padding: '8px 12px', borderRadius: 10, fontSize: 12, fontWeight: 600,
-          border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer',
-        }}>
-          <option value="">📍 전체 지역</option>
-          {regions.map(r => <option key={r} value={r}>{r}</option>)}
-        </select>
+        {initialRegion ? (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '6px 12px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+            background: 'rgba(59,123,246,0.1)', border: '1px solid rgba(59,123,246,0.2)',
+            color: 'var(--brand)',
+          }}>
+            📍 {initialRegion}
+          </div>
+        ) : (
+          <select value={selectedRegion || ''} onChange={(e: any) => setSelectedRegion(e.target.value || null)} style={{
+            padding: '8px 12px', borderRadius: 10, fontSize: 12, fontWeight: 600,
+            border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer',
+          }}>
+            <option value="">📍 전체 지역</option>
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+        )}
         <select value={sortBy} onChange={(e: any) => setSortBy(e.target.value as any)} style={{
           padding: '8px 12px', borderRadius: 10, fontSize: 12, fontWeight: 600,
           border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer',
