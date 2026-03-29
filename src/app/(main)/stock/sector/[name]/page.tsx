@@ -126,6 +126,13 @@ export default async function SectorPage({ params }: Props) {
         </time>
       </div>
 
+      {/* SEO 가시적 텍스트 */}
+      <p className="site-description" style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '0 0 12px', wordBreak: 'keep-all' }}>
+        {sector} 섹터에 속한 {stocks.length}개 종목의 시가총액, 등락률, 거래량을 비교 분석합니다.
+        {(() => { const up = stocks.filter(s => Number(s.change_pct) > 0).length; const down = stocks.filter(s => Number(s.change_pct) < 0).length; return ` 현재 상승 ${up}종목, 하락 ${down}종목이며, 섹터 평균 등락률은 ${avgPct >= 0 ? '+' : ''}${avgPct.toFixed(2)}%입니다.`; })()}
+        {stocks[0] && ` 시총 1위는 ${stocks[0].name}입니다.`}
+      </p>
+
       {/* 섹터 요약 — 시각 대시보드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 8, marginBottom: 16 }}>
         {/* 상승/하락 도넛 차트 */}
