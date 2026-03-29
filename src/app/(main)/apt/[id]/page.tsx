@@ -148,13 +148,15 @@ async function fetchUnifiedData(slug: string) {
   const termPost = sanitizeSearchQuery(name.length > 3 ? name.slice(0, 3) : name, 20);
   const rShort = sanitizeSearchQuery(region.slice(0, 2), 10);
 
-  const [tradesR, blogsR, postsR, nearbyR, sameBuilderR] = await Promise.allSettled([
+  const [tradesR, blogsR, postsR, nearbyR, sameBuilderR, regionPriceR] = await Promise.allSettled([
     sb.from('apt_transactions').select('id, apt_name, deal_date, deal_amount, exclusive_area, floor, built_year').eq('apt_name', name).order('deal_date', { ascending: false }).limit(30),
     termBlog ? sb.from('blog_posts').select('slug, title, view_count, published_at').eq('is_published', true).or(`title.ilike.%${termBlog}%,title.ilike.%${rShort} 청약%,title.ilike.%${rShort} 부동산%`).order('view_count', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
     termPost ? sb.from('posts').select('id, title, created_at, comments_count').eq('is_deleted', false).ilike('title', `%${termPost}%`).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
     region ? sb.from('apt_sites').select('slug, name, site_type, region, sigungu, total_units, status').eq('is_active', true).eq('region', region).neq('slug', slug).gte('content_score', 25).order('interest_count', { ascending: false }).limit(4) : Promise.resolve({ data: [] }),
     // 같은 시공사 다른 현장 (내부 링크 SEO + 사용자 탐색)
     (sub?.constructor_nm || site?.builder) ? sb.from('apt_subscriptions').select('id, house_nm, region_nm, tot_supply_hshld_co, rcept_bgnde').ilike('constructor_nm', `%${(sub?.constructor_nm || site?.builder || '').split('(')[0].split('주식')[0].trim()}%`).neq('house_nm', name).order('rcept_bgnde', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
+    // 지역 시세 벤치마크 (같은 지역 실거래 통계)
+    region ? sb.from('apt_sites').select('price_min, price_max').eq('region', region).eq('is_active', true).gt('price_min', 0).gt('price_max', 0).limit(100) : Promise.resolve({ data: [] }),
   ]);
 
   const trades = tradesR.status === 'fulfilled' ? (tradesR.value as { data: any })?.data || [] : [];
@@ -162,11 +164,27 @@ async function fetchUnifiedData(slug: string) {
   const relatedPosts = postsR.status === 'fulfilled' ? (postsR.value as { data: any })?.data || [] : [];
   const nearbySites = nearbyR.status === 'fulfilled' ? (nearbyR.value as { data: any })?.data || [] : [];
   const sameBuilderSites = sameBuilderR.status === 'fulfilled' ? (sameBuilderR.value as { data: any })?.data || [] : [];
+  
+  // 지역 시세 벤치마크 계산
+  const regionSites = regionPriceR.status === 'fulfilled' ? (regionPriceR.value as { data: any })?.data || [] : [];
+  const regionBenchmark = (() => {
+    if (regionSites.length < 3) return null;
+    const mins = regionSites.map((s: any) => s.price_min).filter((v: number) => v > 0);
+    const maxs = regionSites.map((s: any) => s.price_max).filter((v: number) => v > 0);
+    if (mins.length < 3) return null;
+    return {
+      avgMin: Math.round(mins.reduce((a: number, b: number) => a + b, 0) / mins.length),
+      avgMax: Math.round(maxs.reduce((a: number, b: number) => a + b, 0) / maxs.length),
+      lowest: Math.min(...mins),
+      highest: Math.max(...maxs),
+      count: regionSites.length,
+    };
+  })();
 
   // Fire-and-forget: 조회수 증가
   if (site?.id) { void sb.rpc('increment_site_view', { p_site_id: site.id }); }
 
-  return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, name, region, slug };
+  return { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, name, region, slug };
 }
 
 // generateStaticParams 제거 — 전량 ISR on-demand (revalidate=3600)
@@ -270,7 +288,7 @@ export default async function AptUnifiedPage({ params }: Props) {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, name, region, slug } = d;
+  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, name, region, slug } = d;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
   const dbFaq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
@@ -529,7 +547,54 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       )}
 
-      {/* Schedule — 비주얼 타임라인 */}
+      {/* 📍 지역 시세 비교 — 이 현장이 지역에서 어디 위치하는지 */}
+      {regionBenchmark && (site?.price_min || site?.price_max || trades.length > 0) && (() => {
+        const myPrice = site?.price_min && site?.price_max 
+          ? Math.round((site.price_min + site.price_max) / 2)
+          : trades.length > 0 
+            ? Math.round(trades.reduce((s: number, t: any) => s + Number(t.deal_amount), 0) / trades.length)
+            : 0;
+        if (myPrice <= 0) return null;
+        const regionAvg = Math.round((regionBenchmark.avgMin + regionBenchmark.avgMax) / 2);
+        const diff = regionAvg > 0 ? Math.round(((myPrice - regionAvg) / regionAvg) * 100) : 0;
+        const regionRange = regionBenchmark.highest - regionBenchmark.lowest;
+        const position = regionRange > 0 ? Math.min(Math.max(((myPrice - regionBenchmark.lowest) / regionRange) * 100, 2), 98) : 50;
+        return (
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>📍 {region} 시세 비교 ({regionBenchmark.count}개 현장)</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: diff > 10 ? '#F87171' : diff < -10 ? '#34D399' : 'var(--text-tertiary)', background: diff > 10 ? 'rgba(248,113,113,0.1)' : diff < -10 ? 'rgba(52,211,153,0.1)' : 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>
+                {diff > 0 ? `+${diff}%` : `${diff}%`} {diff > 10 ? '고가' : diff < -10 ? '저가' : '평균'}
+              </span>
+            </div>
+            {/* 지역 범위 위치 바 */}
+            <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'linear-gradient(90deg, rgba(52,211,153,0.2), rgba(251,191,36,0.2), rgba(248,113,113,0.2))', marginBottom: 4 }}>
+              {/* 지역 평균 마커 */}
+              <div style={{ position: 'absolute', top: -2, left: '50%', width: 2, height: 12, background: 'var(--text-tertiary)', transform: 'translateX(-50%)', borderRadius: 1 }} />
+              {/* 이 현장 위치 */}
+              <div style={{ position: 'absolute', top: -3, left: `${position}%`, width: 14, height: 14, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)', boxShadow: '0 0 6px rgba(59,123,246,0.5)' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)' }}>
+              <span>{fmtAmount(regionBenchmark.lowest)}</span>
+              <span style={{ color: 'var(--text-secondary)' }}>평균 {fmtAmount(regionAvg)}</span>
+              <span>{fmtAmount(regionBenchmark.highest)}</span>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 가격 없는 현장 — 지역 참고 시세 */}
+      {!site?.price_min && !site?.price_max && trades.length === 0 && regionBenchmark && (
+        <div style={{ background: 'rgba(59,123,246,0.03)', border: '1px dashed rgba(59,123,246,0.2)', borderRadius: 10, padding: '12px 14px', marginBottom: 14, textAlign: 'center' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>💰 분양가 미공개 · {region} 참고 시세</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand)' }}>
+            {fmtAmount(regionBenchmark.avgMin)} ~ {fmtAmount(regionBenchmark.avgMax)}
+          </div>
+          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2 }}>
+            {region} {regionBenchmark.count}개 현장 평균 (실제 분양가와 다를 수 있음)
+          </div>
+        </div>
+      )}
       {sub && (() => { 
         const steps = [
           { label: '특별공급', date: sub.spsply_rcept_bgnde, active: !!sub.spsply_rcept_bgnde },
