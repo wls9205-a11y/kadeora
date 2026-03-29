@@ -104,6 +104,7 @@ export default async function ComplexDetailPage({ params }: Props) {
     cur.cnt++;
     yearMap.set(ym, cur);
   });
+  const monthlyTrend = [...yearMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([ym, d]) => ({ ym, avg: Math.round(d.sum / d.cnt), cnt: d.cnt }));
 
   const card = 'kd-card';
 
@@ -171,6 +172,39 @@ export default async function ComplexDetailPage({ params }: Props) {
           </div>
         ))}
       </div>
+
+      {/* 📈 월별 평균 시세 추이 — 서버 렌더링 SVG */}
+      {monthlyTrend.length >= 3 && (() => {
+        const data = monthlyTrend.slice(-12);
+        const maxVal = Math.max(...data.map(d => d.avg));
+        const minVal = Math.min(...data.map(d => d.avg));
+        const range = maxVal - minVal || 1;
+        const w = 100; const h = 40;
+        const pts = data.map((d, i) => `${(i / (data.length - 1)) * w},${h - ((d.avg - minVal) / range) * (h - 4) - 2}`).join(' ');
+        const lastAvg = data[data.length - 1].avg;
+        const firstAvg = data[0].avg;
+        const trendPct = Math.round(((lastAvg - firstAvg) / firstAvg) * 100);
+        return (
+          <div className={card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: trendPct > 0 ? '#F87171' : trendPct < 0 ? '#60A5FA' : 'var(--text-tertiary)', background: trendPct > 0 ? 'rgba(248,113,113,0.1)' : trendPct < 0 ? 'rgba(96,165,250,0.1)' : 'var(--bg-hover)', padding: '2px 8px', borderRadius: 6 }}>
+                {trendPct > 0 ? '▲' : trendPct < 0 ? '▼' : '━'} {Math.abs(trendPct)}% ({data.length}개월)
+              </span>
+            </div>
+            <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 80 }} preserveAspectRatio="none">
+              <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={trendPct >= 0 ? '#F87171' : '#60A5FA'} stopOpacity="0.2" /><stop offset="100%" stopColor={trendPct >= 0 ? '#F87171' : '#60A5FA'} stopOpacity="0" /></linearGradient></defs>
+              <polygon points={`0,${h} ${pts} ${w},${h}`} fill="url(#trendFill)" />
+              <polyline points={pts} fill="none" stroke={trendPct >= 0 ? '#F87171' : '#60A5FA'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+              <span>{data[0].ym}</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>최근 {fmtAmount(lastAvg)}</span>
+              <span>{data[data.length - 1].ym}</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 면적별 비교 */}
       {areaStats.length > 1 && (() => {
