@@ -74,25 +74,31 @@ export default function PromoSheet() {
     };
   }, [loading, userId, pathname]);
 
+  const [showGuide, setShowGuide] = useState(false);
+
   const handleSignup = () => {
     localStorage.setItem('kd_cookie_consent', 'accepted');
     window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`;
   };
 
   const handleInstall = async () => {
-    if (deferredPrompt) {
+    // 클릭 시점에 다시 확인 (다른 컴포넌트가 소비했을 수 있음)
+    const prompt = deferredPrompt || (window as any).__pwaPrompt;
+    if (prompt) {
       try {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
+        prompt.prompt();
+        const result = await prompt.userChoice;
         if (result.outcome === 'accepted') {
           localStorage.setItem('kd_pwa_installed', '1');
         }
         setDeferredPrompt(null);
+        (window as any).__pwaPrompt = null;
+        setVisible(false);
       } catch { /* silent */ }
     } else {
-      // iOS 등 prompt 미지원 → 가이드만 보여주고 닫기
+      // prompt 미지원 → 인라인 가이드 표시 (닫지 않음)
+      setShowGuide(true);
     }
-    setVisible(false);
   };
 
   const handleDismiss = () => {
@@ -140,7 +146,7 @@ export default function PromoSheet() {
         {/* Handle */}
         <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2, margin: '0 auto 20px' }} />
 
-        {variant === 'v1' ? <V1Content onSignup={handleSignup} onDismiss={handleDismissToday} /> : <V2Content onInstall={handleInstall} onDismiss={handleDismiss} deferredPrompt={deferredPrompt} />}
+        {variant === 'v1' ? <V1Content onSignup={handleSignup} onDismiss={handleDismissToday} /> : <V2Content onInstall={handleInstall} onDismiss={handleDismiss} deferredPrompt={deferredPrompt} showGuide={showGuide} />}
 
         {/* Dismiss row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
@@ -253,8 +259,10 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
 }
 
 /* ═══════════ V2: PWA 설치 유도 ═══════════ */
-function V2Content({ onInstall, onDismiss, deferredPrompt }: { onInstall: () => void; onDismiss: () => void; deferredPrompt: any }) {
+function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInstall: () => void; onDismiss: () => void; deferredPrompt: any; showGuide: boolean }) {
   const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSamsung = typeof navigator !== 'undefined' && /SamsungBrowser/.test(navigator.userAgent);
+  const hasPrompt = !!(deferredPrompt || (typeof window !== 'undefined' && (window as any).__pwaPrompt));
 
   return (
     <>
@@ -278,70 +286,57 @@ function V2Content({ onInstall, onDismiss, deferredPrompt }: { onInstall: () => 
 
       {/* Feature cards */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
-        <div style={{
-          flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: 12, padding: '14px 10px', textAlign: 'center',
-        }}>
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 10px', textAlign: 'center' }}>
           <div style={{ fontSize: 20, marginBottom: 6 }}>📱</div>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>앱 다운로드 불필요</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>설치 없이 바로 추가</div>
         </div>
-        <div style={{
-          flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: 12, padding: '14px 10px', textAlign: 'center',
-        }}>
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 10px', textAlign: 'center' }}>
           <div style={{ fontSize: 20, marginBottom: 6 }}>🔔</div>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>실시간 푸시 알림</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>청약/주식 알림 즉시</div>
         </div>
       </div>
 
-      {/* Install guide */}
-      {isIOS ? (
+      {/* 가이드 표시 (prompt 없을 때 버튼 클릭 후 또는 iOS/Samsung) */}
+      {(showGuide || isIOS || isSamsung) && (
         <div style={{
           background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.12)',
-          borderRadius: 10, padding: '12px 14px', marginBottom: 18,
+          borderRadius: 10, padding: '12px 14px', marginBottom: 14,
         }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#93c5fd', marginBottom: 8 }}>iOS 설치 방법</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(96,165,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#60a5fa', fontWeight: 700, flexShrink: 0 }}>1</span>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>하단 공유 버튼 (↑) 탭</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(96,165,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#60a5fa', fontWeight: 700, flexShrink: 0 }}>2</span>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>"홈 화면에 추가" 선택</span>
-            </div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#93c5fd', marginBottom: 10 }}>
+            {isIOS ? 'iOS 설치 방법' : isSamsung ? '삼성 인터넷 설치 방법' : 'Chrome 설치 방법'}
           </div>
-        </div>
-      ) : (
-        <div style={{
-          background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.12)',
-          borderRadius: 10, padding: '12px 14px', marginBottom: 18,
-        }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#93c5fd', marginBottom: 8 }}>설치 방법 (2초면 끝!)</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
-              <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(96,165,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#60a5fa', fontWeight: 700, flexShrink: 0 }}>1</span>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>아래 버튼 클릭</span>
+          {isIOS ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Step n={1} text={'하단 공유 버튼 (↑) 탭'} />
+              <Step n={2} text={'"홈 화면에 추가" 선택'} />
+              <Step n={3} text={'"추가" 버튼 탭 — 완료!'} />
             </div>
-            <span style={{ color: 'rgba(255,255,255,0.2)' }}>→</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
-              <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(96,165,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#60a5fa', fontWeight: 700, flexShrink: 0 }}>2</span>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>&quot;홈 화면 추가&quot;</span>
+          ) : isSamsung ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Step n={1} text={'우측 하단 메뉴 (≡) 탭'} />
+              <Step n={2} text={'"페이지를 다음에 추가" > "홈 화면"'} />
             </div>
-          </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Step n={1} text={'주소창 오른쪽 설치 아이콘 (⊕) 클릭'} />
+              <Step n={2} text={'"설치" 버튼 클릭 — 완료!'} />
+            </div>
+          )}
         </div>
       )}
 
-      {/* CTA */}
-      <button onClick={onInstall} style={{
-        display: 'block', width: '100%', border: 'none', borderRadius: 12,
-        padding: '15px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
-        textAlign: 'center', color: '#fff', background: '#2563eb',
-      }}>
-        홈 화면에 추가하기
-      </button>
+      {/* CTA — prompt 있으면 직접 설치, 없으면 가이드 표시 */}
+      {!showGuide && !isIOS && !isSamsung && (
+        <button onClick={onInstall} style={{
+          display: 'block', width: '100%', border: 'none', borderRadius: 12,
+          padding: '15px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
+          textAlign: 'center', color: '#fff', background: '#2563eb',
+        }}>
+          {hasPrompt ? '홈 화면에 추가하기' : '설치 방법 보기'}
+        </button>
+      )}
 
       {/* Sub CTA */}
       <button onClick={onDismiss} style={{
@@ -351,5 +346,14 @@ function V2Content({ onInstall, onDismiss, deferredPrompt }: { onInstall: () => 
         background: 'rgba(255,255,255,0.06)', marginTop: 8,
       }}>나중에 하기</button>
     </>
+  );
+}
+
+function Step({ n, text }: { n: number; text: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(96,165,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#60a5fa', fontWeight: 700, flexShrink: 0 }}>{n}</span>
+      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{text}</span>
+    </div>
   );
 }

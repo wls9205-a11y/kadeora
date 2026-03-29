@@ -11,6 +11,7 @@ import ShareButtons from '@/components/ShareButtons';
 import SectionShareButton from '@/components/SectionShareButton';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
 import Disclaimer from '@/components/Disclaimer';
+import AptImageGallery from '@/components/AptImageGallery';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
@@ -382,48 +383,52 @@ export default async function AptUnifiedPage({ params }: Props) {
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{name}</span>
       </nav>
 
-      {/* 히어로 이미지 영역 — DB 이미지가 있으면 실제 이미지, 없으면 그라디언트 */}
+      {/* 이미지 갤러리 — 워터마크 + 반응형 (모바일 스와이프 / 데스크탑 그리드) */}
       {(() => {
-        const dbImages = Array.isArray(site?.images) ? site.images.slice(0, 4).map((img: any) => typeof img === 'string' ? img : img?.link || img?.url).filter(Boolean) : [];
-        const heroImage = dbImages.length > 0 ? dbImages[0] : null;
+        const dbImages = Array.isArray(site?.images) ? site.images.slice(0, 5).map((img: any) => ({
+          url: typeof img === 'string' ? img : img?.url || img?.link || '',
+          caption: typeof img === 'string' ? undefined : img?.caption,
+        })).filter((img: any) => img.url) : [];
         const ogUrl = `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&category=apt&subtitle=${encodeURIComponent(region)}`;
+        const badgeEl = (
+          <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 4, flexWrap: 'wrap', zIndex: 2 }}>
+            {subSt && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: SB[subSt].bg.replace('0.15', '0.85'), color: '#fff', fontWeight: 700 }}>{SB[subSt].label}{dDay !== null ? ` D${dDay > 0 ? '-' + dDay : dDay === 0 ? '-Day' : '+' + Math.abs(dDay)}` : ''}</span>}
+            {sub?.is_price_limit && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: 'rgba(139,92,246,0.85)', color: '#fff', fontWeight: 700 }}>상한제</span>}
+            {redevStage && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: 'rgba(251,191,36,0.85)', color: '#fff', fontWeight: 700 }}>{redevStage}</span>}
+          </div>
+        );
         return (
           <>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${name} ${tLabel[sType]} 이미지`,
               about: { '@type': 'ApartmentComplex', name, address: { '@type': 'PostalAddress', addressRegion: region } },
-              image: [{ '@type': 'ImageObject', url: heroImage || ogUrl, name: `${name} — ${region}`, width: 1200, height: 630, position: 1 }],
+              image: dbImages.length > 0
+                ? dbImages.map((img: any, i: number) => ({ '@type': 'ImageObject', url: img.url, name: img.caption || `${name} — ${region}`, position: i + 1 }))
+                : [{ '@type': 'ImageObject', url: ogUrl, name: `${name} — ${region}`, width: 1200, height: 630, position: 1 }],
             })}} />
-            <div style={{
-              position: 'relative', borderRadius: 14, overflow: 'hidden', marginBottom: 14,
-              height: heroImage ? 200 : 140,
-              background: heroImage ? undefined : 'linear-gradient(135deg, #0c1629 0%, #1a3050 50%, #1e3a8a 100%)',
-            }}>
-              {heroImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={heroImage} alt={`${name} 대표 이미지 — ${region}`} width={720} height={400}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="eager" />
-              ) : (
+            {dbImages.length > 0 ? (
+              <AptImageGallery images={dbImages} name={name} region={region} badges={badgeEl} />
+            ) : (
+              <div style={{
+                position: 'relative', borderRadius: 14, overflow: 'hidden', marginBottom: 14,
+                height: 140,
+                background: 'linear-gradient(135deg, #0c1629 0%, #1a3050 50%, #1e3a8a 100%)',
+              }}>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px 18px' }}>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>{region} {site?.sigungu || ''}</div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{site?.builder || sub?.constructor_nm || ''}{(() => {
-                    const total = site?.total_units || sub?.tot_supply_hshld_co;
-                    if (!total) return '';
+                    const totalU = site?.total_units || sub?.tot_supply_hshld_co;
+                    if (!totalU) return '';
                     const types = Array.isArray(sub?.house_type_info) ? sub.house_type_info : [];
                     const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
                     const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
-                    return gen > 0 ? ` · 총 ${total}세대(일반${gen}·특별${spe})` : ` · 총 ${total}세대`;
+                    return gen > 0 ? ` · 총 ${totalU}세대(일반${gen}·특별${spe})` : ` · 총 ${totalU}세대`;
                   })()}</div>
                 </div>
-              )}
-              {/* 오버레이 배지 */}
-              <div style={{ position: 'absolute', top: 10, left: 12, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {subSt && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: SB[subSt].bg.replace('0.15', '0.85'), color: '#fff', fontWeight: 700 }}>{SB[subSt].label}{dDay !== null ? ` D${dDay > 0 ? '-' + dDay : dDay === 0 ? '-Day' : '+' + Math.abs(dDay)}` : ''}</span>}
-                {sub?.is_price_limit && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: 'rgba(139,92,246,0.85)', color: '#fff', fontWeight: 700 }}>상한제</span>}
-                {redevStage && <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 12, background: 'rgba(251,191,36,0.85)', color: '#fff', fontWeight: 700 }}>{redevStage}</span>}
+                {badgeEl}
               </div>
-            </div>
+            )}
           </>
         );
       })()}
