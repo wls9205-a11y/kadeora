@@ -161,9 +161,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 )}
                 {/* 단지명 */}
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3 }}>{apt.house_nm}</div>
-                {/* 주소 + 세대수 */}
+                {/* 주소 + 세대수 + 시공사 */}
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
-                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · 일반분양 ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}
+                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? ` · ${apt.tot_supply_hshld_co.toLocaleString()}세대` : ''}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}
                 </div>
                 {/* AI 요약 (있으면) */}
                 {(apt as Record<string, any>).ai_summary && (

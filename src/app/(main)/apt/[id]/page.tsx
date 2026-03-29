@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import AptCommentInline from '@/components/AptCommentInline';
 import ShareButtons from '@/components/ShareButtons';
+import SectionShareButton from '@/components/SectionShareButton';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
 import Disclaimer from '@/components/Disclaimer';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -654,6 +655,11 @@ export default async function AptUnifiedPage({ params }: Props) {
               </div>
             );
           })()}
+          {/* 하단 CTA: 공유 + 청약홈 */}
+          <div style={{ display: 'flex', gap: 6, marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+            <SectionShareButton section="announcement" label={`${name} 모집공고 요약`} text={`${name} 입주자모집공고 핵심 요약 — ${sub.constructor_nm || site?.builder || ''} 시공, ${sub.tot_supply_hshld_co || site?.total_units || ''}세대`} pagePath={`/apt/${slug}`} />
+            {sub.pblanc_url && <a href={sub.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 16px', borderRadius: 10, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: '#34D399', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>🏠 청약홈 원문</a>}
+          </div>
         </div>
       )}
 
