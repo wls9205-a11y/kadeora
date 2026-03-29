@@ -127,17 +127,22 @@ export default async function HotPage() {
       {(() => {
         const totalLikes = (topPosts ?? []).reduce((s: number, p: any) => s + (p.likes_count ?? 0), 0);
         const totalComments = (topPosts ?? []).reduce((s: number, p: any) => s + (p.comments_count ?? 0), 0);
+        const totalViews = (topPosts ?? []).reduce((s: number, p: any) => s + (p.view_count ?? 0), 0);
         return (
           <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {[
-              { label: '게시글', value: `${(topPosts ?? []).length}편`, color: 'var(--brand)' },
-              { label: '총 좋아요', value: `${totalLikes}`, color: 'var(--accent-red)' },
-              { label: '총 댓글', value: `${totalComments}`, color: 'var(--accent-green)' },
-              { label: '블로그', value: `${(hotBlogs ?? []).length}편`, color: 'var(--accent-purple)' },
+              { label: '게시글', value: (topPosts ?? []).length, unit: '편', max: 10, color: 'var(--brand)', icon: '📝' },
+              { label: '좋아요', value: totalLikes, unit: '', max: 100, color: 'var(--accent-red)', icon: '🤍' },
+              { label: '댓글', value: totalComments, unit: '', max: 50, color: 'var(--accent-green)', icon: '💬' },
+              { label: '조회수', value: totalViews, unit: '', max: 5000, color: 'var(--accent-blue)', icon: '👁' },
             ].map(s => (
-              <div key={s.label} style={{ padding: '6px 12px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', flexShrink: 0, textAlign: 'center' }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: s.color }}>{s.value}</div>
+              <div key={s.label} style={{ flex: 1, padding: '8px 10px', borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', flexShrink: 0, textAlign: 'center', minWidth: 60 }}>
+                <div style={{ fontSize: 12, marginBottom: 2 }}>{s.icon}</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: s.color }}>{s.value.toLocaleString()}{s.unit}</div>
                 <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
+                <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 2, background: s.color }} />
+                </div>
               </div>
             ))}
           </div>

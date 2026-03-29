@@ -279,6 +279,11 @@ export default async function StockDetailPage({ params }: Props) {
           <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
+            {label === '거래량' && s.volume && Number(s.volume) > 0 && (
+              <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min(Math.log10(Number(s.volume)) * 12, 100)}%`, borderRadius: 2, background: 'var(--brand)' }} />
+              </div>
+            )}
           </div>
         ))}
       </div>

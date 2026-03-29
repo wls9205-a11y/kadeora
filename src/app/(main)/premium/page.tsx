@@ -140,8 +140,8 @@ export default function PremiumPage() {
             padding: '10px 14px', borderBottom: i < 8 ? '1px solid var(--border)' : 'none',
           }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{row.name}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>{row.free}</span>
-            <span style={{ fontSize: 12, color: 'var(--brand)', textAlign: 'center', fontWeight: 600 }}>{row.premium}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>{row.free === '✅' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', color: '#34D399', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> : row.free === '❌' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(248,113,113,0.15)', color: '#F87171', fontSize: 10, lineHeight: '16px', textAlign: 'center' }}>✕</span> : row.free}</span>
+            <span style={{ fontSize: 12, color: 'var(--brand)', textAlign: 'center', fontWeight: 600 }}>{row.premium === '✅' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.2)', color: '#34D399', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> : row.premium.startsWith('✅') ? <><span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.2)', color: '#34D399', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> <span style={{ fontSize: 10 }}>{row.premium.replace('✅ ', '')}</span></> : row.premium}</span>
           </div>
         ))}
       </div>
