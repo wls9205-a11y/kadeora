@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
   const decoded = decodeURIComponent(name);
   return {
-    title: `${decoded} 실거래가·시세 분석`,
-    description: `${decoded} 아파트 실거래가 이력, 평당가 추이, 면적별 비교. 최근 거래 내역과 시세 변동을 카더라에서 확인하세요.`,
+    title: `${decoded} 실거래가·시세 분석 | 아파트 매매`,
+    description: `${decoded} 아파트 실거래가 이력, 평당가 추이, 면적별 비교. 최근 거래 내역과 시세 변동을 카더라에서 확인하세요. 분양가 대비 시세도 비교 가능합니다.`,
     alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
     openGraph: {
       title: `${decoded} 실거래가·시세`,
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'naver:author': '카더라',
       'og:updated_time': new Date().toISOString(),
       'article:section': '부동산',
-      'article:tag': `${decoded},실거래가,시세,아파트,부동산`, 'dg:plink': `${SITE_URL}/apt/complex/${name}`,
+      'article:tag': `${decoded},실거래가,시세,아파트,부동산,평당가,매매,시세조회`, 'dg:plink': `${SITE_URL}/apt/complex/${name}`,
     },
   };
 }
@@ -127,8 +127,9 @@ export default async function ComplexDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
-          { '@type': 'Question', name: `${decoded} 최근 실거래가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 ${trades.length}건 실거래 내역을 카더라에서 확인할 수 있습니다. ${region} ${sigungu} ${dong} 소재입니다.` } },
+          { '@type': 'Question', name: `${decoded} 최근 실거래가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 ${trades.length}건 실거래 내역을 카더라에서 확인할 수 있습니다. ${region} ${sigungu} ${dong} 소재이며, ${avgPrice > 0 ? `평균 거래가 ${fmtAmount(avgPrice)}, 최고가 ${fmtAmount(maxPrice)}입니다.` : '상세 내역을 확인하세요.'}` } },
           { '@type': 'Question', name: `${decoded} 시세 조회 방법은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${decoded}의 면적별, 기간별 실거래 내역과 평당가 추이를 무료로 조회할 수 있습니다.` } },
+          { '@type': 'Question', name: `${decoded} 평당가(3.3㎡)는 얼마인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 면적별 평당가를 카더라에서 비교할 수 있습니다. ${areaStats.length > 0 ? `${areaStats.length}개 면적 타입의 거래 내역이 있으며, 면적별 평당가 추이를 확인하세요.` : '상세 내역을 확인하세요.'}` } },
         ],
       })}} />
 
@@ -146,6 +147,15 @@ export default async function ComplexDetailPage({ params }: Props) {
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
       <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 거래 {trades.length}건</p>
+
+      {/* SEO 가시적 텍스트 */}
+      <section className="site-description" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 14 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
+          {decoded}의 실거래가 정보를 제공합니다. {region} {sigungu} {dong} 소재이며, 최근 {trades.length}건의 거래가 확인됩니다.
+          {avgPrice > 0 && <> 평균 거래가는 {fmtAmount(avgPrice)}, 최고가는 {fmtAmount(maxPrice)}, 최저가는 {fmtAmount(minPrice)}입니다.</>}
+          {areaStats.length > 0 && <> {areaStats.length}개 면적 타입의 거래 내역을 면적별로 비교 분석할 수 있습니다.</>}
+        </p>
+      </section>
 
       {/* 요약 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 16 }}>
