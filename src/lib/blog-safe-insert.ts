@@ -133,12 +133,15 @@ export async function safeBlogInsert(
   try {
     const config = await getConfig(admin);
 
-    // 1. 최소 콘텐츠 길이 체크
-    if (data.content.length < config.min_content_length) {
+    // 1. 콘텐츠 자동 보강 (품질 게이트 통과: TOC/내부링크/FAQ/지도링크)
+    const enrichedContent = enrichContent(data.content, data.category, data.title);
+
+    // 2. 최소 콘텐츠 길이 체크 (보강 후 기준)
+    if (enrichedContent.length < config.min_content_length) {
       return { success: false, reason: 'content_too_short' };
     }
 
-    // 2. 슬러그 중복 체크
+    // 3. 슬러그 중복 체크
     const { data: existing } = await admin
       .from('blog_posts')
       .select('id')
@@ -149,7 +152,7 @@ export async function safeBlogInsert(
       return { success: false, reason: 'duplicate_slug' };
     }
 
-    // 3. 제목 유사도 체크 (pg_trgm)
+    // 4. 제목 유사도 체크 (pg_trgm)
     try {
       const { data: similar } = await admin.rpc('check_blog_similarity', {
         p_title: data.title,
@@ -162,7 +165,7 @@ export async function safeBlogInsert(
       // pg_trgm 미설치 → 스킵
     }
 
-    // 4. 하루 생성량 체크
+    // 5. 하루 생성량 체크
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const { count } = await admin
@@ -174,7 +177,7 @@ export async function safeBlogInsert(
       return { success: false, reason: 'daily_limit' };
     }
 
-    // 5. 커버 이미지 자동 생성 (미제공 시)
+    // 6. 커버 이미지 자동 생성 (미제공 시)
     const authorMap: Record<string, string> = {
       stock: '카더라+주식팀', apt: '카더라+부동산팀', unsold: '카더라+부동산팀',
       finance: '카더라+재테크팀', general: '카더라+편집팀',
@@ -182,9 +185,6 @@ export async function safeBlogInsert(
     const author = authorMap[data.category] || '카더라';
     const coverImage = data.cover_image || `/api/og?title=${encodeURIComponent(data.title)}&category=${data.category}&author=${author}&design=2`;
     const imageAlt = data.image_alt || `${data.title} — 카더라 ${data.category === 'stock' ? '주식' : data.category === 'apt' ? '부동산' : '정보'} 분석`;
-
-    // 6. 콘텐츠 자동 보강 (품질 게이트 통과: TOC/내부링크/FAQ/지도링크)
-    const enrichedContent = enrichContent(data.content, data.category, data.title);
 
     // 7. INSERT (큐 대기 상태)
     const { data: inserted, error } = await admin
