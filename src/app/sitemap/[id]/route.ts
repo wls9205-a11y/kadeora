@@ -46,7 +46,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     const staticPaths = [
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/premium', '/shop',
-      '/apt/map', '/apt/diagnose', '/apt/search', '/stock/compare', '/blog/series',
+      '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
     ];
     const entries: SitemapEntry[] = [
       ...staticPaths.map(path => ({
@@ -134,6 +134,30 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
           lastModified: d.created_at || now,
           changeFrequency: 'weekly',
           priority: engagement > 50 ? 0.7 : engagement > 10 ? 0.6 : 0.5,
+        };
+      }));
+    } catch { return xmlResponse([]); }
+  }
+
+  // ── 5~7: complex profiles (단지백과) ──
+  const COMPLEX_PER_SITEMAP = 12000;
+  if (id >= 5 && id <= 7) {
+    try {
+      const sb = getSupabaseAdmin();
+      const chunk = id - 5;
+      const offset = chunk * COMPLEX_PER_SITEMAP;
+      const { data } = await (sb as any).from('apt_complex_profiles')
+        .select('apt_name, updated_at, sale_count_1y, rent_count_1y')
+        .not('age_group', 'is', null)
+        .order('sale_count_1y', { ascending: false })
+        .range(offset, offset + COMPLEX_PER_SITEMAP - 1);
+      return xmlResponse((data || []).map((p: any) => {
+        const activity = (p.sale_count_1y || 0) + (p.rent_count_1y || 0);
+        return {
+          url: `${BASE}/apt/complex/${encodeURIComponent(p.apt_name)}`,
+          lastModified: p.updated_at || now,
+          changeFrequency: activity > 50 ? 'weekly' : 'monthly',
+          priority: activity > 100 ? 0.8 : activity > 20 ? 0.7 : 0.6,
         };
       }));
     } catch { return xmlResponse([]); }

@@ -3,7 +3,7 @@ import { SITE_URL } from '@/lib/constants';
 
 export const revalidate = 3600;
 
-const SITEMAP_IDS = [0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16];
+const SITEMAP_IDS = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16];
 
 export async function GET() {
   const now = new Date().toISOString();
