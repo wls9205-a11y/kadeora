@@ -395,57 +395,64 @@ export async function GET(req: NextRequest) {
       .select('symbol')
       .eq('currency', 'USD')
       .order('market_cap', { ascending: false })
-      .limit(100);
+      .limit(400);
 
     if (usdStocks?.length) {
-      const usdTickers = usdStocks.map((s: StockRow) => s.symbol).join(',');
-      const usdController = new AbortController();
-      const usdTimeout = setTimeout(() => usdController.abort(), 10000);
+      let usdSuccess = 0;
+      // Yahoo Finance는 URL 길이 제한이 있으므로 100개씩 배치
+      const BATCH = 100;
+      for (let b = 0; b < usdStocks.length; b += BATCH) {
+        const batch = usdStocks.slice(b, b + BATCH);
+        const usdTickers = batch.map((s: StockRow) => s.symbol).join(',');
+        try {
+          const usdController = new AbortController();
+          const usdTimeout = setTimeout(() => usdController.abort(), 10000);
+          const usdRes = await fetch(
+            `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${usdTickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketPreviousClose,regularMarketVolume,marketCap`,
+            {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/json',
+              },
+              signal: usdController.signal,
+            }
+          );
+          clearTimeout(usdTimeout);
 
-      const usdRes = await fetch(
-        `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${usdTickers}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketPreviousClose,regularMarketVolume,marketCap`,
-        {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json',
-          },
-          signal: usdController.signal,
-        }
-      );
-      clearTimeout(usdTimeout);
-
-      if (usdRes.ok) {
-        const usdJson = await usdRes.json();
-        const usdQuotes = usdJson?.quoteResponse?.result ?? [];
-        let usdSuccess = 0;
-        for (const q of usdQuotes) {
-          if (q.regularMarketPrice && q.symbol) {
-            const price = q.regularMarketPrice;
-            const prevClose = q.regularMarketPreviousClose;
-            const rawChange = q.regularMarketChange;
-            const rawChangePct = q.regularMarketChangePercent;
-            const change_amt = (rawChange != null && rawChange !== 0)
-              ? Math.round(rawChange * 100) / 100
-              : (prevClose ? Math.round((price - prevClose) * 100) / 100 : 0);
-            const change_pct = (rawChangePct != null && rawChangePct !== 0)
-              ? +(rawChangePct.toFixed(2))
-              : (prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0);
-            await supabase.from('stock_quotes')
-              .update({
-                price,
-                change_amt,
-                change_pct,
-                volume: q.regularMarketVolume ?? 0,
-                market_cap: q.marketCap ?? 0,
-                updated_at: new Date().toISOString(),
-              })
-              .eq('symbol', q.symbol);
-            usdSuccess++;
+          if (usdRes.ok) {
+            const usdJson = await usdRes.json();
+            const usdQuotes = usdJson?.quoteResponse?.result ?? [];
+            for (const q of usdQuotes) {
+              if (q.regularMarketPrice && q.symbol) {
+                const price = q.regularMarketPrice;
+                const prevClose = q.regularMarketPreviousClose;
+                const rawChange = q.regularMarketChange;
+                const rawChangePct = q.regularMarketChangePercent;
+                const change_amt = (rawChange != null && rawChange !== 0)
+                  ? Math.round(rawChange * 100) / 100
+                  : (prevClose ? Math.round((price - prevClose) * 100) / 100 : 0);
+                const change_pct = (rawChangePct != null && rawChangePct !== 0)
+                  ? +(rawChangePct.toFixed(2))
+                  : (prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0);
+                await supabase.from('stock_quotes')
+                  .update({
+                    price,
+                    change_amt,
+                    change_pct,
+                    volume: q.regularMarketVolume ?? 0,
+                    market_cap: q.marketCap ?? 0,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('symbol', q.symbol);
+                usdSuccess++;
+              }
+            }
           }
-        }
-        success += usdSuccess;
-        if (usdSuccess > 0) usdUpdated = true;
+        } catch { /* 개별 배치 실패 무시 — 다음 배치 계속 */ }
+        if (b + BATCH < usdStocks.length) await sleep(200);
       }
+      success += usdSuccess;
+      if (usdSuccess > 0) usdUpdated = true;
     }
   } catch {
     // USD 갱신 실패 시 무시 — 국내 결과만 반환
