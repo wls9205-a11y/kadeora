@@ -65,3 +65,40 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : '서버 오류' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getUser();
+    if (!user) return NextResponse.json({ success: false, error: '로그인 필요' }, { status: 401 });
+    const body = await request.json();
+    const supabase = getSupabaseAdmin();
+
+    if (body.readOnly === true) {
+      // 읽은 알림만 삭제
+      const { count } = await supabase.from('notifications')
+        .delete({ count: 'exact' })
+        .eq('user_id', user.id)
+        .eq('is_read', true);
+      return NextResponse.json({ success: true, deleted: count || 0, message: '읽은 알림 삭제 완료' });
+    }
+
+    if (body.all === true) {
+      // 전체 삭제
+      const { count } = await supabase.from('notifications')
+        .delete({ count: 'exact' })
+        .eq('user_id', user.id);
+      return NextResponse.json({ success: true, deleted: count || 0, message: '전체 알림 삭제 완료' });
+    }
+
+    const notifId = body.id;
+    if (notifId) {
+      await supabase.from('notifications').delete()
+        .eq('id', notifId).eq('user_id', user.id);
+      return NextResponse.json({ success: true, message: '알림 삭제' });
+    }
+
+    return NextResponse.json({ success: false, error: 'id, readOnly, 또는 all 필드 필요' }, { status: 400 });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : '서버 오류' }, { status: 500 });
+  }
+}

@@ -74,7 +74,23 @@ export default function NotificationsPage() {
     setNotifs(p => p.map(n => n.id === id ? { ...n, is_read: true } : n));
   }
 
+  async function deleteRead() {
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ readOnly: true }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifs(p => p.filter(n => !n.is_read));
+        success(`읽은 알림 ${data.deleted}개 삭제`);
+      }
+    } catch { /* ignore */ }
+  }
+
   const unreadCount = notifs.filter(n => !n.is_read).length;
+  const readCount = notifs.filter(n => n.is_read).length;
 
   if (!user && !loading) return (
     <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
@@ -90,8 +106,9 @@ export default function NotificationsPage() {
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
             🔔 알림
+            <a href="/notifications/settings" style={{ fontSize: 14, color: 'var(--text-tertiary)', textDecoration: 'none' }} title="알림 설정">⚙️</a>
           </h1>
           {unreadCount > 0 && (
             <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
@@ -99,15 +116,26 @@ export default function NotificationsPage() {
             </p>
           )}
         </div>
-        {unreadCount > 0 && (
-          <button onClick={markAllRead} style={{
-            padding: '7px 14px', borderRadius: 20, border: '1px solid var(--border)',
-            background: 'transparent', color: 'var(--text-secondary)',
-            fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
-          }}>
-            모두 읽음
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {readCount > 0 && (
+            <button onClick={deleteRead} style={{
+              padding: '7px 14px', borderRadius: 20, border: '1px solid rgba(248,113,113,0.3)',
+              background: 'transparent', color: 'var(--accent-red)',
+              fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+            }}>
+              읽은 알림 삭제
+            </button>
+          )}
+          {unreadCount > 0 && (
+            <button onClick={markAllRead} style={{
+              padding: '7px 14px', borderRadius: 20, border: '1px solid var(--border)',
+              background: 'transparent', color: 'var(--text-secondary)',
+              fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+            }}>
+              모두 읽음
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
