@@ -496,10 +496,9 @@ export default async function AptUnifiedPage({ params }: Props) {
             const pMax = site.price_max;
             const pAvg = Math.round((pMin + pMax) / 2);
             // 전용면적 기반 평당가 추정 (34평 기준)
-            const pyeongPrice = sub?.price_per_pyeong_avg || Math.round(pAvg / 10000 / 34 * 10000);
-            // 가격 등급
-            const tier = pAvg >= 1200000000 ? { label: '12억+', color: '#FF6B6B', emoji: '💎' } : pAvg >= 900000000 ? { label: '9억대', color: '#FB923C', emoji: '🏅' } : pAvg >= 600000000 ? { label: '6억대', color: '#FBBF24', emoji: '✨' } : pAvg >= 300000000 ? { label: '3억대', color: 'var(--brand)', emoji: '🏠' } : { label: '3억 미만', color: '#34D399', emoji: '🌱' };
-            const fmtA = (n: number) => n >= 100000000 ? `${(n / 100000000).toFixed(1)}억` : `${Math.round(n / 10000).toLocaleString()}만`;
+            const pyeongPrice = sub?.price_per_pyeong_avg || Math.round(pAvg / 34);
+            // 가격 등급 (만원 단위)
+            const tier = pAvg >= 120000 ? { label: '12억+', color: '#FF6B6B', emoji: '💎' } : pAvg >= 90000 ? { label: '9억대', color: '#FB923C', emoji: '🏅' } : pAvg >= 60000 ? { label: '6억대', color: '#FBBF24', emoji: '✨' } : pAvg >= 30000 ? { label: '3억대', color: 'var(--brand)', emoji: '🏠' } : { label: '3억 미만', color: '#34D399', emoji: '🌱' };
             return (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -508,15 +507,15 @@ export default async function AptUnifiedPage({ params }: Props) {
                 </div>
                 {/* 가격 범위 바 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 700, minWidth: 42 }}>{fmtA(pMin)}</span>
+                  <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 700, minWidth: 42 }}>{fmtAmount(pMin)}</span>
                   <div style={{ flex: 1, height: 10, borderRadius: 5, background: 'linear-gradient(90deg, rgba(96,165,250,0.25), var(--brand), rgba(248,113,113,0.25))', position: 'relative' }}>
                     <div style={{ position: 'absolute', top: -1, left: '50%', width: 12, height: 12, borderRadius: '50%', background: 'var(--brand)', border: '2px solid var(--bg-surface)', transform: 'translateX(-50%)', boxShadow: '0 0 4px rgba(59,123,246,0.5)' }} />
                   </div>
-                  <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 700, minWidth: 42, textAlign: 'right' }}>{fmtA(pMax)}</span>
+                  <span style={{ fontSize: 12, color: 'var(--accent-red)', fontWeight: 700, minWidth: 42, textAlign: 'right' }}>{fmtAmount(pMax)}</span>
                 </div>
                 {/* 평균 + 평당가 */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                  <span style={{ color: 'var(--text-tertiary)' }}>평균 <strong style={{ color: 'var(--text-primary)' }}>{fmtA(pAvg)}</strong></span>
+                  <span style={{ color: 'var(--text-tertiary)' }}>평균 <strong style={{ color: 'var(--text-primary)' }}>{fmtAmount(pAvg)}</strong></span>
                   {pyeongPrice > 0 && <span style={{ color: 'var(--accent-purple)' }}>평당 <strong>{pyeongPrice.toLocaleString()}만</strong></span>}
                 </div>
               </div>
@@ -652,7 +651,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         const chartMin = Math.min(...allValues);
         const range = chartMax - chartMin || 1;
         const pct = (v: number) => ((v - chartMin) / range * 80 + 10);
-        const fmtA = (n: number) => n >= 100000000 ? `${(n / 100000000).toFixed(1)}억` : `${Math.round(n / 10000).toLocaleString()}만`;
 
         return (
           <div className="apt-card" style={{ background: premium > 0 ? 'rgba(248,113,113,0.03)' : 'rgba(52,211,153,0.03)', border: `1px solid ${premium > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)'}` }}>
@@ -681,13 +679,13 @@ export default async function AptUnifiedPage({ params }: Props) {
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 6 }}>
               <div style={{ background: 'rgba(59,123,246,0.05)', borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
                 <div style={{ fontSize: 9, color: 'var(--brand)', fontWeight: 600, marginBottom: 2 }}>분양가 평균</div>
-                <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>{fmtA(supplyAvg)}</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{fmtA(site.price_min)} ~ {fmtA(site.price_max)}</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>{fmtAmount(supplyAvg)}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{fmtAmount(site.price_min)} ~ {fmtAmount(site.price_max)}</div>
               </div>
               <div style={{ background: premium > 0 ? 'rgba(248,113,113,0.05)' : 'rgba(52,211,153,0.05)', borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
                 <div style={{ fontSize: 9, color: premium > 0 ? '#F87171' : '#34D399', fontWeight: 600, marginBottom: 2 }}>실거래 평균 ({amounts.length}건)</div>
-                <div style={{ fontSize: 14, fontWeight: 800, color: premium > 0 ? '#F87171' : '#34D399' }}>{fmtA(tradeAvg)}</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{fmtA(tradeMin)} ~ {fmtA(tradeMax)}</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: premium > 0 ? '#F87171' : '#34D399' }}>{fmtAmount(tradeAvg)}</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{fmtAmount(tradeMin)} ~ {fmtAmount(tradeMax)}</div>
               </div>
             </div>
           </div>
@@ -863,9 +861,8 @@ export default async function AptUnifiedPage({ params }: Props) {
             // 대표 분양가 (price_max 또는 house_type_info 최고가)
             const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
             const maxTypePrice = types.length > 0 ? Math.max(...types.map((t: any) => Number(t.lttot_top_amount || 0))) : 0;
-            const basePrice = (site?.price_max || maxTypePrice * 10000 || 0); // 원 단위
-            if (basePrice <= 0) return null;
-            const basePriceMan = Math.round(basePrice / 10000); // 만원 단위
+            const basePriceMan = (site?.price_max || maxTypePrice || 0); // 만원 단위
+            if (basePriceMan <= 0) return null;
 
             // 납부 비율 (DB에 있으면 사용, 없으면 업계 표준)
             const schedule = sub.payment_schedule || {};
