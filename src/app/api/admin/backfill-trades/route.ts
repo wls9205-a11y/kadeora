@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { createSupabaseServer } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { LAWD_CODES, parseXmlItems, parseRegionSigungu } from '@/lib/lawd-codes';
@@ -16,14 +17,16 @@ export const maxDuration = 300;
 ═══════════════════════════════════════════════════════════ */
 
 export async function POST(req: NextRequest) {
+  // 관리자 인증 (세션 기반)
+  const authSb = await createSupabaseServer();
+  const { data: { user } } = await authSb.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { data: profile } = await authSb.from('profiles').select('is_admin').eq('id', user.id).single();
+  if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  // 데이터 작업용 (Service Role)
   const supabase = getSupabaseAdmin();
   const sb = supabase as any;
-
-  // 관리자 인증
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
-  if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { type = 'sale', year = 2025, monthStart = 1, monthEnd = 12 } = await req.json();
   const apiKey = process.env.DATA_GO_KR_API_KEY;
