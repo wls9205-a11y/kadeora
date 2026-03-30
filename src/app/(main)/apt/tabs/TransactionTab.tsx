@@ -109,6 +109,29 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
           </div>
         </div>
+        {/* 지역별 동향 한줄 요약 */}
+        {tradeMonthly.length > 4 && (() => {
+          const regionTrends = [...new Set(tradeMonthly.map(s => s.region))].slice(0, 5).map(r => {
+            const data = tradeMonthly.filter(s => s.region === r).sort((a, b) => String(a.stat_month).localeCompare(String(b.stat_month)));
+            if (data.length < 2) return null;
+            const prev = data[data.length - 2]?.avg_price || 0;
+            const curr = data[data.length - 1]?.avg_price || 0;
+            if (!prev || !curr) return null;
+            const pct = Math.round((curr - prev) / prev * 100);
+            return { region: r, pct, up: pct > 0 };
+          }).filter(Boolean) as { region: string; pct: number; up: boolean }[];
+          if (regionTrends.length === 0) return null;
+          return (
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>월간 추이</span>
+              {regionTrends.map(t => (
+                <span key={t.region} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: t.up ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
+                  {t.region} {t.up ? '▲' : '▼'}{Math.abs(t.pct)}%
+                </span>
+              ))}
+            </div>
+          );
+        })()}
       </div>
 
       {/* 추이 차트 */}

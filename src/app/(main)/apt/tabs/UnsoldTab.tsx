@@ -128,6 +128,22 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
             </div>
           </div>
+          {/* 준공후 미분양 비율 게이지 */}
+          {filteredTotal > 0 && filteredAfterCompletion > 0 && (
+            <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>준공후 미분양(악성) 비율</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: Math.round(filteredAfterCompletion / filteredTotal * 100) > 30 ? 'var(--accent-red)' : 'var(--accent-yellow)' }}>{Math.round(filteredAfterCompletion / filteredTotal * 100)}%</span>
+              </div>
+              <div style={{ height: 8, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 4, background: Math.round(filteredAfterCompletion / filteredTotal * 100) > 30 ? 'var(--accent-red)' : 'var(--accent-yellow)', width: `${Math.round(filteredAfterCompletion / filteredTotal * 100)}%`, transition: 'width 0.6s' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>일반 미분양 {(filteredTotal - filteredAfterCompletion).toLocaleString()}호</span>
+                <span style={{ fontSize: 10, color: 'var(--accent-red)' }}>준공후 {filteredAfterCompletion.toLocaleString()}호</span>
+              </div>
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>국토교통부 통계누리 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
             <SectionShareButton section="apt-unsold" label="미분양 아파트 현황 — 지역별 미분양 세대수" pagePath="/apt?tab=unsold" />

@@ -181,28 +181,28 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                     return gen > 0 ? ` · 총 ${apt.tot_supply_hshld_co.toLocaleString()}세대(일반${gen}·특별${spe})` : ` · 총 ${apt.tot_supply_hshld_co.toLocaleString()}세대`;
                   })() : ''}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}
                 </div>
-                {/* AI 요약 (있으면) */}
-                {(apt as Record<string, any>).ai_summary && (
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    🤖 {(apt as Record<string, any>).ai_summary}
-                  </div>
-                )}
-                {/* 💰 분양가 (house_type_info에서 추출) */}
+                {/* 💰 분양가 + 세대수 + 입주 KPI */}
                 {(() => {
                   const hti = (apt as Record<string, any>).house_type_info;
-                  if (!hti || !Array.isArray(hti) || hti.length === 0) return null;
-                  const prices = hti.map((t: any) => t.lttot_top_amount).filter((p: number) => p > 0);
-                  if (prices.length === 0) return null;
-                  const pMin = Math.min(...prices);
-                  const pMax = Math.max(...prices);
+                  const prices = Array.isArray(hti) ? hti.map((t: any) => t.lttot_top_amount).filter((p: number) => p > 0) : [];
+                  const pMin = prices.length > 0 ? Math.min(...prices) : 0;
+                  const pMax = prices.length > 0 ? Math.max(...prices) : 0;
                   const fmtP = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
-                  const ppyeong = (apt as Record<string, any>).price_per_pyeong_avg;
+                  const mvnYm = apt.mvn_prearnge_ym;
+                  const mvnLabel = mvnYm ? `${mvnYm.slice(0, 4)}.${parseInt(mvnYm.slice(4, 6))}` : null;
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>💰 {fmtP(pMin)}{pMax !== pMin ? `~${fmtP(pMax)}` : ''}</span>
-                      {ppyeong > 0 && <span style={{ fontSize: 10, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만</span>}
-                      <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', maxWidth: 80 }}>
-                        <div style={{ height: '100%', width: `${Math.min(pMax / 200000 * 100, 100)}%`, borderRadius: 2, background: 'var(--brand)' }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, marginBottom: 6, background: 'rgba(255,255,255,0.02)', borderRadius: 8, padding: '6px 4px' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>분양가</div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{pMax > 0 ? (pMin !== pMax ? `${fmtP(pMin)}~${fmtP(pMax)}` : fmtP(pMax)) : '미정'}</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총공급</div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)' }}>{apt.tot_supply_hshld_co > 0 ? `${apt.tot_supply_hshld_co.toLocaleString()}세대` : '-'}</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>입주예정</div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{mvnLabel || '-'}</div>
                       </div>
                     </div>
                   );
