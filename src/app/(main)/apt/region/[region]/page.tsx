@@ -35,7 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'website',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded + ' 부동산')}&design=2&subtitle=${encodeURIComponent('청약·실거래·재개발·미분양')}`, width: 1200, height: 630, alt: `${decoded} 부동산 정보` }],
+      images: [
+        { url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded + ' 부동산')}&design=2&subtitle=${encodeURIComponent('청약·실거래·재개발·미분양')}`, width: 1200, height: 630, alt: `${decoded} 부동산 정보` },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded + ' 부동산')}&category=apt`, width: 630, height: 630, alt: `${decoded} 부동산` },
+      ],
     },
     twitter: { card: 'summary_large_image' as const, title: `${decoded} 부동산`, description: `청약·실거래·재개발·미분양 종합 정보` },
     other: {
@@ -134,7 +137,7 @@ export default async function RegionLandingPage({ params }: Props) {
       {/* JSON-LD: BreadcrumbList */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}) }} />
       {/* JSON-LD: CollectionPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL},"speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
       {/* JSON-LD: ItemList (주요 단지) */}
       {data.subscriptions.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'ItemList',

@@ -73,7 +73,10 @@ export async function generateMetadata({ params }: Props) {
         publishedTime: post.created_at,
         authors: [author],
         url: `${SITE_URL}/feed/${post.slug || numId}`,
-        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+        images: [
+          { url: ogImageUrl, width: 1200, height: 630, alt: post.title },
+          { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category || 'talk'}`, width: 630, height: 630, alt: post.title },
+        ],
       },
       twitter: {
         card: 'summary_large_image',

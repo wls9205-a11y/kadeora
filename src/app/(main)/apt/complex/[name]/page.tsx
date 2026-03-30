@@ -190,7 +190,7 @@ export default async function ComplexDetailPage({ params }: Props) {
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* JSON-LD: Place + GeoCoordinates */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context': 'https://schema.org', '@type': 'Place',
+        '@context': 'https://schema.org', '@type': 'Place', 'speakable': { '@type': 'SpeakableSpecification', 'cssSelector': ['h1', '.complex-summary'] },
         name: `${decoded} 아파트`,
         description: `${region} ${sigungu} ${dong} 소재 아파트${builtYear ? ` (${builtYear}년 준공)` : ''}`,
         address: { '@type': 'PostalAddress', addressRegion: region, addressLocality: `${sigungu} ${dong}`, addressCountry: 'KR' },

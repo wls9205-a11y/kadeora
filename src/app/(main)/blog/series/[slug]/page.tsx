@@ -24,12 +24,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&design=2&category=blog`, width: 1200, height: 630, alt: s.title }],
+      images: [
+        { url: `${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&design=2&category=blog`, width: 1200, height: 630, alt: s.title },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(s.title)}&category=blog`, width: 630, height: 630, alt: s.title },
+      ],
     },
     twitter: { card: 'summary_large_image' as const, title: s.title, images: [`${SITE_URL}/api/og?title=${encodeURIComponent(s.title)}&design=2&category=blog`] },
     other: {
       'naver:written_time': s.created_at || '2026-01-15T00:00:00Z',
       'naver:updated_time': s.created_at || new Date().toISOString(),
+      'naver:author': '카더라 블로그팀',
       'article:section': '블로그',
       'article:tag': `${s.title},시리즈,카더라`, 'dg:plink': `${SITE_URL}/blog/series/${slug}`,
     },

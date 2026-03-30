@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   title: '아이템 상점',
   description: '포인트로 아이템을 구매하세요. 확성기, 프로필 뱃지, 닉네임 꾸미기 등',
   alternates: { canonical: SITE_URL + '/shop' },
+  openGraph: {
+    title: '아이템 상점 | 카더라', description: '포인트로 아이템을 구매하세요',
+    url: SITE_URL + '/shop', siteName: '카더라', locale: 'ko_KR', type: 'website',
+    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('아이템 상점')}&design=2&category=shop`, width: 1200, height: 630 }],
+  },
+  other: { 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'article:section': '커뮤니티' },
 };
 
 const ITEMS = [

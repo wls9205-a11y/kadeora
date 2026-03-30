@@ -111,6 +111,21 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           ...(selectedRegion ? [{ '@type': 'ListItem', position: 4, name: selectedRegion }] : []),
         ],
       })}} />
+      {/* FAQPage — 포털 노출 면적 2~3배 확대 */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: '단지백과란 무엇인가요?', acceptedAnswer: { '@type': 'Answer', text: '단지백과는 전국 34,000여 아파트를 입주 연차별로 비교할 수 있는 카더라의 부동산 데이터 서비스입니다. 매매·전세·월세 실거래가, 전세가율, 평당가를 한눈에 확인할 수 있습니다.' } },
+          { '@type': 'Question', name: '단지백과에서 어떤 정보를 확인할 수 있나요?', acceptedAnswer: { '@type': 'Answer', text: '단지별 매매 실거래가, 전세가, 월세, 평당가, 전세가율, 거래량 등을 확인할 수 있습니다. 연차별(신축~30년+) 필터링과 지역별 비교도 가능합니다.' } },
+          { '@type': 'Question', name: '어떤 지역의 아파트가 포함되어 있나요?', acceptedAnswer: { '@type': 'Answer', text: `서울, 경기, 부산, 대구, 인천, 광주, 대전, 울산, 세종 등 전국 ${displayCount.toLocaleString()}개 단지가 포함되어 있으며 매일 업데이트됩니다.` } },
+        ],
+      })}} />
+      {/* speakable — 네이버 음성검색 + 스마트 스니펫 */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'WebPage',
+        name: selectedRegion ? `${selectedRegion} 단지백과` : '단지백과',
+        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.kpi-card'] },
+      })}} />
 
       {/* ═══ 그라데이션 히어로 ═══ */}
       <div style={{

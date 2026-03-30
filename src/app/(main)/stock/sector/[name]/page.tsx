@@ -24,7 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(sector + ' 섹터 종목')}&design=2&category=stock`, width: 1200, height: 630, alt: `${sector} 섹터 종목` }],
+      images: [
+        { url: `${SITE_URL}/api/og?title=${encodeURIComponent(sector + ' 섹터 종목')}&design=2&category=stock`, width: 1200, height: 630, alt: `${sector} 섹터 종목` },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(sector + ' 섹터')}&category=stock`, width: 630, height: 630, alt: `${sector} 섹터` },
+      ],
     },
     twitter: { card: 'summary_large_image' as const, title: `${sector} 섹터 종목`, description: `${sector} 관련 주식 시세, 시총 순위, 등락률 비교` },
     other: {
@@ -86,6 +89,8 @@ export default async function SectorPage({ params }: Props) {
           name: `${s.name} (${s.symbol})`,
         })),
       })}} />
+      {/* JSON-LD: speakable */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${sector} 섹터 종목`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.sector-summary'] } }) }} />
       {/* JSON-LD: FAQPage */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'FAQPage',

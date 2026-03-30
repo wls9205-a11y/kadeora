@@ -218,7 +218,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${title}${priceStr} | 모집공고 요약`, description: desc,
       alternates: { canonical: `${SITE_URL}/apt/${resolved.slug}` },
       robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, 'max-video-preview': -1, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
-      openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }] },
+      openGraph: { title, description: desc, url: `${SITE_URL}/apt/${resolved.slug}`, siteName: '카더라', locale: 'ko_KR', type: 'article', images: [{ url: ogImg, width: 1200, height: 630, alt: `${d.name} 분양정보` }, { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(d.name)}&category=apt`, width: 630, height: 630, alt: `${d.name}` }] },
       twitter: { card: 'summary_large_image', title, description: desc, site: '@kadeora_app', images: [ogImg] },
       other: {
         'article:published_time': d.site?.created_at || d.sub?.fetched_at || '',

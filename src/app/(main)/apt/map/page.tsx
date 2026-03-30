@@ -18,7 +18,8 @@ export const metadata: Metadata = {
     images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('부동산 지도')}&design=2&subtitle=${encodeURIComponent('전국 청약·분양·미분양 한눈에')}`, width: 1200, height: 630, alt: '카더라 부동산 지도' }],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/map' },
+  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라 부동산팀',
+      'article:section': '부동산', 'dg:plink': SITE_URL + '/apt/map' },
 };
 
 const REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];

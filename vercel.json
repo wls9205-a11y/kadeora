@@ -10,7 +10,7 @@
       "maxDuration": 180
     },
     "src/app/api/stock-refresh/*.ts": {
-      "maxDuration": 120
+      "maxDuration": 300
     },
     "src/app/api/cron/stock-price/*.ts": {
       "maxDuration": 120

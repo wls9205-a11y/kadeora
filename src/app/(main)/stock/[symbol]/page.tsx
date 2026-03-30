@@ -52,7 +52,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&design=2&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` }],
+      images: [
+        { url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) ${p} ${ch}`)}&design=2&category=stock`, width: 1200, height: 630, alt: `${s.name} 주가 시세` },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name} (${symbol})`)}&category=stock`, width: 630, height: 630, alt: `${s.name} 시세` },
+      ],
     },
     twitter: { card: 'summary_large_image', title: `${s.name} ${p} ${ch}`, description: `${s.market} · 실시간 시세 · 차트 · 수급 분석` },
     other: (() => {

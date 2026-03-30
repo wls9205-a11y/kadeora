@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: { card: 'summary_large_image', title, description: desc },
     other: {
+      'naver:author': '카더라 부동산팀',
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
     },

@@ -208,6 +208,10 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"전국 아파트 청약 일정","numberOfItems":apts.length,"itemListElement":itemList}) }} />
     {/* CollectionPage → search engine context */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":"아파트 청약·분양·미분양·재개발","description":`전국 ${apts.length}건 청약, ${ongoingApts.length}건 분양중, ${unsold.length}건 미분양 현황`,"url":SITE_URL+"/apt","isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL}}) }} />
+    {/* FAQPage — 포털 노출 면적 확대 */}
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"아파트 청약 일정은 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라(kadeora.app)에서 전국 아파트 청약 일정, 경쟁률, 분양가, 입주 예정일을 실시간으로 확인할 수 있습니다. 지역별·상태별 필터링도 지원합니다."}},{"@type":"Question","name":"미분양 아파트 현황은 어떻게 확인하나요?","acceptedAnswer":{"@type":"Answer","text":`현재 전국 ${unsold.length}개 단지가 미분양 상태입니다. 카더라 부동산 페이지에서 지역별 미분양 세대수, 분양가, 연락처를 확인할 수 있습니다.`}},{"@type":"Question","name":"분양중인 아파트는 몇 개인가요?","acceptedAnswer":{"@type":"Answer","text":`현재 ${ongoingApts.length}개 단지가 분양 진행 중입니다. 각 단지별 분양가, 시공사, 위치 정보를 카더라에서 비교할 수 있습니다.`}}]}) }} />
+    {/* speakable */}
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
     <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} />
     <Disclaimer />
   </Suspense>;
