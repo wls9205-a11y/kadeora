@@ -17,7 +17,7 @@ import { isNew } from './tabs/apt-utils';
 import { useToast } from '@/components/Toast';
 import SectionShareButton from '@/components/SectionShareButton';
 
-export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0, tradeByRegion = {}, redevByRegion = {}, subTotalCount = 0, unsoldTotalCount = 0, ongoingTotalCount = 0, dataFreshness = { sub: '', trade: '', unsold: '', redev: '' } }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number; tradeByRegion?: Record<string, number>; redevByRegion?: Record<string, number>; subTotalCount?: number; unsoldTotalCount?: number; ongoingTotalCount?: number; dataFreshness?: { sub: string; trade: string; unsold: string; redev: string } }) {
+export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0, tradeByRegion = {}, redevByRegion = {}, subTotalCount = 0, unsoldTotalCount = 0, ongoingTotalCount = 0, dataFreshness = { sub: '', trade: '', unsold: '', redev: '' }, redevRedevCount = 0, redevRebuildCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number; tradeByRegion?: Record<string, number>; redevByRegion?: Record<string, number>; subTotalCount?: number; unsoldTotalCount?: number; ongoingTotalCount?: number; dataFreshness?: { sub: string; trade: string; unsold: string; redev: string }; redevRedevCount?: number; redevRebuildCount?: number }) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const validTabs = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
@@ -151,6 +151,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         onRegionClick={setSelectedRegion}
         onTabChange={(tab: string) => handleTabChange(tab as 'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade')}
         activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+        redevRedevCount={redevRedevCount}
+        redevRebuildCount={redevRebuildCount}
         shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
       />
 

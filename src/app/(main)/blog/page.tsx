@@ -414,82 +414,31 @@ export default async function BlogPage({ searchParams }: Props) {
           description={q ? '다른 검색어로 시도해보세요' : '곧 새로운 분석이 올라옵니다'}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {(posts ?? []).map((p: any, idx: number) => {
+        <div className="listing-grid">
+          {(posts ?? []).map((p: any) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
             const readMin = p.reading_time_min || 3;
             const dateStr = new Date(p.created_at || Date.now()).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
-            const timeStr = new Date(p.created_at || Date.now()).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
-            const isFirst = idx === 0 && pageNum === 1 && !q && category === 'all';
-            const prevDate = idx > 0 ? new Date((posts ?? [])[idx - 1].created_at || Date.now()).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : null;
-            const showDateHeader = idx === 0 || dateStr !== prevDate;
-
             return (
-              <React.Fragment key={p.id}>
-                {/* 날짜 구분선 */}
-                {showDateHeader && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: idx === 0 ? '0 0 8px' : '12px 0 8px' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}>{dateStr}</span>
-                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-                  </div>
-                )}
-
-                {/* 피쳐드 히어로 (첫 번째 글) */}
-                {isFirst ? (
-                  <Link href={`/blog/${p.slug}`} className="kd-card-hover" style={{
-                    display: 'block', borderRadius: 14, overflow: 'hidden', marginBottom: 8, cursor: 'pointer',
-                    background: `linear-gradient(135deg, var(--bg-surface) 0%, ${catColor}08 100%)`,
-                    border: `1px solid var(--border)`, padding: '20px 18px 16px', textDecoration: 'none', color: 'inherit',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>
-                        {CATS.find(c => c.key === p.category)?.label || p.category}
-                      </span>
-                      {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 5px', borderRadius: 3, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeStr}</span>
-                    </div>
-                    <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.4, letterSpacing: '-0.3px' }}>{q ? highlightTitle(p.title, q) : p.title}</div>
-                    {p.excerpt && <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 8, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>}
-                    <div style={{ display: 'flex', gap: 12, fontSize: 10, color: 'var(--text-tertiary)' }}>
-                      <span>📖 {readMin}분</span>
-                      <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
-                      {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
-                      {(p.helpful_count || 0) > 0 && <span>👍 {p.helpful_count}</span>}
-                    </div>
-                  </Link>
-                ) : (
-                  /* 일반 포스트 — 타임라인 스타일 */
-                  <Link href={`/blog/${p.slug}`} className="kd-card-hover" style={{
-                    display: 'flex', gap: 12, padding: '12px 14px 12px 12px', textDecoration: 'none', color: 'inherit',
-                    borderBottom: '1px solid var(--border)',
-                    position: 'relative', marginLeft: 10,
-                    borderLeft: `2px solid var(--border)`, paddingLeft: 16,
-                  }}>
-                    {/* 타임라인 도트 */}
-                    <div style={{ position: 'absolute', left: -5, top: 18, width: 8, height: 8, borderRadius: 4, background: catColor, border: '2px solid var(--bg-base)', zIndex: 1 }} />
-                    {/* 시간 */}
-                    <div style={{ width: 50, flexShrink: 0, paddingTop: 1 }}>
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>{timeStr}</span>
-                    </div>
-                    {/* 내용 */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: catColor }}>{CATS.find(c => c.key === p.category)?.label || p.category}</span>
-                        {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
-                        {p.rewritten_at && <span style={{ padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)', fontSize: 9, fontWeight: 700 }}>UP</span>}
-                      </div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
-                      {p.excerpt && <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>}
-                      <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
-                        <span>📖 {readMin}분</span>
-                        <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
-                        {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
-                        {(p.helpful_count || 0) > 0 && <span>👍 {p.helpful_count}</span>}
-                      </div>
-                    </div>
-                  </Link>
-                )}
-              </React.Fragment>
+              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-card-hover" style={{
+                display: 'block', padding: '12px', borderRadius: 12, textDecoration: 'none', color: 'inherit',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>{CATS.find(c => c.key === p.category)?.label || p.category}</span>
+                  {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
+                  {p.rewritten_at && <span style={{ fontSize: 8, fontWeight: 700, padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)' }}>UP</span>}
+                  <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)' }}>{dateStr}</span>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
+                {p.excerpt && <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>}
+                <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                  <span>📖 {readMin}분</span>
+                  <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
+                  {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
+                  {(p.helpful_count || 0) > 0 && <span>👍 {p.helpful_count}</span>}
+                </div>
+              </Link>
             );
           })}
         </div>

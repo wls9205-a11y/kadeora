@@ -159,3 +159,14 @@
   animation: shimmer 1.5s ease infinite;
 }
 
+
+/* ═══ 2열 카드 리스팅 그리드 ═══ */
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+/* 모바일 좁은 화면 → 1열 폴백 */
+@media (max-width: 420px) {
+  .listing-grid { grid-template-columns: 1fr; }
+}

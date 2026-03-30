@@ -145,6 +145,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           {effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역, 시공사로 검색해보세요</div>}
         </div>
       )}
+      <div className="listing-grid">
       {paged.map((o) => {
         const isUnsold = o.source === 'unsold';
         const pMin = o.sale_price_min ? Math.round(o.sale_price_min / 10000 * 10) / 10 : null;
@@ -161,7 +162,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <Link key={o.id} href={linkH} className="kd-card-hover" style={{
             display: 'block', textDecoration: 'none', color: 'inherit',
             background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03))' : 'var(--bg-surface)',
-            border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8,
+            border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 12, padding: '12px 14px',
             borderLeft: `4px solid ${isPremium ? 'var(--accent-yellow)' : accentColor}`,
             boxShadow: isPremium ? '0 0 12px rgba(251,191,36,0.08)' : undefined,
           }}>
@@ -266,6 +267,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           </Link>
         );
       })}
+      </div>
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (

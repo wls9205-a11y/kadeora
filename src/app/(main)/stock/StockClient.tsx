@@ -64,7 +64,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
   const [showInactive, setShowInactive] = useState(false);
-  const [viewMode, setViewMode] = useState<'list'|'card'>('list');
+  const [viewMode, setViewMode] = useState<'list'|'card'>('card');
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
@@ -719,7 +719,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             </div>
           </div>
           {/* 카드 그리드 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="listing-grid">
             {m7Stocks.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0)).map((st) => {
               const pct = st.change_pct ?? 0;
               const color = pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)';

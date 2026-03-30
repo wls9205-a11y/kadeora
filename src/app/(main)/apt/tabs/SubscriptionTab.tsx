@@ -119,6 +119,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
 
           {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '조건에 맞는 청약이 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역, 시공사로 검색해보세요</div>}</div>}
 
+          <div className="listing-grid">
           {filtered.map((apt, i) => {
             const st = getStatus(apt);
             const bd = SB[st];
@@ -136,7 +137,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
               <Link key={apt.id} href={`/apt/${encodeURIComponent(generateAptSlug(apt.house_nm) || apt.house_manage_no || String(apt.id))}`} className="kd-card-hover" style={{
-                display: 'block', padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
+                display: 'block', padding: '12px 14px 10px', borderRadius: 12,
                 background: st === 'open' ? 'linear-gradient(135deg, var(--bg-surface), rgba(96,165,250,0.04))' : 'var(--bg-surface)',
                 border: st === 'open' ? '1.5px solid rgba(96,165,250,0.3)' : '1px solid var(--border)',
                 opacity: st === 'closed' ? 0.55 : 1,
@@ -217,6 +218,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               </Link>
             );
           })}
+          </div>
 
           {/* 청약 캘린더 */}
           <div className="kd-card">

@@ -29,6 +29,8 @@ interface Props {
   onRegionClick?: (region: string) => void;
   onTabChange?: (tab: string) => void;
   activeRegion?: string;
+  redevRedevCount?: number;
+  redevRebuildCount?: number;
   shareButton?: React.ReactNode;
 }
 
@@ -50,7 +52,7 @@ const LABELS: Record<string, string> = {
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, onTabChange, activeRegion, shareButton }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, onTabChange, activeRegion, redevRedevCount = 0, redevRebuildCount = 0, shareButton }: Props) {
   const router = useRouter();
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
@@ -162,9 +164,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             const tradeAvg = transactions.length > 0 ? Math.round((transactions as any[]).reduce((s: number, t: any) => s + (Number(t.deal_amount) || 0), 0) / transactions.length) : 0;
             const tradeMax = transactions.length > 0 ? Math.max(...(transactions as any[]).map((t: any) => Number(t.deal_amount) || 0)) : 0;
             const fmtA = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : n > 0 ? `${n.toLocaleString()}만` : '-';
-            // 재개발/재건축 분리 카운트
-            const redevCount = (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재개발')).length;
-            const rebuildCount = (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재건축')).length;
+            // 재개발/재건축 분리 카운트 — SSR에서 전달받은 값 사용
+            const redevCount = redevRedevCount || (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재개발')).length;
+            const rebuildCount = redevRebuildCount || (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재건축')).length;
             // 분양중: 최근 입주 시공사
             const ongoingUnits = (ongoingApts as any[]).reduce((s: number, a: any) => s + (Number(a.tot_supply_hshld_co) || 0), 0);
             const maxVal = Math.max(cats.sub, cats.ongoing, cats.unsold, cats.redev, cats.trade, 34495, 5522);
@@ -280,7 +282,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       </div>
 
       {/* Compact tile grid — 모바일 3열 / 데스크탑 5열 */}
-      <div className="grid grid-cols-3 md:grid-cols-5" style={{
+      <div className="grid grid-cols-4 md:grid-cols-5" style={{
         gap: 5,
         maxWidth: '100%',
         overflow: 'hidden',
@@ -293,7 +295,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               onClick={() => onRegionClick?.(isActive ? '전체' : r.name)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                padding: '6px 8px',
+                padding: '5px 6px',
                 background: isActive ? 'var(--brand-bg, rgba(37,99,235,0.06))' : 'var(--bg-surface)',
                 border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                 borderRadius: 7,
@@ -306,11 +308,11 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             >
               {/* Name + mini bar */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
+                  <span style={{ fontSize: 12, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                     {r.name}
                   </span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                     {r.total.toLocaleString()}
                   </span>
                 </div>

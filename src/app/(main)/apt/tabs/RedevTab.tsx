@@ -161,6 +161,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 카드 리스트 (20건씩 페이지네이션) */}
+            <div className="listing-grid">
             {filteredRedev.slice(0, redevPage * 20).map((r) => {
               const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
               const stageIdx = STAGE_ORDER.indexOf(r.stage || '');
@@ -169,7 +170,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               return (
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{
                   display: 'block', textDecoration: 'none', color: 'inherit',
-                  padding: '14px 16px 12px', borderRadius: 14, marginBottom: 8,
+                  padding: '12px 14px 10px', borderRadius: 12,
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   cursor: 'pointer',
                   position: 'relative', overflow: 'hidden',
@@ -215,6 +216,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                 </Link>
               );
             })}
+            </div>
 
             {redevPage * 20 < filteredRedev.length && (
               <button onClick={() => setRedevPage(p => p + 1)} style={{
