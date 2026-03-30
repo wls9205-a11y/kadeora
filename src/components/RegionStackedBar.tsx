@@ -1,5 +1,6 @@
 'use client';
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface RegionData {
   name: string;
@@ -50,6 +51,7 @@ const LABELS: Record<string, string> = {
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
 export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, onTabChange, activeRegion, shareButton }: Props) {
+  const router = useRouter();
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
     const ensure = (name: string) => {
@@ -149,12 +151,13 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
           </svg>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{dataFreshness?.sub ? `${dataFreshness.sub.split(' ').slice(0, 2).join(' ')} 수집` : ''}</div>
         </div>
-        {/* 2×4 card grid */}
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 3, minWidth: 0 }}>
+        {/* 2×4 card grid — 모바일에서도 4열 유지하되 gap 줄임 */}
+        <div className="donut-card-grid" style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 3, minWidth: 0 }}>
           {(() => {
             const today = new Date().toISOString().slice(0, 10);
             const openCount = apts.filter((a: any) => a.rcept_bgnde <= today && a.rcept_endde >= today).length;
             const upcomingCount = apts.filter((a: any) => a.rcept_bgnde > today).length;
+            const closedCount = apts.filter((a: any) => a.rcept_endde < today).length;
             const unsoldUnits = (unsold as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
             const tradeAvg = transactions.length > 0 ? Math.round((transactions as any[]).reduce((s: number, t: any) => s + (Number(t.deal_amount) || 0), 0) / transactions.length) : 0;
             const tradeMax = transactions.length > 0 ? Math.max(...(transactions as any[]).map((t: any) => Number(t.deal_amount) || 0)) : 0;
@@ -162,6 +165,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             // 재개발/재건축 분리 카운트
             const redevCount = (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재개발')).length;
             const rebuildCount = (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재건축')).length;
+            // 분양중: 최근 입주 시공사
+            const ongoingUnits = (ongoingApts as any[]).reduce((s: number, a: any) => s + (Number(a.tot_supply_hshld_co) || 0), 0);
             const maxVal = Math.max(cats.sub, cats.ongoing, cats.unsold, cats.redev, cats.trade, 34495, 5522);
 
             const cardStyle = (color: string) => ({
@@ -188,6 +193,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ display: 'flex', gap: 2, marginTop: 2, flexWrap: 'wrap' }}>
                   {openCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(59,155,107,0.1)', color: '#3B9B6B', fontWeight: 500 }}>접수 {openCount}</span>}
                   {upcomingCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(96,165,250,0.08)', color: '#60A5FA', fontWeight: 500 }}>예정 {upcomingCount}</span>}
+                  {closedCount > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 500 }}>마감 {closedCount}</span>}
                 </div>
                 <div style={descStyle}>전국 아파트 청약 일정, 경쟁률, 당첨 결과</div>
               </div>
@@ -199,7 +205,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>분양중</div>
                 {barStyle(Math.round(cats.ongoing / maxVal * 100), COLORS.ongoing)}
-                <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: COLORS.ongoing }}>입주전 현장</span></div>
+                <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: COLORS.ongoing }}>{ongoingUnits > 0 ? `${ongoingUnits.toLocaleString()}세대` : '입주전 현장'}</span></div>
                 <div style={descStyle}>청약 마감 후 입주 전 현장 + 미분양 통합</div>
               </div>
               {/* 미분양 */}
@@ -242,7 +248,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={descStyle}>전국 아파트 매매 실거래가, 지역별 시세 동향</div>
               </div>
               {/* 단지백과 */}
-              <div style={{ ...cardStyle('var(--border)'), borderLeftColor: 'var(--border)' }} onClick={() => { window.location.href = '/apt/complex'; }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={{ ...cardStyle('var(--border)'), borderLeftColor: 'var(--border)' }} onClick={() => { router.push('/apt/complex'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>34,495</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
@@ -256,7 +262,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={descStyle}>전국 아파트 연차별 매매·전세·월세 시세 비교</div>
               </div>
               {/* 분양사이트 */}
-              <div style={cardStyle('#22D3EE')} onClick={() => { window.location.href = '/apt/sites'; }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={cardStyle('#22D3EE')} onClick={() => { router.push('/apt/sites'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#22D3EE', fontVariantNumeric: 'tabular-nums' }}>5,522</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
@@ -267,13 +273,13 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={descStyle}>전국 분양 현장별 분양가·시공사·입주 정보</div>
               </div>
               {/* 부동산 지도 */}
-              <div style={cardStyle('#FBB724')} onClick={() => { window.location.href = '/apt/map'; }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={cardStyle('#FBB724')} onClick={() => { router.push('/apt/map'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#BA7517', fontVariantNumeric: 'tabular-nums' }}>지도</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>부동산 지도</div>
-                {barStyle(60, '#FBB724')}
+                {barStyle(Math.round(regions.length / 17 * 100), '#FBB724')}
                 <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: '#BA7517', fontWeight: 500 }}>17개 지역</span></div>
                 <div style={descStyle}>전국 청약·분양·미분양·재개발 지도 한눈에</div>
               </div>

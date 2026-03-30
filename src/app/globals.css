@@ -600,6 +600,16 @@ body {
   .region-overview-layout > div:first-child { max-width: 160px; margin: 0 auto 8px; }
 }
 
+/* B-2 도넛 카드 그리드 — 모바일 최적화 */
+@media (max-width: 480px) {
+  .donut-card-grid { font-size: 0.95em; gap: 2px !important; }
+  .donut-card-grid > div { padding: 4px 3px !important; }
+}
+@media (max-width: 380px) {
+  .donut-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 1px !important; }
+  .donut-card-grid > div { padding: 3px 2px !important; }
+}
+
 /* 탭 세그먼트 — 작은 화면에서 폰트 축소 */
 @media (max-width: 380px) {
   .kd-tab-segment { font-size: 11px !important; }
