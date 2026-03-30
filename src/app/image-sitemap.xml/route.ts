@@ -15,7 +15,7 @@ export const revalidate = 3600; // 1시간 캐시
 export async function GET() {
   const sb = getSupabaseAdmin();
 
-  const [sitesR, blogsR, stocksR] = await Promise.all([
+  const [sitesR, blogsR, stocksR, complexR] = await Promise.all([
     sb.from('apt_sites')
       .select('slug, name, images, region, sigungu')
       .eq('is_active', true)
@@ -26,13 +26,18 @@ export async function GET() {
       .select('slug, title, cover_image, image_alt, category')
       .eq('is_published', true)
       .not('cover_image', 'is', null)
-      // /api/og 동적 URL도 포함 (Googlebot-Image, Yeti가 렌더링 가능)
       .order('published_at', { ascending: false })
       .limit(50000),
     sb.from('stock_quotes')
       .select('symbol, name, market, sector, price, change_pct, currency')
       .gt('price', 0)
       .limit(1000),
+    (sb as any).from('apt_complex_profiles')
+      .select('apt_name, region_nm, sigungu, age_group, latest_sale_price, latest_jeonse_price')
+      .not('age_group', 'is', null)
+      .gt('latest_sale_price', 0)
+      .order('sale_count_1y', { ascending: false })
+      .limit(5000),
   ]);
 
   const entries: string[] = [];
@@ -99,6 +104,29 @@ ${imageXml}
         <image:loc>${escapeXml(ogUrl)}</image:loc>
         <image:title>${titleText}</image:title>
         <image:caption>${escapeXml(`${s.name} ${s.market} 상장 ${s.sector || ''} 종목 주가 시세`)}</image:caption>
+      </image:image>
+  </url>`);
+  }
+
+  // ━━━ 단지백과 이미지 (OG + Square) ━━━
+  for (const c of complexR.data || []) {
+    const saleStr = c.latest_sale_price > 0 ? `매매 ${Math.round(c.latest_sale_price / 10000)}억` : '';
+    const jeonseStr = c.latest_jeonse_price > 0 ? `전세 ${Math.round(c.latest_jeonse_price / 10000)}억` : '';
+    const subtitle = [saleStr, jeonseStr].filter(Boolean).join(' · ') || '실거래가 시세';
+    const ogUrl = `${BASE}/api/og?title=${encodeURIComponent(c.apt_name)}&design=2&category=apt&subtitle=${encodeURIComponent(subtitle)}&author=${encodeURIComponent('카더라 부동산팀')}`;
+    const ogSquareUrl = `${BASE}/api/og-square?title=${encodeURIComponent(c.apt_name)}&category=apt&subtitle=${encodeURIComponent(subtitle)}`;
+    const titleText = escapeXml(`${c.apt_name} ${c.region_nm} ${c.sigungu} ${c.age_group || ''} 아파트 실거래가`);
+    entries.push(`  <url>
+    <loc>${BASE}/apt/complex/${encodeURIComponent(c.apt_name)}</loc>
+      <image:image>
+        <image:loc>${escapeXml(ogUrl)}</image:loc>
+        <image:title>${titleText}</image:title>
+        <image:caption>${escapeXml(`${c.apt_name} 아파트 ${subtitle} — 카더라 단지백과`)}</image:caption>
+      </image:image>
+      <image:image>
+        <image:loc>${escapeXml(ogSquareUrl)}</image:loc>
+        <image:title>${titleText}</image:title>
+        <image:caption>${escapeXml(`${c.apt_name} 단지백과 네이버 모바일용`)}</image:caption>
       </image:image>
   </url>`);
   }
