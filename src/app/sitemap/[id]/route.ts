@@ -71,7 +71,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       ...['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => ({
         url: `${BASE}/daily/${encodeURIComponent(r)}`,
         lastModified: now,
-        changeFrequency: 'daily' as const,
+        changeFrequency: 'daily',
         priority: 0.85,
       })),
     ];

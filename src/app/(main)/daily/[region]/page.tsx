@@ -1,22 +1,20 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
-import { fetchDailyReportData, REPORT_REGIONS, type ReportRegion, type DailyReportData } from '@/lib/daily-report-data';
+import { fetchDailyReportData, REPORT_REGIONS, type ReportRegion } from '@/lib/daily-report-data';
 import DailyReportClient from './DailyReportClient';
 
 interface Props { params: Promise<{ region: string }> }
 
-export async function generateStaticParams() {
-  return REPORT_REGIONS.map(region => ({ region: encodeURIComponent(region) }));
-}
-
+// ISR on-demand — 첫 요청 시 생성, 60초 캐시
 export const revalidate = 60;
 export const maxDuration = 30;
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region: raw } = await params;
   const region = decodeURIComponent(raw);
-  if (!REPORT_REGIONS.includes(region as ReportRegion)) return { title: '카더라 데일리' };
+  if (!(REPORT_REGIONS as readonly string[]).includes(region)) return { title: '카더라 데일리' };
 
   const now = new Date();
   const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
@@ -66,11 +64,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DailyReportPage({ params }: Props) {
   const { region: raw } = await params;
   const region = decodeURIComponent(raw) as ReportRegion;
-  if (!REPORT_REGIONS.includes(region)) notFound();
+  if (!(REPORT_REGIONS as readonly string[]).includes(region)) notFound();
 
-  const result = await fetchDailyReportData(region).catch(() => null);
-  if (!result) notFound();
-  const data = result!;
+  const result = await fetchDailyReportData(region as ReportRegion).catch(() => null);
+  if (!result) return notFound();
+  const data = result;
 
   const now = new Date();
   const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
