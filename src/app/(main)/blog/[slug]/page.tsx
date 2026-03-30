@@ -444,7 +444,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </nav>
 
       <article style={{ paddingBottom: 40 }}>
-        {/* 이미지 캐러셀 (포털 이미지탭 노출) */}
+        {/* 커버 이미지 */}
         {post.cover_image && (() => {
           const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
           return (
@@ -456,25 +456,35 @@ export default async function BlogDetailPage({ params }: Props) {
                   { '@type': 'ImageObject', url: ogSquare, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: 2 },
                 ],
               })}} />
-              <div style={{ marginBottom: 16, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <div style={{ marginBottom: 16, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border)' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={post.cover_image} alt={post.image_alt || `${post.title} — 카더라 블로그`} width={1200} height={630} style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block', borderRadius: 10 }} loading="eager" />
               </div>
             </>
           );
         })()}
-        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.3, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
-        {/* 저자 + 메타 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+
+        {/* 카테고리 뱃지 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+          <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 4, background: `${catColor}15`, color: catColor, letterSpacing: '0.3px' }}>
+            {({ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' } as Record<string, string>)[post.category] || '📝'} {({ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
+          </span>
+          {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
+        </div>
+
+        <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
+
+        {/* 저자 + 메타 — 카드 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, padding: '10px 14px', borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${catColor}30, ${catColor}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, border: `1px solid ${catColor}20` }}>
             {{ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' }[post.category] || '📝'}
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{post.author_name || '카더라 데이터팀'}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
               <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
               <span>·</span>
-              <span>조회 {post.view_count ?? 0}</span>
+              <span>👀 {post.view_count ?? 0}</span>
               <span>·</span>
               <span>📖 {readingTimeMin}분</span>
               {post.rewritten_at && (
@@ -492,8 +502,8 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
 
         {(post.tags ?? []).length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none' }}>#{t}</Link>)}
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 14 }}>
+            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>#{t}</Link>)}
           </div>
         )}
 

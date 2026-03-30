@@ -119,6 +119,9 @@ Sitemap: https://kadeora.app/sitemap/1.xml
 Sitemap: https://kadeora.app/sitemap/2.xml
 Sitemap: https://kadeora.app/sitemap/3.xml
 Sitemap: https://kadeora.app/sitemap/4.xml
+Sitemap: https://kadeora.app/sitemap/5.xml
+Sitemap: https://kadeora.app/sitemap/6.xml
+Sitemap: https://kadeora.app/sitemap/7.xml
 Sitemap: https://kadeora.app/sitemap/10.xml
 Sitemap: https://kadeora.app/sitemap/11.xml
 Sitemap: https://kadeora.app/sitemap/12.xml
