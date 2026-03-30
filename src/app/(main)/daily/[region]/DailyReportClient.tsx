@@ -29,6 +29,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
   const isArchive = !!viewDate;
 
   const displayDate = viewDate ? new Date(viewDate) : new Date();
+  const now = displayDate; // 체크포인트 계산용
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   const dateLabel = `${displayDate.getFullYear()}.${String(displayDate.getMonth() + 1).padStart(2, '0')}.${String(displayDate.getDate()).padStart(2, '0')} ${dayNames[displayDate.getDay()]}`;
 
