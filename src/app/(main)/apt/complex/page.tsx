@@ -29,14 +29,21 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
   const { region: selectedRegion } = await searchParams;
   const sb = await createSupabaseServer();
 
-  // 지역별 통계
-  const { data: regionRows } = await (sb as any).from('v_complex_region_stats').select('*');
+  // 지역별 + 연차별 통계
+  const [{ data: regionRows }, { data: ageRows }] = await Promise.all([
+    (sb as any).from('v_complex_region_stats').select('*'),
+    (sb as any).from('v_complex_age_stats').select('*'),
+  ]);
+
   const regionData = REGIONS
     .map(r => { const row = (regionRows || []).find((x: any) => x.region_nm === r); return { region: r, count: row?.profile_count || 0, avgPrice: row?.avg_sale_price || 0 }; })
     .filter(r => r.count > 0);
   const totalProfiles = (regionRows || []).reduce((s: number, r: any) => s + (r.profile_count || 0), 0);
 
-  // 프로필 조회 (지역 필터 적용)
+  const ageMap = new Map<string, any>();
+  for (const r of (ageRows || [])) ageMap.set(r.age_group, r);
+
+  // 프로필 조회
   let pq = (sb as any).from('apt_complex_profiles')
     .select('apt_name, sigungu, region_nm, dong, age_group, latest_sale_price, latest_jeonse_price, latest_monthly_deposit, latest_monthly_rent, jeonse_ratio, sale_count_1y, rent_count_1y, built_year, avg_sale_price_pyeong, latitude, longitude')
     .not('age_group', 'is', null)
@@ -45,16 +52,24 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
   const { data: profiles } = await pq.limit(1000);
   const allProfiles: any[] = profiles || [];
 
-  // 연차별 통계 (현재 데이터 기준)
-  const ageStats = new Map<string, { cnt: number; totalPrice: number }>();
-  AGE_GROUPS.forEach(g => ageStats.set(g, { cnt: 0, totalPrice: 0 }));
+  // 연차별 통계 (현재 필터 기준)
+  const localAgeStats = new Map<string, { cnt: number; totalPrice: number }>();
+  AGE_GROUPS.forEach(g => localAgeStats.set(g, { cnt: 0, totalPrice: 0 }));
   for (const p of allProfiles) {
     if (p.age_group && p.latest_sale_price > 0) {
-      const s = ageStats.get(p.age_group);
+      const s = localAgeStats.get(p.age_group);
       if (s) { s.cnt++; s.totalPrice += Number(p.latest_sale_price); }
     }
   }
-  const ageChartData = AGE_GROUPS.map(g => { const s = ageStats.get(g)!; return { group: g, avg: s.cnt > 0 ? Math.round(s.totalPrice / s.cnt) : 0, count: s.cnt }; });
+  const ageChartData = AGE_GROUPS.map(g => {
+    const s = localAgeStats.get(g)!;
+    const dbRow = ageMap.get(g);
+    return {
+      group: g,
+      avg: selectedRegion ? (s.cnt > 0 ? Math.round(s.totalPrice / s.cnt) : 0) : (dbRow?.avg_sale_price || 0),
+      count: selectedRegion ? s.cnt : (dbRow?.profile_count || 0),
+    };
+  });
 
   const topComplexes = allProfiles.slice(0, 100).map((p: any) => ({
     aptName: p.apt_name, sigungu: p.sigungu, region: p.region_nm, dong: p.dong || '',
@@ -62,11 +77,20 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
     lastPrice: p.latest_sale_price || 0, jeonse: p.latest_jeonse_price || 0,
     monthly: p.latest_monthly_deposit || 0, monthlyRent: p.latest_monthly_rent || 0,
     ageGroup: p.age_group || '', jeonseRatio: p.jeonse_ratio || null,
-    pyeongPrice: p.avg_sale_price_pyeong || 0,
-    hasCoords: !!(p.latitude && p.longitude),
+    pyeongPrice: p.avg_sale_price_pyeong || 0, hasCoords: !!(p.latitude && p.longitude),
   }));
 
   const displayCount = selectedRegion ? regionData.find(r => r.region === selectedRegion)?.count || allProfiles.length : totalProfiles;
+
+  // KPI 집계
+  const avgSale = allProfiles.length ? Math.round(allProfiles.filter(p => p.latest_sale_price > 0).reduce((s: number, p: any) => s + Number(p.latest_sale_price), 0) / allProfiles.filter(p => p.latest_sale_price > 0).length) : 0;
+  const avgRatio = allProfiles.length ? Math.round(allProfiles.filter(p => p.jeonse_ratio > 0).reduce((s: number, p: any) => s + Number(p.jeonse_ratio), 0) / (allProfiles.filter(p => p.jeonse_ratio > 0).length || 1)) : 0;
+  const totalTrades = allProfiles.reduce((s: number, p: any) => s + (p.sale_count_1y || 0) + (p.rent_count_1y || 0), 0);
+  const ratioColor = avgRatio > 80 ? '#ef4444' : avgRatio > 60 ? '#f59e0b' : '#22c55e';
+
+  // 도넛 데이터 (연차 비율)
+  const ageDonut = ageChartData.filter(a => a.count > 0);
+  const donutTotal = ageDonut.reduce((s, a) => s + a.count, 0);
 
   return (
     <article style={{ maxWidth: 960, margin: '0 auto', padding: '0 14px 80px' }}>
@@ -74,7 +98,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'CollectionPage',
         name: selectedRegion ? `${selectedRegion} 단지백과` : '단지백과',
-        description: `${selectedRegion || '전국'} ${displayCount.toLocaleString()}개 아파트 입주 연차별 비교`,
+        description: `${selectedRegion || '전국'} ${displayCount.toLocaleString()}개 아파트 연차별 비교`,
         url: `${SITE_URL}/apt/complex`, numberOfItems: displayCount,
         isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
       })}} />
@@ -88,78 +112,133 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
         ],
       })}} />
 
-      {/* ═══ 콤팩트 헤더 (1줄) ═══ */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-        <div>
-          <nav style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4, display: 'flex', gap: 4 }}>
-            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link><span>›</span>
-            <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>부동산</Link><span>›</span>
-            {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'var(--text-primary)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'var(--text-primary)' }}>단지백과</span>)}
-          </nav>
-          <h1 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
-            🏢 {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: 8 }}>{displayCount.toLocaleString()}개 단지</span>
-          </h1>
-        </div>
-        {selectedRegion && (
-          <Link href="/apt/complex" style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.1)', padding: '5px 12px', borderRadius: 8 }}>
-            ✕ 전체 보기
-          </Link>
-        )}
-      </div>
-
-      {/* ═══ 지역 필 바 — 수평 스크롤 ═══ */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', paddingBottom: 2 }}>
-        <Link href="/apt/complex" style={{
-          padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-          background: !selectedRegion ? 'var(--brand)' : 'var(--bg-surface)', color: !selectedRegion ? '#fff' : 'var(--text-secondary)',
-          border: !selectedRegion ? 'none' : '1px solid var(--border)',
-          boxShadow: !selectedRegion ? '0 2px 8px rgba(59,123,246,0.3)' : 'none',
-        }}>전체</Link>
-        {regionData.map(r => {
-          const active = selectedRegion === r.region;
-          return (
-            <Link key={r.region} href={active ? '/apt/complex' : `/apt/complex?region=${encodeURIComponent(r.region)}`} style={{
-              padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-              background: active ? 'var(--brand)' : 'var(--bg-surface)', color: active ? '#fff' : 'var(--text-secondary)',
-              border: active ? 'none' : '1px solid var(--border)',
-              boxShadow: active ? '0 2px 8px rgba(59,123,246,0.3)' : 'none',
-            }}>{r.region} <span style={{ fontSize: 10, opacity: 0.7 }}>{r.count.toLocaleString()}</span></Link>
-          );
-        })}
-      </div>
-
-      {/* ═══ 연차별 미니 바 — 1줄 인라인 ═══ */}
+      {/* ═══ 그라데이션 히어로 ═══ */}
       <div style={{
-        display: 'flex', gap: 4, marginBottom: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', paddingBottom: 2,
+        borderRadius: 14, padding: '18px 18px 14px', marginBottom: 14, position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(135deg, #0F1B3E 0%, rgba(59,123,246,0.3) 100%)',
+        border: '1px solid rgba(59,123,246,0.15)',
       }}>
-        {ageChartData.map(d => {
-          const maxAvg = Math.max(...ageChartData.map(x => x.avg));
-          const pct = maxAvg > 0 ? Math.round((d.avg / maxAvg) * 100) : 0;
-          const colors: Record<string, string> = { '신축': '#3b7bf6', '5년차': '#06b6d4', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
-          const c = colors[d.group] || '#666';
-          return (
-            <div key={d.group} style={{
-              flex: '1 1 0', minWidth: 70, background: 'var(--bg-surface)', border: '1px solid var(--border)',
-              borderRadius: 10, padding: '8px 6px', textAlign: 'center', flexShrink: 0,
-            }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: c, marginBottom: 4 }}>{d.group}</div>
-              <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 4 }}>
-                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2, background: c }} />
-              </div>
-              <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.1 }}>{d.avg > 0 ? fmtAmount(d.avg) : '—'}</div>
-              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{d.count.toLocaleString()}개</div>
-            </div>
-          );
-        })}
+        <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(59,123,246,0.08)' }} />
+        <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(59,123,246,0.05)' }} />
+        <nav style={{ fontSize: 10, color: 'rgba(232,237,245,0.4)', marginBottom: 6, display: 'flex', gap: 4, position: 'relative', flexWrap: 'wrap' }}>
+          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link><span>›</span>
+          <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>부동산</Link><span>›</span>
+          {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'rgba(232,237,245,0.9)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'rgba(232,237,245,0.9)' }}>단지백과</span>)}
+        </nav>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', position: 'relative' }}>
+          <h1 style={{ fontSize: 20, fontWeight: 900, margin: 0, color: '#E8EDF5' }}>
+            🏢 {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
+          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {selectedRegion && (
+              <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.15)', padding: '3px 10px', borderRadius: 6 }}>✕ 전체</Link>
+            )}
+            <span style={{ fontSize: 12, color: 'rgba(232,237,245,0.6)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
+          </div>
+        </div>
       </div>
 
-      {/* ═══ 카드 그리드 ═══ */}
+      {/* ═══ KPI 3열 ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 14 }}>
+        {[
+          { label: '평균 매매가', value: fmtAmount(avgSale), icon: '💰' },
+          { label: '평균 전세가율', value: `${avgRatio}%`, icon: '📊', color: ratioColor },
+          { label: '총 거래', value: totalTrades.toLocaleString() + '건', icon: '📈' },
+        ].map(k => (
+          <div key={k.label} style={{
+            background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))',
+            borderRadius: 10, padding: '10px 8px', textAlign: 'center',
+            border: '1px solid var(--border)',
+          }}>
+            <div style={{ fontSize: 14, marginBottom: 2 }}>{k.icon}</div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: k.color || 'var(--text-primary)' }}>{k.value}</div>
+            <div style={{ fontSize: 8, color: 'var(--text-tertiary)', marginTop: 1 }}>{k.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ═══ 지역별 현황 — 도넛 + 타일 (부동산 메인 스타일) ═══ */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>지역별 현황</div>
+
+        {/* 도넛 + 범례 */}
+        <div style={{
+          display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: 12, padding: '10px 12px', marginBottom: 6, overflow: 'hidden',
+        }}>
+          {/* 도넛 SVG — 연차별 분포 */}
+          <svg width={100} height={100} viewBox="0 0 100 100" style={{ flexShrink: 0 }}>
+            <circle cx={50} cy={50} r={38} fill="none" stroke="var(--border)" strokeWidth={14} opacity={0.4} />
+            {(() => {
+              const R = 38, CIRC = 2 * Math.PI * R;
+              const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
+              let offset = 0;
+              return ageDonut.map(a => {
+                const len = donutTotal > 0 ? (a.count / donutTotal) * CIRC : 0;
+                const arc = <circle key={a.group} cx={50} cy={50} r={R} fill="none" stroke={ageColors[a.group] || '#666'} strokeWidth={14} strokeDasharray={`${len} ${CIRC - len}`} strokeDashoffset={-offset} transform="rotate(-90 50 50)" />;
+                offset += len;
+                return arc;
+              });
+            })()}
+            <text x={50} y={46} textAnchor="middle" style={{ fontSize: 10, fontWeight: 600, fill: 'var(--text-secondary)' }}>{selectedRegion || '전체'}</text>
+            <text x={50} y={60} textAnchor="middle" style={{ fontSize: 13, fontWeight: 800, fill: 'var(--text-primary)' }}>{displayCount.toLocaleString()}</text>
+          </svg>
+
+          {/* 연차 범례 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 80 }}>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>연차별 분포 · 총 {donutTotal.toLocaleString()}개</div>
+            {(() => {
+              const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
+              return ageDonut.map(a => (
+                <div key={a.group} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: ageColors[a.group], flexShrink: 0 }} />
+                  <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{a.group}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>
+                    {a.count.toLocaleString()}<span style={{ fontSize: 10, fontWeight: 400, opacity: 0.5, marginLeft: 1 }}>개</span>
+                  </span>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+
+        {/* 지역 타일 그리드 — /apt 스타일 미니 바 */}
+        <div className="grid grid-cols-3 md:grid-cols-5" style={{ gap: 5 }}>
+          {regionData.map(r => {
+            const isActive = selectedRegion === r.region;
+            const maxCount = Math.max(...regionData.map(x => x.count));
+            const pct = maxCount > 0 ? (r.count / maxCount) * 100 : 0;
+            return (
+              <Link key={r.region} href={isActive ? '/apt/complex' : `/apt/complex?region=${encodeURIComponent(r.region)}`} style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '6px 8px', textDecoration: 'none',
+                background: isActive ? 'rgba(59,123,246,0.06)' : 'var(--bg-surface)',
+                border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
+                borderRadius: 7, width: '100%', fontFamily: 'inherit',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 2, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
+                    <div style={{ width: `${pct}%`, height: '100%', background: isActive ? 'var(--brand)' : 'var(--text-tertiary)', borderRadius: 2, transition: 'width 0.3s' }} />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ═══ 클라이언트 필터 + 카드 그리드 ═══ */}
       <ComplexClient
         complexes={topComplexes}
         ageGroups={AGE_GROUPS}
         regions={regionData.map(r => r.region)}
         initialRegion={selectedRegion || null}
+        ageChartData={ageChartData}
       />
     </article>
   );
