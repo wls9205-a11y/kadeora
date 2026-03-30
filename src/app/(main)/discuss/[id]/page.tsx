@@ -103,6 +103,7 @@ export default async function DiscussDetailPage({ params }: Props) {
     text: topic.description || `${topic.option_a} vs ${topic.option_b}`,
     url: `${SITE}/discuss/${id}`,
     datePublished: topic.created_at,
+    dateModified: topic.created_at,
     interactionStatistic: [
       { '@type': 'InteractionCounter', interactionType: 'https://schema.org/VoteAction', userInteractionCount: total },
       { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: topic.comment_count || 0 },

@@ -41,6 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'dg:plink': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`,
       'article:section': '주식',
       'article:tag': `${sector},섹터,주식,시세,등락률,시가총액`,
+      'article:published_time': '2026-01-15T00:00:00Z',
+      'article:modified_time': new Date().toISOString(),
       'naver:author': '카더라',
       'og:updated_time': new Date().toISOString(),
     },
