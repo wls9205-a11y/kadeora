@@ -13,6 +13,8 @@ interface StockResult { stocks: StockRow[]; success: number; failed: number; }
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+export const maxDuration = 300;
+
 async function getKisToken(appkey: string, appsecret: string): Promise<string | null> {
   try {
     const res = await fetch('https://openapi.koreainvestment.com:9443/oauth2/tokenP', {
