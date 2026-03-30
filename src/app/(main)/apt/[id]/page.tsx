@@ -161,7 +161,7 @@ async function fetchUnifiedData(slug: string) {
     region ? sb.from('apt_sites').select('price_min, price_max').eq('region', region).eq('is_active', true).gt('price_min', 0).gt('price_max', 0).limit(100) : Promise.resolve({ data: [] }),
     sigungu ? sb.from('apt_transactions').select('apt_name, deal_date, deal_amount, exclusive_area, floor').ilike('sigungu', `%${sigungu}%`).neq('apt_name', name).order('deal_date', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
     // 단지백과 — 같은 시군구 기존 아파트 시세 (시세비교/전세가율/평당가)
-    sigungu ? (sb as any).from('apt_complex_profiles').select('apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households').ilike('sigungu', `%${sigungu}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
+    sigungu ? (sb as any).from('apt_complex_profiles').select('apt_name, built_year, latest_sale_price, avg_sale_price_pyeong, latest_jeonse_price, jeonse_ratio, total_households, price_change_1y, sale_count_1y').ilike('sigungu', `%${sigungu}%`).gt('latest_sale_price', 0).order('latest_sale_price', { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
   ]);
 
   const trades = tradesR.status === 'fulfilled' ? (tradesR.value as { data: any })?.data || [] : [];
@@ -1038,6 +1038,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                 <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>매매가</th>
                 <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>평당가</th>
                 <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전세가율</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전년대비</th>
               </tr></thead>
               <tbody>
                 {complexProfiles.slice(0, 6).map((c: any, i: number) => (
@@ -1047,6 +1048,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                     <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>{fmtAmount(c.latest_sale_price)}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{c.avg_sale_price_pyeong ? `${c.avg_sale_price_pyeong.toLocaleString()}만` : '-'}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', color: Number(c.jeonse_ratio || 0) >= 80 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.jeonse_ratio ? `${c.jeonse_ratio}%` : '-'}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 600, color: Number(c.price_change_1y || 0) > 0 ? 'var(--accent-red)' : Number(c.price_change_1y || 0) < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{c.price_change_1y ? `${Number(c.price_change_1y) > 0 ? '+' : ''}${c.price_change_1y}%` : '-'}</td>
                   </tr>
                 ))}
                 {myPriceMax > 0 && (
@@ -1055,6 +1057,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                     <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>분양중</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 800, color: 'var(--brand)' }}>{fmtAmount(myPriceMax)}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</td>
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>-</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>-</td>
                   </tr>
                 )}
@@ -1099,6 +1102,19 @@ export default async function AptUnifiedPage({ params }: Props) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
             <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>출처: 국토교통부 실거래가 공개시스템</div>
             <SectionShareButton section="apt-trade-compare" label={`${sigungu || region} 최근 실거래 vs ${name} 분양가 비교`} pagePath={`/apt/${slug}`} />
+          </div>
+        </div>
+      )}
+
+      {/* 위치 정보 + 지도 링크 */}
+      {(site?.latitude && site?.longitude) && (
+        <div className="apt-card">
+          <h2 style={ct}>📍 위치</h2>
+          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 8px' }}>{site?.address || `${region} ${site?.sigungu || ''} ${site?.dong || ''}`}{site?.nearby_station ? ` · 최근접 역 ${site.nearby_station}` : ''}</p>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <a href={`https://map.kakao.com/?q=${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 8, background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>🗺️ 카카오맵</a>
+            <a href={`https://map.naver.com/v5/search/${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 8, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: 'var(--accent-green)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>🗺️ 네이버지도</a>
+            <a href={`https://www.google.com/maps?q=${site.latitude},${site.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 8, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: 'var(--accent-blue)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>🗺️ 구글맵</a>
           </div>
         </div>
       )}

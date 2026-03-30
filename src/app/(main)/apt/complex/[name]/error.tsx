@@ -1,22 +1,13 @@
 'use client';
-import { useEffect } from 'react';
-import * as Sentry from '@sentry/nextjs';
-import Link from 'next/link';
-
-export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
-  useEffect(() => { Sentry.captureException(error); }, [error]);
+export default function AptError({ reset }: { error: Error; reset: () => void }) {
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
-      <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 12 }}>😵</div>
-      <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>페이지를 불러오지 못했어요</h2>
-      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 20 }}>잠시 후 다시 시도해주세요</p>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '80px 16px', textAlign: 'center' }}>
+      <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>페이지를 불러올 수 없습니다</h1>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 24 }}>잠시 후 다시 시도해 주세요. 문제가 계속되면 새로고침해 주세요.</p>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-        <button onClick={reset} style={{ padding: '10px 20px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>
-          다시 시도
-        </button>
-        <Link href="/feed" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 600, textDecoration: 'none' }}>
-          홈으로
-        </Link>
+        <button onClick={() => reset()} style={{ padding: '10px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 'var(--fs-sm)' }}>다시 시도</button>
+        <a href="/apt" style={{ padding: '10px 20px', borderRadius: 8, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, fontSize: 'var(--fs-sm)', border: '1px solid var(--border)' }}>부동산 목록</a>
       </div>
     </div>
   );
