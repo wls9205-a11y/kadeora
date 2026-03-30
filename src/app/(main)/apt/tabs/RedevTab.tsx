@@ -1,4 +1,5 @@
 'use client';
+import SectionShareButton from '@/components/SectionShareButton';
 import type { RedevProject } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -149,7 +150,10 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 안내 */}
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준{freshDate ? ` · ${freshDate} 갱신` : ''} · 매주 월요일 자동 갱신</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준{freshDate ? ` · ${freshDate} 갱신` : ''} · 매주 월요일 자동 갱신</div>
+              <SectionShareButton section="apt-redev" label="재개발·재건축 현황 — 단계별 진행상황" pagePath="/apt?tab=redev" />
+            </div>
 
             {/* 결과 카운트 */}
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>

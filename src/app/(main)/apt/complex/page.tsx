@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
+import ShareButtons from '@/components/ShareButtons';
 import ComplexClient from './ComplexClient';
 
 export const revalidate = 3600;
@@ -150,6 +151,9 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
             )}
             <span style={{ fontSize: 12, color: 'rgba(232,237,245,0.6)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
           </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8, position: 'relative' }}>
+          <ShareButtons title={`${selectedRegion || '전국'} 단지백과 — ${displayCount.toLocaleString()}개 아파트 비교`} postId="complex" />
         </div>
       </div>
 

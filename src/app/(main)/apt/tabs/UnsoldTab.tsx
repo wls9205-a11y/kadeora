@@ -1,4 +1,5 @@
 'use client';
+import SectionShareButton from '@/components/SectionShareButton';
 import type { UnsoldApt } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { type SharedTabProps, generateAptSlug } from './apt-utils';
@@ -127,7 +128,10 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
             </div>
           </div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>국토교통부 통계누리 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>국토교통부 통계누리 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
+            <SectionShareButton section="apt-unsold" label="미분양 아파트 현황 — 지역별 미분양 세대수" pagePath="/apt?tab=unsold" />
+          </div>
         </div>
         );
       })()}

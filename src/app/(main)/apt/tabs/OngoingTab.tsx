@@ -1,4 +1,5 @@
 'use client';
+import SectionShareButton from '@/components/SectionShareButton';
 import type { OngoingApt, PremiumListing } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -317,7 +318,10 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             </div>
           ))}
         </div>
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>청약홈 + 국토교통부 미분양 통계 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
+          <SectionShareButton section="apt-ongoing" label="분양중 아파트 현황 — 분양가·시공사·미분양 한눈에" pagePath="/apt?tab=ongoing" />
+        </div>
       </div>
 
       {/* ③ 단계별 파이프라인 */}

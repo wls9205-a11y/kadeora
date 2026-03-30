@@ -1,4 +1,5 @@
 'use client';
+import SectionShareButton from '@/components/SectionShareButton';
 import type { AptTransaction } from '@/types/apt';
 import { useState, useEffect } from 'react';
 import { isNew, NewBadge, fmtAmount, type SharedTabProps } from './apt-utils';
@@ -243,9 +244,12 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         }}>더 보기 ({Math.min(page * 20, filtered.length)} / {filtered.length}건)</button>
       )}
 
-      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-        📊 국토교통부 실거래가 공개시스템 기준{freshDate ? ` · 최근 거래일 ${freshDate}` : ''} · 최근 1년
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: 0 }}>
+          📊 국토교통부 실거래가 공개시스템 기준{freshDate ? ` · 최근 거래일 ${freshDate}` : ''} · 최근 1년
+        </p>
+        <SectionShareButton section="apt-trade" label="아파트 실거래가 현황 — 지역별·단지별 시세" pagePath="/apt?tab=trade" />
+      </div>
 
       {/* 실거래 상세 모달 */}
       {selected && (() => {
