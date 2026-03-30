@@ -216,7 +216,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     stockTop10.push({
       name: s.name, symbol: s.symbol, market: s.market,
       price: Number(s.price), change_pct: Number(s.change_pct || 0),
-      market_cap: s.market_cap, sector: s.sector || '',
+      market_cap: s.market_cap ?? 0, sector: s.sector || '',
       week_ago: weekAgo ? Number(weekAgo) : null, week_pct: weekPct,
     });
   }
