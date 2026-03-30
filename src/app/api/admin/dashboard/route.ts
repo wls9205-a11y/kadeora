@@ -117,12 +117,16 @@ export async function GET(req: Request) {
       };
 
       // 데이터 커버리지 KPI
-      const [aptPriceR, aptCoordsR, stockDescR, aptCrawlLastR, aptImagesR] = await Promise.all([
+      const [aptPriceR, aptCoordsR, stockDescR, aptCrawlLastR, aptImagesR, aiSummaryAccurateR, stockRefreshR] = await Promise.all([
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('price_per_pyeong_avg', 'is', null),
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).not('latitude', 'is', null),
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).neq('description', '').not('description', 'is', null),
         sb.from('cron_logs').select('created_at, status, records_created, error_message').eq('cron_name', 'apt-crawl-pricing').order('created_at', { ascending: false }).limit(5),
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).not('images', 'is', null).neq('images', '[]'),
+        // ai_summary 정확도 (총·일반·특별 포함 = 정확)
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).like('ai_summary', '%총%세대%일반%특별%'),
+        // stock-refresh 최근 실행
+        sb.from('cron_logs').select('created_at, status').eq('cron_name', 'stock-refresh').order('created_at', { ascending: false }).limit(1).maybeSingle(),
       ]);
       // DB 크기 조회
       let dbSizeStr = '?';
@@ -135,6 +139,8 @@ export async function GET(req: Request) {
         aptCoords: { done: aptCoordsR.count ?? 0, total: sitesR.count ?? 0, pct: sitesR.count ? Math.round(((aptCoordsR.count ?? 0) / (sitesR.count ?? 1)) * 100) : 0 },
         aptImages: { done: aptImagesR.count ?? 0, total: sitesR.count ?? 0, pct: sitesR.count ? Math.round(((aptImagesR.count ?? 0) / (sitesR.count ?? 1)) * 100) : 0 },
         stockDesc: { done: stockDescR.count ?? 0, total: stockR.count ?? 0, pct: stockR.count ? Math.round(((stockDescR.count ?? 0) / (stockR.count ?? 1)) * 100) : 0 },
+        aiSummary: { done: aiSummaryAccurateR.count ?? 0, total: aptR.count ?? 0, pct: aptR.count ? Math.round(((aiSummaryAccurateR.count ?? 0) / (aptR.count ?? 1)) * 100) : 0 },
+        stockRefresh: stockRefreshR.data ? { lastAt: stockRefreshR.data.created_at, ok: stockRefreshR.data.status === 'success' } : null,
         aptCrawlRecent: (aptCrawlLastR.data || []).map((r: any) => ({ at: r.created_at, ok: r.status === 'success', created: r.records_created ?? 0, err: r.error_message?.slice(0, 60) })),
         dbSize: dbSizeStr,
       };
@@ -339,6 +345,8 @@ export async function GET(req: Request) {
           totalSitemap,
           sitemapPct: scoreStats?.length ? Math.round((totalSitemap / scoreStats.length) * 100) : 0,
           blogRewrittenPct,
+          indexedBlogs: premiumKpi.indexNow.done,
+          unindexedBlogs: premiumKpi.indexNow.pending,
         },
         blogProduction: {
           today: blogTodayR.count ?? 0,

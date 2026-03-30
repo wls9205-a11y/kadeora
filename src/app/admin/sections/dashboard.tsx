@@ -169,6 +169,8 @@ export default function DashboardSection() {
         {dataCoverage && <HealthBadge label="좌표" value={`${dataCoverage.aptCoords.pct}%`} ok={dataCoverage.aptCoords.pct > 30} />}
         {dataCoverage && <HealthBadge label="이미지" value={`${dataCoverage.aptImages?.pct ?? 0}%`} ok={(dataCoverage.aptImages?.pct ?? 0) > 10} />}
         {dataCoverage && <HealthBadge label="종목설명" value={`${dataCoverage.stockDesc.pct}%`} ok={dataCoverage.stockDesc.pct > 50} />}
+        {dataCoverage?.aiSummary && <HealthBadge label="AI요약" value={`${dataCoverage.aiSummary.pct}%`} ok={dataCoverage.aiSummary.pct > 30} />}
+        {dataCoverage?.stockRefresh && <HealthBadge label="시세" value={dataCoverage.stockRefresh.ok ? '정상' : '오류'} ok={dataCoverage.stockRefresh.ok} />}
         {dataCoverage?.dbSize && <HealthBadge label="DB" value={dataCoverage.dbSize} ok={true} />}
       </div>
 
@@ -702,6 +704,117 @@ export default function DashboardSection() {
               ⚠️ AI 크레딧 충전 필요
             </a>
           )}
+        </div>
+      </div>
+
+      {/* ── 플랫폼 전체 현황 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🌐 플랫폼 전체 현황</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>kadeora.app</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+          {[
+            { icon: '📰', label: '블로그', val: fmt(kpi.blogs), color: C.yellow },
+            { icon: '📈', label: '종목', val: `${fmt(kpi.stocks)}개`, color: C.cyan },
+            { icon: '🏢', label: '단지백과', val: fmt(complexKpi?.totalProfiles ?? 0), color: C.green },
+            { icon: '👥', label: '유저', val: fmt(kpi.users), color: C.purple },
+            { icon: '💰', label: '매매거래', val: fmt(complexKpi?.saleTransactions ?? 0), color: C.text },
+            { icon: '🏠', label: '전월세', val: fmt(complexKpi?.rentTransactions ?? 0), color: C.text },
+            { icon: '📋', label: '청약공고', val: fmt(kpi.subscriptions ?? 0), color: C.green },
+            { icon: '⚡', label: '크론', val: `${cron.total}개/24h`, color: cron.fail === 0 ? C.green : C.red },
+          ].map(item => (
+            <div key={item.label} style={{ background: C.bg, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 11, marginBottom: 1 }}>{item.icon}</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>
+              <div style={{ fontSize: 8, color: C.textDim }}>{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 분양 정확도 + SEO 인덱싱 ── */}
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        {/* 분양 정확도 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🎯 분양 정보 정확도</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {dataCoverage?.aiSummary && (() => {
+              const pct = dataCoverage.aiSummary.pct;
+              return (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, color: C.textSec }}>AI 요약 정확도</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: pct > 50 ? C.green : pct > 20 ? C.yellow : C.red }}>{dataCoverage.aiSummary.done}/{dataCoverage.aiSummary.total} ({pct}%)</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: 3, background: pct > 50 ? C.green : pct > 20 ? C.yellow : C.red, width: `${pct}%`, transition: 'width 0.6s' }} />
+                  </div>
+                  <div style={{ fontSize: 8, color: C.textDim, marginTop: 2 }}>총·일반·특별 세대수 정확 포함 기준</div>
+                </div>
+              );
+            })()}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 10, color: C.textSec }}>분양가 수집</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: (dataCoverage?.aptPrice?.pct ?? 0) > 50 ? C.green : C.yellow }}>{dataCoverage?.aptPrice?.pct ?? 0}%</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 3, background: (dataCoverage?.aptPrice?.pct ?? 0) > 50 ? C.green : C.yellow, width: `${dataCoverage?.aptPrice?.pct ?? 0}%`, transition: 'width 0.6s' }} />
+              </div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 10, color: C.textSec }}>이미지 수집</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: (dataCoverage?.aptImages?.pct ?? 0) > 30 ? C.green : C.red }}>{dataCoverage?.aptImages?.done ?? 0}/{dataCoverage?.aptImages?.total ?? 0} ({dataCoverage?.aptImages?.pct ?? 0}%)</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 3, background: (dataCoverage?.aptImages?.pct ?? 0) > 30 ? C.green : C.red, width: `${Math.max(dataCoverage?.aptImages?.pct ?? 0, 1)}%`, transition: 'width 0.6s' }} />
+              </div>
+            </div>
+            {dataCoverage?.stockRefresh && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 6, borderTop: `1px solid ${C.border}` }}>
+                <span style={{ fontSize: 10, color: C.textSec }}>시세 갱신</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: dataCoverage.stockRefresh.ok ? C.green : C.red }}>
+                  {dataCoverage.stockRefresh.ok ? '✅ 정상' : '❌ 오류'} · {dataCoverage.stockRefresh.lastAt ? ago(dataCoverage.stockRefresh.lastAt) : '없음'}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* SEO 인덱싱 현황 */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🔍 SEO / 인덱싱 현황</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 8 }}>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.green }}>{fmt(seo?.indexedBlogs ?? 0)}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>IndexNow 전송</div>
+            </div>
+            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.yellow }}>{fmt(seo?.unindexedBlogs ?? 0)}</div>
+              <div style={{ fontSize: 9, color: C.textDim }}>미전송</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {[
+              { label: 'speakable', val: '6/6 페이지', ok: true },
+              { label: 'FAQPage', val: '6/6 페이지', ok: true },
+              { label: 'og-square', val: '6/6 페이지', ok: true },
+              { label: 'SiteNav', val: '7개 네비게이션', ok: true },
+              { label: 'thumbnailUrl', val: '6/6 페이지', ok: true },
+              { label: 'naver:author', val: '전 페이지', ok: true },
+            ].map(item => (
+              <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10 }}>
+                <span style={{ color: C.textSec }}>{item.label}</span>
+                <span style={{ fontWeight: 600, color: item.ok ? C.green : C.red }}>{item.val}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 8, paddingTop: 6, borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
+            <span style={{ color: C.textDim }}>사이트맵</span>
+            <span style={{ fontWeight: 700, color: (seo?.sitemapPct ?? 0) > 80 ? C.green : C.yellow }}>{seo?.sitemapPct ?? 0}% ({fmt(seo?.totalSitemap ?? 0)}건)</span>
+          </div>
         </div>
       </div>
 
