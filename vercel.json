@@ -195,7 +195,7 @@
     },
     {
       "path": "/api/stock-refresh",
-      "schedule": "*/30 0-7 * * 1-5"
+      "schedule": "*/5 0-7 * * 1-5"
     },
     {
       "path": "/api/stock-refresh",
