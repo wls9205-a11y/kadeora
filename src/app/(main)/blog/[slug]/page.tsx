@@ -444,66 +444,67 @@ export default async function BlogDetailPage({ params }: Props) {
       </nav>
 
       <article style={{ paddingBottom: 40 }}>
-        {/* 커버 이미지 */}
+        {/* ImageGallery JSON-LD (유지 — 포털 이미지 탭) */}
         {post.cover_image && (() => {
           const ogSquare = `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}&author=${encodeURIComponent(post.author_name || '카더라')}`;
           return (
-            <>
-              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-                '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${post.title} 이미지`,
-                image: [
-                  { '@type': 'ImageObject', url: post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image, name: post.image_alt || post.title, width: 1200, height: 630, position: 1 },
-                  { '@type': 'ImageObject', url: ogSquare, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: 2 },
-                ],
-              })}} />
-              <div style={{ marginBottom: 16, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={post.cover_image} alt={post.image_alt || `${post.title} — 카더라 블로그`} width={1200} height={630} style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block', borderRadius: 10 }} loading="eager" />
-              </div>
-            </>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${post.title} 이미지`,
+              image: [
+                { '@type': 'ImageObject', url: post.cover_image.startsWith('/') ? `${SITE}${post.cover_image}` : post.cover_image, name: post.image_alt || post.title, width: 1200, height: 630, position: 1 },
+                { '@type': 'ImageObject', url: ogSquare, name: `${post.title} — 카더라 블로그`, width: 630, height: 630, position: 2 },
+              ],
+            })}} />
           );
         })()}
 
-        {/* 카테고리 뱃지 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-          <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 4, background: `${catColor}15`, color: catColor, letterSpacing: '0.3px' }}>
-            {({ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' } as Record<string, string>)[post.category] || '📝'} {({ stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
-          </span>
-          {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
-        </div>
+        {/* 히어로 — 카테고리 + 제목 + 저자 통합 */}
+        <div style={{ borderRadius: 16, padding: '22px 20px 18px', marginBottom: 14, background: `linear-gradient(160deg, var(--bg-surface) 0%, ${catColor}06 50%, var(--bg-surface) 100%)`, border: `1px solid ${catColor}15`, position: 'relative', overflow: 'hidden' }}>
+          {/* 데코 원형 */}
+          <div style={{ position: 'absolute', top: -50, right: -40, width: 160, height: 160, borderRadius: '50%', background: `${catColor}04`, pointerEvents: 'none' }} />
+          <div style={{ position: 'relative' }}>
+            {/* 카테고리 + 시리즈 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 6, background: `${catColor}18`, color: catColor, letterSpacing: '0.3px' }}>
+                {({ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' } as Record<string, string>)[post.category] || '📝'} {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활 정보' } as Record<string, string>)[post.category] || post.category}
+              </span>
+              {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
+            </div>
 
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.35, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
+            {/* 제목 */}
+            <h1 style={{ fontSize: 21, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.4, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
 
-        {/* 저자 + 메타 — 카드 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, padding: '10px 14px', borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${catColor}30, ${catColor}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, border: `1px solid ${catColor}20` }}>
-            {{ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' }[post.category] || '📝'}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{post.author_name || '카더라 데이터팀'}</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
-              <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
-              <span>·</span>
-              <span>👀 {post.view_count ?? 0}</span>
-              <span>·</span>
-              <span>📖 {readingTimeMin}분</span>
-              {post.rewritten_at && (
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 3,
-                  padding: '1px 6px', borderRadius: 4,
-                  background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)',
-                  fontSize: 10, fontWeight: 600,
-                }}>
-                  🔄 업데이트
-                </span>
-              )}
+            {/* 저자 바 — 히어로 안 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${catColor}25, var(--brand, #3B7BF6)15)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 13, fontWeight: 900, color: catColor }}>K</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{post.author_name || '카더라 데이터팀'}</span>
+                  <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 4, background: `${catColor}12`, color: catColor, fontWeight: 700 }}>전문가</span>
+                </div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
+                  <time dateTime={post.published_at || post.created_at || new Date().toISOString()}>{new Date(post.published_at || post.created_at || Date.now()).toLocaleDateString('ko-KR')}</time>
+                  <span>·</span>
+                  <span>👀 {post.view_count ?? 0}</span>
+                  <span>·</span>
+                  <span>📖 {readingTimeMin}분</span>
+                  {post.rewritten_at && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 6px', borderRadius: 4, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)', fontSize: 10, fontWeight: 600 }}>
+                      🔄 업데이트
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* 태그 */}
         {(post.tags ?? []).length > 0 && (
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 14 }}>
-            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>#{t}</Link>)}
+            {(post.tags ?? []).map((t: string) => <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>#{t}</Link>)}
           </div>
         )}
 
