@@ -29,6 +29,7 @@ interface Props {
   onRegionClick?: (region: string) => void;
   onTabChange?: (tab: string) => void;
   activeRegion?: string;
+  activeTab?: string;
   redevRedevCount?: number;
   redevRebuildCount?: number;
   shareButton?: React.ReactNode;
@@ -52,7 +53,7 @@ const LABELS: Record<string, string> = {
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, onTabChange, activeRegion, redevRedevCount = 0, redevRebuildCount = 0, shareButton }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, onTabChange, activeRegion, activeTab, redevRedevCount = 0, redevRebuildCount = 0, shareButton }: Props) {
   const router = useRouter();
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
@@ -171,8 +172,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
             const ongoingUnits = (ongoingApts as any[]).reduce((s: number, a: any) => s + (Number(a.tot_supply_hshld_co) || 0), 0);
             const maxVal = Math.max(cats.sub, cats.ongoing, cats.unsold, cats.redev, cats.trade, 34495, 5522);
 
-            const cardStyle = (color: string) => ({
+            const cardStyle = (color: string, tabKey?: string) => ({
               padding: '5px 5px', borderLeft: `2px solid ${color}`, borderRadius: 0 as const, cursor: 'pointer' as const, transition: 'background 0.12s',
+              ...(activeTab && activeTab === tabKey ? { background: 'var(--bg-hover)', borderLeftWidth: 3 } : {}),
             });
             const barStyle = (pct: number, color: string) => (
               <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 3, overflow: 'hidden' }}>
@@ -184,7 +186,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
             return <>
               {/* 청약정보 */}
-              <div style={cardStyle(COLORS.sub)} onClick={() => onTabChange?.('sub')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={cardStyle(COLORS.sub, 'sub')} onClick={() => onTabChange?.('sub')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.sub.toLocaleString()}</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
@@ -198,7 +200,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 </div>
               </div>
               {/* 분양중 */}
-              <div style={cardStyle(COLORS.ongoing)} onClick={() => onTabChange?.('ongoing')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={cardStyle(COLORS.ongoing, 'ongoing')} onClick={() => onTabChange?.('ongoing')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.ongoing.toLocaleString()}</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
@@ -208,7 +210,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: COLORS.ongoing }}>{ongoingUnits > 0 ? `${ongoingUnits.toLocaleString()}세대` : '입주전 현장'}</span></div>
               </div>
               {/* 미분양 */}
-              <div style={cardStyle(COLORS.unsold)} onClick={() => onTabChange?.('unsold')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={cardStyle(COLORS.unsold, 'unsold')} onClick={() => onTabChange?.('unsold')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.unsold.toLocaleString()}</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
@@ -218,7 +220,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 {unsoldUnits > 0 && <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(226,75,74,0.1)', color: '#E24B4A', fontWeight: 500 }}>{unsoldUnits.toLocaleString()}세대</span></div>}
               </div>
               {/* 재개발·재건축 */}
-              <div style={cardStyle(COLORS.redev)} onClick={() => onTabChange?.('redev')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={cardStyle(COLORS.redev, 'redev')} onClick={() => onTabChange?.('redev')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.redev.toLocaleString()}</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
@@ -231,7 +233,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 </div>
               </div>
               {/* 실거래(2026) */}
-              <div style={cardStyle(COLORS.trade)} onClick={() => onTabChange?.('trade')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+              <div style={cardStyle(COLORS.trade, 'trade')} onClick={() => onTabChange?.('trade')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.trade.toLocaleString()}</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
@@ -281,12 +283,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         </div>
       </div>
 
-      {/* Compact tile grid — 모바일 3열 / 데스크탑 5열 */}
-      <div className="grid grid-cols-4 md:grid-cols-5" style={{
-        gap: 5,
-        maxWidth: '100%',
-        overflow: 'hidden',
-      }}>
+      {/* 지역별 — 깔끔 5열 그리드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 3, marginBottom: 6 }}>
         {regions.map((r: RegionData) => {
           const isActive = activeRegion === r.name;
           return (
@@ -294,32 +292,19 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               key={r.name}
               onClick={() => onRegionClick?.(isActive ? '전체' : r.name)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                padding: '5px 6px',
-                background: isActive ? 'var(--brand-bg, rgba(37,99,235,0.06))' : 'var(--bg-surface)',
-                border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
-                borderRadius: 7,
-                cursor: 'pointer',
-                textAlign: 'left',
-                fontFamily: 'inherit',
-                width: '100%',
-                transition: 'border-color 0.15s',
+                display: 'flex', alignItems: 'center', gap: 0, flexDirection: 'column',
+                padding: '5px 4px', background: isActive ? 'rgba(59,123,246,0.06)' : 'transparent',
+                border: isActive ? '1px solid rgba(59,123,246,0.25)' : '0.5px solid var(--border)',
+                borderRadius: 6, cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit', width: '100%',
+                transition: 'border-color 0.12s, background 0.12s',
               }}
             >
-              {/* Name + mini bar */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
-                  <span style={{ fontSize: 12, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>
-                    {r.name}
-                  </span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
-                    {r.total.toLocaleString()}
-                  </span>
-                </div>
-                {/* Single progress bar */}
-                <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 2, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.round((r.total / (regions[0]?.total || 1)) * 100)}%`, background: isActive ? 'var(--brand)' : 'var(--brand-dim, rgba(59,123,246,0.4))', borderRadius: 2 }} />
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'baseline', padding: '0 2px' }}>
+                <span style={{ fontSize: 12, fontWeight: isActive ? 700 : 500, color: isActive ? 'var(--brand)' : 'var(--text-primary)' }}>{r.name}</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>{r.total.toLocaleString()}</span>
+              </div>
+              <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 3, overflow: 'hidden', width: '100%' }}>
+                <div style={{ height: '100%', width: `${Math.max(Math.round((r.total / (regions[0]?.total || 1)) * 100), 2)}%`, background: isActive ? 'var(--brand)' : 'rgba(59,123,246,0.25)', borderRadius: 1 }} />
               </div>
             </button>
           );

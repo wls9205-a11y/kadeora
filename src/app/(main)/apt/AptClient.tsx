@@ -129,9 +129,46 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
-          <Link href="/apt/search" className="kd-action-link">🔍 검색</Link>
+          <SectionShareButton section="apt-main" label="부동산 청약·분양·실거래 정보 한눈에!" pagePath="/apt" />
         </div>
       </div>
+
+      {/* 통합 검색창 (상단 배치) */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+        <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)} style={{
+          padding: '7px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+          background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
+        }}>
+          <option value="전체">전국</option>
+          {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
+          <input
+            value={globalSearch}
+            onChange={e => setGlobalSearch(e.target.value)}
+            placeholder="단지명, 시공사, 지역 통합 검색..."
+            aria-label="부동산 통합 검색"
+            className="kd-search-input"
+            style={{ paddingLeft: 34, width: '100%', boxSizing: 'border-box' }}
+          />
+          {globalSearch && (
+            <button onClick={() => setGlobalSearch('')} style={{
+              position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+              background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: '50%',
+              width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, lineHeight: 1,
+            }} aria-label="검색어 지우기">✕</button>
+          )}
+        </div>
+      </div>
+      {globalSearch && (
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8, marginTop: -6 }}>
+          🔍 &quot;{globalSearch}&quot; — 현재 탭에서 필터링 중
+        </div>
+      )}
 
       {/* 지역별 스택바 현황 */}
       <RegionStackedBar
@@ -151,40 +188,11 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         onRegionClick={setSelectedRegion}
         onTabChange={(tab: string) => handleTabChange(tab as 'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade')}
         activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
+        activeTab={activeTab}
         redevRedevCount={redevRedevCount}
         redevRebuildCount={redevRebuildCount}
         shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
       />
-
-      {/* 탭 세그먼트 — KPI 숫자 인라인 표시 */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
-        {[
-          { k: 'sub' as const,     icon: '📅', label: '청약',   badge: `${openCount}·${upcomingCount}`,     badgeColor: 'var(--accent-green)' },
-          { k: 'ongoing' as const, icon: '🏢', label: '분양중', badge: ongoingApts.length > 0 ? String(ongoingApts.length) : '',         badgeColor: 'var(--accent-purple)' },
-          { k: 'unsold' as const,  icon: '🏚️', label: '미분양', badge: unsoldTotal > 0 ? `${Math.round(unsoldTotal/1000)}k` : '',        badgeColor: 'var(--accent-red)' },
-          { k: 'redev' as const,   icon: '🏗️', label: '재개발', badge: redevCount > 0 ? String(redevCount) : '',                         badgeColor: 'var(--accent-orange)' },
-          { k: 'trade' as const,   icon: '💰', label: '실거래', badge: tradeCount > 0 ? tradeCount.toLocaleString() : '',          badgeColor: 'var(--accent-cyan)' },
-        ].map(({ k, icon, label, badge, badgeColor }) => {
-          const isActive = activeTab === k;
-          return (
-            <button key={k} onClick={() => handleTabChange(k)} aria-pressed={isActive} style={{
-              flex: '1 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              padding: '8px 6px', borderRadius: 7, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-              background: isActive ? 'var(--brand)' : 'transparent',
-              color: isActive ? '#fff' : 'var(--text-tertiary)',
-              transition: 'all 0.15s',
-              minWidth: 0,
-            }}>
-              <span style={{ fontSize: 12, lineHeight: 1 }}>{icon} <span style={{ fontWeight: 700, fontSize: 12 }}>{label}</span></span>
-              {badge && (
-                <span style={{ fontSize: 10, marginTop: 2, opacity: isActive ? 0.85 : 0.7, color: isActive ? '#fff' : badgeColor, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                  {badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
 
       {/* 지역 필터 활성 배지 */}
       {selectedRegion !== '전체' && (
@@ -201,42 +209,6 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         </div>
       )}
 
-      {/* 통합 검색창 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-        <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)} style={{
-          padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-          background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
-        }}>
-          <option value="전체">전국</option>
-          {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
-          <input
-            value={globalSearch}
-            onChange={e => setGlobalSearch(e.target.value)}
-            placeholder="단지명, 시공사 검색..."
-            aria-label="부동산 검색"
-            className="kd-search-input"
-            style={{ paddingLeft: 34, width: '100%', boxSizing: 'border-box' }}
-          />
-          {globalSearch && (
-            <button onClick={() => setGlobalSearch('')} style={{
-              position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-              background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: '50%',
-              width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 11, padding: 0, lineHeight: 1,
-            }} aria-label="검색어 지우기">✕</button>
-          )}
-        </div>
-      </div>
-      {globalSearch && (
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8, marginTop: -6 }}>
-          🔍 &quot;{globalSearch}&quot; — 현재 탭에서 필터링 중 · 다른 탭에서도 동일하게 적용됩니다
-        </div>
-      )}
       {/* ━━━ 청약 일정 탭 ━━━ */}
       {activeTab === 'sub' && (
         <SubscriptionTab
