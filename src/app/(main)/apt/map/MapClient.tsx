@@ -221,21 +221,13 @@ export default function MapClient() {
 
       {/* 지도 */}
       <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
-        <div ref={mapRef} style={{ width: '100%', height: 'min(500px, 60vh)', background: 'var(--bg-hover)' }}>
+        <div ref={mapRef} style={{ width: '100%', height: sdkError ? 'auto' : 'min(500px, 60vh)', background: 'var(--bg-hover)' }}>
           {sdkError ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', fontSize: 14, gap: 8, padding: 20 }}>
-              <span style={{ fontSize: 32 }}>🗺️</span>
-              <span>지도를 불러올 수 없습니다</span>
-              <span style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>카카오 지도 SDK 로딩 실패. 아래 버튼으로 직접 검색하세요.</span>
-              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                <a href="https://map.kakao.com/?q=아파트+청약" target="_blank" rel="noopener noreferrer" style={{
-                  padding: '8px 16px', borderRadius: 8, background: '#FEE500', color: '#191919',
-                  border: 'none', fontSize: 13, fontWeight: 700, textDecoration: 'none',
-                }}>카카오맵에서 보기</a>
-                <button onClick={() => window.location.reload()} style={{
-                  padding: '8px 16px', borderRadius: 8, background: 'var(--brand)', color: '#fff',
-                  border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                }}>새로고침</button>
+            <div style={{ padding: '20px 16px', textAlign: 'center' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 10 }}>카카오 지도 SDK를 불러올 수 없습니다 · 아래 목록에서 지역별 현황을 확인하세요</div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 8, background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>카카오맵에서 보기</a>
+                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 8, background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>새로고침</button>
               </div>
             </div>
           ) : !sdkReady ? (
