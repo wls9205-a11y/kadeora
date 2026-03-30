@@ -32,7 +32,7 @@ function getFriday(): Date {
 }
 
 export default function WeeklyPrediction() {
-  const { user } = useAuth();
+  const { userId } = useAuth();
   const [data, setData] = useState<PredictionData | null>(null);
   const [inputVal, setInputVal] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -59,9 +59,9 @@ export default function WeeklyPrediction() {
 
       // 내 예측
       let myPred: number | null = null;
-      if (user) {
+      if (userId) {
         const { data: myRow } = await (sb as any).from('weekly_predictions')
-          .select('prediction').eq('user_id', user.id).eq('week_start', weekStart).single();
+          .select('prediction').eq('user_id', userId).eq('week_start', weekStart).single();
         if (myRow) myPred = Number(myRow.prediction);
       }
 
@@ -89,23 +89,23 @@ export default function WeeklyPrediction() {
       if (myPred) setSubmitted(true);
     };
     load();
-  }, [user]);
+  }, [userId]);
 
   const handleSubmit = async () => {
-    if (!user || !inputVal || submitting) return;
+    if (!userId || !inputVal || submitting) return;
     const val = Number(inputVal);
     if (isNaN(val) || val < 1000 || val > 5000) return;
     setSubmitting(true);
     const sb = createSupabaseBrowser();
     await (sb as any).from('weekly_predictions').upsert({
-      user_id: user.id,
+      user_id: userId,
       week_start: getMonday(),
       prediction: val,
     }, { onConflict: 'user_id,week_start' });
 
     // 포인트 지급 (첫 참여 시)
     if (!submitted) {
-      try { await sb.rpc('award_points', { p_user_id: user.id, p_amount: 10, p_reason: '코스피 예측 참여' }); } catch {}
+      try { await sb.rpc('award_points', { p_user_id: userId, p_amount: 10, p_reason: '코스피 예측 참여' }); } catch {}
     }
     setSubmitted(true);
     setSubmitting(false);
@@ -148,7 +148,7 @@ export default function WeeklyPrediction() {
           <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>내 예측: <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{data.myPrediction.toLocaleString()}</span></span>
           <span style={{ fontSize: 11, color: 'var(--accent-green)' }}>✓ 참여 완료 +10P</span>
         </div>
-      ) : user ? (
+      ) : userId ? (
         <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
           <input type="number" placeholder="금요일 종가 예측"
             value={inputVal} onChange={e => setInputVal(e.target.value)}

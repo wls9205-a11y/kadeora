@@ -13,17 +13,17 @@ interface WatchItem {
 }
 
 export default function MiniWatchlist() {
-  const { user } = useAuth();
+  const { userId } = useAuth();
   const [items, setItems] = useState<WatchItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
+    if (!userId) { setLoading(false); return; }
     const load = async () => {
       const sb = createSupabaseBrowser();
       const { data: watchlist } = await sb.from('user_watchlist')
         .select('item_type, item_id, item_name')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('display_order')
         .limit(5);
 
@@ -61,10 +61,10 @@ export default function MiniWatchlist() {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [userId]);
 
   // 비로그인 또는 관심 종목 없음 → CTA
-  if (!user) {
+  if (!userId) {
     return (
       <div style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>⭐ 관심 종목 시세를 피드에서 바로 확인하세요</span>
