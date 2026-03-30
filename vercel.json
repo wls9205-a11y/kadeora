@@ -9,6 +9,9 @@
     "src/app/api/cron/sync-apt-sites/*.ts": {
       "maxDuration": 180
     },
+    "src/app/api/cron/apt-price-sync/*.ts": {
+      "maxDuration": 120
+    },
     "src/app/api/stock-refresh/*.ts": {
       "maxDuration": 300
     },
