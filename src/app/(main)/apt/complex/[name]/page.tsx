@@ -106,42 +106,32 @@ export default async function ComplexDetailPage({ params }: Props) {
   const dong = tradeList[0].dong || '';
   const sigungu = tradeList[0].sigungu || '';
 
-  // 관련 블로그
-  let relatedBlogs: Record<string, any>[] = [];
-  try {
-    const searchTerm = sanitizeSearchQuery(decoded.length > 4 ? decoded.slice(0, 4) : decoded, 20);
-    const { data: rb } = await sb.from('blog_posts').select('slug,title,view_count,published_at')
+  // 관련 블로그 + 전월세 + 사이트이미지 — 병렬 조회
+  const searchTerm = sanitizeSearchQuery(decoded.length > 4 ? decoded.slice(0, 4) : decoded, 20);
+  const [blogsR, rentR, siteR] = await Promise.allSettled([
+    sb.from('blog_posts').select('slug,title,view_count,published_at')
       .eq('is_published', true).or(`title.ilike.%${searchTerm}%,title.ilike.%${region.slice(0,2)} 부동산%`)
-      .order('view_count', { ascending: false }).limit(3) as { data: Record<string, any>[] | null };
-    relatedBlogs = rb || [];
-  } catch {}
-
-  // 전월세 데이터
-  let rentTrades: Record<string, any>[] = [];
-  try {
-    const { data: rt } = await (sb as any).from('apt_rent_transactions')
+      .order('view_count', { ascending: false }).limit(3),
+    (sb as any).from('apt_rent_transactions')
       .select('rent_type, deposit, monthly_rent, deal_date, exclusive_area, floor')
       .eq('apt_name', decoded)
       .order('deal_date', { ascending: false })
-      .limit(100);
-    rentTrades = rt || [];
-  } catch {}
+      .limit(100),
+    sb.from('apt_sites').select('slug, images')
+      .ilike('name', `%${decoded}%`).eq('is_active', true).limit(1).maybeSingle(),
+  ]);
 
-  // apt_sites 이미지 (단지 사진)
+  const relatedBlogs: Record<string, any>[] = blogsR.status === 'fulfilled' ? (blogsR.value?.data || []) : [];
+  const rentTrades: Record<string, any>[] = rentR.status === 'fulfilled' ? (rentR.value?.data || []) : [];
   let siteImages: string[] = [];
   let siteSlug: string | null = null;
-  try {
-    const { data: site } = await sb.from('apt_sites')
-      .select('slug, images')
-      .ilike('name', `%${decoded}%`)
-      .eq('is_active', true)
-      .limit(1)
-      .maybeSingle();
+  if (siteR.status === 'fulfilled' && siteR.value?.data) {
+    const site = siteR.value.data;
     if (site?.images && Array.isArray(site.images)) {
       siteImages = site.images.filter((img: any) => typeof img === 'string' || img?.url).map((img: any) => typeof img === 'string' ? img : img.url).slice(0, 6);
     }
     if (site?.slug) siteSlug = site.slug;
-  } catch {}
+  }
 
   // 통계 계산
   const amounts = tradeList.filter(t => t.deal_amount > 0).map(t => t.deal_amount);

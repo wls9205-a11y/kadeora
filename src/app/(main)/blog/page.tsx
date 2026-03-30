@@ -108,20 +108,25 @@ export default async function BlogPage({ searchParams }: Props) {
   const perPage = 20;
   const sb = await createSupabaseServer();
 
-  // 카테고리별 건수 (단일 RPC로 5개 쿼리 → 1개)
-  const { data: catCountsRaw } = await sb.rpc('blog_category_counts');
+  // 카테고리 건수 + 인기글 + 인기태그 — 병렬 조회
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const [catCountsR, popularR, tagsR] = await Promise.allSettled([
+    sb.rpc('blog_category_counts'),
+    sb.from('blog_posts')
+      .select('id, slug, title, category, view_count, cover_image')
+      .eq('is_published', true)
+      .gte('created_at', thirtyDaysAgo)
+      .order('view_count', { ascending: false })
+      .limit(5),
+    pageNum === 1 && !q ? sb.rpc('blog_popular_tags', { limit_count: 20 }) : Promise.resolve({ data: [] }),
+  ]);
+
+  const catCountsRaw = catCountsR.status === 'fulfilled' ? catCountsR.value?.data : [];
   const countMap: Record<string, number> = { all: 0 };
   (catCountsRaw || []).forEach((c: any) => { countMap[c.category] = Number(c.cnt); countMap.all += Number(c.cnt); });
   const totalCount = countMap.all;
 
-  // 인기글 (최근 30일 내 조회수 TOP 5)
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-  const { data: popularPosts } = await sb.from('blog_posts')
-    .select('id, slug, title, category, view_count, cover_image')
-    .eq('is_published', true)
-    .gte('created_at', thirtyDaysAgo)
-    .order('view_count', { ascending: false })
-    .limit(5);
+  const popularPosts = popularR.status === 'fulfilled' ? popularR.value?.data : [];
 
   // 오늘의 추천 (카테고리별 최신 1편씩)
   let todayPicks: any[] = [];
@@ -140,14 +145,8 @@ export default async function BlogPage({ searchParams }: Props) {
     } catch {}
   }
 
-  // 인기 태그
-  let popularTags: { tag: string; cnt: number }[] = [];
-  if (pageNum === 1 && !q) {
-    try {
-      const { data: tagData } = await sb.rpc('blog_popular_tags', { limit_count: 20 });
-      popularTags = tagData || [];
-    } catch {}
-  }
+  // 인기 태그 (위에서 병렬 조회됨)
+  const popularTags: { tag: string; cnt: number }[] = tagsR.status === 'fulfilled' ? ((tagsR.value as any)?.data || []) : [];
 
   // 메인 쿼리
   const now = new Date().toISOString();
