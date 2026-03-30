@@ -78,7 +78,7 @@ export default function PrivacyPage() {
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>5. 쿠키 사용</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>7. 쿠키 사용</h2>
         <ul style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 20 }}>
           <li>사용 목적: 로그인 유지 및 이용자 설정 저장</li>
           <li>쿠키 거부 방법: 브라우저 설정에서 쿠키를 거부할 수 있습니다. 다만, 거부 시 일부 서비스 이용이 제한될 수 있습니다.</li>
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>6. 이용자 권리</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>8. 이용자 권리</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           이용자는 언제든지 자신의 개인정보에 대해 열람, 정정, 삭제, 처리 정지를 요구할 수 있습니다.
           요청은 아래 개인정보 삭제 요청 이메일을 통해 접수할 수 있으며, 지체 없이 조치하겠습니다.
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>7. 개인정보 삭제 요청</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>9. 개인정보 삭제 요청</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           개인정보 삭제를 원하시는 경우 아래 이메일로 요청해 주세요.{' '}
           <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)' }}>kadeora.app@gmail.com</a>
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>8. 개인정보보호 책임자</h2>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>10. 개인정보보호 책임자</h2>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           이메일:{' '}
           <a href="mailto:kadeora.app@gmail.com" style={{ color: 'var(--brand)' }}>kadeora.app@gmail.com</a>
