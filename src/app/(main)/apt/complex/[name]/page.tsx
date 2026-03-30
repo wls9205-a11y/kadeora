@@ -126,6 +126,22 @@ export default async function ComplexDetailPage({ params }: Props) {
     rentTrades = rt || [];
   } catch {}
 
+  // apt_sites 이미지 (단지 사진)
+  let siteImages: string[] = [];
+  let siteSlug: string | null = null;
+  try {
+    const { data: site } = await sb.from('apt_sites')
+      .select('slug, images')
+      .ilike('name', `%${decoded}%`)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+    if (site?.images && Array.isArray(site.images)) {
+      siteImages = site.images.filter((img: any) => typeof img === 'string' || img?.url).map((img: any) => typeof img === 'string' ? img : img.url).slice(0, 6);
+    }
+    if (site?.slug) siteSlug = site.slug;
+  } catch {}
+
   // 통계 계산
   const amounts = trades.filter(t => t.deal_amount > 0).map(t => t.deal_amount);
   const avgPrice = amounts.length ? Math.round(amounts.reduce((s, a) => s + a, 0) / amounts.length) : 0;
@@ -222,6 +238,23 @@ export default async function ComplexDetailPage({ params }: Props) {
         ],
       })}} />
 
+      {/* JSON-LD: ImageGallery (이미지 있을 때) */}
+      {siteImages.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org', '@type': 'ImageGallery',
+          name: `${decoded} 아파트 이미지`,
+          description: `${decoded} 아파트 조감도, 투시도, 배치도 등 이미지`,
+          url: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`,
+          image: siteImages.map(url => ({
+            '@type': 'ImageObject',
+            url: url.startsWith('http') ? url : `https:${url}`,
+            name: `${decoded} 아파트`,
+            description: `${region} ${sigungu} ${decoded} 아파트`,
+          })),
+          numberOfItems: siteImages.length,
+        })}} />
+      )}
+
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
@@ -233,6 +266,22 @@ export default async function ComplexDetailPage({ params }: Props) {
         <span>›</span>
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{decoded}</span>
       </nav>
+
+      {/* 이미지 갤러리 (apt_sites 이미지 있을 때) */}
+      {siteImages.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: siteImages.length >= 3 ? '2fr 1fr 1fr' : siteImages.length === 2 ? '1fr 1fr' : '1fr', gap: 4, marginBottom: 12, borderRadius: 12, overflow: 'hidden', maxHeight: 200 }}>
+          {siteImages.slice(0, 3).map((url, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={i} src={url.startsWith('http') ? url : `https:${url}`}
+              alt={`${decoded} 아파트 ${i === 0 ? '조감도' : i === 1 ? '투시도' : '배치도'}`}
+              style={{ width: '100%', height: i === 0 && siteImages.length >= 3 ? 200 : 98, objectFit: 'cover', display: 'block' }}
+              loading={i === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer"
+              onError={(e: any) => { e.target.style.display = 'none'; }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라 부동산팀')}`} alt={`${decoded} 아파트 ${region} ${sigungu} 실거래가 시세 ${latestPrice > 0 ? fmtAmount(latestPrice) : ''}`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
@@ -497,8 +546,9 @@ export default async function ComplexDetailPage({ params }: Props) {
       <AptReviewSection aptName={decoded} region={region} />
 
       {/* 🔗 외부 링크 — 아이콘 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: siteSlug ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
         {[
+          ...(siteSlug ? [{ emoji: '🏗️', label: '현장 정보', href: `/apt/${siteSlug}`, ext: false }] : []),
           { emoji: '🗺️', label: '카카오맵', href: `https://map.kakao.com/?q=${encodeURIComponent(decoded + ' ' + dong)}`, ext: true },
           { emoji: '🗺️', label: '네이버지도', href: `https://map.naver.com/p/search/${encodeURIComponent(decoded + ' ' + dong)}`, ext: true },
           { emoji: '🔍', label: '실거래 검색', href: `/apt/search?q=${encodeURIComponent(decoded)}`, ext: false },
@@ -542,14 +592,14 @@ export default async function ComplexDetailPage({ params }: Props) {
       </p>
 
       {/* CTA */}
-      <Link href={`/apt/search?q=${encodeURIComponent(decoded)}`} style={{
+      <Link href={siteSlug ? `/apt/${siteSlug}` : `/apt/search?q=${encodeURIComponent(decoded)}`} style={{
         display: 'block', textAlign: 'center', padding: '16px', marginBottom: 40,
         borderRadius: 14, fontWeight: 800, textDecoration: 'none', fontSize: 14,
         background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)',
         color: '#fff', boxShadow: '0 4px 16px rgba(37,99,235,0.3)',
         transition: 'transform 0.15s ease',
       }}>
-        🏗️ 이 현장의 전체 정보 보기 (청약 · 재개발 · 리뷰) →
+        🏗️ {siteSlug ? '이 현장의 전체 정보 보기 (청약 · 이미지 · 리뷰)' : '실거래 검색에서 더 알아보기'} →
       </Link>
     </article>
   );
