@@ -100,7 +100,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
   if (regions.length === 0) return null;
 
-  const sel = activeRegion ? regions.find(r => r.name === activeRegion) : null;
+  const sel = activeRegion ? regions.find((r: RegionData) => r.name === activeRegion) : null;
   const cats = sel ? { sub: sel.sub, ongoing: sel.ongoing, unsold: sel.unsold, redev: sel.redev, trade: sel.trade } : grandCats;
   const total = sel ? sel.total : grandTotal;
 
@@ -288,7 +288,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         maxWidth: '100%',
         overflow: 'hidden',
       }}>
-        {regions.map((r) => {
+        {regions.map((r: RegionData) => {
           const isActive = activeRegion === r.name;
           return (
             <button
