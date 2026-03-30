@@ -246,6 +246,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           showToast={showToast}
           globalRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
           globalSearch={globalSearch}
+          subTotalCount={subTotalCount}
         />
       )}
 

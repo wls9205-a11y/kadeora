@@ -10,11 +10,12 @@ interface Props extends SharedTabProps {
   apts: Apt[];
   alertCounts: Record<string, number>;
   regionStats: { name: string; total: number; open: number; upcoming: number; closed: number }[];
+  subTotalCount?: number;
 }
 
 const SB = STATUS_BADGE;
 
-export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch }: Props) {
+export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch, subTotalCount }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'|'price'>('date');
@@ -97,7 +98,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               {(['전체', 'open', 'upcoming', 'closed'] as const).map(v => {
                 const labels: Record<string, string> = { '전체': '전체', 'open': '접수중', 'upcoming': '예정', 'closed': '마감' };
                 const counts: Record<string, number> = {
-                  '전체': filtered.length,
+                  '전체': (region === '전체' && !effectiveSearch && subTotalCount) ? subTotalCount : filtered.length,
                   'open': filtered.filter(a => getStatus(a) === 'open').length,
                   'upcoming': filtered.filter(a => getStatus(a) === 'upcoming').length,
                   'closed': filtered.filter(a => getStatus(a) === 'closed').length,
