@@ -45,6 +45,7 @@ async function fetchAptData() {
   let subTotalCount = 0;
   let unsoldTotalCount = 0;
   let ongoingTotalCount = 0;
+  let dataFreshness = { sub: '', trade: '', unsold: '', redev: '' };
   let tradeByRegion: Record<string, number> = {};
   let redevByRegion: Record<string, number> = {};
   const regionAvgPriceMap: Record<string, number> = {};
@@ -80,7 +81,6 @@ async function fetchAptData() {
       sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('status', 'ongoing'),
     ]);
     // 데이터 수집일 조회 (별도 — 실패해도 무시)
-    let dataFreshness = { sub: '', trade: '', unsold: '', redev: '' };
     try {
       const [subFreshR, tradeFreshR, unsoldFreshR, redevFreshR] = await Promise.all([
         sb.from('apt_subscriptions').select('fetched_at').order('fetched_at', { ascending: false }).limit(1).maybeSingle(),
