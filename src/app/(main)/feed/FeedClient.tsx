@@ -401,7 +401,7 @@ export default function FeedClient({
         )}
 
         {/* ━━━ 게시글 목록 ━━━ */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="listing-grid">
           {visiblePosts.map((post: PostWithProfile, i: number) => {
             const postExt = post;
             const displayName = post.is_anonymous ? '익명' : (post.profiles?.nickname ?? '익명');
@@ -421,7 +421,7 @@ export default function FeedClient({
             const card = (
               <div key={post.id} className={`animate-fadeIn kd-feed-card${visitedIds.has(post.id) ? ' visited' : ''}`}
                 data-cat={post.category}
-                style={{ padding: '12px 14px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 10, transition: 'all var(--transition-fast)', position: 'relative' }}>
+                style={{ padding: '12px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 12, transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
                   <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 8px', borderRadius: '0 0 6px 6px' }}>
@@ -430,9 +430,9 @@ export default function FeedClient({
                 )}
 
                 {/* 상단: 아바타 + 메타 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                   <Link href={post.is_anonymous ? '#' : `/profile/${post.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text-inverse)' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-inverse)' }}>
                       {displayName[0].toUpperCase()}
                     </div>
                   </Link>
@@ -462,7 +462,7 @@ export default function FeedClient({
                       {post.title}
                     </div>
                   )}
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                     {stripHtml(post.excerpt || post.content).slice(0, 200)}
                   </div>
                   {/* 히어로 이미지 (1장) 또는 갤러리 (2장+) */}
@@ -474,12 +474,12 @@ export default function FeedClient({
                   {post.images && post.images.length > 1 && (
                     <div style={{ marginTop: 10, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
                       {(post.images as string[]).slice(0, 3).map((img, idx) => (
-                        <div key={idx} style={{ width: 90, height: 90, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
-                          <Image src={img} alt="게시글 이미지" fill sizes="90px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
+                        <div key={idx} style={{ width: 70, height: 70, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
+                          <Image src={img} alt="게시글 이미지" fill sizes="70px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
                         </div>
                       ))}
                       {post.images.length > 3 && (
-                        <div style={{ width: 90, height: 90, borderRadius: 10, flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                        <div style={{ width: 70, height: 70, borderRadius: 10, flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
                           +{post.images.length - 3}
                         </div>
                       )}
