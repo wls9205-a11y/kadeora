@@ -199,6 +199,12 @@ export default async function ComplexDetailPage({ params }: Props) {
           hasMap: `https://map.kakao.com/?q=${encodeURIComponent(decoded + ' 아파트')}`,
         } : {}),
         ...(builtYear ? { foundingDate: `${builtYear}` } : {}),
+        mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}` },
+        image: [
+          { '@type': 'ImageObject', url: ogUrl, width: 1200, height: 630 },
+          { '@type': 'ImageObject', url: ogSquareUrl, width: 630, height: 630 },
+        ],
+        thumbnailUrl: ogSquareUrl,
       })}} />
 
       {/* JSON-LD: Dataset (실거래 데이터셋) */}

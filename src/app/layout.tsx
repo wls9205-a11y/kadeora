@@ -157,6 +157,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             'query-input': 'required name=search_term_string',
           },
         }) }} />
+        {/* SiteNavigationElement — Google 확장 사이트링크 */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@graph': [
+            { '@type': 'SiteNavigationElement', name: '주식 시세', url: `${SITE_URL}/stock`, description: '실시간 주식 시세, 섹터 분석, AI 브리핑' },
+            { '@type': 'SiteNavigationElement', name: '부동산', url: `${SITE_URL}/apt`, description: '아파트 청약, 분양, 미분양, 재개발 현황' },
+            { '@type': 'SiteNavigationElement', name: '단지백과', url: `${SITE_URL}/apt/complex`, description: '전국 34,000+ 아파트 연차별 실거래가 비교' },
+            { '@type': 'SiteNavigationElement', name: '블로그', url: `${SITE_URL}/blog`, description: '투자 정보 데이터 블로그' },
+            { '@type': 'SiteNavigationElement', name: '종목 비교', url: `${SITE_URL}/stock/compare`, description: '국내외 주식 종목 핵심 지표 비교' },
+            { '@type': 'SiteNavigationElement', name: '청약 가점 계산기', url: `${SITE_URL}/apt/diagnose`, description: '무주택·부양가족·통장 가점 자동 계산' },
+          ],
+        }) }} />
       </head>
       <body className={inter.className}>
         {/* 글로벌 PWA 설치 프롬프트 캡처 — 어디서든 window.__pwaPrompt 로 접근 */}

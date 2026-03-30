@@ -90,7 +90,7 @@ export default async function SectorPage({ params }: Props) {
         })),
       })}} />
       {/* JSON-LD: speakable */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${sector} 섹터 종목`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.sector-summary'] } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${sector} 섹터 종목`, url: `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}` }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(sector + ' 섹터')}&category=stock`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.sector-summary'] } }) }} />
       {/* JSON-LD: FAQPage */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'FAQPage',

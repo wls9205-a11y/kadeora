@@ -78,6 +78,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'dg:plink': `${SITE_URL}/stock/${symbol}`,
         'naver:author': '카더라',
         'og:updated_time': s.updated_at || new Date().toISOString(),
+        'og:price:amount': String(s.price),
+        'og:price:currency': isUS ? 'USD' : 'KRW',
       };
     })(),
   };
@@ -160,10 +162,16 @@ export default async function StockDetailPage({ params }: Props) {
         headline: `${s.name} (${symbol}) 주가 시세 분석`,
         description: s.description || `${s.name} ${s.market} 상장 종목 실시간 시세`,
         url: `${SITE_URL}/stock/${symbol}`,
+        datePublished: s.updated_at || new Date().toISOString(),
         dateModified: s.updated_at || new Date().toISOString(),
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
-        publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png` } },
-        image: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`,
+        publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } },
+        image: [
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol})`)}&design=2&category=stock`, width: 1200, height: 630 },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`, width: 630, height: 630 },
+        ],
+        thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/${symbol}` },
         speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.stock-price-header'] },
       })}} />
       {/* JSON-LD 4: FAQ (검색결과 아코디언) */}

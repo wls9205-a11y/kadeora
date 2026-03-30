@@ -346,13 +346,20 @@ export default async function BlogDetailPage({ params }: Props) {
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${slug}` },
     url: `${SITE}/blog/${slug}`,
-    image: {
-      '@type': 'ImageObject',
-      url: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
-      width: 1200,
-      height: 630,
-      caption: post.image_alt || post.title,
-    },
+    image: [
+      {
+        '@type': 'ImageObject',
+        url: post.cover_image || `${SITE}/api/og?title=${encodeURIComponent(post.title)}&category=${post.category}&design=2`,
+        width: 1200, height: 630,
+        caption: post.image_alt || post.title,
+      },
+      {
+        '@type': 'ImageObject',
+        url: `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}`,
+        width: 630, height: 630,
+      },
+    ],
+    thumbnailUrl: `${SITE}/api/og-square?title=${encodeURIComponent(post.title)}&category=${post.category}`,
     keywords: (post.tags ?? []).join(', '),
     inLanguage: 'ko-KR',
     isAccessibleForFree: true,
