@@ -1,58 +1,40 @@
-# 카더라 STATUS.md — 세션 62 (2026-03-31 05:00 KST)
+# 카더라 STATUS.md — 세션 58 최종 (2026-03-31 07:50 KST)
 
-## 최신 커밋 체인
-- `e884ce7a` — fix: DailyReportClient now 변수 복원
-- `384ae4a6` — feat: 카더라 데일리 아카이브 — 스냅샷+날짜 네비게이션
-- `32b1e1a7` — fix: market_cap null 타입 수정
-- `197ee5bd` — feat: 카더라 데일리 — 주식·부동산 올인원 투자 리포트
-- `0144d1d3` — docs: STATUS.md 세션 61
-- `41c4f7a0` — seo: 포털 노출면적 만점
+## 최신 커밋
+- `eae50c6` — 부동산 UX 대폭 개선 (통합검색+중복제거+지역타일리디자인)
+- `e56d5cf` — 모바일 2열 카드 수정 + DailyReportCard 리디자인
+- `6355143` — B-2 도넛 카드 개선 6건
+- `eb6a895` — B-2 도넛 리디자인 (2×4 프로그레스바+설명글)
 
-## 세션 62 — 카더라 데일리 풀스택 구현
+## 세션 58 주요 성과
 
-### 새 파일 (8개, ~1,200줄)
-- `src/lib/daily-report-data.ts` — 데이터 fetcher (12개 병렬 쿼리)
-- `src/app/(main)/daily/page.tsx` — /daily → /daily/서울 리다이렉트
-- `src/app/(main)/daily/[region]/page.tsx` — SSR (ISR 60s, SEO 만점)
-- `src/app/(main)/daily/[region]/DailyReportClient.tsx` — 7섹션 UI
-- `src/app/(main)/daily/[region]/[date]/page.tsx` — 날짜별 아카이브
-- `src/app/(main)/daily/[region]/archive/page.tsx` — 월별 목록
-- `src/components/DailyReportCard.tsx` — 피드 상단 요약 카드
-- `src/app/api/cron/daily-report-snapshot/route.ts` — 스냅샷 크론
+### 부동산 페이지 UX 대폭 개선
+- 통합 검색 상단 이동 (전국 드롭다운 + 검색 통합)
+- 중복 탭 세그먼트 제거 (B-2 카드가 탭 전환 대체)
+- 하단 검색창 제거 (상단으로 통합)
+- 지역 타일 리디자인 (5열 미니멀 + 2px 프로그레스바)
+- B-2 카드에 activeTab 하이라이트 추가
 
-### 수정 파일 (5개)
-- FeedClient.tsx — DailyReportCard 삽입
-- Navigation.tsx — 더보기 최상단 📊 카더라 데일리
-- sitemap — 17지역 + archive = 34 URL 추가
-- robots.txt — Allow: /daily/
-- vercel.json — 크론 추가
+### B-2 도넛 리디자인
+- 2×4 그리드 8칸 (청약/분양중/미분양/재개발·재건축/실거래/단지백과/분양사이트/지도)
+- 프로그레스바 + 서브뱃지 + 설명글 + 전국 통일
 
-### DB: daily_reports 테이블
-- region + report_date UNIQUE, JSONB data, RLS
-- 크론 78번째: daily-report-snapshot (평일 7시 KST)
+### DailyReportCard 리디자인
+- 그라데이션 배경 + "읽기 →" CTA + 핵심지표 3칸
 
-### URL 구조
-- /daily/서울 → 오늘 (실시간)
-- /daily/서울/2026-03-30 → 아카이브 (스냅샷)
-- /daily/서울/archive → 월별 목록
+### 모바일 2열 카드 수정
+- listing-grid 1열 폴백: 420px → 320px
 
-### SEO: og + JSON-LD 3종 + Naver + Speakable
+### 시총 데이터 수정
+- 삼성전자: 330조 → 1,044조 (네이버 기준)
+- SK하이닉스: 657조 → 622조
 
-## PENDING
-1. 첫 스냅샷: curl -H "Authorization: Bearer CRON_SECRET" https://kadeora.app/api/cron/daily-report-snapshot
-2. 아카이브 라이브 테스트
-3. 프리미엄 버전 (AI 인사이트)
-4. Google/Naver 사이트맵 재제출
-
-## 아키텍처 규칙 (11개 — 변경 없음)
-1. 블로그 삭제 금지 2. stockcoin.net 금지 3. 포인트 RPC만
-4. CSP middleware.ts 5. 크론 에러 200 6. OG 폰트 Node.js fs
-7. PostWithProfile/CommentWithProfile 보호 8. daily_create_limit 80
-9. DB트리거 HOURLY/DAILY_LIMIT 80 10. Supabase RPC try/catch
-11. STATUS.md 반드시 업데이트
-
-## DB 현황
-- stock_quotes 1,672 / apt_subscriptions 2,692 / unsold_apts 180
-- redevelopment 202 / apt_complex_profiles 34,495 / apt_sites 5,512
-- blog_posts 20,863 / posts 4,460 / daily_reports 0 (첫 크론 대기)
-- 크론 78개
+## 아키텍처 규칙 (11개)
+1. 블로그 삭제 금지 2. stockcoin.net 금지
+3. 포인트 RPC만 4. CSP middleware.ts
+5. 크론 에러 200 6. OG 폰트 Node.js fs
+7. PostWithProfile/CommentWithProfile 보호
+8. daily_create_limit 80
+9. DB트리거 HOURLY/DAILY_LIMIT 80
+10. Supabase RPC: try/catch (.catch() 금지)
+11. 작업 완료 시 STATUS.md 반드시 업데이트
