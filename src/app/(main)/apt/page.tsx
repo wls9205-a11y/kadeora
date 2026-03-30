@@ -42,6 +42,9 @@ async function fetchAptData() {
   let lastRefreshed: string | null = null;
   let redevTotalCount = 0;
   let tradeTotalCount = 0;
+  let subTotalCount = 0;
+  let unsoldTotalCount = 0;
+  let ongoingTotalCount = 0;
   let tradeByRegion: Record<string, number> = {};
   let redevByRegion: Record<string, number> = {};
   const regionAvgPriceMap: Record<string, number> = {};
@@ -62,20 +65,27 @@ async function fetchAptData() {
     } catch {}
 
     // SSR: 청약 + 미분양 + 알림 카운트 + 지역별 실거래/재개발 건수
-    const [aptsR, unsoldR, alertsR, redevCountR, tradeByRegionR, redevByRegionR] = await Promise.all([
+    const [aptsR, unsoldR, alertsR, redevCountR, tradeByRegionR, redevByRegionR, subCountR, unsoldCountR, ongoingCountR] = await Promise.all([
       sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm, is_price_limit, ai_summary, house_type_info, price_per_pyeong_avg')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
-        .order('rcept_bgnde', { ascending: false }).limit(1000),
+        .order('rcept_bgnde', { ascending: false }).limit(3000),
       sb.from('unsold_apts').select('id, house_nm, region_nm, sigungu_nm, tot_supply_hshld_co, tot_unsold_hshld_co, supply_addr, completion_ym, sale_price_min, sale_price_max, pblanc_url, contact_tel, source, created_at, is_active').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
       sb.from('apt_alerts').select('house_manage_no'),
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
       (sb as any).rpc('get_trade_count_by_region'),
       (sb as any).rpc('get_redev_count_by_region'),
+      // 정확한 카운트 (도넛 차트용)
+      sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }),
+      sb.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('status', 'ongoing'),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
     (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
     redevTotalCount = redevCountR.count ?? 0;
+    subTotalCount = subCountR.count ?? 0;
+    unsoldTotalCount = unsoldCountR.count ?? 0;
+    ongoingTotalCount = ongoingCountR.count ?? 0;
     // 실거래 총 건수 — RPC 지역별 합산
     (tradeByRegionR.data || []).forEach((r: any) => { if (r.region) { tradeByRegion[r.region] = Number(r.trade_count) || 0; tradeTotalCount += Number(r.trade_count) || 0; } });
     (redevByRegionR.data || []).forEach((r: any) => { if (r.region) redevByRegion[r.region] = Number(r.redev_count) || 0; });
@@ -188,11 +198,11 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion } = await fetchAptData();
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
@@ -212,7 +222,7 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"아파트 청약 일정은 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라(kadeora.app)에서 전국 아파트 청약 일정, 경쟁률, 분양가, 입주 예정일을 실시간으로 확인할 수 있습니다. 지역별·상태별 필터링도 지원합니다."}},{"@type":"Question","name":"미분양 아파트 현황은 어떻게 확인하나요?","acceptedAnswer":{"@type":"Answer","text":`현재 전국 ${unsold.length}개 단지가 미분양 상태입니다. 카더라 부동산 페이지에서 지역별 미분양 세대수, 분양가, 연락처를 확인할 수 있습니다.`}},{"@type":"Question","name":"분양중인 아파트는 몇 개인가요?","acceptedAnswer":{"@type":"Answer","text":`현재 ${ongoingApts.length}개 단지가 분양 진행 중입니다. 각 단지별 분양가, 시공사, 위치 정보를 카더라에서 비교할 수 있습니다.`}}]}) }} />
     {/* speakable */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
-    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} />
+    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} />
     <Disclaimer />
   </Suspense>;
 }

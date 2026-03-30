@@ -21,6 +21,9 @@ interface Props {
   tradeTotalCount?: number;
   tradeByRegion?: Record<string, number>;
   redevByRegion?: Record<string, number>;
+  subTotalCount?: number;
+  unsoldTotalCount?: number;
+  ongoingTotalCount?: number;
   onRegionClick?: (region: string) => void;
   activeRegion?: string;
   shareButton?: React.ReactNode;
@@ -44,7 +47,7 @@ const LABELS: Record<string, string> = {
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, onRegionClick, activeRegion, shareButton }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, onRegionClick, activeRegion, shareButton }: Props) {
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
     const ensure = (name: string) => {
@@ -86,9 +89,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
   const grandTotal = regions.reduce((s: number, r: RegionData) => s + r.total, 0);
   const grandCats = {
-    sub: regions.reduce((s: number, r: RegionData) => s + r.sub, 0),
-    ongoing: regions.reduce((s: number, r: RegionData) => s + r.ongoing, 0),
-    unsold: regions.reduce((s: number, r: RegionData) => s + r.unsold, 0),
+    sub: subTotalCount || regions.reduce((s: number, r: RegionData) => s + r.sub, 0),
+    ongoing: ongoingTotalCount || regions.reduce((s: number, r: RegionData) => s + r.ongoing, 0),
+    unsold: unsoldTotalCount || regions.reduce((s: number, r: RegionData) => s + r.unsold, 0),
     redev: redevTotalCount || regions.reduce((s: number, r: RegionData) => s + r.redev, 0),
     trade: tradeTotalCount || regions.reduce((s: number, r: RegionData) => s + r.trade, 0),
   };
