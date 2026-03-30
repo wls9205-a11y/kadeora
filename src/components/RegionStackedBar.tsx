@@ -42,7 +42,7 @@ const LABELS: Record<string, string> = {
   ongoing: '분양',
   unsold: '미분양',
   redev: '재개발',
-  trade: '실거래',
+  trade: '실거래(1년)',
 };
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
