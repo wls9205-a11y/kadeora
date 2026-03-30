@@ -102,6 +102,10 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
     <>
       {/* 연차 pill + 정렬 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        {(() => {
+          const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
+          return (
+          <>
         <button onClick={() => setSelectedAge(null)} style={{
           padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
           fontSize: 10, fontWeight: !selectedAge ? 700 : 500,
@@ -111,16 +115,19 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
         }}>전체</button>
         {ageGroups.map((g: any) => {
           const active = selectedAge === g;
+          const c = ageColors[g] || '#6B82A0';
           return (
             <button key={g} onClick={() => setSelectedAge(active ? null : g)} style={{
               padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
               fontSize: 10, fontWeight: active ? 700 : 500,
-              background: active ? 'rgba(59,123,246,0.2)' : 'transparent',
-              color: active ? 'var(--brand)' : 'var(--text-tertiary)',
-              border: active ? '1px solid rgba(59,123,246,0.4)' : '1px solid var(--border)',
+              background: active ? `${c}20` : 'transparent',
+              color: active ? c : 'var(--text-tertiary)',
+              border: active ? `1px solid ${c}50` : '1px solid var(--border)',
             }}>{g}</button>
           );
         })}
+          </>);
+        })()}
         <select value={sortBy} onChange={(e: any) => setSortBy(e.target.value)} style={{
           marginLeft: 'auto', padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 10, cursor: 'pointer',
@@ -132,31 +139,35 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
         </select>
       </div>
 
-      {/* 연차 통계 바 — 클릭 가능 */}
-      {ageChartData && (
+      {/* 연차 통계 바 — 클릭 가능, 연차별 액센트 컬러 */}
+      {ageChartData && (() => {
+        const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
+        return (
         <div style={{ display: 'flex', gap: 3, marginBottom: 14 }}>
           {ageChartData.map((a: any) => {
             const max = Math.max(...ageChartData.map((x: any) => x.avg));
             const on = selectedAge === a.group;
+            const c = ageColors[a.group] || '#6B82A0';
             return (
               <div key={a.group} onClick={() => setSelectedAge(selectedAge === a.group ? null : a.group)} style={{
                 flex: 1, background: on ? 'var(--bg-hover)' : 'var(--bg-surface)', borderRadius: 8, padding: '7px 2px',
                 textAlign: 'center', cursor: 'pointer',
-                border: on ? '1px solid rgba(59,123,246,0.4)' : '1px solid var(--border)',
-                boxShadow: on ? '0 0 8px rgba(59,123,246,0.15)' : 'none',
+                border: on ? `1px solid ${c}60` : '1px solid var(--border)',
+                boxShadow: on ? `0 0 10px ${c}25` : 'none',
               }}>
-                <div style={{ fontSize: 8, color: on ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: 600 }}>{a.group}</div>
+                <div style={{ fontSize: 8, color: on ? c : 'var(--text-tertiary)', fontWeight: 600 }}>{a.group}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: on ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{a.avg > 0 ? fmtAmount(a.avg) : '—'}</div>
-                <div style={{ height: 3, background: 'var(--border)', borderRadius: 2, margin: '3px 3px 0', overflow: 'hidden' }}>
+                <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, margin: '3px 3px 0', overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${max > 0 ? (a.avg / max) * 100 : 0}%`, borderRadius: 2,
-                    background: on ? 'linear-gradient(90deg, var(--brand), rgba(59,123,246,0.6))' : 'rgba(107,130,160,0.4)',
+                    background: on ? `linear-gradient(90deg, ${c}, ${c}90)` : `${c}40`,
                   }} />
                 </div>
               </div>
             );
           })}
         </div>
-      )}
+        );
+      })()}
 
       {/* 검색 + 카운트 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, alignItems: 'center' }}>

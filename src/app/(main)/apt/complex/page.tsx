@@ -223,7 +223,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
                     <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 2, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: isActive ? 'var(--brand)' : 'var(--text-tertiary)', borderRadius: 2, transition: 'width 0.3s' }} />
+                    <div style={{ width: `${pct}%`, height: '100%', background: isActive ? 'linear-gradient(90deg, var(--brand), rgba(59,123,246,0.7))' : 'linear-gradient(90deg, rgba(59,123,246,0.5), rgba(59,123,246,0.2))', borderRadius: 2, transition: 'width 0.3s' }} />
                   </div>
                 </div>
               </Link>
