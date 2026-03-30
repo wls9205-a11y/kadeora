@@ -166,7 +166,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
 }
-/* 모바일 좁은 화면 → 1열 폴백 */
-@media (max-width: 420px) {
+/* 극소 화면(320px 미만)에서만 1열 폴백 */
+@media (max-width: 320px) {
   .listing-grid { grid-template-columns: 1fr; }
 }

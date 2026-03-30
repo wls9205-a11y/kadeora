@@ -73,41 +73,57 @@ export default function DailyReportCard() {
   return (
     <Link href={`/daily/${encodeURIComponent(data.region)}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 10 }}>
       <div style={{
-        padding: '12px 14px', borderRadius: 12,
-        background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        transition: 'transform 0.1s',
+        padding: '14px 16px', borderRadius: 14,
+        background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.04) 100%)',
+        border: '1.5px solid rgba(59,123,246,0.2)',
+        transition: 'transform 0.1s, border-color 0.15s',
+        position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 14 }}>📊</span>
-            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>카더라 데일리</span>
-            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>
-              {now.getMonth() + 1}/{now.getDate()} {dayNames[now.getDay()]}
-            </span>
+        {/* 배경 데코 원 */}
+        <div style={{ position: 'absolute', right: -20, top: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(59,123,246,0.04)' }} />
+        <div style={{ position: 'absolute', right: 30, bottom: -15, width: 50, height: 50, borderRadius: '50%', background: 'rgba(96,165,250,0.03)' }} />
+
+        {/* 헤더 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>📊</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.3 }}>카더라 데일리 리포트</div>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                {now.getMonth() + 1}월 {now.getDate()}일 {dayNames[now.getDay()]}요일 {isWeekend ? '· 주말판' : ''}
+              </div>
+            </div>
           </div>
-          <span style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600 }}>전체 보기 →</span>
+          <div style={{
+            padding: '6px 14px', borderRadius: 20, background: 'var(--brand)', color: '#fff',
+            fontSize: 12, fontWeight: 700, flexShrink: 0,
+          }}>읽기 →</div>
         </div>
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {data.topStockPct !== 0 && (
-            <span style={{
-              fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4,
-              background: data.topStockPct > 0 ? 'rgba(239,68,68,0.08)' : 'rgba(59,130,246,0.08)',
-              color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--text-brand)',
-            }}>
-              {data.topStock} {data.topStockPct > 0 ? '+' : ''}{data.topStockPct.toFixed(1)}%
-            </span>
-          )}
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(59,130,246,0.08)', color: 'var(--text-brand)' }}>
-            청약 {data.subCount}건
-          </span>
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.08)', color: 'var(--accent-yellow)' }}>
-            미분양 {data.unsoldUnits.toLocaleString()}세대
-          </span>
-          {data.topSub && (
-            <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(16,185,129,0.08)', color: 'var(--accent-green)' }}>
-              {data.topSub.slice(0, 12)}
-            </span>
-          )}
+
+        {/* 핵심 지표 3칸 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, position: 'relative' }}>
+          {/* 주식 */}
+          <div style={{ padding: '6px 8px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>시총 1위</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--brand)' }}>
+              {data.topStock.slice(0, 6)}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--brand)' }}>
+              {data.topStockPct > 0 ? '▲' : '▼'}{Math.abs(data.topStockPct).toFixed(1)}%
+            </div>
+          </div>
+          {/* 청약 */}
+          <div style={{ padding: '6px 8px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>이번주 청약</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-green)' }}>{data.subCount}건</div>
+            {data.topSub && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.topSub.slice(0, 8)}</div>}
+          </div>
+          {/* 미분양 */}
+          <div style={{ padding: '6px 8px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>전국 미분양</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-orange)' }}>{(data.unsoldUnits / 10000).toFixed(1)}만</div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{data.unsoldUnits.toLocaleString()}세대</div>
+          </div>
         </div>
       </div>
     </Link>
