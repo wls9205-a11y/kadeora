@@ -173,8 +173,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               </div>
             );
             const descStyle: React.CSSProperties = { fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const };
-            const hoverIn = (e: React.MouseEvent) => (e.currentTarget.style.background = 'var(--bg-hover)');
-            const hoverOut = (e: React.MouseEvent) => (e.currentTarget.style.background = 'transparent');
+            const hoverIn = (e: React.MouseEvent<HTMLDivElement>) => (e.currentTarget.style.background = 'var(--bg-hover)');
+            const hoverOut = (e: React.MouseEvent<HTMLDivElement>) => (e.currentTarget.style.background = 'transparent');
 
             return <>
               {/* 청약정보 */}
