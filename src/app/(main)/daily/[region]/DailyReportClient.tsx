@@ -3,7 +3,13 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import type { DailyReportData } from '@/lib/daily-report-data';
 
-interface Props { data: DailyReportData; regions: string[] }
+interface Props {
+  data: DailyReportData;
+  regions: string[];
+  viewDate?: string | null;   // 아카이브 모드 (null = 오늘 실시간)
+  prevDate?: string | null;
+  nextDate?: string | null;
+}
 
 function fmt(n: number) { return n >= 10000 ? (n / 10000).toFixed(1) + '억' : n.toLocaleString() + '만'; }
 function fmtB(n: number) { return n >= 1e12 ? (n / 1e12).toFixed(1) + 'T' : n >= 1e9 ? (n / 1e9).toFixed(0) + 'B' : n.toLocaleString(); }
@@ -17,13 +23,14 @@ const SH = ({ icon, title }: { icon: string; title: string }) => (
   </div>
 );
 
-export default function DailyReportClient({ data, regions }: Props) {
+export default function DailyReportClient({ data, regions, viewDate, prevDate, nextDate }: Props) {
   const router = useRouter();
   const d = data;
+  const isArchive = !!viewDate;
 
-  const now = new Date();
+  const displayDate = viewDate ? new Date(viewDate) : new Date();
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-  const dateLabel = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${dayNames[now.getDay()]}`;
+  const dateLabel = `${displayDate.getFullYear()}.${String(displayDate.getMonth() + 1).padStart(2, '0')}.${String(displayDate.getDate()).padStart(2, '0')} ${dayNames[displayDate.getDay()]}`;
 
   const localUnsoldUnits = d.unsoldLocal.reduce((s, r) => s + r.units, 0);
   const localUnsoldPct = d.unsoldUnits > 0 ? Math.round(localUnsoldUnits / d.unsoldUnits * 1000) / 10 : 0;
@@ -38,25 +45,72 @@ export default function DailyReportClient({ data, regions }: Props) {
 
   const maxGu = d.guPrices[0]?.sale || 1;
 
+  // 날짜 네비게이션 핸들러
+  const goToDate = (date: string) => router.push(`/daily/${encodeURIComponent(d.region)}/${date}`);
+  const goToToday = () => router.push(`/daily/${encodeURIComponent(d.region)}`);
+  const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) goToDate(e.target.value);
+  };
+
   return (
     <div>
+      {/* 아카이브 모드 배너 */}
+      {isArchive && (
+        <div style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-yellow)' }}>📂 {viewDate} 아카이브</span>
+          <button onClick={goToToday} style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', background: 'none', border: '1px solid var(--brand)', borderRadius: 6, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>오늘 보기 →</button>
+        </div>
+      )}
+
       {/* ═══ HERO ═══ */}
       <div style={{ padding: '16px 14px', background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>카더라 데일리 #{d.issueNo}</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5 }}>오늘의 투자 브리핑</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{isArchive ? '투자 브리핑 아카이브' : '오늘의 투자 브리핑'}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{dateLabel}</div>
             <select
               value={d.region}
-              onChange={e => router.push(`/daily/${encodeURIComponent(e.target.value)}`)}
+              onChange={e => {
+                const base = `/daily/${encodeURIComponent(e.target.value)}`;
+                router.push(viewDate ? `${base}/${viewDate}` : base);
+              }}
               style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {regions.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
+        </div>
+
+        {/* 날짜 네비게이션 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderTop: '1px solid var(--border)', marginBottom: 6 }}>
+          <button
+            onClick={() => prevDate && goToDate(prevDate)}
+            disabled={!prevDate}
+            style={{ fontSize: 12, fontWeight: 700, color: prevDate ? 'var(--brand)' : 'var(--text-tertiary)', background: 'none', border: 'none', cursor: prevDate ? 'pointer' : 'default', fontFamily: 'inherit', padding: '4px 8px' }}
+          >◀ 이전</button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{dateLabel}</span>
+            <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: 14 }}>📅</span>
+              <input
+                type="date"
+                onChange={handleDateInput}
+                defaultValue={viewDate || undefined}
+                max={new Date().toISOString().slice(0, 10)}
+                min="2026-01-06"
+                style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+              />
+            </label>
+          </div>
+
+          <button
+            onClick={() => nextDate ? goToDate(nextDate) : (!isArchive ? undefined : goToToday())}
+            disabled={!nextDate && !isArchive}
+            style={{ fontSize: 12, fontWeight: 700, color: (nextDate || isArchive) ? 'var(--brand)' : 'var(--text-tertiary)', background: 'none', border: 'none', cursor: (nextDate || isArchive) ? 'pointer' : 'default', fontFamily: 'inherit', padding: '4px 8px' }}
+          >{nextDate ? '다음 ▶' : isArchive ? '오늘 ▶' : '최신'}</button>
         </div>
 
         {/* 어젯밤 달라진 것 */}

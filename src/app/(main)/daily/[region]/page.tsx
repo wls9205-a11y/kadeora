@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 import { fetchDailyReportData, REPORT_REGIONS, type ReportRegion } from '@/lib/daily-report-data';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import DailyReportClient from './DailyReportClient';
 
 interface Props { params: Promise<{ region: string }> }
@@ -70,6 +71,19 @@ export default async function DailyReportPage({ params }: Props) {
   if (!result) return notFound();
   const data = result;
 
+  // 이전 아카이브 날짜 조회
+  const sb = getSupabaseAdmin();
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const prevResult = await (sb as any).from('daily_reports')
+    .select('report_date')
+    .eq('region', region)
+    .lt('report_date', todayStr)
+    .order('report_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const prevDate = prevResult?.data?.report_date || null;
+
   const now = new Date();
   const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
@@ -129,7 +143,7 @@ export default async function DailyReportPage({ params }: Props) {
         ],
       }) }} />
 
-      <DailyReportClient data={data} regions={[...REPORT_REGIONS]} />
+      <DailyReportClient data={data} regions={[...REPORT_REGIONS]} prevDate={prevDate} />
     </div>
   );
 }

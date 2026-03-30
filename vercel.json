@@ -407,6 +407,10 @@
     {
       "path": "/api/cron/refresh-mv",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/daily-report-snapshot",
+      "schedule": "0 22 * * 0-4"
     }
   ]
 }
