@@ -177,7 +177,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ height: '100%', width: `${Math.max(pct, 1)}%`, background: color, borderRadius: 2 }} />
               </div>
             );
-            const descStyle: React.CSSProperties = { fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const };
             const hoverIn = (e: React.MouseEvent<HTMLDivElement>) => (e.currentTarget.style.background = 'var(--bg-hover)');
             const hoverOut = (e: React.MouseEvent<HTMLDivElement>) => (e.currentTarget.style.background = 'transparent');
 
@@ -195,7 +194,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                   {upcomingCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(96,165,250,0.08)', color: '#60A5FA', fontWeight: 500 }}>예정 {upcomingCount}</span>}
                   {closedCount > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 500 }}>마감 {closedCount}</span>}
                 </div>
-                <div style={descStyle}>전국 아파트 청약 일정, 경쟁률, 당첨 결과</div>
               </div>
               {/* 분양중 */}
               <div style={cardStyle(COLORS.ongoing)} onClick={() => onTabChange?.('ongoing')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
@@ -206,7 +204,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>분양중</div>
                 {barStyle(Math.round(cats.ongoing / maxVal * 100), COLORS.ongoing)}
                 <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: COLORS.ongoing }}>{ongoingUnits > 0 ? `${ongoingUnits.toLocaleString()}세대` : '입주전 현장'}</span></div>
-                <div style={descStyle}>청약 마감 후 입주 전 현장 + 미분양 통합</div>
               </div>
               {/* 미분양 */}
               <div style={cardStyle(COLORS.unsold)} onClick={() => onTabChange?.('unsold')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
@@ -217,7 +214,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>미분양</div>
                 {barStyle(Math.round(cats.unsold / maxVal * 100), COLORS.unsold)}
                 {unsoldUnits > 0 && <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(226,75,74,0.1)', color: '#E24B4A', fontWeight: 500 }}>{unsoldUnits.toLocaleString()}세대</span></div>}
-                <div style={descStyle}>전국 미분양 세대수, 준공후 미분양 현황</div>
               </div>
               {/* 재개발·재건축 */}
               <div style={cardStyle(COLORS.redev)} onClick={() => onTabChange?.('redev')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
@@ -231,7 +227,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                   {redevCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(216,90,48,0.08)', color: '#D85A30', fontWeight: 500 }}>재개발 {redevCount}</span>}
                   {rebuildCount > 0 && <span style={{ fontSize: 9, color: '#D85A30', fontWeight: 500 }}>재건축 {rebuildCount}</span>}
                 </div>
-                <div style={descStyle}>전국 정비사업 단계별 진행 현황</div>
               </div>
               {/* 실거래(2026) */}
               <div style={cardStyle(COLORS.trade)} onClick={() => onTabChange?.('trade')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
@@ -245,7 +240,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                   {tradeAvg > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(55,138,221,0.08)', color: '#378ADD', fontWeight: 500 }}>평균 {fmtA(tradeAvg)}</span>}
                   {tradeMax > 0 && <span style={{ fontSize: 9, color: '#378ADD', fontWeight: 500 }}>최고 {fmtA(tradeMax)}</span>}
                 </div>
-                <div style={descStyle}>전국 아파트 매매 실거래가, 지역별 시세 동향</div>
               </div>
               {/* 단지백과 */}
               <div style={{ ...cardStyle('var(--border)'), borderLeftColor: 'var(--border)' }} onClick={() => { router.push('/apt/complex'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
@@ -259,7 +253,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>매매 49.7만</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>전월세 209만</span>
                 </div>
-                <div style={descStyle}>전국 아파트 연차별 매매·전세·월세 시세 비교</div>
               </div>
               {/* 분양사이트 */}
               <div style={cardStyle('#22D3EE')} onClick={() => { router.push('/apt/sites'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
@@ -270,7 +263,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>분양사이트</div>
                 {barStyle(Math.round(5522 / maxVal * 100), '#22D3EE')}
                 <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: '#22D3EE', fontWeight: 500 }}>전국 현장</span></div>
-                <div style={descStyle}>전국 분양 현장별 분양가·시공사·입주 정보</div>
               </div>
               {/* 부동산 지도 */}
               <div style={cardStyle('#FBB724')} onClick={() => { router.push('/apt/map'); }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
@@ -281,7 +273,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>부동산 지도</div>
                 {barStyle(Math.round(regions.length / 17 * 100), '#FBB724')}
                 <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: '#BA7517', fontWeight: 500 }}>17개 지역</span></div>
-                <div style={descStyle}>전국 청약·분양·미분양·재개발 지도 한눈에</div>
               </div>
             </>;
           })()}
@@ -323,23 +314,9 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                     {r.total.toLocaleString()}
                   </span>
                 </div>
-                {/* Mini stacked bar */}
-                <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 1.5, overflow: 'hidden', marginTop: 2 }}>
-                  {CAT_KEYS.map(k => {
-                    const v = r[k];
-                    if (v <= 0) return null;
-                    return (
-                      <div
-                        key={k}
-                        style={{
-                          width: `${(v / r.total) * 100}%`,
-                          height: '100%',
-                          background: COLORS[k],
-                          minWidth: v > 0 ? 1 : 0,
-                        }}
-                      />
-                    );
-                  })}
+                {/* Single progress bar */}
+                <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 2, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.round((r.total / (regions[0]?.total || 1)) * 100)}%`, background: isActive ? 'var(--brand)' : 'var(--brand-dim, rgba(59,123,246,0.4))', borderRadius: 2 }} />
                 </div>
               </div>
             </button>
