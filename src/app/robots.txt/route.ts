@@ -10,6 +10,7 @@ Allow: /feed/
 Allow: /stock/
 Allow: /apt/
 Allow: /blog/
+Allow: /daily/
 Allow: /discuss
 Disallow: /admin/
 Disallow: /payment/

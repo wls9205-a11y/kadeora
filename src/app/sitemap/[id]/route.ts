@@ -46,7 +46,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     const staticPaths = [
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/premium',
-      '/grades', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
+      '/grades', '/daily', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
     ];
     const entries: SitemapEntry[] = [
       ...staticPaths.map(path => ({
@@ -66,6 +66,13 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         lastModified: now,
         changeFrequency: 'weekly',
         priority: 0.7,
+      })),
+      // 카더라 데일리 — 17개 지역
+      ...['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => ({
+        url: `${BASE}/daily/${encodeURIComponent(r)}`,
+        lastModified: now,
+        changeFrequency: 'daily' as const,
+        priority: 0.85,
       })),
     ];
     return xmlResponse(entries);

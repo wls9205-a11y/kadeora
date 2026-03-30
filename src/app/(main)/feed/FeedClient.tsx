@@ -13,6 +13,7 @@ import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/EmptyState';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import PersonalDashboard from '@/components/PersonalDashboard';
+import DailyReportCard from '@/components/DailyReportCard';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -259,6 +260,7 @@ export default function FeedClient({
         </div>
 
         <PersonalDashboard />
+        <DailyReportCard />
 
         {/* ━━━ 카테고리 탭 ━━━ */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', flexWrap: 'nowrap', paddingBottom: 2 }}>
