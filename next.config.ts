@@ -129,6 +129,9 @@ const nextConfig: NextConfig = {
     return [
       { source: "/api/stock-debug", destination: "/", permanent: true },
       { source: "/api/stock-debug/:path*", destination: "/", permanent: true },
+      { source: "/rss", destination: "/feed.xml", permanent: true },
+      { source: "/rss.xml", destination: "/feed.xml", permanent: true },
+      { source: "/sitemap", destination: "/sitemap.xml", permanent: true },
     ];
   },
 };
