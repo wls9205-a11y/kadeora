@@ -1,38 +1,50 @@
-# 카더라 STATUS.md — 세션 58 최종 (2026-03-30 22:30 KST)
+# 카더라 STATUS.md — 세션 61 최종 (2026-03-31 02:20 KST)
 
-## 최신 커밋
-- `6355143` — B-2 도넛 카드 개선 6건 (SPA/뱃지/반응형/지도바)
-- `eb6a895` — B-2 도넛 리디자인 (2×4 프로그레스바+설명글+재개발/재건축 분리)
-- `7b33a13` — 부동산 지도 분양중/미분양 수정
-- `bb745f6` — 부동산 지도 SDK 에러 UI 개선
-- `78f5b6a` — V2-A 도넛 리디자인 + 이미지 높이 최적화
+## 최신 커밋 체인
+- `41c4f7a0` — seo: 포털 노출면적 만점 — FAQPage+Speakable+article 시간 보완
+- `fbfaa189` — fix: sitemap/robots 3건 — grades 추가, shop 충돌, notifications 차단
+- `3dd24def` — design: 피드 2열 카드 레이아웃 (V1)
+- `c78e4369` — fix: fetchAptData return 누락 수정
+- `a2359d46` — design: 2열 카드 — 부동산 3탭 + 재개발 뱃지 + 지역 4열
+- `664cae91` — design: 부동산 통계 간결화 — 설명글 제거 + 프로그레스 바
+- `e0517c12` — fix: BlogToc 스크롤 버그 3건
+- `f31839ca` — fix: RegionStackedBar TS implicit any
+- `619ed8d6` — design: 블로그 TOC 가로 칩 스크롤 + 커버 중복 제거 + 사이드바 제거
+- `ff89fda1` — design: 블로그 상세 히어로 리포트 디자인
 
-## 세션 58 주요 성과
+## 세션 61 주요 성과
 
-### B-2 도넛 리디자인 (최종)
-- 2×4 그리드: 8칸 = 청약/분양중/미분양/재개발·재건축/실거래(2026)/단지백과/분양사이트/부동산지도
-- 프로그레스바: 각 칸에 전체 대비 비율 바 시각화
-- 서브 뱃지: 접수 5/예정 11/마감 984, 재개발 165/재건축 37, 68,264세대, 평균 3.4억/최고 65억
-- 설명글: 각 탭 주제 한줄 설명 (9px, 2줄 제한)
-- 전국 통일: "서울·경기·부산" 특정 지역 → "전국" 표기
-- 클릭 인터랙션: 각 카드 클릭 → 해당 탭 전환 / 단지백과·분양사이트·지도는 router.push
-- 모바일 반응형: 480px/380px 브레이크포인트
+### 1. 블로그 디자인 리뉴얼
+- 블로그 목록: 매거진+타임라인 통합 (히어로 카드 + 날짜 구분선)
+- 블로그 상세: 히어로 리포트 디자인 (그라데이션 카드 + 전문가 뱃지)
+- 가로 칩 TOC: sticky top:56px + IntersectionObserver + 스크롤 버그 3건 수정
+- 커버 이미지 중복 제거: enhanceBlogVisuals insertCoverImage 비활성화
+- 사이드바 TOC 제거 → 단일 컬럼 780px
+- H2 왼쪽 보더 3px brand / H3 왼쪽 보더 2px border
 
-### 이미지 높이 최적화 (4곳)
-- complex/[name], region/[region], discuss/[id]: maxHeight 160px
-- blog/[slug]: maxHeight 280px + borderRadius
+### 2. 2열 카드 레이아웃 — 전 페이지 적용
+- CSS: .listing-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+- @media (max-width: 420px) → 1열 폴백
+- 적용 대상: SubscriptionTab, OngoingTab, RedevTab, FeedClient, blog/page, StockClient(기존)
+- 카드 패딩 컴팩트화 (14→12px), 아바타 32→28px, 갤러리 90→70px
 
-### 부동산 지도 수정
-- 분양중 데이터 fetch 추가 (기존에 빠져있었음)
-- 기본 레이어 4개 전체 활성화
-- SDK 에러 UI → 컴팩트 안내 메시지
+### 3. 부동산 통계 간결화
+- 2×4 카드 설명글 8개 완전 제거 → 높이 30% 줄어듦
+- 지역 타일: 3열→4열, 스택바→단일 프로그레스 바, 폰트 12/11px
+- 재개발 세부 뱃지: SSR에서 재개발 165 / 재건축 37 카운트 전달
 
-### UX 강화 6건
-- 청약 카드 3열 KPI 행, 실거래 월간 동향 한줄
-- 미분양 준공후 비율 게이지, 에러 바운더리 2곳
-- 위치 지도 링크 3개
+### 4. 사이트맵 + robots.txt 전수 감사
+- /grades 사이트맵 누락 → 추가
+- /shop sitemap-Disallow 충돌 → sitemap에서 제거
+- /notifications Disallow 추가
+- 총 67,108 URL (sitemap 0~7, 10~16)
 
-## 아키텍처 규칙 (11개)
+### 5. 포털 노출면적 만점 (15/15)
+- 전 페이지 10/10: OG 3종 + Naver 3종 + BreadcrumbList + FAQPage + Speakable + thumbnailUrl
+- blog/series: FAQPage+Speakable 추가
+- region/sector/discuss: article:published/modified_time 추가
+
+## 아키텍처 규칙 (11개 — 변경 없음)
 1. 블로그 삭제 금지 2. stockcoin.net 금지
 3. 포인트 RPC만 4. CSP middleware.ts
 5. 크론 에러 200 6. OG 폰트 Node.js fs
