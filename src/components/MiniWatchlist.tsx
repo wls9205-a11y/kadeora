@@ -21,7 +21,7 @@ export default function MiniWatchlist() {
     if (!userId) { setLoading(false); return; }
     const load = async () => {
       const sb = createSupabaseBrowser();
-      const { data: watchlist } = await sb.from('user_watchlist')
+      const { data: watchlist } = await (sb as any).from('user_watchlist')
         .select('item_type, item_id, item_name')
         .eq('user_id', userId)
         .order('display_order')
