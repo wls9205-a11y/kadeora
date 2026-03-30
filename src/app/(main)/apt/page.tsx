@@ -62,27 +62,22 @@ async function fetchAptData() {
     } catch {}
 
     // SSR: 청약 + 미분양 + 알림 카운트 + 지역별 실거래/재개발 건수
-    const [aptsR, unsoldR, alertsR, redevCountR, tradeCountR, tradeByRegionR, redevByRegionR] = await Promise.all([
+    const [aptsR, unsoldR, alertsR, redevCountR, tradeByRegionR, redevByRegionR] = await Promise.all([
       sb.from('apt_subscriptions').select('id, house_nm, house_manage_no, region_nm, hssply_adres, tot_supply_hshld_co, rcept_bgnde, rcept_endde, przwner_presnatn_de, cntrct_cncls_bgnde, cntrct_cncls_endde, spsply_rcept_bgnde, spsply_rcept_endde, mvn_prearnge_ym, pblanc_url, mdatrgbn_nm, competition_rate_1st, competition_rate_2nd, view_count, fetched_at, supply_addr, constructor_nm, is_price_limit, ai_summary, house_type_info, price_per_pyeong_avg')
         .or(`rcept_endde.gte.${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)},rcept_bgnde.lte.${new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}`)
         .order('rcept_bgnde', { ascending: false }).limit(1000),
       sb.from('unsold_apts').select('id, house_nm, region_nm, sigungu_nm, tot_supply_hshld_co, tot_unsold_hshld_co, supply_addr, completion_ym, sale_price_min, sale_price_max, pblanc_url, contact_tel, source, created_at, is_active').eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }),
       sb.from('apt_alerts').select('house_manage_no'),
       sb.from('redevelopment_projects').select('id', { count: 'exact', head: true }).eq('is_active', true),
-      sb.from('apt_transactions').select('id', { count: 'exact', head: true }),
-      // 지역별 실거래 건수 (15행) — 497K건 로드 대신 GROUP BY
       (sb as any).rpc('get_trade_count_by_region'),
-      // 지역별 재개발 건수 (11행)
       (sb as any).rpc('get_redev_count_by_region'),
     ]);
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
     (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
     redevTotalCount = redevCountR.count ?? 0;
-    tradeTotalCount = tradeCountR.count ?? 0;
-
-    // 지역별 실거래/재개발 건수 맵 (RegionStackedBar 즉시 표시용)
-    (tradeByRegionR.data || []).forEach((r: any) => { if (r.region) tradeByRegion[r.region] = Number(r.trade_count) || 0; });
+    // 실거래 총 건수 — RPC 지역별 합산
+    (tradeByRegionR.data || []).forEach((r: any) => { if (r.region) { tradeByRegion[r.region] = Number(r.trade_count) || 0; tradeTotalCount += Number(r.trade_count) || 0; } });
     (redevByRegionR.data || []).forEach((r: any) => { if (r.region) redevByRegion[r.region] = Number(r.redev_count) || 0; });
 
     // 지역별 평균가 (분양중 단지에 주입)

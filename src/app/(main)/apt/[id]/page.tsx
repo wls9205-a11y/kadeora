@@ -451,27 +451,6 @@ export default async function AptUnifiedPage({ params }: Props) {
         )}
       </div>
 
-      {/* SEO 요약 섹션 (가시적 텍스트 — 네이버/구글 크롤러 인덱싱 대상) */}
-      <section className="site-description" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📋 {name} 분양 요약</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
-          {region} {site?.sigungu || ''} {name}은(는) {site?.builder || sub?.constructor_nm || ''}{site?.builder || sub?.constructor_nm ? ' 시공, ' : ''}총 {site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대 규모의 {tLabel[sType] || '분양'} 현장입니다.
-          {(() => { const t = Array.isArray(sub?.house_type_info) ? sub.house_type_info : []; const g = t.reduce((s: number, x: any) => s + (x.supply || 0), 0); return g > 0 ? ` 일반분양 ${g}세대, 특별공급 ${t.reduce((s: number, x: any) => s + (x.spsply_hshldco || 0), 0)}세대입니다.` : ''; })()}
-          {sub?.rcept_bgnde && <> 청약 접수일은 {sub.rcept_bgnde}이며,</>}
-          {sub?.mvn_prearnge_ym && <> 입주 예정일은 {fmtYM(sub.mvn_prearnge_ym)}입니다.</>}
-          {(site?.price_min || site?.price_max) && <> 분양가는 {site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}{site?.price_min && site?.price_max ? ' ~ ' : ''}{site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다.</>}
-          {sub?.is_price_limit && <> 본 현장은 분양가상한제 적용 현장입니다.</>}
-          {(site?.nearby_station || sub?.nearest_station) && <> 최근접 역은 {site?.nearby_station || sub?.nearest_station}입니다.</>}
-          {(site?.school_district || sub?.nearest_school) && <> 학군은 {site?.school_district || sub?.nearest_school} 인근입니다.</>}
-          {sub && <> 입주자모집공고 핵심 요약, 분양가격, 청약 자격 조건, 견본주택 정보를 카더라에서 확인하세요.</>}
-          {sub?.model_house_addr && <> 견본주택(모델하우스) 주소: {sub.model_house_addr}.</>}
-        </p>
-        {site?.description && site.description !== `${region} ${name}` && (
-          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.65, margin: '8px 0 0', wordBreak: 'keep-all' }}>
-            {site.description.length > 300 ? site.description.slice(0, 300) + '...' : site.description}
-          </p>
-        )}
-      </section>
 
       {/* Share + Bookmark — 바이럴 액션 바 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, padding: '8px 12px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.1)' }}>
@@ -903,89 +882,6 @@ export default async function AptUnifiedPage({ params }: Props) {
             );
           })()}
 
-          {/* 💳 납부 일정 + 실입주 비용 시뮬레이터 */}
-          {(site?.price_min || sub?.house_type_info) && (() => {
-            // 대표 분양가 (price_max 또는 house_type_info 최고가)
-            const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
-            const maxTypePrice = types.length > 0 ? Math.max(...types.map((t: any) => Number(t.lttot_top_amount || 0))) : 0;
-            const basePriceMan = (site?.price_max || maxTypePrice || 0); // 만원 단위
-            if (basePriceMan <= 0) return null;
-
-            // 납부 비율 (DB에 있으면 사용, 없으면 업계 표준)
-            const schedule = sub.payment_schedule || {};
-            const contractPct = schedule.계약금_pct || 10;
-            const midPct = schedule.중도금_pct || 60;
-            const balancePct = schedule.잔금_pct || 30;
-            const midCount = schedule.중도금_횟수 || 6;
-            const midLoan = schedule.중도금_대출 || null;
-            const isEstimate = !sub.payment_schedule;
-
-            // 옵션/확장 비용
-            const optionCosts = sub.option_costs || (site as any)?.option_costs;
-            const extCost = sub.extension_cost || (site as any)?.extension_cost || 0;
-            const optTotal = optionCosts ? Object.values(optionCosts).reduce((s: number, v: any) => s + (Number(v) || 0), 0) as number : 0;
-
-            const fmtM = (v: number) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${v.toLocaleString()}만`;
-
-            return (
-              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>💳 납부 일정{isEstimate ? ' (추정)' : ''}</span>
-                  {isEstimate && <span style={{ fontSize: 8, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '1px 5px', borderRadius: 3 }}>업계 표준 기준</span>}
-                </div>
-                {/* 납부 비율 시각 바 */}
-                <div style={{ display: 'flex', height: 20, borderRadius: 6, overflow: 'hidden', marginBottom: 6 }}>
-                  <div style={{ width: `${contractPct}%`, background: '#34D399', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff' }}>계약금</div>
-                  <div style={{ width: `${midPct}%`, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff' }}>중도금</div>
-                  <div style={{ width: `${balancePct}%`, background: '#FB923C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff' }}>잔금</div>
-                </div>
-                {/* 납부 금액 상세 */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 4, marginBottom: 8 }}>
-                  <div style={{ background: 'rgba(52,211,153,0.06)', borderRadius: 6, padding: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: '#34D399' }}>{fmtM(Math.round(basePriceMan * contractPct / 100))}</div>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>계약금 {contractPct}%</div>
-                  </div>
-                  <div style={{ background: 'rgba(59,123,246,0.06)', borderRadius: 6, padding: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--brand)' }}>{fmtM(Math.round(basePriceMan * midPct / 100))}</div>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>중도금 {midPct}% ({midCount}회)</div>
-                    {midLoan && <div style={{ fontSize: 8, color: midLoan === '무이자' ? '#34D399' : 'var(--accent-red)' }}>{midLoan}</div>}
-                  </div>
-                  <div style={{ background: 'rgba(251,146,60,0.06)', borderRadius: 6, padding: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: '#FB923C' }}>{fmtM(Math.round(basePriceMan * balancePct / 100))}</div>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>잔금 {balancePct}%</div>
-                  </div>
-                </div>
-                {/* 실입주 예상 비용 */}
-                <div style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.04), rgba(59,123,246,0.04))', border: '1px solid rgba(139,92,246,0.1)', borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#8B5CF6', marginBottom: 5 }}>🏠 실입주 예상 비용{(optTotal === 0 && extCost === 0) ? ' (분양가 기준)' : ''}</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-tertiary)' }}>분양가 (최고가 기준)</span>
-                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{fmtM(basePriceMan)}</span>
-                    </div>
-                    {optionCosts && Object.entries(optionCosts).map(([k, v]) => (
-                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: 'var(--text-tertiary)' }}>+ {k}</span>
-                        <span style={{ fontWeight: 600, color: 'var(--accent-blue)' }}>{fmtM(Number(v))}</span>
-                      </div>
-                    ))}
-                    {extCost > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: 'var(--text-tertiary)' }}>+ 확장비</span>
-                        <span style={{ fontWeight: 600, color: 'var(--accent-blue)' }}>{fmtM(extCost)}</span>
-                      </div>
-                    )}
-                    {(optTotal > 0 || extCost > 0) && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 3, marginTop: 2 }}>
-                        <span style={{ fontWeight: 700, color: '#8B5CF6' }}>예상 총비용</span>
-                        <span style={{ fontWeight: 800, color: '#8B5CF6' }}>{fmtM(basePriceMan + optTotal + extCost)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
 
           {/* 같은 시공사 다른 현장 (내부 링크) */}
           {sameBuilderSites.length > 0 && (
