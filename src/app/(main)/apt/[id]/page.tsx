@@ -285,17 +285,18 @@ export default async function AptUnifiedPage({ params }: Props) {
   } catch {
     notFound();
   }
-  if (resolved.type === 'redirect' && resolved.slug) permanentRedirect(`/apt/${encodeURIComponent(resolved.slug)}`);
-  if (resolved.type !== 'slug') notFound();
+  if (!resolved) notFound();
+  if (resolved!.type === 'redirect' && resolved!.slug) permanentRedirect(`/apt/${encodeURIComponent(resolved!.slug)}`);
+  if (resolved!.type !== 'slug') notFound();
 
   let d;
   try {
-    d = await fetchUnifiedData(resolved.slug);
+    d = await fetchUnifiedData(resolved!.slug!);
   } catch {
     notFound();
   }
   if (!d) notFound();
-  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug } = d;
+  const { site, sub, unsold, redev, trades, relatedBlogs, relatedPosts, nearbySites, sameBuilderSites, regionBenchmark, regionTrades, complexProfiles, name, region, sigungu, slug } = d!;
   const sType = site?.site_type || (sub ? 'subscription' : unsold ? 'unsold' : redev ? 'redevelopment' : trades.length > 0 ? 'trade' : 'subscription');
   const features = Array.isArray(site?.key_features) ? site.key_features : [];
   const dbFaq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
