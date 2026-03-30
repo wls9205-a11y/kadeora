@@ -10,43 +10,59 @@ interface TocItem {
 export default function BlogToc({ toc }: { toc: TocItem[] }) {
   const [activeId, setActiveId] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isClickScrolling = useRef(false);
 
+  // IntersectionObserver — 현재 읽는 섹션 감지
   useEffect(() => {
     const headings = toc.map(t => document.getElementById(t.id)).filter(Boolean) as HTMLElement[];
     if (!headings.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
+        // 클릭 스크롤 중에는 Observer 무시 (충돌 방지)
+        if (isClickScrolling.current) return;
         const visible = entries.filter(e => e.isIntersecting);
         if (visible.length > 0) {
           setActiveId(visible[0].target.id);
         }
       },
-      { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 }
+      { rootMargin: '-100px 0px -60% 0px', threshold: 0.1 }
     );
 
     headings.forEach(h => observer.observe(h));
     return () => observer.disconnect();
   }, [toc]);
 
-  // 활성 칩이 보이도록 스크롤
+  // 활성 칩만 가로 스크롤 (페이지 스크롤 건드리지 않음)
   useEffect(() => {
     if (!activeId || !scrollRef.current) return;
-    const activeEl = scrollRef.current.querySelector(`[data-toc-id="${activeId}"]`);
-    if (activeEl) {
-      (activeEl as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
+    const container = scrollRef.current;
+    const activeEl = container.querySelector(`[data-toc-id="${activeId}"]`) as HTMLElement | null;
+    if (!activeEl) return;
+
+    // container 내에서만 가로 스크롤 — scrollIntoView 대신 scrollLeft 직접 제어
+    const containerRect = container.getBoundingClientRect();
+    const elRect = activeEl.getBoundingClientRect();
+    const offset = elRect.left - containerRect.left - containerRect.width / 2 + elRect.width / 2;
+    container.scrollBy({ left: offset, behavior: 'smooth' });
   }, [activeId]);
 
+  // 클릭 → 해당 섹션으로 스크롤 (sticky 오프셋 보정)
   const scrollTo = useCallback((id: string) => {
     const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActiveId(id);
-    }
+    if (!el) return;
+
+    isClickScrolling.current = true;
+    setActiveId(id);
+
+    // sticky 헤더(56px) + TOC 바(~40px) + 여유(12px) = 108px 오프셋
+    const y = el.getBoundingClientRect().top + window.scrollY - 108;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+
+    // 스크롤 완료 후 Observer 재활성화
+    setTimeout(() => { isClickScrolling.current = false; }, 800);
   }, []);
 
-  // H2만 표시 (H3은 목차 칩에서 제외 — 공간 효율)
   const h2Items = toc.filter(t => t.level === 2);
   if (h2Items.length < 2) return null;
 
@@ -86,7 +102,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
               }}
             >
               <span style={{ fontSize: 9, fontWeight: 800, opacity: 0.7 }}>{i + 1}</span>
-              {cleanText.length > 14 ? cleanText.slice(0, 14) + '…' : cleanText}
+              {cleanText.length > 14 ? cleanText.slice(0, 14) + '\u2026' : cleanText}
             </button>
           );
         })}
