@@ -19,16 +19,29 @@ export const maxDuration = 120;
 
 const ANTHROPIC_KEY = () => process.env.ANTHROPIC_API_KEY || '';
 
-export const GET = withCronAuth(async (_req: NextRequest) => {
-  if (!ANTHROPIC_KEY()) {
-    return NextResponse.json({ ok: true, error: 'ANTHROPIC_API_KEY not set', updated: 0 });
-  }
+// 템플릿 기반 description 생성 (크레딧 불필요)
+function generateTemplateDesc(s: { symbol: string; name: string; market: string; sector: string | null; price: number; market_cap: number }): string {
+  const fmtCap = (n: number) => {
+    if (n >= 1000000000000) return `${(n / 1000000000000).toFixed(1)}조원`;
+    if (n >= 100000000) return `${Math.round(n / 100000000).toLocaleString()}억원`;
+    return `${n.toLocaleString()}원`;
+  };
+  const fmtPrice = (p: number) => p >= 10000 ? `${(p).toLocaleString()}원` : `${p}원`;
+  const marketLabel = s.market === 'KOSPI' || s.market === 'KOSDAQ' ? `${s.market} 상장` : `${s.market} 상장`;
+  const sectorLabel = s.sector ? `${s.sector} 섹터` : '';
+  const capLabel = s.market_cap > 0 ? `시가총액 ${fmtCap(s.market_cap)}` : '';
 
+  if (s.market === 'NYSE' || s.market === 'NASDAQ') {
+    return `${s.name}(${s.symbol})은(는) ${marketLabel}된 ${sectorLabel ? sectorLabel + ' ' : ''}글로벌 기업입니다.${capLabel ? ` ${capLabel}.` : ''} 현재가 $${Number(s.price).toFixed(2)}.`;
+  }
+  return `${s.name}(${s.symbol})은(는) ${marketLabel}된 ${sectorLabel ? sectorLabel + ' ' : ''}기업입니다.${capLabel ? ` ${capLabel}.` : ''} 현재가 ${fmtPrice(Number(s.price))}.`;
+}
+
+export const GET = withCronAuth(async (_req: NextRequest) => {
   const result = await withCronLogging('stock-desc-gen', async () => {
     const sb = getSupabaseAdmin();
-    const BATCH = 20;
+    const BATCH = 50;
 
-    // description이 비어있는 종목 조회
     const { data: targets } = await sb.from('stock_quotes')
       .select('symbol, name, market, sector, price, market_cap')
       .or('description.is.null,description.eq.')
@@ -36,91 +49,58 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       .limit(BATCH);
 
     if (!targets?.length) {
-      return { processed: 0, created: 0, updated: 0, failed: 0, metadata: { message: '전체 완료 — description 누락 없음' } };
+      return { processed: 0, created: 0, updated: 0, failed: 0, metadata: { message: 'description 누락 없음' } };
     }
 
-    // 배치 프롬프트: 한 번의 AI 콜로 20개 동시 생성
-    const stockList = targets.map((s, i) => 
-      `${i + 1}. ${s.symbol} | ${s.name} | ${s.market} | ${s.sector || '미분류'} | 시가총액 ${s.market_cap ? Math.round(s.market_cap / 100000000) + '억원' : '미정'}`
-    ).join('\n');
+    let updated = 0;
+    let failed = 0;
+    let mode = 'template';
 
-    const prompt = `다음 주식 종목들의 한국어 설명(description)을 각각 2~3문장으로 작성해주세요.
-
-규칙:
-- 투자자에게 유용한 핵심 사업 설명 위주
-- "~하는 기업입니다" 형태
-- 해외 종목도 한국어로 설명
-- 각 종목은 반드시 번호를 유지하고 JSON 배열로 응답
-- 다른 텍스트 없이 JSON만 응답
-
-종목 목록:
-${stockList}
-
-응답 형식 (JSON만):
-[{"n":1,"desc":"설명..."},{"n":2,"desc":"설명..."}]`;
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_KEY(),
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 3000,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-        signal: AbortSignal.timeout(30000),
-      });
-
-      if (!res.ok) {
-        if (res.status === 529 || res.status === 402) {
-          return { processed: 0, created: 0, updated: 0, failed: targets.length, metadata: { error: 'Anthropic 크레딧 부족' } };
-        }
-        return { processed: 0, created: 0, updated: 0, failed: targets.length, metadata: { error: `API ${res.status}` } };
-      }
-
-      const data = await res.json();
-      const text = data?.content?.[0]?.text || '';
-      
-      // JSON 파싱 (코드블록 제거)
-      const clean = text.replace(/```json\s*|```/g, '').trim();
-      let descriptions: { n: number; desc: string }[];
+    // AI 시도 (키 있을 때만, 최대 20건)
+    if (ANTHROPIC_KEY()) {
       try {
-        descriptions = JSON.parse(clean);
-      } catch {
-        // 부분 파싱 시도
-        const match = clean.match(/\[[\s\S]*\]/);
-        if (match) {
-          try { descriptions = JSON.parse(match[0]); } catch { 
-            return { processed: targets.length, created: 0, updated: 0, failed: targets.length, metadata: { error: 'JSON parse failed' } };
+        const aiBatch = targets.slice(0, 20);
+        const stockList = aiBatch.map((s: any, i: number) =>
+          `${i + 1}. ${s.symbol} | ${s.name} | ${s.market} | ${s.sector || '미분류'} | 시총 ${s.market_cap ? Math.round(s.market_cap / 100000000) + '억' : '미정'}`
+        ).join('\n');
+        const prompt = `다음 주식 종목들의 한국어 설명을 각각 2~3문장으로. 핵심 사업 위주. JSON만: [{"n":1,"desc":"..."}]\n${stockList}`;
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
+          signal: AbortSignal.timeout(30000),
+        });
+        if (res.ok) {
+          const text = ((await res.json())?.content?.[0]?.text || '').replace(/```json\s*|```/g, '').trim();
+          const match = text.match(/\[[\s\S]*\]/);
+          if (match) {
+            const descs: { n: number; desc: string }[] = JSON.parse(match[0]);
+            for (const item of descs) {
+              const idx = item.n - 1;
+              if (idx >= 0 && idx < aiBatch.length && item.desc) {
+                const { error } = await sb.from('stock_quotes').update({ description: item.desc }).eq('symbol', aiBatch[idx].symbol);
+                if (!error) { updated++; mode = 'ai+template'; }
+              }
+            }
           }
-        } else {
-          return { processed: targets.length, created: 0, updated: 0, failed: targets.length, metadata: { error: 'No JSON array' } };
         }
-      }
-
-      let updated = 0;
-      let failed = 0;
-
-      for (const item of descriptions) {
-        const idx = item.n - 1;
-        if (idx < 0 || idx >= targets.length || !item.desc) { failed++; continue; }
-        const stock = targets[idx];
-
-        const { error } = await sb.from('stock_quotes')
-          .update({ description: item.desc })
-          .eq('symbol', stock.symbol);
-
-        if (error) { failed++; } else { updated++; }
-      }
-
-      return { processed: targets.length, created: updated, updated, failed, metadata: { aiModel: 'haiku-4.5' } };
-    } catch (e) {
-      return { processed: targets.length, created: 0, updated: 0, failed: targets.length, metadata: { error: e instanceof Error ? e.message : 'unknown' } };
+      } catch { /* AI 실패 → 템플릿 폴백 */ }
     }
+
+    // 템플릿으로 나머지 채우기 (AI 처리 안 된 것 + AI 없을 때 전체)
+    const { data: remaining } = await sb.from('stock_quotes')
+      .select('symbol, name, market, sector, price, market_cap')
+      .or('description.is.null,description.eq.')
+      .order('market_cap', { ascending: false, nullsFirst: false })
+      .limit(BATCH);
+
+    for (const stock of (remaining || [])) {
+      const desc = generateTemplateDesc(stock as any);
+      const { error } = await sb.from('stock_quotes').update({ description: desc }).eq('symbol', stock.symbol);
+      if (error) { failed++; } else { updated++; }
+    }
+
+    return { processed: targets.length, created: updated, updated, failed, metadata: { mode, batch: targets.length } };
   });
 
   if (!result.success) return NextResponse.json({ ok: true, error: result.error });

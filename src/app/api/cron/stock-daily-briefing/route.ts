@@ -37,20 +37,33 @@ export async function GET(req: NextRequest) {
     }
     const sectorPerf = Object.entries(sectorMap).map(([name, v]) => ({ name, avg_pct: +(v.total / v.count).toFixed(2) })).sort((a, b) => b.avg_pct - a.avg_pct);
 
-    // Generate AI briefing via Anthropic
+    // Generate briefing — AI 우선, 실패 시 데이터 기반 자동 생성
     let title = '오늘의 시황';
     let summary = '';
     let sentiment = 'neutral';
     const sectorAnalysis: Record<string, any>[] = sectorPerf.slice(0, 6);
     let apiCalls = 0;
+    let mode = 'data';
+
+    // 데이터 기반 자동 생성 (AI 불필요)
+    const autoGenerate = () => {
+      const avgChg = allStocks.length > 0 ? allStocks.reduce((s: number, st: any) => s + (Number(st.change_pct) || 0), 0) / allStocks.length : 0;
+      sentiment = avgChg > 0.3 ? 'bullish' : avgChg < -0.3 ? 'bearish' : 'neutral';
+      const sentLabel = sentiment === 'bullish' ? '상승' : sentiment === 'bearish' ? '하락' : '보합';
+      title = `${sentLabel}세 · ${topGainers[0]?.name || ''} 강세`;
+      const topG = topGainers.slice(0, 3).map((s: any) => `${s.name}(+${Number(s.change_pct).toFixed(1)}%)`).join(' ');
+      const topL = topLosers.slice(0, 3).map((s: any) => `${s.name}(${Number(s.change_pct).toFixed(1)}%)`).join(' ');
+      const topSec = sectorPerf.slice(0, 2).map(s => `${s.name}(${s.avg_pct > 0 ? '+' : ''}${s.avg_pct}%)`).join(' ');
+      summary = `상승: ${topG}. 하락: ${topL}. 섹터: ${topSec}.`;
+    };
 
     if (process.env.ANTHROPIC_API_KEY) {
       try {
         const prompt = `오늘 한국 증시 데이터:
-상승 TOP5: ${topGainers.map(s => `${s.name}(${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${Number(s.change_pct ?? 0).toFixed(1)}%)`).join(', ')}
-하락 TOP5: ${topLosers.map(s => `${s.name}(${Number(s.change_pct ?? 0).toFixed(1)}%)`).join(', ')}
+상승 TOP5: ${topGainers.map((s: any) => `${s.name}(${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${Number(s.change_pct ?? 0).toFixed(1)}%)`).join(', ')}
+하락 TOP5: ${topLosers.map((s: any) => `${s.name}(${Number(s.change_pct ?? 0).toFixed(1)}%)`).join(', ')}
 섹터: ${sectorPerf.slice(0, 5).map(s => `${s.name}(${s.avg_pct > 0 ? '+' : ''}${s.avg_pct}%)`).join(', ')}
-${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${Number(t.avg_change_rate ?? 0) > 0 ? '+' : ''}${Number(t.avg_change_rate ?? 0).toFixed(1)}%)`).join(', ')}` : ''}
+${themeHistory?.length ? `테마: ${themeHistory.map((t: any) => `${t.theme_name}(${Number(t.avg_change_rate ?? 0) > 0 ? '+' : ''}${Number(t.avg_change_rate ?? 0).toFixed(1)}%)`).join(', ')}` : ''}
 
 200자 이내로 시황을 요약하세요. JSON만 응답: {"title":"제목(20자이내)","summary":"요약","sentiment":"bullish|neutral|bearish"}`;
 
@@ -61,8 +74,7 @@ ${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${Num
           signal: AbortSignal.timeout(15000),
         });
         apiCalls = 1;
-        if (!res.ok) { if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } }; return { processed: 0, created: 0, failed: 1, metadata: { reason: 'anthropic_error', status: res.status } }; }
-      if (res.ok) {
+        if (res.ok) {
           const data = await res.json();
           const match = (data.content?.[0]?.text || '').match(/\{[\s\S]*\}/);
           if (match) {
@@ -70,10 +82,11 @@ ${themeHistory?.length ? `테마: ${themeHistory.map(t => `${t.theme_name}(${Num
             if (parsed.title) title = parsed.title;
             if (parsed.summary) summary = parsed.summary;
             if (parsed.sentiment) sentiment = parsed.sentiment;
-          }
-        }
-      } catch {}
-    }
+            mode = 'ai';
+          } else { autoGenerate(); }
+        } else { autoGenerate(); } // 402/529 크레딧 소진 → 데이터 기반 폴백
+      } catch { autoGenerate(); }
+    } else { autoGenerate(); } // API 키 없음 → 데이터 기반 폴백
 
     if (!summary) {
       const upPct = allStocks.filter(s => Number(s.change_pct ?? 0) > 0).length / (allStocks.length || 1) * 100;
@@ -146,7 +159,7 @@ Sectors: ${usSectorPerf.slice(0,5).map(s=>`${s.name}(${s.avg_pct>0?'+':''}${s.av
       apiCalls += 1;
     }
 
-    return { processed: allStocks.length + usAll.length, created: 2, failed: 0, metadata: { api_name: 'anthropic', api_calls: apiCalls } };
+    return { processed: allStocks.length + usAll.length, created: 2, failed: 0, metadata: { mode, api_calls: apiCalls } };
   });
 
   if (!result.success) return NextResponse.json({ error: result.error }, { status: 200 });

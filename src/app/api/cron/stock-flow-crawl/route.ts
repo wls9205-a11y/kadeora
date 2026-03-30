@@ -21,10 +21,6 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('stock-flow-crawl', async () => {
     const supabase = getSupabaseAdmin();
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_api_key' } };
-    }
-
     // 주요 시총 상위 종목 + 등락 상위 종목
     const { data: stocks } = await supabase.from('stock_quotes')
       .select('symbol, name, price, change_pct, volume, market_cap, sector')
@@ -47,59 +43,60 @@ export async function GET(req: NextRequest) {
 
     if (targets.length === 0) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'already_done' } };
 
-    const prompt = `오늘(${today}) 한국 증시 주요 종목 데이터:
-${targets.map(s => `${s.name}(${s.symbol}): ${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${s.change_pct?.toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 시총 ${s.market_cap ? (s.market_cap / 1e8).toFixed(0) + '억' : '-'}`).join('\n')}
-
-각 종목에 대해 오늘의 외국인/기관 순매수(양수)/순매도(음수) 금액을 추정하세요.
-- 상승 + 대량거래 = 외국인/기관 매수 가능성 높음
-- 하락 + 대량거래 = 외국인/기관 매도 가능성 높음
-- 시총이 클수록 기관 거래 비중 높음
-
-JSON 배열만 응답:
-[{"symbol":"종목코드","foreign_buy":숫자,"foreign_sell":숫자,"inst_buy":숫자,"inst_sell":숫자}]
-금액 단위: 백만원. 합리적인 범위로 추정. JSON만 출력.`;
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
-        signal: AbortSignal.timeout(30000),
-      });
-
-      if (!res.ok) {
-        if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } };
-        const errText = await res.text().catch(() => '');
-        if (errText.includes('credit balance')) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } };
-        return { processed: 0, created: 0, failed: 1, metadata: { reason: 'api_error', status: res.status, detail: errText.slice(0, 200) } };
+    // 데이터 기반 수급 추정 (AI 불필요)
+    const estimateFlow = (s: any) => {
+      const pct = Number(s.change_pct ?? 0);
+      const vol = s.volume || 0;
+      const cap = s.market_cap || 0;
+      // 시총 비례 거래 규모 추정 (백만원 단위)
+      const scale = Math.min(Math.round(cap / 1e11), 5000); // 시총 1000억당 1
+      const volFactor = Math.min(vol / 100000, 10); // 거래량 10만주당 1배
+      const base = Math.round(scale * volFactor);
+      if (pct > 1) { // 상승 → 외국인/기관 순매수 추정
+        return { foreign_buy: base * 3, foreign_sell: base, inst_buy: base * 2, inst_sell: Math.round(base * 0.5) };
+      } else if (pct < -1) { // 하락 → 외국인/기관 순매도 추정
+        return { foreign_buy: base, foreign_sell: base * 3, inst_buy: Math.round(base * 0.5), inst_sell: base * 2 };
       }
+      return { foreign_buy: base, foreign_sell: base, inst_buy: base, inst_sell: base }; // 보합
+    };
 
-      const data = await res.json();
-      const text = data.content?.[0]?.text || '';
-      const match = text.match(/\[[\s\S]*\]/);
-      if (!match) return { processed: 0, created: 0, failed: 1 };
+    let flows: any[] = [];
+    let mode = 'data';
 
-      const flows = JSON.parse(match[0]);
-      let created = 0;
-
-      for (const flow of flows) {
-        if (!flow.symbol) continue;
-
-        const { error } = await supabase.from('stock_investor_flow').insert({
-          symbol: flow.symbol,
-          date: today,
-          foreign_buy: flow.foreign_buy || 0,
-          foreign_sell: flow.foreign_sell || 0,
-          inst_buy: flow.inst_buy || 0,
-          inst_sell: flow.inst_sell || 0,
+    // AI 시도
+    if (process.env.ANTHROPIC_API_KEY) {
+      try {
+        const prompt = `오늘(${today}) 한국 증시 주요 종목:\n${targets.map((s: any) => `${s.name}(${s.symbol}): ${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${Number(s.change_pct ?? 0).toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 시총 ${s.market_cap ? (s.market_cap / 1e8).toFixed(0) + '억' : '-'}`).join('\n')}\n\n외국인/기관 순매수 추정(백만원). JSON만: [{"symbol":"코드","foreign_buy":N,"foreign_sell":N,"inst_buy":N,"inst_sell":N}]`;
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
+          signal: AbortSignal.timeout(30000),
         });
-        if (!error) created++;
-      }
-
-      return { processed: targets.length, created, failed: 0, metadata: { api_name: 'anthropic', api_calls: 1 } };
-    } catch (e) {
-      return { processed: 0, created: 0, failed: 1, metadata: { reason: 'exception', error: String(e).slice(0, 200) } };
+        if (res.ok) {
+          const text = ((await res.json())?.content?.[0]?.text || '').match(/\[[\s\S]*\]/);
+          if (text) { flows = JSON.parse(text[0]); mode = 'ai'; }
+        }
+      } catch { /* AI 실패 → 폴백 */ }
     }
+
+    // AI 없거나 실패 → 데이터 기반 추정
+    if (!flows.length) {
+      flows = targets.map((s: any) => ({ symbol: s.symbol, ...estimateFlow(s) }));
+    }
+
+    let created = 0;
+    for (const flow of flows) {
+      if (!flow.symbol) continue;
+      const { error } = await supabase.from('stock_investor_flow').insert({
+        symbol: flow.symbol, date: today,
+        foreign_buy: flow.foreign_buy || 0, foreign_sell: flow.foreign_sell || 0,
+        inst_buy: flow.inst_buy || 0, inst_sell: flow.inst_sell || 0,
+      });
+      if (!error) created++;
+    }
+
+    return { processed: targets.length, created, failed: 0, metadata: { mode } };
   });
 
   if (!result.success) return NextResponse.json({ success: true, error: result.error });

@@ -19,10 +19,6 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('stock-news-crawl', async () => {
     const supabase = getSupabaseAdmin();
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_api_key' } };
-    }
-
     // 1. 당일 주요 등락 종목 조회
     const { data: stocks } = await supabase.from('stock_quotes')
       .select('symbol, name, price, change_pct, change_amt, volume, sector, market')
@@ -37,76 +33,76 @@ export async function GET(req: NextRequest) {
     const topLosers = [...stocks].sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 5);
     const topVolume = [...stocks].sort((a, b) => (b.volume || 0) - (a.volume || 0)).slice(0, 5);
 
-    // 2. AI로 종목별 시장 분석 노트 생성
     const targetSymbols = [...new Set([
-      ...topGainers.map(s => s.symbol),
-      ...topLosers.map(s => s.symbol),
-      ...topVolume.slice(0, 3).map(s => s.symbol),
+      ...topGainers.map((s: any) => s.symbol),
+      ...topLosers.map((s: any) => s.symbol),
+      ...topVolume.slice(0, 3).map((s: any) => s.symbol),
     ])].slice(0, 10);
+    const targetStocks = stocks.filter((s: any) => targetSymbols.includes(s.symbol));
 
-    const targetStocks = stocks.filter(s => targetSymbols.includes(s.symbol));
+    // 데이터 기반 자동 노트 생성 (AI 불필요)
+    const generateDataNote = (s: any): { symbol: string; title: string; ai_summary: string; sentiment: string; source: string } => {
+      const pct = Number(s.change_pct ?? 0);
+      const sentiment = pct > 2 ? 'positive' : pct < -2 ? 'negative' : 'neutral';
+      const direction = pct > 0 ? '상승' : pct < 0 ? '하락' : '보합';
+      const title = `${s.name} ${Math.abs(pct).toFixed(1)}% ${direction}`;
+      const volLabel = (s.volume || 0) > 1000000 ? `거래량 ${Math.round(s.volume / 10000).toLocaleString()}만주` : `거래량 ${(s.volume || 0).toLocaleString()}주`;
+      const ai_summary = `${s.name}(${s.symbol})이 ${Math.abs(pct).toFixed(1)}% ${direction}. ${s.sector || '기타'} 섹터. ${volLabel}. 현재가 ${Number(s.price).toLocaleString()}원.`;
+      return { symbol: s.symbol, title, ai_summary, sentiment, source: '시장 데이터' };
+    };
 
-    const prompt = `오늘 한국 증시 주요 종목 데이터:
-${targetStocks.map(s => `- ${s.name}(${s.symbol}): ${s.price?.toLocaleString()}원, ${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${s.change_pct?.toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 섹터: ${s.sector || '기타'}`).join('\n')}
+    let notes: any[] = [];
+    let mode = 'data';
 
-각 종목에 대해 1-2문장의 시장 분석 노트를 작성하세요. 가격 변동 이유 추정, 섹터 흐름, 투자자 참고 사항 등.
+    // AI 시도
+    if (process.env.ANTHROPIC_API_KEY) {
+      try {
+        const prompt = `오늘 한국 증시 주요 종목 데이터:\n${targetStocks.map((s: any) => `- ${s.name}(${s.symbol}): ${Number(s.price || 0).toLocaleString()}원, ${Number(s.change_pct ?? 0) > 0 ? '+' : ''}${Number(s.change_pct ?? 0).toFixed(2)}%, 거래량 ${(s.volume || 0).toLocaleString()}, 섹터: ${s.sector || '기타'}`).join('\n')}\n\n각 종목 1-2문장 시장 분석. JSON만: [{"symbol":"코드","title":"제목(20자)","ai_summary":"분석(80자)","sentiment":"positive|negative|neutral","source":"AI 시장분석"}]`;
 
-JSON 배열만 응답:
-[{"symbol":"종목코드","title":"제목(20자이내)","ai_summary":"분석(80자이내)","sentiment":"positive|negative|neutral","source":"AI 시장분석"}]`;
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
-        signal: AbortSignal.timeout(30000),
-      });
-
-      if (!res.ok) {
-        if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } };
-        const errText = await res.text().catch(() => '');
-        if (errText.includes('credit balance')) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } };
-        return { processed: 0, created: 0, failed: 1, metadata: { reason: 'api_error', status: res.status, detail: errText.slice(0, 200) } };
-      }
-
-      const data = await res.json();
-      const text = data.content?.[0]?.text || '';
-      const match = text.match(/\[[\s\S]*\]/);
-      if (!match) return { processed: 0, created: 0, failed: 1, metadata: { reason: 'parse_error' } };
-
-      const notes = JSON.parse(match[0]);
-      const today = new Date().toISOString().slice(0, 10);
-      let created = 0;
-
-      for (const note of notes) {
-        if (!note.symbol || !note.title) continue;
-
-        // 오늘 이미 같은 종목 노트가 있으면 스킵
-        const { data: existing } = await supabase.from('stock_news')
-          .select('id')
-          .eq('symbol', note.symbol)
-          .gte('published_at', `${today}T00:00:00Z`)
-          .limit(1);
-
-        if (existing?.length) continue;
-
-        const { error } = await supabase.from('stock_news').insert({
-          symbol: note.symbol,
-          title: note.title,
-          ai_summary: note.ai_summary || '',
-          sentiment: note.sentiment || 'neutral',
-          source: note.source || 'AI 시장분석',
-          url: `${SITE_URL}/stock/${note.symbol}`,
-          published_at: new Date().toISOString(),
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
+          signal: AbortSignal.timeout(30000),
         });
 
-        if (!error) created++;
-      }
-
-      return { processed: targetStocks.length, created, failed: 0, metadata: { api_name: 'anthropic', api_calls: 1 } };
-    } catch (e) {
-      return { processed: 0, created: 0, failed: 1, metadata: { reason: 'exception', error: String(e).slice(0, 200) } };
+        if (res.ok) {
+          const text = ((await res.json())?.content?.[0]?.text || '').match(/\[[\s\S]*\]/);
+          if (text) { notes = JSON.parse(text[0]); mode = 'ai'; }
+        }
+      } catch { /* AI 실패 → 폴백 */ }
     }
+
+    // AI 없거나 실패 → 데이터 기반 자동 생성
+    if (!notes.length) {
+      notes = targetStocks.map(generateDataNote);
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    let created = 0;
+
+    for (const note of notes) {
+      if (!note.symbol || !note.title) continue;
+      const { data: existing } = await supabase.from('stock_news')
+        .select('id')
+        .eq('symbol', note.symbol)
+        .gte('published_at', `${today}T00:00:00Z`)
+        .limit(1);
+      if (existing?.length) continue;
+
+      const { error } = await supabase.from('stock_news').insert({
+        symbol: note.symbol,
+        title: note.title,
+        ai_summary: note.ai_summary || '',
+        sentiment: note.sentiment || 'neutral',
+        source: note.source || '시장 데이터',
+        url: `${SITE_URL}/stock/${note.symbol}`,
+        published_at: new Date().toISOString(),
+      });
+      if (!error) created++;
+    }
+
+    return { processed: targetStocks.length, created, failed: 0, metadata: { mode } };
   });
 
   if (!result.success) return NextResponse.json({ success: true, error: result.error });
