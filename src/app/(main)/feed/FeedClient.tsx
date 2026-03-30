@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { Heart, MessageCircle, Share2, Search, User, TrendingUp, Clock, Users } from 'lucide-react';
+import { MessageCircle, Share2, Search, User, TrendingUp, Clock, Users } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -14,10 +14,37 @@ import EmptyState from '@/components/EmptyState';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import PersonalDashboard from '@/components/PersonalDashboard';
 import DailyReportCard from '@/components/DailyReportCard';
+import LiveActivityIndicator from '@/components/LiveActivityIndicator';
+import MiniWatchlist from '@/components/MiniWatchlist';
+import WeeklyPrediction from '@/components/WeeklyPrediction';
+import PostReactions from '@/components/PostReactions';
+import LoungeLivePreview from '@/components/LoungeLivePreview';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
 const PAGE_SIZE = 20;
+
+// 베스트 댓글 미리보기 (카드 내부)
+function BestCommentPreview({ postId }: { postId: number }) {
+  const [best, setBest] = useState<{ content: string; nickname: string; likes_count: number; grade: number } | null>(null);
+  useEffect(() => {
+    const sb = createSupabaseBrowser();
+    (sb as any).rpc('get_best_comment', { p_post_id: postId }).then(({ data }: any) => {
+      if (data && data.content) setBest(data);
+    });
+  }, [postId]);
+  if (!best) return null;
+  return (
+    <div style={{ marginTop: 6, padding: '5px 8px', borderLeft: '2px solid rgba(59,123,246,0.3)', background: 'var(--bg-hover)', borderRadius: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)' }}>Best</span>
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{best.nickname} {GRADE_EMOJI[best.grade] ?? '🌱'}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>♥ {best.likes_count}</span>
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{best.content}</div>
+    </div>
+  );
+}
 
 type SortKey = 'latest' | 'popular' | 'comments';
 
@@ -259,8 +286,13 @@ export default function FeedClient({
           </div>
         </div>
 
+        {/* 실시간 활동 표시 */}
+        <LiveActivityIndicator />
+
         <PersonalDashboard />
+        <MiniWatchlist />
         <DailyReportCard />
+        <WeeklyPrediction />
 
         {/* ━━━ 카테고리 탭 ━━━ */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', flexWrap: 'nowrap', paddingBottom: 2 }}>
@@ -402,6 +434,9 @@ export default function FeedClient({
           </div>
         )}
 
+        {/* 라운지 라이브 프리뷰 */}
+        <LoungeLivePreview />
+
         {/* ━━━ 게시글 목록 ━━━ */}
         <div className="listing-grid">
           {visiblePosts.map((post: PostWithProfile, i: number) => {
@@ -528,11 +563,7 @@ export default function FeedClient({
 
                 {/* 인터랙션 바 */}
                 <div className="kd-interaction-bar" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, paddingTop: 7, borderTop: '1px solid var(--border)' }}>
-                  <button onClick={(e) => handleUpvote(e, post.id as number)} aria-label="좋아요"
-                    className={isLiked ? 'animate-like' : ''}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, background: isLiked ? 'rgba(239,68,68,0.08)' : 'var(--bg-hover)', border: 'none', borderRadius: 16, cursor: 'pointer', fontSize: 11, color: isLiked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontWeight: 600, fontFamily: 'inherit', padding: '4px 10px', transition: 'all var(--transition-fast)' }}>
-                    <Heart size={14} fill={isLiked ? 'var(--accent-red)' : 'none'} stroke={isLiked ? 'var(--accent-red)' : 'currentColor'} /> {displayLikes > 0 ? numFmt(displayLikes) : '좋아요'}
-                  </button>
+                  <PostReactions postId={post.id as number} userId={currentUserId} initialLikes={displayLikes} compact />
                   <Link href={`${postHref}#comments`} aria-label="댓글"
                     style={{ display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, background: 'var(--bg-hover)', borderRadius: 16, padding: '4px 10px' }}>
                     <MessageCircle size={14} /> {commentCount > 0 ? numFmt(commentCount) : '댓글'}
@@ -555,6 +586,11 @@ export default function FeedClient({
                     </Link>
                   )}
                 </div>
+
+                {/* 베스트 댓글 미리보기 */}
+                {commentCount >= 3 && (
+                  <BestCommentPreview postId={post.id as number} />
+                )}
               </div>
             );
 
