@@ -567,3 +567,72 @@ body {
 /* 블로그 next-article 플로팅 카드 */
 @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .kd-next-article { animation: slideUp 0.3s ease-out; }
+
+/* ━━━ 세션58: 모바일 반응형 전면 강화 ━━━ */
+
+/* 부동산 탭 그리드 — 모바일에서 2열→1열 */
+@media (max-width: 420px) {
+  .mc-g2 { grid-template-columns: 1fr !important; }
+}
+
+/* 부동산 카드 내부 패딩 최적화 */
+.apt-card { padding: 12px 14px; border-radius: 10px; background: var(--bg-surface); border: 1px solid var(--border); margin-bottom: 8px; }
+@media (max-width: 380px) {
+  .apt-card { padding: 10px 12px; }
+}
+
+/* 테이블 오버플로우 — 모바일 가로 스크롤 */
+.apt-card table { width: 100%; font-size: var(--fs-xs); }
+@media (max-width: 480px) {
+  .apt-card table { font-size: 10px; }
+  .apt-card th, .apt-card td { padding: 4px 3px !important; }
+}
+
+/* KPI 3열 그리드 — 좁은 화면에서 간격 축소 */
+@media (max-width: 380px) {
+  .kpi-row { gap: 4px !important; }
+  .kpi-row > div { padding: 6px 4px !important; }
+}
+
+/* 도넛 차트 + 범례 — 모바일 스택 */
+@media (max-width: 420px) {
+  .region-overview-layout { flex-direction: column !important; }
+  .region-overview-layout > div:first-child { max-width: 160px; margin: 0 auto 8px; }
+}
+
+/* 탭 세그먼트 — 작은 화면에서 폰트 축소 */
+@media (max-width: 380px) {
+  .kd-tab-segment { font-size: 11px !important; }
+  .kd-tab-segment > button { padding: 6px 4px !important; }
+}
+
+/* 공유 버튼 — 모바일에서 간격 조정 */
+@media (max-width: 420px) {
+  .share-buttons { gap: 4px !important; }
+  .share-buttons button { padding: 4px 8px !important; font-size: 11px !important; }
+}
+
+/* 타임라인 단계 — 모바일 텍스트 축소 */
+@media (max-width: 380px) {
+  .tl-step { font-size: 8px !important; }
+}
+
+/* 필터 pill — 한줄 스크롤 */
+.filter-pills { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+.filter-pills::-webkit-scrollbar { display: none; }
+
+/* 카드 내 flex 줄바꿈 */
+@media (max-width: 420px) {
+  .card-flex-wrap { flex-wrap: wrap !important; }
+}
+
+/* 분양 상세 — 시세 비교 테이블 스크롤 */
+@media (max-width: 480px) {
+  .apt-card .price-compare-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* 하단 CTA 버튼 — 모바일 풀너비 */
+@media (max-width: 420px) {
+  .cta-row { flex-direction: column !important; }
+  .cta-row > a, .cta-row > button { width: 100% !important; text-align: center !important; }
+}

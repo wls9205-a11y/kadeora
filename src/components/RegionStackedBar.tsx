@@ -43,7 +43,7 @@ const LABELS: Record<string, string> = {
   ongoing: '분양',
   unsold: '미분양',
   redev: '재개발',
-  trade: '실거래(1년)',
+  trade: '실거래(2026)',
 };
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
@@ -128,7 +128,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       </div>
 
       {/* Donut + Legend */}
-      <div style={{
+      <div className="region-overview-layout" style={{
         display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 6,

@@ -304,7 +304,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       {/* 종합 현황 + 수도권/지방 */}
       <div className="kd-card" style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 {ongoingRegion !== '전체' ? `${ongoingRegion} ` : ''}분양중 현황</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: 6 }}>
           {[
             { label: '전체', value: filtered.length, color: 'var(--brand)' },
             { label: '분양중', value: allSubCount, color: 'var(--accent-green)' },
@@ -385,7 +385,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 16 }}>
                 {[
                   ['공급 세대수', (o.total_supply ?? 0) > 0 ? (() => {
                     const types = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];

@@ -160,7 +160,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           { k: 'ongoing' as const, icon: '🏢', label: '분양중', badge: ongoingApts.length > 0 ? String(ongoingApts.length) : '',         badgeColor: 'var(--accent-purple)' },
           { k: 'unsold' as const,  icon: '🏚️', label: '미분양', badge: unsoldTotal > 0 ? `${Math.round(unsoldTotal/1000)}k` : '',        badgeColor: 'var(--accent-red)' },
           { k: 'redev' as const,   icon: '🏗️', label: '재개발', badge: redevCount > 0 ? String(redevCount) : '',                         badgeColor: 'var(--accent-orange)' },
-          { k: 'trade' as const,   icon: '💰', label: '실거래', badge: tradeCount > 0 ? `${(tradeCount/1000).toFixed(0)}k` : '',          badgeColor: 'var(--accent-cyan)' },
+          { k: 'trade' as const,   icon: '💰', label: '실거래', badge: tradeCount > 0 ? tradeCount.toLocaleString() : '',          badgeColor: 'var(--accent-cyan)' },
         ].map(({ k, icon, label, badge, badgeColor }) => {
           const isActive = activeTab === k;
           return (

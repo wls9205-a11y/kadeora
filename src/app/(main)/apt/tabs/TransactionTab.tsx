@@ -246,10 +246,16 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
         <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: 0 }}>
-          📊 국토교통부 실거래가 공개시스템 기준{freshDate ? ` · 최근 거래일 ${freshDate}` : ''} · 최근 1년
+          📊 국토교통부 실거래가 공개시스템 기준{freshDate ? ` · 최근 거래일 ${freshDate}` : ''} · 2026년 기준
         </p>
         <SectionShareButton section="apt-trade" label="아파트 실거래가 현황 — 지역별·단지별 시세" pagePath="/apt?tab=trade" />
       </div>
+
+      {/* 단지백과 유도 */}
+      <a href="/apt/complex" style={{ display: 'block', marginTop: 12, padding: '12px 16px', borderRadius: 10, background: 'linear-gradient(135deg, rgba(59,123,246,0.08), rgba(139,92,246,0.06))', border: '1px solid rgba(59,123,246,0.15)', textDecoration: 'none', textAlign: 'center' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)', marginBottom: 2 }}>📊 더 많은 실거래 데이터는 단지백과에서</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전국 34,000+ 아파트 · 매매 49만건 + 전월세 209만건 · 연차별 비교</div>
+      </a>
 
       {/* 실거래 상세 모달 */}
       {selected && (() => {
@@ -259,7 +265,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           <BottomSheet open={!!selected} onClose={() => setSelected(null)} title={t.apt_name}>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래가</div>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{fmtAmount(t.deal_amount || 0)}</div>
