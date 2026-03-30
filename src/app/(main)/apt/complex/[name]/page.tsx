@@ -100,10 +100,11 @@ export default async function ComplexDetailPage({ params }: Props) {
     .limit(200) as { data: Record<string, any>[] | null };
 
   if (!trades?.length) notFound();
+  const tradeList = trades!;
 
-  const region = trades[0].region_nm || '';
-  const dong = trades[0].dong || '';
-  const sigungu = trades[0].sigungu || '';
+  const region = tradeList[0].region_nm || '';
+  const dong = tradeList[0].dong || '';
+  const sigungu = tradeList[0].sigungu || '';
 
   // 관련 블로그
   let relatedBlogs: Record<string, any>[] = [];
@@ -143,11 +144,11 @@ export default async function ComplexDetailPage({ params }: Props) {
   } catch {}
 
   // 통계 계산
-  const amounts = trades.filter(t => t.deal_amount > 0).map(t => t.deal_amount);
+  const amounts = tradeList.filter(t => t.deal_amount > 0).map(t => t.deal_amount);
   const avgPrice = amounts.length ? Math.round(amounts.reduce((s, a) => s + a, 0) / amounts.length) : 0;
   const maxPrice = amounts.length ? Math.max(...amounts) : 0;
   const minPrice = amounts.length ? Math.min(...amounts) : 0;
-  const latestPrice = trades.length > 0 ? (trades[0]?.deal_amount || 0) : 0;
+  const latestPrice = tradeList.length > 0 ? (tradeList[0]?.deal_amount || 0) : 0;
 
   // 전월세 요약
   const latestJeonse = rentTrades.find(r => r.rent_type === 'jeonse');
@@ -155,16 +156,16 @@ export default async function ComplexDetailPage({ params }: Props) {
   const jeonseRatio = latestJeonse && latestPrice > 0 ? Math.round((latestJeonse.deposit / latestPrice) * 100) : null;
 
   // 면적별 그룹핑
-  const areaMap = new Map<string, { count: number; avg: number; trades: Record<string, any>[] }>();
-  trades.forEach(t => {
+  const areaMap = new Map<string, { count: number; avg: number; tradeList: Record<string, any>[] }>();
+  tradeList.forEach(t => {
     const area = `${Math.round(t.exclusive_area)}㎡`;
-    const cur = areaMap.get(area) || { count: 0, avg: 0, trades: [] };
+    const cur = areaMap.get(area) || { count: 0, avg: 0, tradeList: [] };
     cur.count++;
-    cur.trades.push(t);
+    cur.tradeList.push(t);
     areaMap.set(area, cur);
   });
   areaMap.forEach((v) => {
-    const amts = v.trades.filter((t: Record<string, any>) => t.deal_amount > 0).map((t: Record<string, any>) => t.deal_amount);
+    const amts = v.tradeList.filter((t: Record<string, any>) => t.deal_amount > 0).map((t: Record<string, any>) => t.deal_amount);
     v.avg = amts.length ? Math.round(amts.reduce((s: number, a: number) => s + a, 0) / amts.length) : 0;
   });
   const areaStats = Array.from(areaMap.entries())
@@ -173,7 +174,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
   // 연도별 평균가 추이
   const yearMap = new Map<string, { sum: number; cnt: number }>();
-  trades.forEach(t => {
+  tradeList.forEach(t => {
     if (!t.deal_date || !t.deal_amount) return;
     const ym = t.deal_date.slice(0, 7);
     const cur = yearMap.get(ym) || { sum: 0, cnt: 0 };
@@ -183,7 +184,7 @@ export default async function ComplexDetailPage({ params }: Props) {
   });
   const monthlyTrend = [...yearMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([ym, d]) => ({ ym, avg: Math.round(d.sum / d.cnt), cnt: d.cnt }));
 
-  const builtYear = trades[0]?.built_year || profile?.built_year || 0;
+  const builtYear = tradeList[0]?.built_year || profile?.built_year || 0;
   const hasCoords = profile?.latitude && profile?.longitude;
 
   return (
@@ -211,13 +212,13 @@ export default async function ComplexDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Dataset',
         name: `${decoded} 아파트 실거래가 데이터`,
-        description: `${decoded} 아파트의 매매·전세·월세 실거래 데이터 ${trades.length + rentTrades.length}건`,
+        description: `${decoded} 아파트의 매매·전세·월세 실거래 데이터 ${tradeList.length + rentTrades.length}건`,
         url: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`,
         keywords: [decoded, '실거래가', '아파트 시세', region, sigungu],
         creator: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         dateModified: new Date().toISOString(),
         spatialCoverage: { '@type': 'Place', name: `${region} ${sigungu}` },
-        temporalCoverage: trades.length > 0 ? `${trades[trades.length-1]?.deal_date || ''}/${trades[0]?.deal_date || ''}` : '',
+        temporalCoverage: tradeList.length > 0 ? `${tradeList[tradeList.length-1]?.deal_date || ''}/${tradeList[0]?.deal_date || ''}` : '',
         distribution: { '@type': 'DataDownload', contentUrl: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`, encodingFormat: 'text/html' },
       })}} />
 
@@ -295,7 +296,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         {profile?.age_group && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: profile.age_group === '신축' ? 'rgba(59,123,246,0.1)' : 'var(--bg-hover)', color: profile.age_group === '신축' ? 'var(--brand)' : 'var(--text-secondary)' }}>{profile.age_group}</span>}
         {builtYear > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{builtYear}년 준공</span>}
       </div>
-      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 매매 {trades.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 매매 {tradeList.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
 
       {/* SEO 가시적 텍스트 (확장) */}
       <section className="site-description" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 14 }}>
@@ -304,7 +305,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           {avgPrice > 0 && <> 최근 매매 평균가 {fmtAmount(avgPrice)}, 최고가 {fmtAmount(maxPrice)}, 최저가 {fmtAmount(minPrice)}.</>}
           {latestJeonse && <> 전세가 {fmtAmount(latestJeonse.deposit)}{jeonseRatio ? ` (전세가율 ${jeonseRatio}%)` : ''}.</>}
           {latestMonthly && <> 월세 보증금 {fmtAmount(latestMonthly.deposit)}/월 {latestMonthly.monthly_rent}만원.</>}
-          {areaStats.length > 0 && <> {areaStats.length}개 면적 타입에서 {trades.length}건의 거래가 확인됩니다.</>}
+          {areaStats.length > 0 && <> {areaStats.length}개 면적 타입에서 {tradeList.length}건의 거래가 확인됩니다.</>}
         </p>
       </section>
 
@@ -333,7 +334,7 @@ export default async function ComplexDetailPage({ params }: Props) {
                   padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 800, display: 'inline-block',
                 }}>전세가율 {jeonseRatio}%</div>
               )}
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>거래 {trades.length}건</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>거래 {tradeList.length}건</div>
             </div>
           </div>
         </div>
@@ -453,9 +454,9 @@ export default async function ComplexDetailPage({ params }: Props) {
                   <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{a.area}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>평균 <span style={{ fontWeight: 700, color: c }}>{fmtAmount(a.avg)}</span></div>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{a.count}건 거래</div>
-                  {a.trades[0]?.exclusive_area > 0 && a.avg > 0 && (
+                  {a.tradeList[0]?.exclusive_area > 0 && a.avg > 0 && (
                     <div style={{ fontSize: 11, color: 'var(--accent-blue)', fontWeight: 700, marginTop: 3 }}>
-                      평당 {fmtAmount(Math.round(a.avg / (a.trades[0].exclusive_area / 3.3058)))}
+                      평당 {fmtAmount(Math.round(a.avg / (a.tradeList[0].exclusive_area / 3.3058)))}
                     </div>
                   )}
                 </div>
@@ -472,13 +473,13 @@ export default async function ComplexDetailPage({ params }: Props) {
       <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📋 매매 거래 이력</span>
-          <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{trades.length}건</span>
+          <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{tradeList.length}건</span>
         </div>
         {/* 헤더 */}
         <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 70px', gap: 8, padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
           <span>날짜</span><span>면적 · 층</span><span style={{ textAlign: 'right' }}>금액</span>
         </div>
-        {trades.slice(0, 50).map((t, i) => {
+        {tradeList.slice(0, 50).map((t, i) => {
           const amt = t.deal_amount || 0;
           const color = amt >= 100000 ? '#ef4444' : amt >= 50000 ? '#f97316' : amt >= 30000 ? '#3b82f6' : '#22c55e';
           return (
@@ -497,9 +498,9 @@ export default async function ComplexDetailPage({ params }: Props) {
             </div>
           );
         })}
-        {trades.length > 50 && (
+        {tradeList.length > 50 && (
           <div style={{ textAlign: 'center', padding: '14px 0', color: 'var(--text-tertiary)', fontSize: 12, fontWeight: 600 }}>
-            +{trades.length - 50}건 더 있음
+            +{tradeList.length - 50}건 더 있음
           </div>
         )}
       </div>
