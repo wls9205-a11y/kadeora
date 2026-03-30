@@ -128,81 +128,156 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         {shareButton}
       </div>
 
-      {/* V2-A: Mini donut + 2×3 interactive card grid */}
+      {/* B-2: Mini donut + 2×4 interactive card grid with progress bars */}
       <div style={{
-        display: 'flex', gap: 10, alignItems: 'center',
+        display: 'flex', gap: 8, alignItems: 'center',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '10px 10px', marginBottom: 6,
+        borderRadius: 'var(--radius-md)', padding: '10px 8px', marginBottom: 6,
         overflow: 'hidden',
       }}>
         {/* Mini donut */}
         <div style={{ flexShrink: 0, textAlign: 'center' }}>
-          <svg width={72} height={72} viewBox="0 0 72 72">
-            <circle cx={36} cy={36} r={R} fill="none" stroke="var(--border)" strokeWidth={10} opacity={0.2} />
-            <g transform="rotate(-90 36 36)">
+          <svg width={64} height={64} viewBox="0 0 64 64">
+            <circle cx={32} cy={32} r={R} fill="none" stroke="var(--border)" strokeWidth={9} opacity={0.2} />
+            <g transform="rotate(-90 32 32)">
               {arcs.map(a => (
-                <circle key={a.key} cx={36} cy={36} r={R} fill="none" stroke={a.color} strokeWidth={10} strokeDasharray={a.dasharray} strokeDashoffset={a.dashoffset} strokeLinecap="butt" style={{ transition: 'stroke-dasharray 0.3s' }} />
+                <circle key={a.key} cx={32} cy={32} r={R} fill="none" stroke={a.color} strokeWidth={9} strokeDasharray={a.dasharray} strokeDashoffset={a.dashoffset} strokeLinecap="butt" style={{ transition: 'stroke-dasharray 0.3s' }} />
               ))}
             </g>
-            <text x={36} y={33} textAnchor="middle" style={{ fontSize: 9, fill: 'var(--text-tertiary)' }}>{sel ? sel.name : '전체'}</text>
-            <text x={36} y={44} textAnchor="middle" style={{ fontSize: 13, fontWeight: 700, fill: 'var(--text-primary)' }}>{total.toLocaleString()}</text>
+            <text x={32} y={29} textAnchor="middle" style={{ fontSize: 9, fill: 'var(--text-tertiary)' }}>{sel ? sel.name : '전체'}</text>
+            <text x={32} y={39} textAnchor="middle" style={{ fontSize: 12, fontWeight: 700, fill: 'var(--text-primary)' }}>{total.toLocaleString()}</text>
           </svg>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{dataFreshness?.sub ? `${dataFreshness.sub.split(' ').slice(0, 2).join(' ')} 수집` : ''}</div>
         </div>
-        {/* 2×3 card grid */}
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 4, minWidth: 0 }}>
+        {/* 2×4 card grid */}
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 3, minWidth: 0 }}>
           {(() => {
             const today = new Date().toISOString().slice(0, 10);
             const openCount = apts.filter((a: any) => a.rcept_bgnde <= today && a.rcept_endde >= today).length;
             const upcomingCount = apts.filter((a: any) => a.rcept_bgnde > today).length;
             const unsoldUnits = (unsold as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
-            const redevTop = Object.entries(redevByRegion).sort((a, b) => b[1] - a[1]).slice(0, 2);
             const tradeAvg = transactions.length > 0 ? Math.round((transactions as any[]).reduce((s: number, t: any) => s + (Number(t.deal_amount) || 0), 0) / transactions.length) : 0;
             const tradeMax = transactions.length > 0 ? Math.max(...(transactions as any[]).map((t: any) => Number(t.deal_amount) || 0)) : 0;
             const fmtA = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : n > 0 ? `${n.toLocaleString()}만` : '-';
+            // 재개발/재건축 분리 카운트
+            const redevCount = (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재개발')).length;
+            const rebuildCount = (redevelopment as any[]).filter((r: any) => (r.project_type || '').includes('재건축')).length;
+            const maxVal = Math.max(cats.sub, cats.ongoing, cats.unsold, cats.redev, cats.trade, 34495, 5522);
 
-            const cards = [
-              { key: 'sub', tab: 'sub', label: '청약정보', value: cats.sub, color: COLORS.sub, tags: [
-                ...(openCount > 0 ? [{ text: `접수 ${openCount}`, bg: 'rgba(59,155,107,0.12)', color: '#3B9B6B' }] : []),
-                ...(upcomingCount > 0 ? [{ text: `예정 ${upcomingCount}`, bg: 'rgba(96,165,250,0.1)', color: '#60A5FA' }] : []),
-              ]},
-              { key: 'ongoing', tab: 'ongoing', label: '분양중', value: cats.ongoing, color: COLORS.ongoing, tags: [
-                { text: '입주전 현장', bg: 'rgba(127,119,221,0.08)', color: '#7F77DD' },
-              ]},
-              { key: 'unsold', tab: 'unsold', label: '미분양', value: cats.unsold, color: COLORS.unsold, tags: [
-                ...(unsoldUnits > 0 ? [{ text: `${unsoldUnits.toLocaleString()}세대`, bg: 'rgba(226,75,74,0.12)', color: '#E24B4A' }] : []),
-              ]},
-              { key: 'redev', tab: 'redev', label: '재개발', value: cats.redev, color: COLORS.redev, tags: redevTop.map(([r, c]) => ({ text: `${r} ${c}`, bg: 'rgba(216,90,48,0.08)', color: '#D85A30' })) },
-              { key: 'trade', tab: 'trade', label: '실거래(2026)', value: cats.trade, color: COLORS.trade, tags: [
-                ...(tradeAvg > 0 ? [{ text: `평균 ${fmtA(tradeAvg)}`, bg: 'rgba(55,138,221,0.1)', color: '#378ADD' }] : []),
-                ...(tradeMax > 0 ? [{ text: `최고 ${fmtA(tradeMax)}`, bg: 'rgba(55,138,221,0.06)', color: '#378ADD' }] : []),
-              ]},
-              { key: 'complex', tab: null, label: '단지백과', value: 34495, color: 'var(--text-tertiary)', tags: [
-                { text: '매매 49.7만', bg: 'var(--bg-hover)', color: 'var(--text-secondary)' },
-                { text: '전월세 209만', bg: 'var(--bg-hover)', color: 'var(--text-secondary)' },
-              ]},
-            ];
+            const cardStyle = (color: string) => ({
+              padding: '5px 5px', borderLeft: `2px solid ${color}`, borderRadius: 0 as const, cursor: 'pointer' as const, transition: 'background 0.12s',
+            });
+            const barStyle = (pct: number, color: string) => (
+              <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 3, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.max(pct, 1)}%`, background: color, borderRadius: 2 }} />
+              </div>
+            );
+            const descStyle: React.CSSProperties = { fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const };
+            const hoverIn = (e: React.MouseEvent) => (e.currentTarget.style.background = 'var(--bg-hover)');
+            const hoverOut = (e: React.MouseEvent) => (e.currentTarget.style.background = 'transparent');
 
-            return cards.map(c => (
-              <div key={c.key} onClick={() => {
-                if (c.tab && onTabChange) onTabChange(c.tab);
-                else if (c.key === 'complex') window.location.href = '/apt/complex';
-              }} style={{
-                padding: '6px 6px', borderRadius: 6, borderLeft: `2px solid ${c.color}`,
-                cursor: 'pointer', transition: 'background 0.15s',
-              }} onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{c.value.toLocaleString()}</span>
+            return <>
+              {/* 청약정보 */}
+              <div style={cardStyle(COLORS.sub)} onClick={() => onTabChange?.('sub')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.sub.toLocaleString()}</span>
                   <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
                 </div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>{c.label}</div>
-                <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                  {c.tags.map((t, i) => (
-                    <span key={i} style={{ fontSize: 9, padding: '0px 4px', borderRadius: 3, background: t.bg, color: t.color, fontWeight: 500 }}>{t.text}</span>
-                  ))}
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>청약정보</div>
+                {barStyle(Math.round(cats.sub / maxVal * 100), COLORS.sub)}
+                <div style={{ display: 'flex', gap: 2, marginTop: 2, flexWrap: 'wrap' }}>
+                  {openCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(59,155,107,0.1)', color: '#3B9B6B', fontWeight: 500 }}>접수 {openCount}</span>}
+                  {upcomingCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(96,165,250,0.08)', color: '#60A5FA', fontWeight: 500 }}>예정 {upcomingCount}</span>}
                 </div>
+                <div style={descStyle}>전국 아파트 청약 일정, 경쟁률, 당첨 결과</div>
               </div>
-            ));
+              {/* 분양중 */}
+              <div style={cardStyle(COLORS.ongoing)} onClick={() => onTabChange?.('ongoing')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.ongoing.toLocaleString()}</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>분양중</div>
+                {barStyle(Math.round(cats.ongoing / maxVal * 100), COLORS.ongoing)}
+                <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: COLORS.ongoing }}>입주전 현장</span></div>
+                <div style={descStyle}>청약 마감 후 입주 전 현장 + 미분양 통합</div>
+              </div>
+              {/* 미분양 */}
+              <div style={cardStyle(COLORS.unsold)} onClick={() => onTabChange?.('unsold')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.unsold.toLocaleString()}</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>미분양</div>
+                {barStyle(Math.round(cats.unsold / maxVal * 100), COLORS.unsold)}
+                {unsoldUnits > 0 && <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(226,75,74,0.1)', color: '#E24B4A', fontWeight: 500 }}>{unsoldUnits.toLocaleString()}세대</span></div>}
+                <div style={descStyle}>전국 미분양 세대수, 준공후 미분양 현황</div>
+              </div>
+              {/* 재개발·재건축 */}
+              <div style={cardStyle(COLORS.redev)} onClick={() => onTabChange?.('redev')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.redev.toLocaleString()}</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>재개발·재건축</div>
+                {barStyle(Math.round(cats.redev / maxVal * 100), COLORS.redev)}
+                <div style={{ display: 'flex', gap: 2, marginTop: 2, flexWrap: 'wrap' }}>
+                  {redevCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(216,90,48,0.08)', color: '#D85A30', fontWeight: 500 }}>재개발 {redevCount}</span>}
+                  {rebuildCount > 0 && <span style={{ fontSize: 9, color: '#D85A30', fontWeight: 500 }}>재건축 {rebuildCount}</span>}
+                </div>
+                <div style={descStyle}>전국 정비사업 단계별 진행 현황</div>
+              </div>
+              {/* 실거래(2026) */}
+              <div style={cardStyle(COLORS.trade)} onClick={() => onTabChange?.('trade')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{cats.trade.toLocaleString()}</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>실거래(2026)</div>
+                {barStyle(Math.round(cats.trade / maxVal * 100), COLORS.trade)}
+                <div style={{ display: 'flex', gap: 2, marginTop: 2, flexWrap: 'wrap' }}>
+                  {tradeAvg > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(55,138,221,0.08)', color: '#378ADD', fontWeight: 500 }}>평균 {fmtA(tradeAvg)}</span>}
+                  {tradeMax > 0 && <span style={{ fontSize: 9, color: '#378ADD', fontWeight: 500 }}>최고 {fmtA(tradeMax)}</span>}
+                </div>
+                <div style={descStyle}>전국 아파트 매매 실거래가, 지역별 시세 동향</div>
+              </div>
+              {/* 단지백과 */}
+              <div style={{ ...cardStyle('var(--border)'), borderLeftColor: 'var(--border)' }} onClick={() => { window.location.href = '/apt/complex'; }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>34,495</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>단지백과</div>
+                {barStyle(100, 'var(--border)')}
+                <div style={{ display: 'flex', gap: 2, marginTop: 2, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>매매 49.7만</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>전월세 209만</span>
+                </div>
+                <div style={descStyle}>전국 아파트 연차별 매매·전세·월세 시세 비교</div>
+              </div>
+              {/* 분양사이트 */}
+              <div style={cardStyle('#22D3EE')} onClick={() => { window.location.href = '/apt/sites'; }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#22D3EE', fontVariantNumeric: 'tabular-nums' }}>5,522</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>분양사이트</div>
+                {barStyle(Math.round(5522 / maxVal * 100), '#22D3EE')}
+                <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: '#22D3EE', fontWeight: 500 }}>전국 현장</span></div>
+                <div style={descStyle}>전국 분양 현장별 분양가·시공사·입주 정보</div>
+              </div>
+              {/* 부동산 지도 */}
+              <div style={cardStyle('#FBB724')} onClick={() => { window.location.href = '/apt/map'; }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#BA7517', fontVariantNumeric: 'tabular-nums' }}>지도</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>부동산 지도</div>
+                {barStyle(60, '#FBB724')}
+                <div style={{ marginTop: 2 }}><span style={{ fontSize: 9, color: '#BA7517', fontWeight: 500 }}>17개 지역</span></div>
+                <div style={descStyle}>전국 청약·분양·미분양·재개발 지도 한눈에</div>
+              </div>
+            </>;
           })()}
         </div>
       </div>
