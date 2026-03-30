@@ -298,7 +298,7 @@ export default async function AptUnifiedPage({ params }: Props) {
     { q: `${name} 위치가 어디인가요?`, a: `${name}은(는) ${region} ${site?.sigungu || ''} ${site?.dong || site?.address || ''}에 위치해 있습니다. ${site?.nearby_station || sub?.nearest_station ? `최근접 역은 ${site?.nearby_station || sub?.nearest_station}입니다.` : ''}` },
     ...(sub?.rcept_bgnde ? [{ q: `${name} 청약 일정은 언제인가요?`, a: `${name}의 청약 접수 기간은 ${sub.rcept_bgnde} ~ ${sub.rcept_endde || ''}입니다. ${sub.przwner_presnatn_de ? `당첨자 발표일은 ${sub.przwner_presnatn_de}입니다.` : ''} ${sub.mvn_prearnge_ym ? `입주 예정은 ${fmtYM(sub.mvn_prearnge_ym)}입니다.` : ''}` }] : []),
     { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${site?.builder || sub?.constructor_nm || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} 총 ${site?.total_units || sub?.tot_supply_hshld_co || '미정'}세대 규모입니다.` },
-    ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? `${Math.round(site.price_min / 10000).toLocaleString()}만원` : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? `${Math.round(site.price_max / 10000).toLocaleString()}만원` : ''} 수준입니다. 타입별 상세 분양가는 청약홈에서 확인할 수 있습니다.` }] : []),
+    ...(site?.price_min || site?.price_max ? [{ q: `${name} 분양가는 얼마인가요?`, a: `${name}의 분양가는 ${site?.price_min ? fmtAmount(site.price_min) : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? fmtAmount(site.price_max) : ''} (최고분양가 기준)입니다. 타입별 상세 분양가는 아래 평형별 공급 테이블에서 확인하세요.` }] : []),
     ...(sub ? [{ q: `${name} 모집공고 핵심 내용은 무엇인가요?`, a: `${name}의 입주자모집공고 핵심 내용: ${sub.is_price_limit ? '분양가상한제 적용, ' : ''}${sub.constructor_nm || site?.builder ? `시공사 ${sub.constructor_nm || site?.builder}, ` : ''}총 ${sub.tot_supply_hshld_co || site?.total_units || '미정'}세대 공급. ${sub.mvn_prearnge_ym ? `입주 예정 ${fmtYM(sub.mvn_prearnge_ym)}.` : ''} 카더라에서 모집공고 핵심 요약을 확인하세요.` }] : []),
     ...(sub?.is_price_limit !== undefined ? [{ q: `${name}은 분양가상한제 적용 현장인가요?`, a: `${name}은(는) 분양가상한제 ${sub.is_price_limit ? '적용 현장입니다. 분양가상한제 적용 시 전매제한 및 거주의무 등의 규제가 적용될 수 있습니다.' : '미적용 현장입니다.'}` }] : []),
     ...(sub ? [{ q: `${name} 견본주택(모델하우스) 위치는 어디인가요?`, a: `${name}의 견본주택(모델하우스) ${sub.model_house_addr ? `주소는 ${sub.model_house_addr}입니다.` : '위치는 입주자모집공고문에서 확인할 수 있습니다.'} 청약홈에서 모집공고 원문을 확인하세요.` }] : []),
@@ -490,7 +490,14 @@ export default async function AptUnifiedPage({ params }: Props) {
 
         const cards = [
           { l: '총 공급', v: totalUnits > 0 ? `${totalUnits.toLocaleString()}` : '-', sub: hasBreakdown ? `일반 ${generalSupply} · 특별 ${specialSupply}` : '', c: 'var(--text-primary)', icon: '🏢', bar: Math.min((totalUnits / 5000) * 100, 100), barColor: 'var(--brand)' },
-          { l: sub ? '분양가' : '시세', v: (site?.price_min || site?.price_max) ? `${fmtAmount(site?.price_min)}~${fmtAmount(site?.price_max)}` : unsold?.sale_price_min ? `${fmtAmount(unsold.sale_price_min)}~` : '-', sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)' },
+          { l: sub ? '분양가' : '시세', v: (() => {
+            const pMin = site?.price_min || unsold?.sale_price_min || 0;
+            const pMax = site?.price_max || 0;
+            if (!pMin && !pMax) return '-';
+            const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
+            if (pMin && pMax && pMin !== pMax) return `${fmt(pMin)}~\n${fmt(pMax)}`;
+            return fmt(pMin || pMax);
+          })(), sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)' },
           { l: '입주예정', v: fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || '-', sub: '', c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)' },
           { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, sub: '', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B' },
         ];
@@ -501,7 +508,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               <div key={s.l} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2 }}>{s.v}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2, whiteSpace: 'pre-line' }}>{s.v}</div>
                 {s.sub && <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3 }}>{s.sub}</div>}
                 {s.bar > 0 && <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}><div style={{ height: '100%', width: `${s.bar}%`, borderRadius: 2, background: s.barColor }} /></div>}
               </div>
@@ -836,50 +843,66 @@ export default async function AptUnifiedPage({ params }: Props) {
             </div>
           )}
 
-          {/* 평형별 공급 정보 (house_type_info) — 분양가격 포함 */}
+          {/* 평형별 공급 정보 — 정확한 데이터 테이블 */}
           {sub.house_type_info && (() => {
             const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
             if (!types.length) return null;
-            const maxSupply = Math.max(...types.map((t: any) => Number(t.supply || t.supply_count || t.suply_hshldco || 0)));
-            const hasPrice = types.some((t: any) => Number(t.lttot_top_amount || t.supply_price || 0) > 0);
+            const hasPrice = types.some((t: any) => Number(t.lttot_top_amount || 0) > 0);
+            const totalGen = types.reduce((s: number, t: any) => s + Number(t.supply || 0), 0);
+            const totalSpe = types.reduce((s: number, t: any) => s + Number(t.spsply_hshldco || 0), 0);
             return (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>📐 평형별 공급{hasPrice ? ' · 분양가' : ''}</span>
-                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총 {types.length}개 타입</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>📐 평형별 공급 · 분양가</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>총 {sub.tot_supply_hshld_co}세대 (일반{totalGen} · 특별{totalSpe})</span>
                 </div>
-                {types.slice(0, 8).map((t: any, i: number) => {
-                  const typeLabel = t.type || '';
-                  const area = t.area || t.exclusive_area || t.suply_ar || '?';
-                  const areaNum = parseFloat(area);
-                  const pyeong = areaNum > 0 ? Math.round(areaNum / 3.3058) : 0;
-                  const supply = Number(t.supply || t.supply_count || t.suply_hshldco || 0);
-                  const spsply = Number(t.spsply_hshldco || 0);
-                  const price = Number(t.lttot_top_amount || t.supply_price || 0);
-                  const exclusiveArea = parseFloat((typeLabel || '0').replace(/[A-Za-z]/g, ''));
-                  const ppyeong = price > 0 && exclusiveArea > 10 ? Math.round(price / (exclusiveArea / 3.3058)) : 0;
-                  return (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                      <div style={{ minWidth: 55 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{pyeong > 0 ? `${pyeong}평` : `${area}㎡`}</span>
-                        {typeLabel && <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>{typeLabel}</div>}
-                      </div>
-                      <div style={{ flex: 1, height: 16, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
-                        <div style={{ height: '100%', width: `${maxSupply > 0 ? (supply / maxSupply) * 100 : 0}%`, borderRadius: 4, background: `hsl(${220 + i * 18}, 60%, 55%)` }} />
-                        <span style={{ position: 'absolute', left: 6, top: 1, fontSize: 10, lineHeight: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>{supply}세대{spsply > 0 ? ` (특${spsply})` : ''}</span>
-                      </div>
-                      {price > 0 && (
-                        <div style={{ minWidth: 55, textAlign: 'right' }}>
-                          <div style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 700 }}>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
-                          {ppyeong > 0 && <div style={{ fontSize: 8, color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만</div>}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1.5px solid var(--border)' }}>
+                        <th style={{ padding: '5px 6px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>타입</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전용(㎡)</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>일반</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>특별</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>합계</th>
+                        {hasPrice && <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>최고분양가</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {types.map((t: any, i: number) => {
+                        const typeLabel = t.type || '';
+                        const exclusiveArea = parseFloat((typeLabel || '0').replace(/[A-Za-z]/g, ''));
+                        const supply = Number(t.supply || 0);
+                        const spsply = Number(t.spsply_hshldco || 0);
+                        const total = supply + spsply;
+                        const price = Number(t.lttot_top_amount || 0);
+                        return (
+                          <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: '6px', fontWeight: 700, color: 'var(--text-primary)' }}>{typeLabel || '-'}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{exclusiveArea > 0 ? exclusiveArea.toFixed(1) : '-'}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--brand)', fontWeight: 600 }}>{supply}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--accent-purple)' }}>{spsply}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{total}</td>
+                            {hasPrice && <td style={{ padding: '6px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</td>}
+                          </tr>
+                        );
+                      })}
+                      <tr style={{ borderTop: '1.5px solid var(--brand)', background: 'var(--bg-hover)' }}>
+                        <td style={{ padding: '6px', fontWeight: 800, color: 'var(--text-primary)' }}>합계</td>
+                        <td></td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 800, color: 'var(--brand)' }}>{totalGen}</td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 800, color: 'var(--accent-purple)' }}>{totalSpe}</td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 800, color: 'var(--text-primary)' }}>{totalGen + totalSpe}</td>
+                        {hasPrice && <td></td>}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 6 }}>출처: 청약홈 모집공고 · 최고 분양가 기준 (만원)</div>
               </div>
             );
           })()}
+
           {/* 💳 납부 일정 + 실입주 비용 시뮬레이터 */}
           {(site?.price_min || sub?.house_type_info) && (() => {
             // 대표 분양가 (price_max 또는 house_type_info 최고가)
