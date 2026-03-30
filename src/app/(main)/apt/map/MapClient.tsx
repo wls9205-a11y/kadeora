@@ -25,7 +25,7 @@ export default function MapClient() {
   const markersRef = useRef<any[]>([]);
   const clustererRef = useRef<any>(null);
   const [sdkReady, setSdkReady] = useState(false);
-  const [layers, setLayers] = useState<Set<Layer>>(new Set(['subscription', 'redevelopment']));
+  const [layers, setLayers] = useState<Set<Layer>>(new Set(['subscription', 'ongoing', 'redevelopment', 'unsold']));
   const [pins, setPins] = useState<Pin[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
@@ -44,6 +44,18 @@ export default function MapClient() {
         (data || []).forEach((d: Record<string, any>) => allPins.push({
           id: d.id, name: d.house_nm, address: d.hssply_adres || d.region_nm || '',
           layer: 'subscription', extra: `${d.tot_supply_hshld_co || '?'}세대 · ~${(d.rcept_endde || '').slice(5)}`,
+        }));
+      }
+
+      if (layers.has('ongoing')) {
+        const { data } = await sb.from('apt_subscriptions')
+          .select('id, house_nm, hssply_adres, region_nm, tot_supply_hshld_co, mvn_prearnge_ym, rcept_endde')
+          .lt('rcept_endde', new Date().toISOString().slice(0, 10))
+          .order('rcept_endde', { ascending: false }).limit(300) as { data: Record<string, any>[] | null };
+        const seen = new Set(allPins.map(p => p.name));
+        (data || []).filter((d: Record<string, any>) => !seen.has(d.house_nm)).forEach((d: Record<string, any>) => allPins.push({
+          id: `o${d.id}`, name: d.house_nm, address: d.hssply_adres || d.region_nm || '',
+          layer: 'ongoing', extra: `${d.tot_supply_hshld_co || '?'}세대${d.mvn_prearnge_ym ? ` · 입주 ${d.mvn_prearnge_ym.slice(0,4)}.${parseInt(d.mvn_prearnge_ym.slice(4))}` : ''}`,
         }));
       }
 
