@@ -21,13 +21,14 @@ export default function MiniWatchlist() {
     if (!userId) { setLoading(false); return; }
     const load = async () => {
       const sb = createSupabaseBrowser();
-      const { data: watchlist } = await (sb as any).from('user_watchlist')
+      const { data: rawWatchlist } = await (sb as any).from('user_watchlist')
         .select('item_type, item_id, item_name')
         .eq('user_id', userId)
         .order('display_order')
         .limit(5);
 
-      if (!watchlist || watchlist.length === 0) { setLoading(false); return; }
+      const watchlist = (rawWatchlist || []) as { item_type: string; item_id: string; item_name: string }[];
+      if (watchlist.length === 0) { setLoading(false); return; }
 
       // 주식 종목 시세 조회
       const stockIds = watchlist.filter(w => w.item_type === 'stock').map(w => w.item_id);
