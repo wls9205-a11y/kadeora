@@ -167,7 +167,9 @@ export default function DashboardSection() {
         {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
         {dataCoverage && <HealthBadge label="분양가" value={`${dataCoverage.aptPrice.pct}%`} ok={dataCoverage.aptPrice.pct > 30} />}
         {dataCoverage && <HealthBadge label="좌표" value={`${dataCoverage.aptCoords.pct}%`} ok={dataCoverage.aptCoords.pct > 30} />}
+        {dataCoverage && <HealthBadge label="이미지" value={`${dataCoverage.aptImages?.pct ?? 0}%`} ok={(dataCoverage.aptImages?.pct ?? 0) > 10} />}
         {dataCoverage && <HealthBadge label="종목설명" value={`${dataCoverage.stockDesc.pct}%`} ok={dataCoverage.stockDesc.pct > 50} />}
+        {dataCoverage?.dbSize && <HealthBadge label="DB" value={dataCoverage.dbSize} ok={true} />}
       </div>
 
       {/* ── Row 2: 핵심 KPI 8카드 + 어제 대비 ── */}
@@ -392,7 +394,7 @@ export default function DashboardSection() {
       {dataCoverage && (
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>📊 데이터 커버리지</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {/* 분양가 수집 */}
             <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -422,7 +424,17 @@ export default function DashboardSection() {
                 <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.aptCoords.pct > 80 ? C.green : dataCoverage.aptCoords.pct > 30 ? C.yellow : C.red, width: `${Math.max(dataCoverage.aptCoords.pct, 1)}%`, transition: 'width 0.6s' }} />
               </div>
               <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.aptCoords.done)}/{fmt(dataCoverage.aptCoords.total)}건</div>
-              {dataCoverage.aptCoords.pct === 0 && <div style={{ marginTop: 4, fontSize: 8, color: C.red, fontWeight: 600 }}>⚠️ 미착수</div>}
+            </div>
+            {/* 🖼️ 이미지 수집 */}
+            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>🖼️ 이미지 수집</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: (dataCoverage.aptImages?.pct ?? 0) > 50 ? C.green : (dataCoverage.aptImages?.pct ?? 0) > 10 ? C.yellow : C.red }}>{dataCoverage.aptImages?.pct ?? 0}%</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+                <div style={{ height: '100%', borderRadius: 3, background: (dataCoverage.aptImages?.pct ?? 0) > 50 ? C.green : (dataCoverage.aptImages?.pct ?? 0) > 10 ? C.yellow : C.red, width: `${Math.max(dataCoverage.aptImages?.pct ?? 0, 1)}%`, transition: 'width 0.6s' }} />
+              </div>
+              <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.aptImages?.done ?? 0)}/{fmt(dataCoverage.aptImages?.total ?? 0)}건</div>
             </div>
             {/* 종목 description */}
             <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
