@@ -9,7 +9,6 @@ import BlogCommentCTA from '@/components/BlogCommentCTA';
 import ShareButtons from '@/components/ShareButtons';
 import BlogFaqAccordion from '@/components/BlogFaqAccordion';
 import BlogToc from '@/components/BlogToc';
-import BlogTocSidebar from '@/components/BlogTocSidebar';
 import BlogActions from '@/components/BlogActions';
 import { getAvatarColor } from '@/lib/avatar';
 import { parseFaqFromContent } from '@/lib/blog-faq-parser';
@@ -810,13 +809,6 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       )}
       </div>
-
-      {/* 데스크탑 고정 사이드바 TOC */}
-      {toc.length >= 3 && (
-        <div className="blog-toc-sidebar">
-          <BlogTocSidebar toc={toc} />
-        </div>
-      )}
     </div>
   );
 }

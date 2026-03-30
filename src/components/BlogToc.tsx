@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface TocItem {
   level: number;
@@ -9,15 +9,14 @@ interface TocItem {
 
 export default function BlogToc({ toc }: { toc: TocItem[] }) {
   const [activeId, setActiveId] = useState('');
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const headings = toc.map(t => document.getElementById(t.id)).filter(Boolean) as HTMLElement[];
     if (!headings.length) return;
 
-    observerRef.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
-        // 화면에 보이는 헤딩 중 가장 위에 있는 것을 활성으로
         const visible = entries.filter(e => e.isIntersecting);
         if (visible.length > 0) {
           setActiveId(visible[0].target.id);
@@ -26,40 +25,72 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
       { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 }
     );
 
-    headings.forEach(h => observerRef.current?.observe(h));
-    return () => observerRef.current?.disconnect();
+    headings.forEach(h => observer.observe(h));
+    return () => observer.disconnect();
   }, [toc]);
 
-  const scrollTo = (id: string) => {
+  // 활성 칩이 보이도록 스크롤
+  useEffect(() => {
+    if (!activeId || !scrollRef.current) return;
+    const activeEl = scrollRef.current.querySelector(`[data-toc-id="${activeId}"]`);
+    if (activeEl) {
+      (activeEl as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeId]);
+
+  const scrollTo = useCallback((id: string) => {
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveId(id);
     }
-  };
+  }, []);
+
+  // H2만 표시 (H3은 목차 칩에서 제외 — 공간 효율)
+  const h2Items = toc.filter(t => t.level === 2);
+  if (h2Items.length < 2) return null;
 
   return (
-    <nav aria-label="목차" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
-      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>목차</div>
-      {toc.map((item, i) => (
-        <button
-          key={i}
-          onClick={() => scrollTo(item.id)}
-          style={{
-            display: 'block', width: '100%', textAlign: 'left',
-            padding: '4px 0',
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 'var(--fs-sm)', lineHeight: 1.5,
-            color: activeId === item.id ? 'var(--brand)' : 'var(--text-secondary)',
-            fontWeight: activeId === item.id ? 700 : 400,
-            borderLeft: activeId === item.id ? '2px solid var(--brand)' : '2px solid transparent',
-            paddingLeft: activeId === item.id ? (item.level === 3 ? 14 : 6) : (item.level === 3 ? 16 : 8),
-            transition: 'all 0.15s',
-          }}
-        >
-          {item.text.replace(/<[^>]+>/g, '')}
-        </button>
-      ))}
+    <nav
+      aria-label="목차"
+      style={{
+        position: 'sticky', top: 56, zIndex: 10,
+        background: 'var(--bg-base)', padding: '8px 0', marginBottom: 16,
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
+      <div
+        ref={scrollRef}
+        className="apt-pill-scroll"
+        style={{
+          display: 'flex', gap: 5, overflowX: 'auto',
+          scrollbarWidth: 'none', paddingBottom: 2,
+        }}
+      >
+        {h2Items.map((item, i) => {
+          const isActive = activeId === item.id;
+          const cleanText = item.text.replace(/<[^>]+>/g, '').replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+\s*/u, '');
+          return (
+            <button
+              key={item.id}
+              data-toc-id={item.id}
+              onClick={() => scrollTo(item.id)}
+              style={{
+                padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: isActive ? 700 : 500,
+                background: isActive ? 'var(--brand)' : 'var(--bg-surface)',
+                color: isActive ? '#fff' : 'var(--text-secondary)',
+                border: isActive ? 'none' : '1px solid var(--border)',
+                cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4,
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{ fontSize: 9, fontWeight: 800, opacity: 0.7 }}>{i + 1}</span>
+              {cleanText.length > 14 ? cleanText.slice(0, 14) + '…' : cleanText}
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 }

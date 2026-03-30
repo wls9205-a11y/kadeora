@@ -637,51 +637,7 @@ body {
   .cta-row > a, .cta-row > button { width: 100% !important; text-align: center !important; }
 }
 
-/* ═══ 블로그 본문 — 에디토리얼 스타일 ═══ */
-.blog-content h2 {
-  padding-left: 12px;
-  border-left: 3px solid var(--brand, #3B7BF6);
-  margin-top: 28px;
-  margin-bottom: 12px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-}
-.blog-content h3 {
-  padding-left: 10px;
-  border-left: 2px solid var(--border);
-  margin-top: 20px;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-.blog-content blockquote {
-  border-left: 3px solid var(--accent-green, #34D399);
-  padding: 10px 16px;
-  margin: 16px 0;
-  border-radius: 0 10px 10px 0;
-  background: var(--bg-surface);
-}
-.blog-content table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  margin: 12px 0;
-}
-.blog-content th {
-  background: var(--bg-surface);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-.blog-content td {
-  padding: 8px 12px;
-  font-size: var(--fs-sm);
-  border-bottom: 1px solid var(--border);
-}
-.blog-content tr:last-child td { border-bottom: none; }
+/* ═══ 블로그 본문 — 보충 스타일 ═══ */
 .blog-content .highlight-box {
   padding: 14px 16px;
   border-radius: 12px;

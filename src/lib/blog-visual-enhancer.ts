@@ -213,7 +213,7 @@ export function enhanceBlogVisuals(html: string, options?: EnhanceOptions): stri
   e = insertSummaryCard(e, opts.excerpt);
   e = insertHeroStats(e);        // #2
   e = insertColorTags(e, opts);  // #3
-  e = insertCoverImage(e, opts); // #1
+  // e = insertCoverImage(e, opts); // #1 — 히어로 카드로 대체 (page.tsx에서 처리)
 
   return e;
 }

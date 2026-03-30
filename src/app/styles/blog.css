@@ -1,5 +1,5 @@
 /* ========================================
-   블로그 상세 2단 레이아웃
+   블로그 상세 레이아웃 — 단일 컬럼
    ======================================== */
 .blog-detail-layout {
   max-width: 780px;
@@ -11,26 +11,12 @@
 }
 .blog-toc-inline { display: block; }
 .blog-toc-sidebar { display: none; }
-/* TOC 사이드바: 3컬럼 레이아웃에서 메인 컬럼이 충분히 넓을 때만 (1440px+) */
-@media (min-width: 1440px) {
-  .blog-detail-layout {
-    max-width: 1060px;
-    display: flex;
-    gap: 40px;
-  }
-  .blog-detail-layout > .blog-detail-main {
-    flex: 1;
-    min-width: 0;
-  }
-  .blog-toc-inline { display: none; }
-  .blog-toc-sidebar { display: block; flex-shrink: 0; width: 220px; }
-}
 
 /* ========================================
    블로그 본문 마크다운
    ======================================== */
-.blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 32px 0 14px; color: var(--text-primary); border-bottom: 2px solid var(--border); padding-bottom: 10px; word-break: keep-all; letter-spacing: -0.3px; }
-.blog-content h3 { font-size: var(--fs-lg); font-weight: 700; margin: 24px 0 10px; color: var(--text-primary); word-break: keep-all; letter-spacing: -0.2px; }
+.blog-content h2 { font-size: var(--fs-xl); font-weight: 800; margin: 32px 0 14px; color: var(--text-primary); border-left: 3px solid var(--brand); padding-left: 12px; word-break: keep-all; letter-spacing: -0.3px; }
+.blog-content h3 { font-size: var(--fs-lg); font-weight: 700; margin: 24px 0 10px; color: var(--text-primary); border-left: 2px solid var(--border); padding-left: 10px; word-break: keep-all; letter-spacing: -0.2px; }
 .blog-content p { margin: 12px 0; line-height: 1.85; overflow-wrap: break-word; word-break: break-word; color: var(--text-secondary); }
 .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: var(--fs-base); table-layout: auto; }
 .blog-content thead { background: var(--bg-surface); }
