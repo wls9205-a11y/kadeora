@@ -79,6 +79,22 @@ async function fetchAptData() {
       sb.from('unsold_apts').select('id', { count: 'exact', head: true }).eq('is_active', true),
       sb.from('apt_sites').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('status', 'ongoing'),
     ]);
+    // 데이터 수집일 조회 (별도 — 실패해도 무시)
+    let dataFreshness = { sub: '', trade: '', unsold: '', redev: '' };
+    try {
+      const [subFreshR, tradeFreshR, unsoldFreshR, redevFreshR] = await Promise.all([
+        sb.from('apt_subscriptions').select('fetched_at').order('fetched_at', { ascending: false }).limit(1).maybeSingle(),
+        sb.from('apt_transactions').select('deal_date').order('deal_date', { ascending: false }).limit(1).maybeSingle(),
+        sb.from('unsold_apts').select('created_at').order('created_at', { ascending: false }).limit(1).maybeSingle(),
+        sb.from('redevelopment_projects').select('updated_at').order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+      ]);
+      dataFreshness = {
+        sub: subFreshR.data?.fetched_at ? new Date(subFreshR.data.fetched_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' }) : '',
+        trade: tradeFreshR.data?.deal_date ? new Date(tradeFreshR.data.deal_date + 'T00:00:00+09:00').toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' }) : '',
+        unsold: unsoldFreshR.data?.created_at ? new Date(unsoldFreshR.data.created_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' }) : '',
+        redev: redevFreshR.data?.updated_at ? new Date(redevFreshR.data.updated_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' }) : '',
+      };
+    } catch {}
     if (aptsR.data?.length) apts = aptsR.data;
     if (unsoldR.data?.length) unsold = unsoldR.data;
     (alertsR.data || []).forEach((a: Record<string, any>) => { alertCounts[a.house_manage_no] = (alertCounts[a.house_manage_no] || 0) + 1; });
@@ -198,11 +214,11 @@ async function fetchAptData() {
   const dedupedSub = ongoingFromSub.filter(s => !unsoldNames.has(`${s.house_nm}::${s.region_nm}`));
   const ongoingApts = [...ongoingFromUnsold, ...dedupedSub].sort((a, b) => (b.total_supply || 0) - (a.total_supply || 0));
 
-  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount };
+  return { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness };
 }
 
 export default async function AptPage() {
-  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount } = await fetchAptData();
+  const { apts, unsold, alertCounts, lastRefreshed, regionStats, ongoingApts, redevTotalCount, tradeTotalCount, tradeByRegion, redevByRegion, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness } = await fetchAptData();
   // ItemList for Google carousel rich results
   const itemList = apts.slice(0, 10).map((a: any, i: number) => ({
     '@type': 'ListItem',
@@ -222,7 +238,7 @@ export default async function AptPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"아파트 청약 일정은 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라(kadeora.app)에서 전국 아파트 청약 일정, 경쟁률, 분양가, 입주 예정일을 실시간으로 확인할 수 있습니다. 지역별·상태별 필터링도 지원합니다."}},{"@type":"Question","name":"미분양 아파트 현황은 어떻게 확인하나요?","acceptedAnswer":{"@type":"Answer","text":`현재 전국 ${unsold.length}개 단지가 미분양 상태입니다. 카더라 부동산 페이지에서 지역별 미분양 세대수, 분양가, 연락처를 확인할 수 있습니다.`}},{"@type":"Question","name":"분양중인 아파트는 몇 개인가요?","acceptedAnswer":{"@type":"Answer","text":`현재 ${ongoingApts.length}개 단지가 분양 진행 중입니다. 각 단지별 분양가, 시공사, 위치 정보를 카더라에서 비교할 수 있습니다.`}}]}) }} />
     {/* speakable */}
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":"부동산 — 청약·분양·미분양·재개발","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]}}) }} />
-    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} />
+    <AptClient apts={apts} unsold={unsold} alertCounts={alertCounts} lastRefreshed={lastRefreshed} regionStats={regionStats} ongoingApts={ongoingApts} redevTotalCount={redevTotalCount} tradeTotalCount={tradeTotalCount} tradeByRegion={tradeByRegion} redevByRegion={redevByRegion} subTotalCount={subTotalCount} unsoldTotalCount={unsoldTotalCount} ongoingTotalCount={ongoingTotalCount} dataFreshness={dataFreshness} />
     <Disclaimer />
   </Suspense>;
 }

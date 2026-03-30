@@ -10,9 +10,10 @@ const RedevTimeline = dynamic(() => import('@/components/RedevTimeline'), { ssr:
 
 interface Props extends SharedTabProps {
   redevelopment: RedevProject[];
+  freshDate?: string;
 }
 
-export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion, globalSearch }: Props) {
+export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, setCommentTarget, showToast: _showToast, globalRegion, globalSearch, freshDate }: Props) {
   const [redevType, setRedevType] = useState('전체');
   const [redevRegion, setRedevRegion] = useState(globalRegion || '전체');
   const [redevPage, setRedevPage] = useState(1);
@@ -148,7 +149,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 안내 */}
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준 · 매주 월요일 자동 갱신</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준{freshDate ? ` · ${freshDate} 갱신` : ''} · 매주 월요일 자동 갱신</div>
 
             {/* 결과 카운트 */}
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>

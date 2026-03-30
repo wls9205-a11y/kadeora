@@ -10,9 +10,10 @@ const BottomSheet = dynamic(() => import('@/components/BottomSheet'), { ssr: fal
 interface Props extends SharedTabProps {
   ongoingApts: OngoingApt[];
   premiumListings: PremiumListing[];
+  freshDate?: string;
 }
 
-export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion, globalSearch }: Props) {
+export default function OngoingTab({ ongoingApts, premiumListings, watchlist, toggleWatchlist, setCommentTarget, globalRegion, globalSearch, freshDate }: Props) {
   const [ongoingRegion, setOngoingRegion] = useState(globalRegion || '전체');
   const [ongoingPage, setOngoingPage] = useState(1);
   const [ongoingSort, setOngoingSort] = useState<'supply'|'unsold'|'price'|'competition'>('supply');
@@ -316,7 +317,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             </div>
           ))}
         </div>
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>청약홈 + 국토교통부 미분양 통계 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
       </div>
 
       {/* ③ 단계별 파이프라인 */}
@@ -360,7 +361,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       )}
 
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-        청약홈·국토교통부 미분양 통계 기준 · 청약 마감 후 입주 전 현장 + 미분양 현장 통합 · 정확한 분양 정보는 각 현장에 직접 확인하세요
+        청약홈·국토교통부 미분양 통계 기준{freshDate ? ` · ${freshDate} 수집` : ''} · 청약 마감 후 입주 전 현장 + 미분양 현장 통합 · 정확한 분양 정보는 각 현장에 직접 확인하세요
       </p>
 
       {/* 상담사 CTA 배너 — 유저 100명 이후 오픈 예정 */}

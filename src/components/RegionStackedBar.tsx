@@ -24,6 +24,7 @@ interface Props {
   subTotalCount?: number;
   unsoldTotalCount?: number;
   ongoingTotalCount?: number;
+  dataFreshness?: { sub: string; trade: string; unsold: string; redev: string };
   onRegionClick?: (region: string) => void;
   activeRegion?: string;
   shareButton?: React.ReactNode;
@@ -47,7 +48,7 @@ const LABELS: Record<string, string> = {
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, onRegionClick, activeRegion, shareButton }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, activeRegion, shareButton }: Props) {
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
     const ensure = (name: string) => {
@@ -180,7 +181,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         {/* Legend — show all 5 categories */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 80, flex: 1 }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 1 }}>
-            {new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })} 기준 · 총 {total.toLocaleString()}건
+            {dataFreshness?.sub ? `${dataFreshness.sub} 수집` : `${new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })} 기준`} · 총 {total.toLocaleString()}건
           </div>
           {allEntries.map(e => (
             <div key={e.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

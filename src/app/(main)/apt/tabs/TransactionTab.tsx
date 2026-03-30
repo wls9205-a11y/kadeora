@@ -13,9 +13,10 @@ const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'), 
 interface Props extends SharedTabProps {
   transactions: AptTransaction[];
   tradeMonthly: { stat_month: string; region: string; avg_price: number; count: number }[];
+  freshDate?: string;
 }
 
-export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion, globalSearch }: Props) {
+export default function TransactionTab({ transactions, tradeMonthly, watchlist, toggleWatchlist, globalRegion, globalSearch, freshDate }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [page, setPage] = useState(1);
   const [areaFilter, setAreaFilter] = useState('전체');
@@ -243,7 +244,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
       )}
 
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-        📊 국토교통부 실거래가 공개시스템 기준
+        📊 국토교통부 실거래가 공개시스템 기준{freshDate ? ` · 최근 거래일 ${freshDate}` : ''} · 최근 1년
       </p>
 
       {/* 실거래 상세 모달 */}

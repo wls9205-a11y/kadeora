@@ -12,9 +12,10 @@ interface Props extends SharedTabProps {
   unsold: UnsoldApt[];
   unsoldMonthly: { stat_month: string; total_unsold: number; after_completion: number; region?: string }[];
   unsoldSummary: Record<string, any> | string | null;
+  freshDate?: string;
 }
 
-export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch }: Props) {
+export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch, freshDate }: Props) {
   const [unsoldRegion, setUnsoldRegion] = useState(globalRegion || '전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
   const [surgeAlerts, setSurgeAlerts] = useState<{ region_nm: string; current_count: number; prev_count: number; change_pct: number }[]>([]);
@@ -126,7 +127,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
             </div>
           </div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>국토교통부 통계누리 기준</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>국토교통부 통계누리 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
         </div>
         );
       })()}

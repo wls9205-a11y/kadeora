@@ -11,11 +11,12 @@ interface Props extends SharedTabProps {
   alertCounts: Record<string, number>;
   regionStats: { name: string; total: number; open: number; upcoming: number; closed: number }[];
   subTotalCount?: number;
+  freshDate?: string;
 }
 
 const SB = STATUS_BADGE;
 
-export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch, subTotalCount }: Props) {
+export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUser, watchlist, toggleWatchlist, setCommentTarget: _setCommentTarget, showToast: _showToast, globalRegion, globalSearch, subTotalCount, freshDate }: Props) {
   const [region, setRegion] = useState(globalRegion || '전체');
   const [statusFilter, setStatusFilter] = useState('전체');
   const [aptSort, setAptSort] = useState<'date'|'supply'|'deadline'|'competition'|'price'>('date');
@@ -288,7 +289,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           </div>
 
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
-            📊 청약홈·공공데이터포털 API 기준 · 매일 06시 자동 갱신
+            📊 청약홈·공공데이터포털 API 기준{freshDate ? ` · ${freshDate} 수집` : ''} · 매일 06시 자동 갱신
           </p>
         </div>
 
