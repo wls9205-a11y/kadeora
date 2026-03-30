@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { fmtCap, stockColor, fmtPrice } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
+import ShareButtons from '@/components/ShareButtons';
 
 export const revalidate = 3600;
 
@@ -129,6 +130,9 @@ export default async function SectorPage({ params }: Props) {
         <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
           {new Date().toLocaleDateString('ko-KR')} 기준
         </time>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+          <ShareButtons title={`${sector} 섹터 ${stocks.length}종목 — 시세·등락률 비교`} postId={`sector-${sector}`} />
+        </div>
       </div>
 
       {/* SEO 가시적 텍스트 */}

@@ -1061,7 +1061,10 @@ export default async function AptUnifiedPage({ params }: Props) {
               </tbody>
             </table>
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 6 }}>출처: 단지백과 · 국토교통부 실거래가 공개시스템</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>출처: 단지백과 · 국토교통부 실거래가 공개시스템</div>
+            <SectionShareButton section="apt-price-compare" label={`${name} vs ${sigungu || region} 아파트 시세 비교`} pagePath={`/apt/${slug}`} />
+          </div>
         </div>
         );
       })()}
@@ -1093,7 +1096,10 @@ export default async function AptUnifiedPage({ params }: Props) {
               </tbody>
             </table>
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 6 }}>출처: 국토교통부 실거래가 공개시스템</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+            <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>출처: 국토교통부 실거래가 공개시스템</div>
+            <SectionShareButton section="apt-trade-compare" label={`${sigungu || region} 최근 실거래 vs ${name} 분양가 비교`} pagePath={`/apt/${slug}`} />
+          </div>
         </div>
       )}
 

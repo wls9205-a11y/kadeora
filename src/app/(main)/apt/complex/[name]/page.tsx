@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import dynamic from 'next/dynamic';
+import ShareButtons from '@/components/ShareButtons';
 
 const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
@@ -286,7 +287,10 @@ export default async function ComplexDetailPage({ params }: Props) {
         {profile?.age_group && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: profile.age_group === '신축' ? 'rgba(59,123,246,0.1)' : 'var(--bg-hover)', color: profile.age_group === '신축' ? 'var(--brand)' : 'var(--text-secondary)' }}>{profile.age_group}</span>}
         {builtYear > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{builtYear}년 준공</span>}
       </div>
-      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{region} {sigungu} {dong} · 매매 {tradeList.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{region} {sigungu} {dong} · 매매 {tradeList.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <ShareButtons title={`${decoded} 아파트 실거래가·시세 — ${region} ${sigungu}`} postId={`complex-${name}`} />
+      </div>
 
       {/* SEO 가시적 텍스트 (확장) */}
       <section className="site-description" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 14 }}>

@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import MapWrapper from './MapWrapper';
+import ShareButtons from '@/components/ShareButtons';
 
 export const metadata: Metadata = {
   title: '부동산 지도',
@@ -62,7 +63,10 @@ export default async function AptMapPage() {
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🗺️ 지역별 부동산 현황</h1>
-          <Link href="/apt" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ShareButtons title="지역별 부동산 현황 — 청약·미분양·재개발 지도" postId="apt-map" />
+            <Link href="/apt" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
+          </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
           {REGIONS.map(r => {
