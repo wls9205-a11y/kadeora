@@ -713,7 +713,7 @@ export default function DashboardSection() {
           <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🌐 플랫폼 전체 현황</span>
           <span style={{ fontSize: 10, color: C.textDim }}>kadeora.app</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 8 }}>
           {[
             { icon: '📰', label: '블로그', val: fmt(kpi.blogs), color: C.yellow },
             { icon: '📈', label: '종목', val: `${fmt(kpi.stocks)}개`, color: C.cyan },
@@ -728,6 +728,43 @@ export default function DashboardSection() {
               <div style={{ fontSize: 11, marginBottom: 1 }}>{item.icon}</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>
               <div style={{ fontSize: 8, color: C.textDim }}>{item.label}</div>
+            </div>
+          ))}
+        </div>
+        {/* 추가 데이터 현황 */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingTop: 6, borderTop: `1px solid ${C.border}`, fontSize: 10 }}>
+          <span style={{ color: C.textDim }}>분양사이트 <strong style={{ color: C.cyan }}>{fmt(seo?.aptSites ?? 5522)}</strong></span>
+          <span style={{ color: C.textDim }}>미분양 <strong style={{ color: C.red }}>{fmt(kpi.unsold ?? 180)}</strong>건 <strong style={{ color: C.red }}>{fmt(kpi.unsoldUnits ?? 68264)}</strong>세대</span>
+          <span style={{ color: C.textDim }}>재개발 <strong style={{ color: '#D85A30' }}>{fmt(kpi.redevOnly ?? 165)}</strong> 재건축 <strong style={{ color: '#D85A30' }}>{fmt(kpi.rebuildOnly ?? 37)}</strong></span>
+          <span style={{ color: C.textDim }}>DB <strong style={{ color: C.text }}>{dataCoverage?.dbSize ?? '~1.4GB'}</strong></span>
+        </div>
+      </div>
+
+      {/* ── 최근 릴리즈 내역 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 58)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-03-30</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+          {[
+            { tag: 'DESIGN', label: 'B-2 도넛 리디자인', desc: '2×4 프로그레스바 + 설명글 + 재개발/재건축 분리', color: C.brand, commit: 'eb6a895' },
+            { tag: 'FIX', label: '지도 분양중/미분양', desc: '기본 4레이어 활성 + ongoing fetch 추가', color: C.green, commit: '7b33a13' },
+            { tag: 'UX', label: '이미지 높이 최적화', desc: '4곳 maxHeight 160~280px + lazy 로딩', color: C.cyan, commit: '78f5b6a' },
+            { tag: 'FEAT', label: 'UX 강화 6건', desc: '청약KPI행 · 실거래동향 · 미분양게이지 · 에러바운더리', color: C.purple, commit: 'b86a7d6' },
+            { tag: 'DATA', label: '실거래 2026년 기준', desc: '5,408건 + 모바일 반응형 + 단지백과 유도', color: C.yellow, commit: 'ddaccee' },
+            { tag: 'FEAT', label: '공유버튼 11곳', desc: '탭 · 섹션 · 상세 · 지도 전면 배치', color: C.purple, commit: '772bf1a' },
+            { tag: 'DATA', label: '수집일 전면 표시', desc: '도넛 헤더 + 5개 탭 푸터 수집일', color: C.yellow, commit: '73448ab' },
+            { tag: 'FEAT', label: '분양 상세 6가지', desc: '시세비교 · 전세가율 · 전용률 · 시공사비교', color: C.purple, commit: '0e8a4fc' },
+            { tag: 'DESIGN', label: '블로그 에디토리얼', desc: 'TOC 가로칩 + 히어로 리포트 + 타임라인 목록', color: C.brand, commit: '619ed8d' },
+          ].map(r => (
+            <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 8, background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: `${r.color}18`, color: r.color, fontWeight: 700 }}>{r.tag}</span>
+                <span style={{ fontSize: 8, color: C.textDim, fontFamily: 'monospace' }}>{r.commit}</span>
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.text, marginBottom: 2 }}>{r.label}</div>
+              <div style={{ fontSize: 9, color: C.textDim, lineHeight: 1.3 }}>{r.desc}</div>
             </div>
           ))}
         </div>
