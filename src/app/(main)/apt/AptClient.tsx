@@ -149,6 +149,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         ongoingTotalCount={ongoingTotalCount}
         dataFreshness={dataFreshness}
         onRegionClick={setSelectedRegion}
+        onTabChange={(tab: string) => handleTabChange(tab as 'sub' | 'ongoing' | 'unsold' | 'redev' | 'trade')}
         activeRegion={selectedRegion !== '전체' ? selectedRegion : undefined}
         shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
       />

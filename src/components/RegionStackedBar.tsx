@@ -26,6 +26,7 @@ interface Props {
   ongoingTotalCount?: number;
   dataFreshness?: { sub: string; trade: string; unsold: string; redev: string };
   onRegionClick?: (region: string) => void;
+  onTabChange?: (tab: string) => void;
   activeRegion?: string;
   shareButton?: React.ReactNode;
 }
@@ -48,7 +49,7 @@ const LABELS: Record<string, string> = {
 
 const CAT_KEYS = ['sub', 'ongoing', 'unsold', 'redev', 'trade'] as const;
 
-export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, activeRegion, shareButton }: Props) {
+export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopment, transactions, redevTotalCount, tradeTotalCount, tradeByRegion = {}, redevByRegion = {}, subTotalCount, unsoldTotalCount, ongoingTotalCount, dataFreshness, onRegionClick, onTabChange, activeRegion, shareButton }: Props) {
   const regions = useMemo(() => {
     const map: Record<string, RegionData> = {};
     const ensure = (name: string) => {
@@ -107,8 +108,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   const allEntries = CAT_KEYS.map(key => ({ key, val: cats[key], color: COLORS[key] }));
   const entries = allEntries.filter(c => c.val > 0);
 
-  // Donut geometry
-  const R = 42;
+  // Donut geometry (mini — 72×72)
+  const R = 26;
   const CIRC = 2 * Math.PI * R;
 
   let offset = 0;
@@ -127,90 +128,81 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
         {shareButton}
       </div>
 
-      {/* Donut + Legend */}
-      <div className="region-overview-layout" style={{
-        display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center',
+      {/* V2-A: Mini donut + 2×3 interactive card grid */}
+      <div style={{
+        display: 'flex', gap: 10, alignItems: 'center',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '10px 12px', marginBottom: 6,
+        borderRadius: 'var(--radius-md)', padding: '10px 10px', marginBottom: 6,
         overflow: 'hidden',
       }}>
-        {/* Donut chart */}
-        <svg width={110} height={110} viewBox="0 0 110 110" style={{ flexShrink: 0 }}>
-          {/* Background ring */}
-          <circle cx={55} cy={55} r={R} fill="none" stroke="var(--border)" strokeWidth={16} opacity={0.4} />
-          {/* Category arcs */}
-          <g transform="rotate(-90 55 55)">
-            {arcs.map(a => (
-              <circle
-                key={a.key}
-                cx={55}
-                cy={55}
-                r={R}
-                fill="none"
-                stroke={a.color}
-                strokeWidth={16}
-                strokeDasharray={a.dasharray}
-                strokeDashoffset={a.dashoffset}
-                strokeLinecap="butt"
-                style={{ transition: 'stroke-dasharray 0.3s, stroke-dashoffset 0.3s' }}
-              />
-            ))}
-          </g>
-          {/* Center text */}
-          {sel ? (
-            <>
-              <text x={55} y={50} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 11, fontWeight: 600, fill: 'var(--text-secondary)' }}>
-                {sel.name}
-              </text>
-              <text x={55} y={66} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 14, fontWeight: 700, fill: 'var(--text-primary)' }}>
-                {total.toLocaleString()}
-              </text>
-            </>
-          ) : (
-            <>
-              <text x={55} y={50} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 11, fontWeight: 600, fill: 'var(--text-secondary)' }}>
-                전체
-              </text>
-              <text x={55} y={66} textAnchor="middle" dominantBaseline="auto" style={{ fontSize: 14, fontWeight: 700, fill: 'var(--text-primary)' }}>
-                {total.toLocaleString()}
-              </text>
-            </>
-          )}
-        </svg>
+        {/* Mini donut */}
+        <div style={{ flexShrink: 0, textAlign: 'center' }}>
+          <svg width={72} height={72} viewBox="0 0 72 72">
+            <circle cx={36} cy={36} r={R} fill="none" stroke="var(--border)" strokeWidth={10} opacity={0.2} />
+            <g transform="rotate(-90 36 36)">
+              {arcs.map(a => (
+                <circle key={a.key} cx={36} cy={36} r={R} fill="none" stroke={a.color} strokeWidth={10} strokeDasharray={a.dasharray} strokeDashoffset={a.dashoffset} strokeLinecap="butt" style={{ transition: 'stroke-dasharray 0.3s' }} />
+              ))}
+            </g>
+            <text x={36} y={33} textAnchor="middle" style={{ fontSize: 9, fill: 'var(--text-tertiary)' }}>{sel ? sel.name : '전체'}</text>
+            <text x={36} y={44} textAnchor="middle" style={{ fontSize: 13, fontWeight: 700, fill: 'var(--text-primary)' }}>{total.toLocaleString()}</text>
+          </svg>
+          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{dataFreshness?.sub ? `${dataFreshness.sub.split(' ').slice(0, 2).join(' ')} 수집` : ''}</div>
+        </div>
+        {/* 2×3 card grid */}
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 4, minWidth: 0 }}>
+          {(() => {
+            const today = new Date().toISOString().slice(0, 10);
+            const openCount = apts.filter((a: any) => a.rcept_bgnde <= today && a.rcept_endde >= today).length;
+            const upcomingCount = apts.filter((a: any) => a.rcept_bgnde > today).length;
+            const unsoldUnits = (unsold as any[]).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
+            const redevTop = Object.entries(redevByRegion).sort((a, b) => b[1] - a[1]).slice(0, 2);
+            const tradeAvg = transactions.length > 0 ? Math.round((transactions as any[]).reduce((s: number, t: any) => s + (Number(t.deal_amount) || 0), 0) / transactions.length) : 0;
+            const tradeMax = transactions.length > 0 ? Math.max(...(transactions as any[]).map((t: any) => Number(t.deal_amount) || 0)) : 0;
+            const fmtA = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : n > 0 ? `${n.toLocaleString()}만` : '-';
 
-        {/* Legend — show all 5 categories */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 80, flex: 1 }}>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 1 }}>
-            {dataFreshness?.sub ? `${dataFreshness.sub} 수집` : `${new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })} 기준`} · 총 {total.toLocaleString()}건
-          </div>
-          {allEntries.map(e => (
-            <div key={e.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: e.color, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{LABELS[e.key]}</span>
-              <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
-                {e.val.toLocaleString()}
-                <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.5, marginLeft: 2 }}>건</span>
-              </span>
-            </div>
-          ))}
-          {/* 미분양 세대 별도 표시 */}
-          {cats.unsold > 0 && (() => {
-            const unsoldUnits = (activeRegion
-              ? (unsold as Record<string, any>[]).filter(u => {
-                  const r = (u.region_nm || '').replace(/특별시|광역시|특별자치시|특별자치도|도$/, '').trim();
-                  return r === activeRegion;
-                })
-              : (unsold as Record<string, any>[])
-            ).reduce((s: number, u: Record<string, any>) => s + (u.tot_unsold_hshld_co || 0), 0);
-            if (unsoldUnits === 0) return null;
-            return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 14 }}>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>↳ 미분양 세대수</span>
-                <span style={{ fontSize: 17, fontWeight: 700, color: COLORS.unsold, fontVariantNumeric: 'tabular-nums', marginLeft: 'auto' }}>
-                  {unsoldUnits.toLocaleString()}<span style={{ fontSize: 11, fontWeight: 400, opacity: 0.5, marginLeft: 2 }}>세대</span>
-                </span>
+            const cards = [
+              { key: 'sub', tab: 'sub', label: '청약정보', value: cats.sub, color: COLORS.sub, tags: [
+                ...(openCount > 0 ? [{ text: `접수 ${openCount}`, bg: 'rgba(59,155,107,0.12)', color: '#3B9B6B' }] : []),
+                ...(upcomingCount > 0 ? [{ text: `예정 ${upcomingCount}`, bg: 'rgba(96,165,250,0.1)', color: '#60A5FA' }] : []),
+              ]},
+              { key: 'ongoing', tab: 'ongoing', label: '분양중', value: cats.ongoing, color: COLORS.ongoing, tags: [
+                { text: '입주전 현장', bg: 'rgba(127,119,221,0.08)', color: '#7F77DD' },
+              ]},
+              { key: 'unsold', tab: 'unsold', label: '미분양', value: cats.unsold, color: COLORS.unsold, tags: [
+                ...(unsoldUnits > 0 ? [{ text: `${unsoldUnits.toLocaleString()}세대`, bg: 'rgba(226,75,74,0.12)', color: '#E24B4A' }] : []),
+              ]},
+              { key: 'redev', tab: 'redev', label: '재개발', value: cats.redev, color: COLORS.redev, tags: redevTop.map(([r, c]) => ({ text: `${r} ${c}`, bg: 'rgba(216,90,48,0.08)', color: '#D85A30' })) },
+              { key: 'trade', tab: 'trade', label: '실거래(2026)', value: cats.trade, color: COLORS.trade, tags: [
+                ...(tradeAvg > 0 ? [{ text: `평균 ${fmtA(tradeAvg)}`, bg: 'rgba(55,138,221,0.1)', color: '#378ADD' }] : []),
+                ...(tradeMax > 0 ? [{ text: `최고 ${fmtA(tradeMax)}`, bg: 'rgba(55,138,221,0.06)', color: '#378ADD' }] : []),
+              ]},
+              { key: 'complex', tab: null, label: '단지백과', value: 34495, color: 'var(--text-tertiary)', tags: [
+                { text: '매매 49.7만', bg: 'var(--bg-hover)', color: 'var(--text-secondary)' },
+                { text: '전월세 209만', bg: 'var(--bg-hover)', color: 'var(--text-secondary)' },
+              ]},
+            ];
+
+            return cards.map(c => (
+              <div key={c.key} onClick={() => {
+                if (c.tab && onTabChange) onTabChange(c.tab);
+                else if (c.key === 'complex') window.location.href = '/apt/complex';
+              }} style={{
+                padding: '6px 6px', borderRadius: 6, borderLeft: `2px solid ${c.color}`,
+                cursor: 'pointer', transition: 'background 0.15s',
+              }} onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{c.value.toLocaleString()}</span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', opacity: 0.6 }}>→</span>
+                </div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>{c.label}</div>
+                <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                  {c.tags.map((t, i) => (
+                    <span key={i} style={{ fontSize: 9, padding: '0px 4px', borderRadius: 3, background: t.bg, color: t.color, fontWeight: 500 }}>{t.text}</span>
+                  ))}
+                </div>
               </div>
-            );
+            ));
           })()}
         </div>
       </div>

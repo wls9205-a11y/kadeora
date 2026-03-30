@@ -458,7 +458,7 @@ export default async function BlogDetailPage({ params }: Props) {
               })}} />
               <div style={{ marginBottom: 16, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={post.cover_image} alt={post.image_alt || `${post.title} — 카더라 블로그`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block' }} loading="eager" />
+                <img src={post.cover_image} alt={post.image_alt || `${post.title} — 카더라 블로그`} width={1200} height={630} style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block', borderRadius: 10 }} loading="eager" />
               </div>
             </>
           );

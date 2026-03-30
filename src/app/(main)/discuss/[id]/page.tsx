@@ -155,7 +155,7 @@ export default async function DiscussDetailPage({ params }: Props) {
       </nav>
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent(topic.title)}&design=2&category=${topic.category}&subtitle=${encodeURIComponent(topic.option_a + ' vs ' + topic.option_b)}`} alt={`${topic.title} — 카더라 토론`} width={1200} height={630} style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
+      <img src={`/api/og?title=${encodeURIComponent(topic.title)}&design=2&category=${topic.category}&subtitle=${encodeURIComponent(topic.option_a + ' vs ' + topic.option_b)}`} alt={`${topic.title} — 카더라 토론`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="lazy" />
 
       {/* Topic Header — SSR rendered for crawlers */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
