@@ -45,8 +45,8 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   if (id === 0) {
     const staticPaths = [
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
-      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/premium', '/shop',
-      '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
+      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/premium',
+      '/grades', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
     ];
     const entries: SitemapEntry[] = [
       ...staticPaths.map(path => ({

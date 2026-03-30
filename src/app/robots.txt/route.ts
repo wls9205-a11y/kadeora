@@ -21,6 +21,7 @@ Disallow: /shop/
 Disallow: /consultant/
 Disallow: /login
 Disallow: /signup
+Disallow: /notifications
 
 # ===== Google =====
 User-agent: Googlebot
