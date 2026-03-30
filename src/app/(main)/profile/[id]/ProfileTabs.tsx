@@ -209,7 +209,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>💬 작성한 댓글이 없어요</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {myComments.map((comment, i) => (
+              {myComments.filter(c => c.post_id).map((comment, i) => (
                 <Link key={comment.id} href={`/feed/${comment.post_id}`} style={{ textDecoration: 'none' }}>
                   <div style={{ padding: '12px 0', borderBottom: i < myComments.length - 1 ? '1px solid var(--border)' : 'none', transition: 'opacity 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
