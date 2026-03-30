@@ -234,45 +234,48 @@ export default async function BlogPage({ searchParams }: Props) {
       })}} />
       {/* speakable — 네이버 음성검색 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }) }} />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📝 블로그</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, paddingTop: 4 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>블로그</h1>
+          <p className="blog-summary" style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '2px 0 0', letterSpacing: '0.3px' }}>매일 업데이트되는 투자 인사이트 · {totalCount.toLocaleString()}편</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <SectionShareButton section="blog" label="투자 정보 블로그 19,000편+" pagePath="/blog" />
-          <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{totalCount.toLocaleString()}편</span>
+          <Link href="/blog?sort=popular" style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontSize: 14 }}>🔥</Link>
         </div>
       </div>
-      <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '0 0 10px' }}>매일 업데이트되는 투자 정보</p>
 
       {/* 검색 */}
-      <form action="/blog" method="GET" style={{ marginBottom: 10 }}>
+      <form action="/blog" method="GET" style={{ marginBottom: 12, position: 'relative' }}>
         {category !== 'all' && <input type="hidden" name="category" value={category} />}
         {sort !== 'latest' && <input type="hidden" name="sort" value={sort} />}
-        <input name="q" defaultValue={q} placeholder="블로그 검색..." style={{
-          width: '100%', padding: '8px 12px', fontSize: 14, borderRadius: 8,
+        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
+        <input name="q" defaultValue={q} placeholder="주식, 청약, 미분양 검색..." style={{
+          width: '100%', padding: '10px 14px 10px 36px', fontSize: 13, borderRadius: 12,
           border: '1px solid var(--border)', background: 'var(--bg-surface)',
-          color: 'var(--text-primary)', boxSizing: 'border-box',
+          color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
         }} />
       </form>
 
-      {/* 카테고리 탭 + 건수 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', scrollbarWidth: 'none' }}>
+      {/* 카테고리 탭 — 밑줄 스타일 */}
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {CATS.map(c => (
           <Link key={c.key} href={`/blog${c.key !== 'all' ? `?category=${c.key}` : ''}${sort !== 'latest' ? `${c.key !== 'all' ? '&' : '?'}sort=${sort}` : ''}${q ? `${c.key !== 'all' || sort !== 'latest' ? '&' : '?'}q=${q}` : ''}`}
             style={{
-              padding: '7px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: category === c.key ? 700 : 500,
-              background: category === c.key ? 'var(--text-primary)' : 'var(--bg-surface)',
-              color: category === c.key ? 'var(--bg-base, #fff)' : 'var(--text-secondary)',
-              textDecoration: 'none', flexShrink: 0, border: category === c.key ? 'none' : '1px solid var(--border)',
-              display: 'flex', alignItems: 'center', gap: 4,
+              padding: '8px 14px', fontSize: 'var(--fs-sm)', fontWeight: category === c.key ? 700 : 500,
+              color: category === c.key ? 'var(--brand)' : 'var(--text-tertiary)',
+              textDecoration: 'none', flexShrink: 0,
+              borderBottom: category === c.key ? '2px solid var(--brand)' : '2px solid transparent',
+              display: 'flex', alignItems: 'center', gap: 4, transition: 'all 0.15s',
             }}>
-            <span>{c.icon}</span> {c.label}
-            <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.7 }}>({countMap[c.key] || 0})</span>
+            {c.label}
+            <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.6 }}>{countMap[c.key] || 0}</span>
           </Link>
         ))}
         <Link href="/blog/series" style={{
-          padding: '7px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 500,
-          background: 'var(--bg-surface)', color: 'var(--accent-blue)',
-          textDecoration: 'none', flexShrink: 0, border: '1px solid var(--accent-blue)',
+          padding: '8px 14px', fontSize: 'var(--fs-sm)', fontWeight: 500,
+          color: 'var(--brand)', textDecoration: 'none', flexShrink: 0,
+          borderBottom: '2px solid transparent',
           display: 'flex', alignItems: 'center', gap: 4,
         }}>
           📚 시리즈
@@ -305,22 +308,34 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* 정렬 토글 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-        {[
-          { key: 'latest', label: '🕐 최신순' },
-          { key: 'popular', label: '🔥 인기순' },
-        ].map(s => (
-          <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
-            style={{
-              padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,
-              background: sort === s.key ? 'var(--brand)' : 'var(--bg-hover)',
-              color: sort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-              textDecoration: 'none', border: 'none',
-            }}>
-            {s.label}
-          </Link>
-        ))}
+      {/* 정렬 + 인기태그 인라인 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[
+            { key: 'latest', label: '최신순' },
+            { key: 'popular', label: '인기순' },
+          ].map(s => (
+            <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
+              style={{
+                padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                background: sort === s.key ? 'var(--brand)' : 'transparent',
+                color: sort === s.key ? '#fff' : 'var(--text-tertiary)',
+                textDecoration: 'none', border: sort === s.key ? 'none' : '1px solid var(--border)',
+              }}>
+              {s.label}
+            </Link>
+          ))}
+        </div>
+        {popularTags.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, overflow: 'hidden' }}>
+            {popularTags.slice(0, 4).map((t: any) => (
+              <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
+                style={{ fontSize: 10, color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                #{t.tag}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 오늘의 추천 */}
@@ -391,7 +406,7 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* 글 목록 — 카드형 */}
+      {/* 글 목록 — 에디토리얼 타임라인 */}
       {(posts ?? []).length === 0 ? (
         <EmptyState
           icon={q ? '🔍' : '📝'}
@@ -399,75 +414,82 @@ export default async function BlogPage({ searchParams }: Props) {
           description={q ? '다른 검색어로 시도해보세요' : '곧 새로운 분석이 올라옵니다'}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {(posts ?? []).map((p: any) => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {(posts ?? []).map((p: any, idx: number) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
-            const catEmoji: Record<string, string> = { apt: '🏢', stock: '📈', unsold: '🏚️', finance: '💰', general: '📝' };
             const readMin = p.reading_time_min || 3;
+            const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+            const timeStr = new Date(p.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const isFirst = idx === 0 && pageNum === 1 && !q && category === 'all';
+            const prevDate = idx > 0 ? new Date((posts ?? [])[idx - 1].created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : null;
+            const showDateHeader = idx === 0 || dateStr !== prevDate;
+
             return (
-              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-card-hover" style={{
-                display: 'flex', gap: 10, padding: '10px 12px', borderRadius: 10,
-                background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                textDecoration: 'none', color: 'inherit',
-              }}>
-                {/* 썸네일 */}
-                <div style={{
-                  width: 72, height: 72, borderRadius: 10, flexShrink: 0, overflow: 'hidden',
-                  background: (() => {
-                    const hash = p.title.split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
-                    const angle = hash % 360;
-                    const pairs: Record<string, [string, string]> = {
-                      stock: ['rgba(96,165,250,0.25)', 'rgba(167,139,250,0.25)'],
-                      apt: ['rgba(52,211,153,0.25)', 'rgba(34,211,238,0.25)'],
-                      unsold: ['rgba(251,191,36,0.25)', 'rgba(248,113,113,0.25)'],
-                      finance: ['rgba(167,139,250,0.25)', 'rgba(236,72,153,0.25)'],
-                    };
-                    const [c1, c2] = pairs[p.category] || ['rgba(148,163,184,0.2)', 'rgba(203,213,225,0.2)'];
-                    return `linear-gradient(${angle}deg, ${c1}, ${c2})`;
-                  })(),
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  position: 'relative',
-                }}>
-                  {p.cover_image && !p.cover_image.includes('default-cover') && !p.cover_image.includes('generic') ? (
-                    <img src={p.cover_image} alt={p.image_alt || p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
-                  ) : (
-                    <span style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>{catEmoji[p.category] || '📝'}</span>
-                  )}
-                  {p.view_count >= 50 && (
-                    <span style={{ position: 'absolute', top: 3, right: 3, width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-red)', border: '1px solid var(--bg-surface)' }} />
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {/* 카테고리 + HOT */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
-                    <span style={{
-                      fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4,
-                      background: `${catColor}15`, color: catColor,
-                    }}>
-                      {CATS.find(c => c.key === p.category)?.label || p.category}
-                    </span>
-                    {p.view_count >= 100 && (
-                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>
-                    )}
+              <React.Fragment key={p.id}>
+                {/* 날짜 구분선 */}
+                {showDateHeader && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: idx === 0 ? '0 0 8px' : '12px 0 8px' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', flexShrink: 0 }}>{dateStr}</span>
+                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
                   </div>
-                  {/* 제목 */}
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
-                  {p.excerpt && (
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>
-                  )}
-                  {/* 메타 */}
-                  <div style={{ display: 'flex', gap: 4, marginTop: 2, fontSize: 10, color: 'var(--text-tertiary)', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span>{new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
-                    <span>·</span>
-                    <span>📖 {readMin}분</span>
-                    <span>·</span>
-                    <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
-                    {(p.comment_count || 0) > 0 && <><span>·</span><span>💬 {p.comment_count}</span></>}
-                    {(p.helpful_count || 0) > 0 && <><span>·</span><span>👍 {p.helpful_count}</span></>}
-                    {p.rewritten_at && <span style={{ padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)', fontSize: 9, fontWeight: 700 }}>UP</span>}
-                  </div>
-                </div>
-              </Link>
+                )}
+
+                {/* 피쳐드 히어로 (첫 번째 글) */}
+                {isFirst ? (
+                  <Link href={`/blog/${p.slug}`} className="kd-card-hover" style={{
+                    display: 'block', borderRadius: 14, overflow: 'hidden', marginBottom: 8, cursor: 'pointer',
+                    background: `linear-gradient(135deg, var(--bg-surface) 0%, ${catColor}08 100%)`,
+                    border: `1px solid var(--border)`, padding: '20px 18px 16px', textDecoration: 'none', color: 'inherit',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>
+                        {CATS.find(c => c.key === p.category)?.label || p.category}
+                      </span>
+                      {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 5px', borderRadius: 3, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
+                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{timeStr}</span>
+                    </div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.4, letterSpacing: '-0.3px' }}>{q ? highlightTitle(p.title, q) : p.title}</div>
+                    {p.excerpt && <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 8, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>}
+                    <div style={{ display: 'flex', gap: 12, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                      <span>📖 {readMin}분</span>
+                      <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
+                      {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
+                      {(p.helpful_count || 0) > 0 && <span>👍 {p.helpful_count}</span>}
+                    </div>
+                  </Link>
+                ) : (
+                  /* 일반 포스트 — 타임라인 스타일 */
+                  <Link href={`/blog/${p.slug}`} className="kd-card-hover" style={{
+                    display: 'flex', gap: 12, padding: '12px 14px 12px 12px', textDecoration: 'none', color: 'inherit',
+                    borderBottom: '1px solid var(--border)',
+                    position: 'relative', marginLeft: 10,
+                    borderLeft: `2px solid var(--border)`, paddingLeft: 16,
+                  }}>
+                    {/* 타임라인 도트 */}
+                    <div style={{ position: 'absolute', left: -5, top: 18, width: 8, height: 8, borderRadius: 4, background: catColor, border: '2px solid var(--bg-base)', zIndex: 1 }} />
+                    {/* 시간 */}
+                    <div style={{ width: 50, flexShrink: 0, paddingTop: 1 }}>
+                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>{timeStr}</span>
+                    </div>
+                    {/* 내용 */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: catColor }}>{CATS.find(c => c.key === p.category)?.label || p.category}</span>
+                        {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
+                        {p.rewritten_at && <span style={{ padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)', fontSize: 9, fontWeight: 700 }}>UP</span>}
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
+                      {p.excerpt && <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>}
+                      <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                        <span>📖 {readMin}분</span>
+                        <span>👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
+                        {(p.comment_count || 0) > 0 && <span>💬 {p.comment_count}</span>}
+                        {(p.helpful_count || 0) > 0 && <span>👍 {p.helpful_count}</span>}
+                      </div>
+                    </div>
+                  </Link>
+                )}
+              </React.Fragment>
             );
           })}
         </div>
