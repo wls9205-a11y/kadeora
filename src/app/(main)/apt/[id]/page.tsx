@@ -491,7 +491,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         const cards = [
           { l: '총 공급', v: totalUnits > 0 ? `${totalUnits.toLocaleString()}` : '-', sub: hasBreakdown ? `일반 ${generalSupply} · 특별 ${specialSupply}` : '', c: 'var(--text-primary)', icon: '🏢', bar: Math.min((totalUnits / 5000) * 100, 100), barColor: 'var(--brand)' },
           { l: sub ? '분양가' : '시세', v: (site?.price_min || site?.price_max) ? `${fmtAmount(site?.price_min)}~${fmtAmount(site?.price_max)}` : unsold?.sale_price_min ? `${fmtAmount(unsold.sale_price_min)}~` : '-', sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)' },
-          { l: '입주예정', v: (site?.move_in_date || sub?.mvn_prearnge_ym) ? (site?.move_in_date || sub?.mvn_prearnge_ym || '').slice(0, 7).replace('-', '.') : '-', sub: '', c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)' },
+          { l: '입주예정', v: fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || '-', sub: '', c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)' },
           { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, sub: '', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B' },
         ];
 
@@ -729,13 +729,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             <h2 style={{ ...ct, margin: 0 }}>📄 모집공고 핵심 요약</h2>
           </div>
 
-          {/* AI 분석 요약 */}
-          {sub.ai_summary && (
-            <div style={{ padding: '10px 12px', borderRadius: 8, background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(52,211,153,0.04))', border: '1px solid rgba(99,102,241,0.12)', marginBottom: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#8B5CF6', marginBottom: 4 }}>🤖 AI 분석</div>
-              <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub.ai_summary}</div>
-            </div>
-          )}
+          {/* AI 분석 — 상단 히어로에 이미 표시되므로 중복 제거 */}
 
           {/* 핵심 지표 시각 분석 — 기존 데이터 최대 활용 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 6, marginBottom: 12 }}>
@@ -1053,22 +1047,27 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>); })()}
 
       {/* 주변 시설 (nearby_facilities) — 크롤러 가시적 텍스트 */}
-      {site?.nearby_facilities && Object.keys(site.nearby_facilities as Record<string, number>).length > 0 && (
+      {site?.nearby_facilities && Object.keys(site.nearby_facilities as Record<string, number>).length > 0 && (() => {
+        const facilityLabels: Record<string, string> = { mart: '마트', park: '공원', school: '학교', subway: '지하철', hospital: '병원', bank: '은행', pharmacy: '약국', convenience: '편의점', library: '도서관', gym: '체육관' };
+        const entries = Object.entries(site.nearby_facilities as Record<string, any>).filter(([k]) => k !== 'updated_at' && k !== 'created_at');
+        if (entries.length === 0 || entries.every(([, v]) => Number(v) === 0)) return null;
+        return (
         <div className="apt-card">
           <h2 style={ct}>🏪 주변 시설</h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {Object.entries(site.nearby_facilities as Record<string, number>).map(([facility, count]) => (
+            {entries.map(([facility, count]) => (
               <div key={facility} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 20, background: 'var(--bg-hover)', border: '1px solid var(--border)', fontSize: 'var(--fs-xs)' }}>
-                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{facility}</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{facilityLabels[facility] || facility}</span>
                 <span style={{ color: 'var(--brand)', fontWeight: 700 }}>{count}개</span>
               </div>
             ))}
           </div>
           <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.6 }}>
-            {name} 주변에는 {Object.entries(site.nearby_facilities as Record<string, number>).map(([f, c]) => `${f} ${c}개`).join(', ')} 등의 편의시설이 있습니다.
+            {name} 주변에는 {entries.map(([f, c]) => `${facilityLabels[f] || f} ${c}개`).join(', ')} 등의 편의시설이 있습니다.
           </p>
         </div>
-      )}
+        );
+      })()}
 
       {/* 실거래 텍스트 요약 (서버 렌더링 — 크롤러용) */}
       {trades.length > 0 && (
