@@ -418,10 +418,10 @@ export default async function BlogPage({ searchParams }: Props) {
           {(posts ?? []).map((p: any, idx: number) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
             const readMin = p.reading_time_min || 3;
-            const dateStr = new Date(p.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
-            const timeStr = new Date(p.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const dateStr = new Date(p.created_at || Date.now()).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+            const timeStr = new Date(p.created_at || Date.now()).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
             const isFirst = idx === 0 && pageNum === 1 && !q && category === 'all';
-            const prevDate = idx > 0 ? new Date((posts ?? [])[idx - 1].created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : null;
+            const prevDate = idx > 0 ? new Date((posts ?? [])[idx - 1].created_at || Date.now()).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : null;
             const showDateHeader = idx === 0 || dateStr !== prevDate;
 
             return (
