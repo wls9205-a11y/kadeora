@@ -276,7 +276,6 @@ export default async function ComplexDetailPage({ params }: Props) {
               alt={`${decoded} 아파트 ${i === 0 ? '조감도' : i === 1 ? '투시도' : '배치도'}`}
               style={{ width: '100%', height: i === 0 && siteImages.length >= 3 ? 200 : 98, objectFit: 'cover', display: 'block' }}
               loading={i === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer"
-              onError={(e: any) => { e.target.style.display = 'none'; }}
             />
           ))}
         </div>
