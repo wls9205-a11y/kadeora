@@ -7,6 +7,7 @@ export const InstallBanner = dynamic(() => import('@/components/InstallBanner'),
 export const PWAInstallTracker = dynamic(() => import('@/components/PWAInstallTracker'), { ssr: false });
 export const NoticeBanner = dynamic(() => import('@/components/NoticeBanner'), { ssr: false });
 export const GuestCTA = dynamic(() => import('@/components/GuestCTA'), { ssr: false });
+export const GuestNudge = dynamic(() => import('@/components/GuestNudge'), { ssr: false });
 export const PageViewTracker = dynamic(() => import('@/components/PageViewTracker'), { ssr: false });
 export const AutoPushPrompt = dynamic(() => import('@/components/AutoPushPrompt'), { ssr: false });
 export const PromoSheet = dynamic(() => import('@/components/PromoSheet'), { ssr: false });

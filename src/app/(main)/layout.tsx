@@ -3,9 +3,8 @@ import { headers } from 'next/headers';
 import { Navigation } from '@/components/Navigation';
 import TrendingTicker from '@/components/TrendingTicker';
 import { ToastProvider } from '@/components/Toast';
-import { GuestGate } from '@/components/GuestGate';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, GuestCTA, PageViewTracker, AutoPushPrompt, PromoSheet } from '@/components/ClientDynamics';
+import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt, PromoSheet, GuestNudge } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
@@ -43,9 +42,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           overflowX: 'hidden',
         }}>
           <ErrorBoundary>
-            <GuestGate isLoggedIn={isLoggedIn}>
               {children}
-            </GuestGate>
           </ErrorBoundary>
         </main>
         <div className="right-panel-wrapper">
@@ -54,7 +51,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       </div>
       <InstallBanner />
       <PWAInstallTracker />
-      <GuestCTA />
+      <GuestNudge />
       <PromoSheet />
       <AutoPushPrompt />
       <PageViewTracker />

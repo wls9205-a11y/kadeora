@@ -31,21 +31,9 @@ export default function PromoSheet() {
     // 제외 경로
     if (['/login', '/auth', '/onboarding', '/admin', '/terms', '/privacy'].some(p => pathname.startsWith(p))) return;
 
-    // V1: 비로그인 유저
+    // V1: 비로그인 유저 → GuestNudge가 대체 (PromoSheet v1 비활성)
     if (!userId) {
-      const dismissedV1 = localStorage.getItem('kd_promo_v1');
-      if (dismissedV1) {
-        // "오늘 하루 보지않기" 체크
-        const dismissDate = new Date(Number(dismissedV1));
-        const now = new Date();
-        if (dismissDate.toDateString() === now.toDateString()) return;
-        // 날짜 바뀌면 다시 표시
-      }
-      const timer = setTimeout(() => {
-        setVariant('v1');
-        setVisible(true);
-      }, 3000);
-      return () => clearTimeout(timer);
+      return; // GuestNudge에서 단계적으로 처리
     }
 
     // V2: 로그인 + 미설치 유저
