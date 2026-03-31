@@ -12,7 +12,10 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('청약 가점 계산기')}&design=2&subtitle=${encodeURIComponent('무주택·부양가족·통장 가점 자동 계산')}`, width: 1200, height: 630, alt: '카더라 청약 가점 계산기' }],
+    images: [
+      { url: `${SITE_URL}/api/og?title=${encodeURIComponent('청약 가점 계산기')}&design=2&subtitle=${encodeURIComponent('무주택·부양가족·통장 가점 자동 계산')}`, width: 1200, height: 630, alt: '카더라 청약 가점 계산기' },
+      { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('청약 가점 계산기')}&category=apt`, width: 630, height: 630, alt: '카더라 청약 가점 계산기' },
+    ],
   },
   twitter: { card: 'summary_large_image' as const, title: '청약 가점 계산기', description: '무주택기간·부양가족·청약통장 가점 자동 계산' },
   other: {
@@ -36,6 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         operatingSystem: 'Web',
         description: '무주택기간, 부양가족 수, 청약통장 가입기간을 입력하면 총 가점과 예상 당첨 가능성을 계산해줍니다.',
         provider: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.diagnose-result'] },
       })}} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'FAQPage',

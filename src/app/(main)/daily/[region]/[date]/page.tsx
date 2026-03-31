@@ -32,7 +32,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: {
       title, description: desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'article',
-      images: [{ url: ogImg, width: 1200, height: 630, alt: `카더라 데일리 리포트 ${region} ${dateStr}` }],
+      images: [
+        { url: ogImg, width: 1200, height: 630, alt: `카더라 데일리 리포트 ${region} ${dateStr}` },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('데일리 리포트')}&category=daily`, width: 630, height: 630, alt: `카더라 데일리 ${region}` },
+      ],
     },
     twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
     other: {
@@ -90,6 +93,14 @@ export default async function DailyReportDatePage({ params }: Props) {
         datePublished: new Date(dateStr + 'T07:00:00+09:00').toISOString(),
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL },
+        speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.report-summary', '.market-overview'] },
+      }) }} />
+
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
+          { '@type': 'Question', name: `${region} ${dateStr} 부동산·주식 시장 동향은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라 데일리 리포트에서 ${region} 지역의 부동산 청약·실거래·미분양과 주식 시황을 매일 분석합니다. 데이터 기반 투자 인사이트를 무료로 확인하세요.` } },
+          { '@type': 'Question', name: '카더라 데일리 리포트는 언제 업데이트되나요?', acceptedAnswer: { '@type': 'Answer', text: '카더라 데일리 리포트는 매일 오전 7시(KST)에 전국 17개 광역시도별로 자동 발행됩니다.' } },
+        ],
       }) }} />
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({

@@ -15,10 +15,13 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('회원 등급 안내')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 등급 시스템' }],
+    images: [
+      { url: `${SITE_URL}/api/og?title=${encodeURIComponent('회원 등급 안내')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 등급 시스템' },
+      { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('회원 등급')}&category=general`, width: 630, height: 630 },
+    ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/grades' },
+  other: { 'naver:author': '카더라', 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/grades' },
 };
 
 
@@ -41,6 +44,7 @@ export default async function GradesPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '등급 안내' }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '회원 등급 안내 — 카더라', url: `${SITE_URL}/grades`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.grade-description'] } }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [

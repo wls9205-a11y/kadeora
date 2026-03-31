@@ -21,7 +21,11 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     keywords: `단지백과,${r || '전국'} 아파트,실거래가,전세가율,연차별,카더라`,
     alternates: { canonical: `${SITE_URL}/apt/complex${r ? `?region=${encodeURIComponent(r)}` : ''}` },
     openGraph: { title: `${r || '전국'} 단지백과 | 카더라`, description: desc, url: `${SITE_URL}/apt/complex`, siteName: '카더라', locale: 'ko_KR', type: 'website',
-      images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent((r || '전국') + ' 단지백과')}&category=apt&design=2&subtitle=${encodeURIComponent('연차별 아파트 비교')}&author=${encodeURIComponent('카더라 부동산팀')}`, width: 1200, height: 630 }] },
+      images: [
+        { url: `${SITE_URL}/api/og?title=${encodeURIComponent((r || '전국') + ' 단지백과')}&category=apt&design=2&subtitle=${encodeURIComponent('연차별 아파트 비교')}&author=${encodeURIComponent('카더라 부동산팀')}`, width: 1200, height: 630 },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent((r || '전국') + ' 단지백과')}&category=apt`, width: 630, height: 630 },
+      ] },
+    twitter: { card: 'summary_large_image' as const, title: `${r || '전국'} 단지백과`, description: desc },
     other: { 'naver:author': '카더라 부동산팀', 'og:updated_time': new Date().toISOString(), 'article:section': '부동산' },
   };
 }

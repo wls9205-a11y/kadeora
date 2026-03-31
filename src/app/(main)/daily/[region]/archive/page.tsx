@@ -23,7 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title, description: desc,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    openGraph: { title, description: desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website' },
+    openGraph: {
+      title, description: desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website',
+      images: [
+        { url: `${SITE_URL}/api/og?title=${encodeURIComponent('데일리 아카이브')}&subtitle=${encodeURIComponent(region)}&design=2`, width: 1200, height: 630 },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('데일리 아카이브')}&category=daily`, width: 630, height: 630 },
+      ],
+    },
+    twitter: { card: 'summary_large_image' as const, title, description: desc },
+    other: { 'naver:author': '카더라' },
   };
 }
 
@@ -63,6 +71,7 @@ export default async function ArchivePage({ params }: Props) {
           { '@type': 'ListItem', position: 3, name: '아카이브' },
         ],
       }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${region} 데일리 아카이브`, url: `${SITE_URL}/daily/${encodeURIComponent(region)}/archive`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] } }) }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div>

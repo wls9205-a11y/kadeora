@@ -16,10 +16,13 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('블로그 시리즈')}&design=2&category=blog`, width: 1200, height: 630, alt: '카더라 블로그 시리즈' }],
+    images: [
+      { url: `${SITE_URL}/api/og?title=${encodeURIComponent('블로그 시리즈')}&design=2&category=blog`, width: 1200, height: 630, alt: '카더라 블로그 시리즈' },
+      { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('블로그 시리즈')}&category=blog`, width: 630, height: 630 },
+    ],
   },
   twitter: { card: 'summary_large_image' },
-  other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/blog/series' },
+  other: { 'naver:author': '카더라', 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/blog/series' },
 };
 
 export const revalidate = 3600;
@@ -37,6 +40,8 @@ export default async function BlogSeriesPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈' }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '블로그 시리즈 — 카더라', url: `${SITE_URL}/blog/series`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '카더라 블로그 시리즈란?', acceptedAnswer: { '@type': 'Answer', text: '카더라 블로그 시리즈는 주식, 부동산, 재테크 등 특정 주제를 여러 편에 걸쳐 심층 분석하는 연재 콘텐츠입니다. 순서대로 읽으면 해당 분야를 체계적으로 이해할 수 있습니다.' } }] }) }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📚 시리즈</h1>

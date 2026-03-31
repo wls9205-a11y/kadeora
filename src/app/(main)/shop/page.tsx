@@ -12,8 +12,12 @@ export const metadata: Metadata = {
     title: '카더라 상점 | 프로 멤버십 · 확성기',
     description: '주식+부동산 올인원 프리미엄. 관심 종목 무제한 · AI 분석 · 급등락 알림.',
     url: `${SITE}/shop`, siteName: '카더라', locale: 'ko_KR', type: 'website',
-    images: [{ url: `${SITE}/api/og?title=${encodeURIComponent('프로 멤버십')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 프로 멤버십' }],
+    images: [
+      { url: `${SITE}/api/og?title=${encodeURIComponent('프로 멤버십')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 프로 멤버십' },
+      { url: `${SITE}/api/og-square?title=${encodeURIComponent('프로 멤버십')}&category=general`, width: 630, height: 630 },
+    ],
   },
+  twitter: { card: 'summary_large_image' as const, title: '카더라 프로 멤버십', description: '주식+부동산 올인원 프리미엄' },
   other: { 'naver:author': '카더라', 'og:updated_time': new Date().toISOString() },
 };
 
