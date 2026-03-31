@@ -92,6 +92,14 @@ export default function RightPanel() {
         </div>
       )}
 
+      {/* 친구 초대 미니 배너 (로그인 유저만) */}
+      {userId && (
+        <Link href={`/profile/${userId}#invite`} style={{ display: 'block', background: 'linear-gradient(135deg, rgba(59,123,246,0.06), rgba(46,232,165,0.04))', border: '1px solid rgba(59,123,246,0.12)', borderRadius: 'var(--radius-card)', padding: '10px 12px', textDecoration: 'none', textAlign: 'center' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>👥 친구 초대하면 둘 다 +50P!</div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>내 초대코드 확인하기 →</div>
+        </Link>
+      )}
+
       {/* 실시간 라운지 채팅 */}
       <MiniLounge />
 

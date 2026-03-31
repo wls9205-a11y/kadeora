@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { DailyReportData } from '@/lib/daily-report-data';
 import { useAuth } from '@/components/AuthProvider';
+import ShareButtons from '@/components/ShareButtons';
 
 interface Props {
   data: DailyReportData;
@@ -551,6 +552,13 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
         </div>
 
+      </div>
+
+      {/* 공유 CTA */}
+      <div style={{ marginTop: 'var(--sp-md)', padding: '16px', borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, rgba(59,123,246,0.06), rgba(46,232,165,0.04))', textAlign: 'center' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>오늘 리포트가 유익했다면?</div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>카카오톡·밴드로 공유하면 +5P 적립!</div>
+        <ShareButtons title={`카더라 데일리 리포트 — ${d.region} ${d.date}`} postId={`daily-${d.region}`} />
       </div>
 
       {/* 푸터 — 리포트 소개 */}

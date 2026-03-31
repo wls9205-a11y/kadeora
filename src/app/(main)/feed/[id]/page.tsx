@@ -550,6 +550,13 @@ export default async function FeedDetailPage({ params }: Props) {
           ))}
         </div>
       )}
+
+      {/* 바이럴 CTA — 하단 공유 유도 */}
+      <div style={{ padding: '16px', borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, rgba(59,123,246,0.05), rgba(46,232,165,0.03))', border: '1px solid rgba(59,123,246,0.08)', textAlign: 'center', marginBottom: 'var(--sp-xl)' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>이 글 어떠셨나요?</div>
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 10 }}>공유하면 +5P · 친구 초대하면 +50P!</div>
+        <ShareButtons title={post.title} postId={post.id} content={post.content} />
+      </div>
     </div>
   );
 }
