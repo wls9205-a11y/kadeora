@@ -1,14 +1,14 @@
 'use client';
 import { useEffect } from 'react';
-import { isTossMode } from '@/lib/toss-mode';
+import { isTossMode, initTossNavigation } from '@/lib/toss-mode';
 
 /**
- * 토스 앱인토스 미니앱 모드 초기화
+ * 토스 앱인토스 미니앱 초기화 (v2)
  * 
- * root layout에서 렌더링 — 토스 모드 감지 시:
  * 1. html에 data-theme="light" + class="toss-mode" 추가
- * 2. CSS로 자체 헤더, 하단탭, 설치배너, CTA 등 숨김
- * 3. body padding 조정 (토스 네이티브 내비바 영역)
+ * 2. CSS로 자체 헤더/하단탭/설치배너/CTA/백버튼 숨김
+ * 3. body padding 제거 (토스 네이티브 내비바 영역)
+ * 4. 뒤로가기 히스토리 관리 — 최초화면에서 앱 종료
  */
 export default function TossModeInit() {
   useEffect(() => {
@@ -18,7 +18,9 @@ export default function TossModeInit() {
     html.setAttribute('data-theme', 'light');
     html.classList.add('toss-mode');
 
-    // 토스 모드 스타일 주입
+    // 뒤로가기 히스토리 관리 초기화
+    initTossNavigation();
+
     const style = document.createElement('style');
     style.id = 'toss-mode-styles';
     style.textContent = `
@@ -37,6 +39,17 @@ export default function TossModeInit() {
         background: #FFFFFF !important;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
+      }
+      /* 반려 사유 #2: 자체 뒤로가기/네비게이션 완전 숨김 — 토스 네이티브만 사용 */
+      .toss-mode nav,
+      .toss-mode [data-nav="bottom"],
+      .toss-mode [data-role="back-button"],
+      .toss-mode .kd-back-button {
+        display: none !important;
+      }
+      /* 토스 모드에서 상단 여백 제거 */
+      .toss-mode main {
+        padding-top: 0 !important;
       }
     `;
     document.head.appendChild(style);

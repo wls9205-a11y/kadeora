@@ -455,6 +455,39 @@ export async function GET(req: NextRequest) {
       }
       success += usdSuccess;
       if (usdSuccess > 0) usdUpdated = true;
+
+      // 등락률 0% 종목 → stock_price_history에서 전일 종가 기반 계산
+      try {
+        const { data: zeroStocks } = await supabase
+          .from('stock_quotes')
+          .select('symbol, price')
+          .eq('currency', 'USD')
+          .eq('change_pct', 0)
+          .gt('price', 0)
+          .limit(200);
+        if (zeroStocks?.length) {
+          const today = new Date().toISOString().split('T')[0];
+          for (const s of zeroStocks) {
+            const { data: hist } = await supabase
+              .from('stock_price_history')
+              .select('close_price')
+              .eq('symbol', s.symbol)
+              .lt('date', today)
+              .order('date', { ascending: false })
+              .limit(1);
+            if (hist?.[0]?.close_price && Number(hist[0].close_price) > 0) {
+              const prev = Number(hist[0].close_price);
+              const curr = Number(s.price);
+              const pct = +((curr - prev) / prev * 100).toFixed(2);
+              if (pct !== 0) {
+                await supabase.from('stock_quotes')
+                  .update({ change_pct: pct, change_amt: +(curr - prev).toFixed(2) })
+                  .eq('symbol', s.symbol);
+              }
+            }
+          }
+        }
+      } catch { /* history fallback 실패 무시 */ }
     }
   } catch {
     // USD 갱신 실패 시 무시 — 국내 결과만 반환

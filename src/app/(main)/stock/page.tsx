@@ -51,7 +51,8 @@ async function fetchStocks() {
   const { data } = await sb
     .from('stock_quotes')
     .select('symbol, name, market, price, change_amt, change_pct, volume, market_cap, currency, sector, updated_at, is_active, description')
-    .order('market_cap', { ascending: false });
+    .order('market_cap', { ascending: false })
+    .limit(2000);
   return data ?? [];
 }
 

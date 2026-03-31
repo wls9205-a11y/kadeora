@@ -1,5 +1,6 @@
 'use client';
 import { useToast } from '@/components/Toast';
+import { isTossMode, tossShare } from '@/lib/toss-mode';
 
 interface Props {
   section: string;     // e.g. 'stock-heatmap', 'apt-region'
@@ -12,15 +13,20 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
   const { success } = useToast();
 
   const handleShare = async () => {
-    const url = `${window.location.origin}${pagePath}?section=${section}`;
+    const path = `${pagePath}?section=${section}`;
+
+    // 토스 미니앱: intoss/toss 스킴 공유 (반려 사유 #1)
+    if (isTossMode()) {
+      const shared = await tossShare(label || '카더라', path);
+      if (shared) return;
+    }
+
+    const url = `${window.location.origin}${path}`;
 
     // 모바일: 네이티브 공유 시트
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({
-          title: label || '카더라',
-          url,
-        });
+        await navigator.share({ title: label || '카더라', url });
         return;
       } catch { /* 취소 시 무시 */ }
     }
