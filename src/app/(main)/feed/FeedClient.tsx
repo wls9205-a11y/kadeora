@@ -504,7 +504,7 @@ export default function FeedClient({
             if (i === 2 && currentUserId) nodes.push(<AttendanceBanner key="attend" />);
             if (i === 4 && !currentUserId) {
               nodes.push(
-                <div key="signup-cta" className="kd-card-glow" style={{ padding: '24px 18px', margin: '6px 0' }}>
+                <div key="signup-cta" className="kd-card-glow" data-nudge="context-cta" style={{ padding: '24px 18px', margin: '6px 0' }}>
                   <div style={{ position: 'relative', zIndex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-lg)' }}>
                       <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', flexShrink: 0 }}>🚀</div>
