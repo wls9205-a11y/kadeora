@@ -236,7 +236,7 @@ export default function WriteClient() {
         aria-label="게시글 제목"
         maxLength={100}
         style={{
-          width: '100%', fontSize: 'var(--fs-lg)', fontWeight: 700, padding: '12px 16px',
+          width: '100%', fontSize: 'var(--fs-lg)', fontWeight: 800, padding: '12px 16px',
           border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
           transition: 'border-color var(--transition-normal)',
@@ -373,7 +373,7 @@ export default function WriteClient() {
         disabled={!canSubmit}
         style={{
           width: '100%', padding: '14px 0', borderRadius: 'var(--radius-card)', border: 'none',
-          fontSize: 'var(--fs-md)', fontWeight: 700, marginTop: 'var(--sp-xl)',
+          fontSize: 'var(--fs-md)', fontWeight: 800, marginTop: 'var(--sp-xl)',
           background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
           color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           cursor: canSubmit ? 'pointer' : 'not-allowed',

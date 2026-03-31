@@ -37,7 +37,7 @@ function BestCommentPreview({ postId }: { postId: number }) {
   return (
     <div style={{ marginTop: 6, padding: '5px 8px', borderLeft: '2px solid rgba(59,123,246,0.3)', background: 'var(--bg-hover)', borderRadius: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 2 }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)' }}>Best</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>Best</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{best.nickname} {GRADE_EMOJI[best.grade] ?? '🌱'}</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>♥ {best.likes_count}</span>
       </div>
@@ -440,7 +440,7 @@ export default function FeedClient({
                 style={{ padding: '12px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 'var(--radius-card)', transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
-                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 8px', borderRadius: '0 0 6px 6px' }}>
+                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '1px 8px', borderRadius: '0 0 6px 6px' }}>
                     📌 고정
                   </div>
                 )}
@@ -448,7 +448,7 @@ export default function FeedClient({
                 {/* 상단: 아바타 + 메타 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                   <Link href={post.is_anonymous ? '#' : `/profile/${post.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-inverse)' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-inverse)' }}>
                       {displayName[0].toUpperCase()}
                     </div>
                   </Link>

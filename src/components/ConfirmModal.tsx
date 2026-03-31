@@ -63,7 +63,7 @@ export function ConfirmModal({
         }}
         onClick={e => e.stopPropagation()}
       >
-        <h3 style={{ margin: '0 0 10px', color: 'var(--text-primary)', fontSize: 'var(--fs-lg)', fontWeight: 700 }}>
+        <h3 style={{ margin: '0 0 10px', color: 'var(--text-primary)', fontSize: 'var(--fs-lg)', fontWeight: 800 }}>
           {title}
         </h3>
         <p style={{ margin: '0 0 24px', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', lineHeight: 1.6 }}>

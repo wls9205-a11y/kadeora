@@ -155,7 +155,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
       {(trades || []).length === 0 && (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>{q ? '🔍' : '🏠'}</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
             {q ? `"${q}" 검색 결과가 없습니다` : '실거래가를 검색하세요'}
           </div>
           <div style={{ fontSize: 'var(--fs-sm)' }}>

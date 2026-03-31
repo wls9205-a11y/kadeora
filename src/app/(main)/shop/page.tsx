@@ -45,7 +45,7 @@ export default function ShopPage() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{item.title}</span>
-                {!item.available && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>준비중</span>}
+                {!item.available && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>준비중</span>}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{item.desc}</div>
             </div>

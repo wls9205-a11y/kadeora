@@ -38,7 +38,7 @@ function LoginForm({ redirect }: LoginFormProps) {
   return (
     <div style={{ width: '100%', maxWidth: 400 }}>
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 8 }}>
+        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'monospace', letterSpacing: '-1px', marginBottom: 'var(--sp-sm)' }}>
           카더라
         </div>
         <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--fs-base)' }}>아는 사람만 아는 그 정보</p>
@@ -53,7 +53,7 @@ function LoginForm({ redirect }: LoginFormProps) {
         <button
           onClick={() => login('kakao')}
           disabled={!!loading}
-          style={{ width: '100%', padding: '14px 20px', marginBottom: 12, borderRadius: 12, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'kakao' ? (
             <div style={{ width: 20, height: 20, border: '2px solid var(--kakao-text, #191919)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -68,7 +68,7 @@ function LoginForm({ redirect }: LoginFormProps) {
         <button
           onClick={() => login('google')}
           disabled={!!loading}
-          style={{ width: '100%', padding: '14px 20px', borderRadius: 12, border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'google' ? (
             <div style={{ width: 20, height: 20, border: '2px solid var(--text-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -84,7 +84,7 @@ function LoginForm({ redirect }: LoginFormProps) {
         </button>
 
         {error && (
-          <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--error)', fontSize: 'var(--fs-sm)' }}>
+          <div style={{ marginTop: 'var(--sp-lg)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--error)', fontSize: 'var(--fs-sm)' }}>
             ⚠ {error}
           </div>
         )}

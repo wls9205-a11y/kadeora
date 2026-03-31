@@ -17,18 +17,18 @@ export default function FaqClient() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
-      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>자주 묻는 질문</h1>
+      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>자주 묻는 질문</h1>
       <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', marginBottom: 32 }}>카더라 사용에 관해 자주 묻는 질문들을 모았습니다</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
         {FAQS.map((faq, i) => (
-          <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', transition: 'border-color 0.15s' }}>
+          <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', overflow: 'hidden', transition: 'border-color 0.15s' }}>
             <button
               onClick={() => setOpen(open === i ? null : i)}
               style={{
                 width: '100%', padding: '16px 20px', background: 'transparent', border: 'none',
                 color: 'var(--text-primary)', textAlign: 'left', cursor: 'pointer',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-md)',
                 fontSize: 'var(--fs-md)', fontWeight: 600, lineHeight: 1.4,
               }}
             >
@@ -52,11 +52,11 @@ export default function FaqClient() {
         ))}
       </div>
 
-      <div style={{ marginTop: 40, padding: '24px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 14, textAlign: 'center' }}>
+      <div style={{ marginTop: 40, padding: '24px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
         <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)' }}>찾는 답이 없으신가요?</p>
         <a href="mailto:kadeora.app@gmail.com" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
-          padding: '10px 20px', borderRadius: 8,
+          padding: '10px 20px', borderRadius: 'var(--radius-sm)',
           background: 'var(--brand)', color: 'var(--text-inverse)',
           textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600,
         }}>📧 문의하기</a>

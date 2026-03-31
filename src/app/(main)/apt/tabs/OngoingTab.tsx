@@ -171,10 +171,10 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                   {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: 'var(--bg-base)', marginRight: 4 }}>PREMIUM</span>}
                   {isNew(o, 'ongoing') && <NewBadge />}
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: isUnsold ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: isUnsold ? 'var(--accent-red)' : 'var(--accent-blue)', border: `1px solid ${isUnsold ? 'rgba(248,113,113,0.25)' : 'rgba(96,165,250,0.25)'}` }}>
                     {isUnsold ? '미분양' : '분양중'}
                   </span>
-                  {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)' }}>🔥 {o.competition_rate}:1</span>}
+                  {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)' }}>🔥 {o.competition_rate}:1</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
@@ -246,14 +246,14 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                   <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 6, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
                     <span style={{ fontSize: 12, lineHeight: 1 }}>👔</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)' }}>
+                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)' }}>
                         {premiumMatch.consultant.is_verified && <span style={{ marginRight: 3 }}>✓</span>}
                         {premiumMatch.consultant.company || '분양 상담사'} · {premiumMatch.consultant.name}
                       </div>
                       {premiumMatch.description && <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{premiumMatch.description}</div>}
                     </div>
                     {(premiumMatch.cta_phone || premiumMatch.consultant.phone) && (
-                      <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
+                      <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
                     )}
                   </div>
                 )}
@@ -359,7 +359,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 <div style={{ flex: 1, height: 20, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: `hsl(${240 - (pct / 100) * 240}, 70%, 55%)` }} />
                 </div>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{pAmt}억</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{pAmt}억</div>
               </Link>
             );
           })}
@@ -383,7 +383,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         return (
           <BottomSheet open={!!selectedOngoing} onClose={() => setSelectedOngoing(null)} title={o.house_nm}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-md)' }}>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? 'var(--accent-red)' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: isU ? 'var(--accent-red-bg)' : 'var(--accent-green-bg)', color: isU ? 'var(--accent-red)' : 'var(--accent-green)' }}>{isU ? '미분양' : '분양중'}</span>
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
 

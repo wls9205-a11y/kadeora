@@ -46,7 +46,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
 
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
         시총 트리맵 · 크기=시총 · 색상=등락
       </div>
 
@@ -70,7 +70,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               boxShadow: isSelected ? `0 0 0 2px ${col}60` : 'none',
             }}>
               {cs >= 2 && rs >= 2 && <span style={{ fontSize: Math.min(10, 7 + cs), fontWeight: 700, color: '#E0EAFF', lineHeight: 1.1, textAlign: 'center' }}>{sec.name}</span>}
-              {rs >= 2 && <span style={{ fontSize: 9, fontWeight: 700, color: col, fontFamily: 'monospace' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</span>}
+              {rs >= 2 && <span style={{ fontSize: 9, fontWeight: 600, color: col, fontFamily: 'monospace' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</span>}
               {rs >= 3 && cs >= 3 && <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)' }}>{fmtCap(sec.total)}</span>}
             </button>
           );

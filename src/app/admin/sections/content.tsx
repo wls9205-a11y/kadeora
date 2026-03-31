@@ -46,27 +46,27 @@ export default function ContentSection() {
 
       {/* KPI 요약 */}
       {data && !loading && (
-        <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+        <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: C.textDim }}>📝 게시글</div>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: C.brand }}>{data?.totalPosts ?? '—'}</div>
           </div>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: C.textDim }}>💬 댓글</div>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: C.green }}>{data?.totalComments ?? '—'}</div>
           </div>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: C.textDim }}>🗳️ 토론</div>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: C.purple }}>{data?.totalDiscussions ?? '—'}</div>
           </div>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: C.textDim }}>💭 채팅</div>
             <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: C.cyan }}>{data?.totalMessages ?? '—'}</div>
           </div>
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-lg)' }}>
         {tabs.map(t => <Pill key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>{t.icon} {t.label}</Pill>)}
       </div>
 

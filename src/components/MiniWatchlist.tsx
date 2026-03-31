@@ -69,7 +69,7 @@ export default function MiniWatchlist() {
     return (
       <div style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>⭐ 관심 종목 시세를 피드에서 바로 확인하세요</span>
-        <Link href="/login" style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>로그인 →</Link>
+        <Link href="/login" style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none' }}>로그인 →</Link>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export default function MiniWatchlist() {
     return (
       <div style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>⭐ 관심 종목을 등록하면 여기서 시세를 확인할 수 있어요</span>
-        <Link href="/stock" style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>등록하기 →</Link>
+        <Link href="/stock" style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none' }}>등록하기 →</Link>
       </div>
     );
   }

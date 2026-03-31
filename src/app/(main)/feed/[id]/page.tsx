@@ -397,7 +397,7 @@ export default async function FeedDetailPage({ params }: Props) {
         {/* 비로그인 가입 유도 — 이미지 아래에 배치 */}
         {!currentUserId && (
           <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-2xl)' }}>
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>전체 글을 보려면 로그인하세요</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>전체 글을 보려면 로그인하세요</div>
             <Link href={`/login?redirect=/feed/${id}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
               카카오로 로그인
             </Link>

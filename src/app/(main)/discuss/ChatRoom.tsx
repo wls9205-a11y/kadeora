@@ -248,7 +248,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                   <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 'var(--sp-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', zIndex: 100, boxShadow: '0 -4px 16px rgba(0,0,0,0.12)' }}>
                     {mentionList.map((u, i) => (
                       <div key={u.id} onClick={() => selectMention(u.nickname ?? '')} style={{ padding: '7px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', background: i === mentionIndex ? 'var(--bg-hover)' : 'transparent' }}>
-                        <div style={{ width: 22, height: 22, borderRadius: '50%', background: avc(u.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{(u.nickname ?? '?')[0]}</div>
+                        <div style={{ width: 22, height: 22, borderRadius: '50%', background: avc(u.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>{(u.nickname ?? '?')[0]}</div>
                         <span style={{ fontWeight: 600 }}>@{u.nickname}</span>
                         <span style={{ fontSize: 'var(--fs-xs)', color: (GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).color, marginLeft: 'auto' }}>{(GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).emoji}</span>
                       </div>
@@ -274,7 +274,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
       {sheetUser && (
         <BottomSheet open={!!sheetUser} onClose={() => setSheetUser(null)} title={sheetUser.nickname ?? '사용자'} maxWidth={480}>
             <div style={{ display: 'flex', gap: 'var(--sp-lg)', alignItems: 'center', marginBottom: 'var(--sp-xl)' }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: avc(sheetUser.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', fontWeight: 700 }}>{(sheetUser.nickname ?? '?')[0]}</div>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: avc(sheetUser.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', fontWeight: 800 }}>{(sheetUser.nickname ?? '?')[0]}</div>
               <div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: (GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).color, fontWeight: 600 }}>
                   {(GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).emoji} {(GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).title}

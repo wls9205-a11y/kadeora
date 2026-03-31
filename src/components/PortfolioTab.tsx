@@ -125,7 +125,7 @@ export default function PortfolioTab() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>📈 30일 수익률 추이</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color }}>{isUp ? '+' : ''}{lastPct.toFixed(2)}%</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color }}>{isUp ? '+' : ''}{lastPct.toFixed(2)}%</span>
             </div>
             <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
               <defs>

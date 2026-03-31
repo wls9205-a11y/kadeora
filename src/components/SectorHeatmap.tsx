@@ -76,7 +76,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
             >
               <div>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', lineHeight: 1.2 }}>{sec.name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-inverse)', lineHeight: 1.2 }}>{sec.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>{sec.stocks.length}종목</div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>

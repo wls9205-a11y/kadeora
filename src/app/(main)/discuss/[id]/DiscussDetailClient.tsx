@@ -148,7 +148,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
 
       {/* Comments */}
       <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginTop: 'var(--sp-lg)' }}>
-        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
+        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
 
         {/* Input */}
         <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>

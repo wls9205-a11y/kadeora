@@ -50,7 +50,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
 
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
         종목 레이더 비교 (최대 3개)
       </div>
 
@@ -125,7 +125,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
                 <div key={s.symbol} style={{ marginBottom: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
                     <div style={{ width: 8, height: 8, borderRadius: 2, background: col }} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
                     <button onClick={() => toggle(s.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 12, marginLeft: 'auto' }}>×</button>
                   </div>
                   {AXES.map((ax, i) => (

@@ -284,7 +284,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
         <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
-        {profile?.age_group && <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: profile.age_group === '신축' ? 'rgba(59,123,246,0.1)' : 'var(--bg-hover)', color: profile.age_group === '신축' ? 'var(--brand)' : 'var(--text-secondary)' }}>{profile.age_group}</span>}
+        {profile?.age_group && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: profile.age_group === '신축' ? 'rgba(59,123,246,0.1)' : 'var(--bg-hover)', color: profile.age_group === '신축' ? 'var(--brand)' : 'var(--text-secondary)' }}>{profile.age_group}</span>}
         {builtYear > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{builtYear}년 준공</span>}
       </div>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{region} {sigungu} {dong} · 매매 {tradeList.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
@@ -470,7 +470,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{tradeList.length}건</span>
         </div>
         {/* 헤더 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 70px', gap: 'var(--sp-sm)', padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 70px', gap: 'var(--sp-sm)', padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
           <span>날짜</span><span>면적 · 층</span><span style={{ textAlign: 'right' }}>금액</span>
         </div>
         {tradeList.slice(0, 50).map((t, i) => {
@@ -506,7 +506,7 @@ export default async function ComplexDetailPage({ params }: Props) {
             <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>🏠 전월세 이력</span>
             <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{rentTrades.length}건</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr auto', gap: 'var(--sp-sm)', padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr auto', gap: 'var(--sp-sm)', padding: '6px 0', borderBottom: '2px solid var(--border)', fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>
             <span>날짜</span><span>면적 · 층</span><span style={{ textAlign: 'right' }}>유형 · 금액</span>
           </div>
           {rentTrades.slice(0, 30).map((r, i) => {

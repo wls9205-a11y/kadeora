@@ -130,7 +130,7 @@ export default function InstallBanner() {
               </div>
             ))}
             <button onClick={() => { hap('light'); setShowIOSGuide(false); handleDismiss(); logInstall('ios'); setTimeout(requestPush, 1000); }}
-              style={{ marginTop: 'var(--sp-xl)', width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-md)', fontWeight: 700, cursor: 'pointer' }}>
+              style={{ marginTop: 'var(--sp-xl)', width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-md)', fontWeight: 800, cursor: 'pointer' }}>
               알겠어요!
             </button>
           </div>

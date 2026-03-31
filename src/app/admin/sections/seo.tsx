@@ -31,22 +31,22 @@ export default function SEOSection() {
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: '0 0 8px' }}>🔍 SEO · 콘텐츠 점수</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 8px' }}>🔍 SEO · 콘텐츠 점수</h1>
       <p style={{ fontSize: 12, color: C.textDim, margin: '0 0 24px' }}>5,420개 현장 페이지의 데이터 풍부도 현황</p>
 
       {/* ── IndexNow + 포털 인덱싱 ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12, marginBottom: 20 }} className="mc-g2">
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 18px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xl)' }} className="mc-g2">
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-lg)', padding: '16px 18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>🔔 IndexNow 전송 현황</span>
             <span style={{ fontSize: 11, color: C.textDim }}>블로그 {fmt(ixn.total)}편</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
             <StatBox icon="✅" label="전송완료" value={ixn.done} color={C.green} />
             <StatBox icon="⏳" label="대기" value={ixn.pending} color={C.yellow} />
             <StatBox icon="📊" label="진행률" value={`${ixn.pct}%`} color={ixn.pct > 80 ? C.green : ixn.pct > 30 ? C.yellow : C.red} accent />
           </div>
-          <div style={{ height: 10, borderRadius: 5, background: C.border, overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ height: 10, borderRadius: 5, background: C.border, overflow: 'hidden', marginBottom: 'var(--sp-sm)' }}>
             <div style={{ height: '100%', borderRadius: 5, background: `linear-gradient(90deg, ${C.green}, ${C.cyan})`, width: `${ixn.pct}%`, transition: 'width 0.6s ease' }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: C.textDim }}>
@@ -55,8 +55,8 @@ export default function SEOSection() {
           </div>
         </div>
 
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 18px' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 12 }}>🌐 포털 인덱싱</div>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-lg)', padding: '16px 18px' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-md)' }}>🌐 포털 인덱싱</div>
           {[
             { name: 'Google', status: '미노출', color: C.red, action: 'Search Console 사이트맵', href: 'https://search.google.com/search-console' },
             { name: 'Naver', status: '대기', color: C.yellow, action: '서치어드바이저 RSS', href: 'https://searchadvisor.naver.com' },
@@ -78,7 +78,7 @@ export default function SEOSection() {
       </div>
 
       {/* ── Hero Stats ── */}
-      <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xl)' }}>
         <StatBox icon="📄" label="전체 페이지" value={seo?.totalSites || 0} color={C.brand} accent />
         <StatBox icon="🗺️" label="사이트맵" value={seo?.totalSitemap || 0} sub={`${seo?.sitemapPct || 0}% 커버리지`} color={C.green} accent />
         <StatBox icon="✍️" label="블로그 리라이트" value={`${seo?.blogRewrittenPct || 0}%`} sub={`${fmt(kpi.blogs)}건 중`} color={C.purple} accent />
@@ -86,14 +86,14 @@ export default function SEOSection() {
       </div>
 
       {/* ── Type Score Cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xl)' }}>
         {Object.entries(seo?.siteTypeBreakdown || {}).sort((a: any, b: any) => b[1].count - a[1].count).map(([type, info]: [string, any]) => (
-          <div key={type} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 18px' }}>
+          <div key={type} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-lg)', padding: '16px 18px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <span style={{ fontSize: 14, fontWeight: 700, color: typeColors[type] || C.text }}>{typeLabels[type] || type}</span>
-              <span style={{ fontSize: 22, fontWeight: 800, color: C.text }}>{fmt(info.count)}</span>
+              <span style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text }}>{fmt(info.count)}</span>
             </div>
-            <div style={{ marginBottom: 8 }}>
+            <div style={{ marginBottom: 'var(--sp-sm)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3 }}>
                 <span style={{ color: C.textDim }}>평균 점수</span>
                 <span style={{ color: typeColors[type], fontWeight: 700 }}>{info.avgScore} / {maxScore}</span>
@@ -111,7 +111,7 @@ export default function SEOSection() {
       </div>
 
       {/* ── Score Formula Reference ── */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-lg)', padding: 18 }}>
         <h3 style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: '0 0 14px' }}>📐 점수 산정 공식 (최대 103점)</h3>
         <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {[

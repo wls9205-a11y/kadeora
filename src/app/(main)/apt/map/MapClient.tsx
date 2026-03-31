@@ -238,8 +238,8 @@ export default function MapClient() {
             <div style={{ padding: '20px 16px', textAlign: 'center' }}>
               <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 10 }}>카카오 지도 SDK를 불러올 수 없습니다 · 아래 목록에서 지역별 현황을 확인하세요</div>
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center' }}>
-                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>카카오맵에서 보기</a>
-                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>새로고침</button>
+                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>카카오맵에서 보기</a>
+                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>새로고침</button>
               </div>
             </div>
           ) : !sdkReady ? (
@@ -260,7 +260,7 @@ export default function MapClient() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                   <span style={{
-                    fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4,
+                    fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
                     background: `${LAYER_CONF[selectedPin.layer].color}20`,
                     color: LAYER_CONF[selectedPin.layer].color,
                   }}>

@@ -47,7 +47,7 @@ export default function BlogSection() {
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 20px' }}>✍️ 블로그 관리</h1>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xl)' }}>
         <KPICard icon="📄" label="전체 블로그" value={blog.total} color={C.brand} />
         <KPICard icon="👁" label="총 조회수" value={blog.totalViews} color={C.cyan} />
         <KPICard icon="✨" label="리라이팅" value={`${rewritePct}%`} sub={`${blog.rewritten}/${blog.total}`} color={C.green} />
@@ -56,13 +56,13 @@ export default function BlogSection() {
       </div>
 
       {/* 블로그 성과 대시보드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-md)', marginBottom: 'var(--sp-xl)' }}>
         {/* 인기글 TOP 10 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18 }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>🔥 인기글 TOP 10</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {(insights.topPosts || []).map((p: any, i: number) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 12 }}>
                 <span style={{ fontWeight: 800, color: i < 3 ? C.brand : C.textDim, minWidth: 18 }}>{i + 1}</span>
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: C.text }}>{p.title}</span>
                 <Badge color={C.purple}>{p.category}</Badge>
@@ -73,9 +73,9 @@ export default function BlogSection() {
         </div>
 
         {/* 카테고리별 조회수 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18 }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>📊 카테고리별 성과</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
             {(insights.catViews || []).map((cv: any) => (
               <div key={cv.category} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                 <span style={{ fontWeight: 600, color: C.text }}>{cv.category}</span>
@@ -86,11 +86,11 @@ export default function BlogSection() {
         </div>
 
         {/* 댓글 많은 글 TOP 5 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18 }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>💬 댓글 많은 글</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {(insights.topCommented || []).map((p: any, i: number) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 12 }}>
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: C.text }}>{p.title}</span>
                 <span style={{ color: C.textDim, flexShrink: 0 }}>💬{p.comment_count}</span>
               </div>
@@ -100,11 +100,11 @@ export default function BlogSection() {
         </div>
 
         {/* helpful 많은 글 TOP 5 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18 }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>👍 도움이 됐어요 TOP</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {(insights.topHelpful || []).map((p: any, i: number) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 12 }}>
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: C.text }}>{p.title}</span>
                 <span style={{ color: C.textDim, flexShrink: 0 }}>👍{p.helpful_count}</span>
               </div>
@@ -116,9 +116,9 @@ export default function BlogSection() {
 
       {/* 최근 7일 발행 추이 */}
       {insights.dailyCounts && Object.keys(insights.dailyCounts).length > 0 && (
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, marginBottom: 20 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18, marginBottom: 'var(--sp-xl)' }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>📅 최근 7일 발행 추이</h3>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 80 }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'flex-end', height: 80 }}>
             {(() => {
               const days: string[] = [];
               for (let i = 6; i >= 0; i--) {
@@ -128,8 +128,8 @@ export default function BlogSection() {
               return days.map(d => {
                 const cnt = insights.dailyCounts[d] || 0;
                 return (
-                  <div key={d} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>{cnt}</span>
+                  <div key={d} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--sp-xs)' }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: C.text }}>{cnt}</span>
                     <div style={{ width: '100%', borderRadius: 4, background: cnt > 0 ? C.brand : C.border, height: `${Math.max(4, (cnt / maxCnt) * 60)}px`, transition: 'height .3s' }} />
                     <span style={{ fontSize: 9, color: C.textDim }}>{d.slice(5)}</span>
                   </div>
@@ -141,11 +141,11 @@ export default function BlogSection() {
       )}
 
       {/* Category breakdown */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, marginBottom: 20 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18, marginBottom: 'var(--sp-xl)' }}>
         <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>카테고리별 분포</h3>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
           {Object.entries(blog.byCat || {}).sort(([, a], [, b]) => (b as number) - (a as number)).map(([cat, cnt]) => (
-            <div key={cat} style={{ padding: '8px 14px', background: C.surface, borderRadius: 8, fontSize: 13 }}>
+            <div key={cat} style={{ padding: '8px 14px', background: C.surface, borderRadius: 'var(--radius-sm)', fontSize: 13 }}>
               <span style={{ fontWeight: 700, color: C.text }}>{cat}</span>
               <span style={{ color: C.textDim, marginLeft: 6 }}>{fmt(cnt as number)}</span>
             </div>
@@ -154,8 +154,8 @@ export default function BlogSection() {
       </div>
 
       {/* Rewrite Progress Bar */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, marginBottom: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18, marginBottom: 'var(--sp-xl)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>리라이팅 진행률</span>
           <span style={{ fontSize: 13, fontWeight: 700, color: C.green }}>{rewritePct}%</span>
         </div>
@@ -165,12 +165,12 @@ export default function BlogSection() {
       </div>
 
       {/* Cron Buttons */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, marginBottom: 20 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 18, marginBottom: 'var(--sp-xl)' }}>
         <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 12px' }}>블로그 크론 실행</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 'var(--sp-sm)' }}>
           {CRON_BTNS.map(b => (
             <button key={b.path} onClick={() => runCron(b.path, b.label)} disabled={running !== null}
-              style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${C.border}`, background: running === b.label ? C.brandBg : C.surface, color: C.text, fontSize: 12, fontWeight: 600, cursor: running ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: running === b.label ? C.brandBg : C.surface, color: C.text, fontSize: 12, fontWeight: 600, cursor: running ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
               <span>{b.icon}</span> {running === b.label ? '실행중...' : b.label}
             </button>
           ))}

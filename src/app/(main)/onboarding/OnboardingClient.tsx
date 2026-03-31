@@ -117,7 +117,7 @@ export default function OnboardingClient() {
               onKeyDown={e => e.key === 'Enter' && nickname.trim().length >= 2 && setStep(2)} />
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
             <button onClick={() => { const v = validateNickname(nickname); if (!v.valid) { error(v.error!); return; } setStep(2); }}
-              className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 'var(--sp-2xl)', padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
+              className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 'var(--sp-2xl)', padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 800 }}>
               다음 →
             </button>
           </div>
@@ -144,7 +144,7 @@ export default function OnboardingClient() {
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(1)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={() => setStep(3)} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>다음 →</button>
+              <button onClick={() => setStep(3)} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 800 }}>다음 →</button>
             </div>
           </div>
         )}
@@ -177,7 +177,7 @@ export default function OnboardingClient() {
             )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(2)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
-              <button onClick={() => ageGroup ? setStep(4) : error('연령대를 선택해주세요')} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>다음 →</button>
+              <button onClick={() => ageGroup ? setStep(4) : error('연령대를 선택해주세요')} className="kd-btn kd-btn-primary" style={{ flex: 2, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 800 }}>다음 →</button>
             </div>
           </div>
         )}

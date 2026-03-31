@@ -94,7 +94,7 @@ export default function Sidebar() {
             {unread > 0 && (
               <span style={{
                 marginLeft: 'auto', background: 'var(--brand)', color: 'var(--text-inverse)',
-                fontSize: 'var(--fs-xs)', fontWeight: 700, borderRadius: 'var(--radius-md)',
+                fontSize: 'var(--fs-xs)', fontWeight: 600, borderRadius: 'var(--radius-md)',
                 padding: '2px 6px', minWidth: 18, textAlign: 'center',
               }}>{unread}</span>
             )}

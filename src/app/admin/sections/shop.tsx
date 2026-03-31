@@ -7,7 +7,7 @@ export default function ShopSection() {
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 16px' }}>🛍️ 상점</h1>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-lg)' }}>
         <Pill active={tab === 'products'} onClick={() => setTab('products')}>📦 상품 관리</Pill>
         <Pill active={tab === 'orders'} onClick={() => setTab('orders')}>🧾 주문 내역</Pill>
       </div>
@@ -72,12 +72,12 @@ function OrdersTab() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 16px', flex: 1 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-md)', marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '12px 16px', flex: 1 }}>
           <div style={{ fontSize: 11, color: C.textDim }}>총 주문</div>
           <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: C.brand }}>{orders.length}건</div>
         </div>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 16px', flex: 1 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '12px 16px', flex: 1 }}>
           <div style={{ fontSize: 11, color: C.textDim }}>총 매출</div>
           <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: C.green }}>{totalRevenue.toLocaleString()}원</div>
         </div>

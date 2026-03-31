@@ -443,16 +443,16 @@ export default async function AptUnifiedPage({ params }: Props) {
       {/* Header */}
       <div style={{ marginBottom: 'var(--sp-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
-          <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-xs)', fontWeight: 700, background: tBg[sType], color: tClr[sType], border: `1px solid ${tClr[sType]}33` }}>{tLabel[sType]}</span>
-          {subSt && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--radius-xl)', background: SB[subSt].bg, color: SB[subSt].color, border: `1px solid ${SB[subSt].border}` }}>{SB[subSt].label}</span>}
-          {redevStage && <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-xs)', fontWeight: 700, background: 'rgba(255,212,59,0.15)', color: '#FFD43B' }}>{redevStage}</span>}
-          {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-purple)', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 'var(--radius-md)' }}>{Number(sub.competition_rate_1st).toFixed(1)}:1</span>}
+          <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: tBg[sType], color: tClr[sType], border: `1px solid ${tClr[sType]}33` }}>{tLabel[sType]}</span>
+          {subSt && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 9px', borderRadius: 'var(--radius-xl)', background: SB[subSt].bg, color: SB[subSt].color, border: `1px solid ${SB[subSt].border}` }}>{SB[subSt].label}</span>}
+          {redevStage && <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'rgba(255,212,59,0.15)', color: '#FFD43B' }}>{redevStage}</span>}
+          {sub?.competition_rate_1st && Number(sub.competition_rate_1st) > 0 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-purple)', background: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: 'var(--radius-md)' }}>{Number(sub.competition_rate_1st).toFixed(1)}:1</span>}
         </div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 2px', lineHeight: 1.3, wordBreak: 'keep-all', overflowWrap: 'break-word' }}>{name}</h1>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{[region, site?.sigungu, site?.dong].filter(Boolean).join(' ') || sub?.hssply_adres || ''}{(site?.builder || sub?.constructor_nm) ? ` · ${site?.builder || sub?.constructor_nm} 시공` : ''}{(site?.developer || sub?.developer_nm) ? ` · ${site?.developer || sub?.developer_nm} 시행` : ''}</p>
         {(sub?.ai_summary || site?.description) && (
           <div style={{ padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), rgba(139,92,246,0.06))', border: '1px solid var(--brand-border)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--brand)', marginBottom: 3 }}>🤖 AI 분석</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--brand)', marginBottom: 3 }}>🤖 AI 분석</div>
             <div className="site-description" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{sub?.ai_summary || site?.description}</div>
           </div>
         )}
@@ -531,7 +531,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>💰 분양가</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: tier.color, background: `${tier.color}15`, padding: '1px 6px', borderRadius: 4 }}>{tier.emoji} {tier.label}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: tier.color, background: `${tier.color}15`, padding: '1px 6px', borderRadius: 4 }}>{tier.emoji} {tier.label}</span>
                 </div>
                 {/* 가격 범위 바 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -590,7 +590,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>📍 {region} 시세 비교 ({regionBenchmark.count}개 현장)</span>
-              <span style={{ fontSize: 10, fontWeight: 700, color: diff > 10 ? '#F87171' : diff < -10 ? '#34D399' : 'var(--text-tertiary)', background: diff > 10 ? 'rgba(248,113,113,0.1)' : diff < -10 ? 'rgba(52,211,153,0.1)' : 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: diff > 10 ? '#F87171' : diff < -10 ? '#34D399' : 'var(--text-tertiary)', background: diff > 10 ? 'rgba(248,113,113,0.1)' : diff < -10 ? 'rgba(52,211,153,0.1)' : 'var(--bg-hover)', padding: '1px 6px', borderRadius: 4 }}>
                 {diff > 0 ? `+${diff}%` : `${diff}%`} {diff > 10 ? '고가' : diff < -10 ? '저가' : '평균'}
               </span>
             </div>
@@ -697,11 +697,11 @@ export default async function AptUnifiedPage({ params }: Props) {
             <div style={{ position: 'relative', height: 80, marginBottom: 'var(--sp-sm)' }}>
               {/* 분양가 범위 */}
               <div style={{ position: 'absolute', top: 8, left: `${pct(site.price_min)}%`, width: `${pct(site.price_max) - pct(site.price_min)}%`, height: 20, borderRadius: 'var(--radius-xs)', background: 'rgba(59,123,246,0.2)', border: '1.5px solid var(--brand)' }}>
-                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 700, color: 'var(--brand)', whiteSpace: 'nowrap' }}>분양가</div>
+                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 600, color: 'var(--brand)', whiteSpace: 'nowrap' }}>분양가</div>
               </div>
               {/* 실거래 범위 */}
               <div style={{ position: 'absolute', top: 44, left: `${pct(tradeMin)}%`, width: `${pct(tradeMax) - pct(tradeMin)}%`, height: 20, borderRadius: 'var(--radius-xs)', background: premium > 0 ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)', border: `1.5px solid ${premium > 0 ? '#F87171' : '#34D399'}` }}>
-                <div style={{ position: 'absolute', bottom: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 700, color: premium > 0 ? '#F87171' : '#34D399', whiteSpace: 'nowrap' }}>실거래가</div>
+                <div style={{ position: 'absolute', bottom: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 600, color: premium > 0 ? '#F87171' : '#34D399', whiteSpace: 'nowrap' }}>실거래가</div>
               </div>
               {/* 분양 평균 마커 */}
               <div style={{ position: 'absolute', top: 4, left: `${pct(supplyAvg)}%`, width: 2, height: 28, background: 'var(--brand)', transform: 'translateX(-50%)' }} />
@@ -925,7 +925,7 @@ export default async function AptUnifiedPage({ params }: Props) {
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sb2.house_nm}</div>
                       <div style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{sb2.region_nm} · {sb2.tot_supply_hshld_co}세대</div>
                     </div>
-                    {pMax > 0 && <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-blue)', flexShrink: 0, marginLeft: 8 }}>{fmtAmount(pMin)}{pMax !== pMin ? `~${fmtAmount(pMax)}` : ''}</div>}
+                    {pMax > 0 && <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-blue)', flexShrink: 0, marginLeft: 8 }}>{fmtAmount(pMin)}{pMax !== pMin ? `~${fmtAmount(pMax)}` : ''}</div>}
                   </Link>
                   );
                 })}
@@ -985,7 +985,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             <div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>미분양</div><div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--accent-red)' }}>{(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호</div></div>
             <div><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>총 세대수</div><div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{unsold.tot_supply_hshld_co ? unsold.tot_supply_hshld_co.toLocaleString() : '-'}</div></div>
           </div>
-          {unsoldRate !== null && <div style={{ position: 'relative', height: 6, background: 'var(--bg-hover)', borderRadius: 3, marginBottom: 6 }}><div style={{ height: '100%', borderRadius: 3, width: `${Math.min(unsoldRate, 100)}%`, background: unsoldRate > 70 ? 'var(--accent-red)' : unsoldRate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} /><span style={{ position: 'absolute', right: 0, top: -16, fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-red)' }}>미분양률 {unsoldRate}%</span></div>}
+          {unsoldRate !== null && <div style={{ position: 'relative', height: 6, background: 'var(--bg-hover)', borderRadius: 3, marginBottom: 6 }}><div style={{ height: '100%', borderRadius: 3, width: `${Math.min(unsoldRate, 100)}%`, background: unsoldRate > 70 ? 'var(--accent-red)' : unsoldRate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} /><span style={{ position: 'absolute', right: 0, top: -16, fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-red)' }}>미분양률 {unsoldRate}%</span></div>}
           {unsold.after_completion_unsold > 0 && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-red)', fontWeight: 600 }}>준공후(악성) 미분양 {unsold.after_completion_unsold}호</div>}
         </div>
       )}
@@ -996,7 +996,7 @@ export default async function AptUnifiedPage({ params }: Props) {
           <div className="apt-stages">{STAGES.map((s, i) => <div key={s} style={{ background: i <= ci ? (i === ci ? '#B794FF' : 'rgba(183,148,255,0.2)') : 'var(--bg-hover)', color: i === ci ? 'var(--bg-base)' : i < ci ? '#B794FF' : 'var(--text-tertiary)' }}>{s.replace('사업시행인가', '시행인가').replace('정비구역지정', '구역지정')}</div>)}</div>
           <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}><div style={{ height: '100%', width: `${pct}%`, borderRadius: 4, background: '#B794FF' }} /></div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}><span>구역지정</span><span style={{ color: '#B794FF', fontWeight: 700 }}>{redevStage} ({pct}%)</span><span>준공</span></div>
-          {redev.ai_summary && <div style={{ marginTop: 10, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 3 }}>🤖 AI 분석</div><div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{redev.ai_summary}</div></div>}
+          {redev.ai_summary && <div style={{ marginTop: 10, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--accent-blue-bg), rgba(52,211,153,0.06))', border: '1px solid rgba(96,165,250,0.15)' }}><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-blue)', marginBottom: 3 }}>🤖 AI 분석</div><div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{redev.ai_summary}</div></div>}
           {[redev.constructor && ['🏗️ 시공사', redev.constructor], redev.developer && ['🏢 시행사', redev.developer], redev.total_households && ['👥 세대수', `${redev.total_households.toLocaleString()}세대`]].filter(Boolean).map(([l, v]: [string, string]) => <div key={l} style={{ ...rw, borderBottom: 'none' }}><span style={rl}>{l}</span><span style={rv}>{v}</span></div>)}
         </div>); })()}
 
@@ -1112,9 +1112,9 @@ export default async function AptUnifiedPage({ params }: Props) {
           <h2 style={ct}>📍 위치</h2>
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 8px' }}>{site?.address || `${region} ${site?.sigungu || ''} ${site?.dong || ''}`}{site?.nearby_station ? ` · 최근접 역 ${site.nearby_station}` : ''}</p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <a href={`https://map.kakao.com/?q=${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>🗺️ 카카오맵</a>
-            <a href={`https://map.naver.com/v5/search/${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: 'var(--accent-green)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>🗺️ 네이버지도</a>
-            <a href={`https://www.google.com/maps?q=${site.latitude},${site.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: 'var(--accent-blue)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>🗺️ 구글맵</a>
+            <a href={`https://map.kakao.com/?q=${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+            <a href={`https://map.naver.com/v5/search/${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: 'var(--accent-green)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+            <a href={`https://www.google.com/maps?q=${site.latitude},${site.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: 'var(--accent-blue)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 구글맵</a>
           </div>
         </div>
       )}
@@ -1283,7 +1283,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>청약 마감 알림 받아보세요</div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프리미엄 멤버십 · D-3, D-1 자동 알림</div>
           </div>
-          <Link href="/premium" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 700, textDecoration: 'none', flexShrink: 0 }}>
+          <Link href="/premium" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
             자세히
           </Link>
         </div>

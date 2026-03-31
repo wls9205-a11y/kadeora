@@ -223,7 +223,7 @@ export default function SearchClient() {
   };
 
   const acSectionHeader = (label: string) => (
-    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-tertiary)', padding: '8px 12px', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)', padding: '8px 12px', textTransform: 'uppercase', letterSpacing: 0.5 }}>
       {label}
     </div>
   );
@@ -491,7 +491,7 @@ export default function SearchClient() {
                   <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
                   <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
-                <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>
                   {highlight(post.title, query)}
                 </h3>
                 <p style={{ margin: '0 0 10px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>

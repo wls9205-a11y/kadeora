@@ -70,7 +70,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)', marginTop: -8 }}>현재가 {fmtPrice(currentPrice)}</div>
         {myAlerts.length > 0 && (
           <div style={{ marginBottom: 'var(--sp-lg)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>활성 알림</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>활성 알림</div>
             {myAlerts.map(a => (
               <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontSize: 'var(--fs-sm)', color: a.is_triggered ? 'var(--accent-green)' : 'var(--text-primary)' }}>
@@ -82,7 +82,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
             ))}
           </div>
         )}
-        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>새 알림 추가</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>새 알림 추가</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           {[{ key: 'above' as const, label: '📈 이상 도달' }, { key: 'below' as const, label: '📉 이하 도달' }].map(t => (
             <button key={t.key} onClick={() => setAlertType(t.key)} style={{

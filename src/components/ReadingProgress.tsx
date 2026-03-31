@@ -32,7 +32,7 @@ export default function ReadingProgress() {
       {progress > 10 && progress < 98 && (
         <div style={{
           position: 'fixed', top: 8, right: 12, zIndex: 100,
-          fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)',
+          fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)',
           background: 'var(--bg-elevated)', padding: '2px 8px',
           borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
           pointerEvents: 'none', opacity: 0.8,

@@ -124,7 +124,7 @@ export default function PersonalDashboard() {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <TrendingUp size={14} color="var(--accent-blue)" />
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 종목</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>관심 종목</span>
                 <Link href="/stock" style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>더보기 →</Link>
               </div>
               {watchStocks.slice(0, 4).map(s => {
@@ -135,7 +135,7 @@ export default function PersonalDashboard() {
                     padding: '5px 0', textDecoration: 'none', borderBottom: '1px solid var(--border)',
                   }}>
                     <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', fontWeight: 500 }}>{s.name}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: stockColor(s.change_pct, isKR) }}>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: stockColor(s.change_pct, isKR) }}>
                       {s.change_pct >= 0 ? '+' : ''}{s.change_pct.toFixed(2)}%
                     </span>
                   </Link>
@@ -149,7 +149,7 @@ export default function PersonalDashboard() {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Building2 size={14} color="var(--accent-green)" />
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 청약</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>관심 청약</span>
                 <Link href="/apt" style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>더보기 →</Link>
               </div>
               {[...favApts].sort((a, b) => {
@@ -165,7 +165,7 @@ export default function PersonalDashboard() {
                     {a.house_nm}
                   </span>
                   <span style={{
-                    fontSize: 'var(--fs-xs)', fontWeight: 700, flexShrink: 0, marginLeft: 8,
+                    fontSize: 'var(--fs-xs)', fontWeight: 600, flexShrink: 0, marginLeft: 8,
                     padding: '2px 6px', borderRadius: 4,
                     background: dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--accent-red)' : 'var(--bg-hover)',
                     color: dDay(a.rcept_endde).includes('D-') && parseInt(dDay(a.rcept_endde).replace('D-', '')) <= 3 ? 'var(--text-inverse)' : 'var(--text-secondary)',
@@ -182,7 +182,7 @@ export default function PersonalDashboard() {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Building2 size={14} color="var(--accent-green)" />
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 청약</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>관심 청약</span>
               </div>
               <Link href="/apt" style={{ display: 'block', textAlign: 'center', padding: '12px 8px', fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
                 관심 청약을 등록해보세요 →
@@ -195,7 +195,7 @@ export default function PersonalDashboard() {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Bell size={14} color="var(--accent-orange)" />
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>새 알림 {alerts.length}개</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>새 알림 {alerts.length}개</span>
                 <Link href="/notifications" style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>보기 →</Link>
               </div>
               {alerts.map(a => (
@@ -216,7 +216,7 @@ export default function PersonalDashboard() {
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <span style={{ fontSize: 14 }}>📰</span>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>추천 읽을거리</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>추천 읽을거리</span>
                 <Link href="/blog" style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>더보기 →</Link>
               </div>
               {recBlogs.map(b => (

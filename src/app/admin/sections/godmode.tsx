@@ -80,16 +80,16 @@ export default function GodModeSection() {
       <p style={{ fontSize: 13, color: C.textDim, margin: '0 0 24px' }}>Phase 순차 실행 — AI/콘텐츠는 Fire&amp;Forget (백그라운드 실행)</p>
 
       {/* Mode Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
         {modes.map(m => (
           <button key={m.key} onClick={() => { setMode(m.key); run(m.key); }} disabled={running}
             style={{
-              padding: '16px 14px', borderRadius: 12, border: `1px solid ${running ? C.border : m.color}40`,
+              padding: '16px 14px', borderRadius: 'var(--radius-card)', border: `1px solid ${running ? C.border : m.color}40`,
               background: C.card, cursor: running ? 'wait' : 'pointer', textAlign: 'left', transition: 'all .15s',
             }}
             onMouseEnter={e => { if (!running) e.currentTarget.style.borderColor = m.color; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = `${m.color}40`; }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.text, marginBottom: 4 }}>{m.label}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-xs)' }}>{m.label}</div>
             <div style={{ fontSize: 11, color: C.textDim }}>{m.desc}</div>
           </button>
         ))}
@@ -97,17 +97,17 @@ export default function GodModeSection() {
 
       {/* Progress */}
       {running && (
-        <div style={{ background: C.card, border: `1px solid ${C.brand}40`, borderRadius: 12, padding: 20, marginBottom: 20, textAlign: 'center' }}>
-          <div style={{ fontSize: 32, marginBottom: 8, animation: 'pulse 1.5s infinite' }}>⚡</div>
+        <div style={{ background: C.card, border: `1px solid ${C.brand}40`, borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-xl)', textAlign: 'center' }}>
+          <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)', animation: 'pulse 1.5s infinite' }}>⚡</div>
           <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: C.text }}>{mode.toUpperCase()} 실행 중...</div>
-          <div style={{ fontSize: 14, color: C.brand, fontWeight: 600, marginTop: 4 }}>{(elapsed / 1000).toFixed(1)}초</div>
+          <div style={{ fontSize: 14, color: C.brand, fontWeight: 600, marginTop: 'var(--sp-xs)' }}>{(elapsed / 1000).toFixed(1)}초</div>
         </div>
       )}
 
       {/* Results */}
       {results.length > 0 && (
         <>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-md)', marginBottom: 'var(--sp-lg)' }}>
             <KPICard icon="✅" label="성공" value={successCount - dispatchedCount} color={C.green} />
             <KPICard icon="🚀" label="Dispatched" value={dispatchedCount} color={C.purple} />
             <KPICard icon="❌" label="실패" value={failCount} color={C.red} />
@@ -131,41 +131,41 @@ export default function GodModeSection() {
 
       {/* ━━━ 특수 작업 ━━━ */}
       <div style={{ marginTop: 32, borderTop: `1px solid ${C.border}`, paddingTop: 24 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 4 }}>🛠 특수 작업</div>
-        <div style={{ fontSize: 12, color: C.textDim, marginBottom: 16 }}>크론 외 1회성 관리 작업</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-xs)' }}>🛠 특수 작업</div>
+        <div style={{ fontSize: 12, color: C.textDim, marginBottom: 'var(--sp-lg)' }}>크론 외 1회성 관리 작업</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           <button onClick={() => runSpecial('/api/admin/seed-longtail-80', '롱테일 80편 시드')}
             disabled={specialRunning}
-            style={{ padding: '10px 16px', borderRadius: 10, border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             📝 롱테일 80편 시드 생성
           </button>
           <button onClick={() => runSpecial('/api/admin/blog-limit-reset', 'daily_create_limit 10 원복')}
             disabled={specialRunning}
-            style={{ padding: '10px 16px', borderRadius: 10, border: `1px solid ${C.cyan}40`, background: C.card, color: C.cyan, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.cyan}40`, background: C.card, color: C.cyan, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🔢 블로그 생성 한도 원복 (→10)
           </button>
         </div>
         {/* 벌크 수집 */}
-        <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 20, marginBottom: 8 }}>📦 실거래 벌크 수집</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 20, marginBottom: 'var(--sp-sm)' }}>📦 실거래 벌크 수집</div>
         <div style={{ fontSize: 11, color: C.textDim, marginBottom: 10 }}>연도별 매매/전월세 과거 데이터 수집 (API 일일 10,000건 한도)</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-sm)' }}>
           {[2023, 2024, 2025].map(y => (
-            <div key={y} style={{ display: 'flex', gap: 4 }}>
+            <div key={y} style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
               <button onClick={() => runSpecial('/api/admin/backfill-trades', `매매 ${y}`, { type: 'sale', year: y })}
                 disabled={specialRunning}
-                style={{ padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+                style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
                 📊 매매 {y}
               </button>
               <button onClick={() => runSpecial('/api/admin/backfill-trades', `전월세 ${y}`, { type: 'rent', year: y })}
                 disabled={specialRunning}
-                style={{ padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.purple}40`, background: C.card, color: C.purple, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
+                style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.purple}40`, background: C.card, color: C.purple, fontWeight: 700, fontSize: 12, cursor: specialRunning ? 'wait' : 'pointer' }}>
                 🏠 전월세 {y}
               </button>
             </div>
           ))}
         </div>
         {specialLog && (
-          <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 8, background: C.card, border: `1px solid ${C.border}`, fontSize: 12, color: specialLog.startsWith('✅') ? C.green : specialLog.startsWith('❌') ? C.red : C.textSec, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+          <div style={{ marginTop: 'var(--sp-md)', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', background: C.card, border: `1px solid ${C.border}`, fontSize: 12, color: specialLog.startsWith('✅') ? C.green : specialLog.startsWith('❌') ? C.red : C.textSec, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
             {specialLog}
           </div>
         )}

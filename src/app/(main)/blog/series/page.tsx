@@ -67,7 +67,7 @@ export default async function BlogSeriesPage() {
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>{s.title}</h2>
                   {s.description && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.description}</p>}
                 </div>
-                <div style={{ position: 'absolute', top: 10, right: 14, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 'var(--radius-xl)', background: `${catColor}20`, color: catColor, border: `1px solid ${catColor}40` }}>
+                <div style={{ position: 'absolute', top: 10, right: 14, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 'var(--radius-xl)', background: `${catColor}20`, color: catColor, border: `1px solid ${catColor}40` }}>
                   {s.post_count}편
                 </div>
               </div>

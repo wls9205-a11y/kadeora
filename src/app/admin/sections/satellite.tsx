@@ -68,9 +68,9 @@ export default function SatelliteSection() {
   const totalRss = sites.reduce((s, x) => s + x.rssItems, 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 900 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-lg)', maxWidth: 900 }}>
       {/* KPI */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-md)' }}>
         {[
           { label: '활성 사이트', value: `${activeSites}/3`, color: C.green },
           { label: 'RSS 아이템', value: totalRss, color: C.yellow },
@@ -78,20 +78,20 @@ export default function SatelliteSection() {
           { label: '자동 딥링크', value: '33%', color: C.cyan },
           { label: '로테이션', value: '주간', color: C.brand },
         ].map((kpi, i) => (
-          <div key={i} style={{ background: C.card, borderRadius: 10, padding: '12px 14px', border: `1px solid ${C.border}` }}>
+          <div key={i} style={{ background: C.card, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', border: `1px solid ${C.border}` }}>
             <div style={{ fontSize: 11, color: C.textDim }}>{kpi.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
           </div>
         ))}
       </div>
 
       {/* Site Status */}
-      <div style={{ background: C.card, borderRadius: 12, padding: 16, border: `1px solid ${C.border}` }}>
+      <div style={{ background: C.card, borderRadius: 'var(--radius-card)', padding: 16, border: `1px solid ${C.border}` }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: C.text }}>사이트 상태</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {sites.map((site, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: C.surface, borderRadius: 8, border: `1px solid ${C.border}` }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: site.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 16 }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', padding: '10px 12px', background: C.surface, borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}` }}>
+              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', background: site.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 16 }}>
                 {site.label}
               </div>
               <div style={{ flex: 1 }}>
@@ -112,7 +112,7 @@ export default function SatelliteSection() {
       </div>
 
       {/* SEO Checklist */}
-      <div style={{ background: C.card, borderRadius: 12, padding: 16, border: `1px solid ${C.border}` }}>
+      <div style={{ background: C.card, borderRadius: 'var(--radius-card)', padding: 16, border: `1px solid ${C.border}` }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: C.text }}>SEO 인프라</h3>
         <table style={{ width: '100%', fontSize: 12, color: C.textSec, borderCollapse: 'collapse' }}>
           <thead>
@@ -137,15 +137,15 @@ export default function SatelliteSection() {
       </div>
 
       {/* Actions */}
-      <div style={{ background: C.card, borderRadius: 12, padding: 16, border: `1px solid ${C.border}` }}>
+      <div style={{ background: C.card, borderRadius: 'var(--radius-card)', padding: 16, border: `1px solid ${C.border}` }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: C.text }}>원클릭 액션</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-sm)' }}>
           {[
             { action: 'check_status', label: '상태 체크' },
             { action: 'ping_search', label: 'IndexNow Ping' },
           ].map(btn => (
             <button key={btn.action} onClick={() => triggerAction(btn.action, btn.label)} style={{
-              padding: '8px 14px', borderRadius: 8, border: `1px solid ${C.border}`,
+              padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`,
               background: C.surface, color: C.text, fontSize: 12, cursor: 'pointer',
             }}>
               {btn.label}
@@ -156,7 +156,7 @@ export default function SatelliteSection() {
 
       {/* Log */}
       {actionLog.length > 0 && (
-        <div style={{ background: C.card, borderRadius: 12, padding: 16, border: `1px solid ${C.border}` }}>
+        <div style={{ background: C.card, borderRadius: 'var(--radius-card)', padding: 16, border: `1px solid ${C.border}` }}>
           <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: C.text }}>로그</h3>
           <div style={{ maxHeight: 150, overflow: 'auto', fontSize: 11, color: C.textDim, fontFamily: 'monospace' }}>
             {actionLog.map((log, i) => <div key={i}>{log}</div>)}

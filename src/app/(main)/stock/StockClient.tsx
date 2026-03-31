@@ -299,7 +299,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             const ms = getMarketStatus();
             const lastUpdate = stocks.length > 0 ? stocks.reduce((latest, s) => s.updated_at > latest ? s.updated_at : latest, stocks[0].updated_at) : null;
             return (
-              <span style={{ fontSize: 10, fontWeight: 700, color: ms.color, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 'var(--radius-xl)', background: `${ms.color}12`, border: `1px solid ${ms.color}30` }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: ms.color, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 'var(--radius-xl)', background: `${ms.color}12`, border: `1px solid ${ms.color}30` }}>
                 {ms.label.includes('장중') && (
                   <span className="kd-pulse-dot" style={{ background: ms.color, flexShrink: 0 }} />
                 )}
@@ -329,7 +329,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             {/* 헤더 */}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 'var(--sp-md)', cursor: 'pointer' }} onClick={() => setBriefingOpen(v => !v)}>
               <div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--brand)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 'var(--sp-xs)', fontFamily: 'monospace' }}>AI 시황 분석</div>
+                <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--brand)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 'var(--sp-xs)', fontFamily: 'monospace' }}>AI 시황 분석</div>
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#E8F2FF', lineHeight: 1.25, letterSpacing: '-0.4px' }}>{briefing.title}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 'var(--radius-sm)', background: bull ? 'rgba(46,232,165,0.1)' : bear ? 'rgba(248,113,113,0.1)' : 'rgba(148,163,184,0.1)', border: `1px solid ${bull ? 'rgba(46,232,165,0.25)' : bear ? 'rgba(248,113,113,0.25)' : 'rgba(148,163,184,0.2)'}`, flexShrink: 0 }}>
@@ -350,7 +350,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                   <div key={kpi.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', padding: '7px 8px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.5px', marginBottom: 3, fontFamily: 'monospace' }}>{kpi.label}</div>
                     <div style={{ fontSize: 14, fontWeight: 900, color: '#D8E8FF', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.3px' }}>{kpi.val}</div>
-                    <div style={{ fontSize: 9, fontWeight: 700, marginTop: 1, color: kpi.color }}>{kpi.chgStr}</div>
+                    <div style={{ fontSize: 9, fontWeight: 600, marginTop: 1, color: kpi.color }}>{kpi.chgStr}</div>
                   </div>
                 ))}
               </div>
@@ -390,7 +390,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                 <div style={{ width: `${(flat/total)*100}%`, background: 'var(--border)' }} />
                 <div style={{ width: `${(dn/total)*100}%`, background: dnColor, transition: 'width 0.5s', borderRadius: '0 3px 3px 0' }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 700, fontFamily: 'monospace' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 600, fontFamily: 'monospace' }}>
                 <span style={{ color: upColor }}>▲{up}</span>
                 <span style={{ color: 'var(--text-tertiary)' }}>—{flat}</span>
                 <span style={{ color: dnColor }}>▼{dn}</span>
@@ -420,7 +420,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ textDecoration: 'none' }}>
               <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: '10px 10px 8px', borderLeft: `3px solid ${ac}`, border: `1px solid var(--border)`, borderLeftWidth: 3, borderLeftColor: ac, transition: 'all var(--transition-fast)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-xs)' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.5px', fontFamily: 'monospace' }}>{s.name}</div>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '0.5px', fontFamily: 'monospace' }}>{s.name}</div>
                   {sparkPath && (
                     <svg width="40" height="16" viewBox="0 0 70 20" style={{ flexShrink: 0 }}>
                       <path d={sparkPath.fill} fill={`${ac === 'var(--accent-red)' ? 'rgba(255,107,107' : ac === 'var(--accent-green)' ? 'rgba(46,232,165' : 'rgba(108,180,255'},0.1)`} />
@@ -477,7 +477,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       })()}
 
       {/* ─ 서브 탭 ─ */}
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '3px' }}>
+      <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '3px' }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
           <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as typeof domesticTab) : setGlobalTab(k as typeof globalTab); }} aria-pressed={currentTab === k} style={{
             flex: 1, padding: '7px 0', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 700, fontSize: 11, whiteSpace: 'nowrap',
@@ -516,7 +516,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             const downC = isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)';
             return (
               <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '10px 12px', marginBottom: 10 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>섹터 등락률</div>
+                <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>섹터 등락률</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {sectorRanking.map(sec => {
                     const isUp = sec.avg > 0;
@@ -533,7 +533,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                           }
                           <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--border)' }} />
                         </div>
-                        <span style={{ fontSize: 10, fontWeight: 700, color, minWidth: 40, textAlign: 'left', flexShrink: 0, fontFamily: 'monospace' }}>{isUp?'+':''}{sec.avg.toFixed(2)}%</span>
+                        <span style={{ fontSize: 10, fontWeight: 600, color, minWidth: 40, textAlign: 'left', flexShrink: 0, fontFamily: 'monospace' }}>{isUp?'+':''}{sec.avg.toFixed(2)}%</span>
                         <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0, fontFamily: 'monospace' }}>{sec.count}종</span>
                       </button>
                     );
@@ -874,7 +874,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             briefingUS={briefingUS || null}
           />
           {/* 포트폴리오 시뮬레이터 */}
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)', marginTop: 'var(--sp-md)' }}>포트폴리오 시뮬레이터</div>
+          <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)', marginTop: 'var(--sp-md)' }}>포트폴리오 시뮬레이터</div>
           <PortfolioSimulator stocks={stocks} isKR={isDomestic} />
           {/* 레이더 비교 */}
           <div style={{ marginTop: 'var(--sp-sm)' }}>
@@ -929,7 +929,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                     <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>관심종목을 추가해보세요</div>
                     <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>종목 목록에서 ☆ 버튼을 눌러 추가</div>
                   </div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
                     🔥 {isDomestic ? '국내 시총 TOP' : '해외 인기'}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -945,7 +945,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                           </div>
                           <div style={{ textAlign: 'right', marginRight: 8 }}>
                             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}</div>
-                            <div style={{ fontSize: 11, fontWeight: 700, color }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</div>
+                            <div style={{ fontSize: 11, fontWeight: 600, color }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</div>
                           </div>
                           <button onClick={() => toggleWatchlist(s.symbol)} style={{ fontSize: 13, padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600, flexShrink: 0 }}>
                             ☆ 추가
@@ -1089,7 +1089,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                 const maxCap = Math.max(c.sa.market_cap || 0, c.sb.market_cap || 0) || 1;
                 return (
                   <div key={c.t} style={{ minWidth: 240, padding: 'var(--sp-md) var(--card-p)', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', flexShrink: 0 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 10 }}>{c.t}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 10 }}>{c.t}</div>
                     {/* 종목 A */}
                     <Link href={`/stock/${encodeURIComponent(c.sa.symbol)}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)', textDecoration: 'none', padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: winner === 'A' ? (pctA > 0 ? (isKR ? 'rgba(248,113,113,0.06)' : 'rgba(52,211,153,0.06)') : (isKR ? 'rgba(96,165,250,0.06)' : 'rgba(248,113,113,0.06)')) : 'transparent' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>

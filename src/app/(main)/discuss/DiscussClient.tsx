@@ -54,7 +54,7 @@ function TopicCard({ topic }: { topic: Topic }) {
           <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
           {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
-        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
+        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
         {topic.topic_type === 'poll' && (
           <div style={{ marginBottom: 'var(--sp-md)' }}>
             {[

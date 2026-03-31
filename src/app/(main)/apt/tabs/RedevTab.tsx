@@ -125,7 +125,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   return (
                     <div key={stage} onClick={() => { setRedevStage(stage === redevStage ? '전체' : stage); setRedevPage(1); }} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 'var(--radius-sm)', background: redevStage === stage ? sc.border : sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50, cursor: 'pointer', opacity: redevStage !== '전체' && redevStage !== stage ? 0.5 : 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 600, color: sc.color, opacity: 0.6, marginBottom: 2 }}>{i + 1}/{STAGE_ORDER.length}</div>
-                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: sc.color }}>{stage.replace('인가', '')}</div>
+                      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: sc.color }}>{stage.replace('인가', '')}</div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: sc.color, margin: '4px 0' }}>{count}</div>
                       <div style={{ fontSize: 'var(--fs-xs)', color: sc.color, opacity: 0.7 }}>{pct}%</div>
                       {i < STAGE_ORDER.length - 1 && <div style={{ position: 'absolute', right: -6, top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>→</div>}
@@ -182,7 +182,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   </div>
                   {/* 1행: 단계 + 유형 + 진행률 + 지역 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, marginTop: 2 }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: sc.bg, color: sc.color }}>{r.stage}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: sc.bg, color: sc.color }}>{r.stage}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: sc.color }}>{progress}%</span>
                     <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>

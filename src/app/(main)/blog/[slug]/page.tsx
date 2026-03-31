@@ -467,7 +467,7 @@ export default async function BlogDetailPage({ params }: Props) {
               <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 'var(--radius-xs)', background: `${catColor}18`, color: catColor, letterSpacing: '0.3px' }}>
                 {({ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' } as Record<string, string>)[post.category] || '📝'} {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활 정보' } as Record<string, string>)[post.category] || post.category}
               </span>
-              {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
+              {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
             </div>
 
             {/* 제목 */}
@@ -545,7 +545,7 @@ export default async function BlogDetailPage({ params }: Props) {
             <div className="blog-content" itemProp="articleBody" style={{ maxHeight: 'clamp(400px, 60vh, 800px)', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(transparent, var(--bg-base))' }} />
             <div style={{ textAlign: 'center', padding: '20px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: -8, position: 'relative' }}>
-              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>전체 글을 보려면 로그인하세요</div>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>전체 글을 보려면 로그인하세요</div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 10 }}>청약 마감 알림도 받을 수 있어요</div>
               <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
                 카카오로 가입
@@ -653,7 +653,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 댓글 섹션 */}
       <BlogCommentCTA commentCount={comments.length} />
       <div id="blog-comments" style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
+        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>의견 {comments.length}개</h3>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
           {CTA_BY_CAT[post.category] ?? CTA_BY_CAT.general}
         </p>
@@ -697,7 +697,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* CTA 배너 — 비로그인만 */}
       {!isLoggedIn && (
       <div style={{ padding: '20px 16px', margin: '20px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
-        <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>매일 업데이트되는 투자 정보를 받아보세요</div>
+        <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>매일 업데이트되는 투자 정보를 받아보세요</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-lg)' }}>청약 마감 알림 · 급등주 알림 · 미분양 업데이트</div>
         <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
           카카오로 3초 가입
@@ -713,7 +713,7 @@ export default async function BlogDetailPage({ params }: Props) {
         return (
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-xl)' }}>
             <Link href={`/blog/series/${seriesInfo.series.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', marginBottom: 10 }}>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)' }}>📚 시리즈</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)' }}>📚 시리즈</span>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{seriesInfo.series.title}</span>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{idx + 1}/{seriesInfo.posts.length}</span>
             </Link>

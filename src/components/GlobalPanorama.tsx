@@ -66,7 +66,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
 
       {/* 상단 우측: 시간 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-        <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace' }}>글로벌 파노라마</span>
+        <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace' }}>글로벌 파노라마</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{ time } KST</span>
       </div>
 
@@ -80,7 +80,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
             <div>
               <div style={{ fontSize: 28, fontWeight: 900, color: fgColor, letterSpacing: '-1px', transition: 'color .4s' }}>{Math.round(fgScore)}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: fgColor, transition: 'color .4s' }}>{fgLabel}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: fgColor, transition: 'color .4s' }}>{fgLabel}</div>
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, color: 'var(--text-tertiary)', marginBottom: 2, fontFamily: 'monospace' }}>

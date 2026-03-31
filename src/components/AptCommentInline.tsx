@@ -34,7 +34,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
 
   return (
     <div>
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>✏️ 한줄평 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>{comments.length}</span></div>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>✏️ 한줄평 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>{comments.length}</span></div>
       {userId ? (
         <div style={{ marginBottom: 'var(--sp-md)' }}>
           <div style={{ position: 'relative' }}>

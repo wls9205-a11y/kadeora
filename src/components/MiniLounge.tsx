@@ -160,7 +160,7 @@ export default function MiniLounge() {
               background: m.is_mine
                 ? 'linear-gradient(135deg, #2563EB, #3B82F6)'
                 : 'linear-gradient(135deg, #334155, #475569)',
-              color: '#fff', fontSize: 9, fontWeight: 700,
+              color: '#fff', fontSize: 9, fontWeight: 600,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               marginTop: 1,
             }}>
@@ -170,7 +170,7 @@ export default function MiniLounge() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--sp-xs)', marginBottom: 1 }}>
                 <span style={{
-                  fontSize: 10, fontWeight: 700,
+                  fontSize: 10, fontWeight: 600,
                   color: m.is_mine ? 'var(--brand)' : 'var(--text-secondary)',
                 }}>
                   {m.is_mine ? '나' : m.nickname}

@@ -94,7 +94,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
               <button aria-label="닫기" key={s.symbol} onClick={() => addHolding(s)} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: (s.change_pct ?? 0) > 0 ? (s.currency === 'USD' ? 'var(--accent-green)' : 'var(--accent-red)') : 'var(--accent-blue)' }}>{(s.change_pct ?? 0) > 0 ? '+' : ''}{(s.change_pct ?? 0).toFixed(2)}%</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: (s.change_pct ?? 0) > 0 ? (s.currency === 'USD' ? 'var(--accent-green)' : 'var(--accent-red)') : 'var(--accent-blue)' }}>{(s.change_pct ?? 0) > 0 ? '+' : ''}{(s.change_pct ?? 0).toFixed(2)}%</span>
               </button>
             ))}
           </div>
@@ -141,7 +141,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
                     <div style={{ width: 8, height: 8, borderRadius: 2, background: seg, flexShrink: 0 }} />
                     <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{h.stock.name}</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: c, fontFamily: 'monospace' }}>{h.stock.pct > 0 ? '+' : ''}{h.stock.pct.toFixed(2)}%</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: c, fontFamily: 'monospace' }}>{h.stock.pct > 0 ? '+' : ''}{h.stock.pct.toFixed(2)}%</span>
                     <span style={{ fontSize: 10, color: c, fontFamily: 'monospace' }}>→{itemProfit > 0 ? '+' : ''}{fmtAmt(Math.abs(itemProfit / 10000))}</span>
                     <button onClick={() => removeHolding(h.stock.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 2px' }}>×</button>
                   </div>

@@ -80,7 +80,7 @@ export default function DashboardSection() {
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       {/* ── Header + Auto-refresh ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div>
           <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: C.text, margin: 0 }}>Mission Control</h1>
           <p style={{ fontSize: 11, color: C.textDim, margin: '2px 0 0' }}>
@@ -90,7 +90,7 @@ export default function DashboardSection() {
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <button aria-label="닫기" onClick={() => runGodMode('full')} disabled={godRunning} style={{
-            padding: '6px 14px', borderRadius: 8, border: 'none',
+            padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
             background: godRunning ? C.yellow : 'linear-gradient(135deg, #2563EB, #7C3AED)',
             color: '#fff', cursor: godRunning ? 'wait' : 'pointer', fontSize: 11, fontWeight: 800,
             display: 'flex', alignItems: 'center', gap: 5,
@@ -99,26 +99,26 @@ export default function DashboardSection() {
           }}>
             {godRunning ? `⏳ ${(godElapsed / 1000).toFixed(1)}s` : '⚡ 전체실행'}
           </button>
-          <button onClick={() => setAutoRefresh(!autoRefresh)} style={{ padding: '4px 8px', borderRadius: 6, border: `1px solid ${autoRefresh ? C.green + '40' : C.border}`, background: autoRefresh ? C.green + '15' : C.card, color: autoRefresh ? C.green : C.textDim, cursor: 'pointer', fontSize: 10, fontWeight: 600 }}>
+          <button onClick={() => setAutoRefresh(!autoRefresh)} style={{ padding: '4px 8px', borderRadius: 'var(--radius-xs)', border: `1px solid ${autoRefresh ? C.green + '40' : C.border}`, background: autoRefresh ? C.green + '15' : C.card, color: autoRefresh ? C.green : C.textDim, cursor: 'pointer', fontSize: 10, fontWeight: 600 }}>
             {autoRefresh ? '🟢 LIVE' : '⏸ 정지'}
           </button>
-          <button onClick={loadData} style={{ padding: '5px 12px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.card, color: C.textSec, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}>🔄</button>
+          <button onClick={loadData} style={{ padding: '5px 12px', borderRadius: 'var(--radius-xs)', border: `1px solid ${C.border}`, background: C.card, color: C.textSec, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}>🔄</button>
         </div>
       </div>
 
       {/* ── GOD MODE 실행 결과 (인라인) ── */}
       {godResults && (
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>⚡ 실행 결과</span>
               <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>✅ {godResults.filter((r: any) => r.ok).length}</span>
               {godResults.filter((r: any) => !r.ok).length > 0 && <span style={{ fontSize: 10, color: C.red, fontWeight: 700 }}>❌ {godResults.filter((r: any) => !r.ok).length}</span>}
               <span style={{ fontSize: 9, color: C.textDim }}>{(godElapsed / 1000).toFixed(1)}초</span>
             </div>
-            <div style={{ display: 'flex', gap: 4 }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
               {godResults.filter((r: any) => !r.ok).length > 0 && (
-                <button onClick={() => runGodMode('failed')} style={{ padding: '3px 8px', borderRadius: 4, border: `1px solid ${C.red}40`, background: C.red + '10', color: C.red, fontSize: 9, fontWeight: 700, cursor: 'pointer' }}>🔴 실패 재시도</button>
+                <button onClick={() => runGodMode('failed')} style={{ padding: '3px 8px', borderRadius: 4, border: `1px solid ${C.red}40`, background: C.red + '10', color: C.red, fontSize: 9, fontWeight: 600, cursor: 'pointer' }}>🔴 실패 재시도</button>
               )}
               <button onClick={() => setGodResults(null)} style={{ padding: '3px 8px', borderRadius: 4, border: `1px solid ${C.border}`, background: C.card, color: C.textDim, fontSize: 9, cursor: 'pointer' }}>✕ 닫기</button>
             </div>
@@ -129,7 +129,7 @@ export default function DashboardSection() {
             ))}
           </div>
           {godResults.filter((r: any) => !r.ok).length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 4 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 'var(--sp-xs)' }}>
               {godResults.filter((r: any) => !r.ok).map((r: any, i: number) => (
                 <Badge key={i} color={C.red}>{(r.name || r.endpoint || '').replace('/api/cron/', '')}</Badge>
               ))}
@@ -139,7 +139,7 @@ export default function DashboardSection() {
       )}
 
       {/* ── 카테고리별 빠른실행 버튼 ── */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         {[
           { mode: 'data', label: '📊 데이터', color: C.green },
           { mode: 'process', label: '⚙️ 가공', color: C.cyan },
@@ -148,14 +148,14 @@ export default function DashboardSection() {
           { mode: 'system', label: '🔧 시스템', color: C.textSec },
         ].map(g => (
           <button aria-label="닫기" key={g.mode} onClick={() => runGodMode(g.mode)} disabled={godRunning}
-            style={{ padding: '4px 10px', borderRadius: 6, border: `1px solid ${g.color}30`, background: `${g.color}10`, color: g.color, fontSize: 10, fontWeight: 700, cursor: godRunning ? 'wait' : 'pointer' }}>
+            style={{ padding: '4px 10px', borderRadius: 'var(--radius-xs)', border: `1px solid ${g.color}30`, background: `${g.color}10`, color: g.color, fontSize: 10, fontWeight: 600, cursor: godRunning ? 'wait' : 'pointer' }}>
             {g.label}
           </button>
         ))}
       </div>
 
       {/* ── Row 1: 시스템 헬스 바 ── */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         <HealthBadge label="크론" value={`${cron.success}/${cron.total}`} ok={cron.fail === 0} />
         <HealthBadge label="신고" value={kpi.pendingReports > 0 ? `${kpi.pendingReports}건` : '없음'} ok={kpi.pendingReports === 0} />
         <HealthBadge label="블로그" value={`오늘 ${blogProduction?.today ?? 0}편`} ok={(blogProduction?.today ?? 0) > 0} />
@@ -175,7 +175,7 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 2: 핵심 KPI 8카드 + 어제 대비 ── */}
-      <div className="mc-g6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
+      <div className="mc-g6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
         {[
           { icon: '👁️', label: '오늘 PV', value: visitors?.todayPV ?? 0, color: C.brand, yest: yesterday?.pv },
           { icon: '👤', label: '오늘 UV', value: visitors?.todayUV ?? 0, color: C.cyan, yest: null },
@@ -188,11 +188,11 @@ export default function DashboardSection() {
         ].map(item => {
           const d = item.yest != null ? delta(item.value, item.yest) : null;
           return (
-            <div key={item.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+            <div key={item.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
               <div style={{ fontSize: 10, color: C.textDim, marginBottom: 3 }}>{item.icon} {item.label}</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: item.color }}>{fmt(item.value)}</span>
-                {d && <span style={{ fontSize: 10, fontWeight: 700, color: d.color }}>{d.arrow}{Math.abs(d.pct)}%</span>}
+                {d && <span style={{ fontSize: 10, fontWeight: 600, color: d.color }}>{d.arrow}{Math.abs(d.pct)}%</span>}
               </div>
             </div>
           );
@@ -200,44 +200,44 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 3: 서비스 상태 카드 (4열) ── */}
-      <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
+      <div className="mc-g4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
         {/* 크론 헬스 */}
-        <div style={{ background: C.card, border: `1px solid ${cron.fail > 0 ? C.red + '40' : C.border}`, borderRadius: 10, padding: '10px 12px', cursor: 'pointer' }} onClick={() => setShowCronDetail(!showCronDetail)}>
+        <div style={{ background: C.card, border: `1px solid ${cron.fail > 0 ? C.red + '40' : C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px', cursor: 'pointer' }} onClick={() => setShowCronDetail(!showCronDetail)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
             <span style={{ fontSize: 10, color: C.textDim }}>⚡ 크론 24h {showCronDetail ? '▲' : '▼'}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: cron.fail > 0 ? C.red : C.green }}>{cron.success}/{cron.total}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: cron.fail > 0 ? C.red : C.green }}>{cron.success}/{cron.total}</span>
           </div>
           <div style={{ height: 5, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
             <div style={{ height: '100%', borderRadius: 3, background: cron.fail > 0 ? C.red : C.green, width: `${cron.total > 0 ? (cron.success / cron.total) * 100 : 100}%` }} />
           </div>
-          {cron.failNames?.length > 0 && <div style={{ marginTop: 4, display: 'flex', gap: 3, flexWrap: 'wrap' }}>{cron.failNames.slice(0, 2).map((n: string) => <Badge key={n} color={C.red}>{n}</Badge>)}</div>}
+          {cron.failNames?.length > 0 && <div style={{ marginTop: 'var(--sp-xs)', display: 'flex', gap: 3, flexWrap: 'wrap' }}>{cron.failNames.slice(0, 2).map((n: string) => <Badge key={n} color={C.red}>{n}</Badge>)}</div>}
           {cron.anthropicCreditWarning && (
-            <div style={{ marginTop: 6, padding: '4px 8px', background: '#FF6B1A22', border: '1px solid #FF6B1A66', borderRadius: 6, fontSize: 10, color: '#FF6B1A', fontWeight: 700 }}>
+            <div style={{ marginTop: 6, padding: '4px 8px', background: '#FF6B1A22', border: '1px solid #FF6B1A66', borderRadius: 'var(--radius-xs)', fontSize: 10, color: '#FF6B1A', fontWeight: 700 }}>
               ⚠️ Anthropic 크레딧 부족 의심 — blog 크론 50%+ 실패 · console.anthropic.com 확인
             </div>
           )}
         </div>
         {/* 유저 활동 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
-          <div style={{ fontSize: 10, color: C.textDim, marginBottom: 4 }}>👤 유저 활동</div>
-          <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+          <div style={{ fontSize: 10, color: C.textDim, marginBottom: 'var(--sp-xs)' }}>👤 유저 활동</div>
+          <div style={{ display: 'flex', gap: 'var(--sp-md)' }}>
             <div><div style={{ fontSize: 16, fontWeight: 800, color: C.green }}>{kpi.newUsersWeek}</div><div style={{ fontSize: 9, color: C.textDim }}>신규(주)</div></div>
             <div><div style={{ fontSize: 16, fontWeight: 800, color: C.cyan }}>{kpi.activeUsersWeek}</div><div style={{ fontSize: 9, color: C.textDim }}>활성(주)</div></div>
           </div>
         </div>
         {/* 콘텐츠 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
-          <div style={{ fontSize: 10, color: C.textDim, marginBottom: 4 }}>📝 콘텐츠</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+          <div style={{ fontSize: 10, color: C.textDim, marginBottom: 'var(--sp-xs)' }}>📝 콘텐츠</div>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
             <div><span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{fmt(kpi.posts)}</span><span style={{ fontSize: 9, color: C.textDim }}> 글</span></div>
             <div><span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{fmt(kpi.discussions)}</span><span style={{ fontSize: 9, color: C.textDim }}> 토론</span></div>
             <div><span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{fmt(kpi.blogs)}</span><span style={{ fontSize: 9, color: C.textDim }}> 블로그</span></div>
           </div>
         </div>
         {/* 부동산 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
-          <div style={{ fontSize: 10, color: C.textDim, marginBottom: 4 }}>🏢 부동산</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+          <div style={{ fontSize: 10, color: C.textDim, marginBottom: 'var(--sp-xs)' }}>🏢 부동산</div>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
             <div><span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{fmt(kpi.subscriptions)}</span><span style={{ fontSize: 9, color: C.textDim }}> 청약</span></div>
             <div><span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{fmt(kpi.unsold)}</span><span style={{ fontSize: 9, color: C.textDim }}> 미분양</span></div>
             <div><span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{fmt(kpi.redev)}</span><span style={{ fontSize: 9, color: C.textDim }}> 재개발</span></div>
@@ -247,14 +247,14 @@ export default function DashboardSection() {
 
       {/* ── 크론 상세 (토글) ── */}
       {showCronDetail && cronDetail && (
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>⚡ 크론 상세 (24h)</div>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>⚡ 크론 상세 (24h)</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 6 }}>
             {Object.entries(cronDetail).sort((a: any, b: any) => b[1].created - a[1].created).map(([name, info]: [string, any]) => (
-              <div key={name} style={{ padding: '8px 10px', borderRadius: 8, background: info.success === info.total ? C.green + '08' : C.red + '08', border: `1px solid ${info.success === info.total ? C.green + '20' : C.red + '20'}` }}>
+              <div key={name} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: info.success === info.total ? C.green + '08' : C.red + '08', border: `1px solid ${info.success === info.total ? C.green + '20' : C.red + '20'}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{name}</span>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: info.success === info.total ? C.green : C.red }}>{info.success}/{info.total}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{name}</span>
+                  <span style={{ fontSize: 9, fontWeight: 600, color: info.success === info.total ? C.green : C.red }}>{info.success}/{info.total}</span>
                 </div>
                 {info.created > 0 && <div style={{ fontSize: 9, color: C.cyan }}>+{fmt(info.created)}건 생산</div>}
               </div>
@@ -264,33 +264,33 @@ export default function DashboardSection() {
       )}
 
       {/* ── Row 4: 트래픽 차트 + 사이트/인기페이지 ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 8, marginBottom: 12 }} className="mc-g2">
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }} className="mc-g2">
         {/* 일일 차트 (14일) */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>일일 트래픽 (14일)</span>
-            <div style={{ display: 'flex', gap: 8, fontSize: 9 }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 9 }}>
               <span style={{ color: C.brand }}>■ PV</span><span style={{ color: C.green }}>■ 신규</span>
             </div>
           </div>
           <MiniChart data={(dailyStats || []).reverse()} />
         </div>
         {/* 인기 페이지 + 사이트 현황 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>🔥 인기 페이지 (오늘)</div>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>🔥 인기 페이지 (오늘)</div>
           {(topPages || []).length === 0 && <div style={{ fontSize: 11, color: C.textDim }}>데이터 없음</div>}
           {(topPages || []).map((p: any, i: number) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0', borderBottom: `1px solid ${C.border}08` }}>
               <span style={{ fontSize: 10, color: C.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{p.path}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: C.brand }}>{p.count}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: C.brand }}>{p.count}</span>
             </div>
           ))}
-          <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 8, paddingTop: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 'var(--sp-sm)', paddingTop: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-xs)' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>전체 페이지</span>
               <span style={{ fontSize: 13, fontWeight: 800, color: C.brand }}>{fmt(totalSites)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-xs)' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>주요 유입</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: C.cyan }}>{visitors?.topReferrer?.source || '—'} ({visitors?.topReferrer?.count || 0})</span>
             </div>
@@ -304,7 +304,7 @@ export default function DashboardSection() {
 
       {/* ── 주식 상세 KPI 패널 ── */}
       {stockKpi && (
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>📈 주식 데이터 현황</span>
             <span style={{ fontSize: 10, color: C.textDim }}>stock_quotes · price_history</span>
@@ -318,28 +318,28 @@ export default function DashboardSection() {
               { label: '뉴스 수', val: fmt(stockKpi.newsCount), color: C.yellow },
               { label: '활성률', val: `${Math.round((stockKpi.active / (stockKpi.total || 1)) * 100)}%`, color: stockKpi.active / (stockKpi.total || 1) > 0.95 ? C.green : C.red },
             ].map(item => (
-              <div key={item.label} style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div key={item.label} style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>
                 <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>{item.label}</div>
               </div>
             ))}
           </div>
-          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>🇰🇷 KR 브리핑 최신</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: stockKpi.lastKRBriefing === new Date().toISOString().slice(0,10) ? C.green : C.red }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: stockKpi.lastKRBriefing === new Date().toISOString().slice(0,10) ? C.green : C.red }}>
                 {stockKpi.lastKRBriefing || '없음'}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>🇺🇸 US 브리핑 최신</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: stockKpi.lastUSBriefing ? C.cyan : C.red }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: stockKpi.lastUSBriefing ? C.cyan : C.red }}>
                 {stockKpi.lastUSBriefing || '없음'}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>시세 수집 상태</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: stockKpi.active > stockKpi.total * 0.9 ? C.green : C.yellow }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: stockKpi.active > stockKpi.total * 0.9 ? C.green : C.yellow }}>
                 {stockKpi.active}/{stockKpi.total} 활성 ({Math.round((stockKpi.active / (stockKpi.total || 1)) * 100)}%)
               </span>
             </div>
@@ -349,7 +349,7 @@ export default function DashboardSection() {
 
       {/* ── 단지백과 KPI 패널 ── */}
       {complexKpi && (
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🏢 단지백과 데이터 현황</span>
             <span style={{ fontSize: 10, color: C.textDim }}>apt_complex_profiles · rent_transactions</span>
@@ -363,28 +363,28 @@ export default function DashboardSection() {
               { label: '매매 거래', val: fmt(complexKpi.saleTransactions), color: C.text },
               { label: '전월세 거래', val: fmt(complexKpi.rentTransactions), color: C.text },
             ].map(item => (
-              <div key={item.label} style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+              <div key={item.label} style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>
                 <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>{item.label}</div>
               </div>
             ))}
           </div>
-          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>📊 매매 커버율</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: complexKpi.withSale / (complexKpi.totalProfiles || 1) > 0.7 ? C.green : C.yellow }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: complexKpi.withSale / (complexKpi.totalProfiles || 1) > 0.7 ? C.green : C.yellow }}>
                 {complexKpi.withSale}/{complexKpi.totalProfiles} ({Math.round((complexKpi.withSale / (complexKpi.totalProfiles || 1)) * 100)}%)
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>📍 좌표 커버율</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: complexKpi.withCoords / (complexKpi.totalProfiles || 1) > 0.3 ? C.yellow : C.red }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: complexKpi.withCoords / (complexKpi.totalProfiles || 1) > 0.3 ? C.yellow : C.red }}>
                 {complexKpi.withCoords}/{complexKpi.totalProfiles} ({Math.round((complexKpi.withCoords / (complexKpi.totalProfiles || 1)) * 100)}%)
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: C.textSec }}>📈 총 실거래 데이터</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: C.cyan }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: C.cyan }}>
                 {fmt(complexKpi.saleTransactions + complexKpi.rentTransactions)}건
               </span>
             </div>
@@ -394,21 +394,21 @@ export default function DashboardSection() {
 
       {/* ── Row 4.2: 데이터 커버리지 현황 ── */}
       {dataCoverage && (
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>📊 데이터 커버리지</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-sm)' }}>
             {/* 분양가 수집 */}
-            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>🏷️ 분양가 수집</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: C.text }}>🏷️ 분양가 수집</span>
                 <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.aptPrice.pct > 80 ? C.green : dataCoverage.aptPrice.pct > 30 ? C.yellow : C.red }}>{dataCoverage.aptPrice.pct}%</span>
               </div>
-              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 'var(--sp-xs)' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.aptPrice.pct > 80 ? C.green : dataCoverage.aptPrice.pct > 30 ? C.yellow : C.red, width: `${dataCoverage.aptPrice.pct}%`, transition: 'width 0.6s' }} />
               </div>
               <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.aptPrice.done)}/{fmt(dataCoverage.aptPrice.total)}건</div>
               {dataCoverage.aptCrawlRecent?.length > 0 && (
-                <div style={{ marginTop: 4, display: 'flex', gap: 2 }}>
+                <div style={{ marginTop: 'var(--sp-xs)', display: 'flex', gap: 2 }}>
                   {dataCoverage.aptCrawlRecent.map((r: any, i: number) => (
                     <div key={i} style={{ width: 8, height: 8, borderRadius: 2, background: r.ok ? C.green : C.red }} title={`${r.at?.slice(11,16)} ${r.ok ? '✅' : '❌'} +${r.created}건${r.err ? ' ' + r.err : ''}`} />
                   ))}
@@ -417,57 +417,57 @@ export default function DashboardSection() {
               )}
             </div>
             {/* apt_sites 좌표 */}
-            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>📍 사이트 좌표</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: C.text }}>📍 사이트 좌표</span>
                 <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.aptCoords.pct > 80 ? C.green : dataCoverage.aptCoords.pct > 30 ? C.yellow : C.red }}>{dataCoverage.aptCoords.pct}%</span>
               </div>
-              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 'var(--sp-xs)' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.aptCoords.pct > 80 ? C.green : dataCoverage.aptCoords.pct > 30 ? C.yellow : C.red, width: `${Math.max(dataCoverage.aptCoords.pct, 1)}%`, transition: 'width 0.6s' }} />
               </div>
               <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.aptCoords.done)}/{fmt(dataCoverage.aptCoords.total)}건</div>
             </div>
             {/* 🖼️ 이미지 수집 */}
-            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>🖼️ 이미지 수집</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: C.text }}>🖼️ 이미지 수집</span>
                 <span style={{ fontSize: 10, fontWeight: 800, color: (dataCoverage.aptImages?.pct ?? 0) > 50 ? C.green : (dataCoverage.aptImages?.pct ?? 0) > 10 ? C.yellow : C.red }}>{dataCoverage.aptImages?.pct ?? 0}%</span>
               </div>
-              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 'var(--sp-xs)' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: (dataCoverage.aptImages?.pct ?? 0) > 50 ? C.green : (dataCoverage.aptImages?.pct ?? 0) > 10 ? C.yellow : C.red, width: `${Math.max(dataCoverage.aptImages?.pct ?? 0, 1)}%`, transition: 'width 0.6s' }} />
               </div>
               <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.aptImages?.done ?? 0)}/{fmt(dataCoverage.aptImages?.total ?? 0)}건</div>
             </div>
             {/* 종목 description */}
-            <div style={{ background: C.bg, borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: C.text }}>📝 종목 설명</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: C.text }}>📝 종목 설명</span>
                 <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.stockDesc.pct > 80 ? C.green : dataCoverage.stockDesc.pct > 30 ? C.yellow : C.red }}>{dataCoverage.stockDesc.pct}%</span>
               </div>
-              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 4 }}>
+              <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 'var(--sp-xs)' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.stockDesc.pct > 80 ? C.green : dataCoverage.stockDesc.pct > 30 ? C.yellow : C.red, width: `${dataCoverage.stockDesc.pct}%`, transition: 'width 0.6s' }} />
               </div>
               <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.stockDesc.done)}/{fmt(dataCoverage.stockDesc.total)}개</div>
-              <div style={{ marginTop: 4, fontSize: 8, color: C.yellow, fontWeight: 600 }}>{fmt(dataCoverage.stockDesc.total - dataCoverage.stockDesc.done)}개 누락</div>
+              <div style={{ marginTop: 'var(--sp-xs)', fontSize: 8, color: C.yellow, fontWeight: 600 }}>{fmt(dataCoverage.stockDesc.total - dataCoverage.stockDesc.done)}개 누락</div>
             </div>
           </div>
         </div>
       )}
 
       {/* ── Row 4.3: 프리미엄 매출 + IndexNow 진행률 ── */}
-      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
         {/* 프리미엄 & 매출 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>👑 프리미엄 & 매출</span>
             <a href="/premium" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: C.brand, textDecoration: 'none', fontWeight: 600 }}>페이지 →</a>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: (premiumKpi?.subscribers ?? 0) > 0 ? C.yellow : C.textDim }}>{premiumKpi?.subscribers ?? 0}</div>
               <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>구독자</div>
             </div>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: (premiumKpi?.totalRevenue ?? 0) > 0 ? C.green : C.textDim }}>₩{((premiumKpi?.totalRevenue ?? 0) / 1000).toFixed(0)}K</div>
               <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>총 매출</div>
             </div>
@@ -477,28 +477,28 @@ export default function DashboardSection() {
             <span>만료 예정: <strong style={{ color: (premiumKpi?.expiringSoon ?? 0) > 0 ? C.yellow : C.textDim }}>{premiumKpi?.expiringSoon ?? 0}</strong>명 (7일 내)</span>
           </div>
           {(premiumKpi?.totalOrders ?? 0) === 0 && (
-            <div style={{ marginTop: 8, padding: '6px 10px', background: C.yellow + '12', border: `1px solid ${C.yellow}30`, borderRadius: 6, fontSize: 10, color: C.yellow, fontWeight: 600 }}>
+            <div style={{ marginTop: 'var(--sp-sm)', padding: '6px 10px', background: C.yellow + '12', border: `1px solid ${C.yellow}30`, borderRadius: 'var(--radius-xs)', fontSize: 10, color: C.yellow, fontWeight: 600 }}>
               ⚠️ Toss 결제 키 미설정 — 결제 불가 상태
             </div>
           )}
         </div>
 
         {/* IndexNow 진행률 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🔍 IndexNow 전송 현황</span>
             <span style={{ fontSize: 10, color: C.textDim }}>블로그 {fmt(premiumKpi?.indexNow?.total ?? 0)}편</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: C.green }}>{fmt(premiumKpi?.indexNow?.done ?? 0)}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>전송완료</div>
             </div>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: C.yellow }}>{fmt(premiumKpi?.indexNow?.pending ?? 0)}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>대기</div>
             </div>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: (premiumKpi?.indexNow?.pct ?? 0) > 80 ? C.green : (premiumKpi?.indexNow?.pct ?? 0) > 30 ? C.yellow : C.red }}>{premiumKpi?.indexNow?.pct ?? 0}%</div>
               <div style={{ fontSize: 9, color: C.textDim }}>진행률</div>
             </div>
@@ -513,23 +513,23 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 4.5: 블로그 생산 현황 + 댓글/크론 카테고리 ── */}
-      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
         {/* 블로그 생산 현황 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>📰 블로그 생산 현황</span>
             <span style={{ fontSize: 10, color: C.textDim }}>총 {fmt(kpi.blogs)}편</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: (blogProduction?.today ?? 0) > 0 ? C.green : C.red }}>{blogProduction?.today ?? 0}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>오늘 발행</div>
             </div>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: C.yellow }}>{fmt(blogProduction?.queue ?? 0)}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>미발행 큐</div>
             </div>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: C.cyan }}>{fmt(blogProduction?.readyToPublish ?? 0)}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>발행 가능</div>
             </div>
@@ -560,40 +560,40 @@ export default function DashboardSection() {
             );
           })()}
           {/* 리라이팅 현황 */}
-          <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 8, paddingTop: 8, display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 'var(--sp-sm)', paddingTop: 8, display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 10, color: C.textDim }}>AI 리라이팅</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: (seo?.blogRewrittenPct ?? 0) > 50 ? C.green : C.yellow }}>{seo?.blogRewrittenPct ?? 0}% 완료</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: (seo?.blogRewrittenPct ?? 0) > 50 ? C.green : C.yellow }}>{seo?.blogRewrittenPct ?? 0}% 완료</span>
           </div>
         </div>
 
         {/* 댓글 + 크론 카테고리 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           {/* 댓글 통계 */}
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>💬 댓글 & 크론 현황</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>💬 댓글 & 크론 현황</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '6px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: C.green }}>{commentStats?.today ?? 0}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>오늘 댓글</div>
             </div>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '6px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: C.purple }}>{fmt(commentStats?.totalReplies ?? 0)}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>대댓글</div>
             </div>
           </div>
           {/* 크론 카테고리별 */}
-          <div style={{ fontSize: 11, fontWeight: 700, color: C.textSec, marginBottom: 6 }}>크론 카테고리 (24h)</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.textSec, marginBottom: 6 }}>크론 카테고리 (24h)</div>
           {cronByCategory && Object.entries(cronByCategory as Record<string, any>).map(([cat, info]: [string, any]) => {
             const icons: Record<string, string> = { blog: '📝', stock: '📈', apt: '🏢', system: '⚙️' };
             const labels: Record<string, string> = { blog: '블로그', stock: '주식', apt: '부동산', system: '시스템' };
             const pct = info.total > 0 ? Math.round((info.success / info.total) * 100) : 100;
             return (
-              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 12, width: 16, textAlign: 'center' }}>{icons[cat]}</span>
                 <span style={{ fontSize: 10, color: C.textSec, width: 40 }}>{labels[cat]}</span>
                 <div style={{ flex: 1, height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
                   <div style={{ height: '100%', borderRadius: 3, background: pct === 100 ? C.green : pct > 70 ? C.yellow : C.red, width: `${pct}%` }} />
                 </div>
-                <span style={{ fontSize: 9, fontWeight: 700, color: pct === 100 ? C.green : C.red, minWidth: 32, textAlign: 'right' }}>{info.success}/{info.total}</span>
+                <span style={{ fontSize: 9, fontWeight: 600, color: pct === 100 ? C.green : C.red, minWidth: 32, textAlign: 'right' }}>{info.success}/{info.total}</span>
                 {info.created > 0 && <span style={{ fontSize: 9, color: C.cyan }}>+{fmt(info.created)}</span>}
               </div>
             );
@@ -602,21 +602,21 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 5: 페이지 타입 분포 + 카테고리 분포 ── */}
-      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
         {/* 페이지 타입 분포 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>페이지 타입 분포</span>
             <span style={{ fontSize: 10, color: C.textDim }}>{fmt(totalSites)}건</span>
           </div>
-          <div style={{ display: 'flex', height: 16, borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ display: 'flex', height: 16, borderRadius: 4, overflow: 'hidden', marginBottom: 'var(--sp-sm)' }}>
             {Object.entries(seo?.siteTypeBreakdown || {}).sort((a: any, b: any) => b[1].count - a[1].count).map(([type, info]: [string, any]) => (
               <div key={type} style={{ width: `${(info.count / totalSites) * 100}%`, background: typeColors[type] || C.textDim }} title={`${typeLabels[type] || type}: ${info.count}건`} />
             ))}
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-sm)' }}>
             {Object.entries(seo?.siteTypeBreakdown || {}).sort((a: any, b: any) => b[1].count - a[1].count).map(([type, info]: [string, any]) => (
-              <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
+              <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 11 }}>
                 <div style={{ width: 6, height: 6, borderRadius: 2, background: typeColors[type] || C.textDim }} />
                 <span style={{ color: C.textSec }}>{typeLabels[type] || type}</span>
                 <span style={{ color: C.text, fontWeight: 700 }}>{fmt(info.count)}</span>
@@ -625,18 +625,18 @@ export default function DashboardSection() {
           </div>
         </div>
         {/* 카테고리별 게시글 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>카테고리별 게시글</div>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>카테고리별 게시글</div>
           {(categoryDistribution || []).map((c: any) => {
             const total = (categoryDistribution || []).reduce((s: number, x: any) => s + x.count, 0) || 1;
             return (
-              <div key={c.category} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div key={c.category} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 12, width: 16, textAlign: 'center' }}>{catIcons[c.category] || '📄'}</span>
                 <span style={{ fontSize: 11, color: C.textSec, width: 40 }}>{c.category}</span>
                 <div style={{ flex: 1, height: 8, borderRadius: 4, background: C.border, overflow: 'hidden' }}>
                   <div style={{ height: '100%', borderRadius: 4, background: C.brand, width: `${(c.count / total) * 100}%`, opacity: 0.7 }} />
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: C.text, minWidth: 35, textAlign: 'right' }}>{fmt(c.count)}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: C.text, minWidth: 35, textAlign: 'right' }}>{fmt(c.count)}</span>
               </div>
             );
           })}
@@ -644,8 +644,8 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 5.5: 어제 대비 증감 요약 ── */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 14px', marginBottom: 12, display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: C.textSec }}>📊 어제 대비</span>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)', display: 'flex', gap: 'var(--sp-lg)', flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 600, color: C.textSec }}>📊 어제 대비</span>
         {[
           { label: 'PV', today: visitors?.todayPV ?? 0, yest: yesterday?.pv ?? 0 },
           { label: '글', today: recentPosts?.length ?? 0, yest: yesterday?.posts ?? 0 },
@@ -654,14 +654,14 @@ export default function DashboardSection() {
         ].map(item => {
           const d = delta(item.today, item.yest);
           return (
-            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
               <span style={{ fontSize: 10, color: C.textDim }}>{item.label}</span>
               <span style={{ fontSize: 12, fontWeight: 800, color: C.text }}>{fmt(item.today)}</span>
-              {d && <span style={{ fontSize: 9, fontWeight: 700, color: d.color }}>{d.arrow}{Math.abs(d.d)}</span>}
+              {d && <span style={{ fontSize: 9, fontWeight: 600, color: d.color }}>{d.arrow}{Math.abs(d.d)}</span>}
             </div>
           );
         })}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
           <span style={{ fontSize: 10, color: C.textDim }}>주간PV</span>
           <span style={{ fontSize: 12, fontWeight: 800, color: C.brand }}>{fmt(visitors?.weekPV ?? 0)}</span>
           <span style={{ fontSize: 10, color: C.textDim }}>UV</span>
@@ -670,9 +670,9 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 5.6: 자동발행 파이프라인 ── */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🔄 자동발행 파이프라인</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
           {[
             { label: '크론 수집', value: cronByCategory?.blog?.total ?? 0, sub: `${cronByCategory?.blog?.success ?? 0}성공`, color: C.brand, icon: '⚡' },
             { label: '', value: 0, sub: '', color: '', icon: '→' },
@@ -684,7 +684,7 @@ export default function DashboardSection() {
           ].map((step, i) => step.icon === '→' ? (
             <div key={i} style={{ fontSize: 14, color: C.textDim, padding: '0 2px' }}>→</div>
           ) : (
-            <div key={i} style={{ flex: 1, textAlign: 'center', padding: '8px 4px', background: `${step.color}08`, borderRadius: 8, border: `1px solid ${step.color}20` }}>
+            <div key={i} style={{ flex: 1, textAlign: 'center', padding: '8px 4px', background: `${step.color}08`, borderRadius: 'var(--radius-sm)', border: `1px solid ${step.color}20` }}>
               <div style={{ fontSize: 12, marginBottom: 2 }}>{step.icon}</div>
               <div style={{ fontSize: 16, fontWeight: 800, color: step.color }}>{fmt(step.value)}</div>
               <div style={{ fontSize: 8, color: C.textDim, marginTop: 1 }}>{step.label}</div>
@@ -693,8 +693,8 @@ export default function DashboardSection() {
           ))}
         </div>
         {/* 발행 가능 글 + 리라이팅 진행률 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
-          <div style={{ display: 'flex', gap: 12, fontSize: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--sp-sm)', paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-md)', fontSize: 10 }}>
             <span style={{ color: C.textDim }}>발행가능 <strong style={{ color: C.cyan }}>{fmt(blogProduction?.readyToPublish ?? 0)}</strong>편</span>
             <span style={{ color: C.textDim }}>리라이팅 <strong style={{ color: (seo?.blogRewrittenPct ?? 0) > 50 ? C.green : C.yellow }}>{seo?.blogRewrittenPct ?? 0}%</strong></span>
             <span style={{ color: C.textDim }}>총 <strong style={{ color: C.text }}>{fmt(kpi.blogs)}</strong>편</span>
@@ -708,12 +708,12 @@ export default function DashboardSection() {
       </div>
 
       {/* ── 플랫폼 전체 현황 ── */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🌐 플랫폼 전체 현황</span>
           <span style={{ fontSize: 10, color: C.textDim }}>kadeora.app</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 'var(--sp-sm)' }}>
           {[
             { icon: '📰', label: '블로그', val: fmt(kpi.blogs), color: C.yellow },
             { icon: '📈', label: '종목', val: `${fmt(kpi.stocks)}개`, color: C.cyan },
@@ -724,7 +724,7 @@ export default function DashboardSection() {
             { icon: '📋', label: '청약공고', val: fmt(kpi.subscriptions ?? 0), color: C.green },
             { icon: '⚡', label: '크론', val: `${cron.total}개/24h`, color: cron.fail === 0 ? C.green : C.red },
           ].map(item => (
-            <div key={item.label} style={{ background: C.bg, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+            <div key={item.label} style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '6px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 11, marginBottom: 1 }}>{item.icon}</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>
               <div style={{ fontSize: 8, color: C.textDim }}>{item.label}</div>
@@ -732,7 +732,7 @@ export default function DashboardSection() {
           ))}
         </div>
         {/* 추가 데이터 현황 */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingTop: 6, borderTop: `1px solid ${C.border}`, fontSize: 10 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap', paddingTop: 6, borderTop: `1px solid ${C.border}`, fontSize: 10 }}>
           <span style={{ color: C.textDim }}>분양사이트 <strong style={{ color: C.cyan }}>{fmt(seo?.aptSites ?? 5522)}</strong></span>
           <span style={{ color: C.textDim }}>미분양 <strong style={{ color: C.red }}>{fmt(kpi.unsold ?? 180)}</strong>건 <strong style={{ color: C.red }}>{fmt(kpi.unsoldUnits ?? 68264)}</strong>세대</span>
           <span style={{ color: C.textDim }}>재개발 <strong style={{ color: '#D85A30' }}>{fmt(kpi.redevOnly ?? 165)}</strong> 재건축 <strong style={{ color: '#D85A30' }}>{fmt(kpi.rebuildOnly ?? 37)}</strong></span>
@@ -741,7 +741,7 @@ export default function DashboardSection() {
       </div>
 
       {/* ── 최근 릴리즈 내역 ── */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 58)</span>
           <span style={{ fontSize: 10, color: C.textDim }}>2026-03-30</span>
@@ -758,12 +758,12 @@ export default function DashboardSection() {
             { tag: 'FEAT', label: '분양 상세 6가지', desc: '시세비교 · 전세가율 · 전용률 · 시공사비교', color: C.purple, commit: '0e8a4fc' },
             { tag: 'DESIGN', label: '블로그 에디토리얼', desc: 'TOC 가로칩 + 히어로 리포트 + 타임라인 목록', color: C.brand, commit: '619ed8d' },
           ].map(r => (
-            <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 8, background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
+            <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
                 <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: `${r.color}18`, color: r.color, fontWeight: 700 }}>{r.tag}</span>
                 <span style={{ fontSize: 8, color: C.textDim, fontFamily: 'monospace' }}>{r.commit}</span>
               </div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.text, marginBottom: 2 }}>{r.label}</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: C.text, marginBottom: 2 }}>{r.label}</div>
               <div style={{ fontSize: 9, color: C.textDim, lineHeight: 1.3 }}>{r.desc}</div>
             </div>
           ))}
@@ -771,18 +771,18 @@ export default function DashboardSection() {
       </div>
 
       {/* ── 분양 정확도 + SEO 인덱싱 ── */}
-      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
         {/* 분양 정확도 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🎯 분양 정보 정확도</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {dataCoverage?.aiSummary && (() => {
               const pct = dataCoverage.aiSummary.pct;
               return (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-xs)' }}>
                     <span style={{ fontSize: 10, color: C.textSec }}>AI 요약 정확도</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: pct > 50 ? C.green : pct > 20 ? C.yellow : C.red }}>{dataCoverage.aiSummary.done}/{dataCoverage.aiSummary.total} ({pct}%)</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: pct > 50 ? C.green : pct > 20 ? C.yellow : C.red }}>{dataCoverage.aiSummary.done}/{dataCoverage.aiSummary.total} ({pct}%)</span>
                   </div>
                   <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
                     <div style={{ height: '100%', borderRadius: 3, background: pct > 50 ? C.green : pct > 20 ? C.yellow : C.red, width: `${pct}%`, transition: 'width 0.6s' }} />
@@ -792,18 +792,18 @@ export default function DashboardSection() {
               );
             })()}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 10, color: C.textSec }}>분양가 수집</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: (dataCoverage?.aptPrice?.pct ?? 0) > 50 ? C.green : C.yellow }}>{dataCoverage?.aptPrice?.pct ?? 0}%</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: (dataCoverage?.aptPrice?.pct ?? 0) > 50 ? C.green : C.yellow }}>{dataCoverage?.aptPrice?.pct ?? 0}%</span>
               </div>
               <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: (dataCoverage?.aptPrice?.pct ?? 0) > 50 ? C.green : C.yellow, width: `${dataCoverage?.aptPrice?.pct ?? 0}%`, transition: 'width 0.6s' }} />
               </div>
             </div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 10, color: C.textSec }}>이미지 수집</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: (dataCoverage?.aptImages?.pct ?? 0) > 30 ? C.green : C.red }}>{dataCoverage?.aptImages?.done ?? 0}/{dataCoverage?.aptImages?.total ?? 0} ({dataCoverage?.aptImages?.pct ?? 0}%)</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: (dataCoverage?.aptImages?.pct ?? 0) > 30 ? C.green : C.red }}>{dataCoverage?.aptImages?.done ?? 0}/{dataCoverage?.aptImages?.total ?? 0} ({dataCoverage?.aptImages?.pct ?? 0}%)</span>
               </div>
               <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: (dataCoverage?.aptImages?.pct ?? 0) > 30 ? C.green : C.red, width: `${Math.max(dataCoverage?.aptImages?.pct ?? 0, 1)}%`, transition: 'width 0.6s' }} />
@@ -812,7 +812,7 @@ export default function DashboardSection() {
             {dataCoverage?.stockRefresh && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 6, borderTop: `1px solid ${C.border}` }}>
                 <span style={{ fontSize: 10, color: C.textSec }}>시세 갱신</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: dataCoverage.stockRefresh.ok ? C.green : C.red }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: dataCoverage.stockRefresh.ok ? C.green : C.red }}>
                   {dataCoverage.stockRefresh.ok ? '✅ 정상' : '❌ 오류'} · {dataCoverage.stockRefresh.lastAt ? ago(dataCoverage.stockRefresh.lastAt) : '없음'}
                 </span>
               </div>
@@ -821,19 +821,19 @@ export default function DashboardSection() {
         </div>
 
         {/* SEO 인덱싱 현황 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🔍 SEO / 인덱싱 현황</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 8 }}>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 'var(--sp-sm)' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: C.green }}>{fmt(seo?.indexedBlogs ?? 0)}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>IndexNow 전송</div>
             </div>
-            <div style={{ background: C.bg, borderRadius: 6, padding: '7px 8px', textAlign: 'center' }}>
+            <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: C.yellow }}>{fmt(seo?.unindexedBlogs ?? 0)}</div>
               <div style={{ fontSize: 9, color: C.textDim }}>미전송</div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
             {[
               { label: 'speakable', val: '6/6 페이지', ok: true },
               { label: 'FAQPage', val: '6/6 페이지', ok: true },
@@ -848,7 +848,7 @@ export default function DashboardSection() {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 8, paddingTop: 6, borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
+          <div style={{ marginTop: 'var(--sp-sm)', paddingTop: 6, borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
             <span style={{ color: C.textDim }}>사이트맵</span>
             <span style={{ fontWeight: 700, color: (seo?.sitemapPct ?? 0) > 80 ? C.green : C.yellow }}>{seo?.sitemapPct ?? 0}% ({fmt(seo?.totalSitemap ?? 0)}건)</span>
           </div>
@@ -856,7 +856,7 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 6: Quick Actions ── */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         <QuickAction label="⚡ GOD MODE" href="#" onClick={() => { const el = document.querySelector('[data-section="godmode"]') as HTMLElement; el?.click(); }} />
         <QuickAction label="📊 SEO" href="#" onClick={() => { const el = document.querySelector('[data-section="seo"]') as HTMLElement; el?.click(); }} />
         <QuickAction label="🛰️ 위성" href="#" onClick={() => { const el = document.querySelector('[data-section="satellite"]') as HTMLElement; el?.click(); }} />
@@ -875,17 +875,17 @@ export default function DashboardSection() {
       </div>
 
       {/* ── Row 7: 실시간 활동 피드 ── */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>실시간 활동</div>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>실시간 활동</div>
         <ActivityFeed users={recentUsers || []} posts={recentPosts || []} comments={recentComments || []} reports={recentReports || []} />
       </div>
 
       {/* ── Row 8: 최근 가입 + 최근 게시글 ── */}
-      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>최근 가입</div>
+      <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>최근 가입</div>
           {(recentUsers || []).map((u: Record<string, any>) => (
-            <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: `1px solid ${C.border}08` }}>
+            <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '5px 0', borderBottom: `1px solid ${C.border}08` }}>
               <span style={{ fontSize: 13 }}>{GRADE_EMOJI[u.grade] || '🌱'}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -897,8 +897,8 @@ export default function DashboardSection() {
             </div>
           ))}
         </div>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>최근 게시글</div>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>최근 게시글</div>
           {(recentPosts || []).map((p: Record<string, any>) => (
             <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: `1px solid ${C.border}08` }}>
               <span style={{ fontSize: 12 }}>{catIcons[p.category] || '📄'}</span>
@@ -918,7 +918,7 @@ export default function DashboardSection() {
 
 function HealthBadge({ label, value, ok }: { label: string; value: string; ok: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: ok ? C.green + '10' : C.red + '10', border: `1px solid ${ok ? C.green + '30' : C.red + '30'}` }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 'var(--radius-xl)', background: ok ? C.green + '10' : C.red + '10', border: `1px solid ${ok ? C.green + '30' : C.red + '30'}` }}>
       <div style={{ width: 6, height: 6, borderRadius: '50%', background: ok ? C.green : C.red }} />
       <span style={{ fontSize: 10, fontWeight: 600, color: C.textSec }}>{label}</span>
       <span style={{ fontSize: 10, fontWeight: 800, color: ok ? C.green : C.red }}>{value}</span>
@@ -928,9 +928,9 @@ function HealthBadge({ label, value, ok }: { label: string; value: string; ok: b
 
 function QuickAction({ label, href, onClick, external }: { label: string; href: string; onClick?: () => void; external?: boolean }) {
   return external ? (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={{ padding: '6px 12px', borderRadius: 8, background: C.card, border: `1px solid ${C.border}`, color: C.textSec, fontSize: 11, fontWeight: 600, textDecoration: 'none', cursor: 'pointer' }}>{label}</a>
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{ padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: C.card, border: `1px solid ${C.border}`, color: C.textSec, fontSize: 11, fontWeight: 600, textDecoration: 'none', cursor: 'pointer' }}>{label}</a>
   ) : (
-    <button onClick={onClick} style={{ padding: '6px 12px', borderRadius: 8, background: C.card, border: `1px solid ${C.border}`, color: C.textSec, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>{label}</button>
+    <button onClick={onClick} style={{ padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: C.card, border: `1px solid ${C.border}`, color: C.textSec, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>{label}</button>
   );
 }
 
@@ -974,7 +974,7 @@ function ActivityFeed({ users, posts, comments, reports }: { users: any[]; posts
   return (
     <div style={{ maxHeight: 200, overflowY: 'auto' }}>
       {items.slice(0, 15).map((item, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', borderBottom: `1px solid ${C.border}08` }}>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '4px 0', borderBottom: `1px solid ${C.border}08` }}>
           <span style={{ fontSize: 12, flexShrink: 0 }}>{item.icon}</span>
           <span style={{ flex: 1, fontSize: 11, color: item.type === 'report' ? C.red : C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
           <span style={{ fontSize: 9, color: C.textDim, flexShrink: 0 }}>{ago(item.time)}</span>

@@ -519,7 +519,7 @@ export default async function StockDetailPage({ params }: Props) {
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 {s.name} 리포트</div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프리미엄 멤버십 · 매일 아침 브리핑</div>
           </div>
-          <Link href="/premium" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 700, textDecoration: 'none', flexShrink: 0 }}>
+          <Link href="/premium" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
             자세히
           </Link>
         </div>

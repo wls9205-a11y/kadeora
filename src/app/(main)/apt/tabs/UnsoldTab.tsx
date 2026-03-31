@@ -121,11 +121,11 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             </div>
             <div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>단지 수</div>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length}곳</div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{fu.length}곳</div>
             </div>
             <div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평균 미분양</div>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{fu.length > 0 ? Math.round(filteredTotal / fu.length).toLocaleString() : 0}호</div>
             </div>
           </div>
           {/* 준공후 미분양 비율 게이지 */}
@@ -229,7 +229,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
           >
             {/* 줄1: 현장명 + 미분양 배지 + 분양가 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-xs)', flexWrap: 'wrap' }}>
-              <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
+              <Link href={`/apt/${encodeURIComponent(generateAptSlug(u.house_nm) || String(u.id))}`} style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', textDecoration: 'none' }}>{u.house_nm && u.source !== 'molit_stat' ? u.house_nm : `${u.region_nm} ${u.sigungu_nm || ''} 미분양`}</Link>
               <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-card)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.2)', fontWeight: 700, flexShrink: 0 }}>
                 {unsoldCount >= 1000 ? '🔴' : unsoldCount >= 500 ? '🟠' : unsoldCount >= 100 ? '🟡' : '🟢'} 미분양 {unsoldCount.toLocaleString()}세대
               </span>
@@ -251,7 +251,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
             {rate !== null && (
               <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 10 }}>
                 <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
-                <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-red)' }}>{rate}%</span>
+                <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-red)' }}>{rate}%</span>
               </div>
             )}
 

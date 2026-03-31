@@ -353,7 +353,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   textDecoration: 'none', color: 'inherit',
                 }}>
                   <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 6 }}>{catEmoji[p.category] || '📝'}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{catLabel[p.category] || p.category}</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{catLabel[p.category] || p.category}</div>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, lineHeight: 1.35 }}>{p.title}</div>
                 </Link>
               );
@@ -425,8 +425,8 @@ export default async function BlogPage({ searchParams }: Props) {
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-xs)' }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>{CATS.find(c => c.key === p.category)?.label || p.category}</span>
-                  {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
+                  <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>{CATS.find(c => c.key === p.category)?.label || p.category}</span>
+                  {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--accent-red)' }}>HOT</span>}
                   {p.rewritten_at && <span style={{ fontSize: 8, fontWeight: 700, padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)' }}>UP</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)' }}>{dateStr}</span>
                 </div>
@@ -458,7 +458,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)', textDecoration: 'none',
                 border: '1px solid var(--border)', transition: 'border-color var(--transition-fast)',
               }}>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.post_count}편</div>
               </Link>
             ))}

@@ -146,15 +146,15 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 {/* 1행: 상태배지 + D-day + 특성 + 지역 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap' }}>
                   {isNew(apt, 'subscription') && <NewBadge />}
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'var(--accent-yellow-bg)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? 'var(--accent-red)' : dday <= 6 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>
                       {st === 'open' ? (dday === 0 ? '🔴 오늘 마감' : `⏰ D-${dday}`) : `D-${dday}`}
                     </span>
                   )}
-                  {(apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit ? <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>분양가상한</span> : null}
-                  {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>투기과열</span>}
-                  {(apt as Record<string, any>)['MDAT_TRGET_AREA_SECD'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange-light)' }}>조정대상</span>}
+                  {(apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit ? <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>분양가상한</span> : null}
+                  {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>투기과열</span>}
+                  {(apt as Record<string, any>)['MDAT_TRGET_AREA_SECD'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange-light)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{apt.region_nm}</span>
                   <button aria-label="닫기" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`subscription:${apt.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                     {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}

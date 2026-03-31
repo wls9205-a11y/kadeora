@@ -104,7 +104,7 @@ export default function ConsultantRegister() {
           const active = steps.indexOf(step) >= i;
           return (
             <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-              <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{i + 1}</div>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{i + 1}</div>
               <span style={{ fontSize: 'var(--fs-xs)', color: active ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: active ? 600 : 400 }}>{s}</span>
               {i < 2 && <span style={{ color: 'var(--text-tertiary)', margin: '0 4px' }}>→</span>}
             </div>
@@ -186,7 +186,7 @@ export default function ConsultantRegister() {
               borderWidth: i === 1 ? 2 : 1,
               position: 'relative',
             }}>
-              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 12px', borderRadius: 'var(--radius-md)', background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
+              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 12px', borderRadius: 'var(--radius-md)', background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
                 <span style={{ fontSize: 'var(--fs-xl)' }}>{tier.icon}</span>
                 <div>
@@ -257,7 +257,7 @@ export default function ConsultantRegister() {
               <div key={l.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'var(--accent-purple-bg)' : l.tier === 'pro' ? 'var(--accent-yellow-bg)' : 'var(--accent-blue-bg)', color: l.tier === 'premium' ? 'var(--accent-purple)' : l.tier === 'pro' ? 'var(--accent-yellow)' : 'var(--accent-blue)' }}>{l.tier.toUpperCase()}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'var(--accent-purple-bg)' : l.tier === 'pro' ? 'var(--accent-yellow-bg)' : 'var(--accent-blue-bg)', color: l.tier === 'premium' ? 'var(--accent-purple)' : l.tier === 'pro' ? 'var(--accent-yellow)' : 'var(--accent-blue)' }}>{l.tier.toUpperCase()}</span>
                     <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginLeft: 8 }}>{l.house_nm || '현장명'}</span>
                   </div>
                   <span style={{ fontSize: 'var(--fs-xs)', color: l.is_active ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 600 }}>{l.is_active ? '활성' : '만료'}</span>

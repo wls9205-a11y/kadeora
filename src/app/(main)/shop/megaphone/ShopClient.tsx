@@ -97,7 +97,7 @@ export default function ShopClient() {
             transition: 'all var(--transition-fast)', position: 'relative',
           }}>
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-md)' }}>{p.icon ?? '🎁'}</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</h3>
+            <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{p.name}</h3>
             <p style={{ margin: '0 0 16px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.description}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>

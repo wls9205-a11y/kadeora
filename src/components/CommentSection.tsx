@@ -89,7 +89,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
 
   return (
     <div style={{ marginTop: 'var(--sp-sm)' }}>
-      <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 700, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
         💬 대화 {comments.length > 0 && <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 500 }}>{comments.length}개</span>}
       </h3>
 
@@ -103,7 +103,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
         )}
         {userId ? (
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 'var(--sp-xs)' }}>나</div>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 'var(--sp-xs)' }}>나</div>
             <div style={{ flex: 1 }}>
               <textarea
                 value={content}
@@ -127,7 +127,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                   padding: '6px 18px', borderRadius: 'var(--radius-xl)', border: 'none',
                   background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
                   color: content.trim() ? 'white' : 'var(--text-tertiary)',
-                  cursor: content.trim() ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 700,
+                  cursor: content.trim() ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 600,
                   transition: 'all var(--transition-fast)',
                 }}>등록</button>
               </div>
@@ -165,7 +165,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ background: isReply ? 'var(--bg-hover)' : 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: isReply ? '4px 12px 12px 12px' : '4px 14px 14px 14px', padding: 'var(--sp-md) var(--card-p)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
                   </div>
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.55, wordBreak: 'break-word' }}>{comment.content}</div>

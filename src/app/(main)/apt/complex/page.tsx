@@ -147,7 +147,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             {selectedRegion && (
-              <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.15)', padding: '3px 10px', borderRadius: 6 }}>✕ 전체</Link>
+              <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.15)', padding: '3px 10px', borderRadius: 6 }}>✕ 전체</Link>
             )}
             <span style={{ fontSize: 12, color: 'rgba(232,237,245,0.6)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
           </div>

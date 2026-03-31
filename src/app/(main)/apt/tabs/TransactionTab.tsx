@@ -125,7 +125,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
             <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>월간 추이</span>
               {regionTrends.map(t => (
-                <span key={t.region} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: t.up ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
+                <span key={t.region} style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: t.up ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
                   {t.region} {t.up ? '▲' : '▼'}{Math.abs(t.pct)}%
                 </span>
               ))}
@@ -204,7 +204,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                         <div style={{ height: '100%', width: `${(t.pp / maxPP) * 100}%`, borderRadius: 2, background: 'var(--brand)' }} />
                       </div>
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', flexShrink: 0 }}>{t.pp.toLocaleString()}만/평</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', flexShrink: 0 }}>{t.pp.toLocaleString()}만/평</span>
                   </div>
                 ))}
               </div>
@@ -236,7 +236,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
               {isNew(t, 'transaction') && <NewBadge />}
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-blue-bg)', color: 'var(--accent-blue-light)' }}>{t.trade_type || '매매'}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-blue-bg)', color: 'var(--accent-blue-light)' }}>{t.trade_type || '매매'}</span>
               {isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(251,191,36,0.15)', color: 'var(--accent-yellow)' }}>🏆 신고가</span>}
               {vsMax !== null && !isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>최고가 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
               <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>

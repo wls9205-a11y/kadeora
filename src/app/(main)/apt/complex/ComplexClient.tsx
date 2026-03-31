@@ -252,7 +252,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                 ].map(p => (
                   <div key={p.label} style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '4px 4px', textAlign: 'center' }}>
                     <div style={{ fontSize: 7, color: 'var(--text-tertiary)' }}>{p.label}</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>{p.value}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{p.value}</div>
                   </div>
                 ))}
               </div>

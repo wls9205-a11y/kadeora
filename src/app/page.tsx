@@ -262,9 +262,9 @@ export default async function HomePage() {
               <Link href="/apt" className="home-nav-link">부동산</Link>
               <Link href="/blog" className="home-nav-link">블로그</Link>
               <Link href="/login" style={{
-                marginLeft: 8, padding: '8px 18px', borderRadius: 999,
+                marginLeft: 8, padding: '8px 18px', borderRadius: 'var(--radius-pill)',
                 background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 14,
-                textDecoration: 'none', border: 'none', display: 'inline-flex', alignItems: 'center', gap: 4,
+                textDecoration: 'none', border: 'none', display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)',
               }}>시작하기</Link>
             </nav>
           </div>
@@ -276,9 +276,9 @@ export default async function HomePage() {
           textAlign: 'center',
         }}>
           <div style={{
-            display: 'inline-block', padding: '6px 16px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+            display: 'inline-block', padding: '6px 16px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
             background: 'var(--brand-bg)', color: 'var(--brand-hover)', border: '1px solid var(--brand-border)',
-            marginBottom: 20,
+            marginBottom: 'var(--sp-xl)',
           }}>
             대한민국 소리소문 정보 커뮤니티
           </div>
@@ -298,15 +298,15 @@ export default async function HomePage() {
             주식 시세, 아파트 청약, 미분양·재개발·실거래가,{' '}
             투자 정보와 커뮤니티를 하나의 앱에서 만나보세요.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/feed" className="kd-btn-glow" style={{
-              padding: '14px 32px', borderRadius: 14, fontSize: 16,
+              padding: '14px 32px', borderRadius: 'var(--radius-lg)', fontSize: 16,
               textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6,
             }}>
               🔍 둘러보기
             </Link>
             <Link href="/login" style={{
-              padding: '14px 32px', borderRadius: 14, fontSize: 16, fontWeight: 700,
+              padding: '14px 32px', borderRadius: 'var(--radius-lg)', fontSize: 16, fontWeight: 700,
               background: '#FEE500', color: '#191919', textDecoration: 'none',
               border: 'none', display: 'inline-flex', alignItems: 'center', gap: 6,
               transition: 'transform 0.12s ease, box-shadow 0.2s ease',
@@ -319,7 +319,7 @@ export default async function HomePage() {
         {/* ━━━ 실시간 통계 ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto 36px', padding: '0 20px' }}>
           <div className="kd-glass" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8,
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 'var(--sp-sm)',
             padding: 'clamp(14px, 2vw, 20px)',
           }}>
             {[
@@ -334,24 +334,24 @@ export default async function HomePage() {
                 <div style={{ fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, color: 'var(--brand-hover)', letterSpacing: '-0.02em' }}>
                   {s.value}<span style={{ fontSize: '0.5em', fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: 2 }}>{s.suffix}</span>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>{s.label}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>{s.label}</div>
               </div>
             ))}
           </div>
           {/* 실시간 프리뷰 */}
           {(indices.length > 0 || openApts.length > 0 || latestBlog) && (
-            <div style={{ marginTop: 20, marginBottom: 16 }}>
+            <div style={{ marginTop: 20, marginBottom: 'var(--sp-lg)' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <span className="kd-pulse-dot" /> 지금 카더라에서
               </div>
-              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', justifyContent: 'center', paddingBottom: 4 }}>
+              <div style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', justifyContent: 'center', paddingBottom: 4 }}>
                 {indices.map((idx: any) => {
                   const pct = Number(idx.change_pct) || 0;
                   return (
-                    <Link key={idx.symbol} href="/stock" className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                    <Link key={idx.symbol} href="/stock" className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: 'var(--card-p) var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '0.03em' }}>{idx.name}</div>
-                      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 900, color: 'var(--text-primary)', marginTop: 4, letterSpacing: '-0.5px' }}>{Number(idx.price).toLocaleString()}</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 4, padding: '2px 8px', borderRadius: 6, background: pct > 0 ? 'rgba(255,107,107,0.08)' : pct < 0 ? 'rgba(108,180,255,0.08)' : 'transparent', display: 'inline-block' }}>
+                      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 900, color: 'var(--text-primary)', marginTop: 'var(--sp-xs)', letterSpacing: '-0.5px' }}>{Number(idx.price).toLocaleString()}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 'var(--sp-xs)', padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: pct > 0 ? 'rgba(255,107,107,0.08)' : pct < 0 ? 'rgba(108,180,255,0.08)' : 'transparent', display: 'inline-block' }}>
                         {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'}{pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                       </div>
                     </Link>
@@ -360,19 +360,19 @@ export default async function HomePage() {
                 {openApts.map((a: any) => {
                   const diff = Math.ceil((new Date(a.rcept_endde).getTime() - Date.now()) / 86400000);
                   return (
-                    <Link key={a.id} href={`/apt/${a.id}`} className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    <Link key={a.id} href={`/apt/${a.id}`} className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: 'var(--card-p) var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--sp-xs)' }}>
                         <span className="kd-pulse-dot" style={{ background: 'var(--accent-green)', width: 5, height: 5 }} /> 접수중
                       </div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>{a.region_nm} · <span style={{ color: diff <= 3 ? 'var(--accent-red)' : 'var(--accent-orange)', fontWeight: 700 }}>D-{diff}</span></div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>{a.region_nm} · <span style={{ color: diff <= 3 ? 'var(--accent-red)' : 'var(--accent-orange)', fontWeight: 700 }}>D-{diff}</span></div>
                     </Link>
                   );
                 })}
                 {latestBlog && (
-                  <Link href={`/blog/${latestBlog.slug}`} className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
+                  <Link href={`/blog/${latestBlog.slug}`} className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: 'var(--card-p) var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
                     <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-purple)' }}>📝 최신 블로그</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>{latestBlog.title}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginTop: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>{latestBlog.title}</div>
                   </Link>
                 )}
               </div>
@@ -381,15 +381,15 @@ export default async function HomePage() {
 
           {/* 커뮤니티 라이브 활동 */}
           {(todayActivity.posts > 0 || todayActivity.comments > 0 || hotPost) && (
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 8, marginBottom: 8 }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center', flexWrap: 'wrap', marginTop: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
               {todayActivity.posts > 0 && (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 20, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 'var(--radius-xl)', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-green)' }}>
                   <span className="kd-pulse-dot" style={{ width: 5, height: 5 }} />
                   오늘 {todayActivity.posts}개 글 · {todayActivity.comments}개 댓글
                 </div>
               )}
               {hotPost && (
-                <Link href={`/feed/${hotPost.slug || hotPost.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 20, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-red)', textDecoration: 'none', maxWidth: 280, overflow: 'hidden' }}>
+                <Link href={`/feed/${hotPost.slug || hotPost.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 'var(--radius-xl)', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, fontWeight: 600, color: 'var(--accent-red)', textDecoration: 'none', maxWidth: 280, overflow: 'hidden' }}>
                   🔥 {(hotPost.title || '').slice(0, 20)}{(hotPost.title || '').length > 20 ? '…' : ''} · ♥{hotPost.likes_count}
                 </Link>
               )}
@@ -400,7 +400,7 @@ export default async function HomePage() {
         {/* ━━━ 주요 서비스 ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
           <h2 style={{
-            fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, textAlign: 'center', marginBottom: 12,
+            fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, textAlign: 'center', marginBottom: 'var(--sp-md)',
             letterSpacing: '-0.02em',
           }}>
             카더라에서 할 수 있는 것들
@@ -411,12 +411,12 @@ export default async function HomePage() {
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
-            gap: 12,
+            gap: 'var(--sp-md)',
           }}>
             {SECTIONS.map((s, i) => (
               <Link key={s.href} href={s.href} className="home-card kd-section-card" style={{
                 display: 'block', textDecoration: 'none',
-                background: 'var(--bg-surface)', borderRadius: 12,
+                background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)',
                 border: '1px solid var(--border)',
                 overflow: 'hidden',
               }}>
@@ -436,7 +436,7 @@ export default async function HomePage() {
                     <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{s.title}</h3>
                   </div>
                   <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 8px' }}>{s.desc}</p>
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
                     {s.tags.map(t => (
                       <span key={t} style={{
                         fontSize: 10, padding: '2px 7px', borderRadius: 4,
@@ -453,7 +453,7 @@ export default async function HomePage() {
         {/* ━━━ 편의 도구 ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
           <h2 style={{
-            fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, textAlign: 'center', marginBottom: 24,
+            fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, textAlign: 'center', marginBottom: 'var(--sp-2xl)',
             letterSpacing: '-0.02em',
           }}>
             편의 도구
@@ -462,7 +462,7 @@ export default async function HomePage() {
             {TOOLS.map(t => (
               <Link key={t.href} href={t.href} className="home-tool" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '10px 18px', borderRadius: 12,
+                padding: '10px 18px', borderRadius: 'var(--radius-card)',
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600,
                 textDecoration: 'none', transition: 'border-color 0.2s, color 0.2s',
@@ -476,12 +476,12 @@ export default async function HomePage() {
         {/* ━━━ FAQ 섹션 (리치 결과 면적 확대) ━━━ */}
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
           <h2 style={{
-            fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, textAlign: 'center', marginBottom: 24,
+            fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: 800, textAlign: 'center', marginBottom: 'var(--sp-2xl)',
             letterSpacing: '-0.02em',
           }}>
             자주 묻는 질문
           </h2>
-          <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--sp-md)' }}>
             {[
               { q: '카더라는 무료인가요?', a: '네, 카더라의 모든 기본 기능은 완전 무료입니다. 주식 시세 조회, 아파트 청약 일정 확인, 커뮤니티 글 작성, 블로그 열람 등 핵심 기능을 무료로 이용할 수 있습니다. 카카오 계정으로 3초 만에 가입하세요.' },
               { q: '어떤 주식 정보를 볼 수 있나요?', a: '코스피, 코스닥, 나스닥, S&P500 등 국내외 주요 종목의 실시간 시세를 제공합니다. 테마별 동향, 섹터 히트맵, AI 종목 분석, 투자자 매매동향, 뉴스 감성 분석 등 다양한 투자 정보를 한눈에 확인할 수 있습니다.' },
@@ -491,7 +491,7 @@ export default async function HomePage() {
               { q: '개인정보는 안전한가요?', a: '카더라는 Supabase 서울 리전에 데이터를 저장하며, 모든 통신은 HTTPS로 암호화됩니다. Row Level Security(RLS)를 적용하여 본인의 데이터만 접근할 수 있으며, CSRF 보호와 Rate Limiting으로 보안을 강화하고 있습니다.' },
             ].map((faq, i) => (
               <details key={i} style={{
-                background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)',
+                background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)',
                 overflow: 'hidden',
               }}>
                 <summary style={{
@@ -516,9 +516,9 @@ export default async function HomePage() {
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 64px' }}>
           <div className="kd-card-glow" style={{
             background: 'linear-gradient(135deg, #152850 0%, #0A1225 100%)',
-            borderRadius: 20, padding: 'clamp(32px, 5vw, 56px)', textAlign: 'center',
+            borderRadius: 'var(--radius-xl)', padding: 'clamp(32px, 5vw, 56px)', textAlign: 'center',
           }}>
-            <h2 style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, marginBottom: 12 }}>
+            <h2 style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, marginBottom: 'var(--sp-md)' }}>
               지금 바로 시작하세요
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 28, lineHeight: 1.7 }}>
@@ -526,8 +526,8 @@ export default async function HomePage() {
               주식·부동산·커뮤니티 모든 기능을 무료로 이용하세요.
             </p>
             <Link href="/login" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '15px 40px', borderRadius: 14, fontSize: 16, fontWeight: 700,
+              display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)',
+              padding: '15px 40px', borderRadius: 'var(--radius-lg)', fontSize: 16, fontWeight: 700,
               background: '#FEE500', color: '#191919', textDecoration: 'none',
               boxShadow: '0 4px 24px rgba(254,229,0,0.25)',
               transition: 'transform 0.12s ease, box-shadow 0.2s ease',
@@ -548,8 +548,8 @@ export default async function HomePage() {
             marginBottom: 32,
           }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>서비스</div>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>서비스</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
                 <Link href="/stock" className="home-flink">주식 시세</Link>
                 <Link href="/apt" className="home-flink">아파트 청약</Link>
                 <Link href="/blog" className="home-flink">블로그</Link>
@@ -557,8 +557,8 @@ export default async function HomePage() {
               </nav>
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>부동산</div>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>부동산</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
                 <Link href="/apt" className="home-flink">청약 일정</Link>
                 <Link href="/apt?tab=unsold" className="home-flink">미분양 현황</Link>
                 <Link href="/apt?tab=redev" className="home-flink">재개발 정보</Link>
@@ -566,8 +566,8 @@ export default async function HomePage() {
               </nav>
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>도구</div>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>도구</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
                 <Link href="/apt/map" className="home-flink">지도뷰</Link>
                 <Link href="/apt/diagnose" className="home-flink">청약 진단</Link>
                 <Link href="/stock/compare" className="home-flink">종목 비교</Link>
@@ -575,8 +575,8 @@ export default async function HomePage() {
               </nav>
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 12 }}>카더라</div>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>카더라</div>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
                 <Link href="/guide" className="home-flink">가이드북</Link>
                 <Link href="/grades" className="home-flink">등급 안내</Link>
                 <Link href="/terms" className="home-flink">이용약관</Link>
@@ -585,11 +585,11 @@ export default async function HomePage() {
             </div>
           </div>
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.9 }}>
-            <p style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>사업자 정보</p>
+            <p style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>사업자 정보</p>
             <p>상호명: 카더라 &nbsp;|&nbsp; 대표자: 노영진 &nbsp;|&nbsp; 사업자등록번호: 278-57-00801</p>
             <p>사업장 주소: 부산광역시 연제구 연동로 27, 405호</p>
             <p>전화: 010-5001-1382 &nbsp;|&nbsp; 이메일: kadeora.app@gmail.com</p>
-            <p style={{ marginTop: 4 }}>© 2026 카더라. All rights reserved.</p>
+            <p style={{ marginTop: 'var(--sp-xs)' }}>© 2026 카더라. All rights reserved.</p>
           </div>
         </footer>
       </div>

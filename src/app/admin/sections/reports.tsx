@@ -7,7 +7,7 @@ export default function ReportsSection() {
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 16px' }}>🚨 신고 / 결제</h1>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-lg)' }}>
         <Pill active={tab === 'reports'} onClick={() => setTab('reports')}>🚨 신고 관리</Pill>
         <Pill active={tab === 'payments'} onClick={() => setTab('payments')}>💳 결제 내역</Pill>
       </div>
@@ -36,7 +36,7 @@ function ReportsTab() {
 
   return (
     <div>
-      <div style={{ fontSize: 13, color: C.textSec, marginBottom: 12 }}>{pending.length}건 미처리</div>
+      <div style={{ fontSize: 13, color: C.textSec, marginBottom: 'var(--sp-md)' }}>{pending.length}건 미처리</div>
       <DataTable
         headers={['사유', '상세', '유형', '신고자', '상태', '신고일', '조치']}
         rows={reports.map(r => [
@@ -47,7 +47,7 @@ function ReportsTab() {
           r.status === 'pending' ? <Badge key="s" color={C.yellow}>미처리</Badge> : r.status === 'resolved' ? <Badge key="s" color={C.green}>처리</Badge> : <Badge key="s" color={C.textDim}>기각</Badge>,
           ago(r.created_at),
           r.status === 'pending' ? (
-            <div key="a" style={{ display: 'flex', gap: 4 }}>
+            <div key="a" style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
               <button onClick={() => action(r.id, 'resolve')} style={{ padding: '3px 8px', borderRadius: 4, border: 'none', background: C.greenBg, color: C.green, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}>처리</button>
               <button onClick={() => action(r.id, 'dismiss')} style={{ padding: '3px 8px', borderRadius: 4, border: 'none', background: C.redBg, color: C.red, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}>기각</button>
             </div>
@@ -75,13 +75,13 @@ function PaymentsTab() {
 
   return (
     <div>
-      <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
+      <div className="mc-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 'var(--sp-lg)' }}>
         {[
           { label: '총 결제', value: `${payments.length}건`, color: C.brand },
           { label: '총 금액', value: `${totalAmount.toLocaleString()}원`, color: C.green },
           { label: '이번 달', value: `${monthAmount.toLocaleString()}원`, color: C.purple },
         ].map(s => (
-          <div key={s.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 16px' }}>
+          <div key={s.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '12px 16px' }}>
             <div style={{ fontSize: 11, color: C.textDim }}>{s.label}</div>
             <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: s.color }}>{s.value}</div>
           </div>

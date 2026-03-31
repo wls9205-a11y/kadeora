@@ -283,7 +283,7 @@ export default async function RegionLandingPage({ params }: Props) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
-                {s.is_price_limit && <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
+                {s.is_price_limit && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                 {s.constructor_nm ? `${s.constructor_nm} · ` : ''}{s.tot_supply_hshld_co}세대 · ~{s.rcept_endde?.slice(5)}
@@ -299,7 +299,7 @@ export default async function RegionLandingPage({ params }: Props) {
                 const pMax = Math.max(...prices);
                 return (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginTop: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)' }}>💰 {fmtPrice(pMin)}{pMax !== pMin ? `~${fmtPrice(pMax)}` : ''}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>💰 {fmtPrice(pMin)}{pMax !== pMin ? `~${fmtPrice(pMax)}` : ''}</span>
                     {s.price_per_pyeong_avg > 0 && <span style={{ fontSize: 9, color: 'var(--accent-purple)' }}>평당 {s.price_per_pyeong_avg.toLocaleString()}만</span>}
                   </div>
                 );

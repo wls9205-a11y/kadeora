@@ -187,7 +187,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 width: 24, height: 24, borderRadius: '50%',
                 background: getAvatarColor(r.profiles?.nickname || ''), display: 'flex',
                 alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 700,
+                color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 600,
               }}>
                 {(r.profiles?.nickname || '?')[0]}
               </div>

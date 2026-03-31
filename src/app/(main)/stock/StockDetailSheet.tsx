@@ -33,7 +33,7 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
         <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)' }}>
           {stock.currency === 'USD' ? `$${stock.price?.toFixed(2)}` : `₩${fmt(stock.price)}`}
         </div>
-        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 'var(--sp-xs)' }}>
+        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: stockColor(stock.change_pct ?? 0, isDomestic), marginTop: 'var(--sp-xs)' }}>
           {(stock.change_pct ?? 0) > 0 ? '▲' : '▼'} {stock.change_amt ? `${(stock.change_amt > 0 ? '+' : '')}${fmt(Math.abs(stock.change_amt))}` : ''} ({Math.abs(stock.change_pct ?? 0).toFixed(2)}%)
         </div>
       </div>

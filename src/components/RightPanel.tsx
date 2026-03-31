@@ -120,7 +120,7 @@ export default function RightPanel() {
               <div key={idx.name} style={{ flex: 1, textAlign: 'center' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{idx.name}</div>
                 <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>{idx.price.toLocaleString()}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: idx.pct > 0 ? 'var(--accent-red)' : idx.pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: idx.pct > 0 ? 'var(--accent-red)' : idx.pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
                   {idx.pct > 0 ? '▲' : idx.pct < 0 ? '▼' : '━'}{Math.abs(idx.pct).toFixed(2)}%
                 </div>
               </div>

@@ -62,16 +62,16 @@ export default function UsersSection() {
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 20px' }}>👤 유저 관리 <span style={{ fontSize: 14, color: C.textDim, fontWeight: 400 }}>({fmt(total)}명)</span></h1>
 
       {/* Controls */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap', alignItems: 'center' }}>
         <input value={search} onChange={e => doSearch(e.target.value)} placeholder="닉네임 / 이름 검색..."
-          style={{ padding: '8px 14px', borderRadius: 8, border: `1px solid ${C.border}`, background: C.card, color: C.text, fontSize: 13, width: 240, fontFamily: 'inherit' }} />
-        <div style={{ display: 'flex', gap: 4 }}>
+          style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.card, color: C.text, fontSize: 13, width: 240, fontFamily: 'inherit' }} />
+        <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
           {filters.map(f => <Pill key={f.key} active={filter === f.key} onClick={() => { setFilter(f.key); setPage(1); }}>{f.label}</Pill>)}
         </div>
       </div>
 
       {loading ? <Spinner /> : (
-        <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-lg)' }}>
           {/* User List */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <DataTable
@@ -92,19 +92,19 @@ export default function UsersSection() {
               onRowClick={(i) => selectUser(users[i])}
             />
             {/* Pagination */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--sp-sm)', marginTop: 'var(--sp-lg)' }}>
               <button aria-label="닫기" disabled={page <= 1} onClick={() => { setPage(page - 1); load(page - 1); }}
-                style={{ padding: '6px 14px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.card, color: C.text, cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1 }}>← 이전</button>
+                style={{ padding: '6px 14px', borderRadius: 'var(--radius-xs)', border: `1px solid ${C.border}`, background: C.card, color: C.text, cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1 }}>← 이전</button>
               <span style={{ padding: '6px 14px', color: C.textSec, fontSize: 13 }}>{page} / {Math.ceil(total / 50) || 1}</span>
               <button disabled={page * 50 >= total} onClick={() => { setPage(page + 1); load(page + 1); }}
-                style={{ padding: '6px 14px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.card, color: C.text, cursor: page * 50 >= total ? 'not-allowed' : 'pointer', opacity: page * 50 >= total ? 0.4 : 1 }}>다음 →</button>
+                style={{ padding: '6px 14px', borderRadius: 'var(--radius-xs)', border: `1px solid ${C.border}`, background: C.card, color: C.text, cursor: page * 50 >= total ? 'not-allowed' : 'pointer', opacity: page * 50 >= total ? 0.4 : 1 }}>다음 →</button>
             </div>
           </div>
 
           {/* User Detail Panel */}
           {selected && (
-            <div style={{ width: 370, flexShrink: 0, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, alignSelf: 'flex-start', position: 'sticky', top: 20, maxHeight: '90vh', overflowY: 'auto' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ width: 370, flexShrink: 0, background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 20, alignSelf: 'flex-start', position: 'sticky', top: 20, maxHeight: '90vh', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: C.text, margin: 0 }}>{GRADE_EMOJI[selected.grade]} {selected.nickname}</h3>
                 <button onClick={() => { setSelected(null); setUserDetail(null); }} style={{ background: 'none', border: 'none', color: C.textDim, cursor: 'pointer', fontSize: 'var(--fs-md)' }}>✕</button>
               </div>
@@ -169,7 +169,7 @@ export default function UsersSection() {
                   {/* 알림 설정 */}
                   <DetailSection title="🔔 알림 설정">
                     {userDetail.notifications ? (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
                         {[
                           ['댓글', userDetail.notifications.push_comments],
                           ['좋아요', userDetail.notifications.push_likes],
@@ -186,7 +186,7 @@ export default function UsersSection() {
                           </Badge>
                         ))}
                         {userDetail.notifications.quiet_start && (
-                          <div style={{ width: '100%', fontSize: 11, color: C.textDim, marginTop: 4 }}>
+                          <div style={{ width: '100%', fontSize: 11, color: C.textDim, marginTop: 'var(--sp-xs)' }}>
                             🌙 방해금지: {userDetail.notifications.quiet_start} ~ {userDetail.notifications.quiet_end}
                           </div>
                         )}
@@ -212,7 +212,7 @@ export default function UsersSection() {
                       </div>
                     )}
                     {userDetail.pwaInstalls?.length > 0 && (
-                      <div style={{ marginTop: 4 }}>
+                      <div style={{ marginTop: 'var(--sp-xs)' }}>
                         {userDetail.pwaInstalls.map((p: any, i: number) => (
                           <div key={i} style={{ fontSize: 11, color: C.textSec, padding: '2px 0' }}>
                             📱 {p.platform || 'unknown'} · {p.browser} · {ago(p.installed_at)}
@@ -224,7 +224,7 @@ export default function UsersSection() {
 
                   {/* 동의 현황 */}
                   <DetailSection title="📋 동의 현황">
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
                       <Badge color={selected.profile_completed ? C.green : C.textDim}>{selected.profile_completed ? '✓' : '✗'} 프로필완성</Badge>
                       <Badge color={selected.onboarded ? C.green : C.textDim}>{selected.onboarded ? '✓' : '✗'} 온보딩</Badge>
                       <Badge color={selected.marketing_agreed ? C.green : C.textDim}>{selected.marketing_agreed ? '✓' : '✗'} 마케팅</Badge>
@@ -237,21 +237,21 @@ export default function UsersSection() {
                 </>
               ) : null}
 
-              {selected.bio && <div style={{ marginTop: 12, padding: 10, background: C.surface, borderRadius: 8, fontSize: 12, color: C.textSec }}>{selected.bio}</div>}
+              {selected.bio && <div style={{ marginTop: 'var(--sp-md)', padding: 10, background: C.surface, borderRadius: 'var(--radius-sm)', fontSize: 12, color: C.textSec }}>{selected.bio}</div>}
               {selected.interests && selected.interests.length > 0 && (
-                <div style={{ marginTop: 8, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                <div style={{ marginTop: 'var(--sp-sm)', display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
                   {selected.interests.map(i => <Badge key={i} color={C.brand}>{i}</Badge>)}
                 </div>
               )}
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: 6, marginTop: 16, flexWrap: 'wrap' }}>
-                <button onClick={() => setPoints(selected.id, selected.points)} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: C.yellow, color: C.textInv, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>포인트 변경</button>
+              <div style={{ display: 'flex', gap: 6, marginTop: 'var(--sp-lg)', flexWrap: 'wrap' }}>
+                <button onClick={() => setPoints(selected.id, selected.points)} style={{ padding: '6px 12px', borderRadius: 'var(--radius-xs)', border: 'none', background: C.yellow, color: C.textInv, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>포인트 변경</button>
                 {selected.is_banned
-                  ? <button onClick={() => userAction(selected.id, 'unban')} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: C.green, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>정지 해제</button>
-                  : <button onClick={() => userAction(selected.id, 'ban')} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: C.red, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>정지</button>
+                  ? <button onClick={() => userAction(selected.id, 'unban')} style={{ padding: '6px 12px', borderRadius: 'var(--radius-xs)', border: 'none', background: C.green, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>정지 해제</button>
+                  : <button onClick={() => userAction(selected.id, 'ban')} style={{ padding: '6px 12px', borderRadius: 'var(--radius-xs)', border: 'none', background: C.red, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>정지</button>
                 }
-                {!selected.is_admin && <button onClick={() => userAction(selected.id, 'makeAdmin')} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: C.purple, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>관리자 부여</button>}
+                {!selected.is_admin && <button onClick={() => userAction(selected.id, 'makeAdmin')} style={{ padding: '6px 12px', borderRadius: 'var(--radius-xs)', border: 'none', background: C.purple, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>관리자 부여</button>}
               </div>
             </div>
           )}

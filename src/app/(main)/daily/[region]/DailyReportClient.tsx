@@ -59,7 +59,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
       {isArchive && (
         <div style={{ padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-yellow)' }}>📂 {viewDate} 아카이브</span>
-          <button onClick={goToToday} style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', background: 'none', border: '1px solid var(--brand)', borderRadius: 'var(--radius-xs)', padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>오늘 보기 →</button>
+          <button onClick={goToToday} style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', background: 'none', border: '1px solid var(--brand)', borderRadius: 'var(--radius-xs)', padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>오늘 보기 →</button>
         </div>
       )}
 
@@ -116,7 +116,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
         {/* 어젯밤 달라진 것 */}
         <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', marginBottom: 'var(--sp-sm)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>어젯밤 달라진 것</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>어젯밤 달라진 것</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
             {d.stockTop10.slice(0, 4).filter(s => s.week_pct != null && s.week_pct !== 0).map(s => (
               <span key={s.symbol} style={{
@@ -218,7 +218,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
         {d.globalStocks.slice(0, 6).map(s => (
           <div key={s.symbol} style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)' }}>{s.symbol}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-primary)' }}>{s.symbol}</div>
             <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)' }}>${Number(s.price).toFixed(0)}</div>
             <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>${fmtB(s.market_cap)}</div>
           </div>
@@ -242,7 +242,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 700, fontSize: 12, color: 'var(--text-primary)' }}>{s.house_nm}</span>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4,
+                    fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4,
                     background: s.status === '접수중' ? 'rgba(16,185,129,0.08)' : 'rgba(59,130,246,0.08)',
                     color: s.status === '접수중' ? 'var(--accent-green)' : 'var(--text-brand)',
                   }}>{s.status}</span>
@@ -387,7 +387,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
         {/* 내일 체크포인트 */}
         <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3 }}>내일 체크포인트</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 3 }}>내일 체크포인트</div>
           <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {d.subscriptions.filter(s => s.status === '접수중').map(s => `• ${s.house_nm} 마감 D-${Math.max(0, Math.ceil((new Date(s.rcept_endde).getTime() - now.getTime()) / 86400000))}`).slice(0, 3).join('\n').split('\n').map((l, i) => <span key={i}>{l}<br /></span>)}
             {d.subscriptions.filter(s => {

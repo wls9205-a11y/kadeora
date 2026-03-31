@@ -216,7 +216,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
   return (
     <div>
       {/* 탭 */}
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '7px 14px', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 'var(--radius-xs)', flexShrink: 0,
@@ -250,7 +250,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
               <div className="kd-card" style={{ background: signalBg, border: signalBorder }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: signalColor, padding: '2px 10px', borderRadius: 'var(--radius-pill)', background: aiComment.signal === 'bullish' ? 'rgba(5,150,105,0.12)' : aiComment.signal === 'bearish' ? 'rgba(248,113,113,0.12)' : 'var(--bg-hover)' }}>{signalLabel}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: signalColor, padding: '2px 10px', borderRadius: 'var(--radius-pill)', background: aiComment.signal === 'bullish' ? 'rgba(5,150,105,0.12)' : aiComment.signal === 'bearish' ? 'rgba(248,113,113,0.12)' : 'var(--bg-hover)' }}>{signalLabel}</span>
                 </div>
                 <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-sm)' }}>

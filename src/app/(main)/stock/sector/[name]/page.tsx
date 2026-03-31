@@ -239,7 +239,7 @@ export default async function SectorPage({ params }: Props) {
               borderBottom: i < stocks.length - 1 ? '1px solid var(--border)' : 'none',
               textDecoration: 'none', color: 'inherit',
             }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', minWidth: 18, textAlign: 'center' }}>{i + 1}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', minWidth: 18, textAlign: 'center' }}>{i + 1}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.symbol} · {fmtCap(s.market_cap, s.currency ?? undefined)}</div>
@@ -248,7 +248,7 @@ export default async function SectorPage({ params }: Props) {
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {fmtPrice(s.price ?? 0, s.currency ?? undefined)}
                 </div>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: stockColor(pct, isKR) }}>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: stockColor(pct, isKR) }}>
                   {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                 </div>
                 <div style={{ width: 30, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>

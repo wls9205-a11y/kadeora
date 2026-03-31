@@ -66,7 +66,7 @@ export default function MissionControl() {
         <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {SECTIONS.map(s => (
             <button key={s.key} data-section={s.key} onClick={() => { setSection(s.key); setSidebarOpen(false); }} style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', width: '100%',
+              display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', width: '100%',
               background: section === s.key ? C.brandBg : 'transparent',
               color: section === s.key ? C.brand : C.textSec,
               fontWeight: section === s.key ? 700 : 500, fontSize: 13, textAlign: 'left', transition: 'all 0.15s',

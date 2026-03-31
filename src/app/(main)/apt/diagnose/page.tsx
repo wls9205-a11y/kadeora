@@ -124,7 +124,7 @@ export default function DiagnosePage() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-xs)' }}>
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{c.region}</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: canWin ? 'var(--accent-green)' : possible ? 'var(--accent-yellow)' : 'var(--accent-red)' }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: canWin ? 'var(--accent-green)' : possible ? 'var(--accent-yellow)' : 'var(--accent-red)' }}>
                     {canWin ? '✅ 유리' : possible ? '⚠️ 가능' : '❌ 어려움'}
                   </span>
                 </div>

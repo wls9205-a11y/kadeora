@@ -36,7 +36,7 @@ export default function RealEstateSection() {
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 20px' }}>🏢 부동산 관리</h1>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
         {tabs.map(t => <Pill key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>{t.icon} {t.label}</Pill>)}
       </div>
 
@@ -142,13 +142,13 @@ function InterestManager() {
   if (loading) return <Spinner />;
 
   return (
-    <div style={{ display: 'flex', gap: 16, flexDirection: 'column' }}>
+    <div style={{ display: 'flex', gap: 'var(--sp-lg)', flexDirection: 'column' }}>
       {/* 단지 목록 */}
       <div>
         <input
           value={search} onChange={e => setSearch(e.target.value)}
           placeholder="단지명/지역 검색..."
-          style={{ width: '100%', maxWidth: 300, padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.border}`, background: C.surface, color: C.text, fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }}
+          style={{ width: '100%', maxWidth: 300, padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.surface, color: C.text, fontSize: 13, marginBottom: 10, boxSizing: 'border-box' }}
         />
         <div style={{ display: 'grid', gap: 6 }}>
           {filtered.length === 0 && <div style={{ color: C.textDim, fontSize: 13, padding: 16 }}>등록된 관심단지가 없습니다</div>}
@@ -157,8 +157,8 @@ function InterestManager() {
               key={g.site_id}
               onClick={() => selectSite(g)}
               style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8,
-                padding: '10px 14px', borderRadius: 10, border: `1px solid ${selected?.site_id === g.site_id ? C.brand : C.border}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-sm)',
+                padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', border: `1px solid ${selected?.site_id === g.site_id ? C.brand : C.border}`,
                 background: selected?.site_id === g.site_id ? `${C.brand}10` : C.surface,
                 cursor: 'pointer', textAlign: 'left', width: '100%',
               }}
@@ -178,14 +178,14 @@ function InterestManager() {
 
       {/* 선택된 단지 상세 */}
       {selected && (
-        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <div>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: C.text }}>{selected.name}</h3>
               <span style={{ fontSize: 12, color: C.textDim }}>{selected.region} {selected.sigungu} — 총 {selected.count}명</span>
             </div>
             <button onClick={downloadCSV} style={{
-              padding: '6px 14px', borderRadius: 8, border: `1px solid ${C.border}`,
+              padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`,
               background: C.surface, color: C.text, fontSize: 12, fontWeight: 600, cursor: 'pointer',
             }}>
               CSV 다운로드

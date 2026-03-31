@@ -7,7 +7,7 @@ export default function NoticesSection() {
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 16px' }}>📢 공지 · 알림</h1>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-lg)' }}>
         <Pill active={tab === 'notices'} onClick={() => setTab('notices')}>📡 공지 전광판</Pill>
         <Pill active={tab === 'push'} onClick={() => setTab('push')}>📣 푸시 알림</Pill>
       </div>
@@ -64,13 +64,13 @@ function NoticeManager() {
 
   return (
     <div>
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 8 }}>새 공지 등록</div>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>새 공지 등록</div>
         <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="전광판에 표시할 공지 내용..." rows={3}
-          style={{ width: '100%', boxSizing: 'border-box', borderRadius: 8, border: `1px solid ${C.border}`, background: C.surface, color: C.text, padding: '10px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit' }} />
-        <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+          style={{ width: '100%', boxSizing: 'border-box', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.surface, color: C.text, padding: '10px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit' }} />
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-sm)', alignItems: 'center' }}>
           <button onClick={handleSave} disabled={saving || !content.trim()} style={{
-            padding: '8px 20px', borderRadius: 8, border: 'none', background: content.trim() ? C.brand : C.border,
+            padding: '8px 20px', borderRadius: 'var(--radius-sm)', border: 'none', background: content.trim() ? C.brand : C.border,
             color: content.trim() ? '#fff' : C.textDim, fontSize: 12, fontWeight: 700, cursor: content.trim() ? 'pointer' : 'not-allowed',
           }}>{saving ? '저장 중...' : '전광판 등록'}</button>
           {result && <span style={{ fontSize: 12, color: result.includes('등록') ? C.green : C.red }}>{result}</span>}
@@ -132,29 +132,29 @@ function PushManager() {
 
   if (loading) return <Spinner />;
 
-  const inp: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '10px 12px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: 13, fontFamily: 'inherit' };
+  const inp: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '10px 12px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-sm)', color: C.text, fontSize: 13, fontFamily: 'inherit' };
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 16px', flex: 1 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-md)', marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '12px 16px', flex: 1 }}>
           <div style={{ fontSize: 11, color: C.textDim }}>📱 푸시 구독자</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: C.brand }}>{subCount}</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.brand }}>{subCount}</div>
         </div>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 16px', flex: 1 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: '12px 16px', flex: 1 }}>
           <div style={{ fontSize: 11, color: C.textDim }}>📨 총 발송</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: C.green }}>{logs.length}</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.green }}>{logs.length}</div>
         </div>
       </div>
 
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 8 }}>새 푸시 발송</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>새 푸시 발송</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목" style={inp} />
           <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="내용" rows={3} style={{ ...inp, resize: 'vertical' as const }} />
           <input value={url} onChange={e => setUrl(e.target.value)} placeholder="URL (기본: /feed)" style={inp} />
           <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()} style={{
-            padding: '10px 0', background: C.brand, color: '#fff', border: 'none', borderRadius: 8,
+            padding: '10px 0', background: C.brand, color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)',
             fontSize: 13, fontWeight: 700, cursor: sending ? 'not-allowed' : 'pointer', opacity: sending ? 0.7 : 1,
           }}>{sending ? '발송 중...' : '전체 발송'}</button>
           {result && <span style={{ fontSize: 12, color: result.includes('완료') ? C.green : C.red }}>{result}</span>}
