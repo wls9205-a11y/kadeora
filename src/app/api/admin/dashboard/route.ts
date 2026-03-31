@@ -124,11 +124,11 @@ export async function GET(req: Request) {
 
       // 데이터 커버리지 KPI
       const [aptPriceR, aptCoordsR, stockDescR, aptCrawlLastR, aptImagesR, aiSummaryAccurateR, stockRefreshR] = await Promise.all([
-        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('price_per_pyeong_avg', 'is', null),
+        sb.from('apt_sites').select('id', { count: 'exact', head: true }).gt('price_min', 0),
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).not('latitude', 'is', null),
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).neq('description', '').not('description', 'is', null),
         sb.from('cron_logs').select('created_at, status, records_created, error_message').eq('cron_name', 'apt-crawl-pricing').order('created_at', { ascending: false }).limit(5),
-        sb.from('apt_sites').select('id', { count: 'exact', head: true }).not('images', 'is', null).neq('images', '[]'),
+        sb.from('apt_sites').select('id', { count: 'exact', head: true }).or('images.neq.[],og_image_url.neq.'),
         // ai_summary 정확도 (총·일반·특별 포함 = 정확)
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).like('ai_summary', '%총%세대%일반%특별%'),
         // stock-refresh 최근 실행
@@ -141,7 +141,7 @@ export async function GET(req: Request) {
         dbSizeStr = dbSizeData || '?';
       } catch { dbSizeStr = '?'; }
       const dataCoverage = {
-        aptPrice: { done: aptPriceR.count ?? 0, total: aptR.count ?? 0, pct: aptR.count ? Math.round(((aptPriceR.count ?? 0) / (aptR.count ?? 1)) * 100) : 0 },
+        aptPrice: { done: aptPriceR.count ?? 0, total: sitesR.count ?? 0, pct: sitesR.count ? Math.round(((aptPriceR.count ?? 0) / (sitesR.count ?? 1)) * 100) : 0 },
         aptCoords: { done: aptCoordsR.count ?? 0, total: sitesR.count ?? 0, pct: sitesR.count ? Math.round(((aptCoordsR.count ?? 0) / (sitesR.count ?? 1)) * 100) : 0 },
         aptImages: { done: aptImagesR.count ?? 0, total: sitesR.count ?? 0, pct: sitesR.count ? Math.round(((aptImagesR.count ?? 0) / (sitesR.count ?? 1)) * 100) : 0 },
         stockDesc: { done: stockDescR.count ?? 0, total: stockR.count ?? 0, pct: stockR.count ? Math.round(((stockDescR.count ?? 0) / (stockR.count ?? 1)) * 100) : 0 },
