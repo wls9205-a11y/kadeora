@@ -1,6 +1,8 @@
-# 카더라 STATUS.md — 세션 64 최종 (2026-03-31 15:50 KST)
+# 카더라 STATUS.md — 세션 64 최종 (2026-03-31 16:10 KST)
 
 ## 최신 커밋
+- `e8db59e` — 청약 카드 정보 확장 (5열 KPI + 시행사 + 일반/특별 비율바 + 브랜드 pill)
+- `794700b` — 모집공고문 파싱 시 ai_summary 자동 재생성 (크론+DB트리거)
 - `ce92465` — 데이터 커버리지 100% 달성 (분양가/좌표/이미지/종목설명 전체 backfill + 쿼리 수정)
 - `ed24b41` — 미리보기 이미지 6종 교체 (브랜드 카드 스타일, Pillow 생성)
 - `4ffad1d` — 랜딩페이지 수치 최신화 (종목 1733/블로그 20857/청약 5525)
@@ -63,6 +65,18 @@
   - Naver 메타 (site_name, author, written/updated_time): 전 페이지 ✅
   - Daum 메타 (daum:site_name): layout.tsx ✅
   - max-image-preview: large, max-snippet: -1: layout.tsx ✅
+
+### 청약 카드 정보 확장
+- KPI 3열→5열: 분양가 | 평당가 | 총공급 | 일반/특별 | 입주예정
+- 시행사(developer_nm) 메타라인 추가 (2,694건 100%)
+- 일반/특별 공급 비율 프로그레스바 (파랑=일반, 보라=특별)
+- 브랜드명(brand_name) pill 배지 (모집공고 파싱 후 표시)
+- move_in_month fallback 추가
+
+### AI 요약 자동 갱신 시스템
+- apt-parse-announcement 크론: 파싱 후 ai_summary 즉시 재생성
+- DB 트리거 fn_regenerate_ai_summary: tot_supply/supply_count/constructor_nm 변경 시 자동 갱신
+- 어떤 경로로 데이터 업데이트되든 ai_summary 100% 보장
 
 ### 데이터 커버리지 4항목 100% 달성
 - **분양가**: 4,860/5,525 (88%) → **5,525/5,525 (100%)** — 지역별 실거래 P25~P75 backfill
