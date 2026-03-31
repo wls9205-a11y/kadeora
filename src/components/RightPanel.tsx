@@ -18,7 +18,7 @@ const GRADES = [
   { emoji: '👑', title: '신의경지', pts: '60K' }, { emoji: '🚀', title: '카더라신', pts: '∞' },
 ];
 
-const FALLBACK = ['삼성전자', 'AI 반도체', '청약 경쟁률', '엔비디아', '기준금리'];
+const FALLBACK = ['삼성전자', 'AI 반도체', '청약 경쟁률', '엔비디아', '기준금리', '아파트 실거래', 'KOSPI', '전세가율', '미분양', 'ETF 비교'];
 
 export default function RightPanel() {
   const [trending, setTrending] = useState<{ keyword: string }[]>([]);
