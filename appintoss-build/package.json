@@ -4,9 +4,13 @@
   "description": "카더라 앱인토스 미니앱 빌드",
   "main": "index.js",
   "scripts": {
-    "build": "node build-web.js",
-    "package": "node package-ait.js"
+    "build": "npx ait build",
+    "build:manual": "node build-web.js && node package-ait.js"
   },
   "type": "commonjs",
-  "dependencies": {}
+  "dependencies": {
+    "@apps-in-toss/web-framework": "^2.0.9",
+    "es-toolkit": "^1.45.1"
+  },
+  "devDependencies": {}
 }
