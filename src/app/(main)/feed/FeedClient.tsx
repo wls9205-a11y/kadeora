@@ -11,6 +11,8 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { SkeletonCard } from '@/components/Skeleton';
 import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/EmptyState';
+import { isTossMode } from '@/lib/toss-mode';
+import TossTeaser from '@/components/TossTeaser';
 import AttendanceBanner from '@/components/AttendanceBanner';
 import DailyReportCard from '@/components/DailyReportCard';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
@@ -234,7 +236,10 @@ export default function FeedClient({
     // 핀 글 상단 고정
     const pinned = filtered.filter((p: PostWithProfile) => p.is_pinned);
     const normal = filtered.filter((p: PostWithProfile) => !p.is_pinned);
-    return [...pinned, ...normal];
+    const all = [...pinned, ...normal];
+    // 토스 모드: 5개만 미리보기
+    if (typeof window !== 'undefined' && isTossMode()) return all.slice(0, 5);
+    return all;
   }, [posts, activeTag]);
 
   const categories = [
@@ -551,13 +556,22 @@ export default function FeedClient({
           </div>
         )}
 
-        {hasMore && (
+        {/* 토스 모드: 5개 미리보기 후 CTA */}
+        {typeof window !== 'undefined' && isTossMode() && posts.length > 5 && (
+          <TossTeaser
+            path="/feed"
+            label="카더라 커뮤니티 전체 보기"
+            subtitle={`${posts.length.toLocaleString()}개 글 중 5개만 표시 중`}
+          />
+        )}
+
+        {hasMore && !(typeof window !== 'undefined' && isTossMode()) && (
           <div ref={sentinelRef} style={{ marginTop: 'var(--sp-sm)' }}>
             <SkeletonCard lines={2} />
             <SkeletonCard lines={2} />
           </div>
         )}
-        {!hasMore && posts.length > 0 && (
+        {!hasMore && posts.length > 0 && !(typeof window !== 'undefined' && isTossMode()) && (
           <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-base)' }}>
             모든 게시글을 읽었어요 ✓
           </div>

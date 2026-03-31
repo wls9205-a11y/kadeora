@@ -20,6 +20,7 @@ import { SITE_URL as SITE } from '@/lib/constants';
 import { enhanceBlogVisuals } from '@/lib/blog-visual-enhancer';
 import ReadingProgress from '@/components/ReadingProgress';
 import NextArticleFloat from '@/components/NextArticleFloat';
+import BlogTossGate from '@/components/BlogTossGate';
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
 const slugify = (text: string) => text.replace(/<[^>]+>/g, '').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -406,6 +407,8 @@ export default async function BlogDetailPage({ params }: Props) {
   });
   const cutoff = Math.floor(htmlFull.length * 0.7);
   const htmlTruncated = htmlFull.slice(0, cutoff);
+  const tossCutoff = Math.floor(htmlFull.length * 0.3);
+  const htmlTossShort = htmlFull.slice(0, tossCutoff);
 
   // 목차 추출
   const toc = extractToc(htmlFull);
@@ -539,7 +542,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 본문 — 마크다운 렌더링 */}
         {isLoggedIn ? (
-          <div className="blog-content" itemProp="articleBody" dangerouslySetInnerHTML={{ __html: htmlFull }} />
+          <BlogTossGate htmlFull={htmlFull} htmlShort={htmlTossShort} slug={slug} title={post.title} />
         ) : (
           <div style={{ position: 'relative' }}>
             <div className="blog-content" itemProp="articleBody" style={{ maxHeight: 'clamp(400px, 60vh, 800px)', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />

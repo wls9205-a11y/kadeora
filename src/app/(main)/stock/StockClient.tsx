@@ -14,6 +14,8 @@ import MiniSparkline from '@/components/MiniSparkline';
 import { fmtCap, stockColor, fmt } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import SectionShareButton from '@/components/SectionShareButton';
+import { isTossMode } from '@/lib/toss-mode';
+import TossTeaser from '@/components/TossTeaser';
 
 interface Stock {
   symbol: string; name: string; market: string; price: number; change_amt: number;
@@ -164,7 +166,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
   const inactiveCount = (isDomestic ? domesticStocks : globalStocks).filter(s => s.price === 0).length;
   const filteredStocks = getFilteredStocks();
   const currentTab = isDomestic ? domesticTab : globalTab;
-  const displayStocks = currentTab === 'ranking' ? filteredStocks.slice(0, stockListLimit) : filteredStocks;
+  const tossActive = typeof window !== 'undefined' && isTossMode();
+  const displayStocks = tossActive ? filteredStocks.slice(0, 10) : (currentTab === 'ranking' ? filteredStocks.slice(0, stockListLimit) : filteredStocks);
 
   const toggleWatchlist = useCallback(async (symbol: string) => {
     const isWatched = watchlistSymbols.includes(symbol);
@@ -1107,7 +1110,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             );
           })()}
           {/* 더보기 버튼 (시총 탭) */}
-          {currentTab === 'ranking' && filteredStocks.length > stockListLimit && (
+          {currentTab === 'ranking' && filteredStocks.length > stockListLimit && !tossActive && (
             <button onClick={() => setStockListLimit(prev => prev + 30)} style={{
               display: 'block', width: '100%', padding: '14px 0', margin: '8px 0 12px',
               background: 'linear-gradient(135deg, var(--brand), #4F46E5)',
@@ -1118,6 +1121,13 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             }}>
               {filteredStocks.length - stockListLimit}종목 더 보기 →
             </button>
+          )}
+          {tossActive && filteredStocks.length > 10 && (
+            <TossTeaser
+              path="/stock"
+              label={`전체 ${filteredStocks.length.toLocaleString()}종목 보기`}
+              subtitle="실시간 시세 · 히트맵 · 포트폴리오 시뮬레이터"
+            />
           )}
         </div>
       )}

@@ -3,6 +3,8 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { haptic } from '@/lib/haptic';
+import { isTossMode } from '@/lib/toss-mode';
+import TossTeaser from '@/components/TossTeaser';
 import { type Apt, getStatus, fmtD, kstNow, isNew, NewBadge, STATUS_BADGE, generateAptSlug, type SharedTabProps } from './apt-utils';
 import SectionShareButton from '@/components/SectionShareButton';
 
@@ -71,7 +73,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   // 페이지네이션 (30개씩)
   const SUB_PER_PAGE = 30;
   const subTotalPages = Math.ceil(filtered.length / SUB_PER_PAGE);
-  const paged = filtered.slice((subPage - 1) * SUB_PER_PAGE, subPage * SUB_PER_PAGE);
+  const paged = (typeof window !== 'undefined' && isTossMode())
+    ? filtered.slice(0, 5)
+    : filtered.slice((subPage - 1) * SUB_PER_PAGE, subPage * SUB_PER_PAGE);
 
   // 필터 변경 시 1페이지로 리셋
   useEffect(() => { setSubPage(1); }, [region, statusFilter, aptSort, effectiveSearch]);
@@ -251,8 +255,17 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           })}
           </div>
 
+          {/* 토스 모드 CTA */}
+          {typeof window !== 'undefined' && isTossMode() && filtered.length > 5 && (
+            <TossTeaser
+              path="/apt"
+              label={`전체 ${filtered.length}건 청약 보기`}
+              subtitle="경쟁률 · 분양가 · 일정 전부 확인"
+            />
+          )}
+
           {/* 페이지네이션 */}
-          {subTotalPages > 1 && (
+          {subTotalPages > 1 && !(typeof window !== 'undefined' && isTossMode()) && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'var(--sp-sm)', padding: 'var(--sp-md) 0' }}>
               <button onClick={() => setSubPage(p => Math.max(1, p - 1))} disabled={subPage === 1} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', background: subPage === 1 ? 'var(--bg-hover)' : 'var(--brand)', color: subPage === 1 ? 'var(--text-tertiary)' : '#fff', border: 'none', cursor: subPage === 1 ? 'default' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>← 이전</button>
               <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{subPage} / {subTotalPages}</span>

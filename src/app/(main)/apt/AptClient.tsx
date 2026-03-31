@@ -16,6 +16,8 @@ import { SkeletonList } from '@/components/Skeleton';
 import { isNew } from './tabs/apt-utils';
 import { useToast } from '@/components/Toast';
 import SectionShareButton from '@/components/SectionShareButton';
+import { isTossMode } from '@/lib/toss-mode';
+import TossTeaser from '@/components/TossTeaser';
 
 export default function AptClient({ apts, unsold = [], redevelopment = [], transactions = [], unsoldSummary, alertCounts = {}, regionStats = [], unsoldMonthly = [], tradeMonthly = [], ongoingApts = [], redevTotalCount = 0, tradeTotalCount = 0, tradeByRegion = {}, redevByRegion = {}, subTotalCount = 0, unsoldTotalCount = 0, ongoingTotalCount = 0, dataFreshness = { sub: '', trade: '', unsold: '', redev: '' }, redevRedevCount = 0, redevRebuildCount = 0 }: { apts: any[]; unsold?: any[]; redevelopment?: any[]; transactions?: any[]; unsoldSummary?: any; alertCounts?: Record<string, number>; lastRefreshed?: string | null; regionStats?: { name: string; total: number; open: number; upcoming: number; closed: number }[]; unsoldMonthly?: any[]; tradeMonthly?: any[]; ongoingApts?: any[]; redevTotalCount?: number; tradeTotalCount?: number; tradeByRegion?: Record<string, number>; redevByRegion?: Record<string, number>; subTotalCount?: number; unsoldTotalCount?: number; ongoingTotalCount?: number; dataFreshness?: { sub: string; trade: string; unsold: string; redev: string }; redevRedevCount?: number; redevRebuildCount?: number }) {
   const searchParams = useSearchParams();
@@ -386,6 +388,15 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           </div>
         );
       })()}
+
+      {/* 토스 모드: 부동산 전체보기 CTA */}
+      {typeof window !== 'undefined' && isTossMode() && (
+        <TossTeaser
+          path="/apt"
+          label="부동산 전체 정보 보기"
+          subtitle="청약 2,694건 · 미분양 213건 · 재개발 206건"
+        />
+      )}
 
       {/* 토스트 알림 */}
       {toast && (

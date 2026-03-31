@@ -11,6 +11,7 @@ import { VercelAnalytics } from '@/components/common/Analytics';
 import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
 import TossModeInit from '@/components/TossModeInit';
+import TossBottomBanner from '@/components/TossBottomBanner';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
 
@@ -175,6 +176,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;});` }} />
         <ThemeProvider>
         <TossModeInit />
+        <TossBottomBanner />
         <OfflineBanner />
         <KakaoInit />
         {children}

@@ -112,3 +112,21 @@ export function tossGoBack(): void {
     window.history.back();
   }
 }
+
+// ── 외부 브라우저로 탈출 (유입 퍼널 핵심) ──
+// 토스 WebView → 외부 브라우저로 카더라 본앱 열기
+export function openInBrowser(path: string = '/'): void {
+  const url = `https://kadeora.app${path}`;
+  try {
+    const w = window as any;
+    // 토스 SDK: 외부 브라우저 열기
+    if (w.TossApp?.openExternal) {
+      w.TossApp.openExternal(url);
+      return;
+    }
+    // 폴백: 새 탭 열기 (WebView에서는 외부 브라우저로 열림)
+    window.open(url, '_blank');
+  } catch {
+    window.open(url, '_blank');
+  }
+}

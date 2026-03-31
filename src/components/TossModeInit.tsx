@@ -50,6 +50,14 @@ export default function TossModeInit() {
       /* 토스 모드에서 상단 여백 제거 */
       .toss-mode main {
         padding-top: 0 !important;
+        padding-bottom: 72px !important; /* 하단 CTA 배너 공간 */
+      }
+      /* 토스 모드 전용: 설치/가입/프로모 숨김 */
+      .toss-mode .guest-cta,
+      .toss-mode .install-banner,
+      .toss-mode .promo-sheet,
+      .toss-mode .auto-push-prompt {
+        display: none !important;
       }
     `;
     document.head.appendChild(style);
