@@ -163,6 +163,7 @@ export default function DashboardSection() {
         <HealthBadge label="24h 생산" value={fmt(totalRecordsCreated || 0) + '건'} ok={(totalRecordsCreated || 0) > 0} />
         <HealthBadge label="사이트맵" value={`${seo?.sitemapPct || 0}%`} ok={(seo?.sitemapPct || 0) > 80} />
         <HealthBadge label="프로" value={`${premiumKpi?.subscribers ?? 0}명`} ok={(premiumKpi?.subscribers ?? 0) > 0} />
+        <HealthBadge label="공유7d" value={`${kpi.shares7d ?? 0}건`} ok={(kpi.shares7d ?? 0) > 0} />
         <HealthBadge label="IndexNow" value={`${premiumKpi?.indexNow?.pct ?? 0}%`} ok={(premiumKpi?.indexNow?.pct ?? 0) > 50} />
         {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
         {dataCoverage && <HealthBadge label="분양가" value={`${dataCoverage.aptPrice.pct}%`} ok={dataCoverage.aptPrice.pct > 90} />}
@@ -949,20 +950,20 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 58)</span>
-          <span style={{ fontSize: 10, color: C.textDim }}>2026-03-30</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 65)</span>
+          <span style={{ fontSize: 10, color: C.textDim }}>2026-04-01</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'DESIGN', label: 'B-2 도넛 리디자인', desc: '2×4 프로그레스바 + 설명글 + 재개발/재건축 분리', color: C.brand, commit: 'eb6a895' },
-            { tag: 'FIX', label: '지도 분양중/미분양', desc: '기본 4레이어 활성 + ongoing fetch 추가', color: C.green, commit: '7b33a13' },
-            { tag: 'UX', label: '이미지 높이 최적화', desc: '4곳 maxHeight 160~280px + lazy 로딩', color: C.cyan, commit: '78f5b6a' },
-            { tag: 'FEAT', label: 'UX 강화 6건', desc: '청약KPI행 · 실거래동향 · 미분양게이지 · 에러바운더리', color: C.purple, commit: 'b86a7d6' },
-            { tag: 'DATA', label: '실거래 2026년 기준', desc: '5,408건 + 모바일 반응형 + 단지백과 유도', color: C.yellow, commit: 'ddaccee' },
-            { tag: 'FEAT', label: '공유버튼 11곳', desc: '탭 · 섹션 · 상세 · 지도 전면 배치', color: C.purple, commit: '772bf1a' },
-            { tag: 'DATA', label: '수집일 전면 표시', desc: '도넛 헤더 + 5개 탭 푸터 수집일', color: C.yellow, commit: '73448ab' },
-            { tag: 'FEAT', label: '분양 상세 6가지', desc: '시세비교 · 전세가율 · 전용률 · 시공사비교', color: C.purple, commit: '0e8a4fc' },
-            { tag: 'DESIGN', label: '블로그 에디토리얼', desc: 'TOC 가로칩 + 히어로 리포트 + 타임라인 목록', color: C.brand, commit: '619ed8d' },
+            { tag: 'VIRAL', label: '공유 시스템 v2', desc: '밴드 추가 · UTM · 공유횟수 · 7개 페이지 CTA', color: C.brand, commit: '1c75bf6' },
+            { tag: 'FEAT', label: '지수 KPI 6열', desc: 'KOSPI/KOSDAQ/S&P500/NASDAQ/환율/금', color: C.cyan, commit: '4d97492' },
+            { tag: 'FEAT', label: '프로 ₩24,900', desc: 'DB+plan-limits+UpgradeModal+상점 (비공개)', color: C.purple, commit: 'ce6d9ee' },
+            { tag: 'FEAT', label: '리포트 강화', desc: '지수/환율 섹션 + 등락률 + 공유 CTA', color: C.yellow, commit: 'f10f424' },
+            { tag: 'FIX', label: '가짜 접속자→실제', desc: 'RPC get_active_visitors (page_views)', color: C.green, commit: '85639c4' },
+            { tag: 'FIX', label: 'CSS 버그 2건', desc: 'kd-btn-ghost/danger 미정의 (12곳)', color: C.red, commit: 'fb168a0' },
+            { tag: 'FIX', label: '크론 에러 3건', desc: 'sync타임아웃·UUID·시세3대버그', color: C.red, commit: '3cb3cc2' },
+            { tag: 'UX', label: 'GuestNudge v2', desc: '6→1 CTA 통합 · 단계적 넛지', color: C.cyan, commit: '7b0e869' },
+            { tag: 'FEAT', label: '인기검색어 10개', desc: 'RightPanel 5→10 + FALLBACK 10개', color: C.purple, commit: 'f9ec695' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>

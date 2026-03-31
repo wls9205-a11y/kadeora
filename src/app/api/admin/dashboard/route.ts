@@ -34,7 +34,7 @@ export async function GET(req: Request) {
       const [
         usersR, postsR, blogR, stockR, aptR, sitesR, interestsR,
         unsoldR, redevR, tradeR, paymentsR, reportsR, dailyR,
-        newUsersWeekR, activeUsersR, discussR, cronR,
+        newUsersWeekR, activeUsersR, discussR, cronR, shareWeekR,
       ] = await Promise.all([
         sb.from('profiles').select('id', { count: 'exact', head: true }),
         sb.from('posts').select('id', { count: 'exact', head: true }).eq('is_deleted', false),
@@ -55,6 +55,8 @@ export async function GET(req: Request) {
         sb.from('cron_logs').select('cron_name, status, duration_ms, created_at')
           .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
           .order('created_at', { ascending: false }).limit(200),
+        sb.from('share_logs').select('id', { count: 'exact', head: true })
+          .gte('created_at', weekAgo),
       ]);
 
       // 주식 상세 KPI (추가)
@@ -374,6 +376,7 @@ export async function GET(req: Request) {
           redev: redevR.count ?? 0,
           trades: tradeR.count ?? 0,
           discussions: discussR.count ?? 0,
+          shares7d: shareWeekR.count ?? 0,
           pendingReports: reportsR.count ?? 0,
           newUsersWeek: newUsersWeekR.count ?? 0,
           activeUsersWeek: activeUsersR.count ?? 0,
