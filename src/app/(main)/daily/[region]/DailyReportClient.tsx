@@ -85,8 +85,8 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${G.goldDark}, ${G.gold}, ${G.goldLight}, ${G.gold}, ${G.goldDark})` }} />
 
           {/* 골드 로고 */}
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: `linear-gradient(135deg, ${G.gold}, ${G.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="7" cy="12" r="4" fill="#E8C778" opacity="0.7"/><circle cx="12" cy="8" r="4" fill="#F5DDA0" opacity="0.8"/><circle cx="17" cy="12" r="4" fill="#E8C778" opacity="0.7"/></svg>
+          <div style={{ margin: '0 auto 14px', width: 40, height: 40 }}>
+            <svg width="40" height="40" viewBox="0 0 72 72"><defs><linearGradient id="rg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E"/><stop offset="100%" stopColor="#2563EB"/></linearGradient></defs><rect x="2" y="2" width="68" height="68" rx="16" fill="url(#rg3)" stroke="#D4A853" strokeWidth="4"/><circle cx="18" cy="36" r="6" fill="white"/><circle cx="36" cy="36" r="6" fill="white"/><circle cx="54" cy="36" r="6" fill="white"/></svg>
           </div>
 
           <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
@@ -470,17 +470,17 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           {/* 주식 시장 요약 */}
           <div style={{ marginBottom: 'var(--sp-md)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: G.gold, marginBottom: 4 }}>✦ 주식 시장</div>
-            국내 시총 TOP 10 종목 중 <b style={{ color: 'var(--text-primary)' }}>{weekUp}개 종목이 상승</b>, {weekDn}개 종목이 하락했습니다.
-            {d.sectors[0] && <> 섹터별로는 <b style={{ color: pctColor(d.sectors[0].avg_pct) }}>{d.sectors[0].sector}</b> 섹터가 {pctStr(d.sectors[0].avg_pct)}로 가장 강한 흐름을 보였습니다.</>}
-            {' '}전체 {d.sectors.length}개 섹터 가운데 {sectorUp}개가 상승, {sectorDn}개가 하락하며 {sectorUp > sectorDn ? '시장 전반에 매수 심리가 우세한' : sectorUp === sectorDn ? '관망세가 짙은' : '매도 압력이 강한'} 장세를 보이고 있습니다.
-            {d.stockTop10[0] && <> 시총 1위 <b style={{ color: 'var(--text-primary)' }}>{d.stockTop10[0].name}</b>은 현재 {Number(d.stockTop10[0].price).toLocaleString()}원{d.stockTop10[0].week_pct != null && d.stockTop10[0].week_pct !== 0 ? `, 주간 ${pctStr(d.stockTop10[0].week_pct)}의 변동을 기록` : ''}하고 있습니다.</>}
-            {d.globalStocks.length > 0 && <> 해외 시장에서는 {d.globalStocks.slice(0, 3).map(s => `${s.symbol} $${Number(s.price).toFixed(0)}`).join(', ')} 수준에서 거래되고 있습니다.</>}
+            국내 <Link href="/stock" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>시총 TOP 10</Link> 종목 중 <b style={{ color: 'var(--accent-red)' }}>{weekUp}개 종목이 상승</b>, <b style={{ color: 'var(--accent-blue)' }}>{weekDn}개 종목이 하락</b>했습니다.
+            {d.sectors[0] && <> 섹터별로는 <Link href={`/stock/sector/${encodeURIComponent(d.sectors[0].sector)}`} style={{ color: pctColor(d.sectors[0].avg_pct), textDecoration: 'none', fontWeight: 700 }}>{d.sectors[0].sector}</Link> 섹터가 <span style={{ color: pctColor(d.sectors[0].avg_pct), fontWeight: 700 }}>{pctStr(d.sectors[0].avg_pct)}</span>로 가장 강한 흐름을 보였습니다.</>}
+            {' '}전체 {d.sectors.length}개 섹터 가운데 <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>{sectorUp}개 상승</span>, <span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>{sectorDn}개 하락</span>하며 {sectorUp > sectorDn ? '시장 전반에 매수 심리가 우세한' : sectorUp === sectorDn ? '관망세가 짙은' : '매도 압력이 강한'} 장세를 보이고 있습니다.
+            {d.stockTop10[0] && <> 시총 1위 <Link href={`/stock/${d.stockTop10[0].symbol}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 700 }}>{d.stockTop10[0].name}</Link>은 현재 <b style={{ color: 'var(--text-primary)' }}>{Number(d.stockTop10[0].price).toLocaleString()}원</b>{d.stockTop10[0].week_pct != null && d.stockTop10[0].week_pct !== 0 ? <>, 주간 <span style={{ color: pctColor(d.stockTop10[0].week_pct), fontWeight: 700 }}>{pctStr(d.stockTop10[0].week_pct)}</span>의 변동을 기록</> : ''}하고 있습니다.</>}
+            {d.globalStocks.length > 0 && <> 해외 시장에서는 {d.globalStocks.slice(0, 3).map((s, i) => <span key={s.symbol}>{i > 0 && ', '}<Link href={`/stock/${s.symbol}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>{s.symbol}</Link> ${Number(s.price).toFixed(0)}</span>)} 수준에서 거래되고 있습니다.</>}
           </div>
 
           {/* 청약 시장 요약 */}
           <div style={{ marginBottom: 'var(--sp-md)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: G.gold, marginBottom: 4 }}>✦ 청약 시장</div>
-            이번 주 전국 <b style={{ color: 'var(--text-primary)' }}>{d.subCountThisWeek}건</b>의 아파트 청약이 예정되어 있으며, 총 <b style={{ color: 'var(--text-primary)' }}>{d.subUnitsThisWeek.toLocaleString()}세대</b> 규모입니다.
+            이번 주 전국 <Link href="/apt" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>{d.subCountThisWeek}건</Link>의 아파트 청약이 예정되어 있으며, 총 <b style={{ color: 'var(--text-primary)' }}>{d.subUnitsThisWeek.toLocaleString()}세대</b> 규모입니다.
             {d.subscriptions.filter(s => s.status === '접수중').length > 0 && <> 현재 접수가 진행 중인 단지는 <b style={{ color: 'var(--text-primary)' }}>{d.subscriptions.filter(s => s.status === '접수중').length}건</b>으로, {d.subscriptions.filter(s => s.status === '접수중').slice(0, 2).map(s => s.house_nm).join(', ')} 등이 있습니다.</>}
             {d.subscriptions.filter(s => s.rcept_bgnde === d.date).length > 0 && <> 오늘 접수가 시작되는 단지로는 <b style={{ color: 'var(--accent-red)' }}>{d.subscriptions.filter(s => s.rcept_bgnde === d.date).map(s => s.house_nm).join(', ')}</b>이(가) 있으니 관심 있는 분은 일정을 확인해 보시기 바랍니다.</>}
             {d.subscriptions.filter(s => s.status === '접수중').length === 0 && d.subscriptions.filter(s => s.rcept_bgnde === d.date).length === 0 && <> 이번 주 남은 접수 일정을 확인하고 관심 단지를 미리 체크해 두시는 것을 권장합니다.</>}
@@ -489,7 +489,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           {/* 미분양 현황 */}
           <div style={{ marginBottom: 'var(--sp-md)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: G.gold, marginBottom: 4 }}>✦ 미분양 현황</div>
-            전국 미분양 아파트는 총 <b style={{ color: 'var(--text-primary)' }}>{d.unsoldUnits.toLocaleString()}세대</b>입니다. {d.region} 지역의 미분양은 <b style={{ color: 'var(--text-primary)' }}>{localUnsoldUnits.toLocaleString()}세대</b>로 전국 대비 {localUnsoldPct}%를 차지하고 있습니다.
+            전국 <Link href="/apt?tab=unsold" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>미분양 아파트</Link>는 총 <b style={{ color: localUnsoldPct > 8 ? 'var(--accent-red)' : 'var(--text-primary)' }}>{d.unsoldUnits.toLocaleString()}세대</b>입니다. <Link href={`/apt/region/${encodeURIComponent(d.region)}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>{d.region}</Link> 지역의 미분양은 <b style={{ color: 'var(--text-primary)' }}>{localUnsoldUnits.toLocaleString()}세대</b>로 전국 대비 <span style={{ color: localUnsoldPct < 3 ? 'var(--accent-green)' : localUnsoldPct > 8 ? 'var(--accent-red)' : 'var(--text-primary)', fontWeight: 700 }}>{localUnsoldPct}%</span>를 차지하고 있습니다.
             {localUnsoldPct < 3 ? ` ${d.region}은 미분양 비중이 매우 낮아 수요가 안정적인 지역으로 평가됩니다.` : localUnsoldPct < 8 ? ` ${d.region}의 미분양 비중은 보통 수준이며, 신규 분양 시 수요 분석이 필요합니다.` : ` ${d.region}의 미분양 비중이 다소 높아 분양 시장 주의가 필요합니다.`}
             {d.unsoldLocal.length > 0 && <> 지역 내 주요 미분양 집중 지역은 {d.unsoldLocal.slice(0, 3).map(u => `${u.sigungu}(${u.units}세대)`).join(', ')} 순입니다.</>}
           </div>
@@ -497,7 +497,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           {/* 재개발 동향 */}
           <div>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: G.gold, marginBottom: 4 }}>✦ 재개발·재건축</div>
-            {d.region} 지역에서는 현재 총 <b style={{ color: 'var(--text-primary)' }}>{d.redevTotal}건</b>의 정비사업이 진행 중입니다.
+            <Link href={`/apt/region/${encodeURIComponent(d.region)}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>{d.region}</Link> 지역에서는 현재 총 <Link href="/apt?tab=redev" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>{d.redevTotal}건</Link>의 정비사업이 진행 중입니다.
             {d.redevStages[0] && <> 단계별로는 {d.redevStages[0].stage}이 {d.redevStages[0].cnt}건({d.redevTotal > 0 ? Math.round((d.redevStages[0].cnt || 0) / d.redevTotal * 100) : 0}%)으로 가장 많으며</>}
             {d.redevStages[1] && <>, {d.redevStages[1].stage} {d.redevStages[1].cnt}건이 뒤를 잇고 있습니다</>}.
             {d.redevRebuild > 0 && <> 이 중 재건축 사업은 {d.redevRebuild}건이며, 나머지는 재개발로 분류됩니다.</>}
@@ -519,18 +519,20 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           </div>
         </div>
 
-        {/* 프리미엄 업셀 — 골드 */}
-        <div style={{ marginTop: 'var(--sp-sm)', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: `linear-gradient(135deg, ${G.goldBg} 0%, rgba(212,168,83,0.03) 100%)`, border: `1px solid ${G.goldBorder}`, textAlign: 'center', fontSize: 'var(--fs-xs)', color: G.gold }}>
-          ✦ 시세차익 계산 · 청약 등급 분석 · 주변 시세 비교 · 시나리오별 전략 → <b style={{ color: G.goldLight }}>카더라 프리미엄</b>
+      </div>
+
+      {/* 푸터 — 리포트 소개 */}
+      <div style={{ marginTop: 'var(--sp-md)', padding: '14px 16px', borderRadius: 'var(--radius-card)', background: G.goldBg, border: `1px solid ${G.goldBorder}` }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          <span style={{ color: G.gold, fontWeight: 700 }}>발행</span> 매일 오전 7시 (평일) · 주말판 토요일 오전 발행<br/>
+          <span style={{ color: G.gold, fontWeight: 700 }}>내용</span> 국내외 <Link href="/stock" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>주식 시황</Link> · <Link href="/apt" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>청약 캘린더</Link> · <Link href="/apt?tab=unsold" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>미분양 현황</Link> · <Link href="/apt?tab=redev" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>재개발 동향</Link> · 시군구별 시세<br/>
+          <span style={{ color: G.gold, fontWeight: 700 }}>대상</span> 카더라 회원 (거주지 등록 필수)
         </div>
       </div>
 
-      {/* 푸터 — 골드 시그니처 */}
-      <div style={{ textAlign: 'center', padding: '14px 0', marginTop: 'var(--sp-lg)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5, position: 'relative' }}>
-        <div style={{ width: 60, height: 1, background: `linear-gradient(90deg, transparent, ${G.gold}, transparent)`, margin: '0 auto 10px' }} />
-        <span style={{ color: G.goldDark, fontWeight: 700, letterSpacing: 1 }}>KADEORA DAILY REPORT</span> #{d.issueNo}<br />
-        매일 오전 7시 발행 · 투자 참고 자료이며 투자 권유가 아닙니다<br />
-        © 2026 kadeora.app
+      <div style={{ textAlign: 'center', padding: '10px 0', marginTop: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
+        <span style={{ color: G.goldDark, fontWeight: 700, letterSpacing: 1 }}>KADEORA DAILY REPORT</span> #{d.issueNo}<br/>
+        본 리포트는 투자 참고 자료이며 투자 권유가 아닙니다 · © 2026 kadeora.app
       </div>
     </div>
   );

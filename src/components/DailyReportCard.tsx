@@ -27,8 +27,8 @@ export default function DailyReportCard() {
         position: 'relative', overflow: 'hidden',
       }}>
         {/* 골드 로고 */}
-        <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #D4A853, #B8942E)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="7" cy="12" r="4" fill="#E8C778" opacity="0.7"/><circle cx="12" cy="8" r="4" fill="#F5DDA0" opacity="0.8"/><circle cx="17" cy="12" r="4" fill="#E8C778" opacity="0.7"/></svg>
+        <div style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <svg width="32" height="32" viewBox="0 0 72 72"><defs><linearGradient id="rcl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F1B3E"/><stop offset="100%" stopColor="#2563EB"/></linearGradient></defs><rect x="2" y="2" width="68" height="68" rx="16" fill="url(#rcl)" stroke="#D4A853" strokeWidth="4"/><circle cx="18" cy="36" r="6" fill="white"/><circle cx="36" cy="36" r="6" fill="white"/><circle cx="54" cy="36" r="6" fill="white"/></svg>
         </div>
 
         {/* 텍스트 */}
