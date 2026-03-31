@@ -20,8 +20,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // pdf-parse v1 (CJS → dynamic import)
-  const pdfParse: (buf: Buffer, opts?: Record<string, unknown>) => Promise<{ text: string; numpages: number }> = (await import('pdf-parse')) as any;
+  // pdf-parse v1 — bypass index.js (avoids test file ENOENT bug)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse = require('pdf-parse/lib/pdf-parse') as (buf: Buffer, opts?: any) => Promise<{ text: string; numpages: number }>;
   const sb = getSupabaseAdmin();
 
   // PDF가 있고, 아직 건물스펙이 없는 건
