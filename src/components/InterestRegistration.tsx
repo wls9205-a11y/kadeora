@@ -117,12 +117,12 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
     fontSize: 'var(--fs-sm)', fontFamily: 'inherit',
   };
   const labelStyle: React.CSSProperties = {
-    fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 4,
+    fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-xs)',
   };
 
   const GuestForm = () => (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 'var(--sp-sm)' }}>
         <div>
           <label style={labelStyle}>이름 <span style={{ color: 'var(--error)' }}>*</span></label>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" style={inputStyle} />
@@ -132,7 +132,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           <input value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="01012345678" inputMode="tel" maxLength={11} style={inputStyle} />
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 'var(--sp-sm)' }}>
         <div>
           <label style={labelStyle}>생년월일 <span style={{ color: 'var(--error)' }}>*</span></label>
           <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={inputStyle} />
@@ -146,7 +146,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
         </div>
       </div>
       {city && (SIGUNGU_MAP[city] || []).length > 0 && (
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 'var(--sp-sm)' }}>
           <label style={labelStyle}>시/군/구 <span style={{ color: 'var(--error)' }}>*</span></label>
           <select value={district} onChange={e => setDistrict(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
             <option value="">시/군/구 선택</option>
@@ -189,9 +189,9 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   );
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '2px solid var(--brand)', borderRadius: 14, padding: '20px 16px', marginBottom: 12 }}>
+    <div style={{ background: 'var(--bg-surface)', border: '2px solid var(--brand)', borderRadius: 14, padding: '20px 16px', marginBottom: 'var(--sp-md)' }}>
       {/* 헤더 */}
-      <div style={{ textAlign: 'center', marginBottom: 16 }}>
+      <div style={{ textAlign: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>관심단지 등록</div>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>이 단지의 최신 정보가 나오면 알려드려요</p>
       </div>

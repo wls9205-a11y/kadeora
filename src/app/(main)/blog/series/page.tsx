@@ -37,7 +37,7 @@ export default async function BlogSeriesPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈' }] }) }} />
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📚 시리즈</h1>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>주제별로 묶어서 읽는 연재 콘텐츠</p>
@@ -45,7 +45,7 @@ export default async function BlogSeriesPage() {
 
       {seriesList.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-tertiary)' }}>
-          <BookOpen size={40} style={{ marginBottom: 12, opacity: 0.5 }} />
+          <BookOpen size={40} style={{ marginBottom: 'var(--sp-md)', opacity: 0.5 }} />
           <p style={{ fontSize: 'var(--fs-sm)' }}>아직 시리즈가 없습니다</p>
         </div>
       ) : (
@@ -60,7 +60,7 @@ export default async function BlogSeriesPage() {
             }}>
               {/* 매거진 커버 */}
               <div style={{ height: 80, background: `linear-gradient(135deg, ${catColor}18 0%, ${catColor}08 100%)`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 14, position: 'relative' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: `${catColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: `${catColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', flexShrink: 0 }}>
                   {s.category === 'stock' ? '📈' : s.category === 'apt' ? '🏢' : s.category === 'finance' ? '💰' : '📝'}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>

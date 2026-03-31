@@ -22,14 +22,14 @@ interface Props {
 export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched, onToggleWatchlist }: Props) {
   return (
     <BottomSheet open={true} onClose={onClose} title={stock.name}>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-lg)' }}>
         <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{stock.symbol}</span>
         <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{stock.market}</span>
         {stock.sector && <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 6 }}>{stock.sector}</span>}
       </div>
 
       {/* 가격 + 등락 */}
-      <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 12 }}>
+      <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-md)' }}>
         <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: 'var(--text-primary)' }}>
           {stock.currency === 'USD' ? `$${stock.price?.toFixed(2)}` : `₩${fmt(stock.price)}`}
         </div>
@@ -39,7 +39,7 @@ export default function StockDetailSheet({ stock, onClose, isDomestic, isWatched
       </div>
 
       {/* 상세 지표 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 'var(--sp-lg)' }}>
         <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>시가총액</div>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>{fmtCap(stock.market_cap, stock.currency)}</div>

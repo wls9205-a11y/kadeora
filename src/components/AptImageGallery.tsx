@@ -68,7 +68,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
 
   return (
     <>
-      <div style={{ marginBottom: 10, borderRadius: 12, overflow: 'hidden', background: '#0c1629' }}>
+      <div style={{ marginBottom: 10, borderRadius: 'var(--radius-card)', overflow: 'hidden', background: '#0c1629' }}>
         {/* 모바일: 스와이프 갤러리 */}
         <div className="md:hidden">
           <div
@@ -182,19 +182,19 @@ export default function AptImageGallery({ images, name, region, badges }: {
       {lightbox !== null && (
         <div
           style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
+            position: 'fixed', inset: 0, zIndex: 100,
             background: '#000',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           }}
           onClick={() => setLightbox(null)}
         >
           <button
-            onClick={() => setLightbox(null)}
+aria-label="닫기"             onClick={() => setLightbox(null)}
             style={{
               position: 'absolute', top: 16, right: 16, zIndex: 10,
               width: 40, height: 40, borderRadius: '50%',
               background: 'rgba(255,255,255,0.15)', border: 'none',
-              color: '#fff', fontSize: 20, cursor: 'pointer',
+              color: '#fff', fontSize: 'var(--fs-lg)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >✕</button>

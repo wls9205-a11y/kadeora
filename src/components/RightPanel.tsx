@@ -51,7 +51,7 @@ export default function RightPanel() {
     <div style={{ width: 200, flexShrink: 0, position: 'sticky', top: 72, height: 'fit-content', display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
       {/* 프로필 카드 */}
       {userId && authProfile && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <div style={{
               width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
@@ -83,8 +83,8 @@ export default function RightPanel() {
         </div>
       )}
       {!userId && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px', textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>카더라와 함께하세요!</div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)', textAlign: 'center' }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>카더라와 함께하세요!</div>
           <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
             display: 'block', padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none',
@@ -96,7 +96,7 @@ export default function RightPanel() {
       <MiniLounge />
 
       {/* 인기 검색어 (5개) */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)' }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span>🔥 인기 검색어</span>
           <Link href="/search" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none' }}>더보기</Link>
@@ -113,8 +113,8 @@ export default function RightPanel() {
 
       {/* 미니 시황 */}
       {indices.length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginTop: 8 }}>
-          <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8, display: 'block', textDecoration: 'none' }}>📊 시장 현황</Link>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)', marginTop: 8 }}>
+          <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)', display: 'block', textDecoration: 'none' }}>📊 시장 현황</Link>
           <div style={{ display: 'flex', gap: 8 }}>
             {indices.map(idx => (
               <div key={idx.name} style={{ flex: 1, textAlign: 'center' }}>
@@ -131,8 +131,8 @@ export default function RightPanel() {
 
       {/* 추천 읽을거리 */}
       {recBlogs.length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
             <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>추천 읽을거리</span>
             <Link href="/blog" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>더보기 →</Link>
           </div>
@@ -157,7 +157,7 @@ export default function RightPanel() {
       )}
 
       {/* 등급 안내 (항상 펼침) */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
         <div style={{
           padding: '10px 14px', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)',
         }}>

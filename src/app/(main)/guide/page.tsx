@@ -68,14 +68,14 @@ export default function GuidePage() {
           { "@type": "Question", name: "회원 등급은 어떻게 올라가나요?", acceptedAnswer: { "@type": "Answer", text: "활동 포인트(글 작성, 댓글, 출석 등)로 자동 등급업됩니다. 새싹부터 카더라신까지 10단계 등급이 있으며 매일 자동 갱신됩니다." } },
         ],
       }) }} />
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>
       </div>
 
       {/* 빠른 시작 3단계 */}
-      <div style={{ marginBottom: 20, padding: 16, background: 'linear-gradient(135deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06))', border: '1px solid var(--border)', borderRadius: 12 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>🚀 빠른 시작 3단계</div>
+      <div style={{ marginBottom: 'var(--sp-xl)', padding: 16, background: 'linear-gradient(135deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06))', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🚀 빠른 시작 3단계</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>1</span>
@@ -105,12 +105,12 @@ export default function GuidePage() {
       </div>
 
       {/* 앱 설치 — 원버튼 */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 'var(--sp-lg)' }}>
         <GuideInstallButton />
       </div>
 
       {/* 주요 기능 소개 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
         <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>주요 기능</h2>
         {FEATURES.map((f, i) => (
           <div key={f.title} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < FEATURES.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'flex-start' }}>
@@ -124,7 +124,7 @@ export default function GuidePage() {
       </div>
 
       {/* 등급 안내 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
         <h2 style={{ margin: '0 0 4px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🏅 회원 등급 안내</h2>
         <p style={{ margin: '0 0 12px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>활동 포인트에 따라 등급이 올라갑니다</p>
         {[
@@ -148,7 +148,7 @@ export default function GuidePage() {
       </div>
 
       {/* 포인트 획득 방법 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
         <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>💰 포인트 획득 방법</h2>
         {[
           { action: '출석체크', pts: '+10P', note: '7일 연속 +30P, 30일 연속 +100P' },
@@ -167,7 +167,7 @@ export default function GuidePage() {
       </div>
 
       {/* 자주 묻는 질문 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
         <h2 style={{ margin: '0 0 12px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>❓ 자주 묻는 질문</h2>
         {[
           { q: '카더라는 무료인가요?', a: '네, 모든 기능을 무료로 이용할 수 있습니다. 프리미엄(월 4,900원)과 전광판 노출권 등 일부 유료 상품이 있지만, 핵심 기능은 전부 무료입니다.' },
@@ -179,16 +179,16 @@ export default function GuidePage() {
           { q: '오프라인에서도 사용할 수 있나요?', a: 'PWA 설치 후에는 이전에 본 페이지를 오프라인에서도 볼 수 있습니다. 새 데이터는 온라인 연결이 필요합니다.' },
         ].map((faq, i, arr) => (
           <div key={i} style={{ padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Q. {faq.q}</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>Q. {faq.q}</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>A. {faq.a}</div>
           </div>
         ))}
       </div>
 
       {/* 문의 */}
-      <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+      <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', padding: 20, textAlign: 'center' }}>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>💌 문의·건의</div>
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)', lineHeight: 1.6 }}>
           버그 신고, 기능 제안, 문의사항이 있으시면 언제든 연락해주세요.
         </div>
         <a href="mailto:kadeora.app@gmail.com" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>

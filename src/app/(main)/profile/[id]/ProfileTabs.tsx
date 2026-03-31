@@ -155,7 +155,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
   return (
     <>
       {/* 탭 바 */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', borderRadius: 12, padding: 4, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', padding: 4, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {tabs.map(tab => (
           <button key={tab} onClick={() => handleTabChange(tab)} aria-pressed={activeTab === tab} style={{
             flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
@@ -214,7 +214,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                   <div style={{ padding: '12px 0', borderBottom: i < myComments.length - 1 ? '1px solid var(--border)' : 'none', transition: 'opacity 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                    <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {comment.content}
                     </div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
@@ -231,7 +231,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
         {activeTab === 'stocks' && (
           !watchStocksLoaded ? <Spinner /> : watchStocks.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>⭐</div>
+              <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>⭐</div>
               관심종목이 없어요<br/>
               <Link href="/stock" style={{ color: 'var(--brand)', fontSize: 'var(--fs-sm)' }}>주식 페이지에서 ☆를 눌러 추가하세요</Link>
             </div>
@@ -267,7 +267,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
         {activeTab === 'apts' && (
           !watchAptsLoaded ? <Spinner /> : watchApts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🏠</div>
+              <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>🏠</div>
               관심단지가 없어요<br/>
               <Link href="/apt" style={{ color: 'var(--brand)', fontSize: 'var(--fs-sm)' }}>부동산 페이지에서 북마크를 눌러 추가하세요</Link>
             </div>

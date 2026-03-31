@@ -20,7 +20,7 @@ export default function OfflineBanner() {
 
   return (
     <div role="alert" aria-live="assertive" style={{
-      position:'fixed', top:0, left:0, right:0, zIndex:9999,
+      position:'fixed', top:0, left:0, right:0, zIndex: 100,
       backgroundColor:'var(--warning)', color:'var(--text-primary)',
       textAlign:'center', padding:'8px 16px', fontSize:14, fontWeight:600
     }}>

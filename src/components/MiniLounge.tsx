@@ -145,7 +145,7 @@ export default function MiniLounge() {
             textAlign: 'center', padding: '40px 10px',
             color: 'var(--text-tertiary)', fontSize: 11, lineHeight: 1.8,
           }}>
-            <div style={{ fontSize: 24, marginBottom: 6 }}>💬</div>
+            <div style={{ fontSize: 'var(--fs-xl)', marginBottom: 6 }}>💬</div>
             아직 대화가 없어요<br />첫 메시지를 남겨보세요
           </div>
         )}

@@ -67,13 +67,13 @@ export default function ShopClient() {
   return (
     <PullToRefresh>
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 'var(--sp-2xl)' }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>커뮤니티 상점</h1>
         <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>게시글 홍보 및 프리미엄 기능을 이용하세요</p>
       </div>
 
       {/* 카테고리 탭 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-xl)', flexWrap: 'wrap' }}>
         {categories.map(cat => (
           <button key={cat} onClick={() => setSelectedCategory(cat)} style={{
             padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
@@ -96,7 +96,7 @@ export default function ShopClient() {
             borderRadius: 14, padding: '20px 20px 16px',
             transition: 'all 0.15s', position: 'relative',
           }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>{p.icon ?? '🎁'}</div>
+            <div style={{ fontSize: 36, marginBottom: 'var(--sp-md)' }}>{p.icon ?? '🎁'}</div>
             <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</h3>
             <p style={{ margin: '0 0 16px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.description}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

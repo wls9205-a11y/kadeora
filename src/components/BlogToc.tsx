@@ -71,7 +71,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
       aria-label="목차"
       style={{
         position: 'sticky', top: 56, zIndex: 10,
-        background: 'var(--bg-base)', padding: '8px 0', marginBottom: 16,
+        background: 'var(--bg-base)', padding: '8px 0', marginBottom: 'var(--sp-lg)',
         borderBottom: '1px solid var(--border)',
       }}
     >

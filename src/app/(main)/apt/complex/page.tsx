@@ -142,7 +142,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'rgba(232,237,245,0.9)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'rgba(232,237,245,0.9)' }}>단지백과</span>)}
         </nav>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', position: 'relative' }}>
-          <h1 style={{ fontSize: 20, fontWeight: 900, margin: 0, color: '#E8EDF5' }}>
+          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, margin: 0, color: '#E8EDF5' }}>
             🏢 {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -184,7 +184,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
         <div style={{
           display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 12, padding: '10px 12px', marginBottom: 6, overflow: 'hidden',
+          borderRadius: 'var(--radius-card)', padding: '10px 12px', marginBottom: 6, overflow: 'hidden',
         }}>
           {/* 도넛 SVG — 연차별 분포 */}
           <svg width={100} height={100} viewBox="0 0 100 100" style={{ flexShrink: 0 }}>

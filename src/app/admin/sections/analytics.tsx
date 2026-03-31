@@ -260,8 +260,8 @@ export function InsightsPanel() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>🎟️ 초대 현황</div>
           <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-            <div><div style={{ fontSize: 18, fontWeight: 800, color: C.brand }}>{inviteStats?.total || 0}</div><div style={{ fontSize: 10, color: C.textDim }}>총 초대</div></div>
-            <div><div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{inviteStats?.used || 0}</div><div style={{ fontSize: 10, color: C.textDim }}>사용됨</div></div>
+            <div><div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: C.brand }}>{inviteStats?.total || 0}</div><div style={{ fontSize: 10, color: C.textDim }}>총 초대</div></div>
+            <div><div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: C.green }}>{inviteStats?.used || 0}</div><div style={{ fontSize: 10, color: C.textDim }}>사용됨</div></div>
           </div>
           {inviteStats?.topInviters?.length > 0 && (
             <>

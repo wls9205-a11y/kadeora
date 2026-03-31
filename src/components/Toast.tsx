@@ -97,7 +97,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ toast, success, error, info }}>
       {children}
       <div role="log" aria-live="polite" aria-atomic="false" style={{
-        position: 'fixed', bottom: 80, right: 20, zIndex: 9999,
+        position: 'fixed', bottom: 80, right: 20, zIndex: 100,
         display: 'flex', flexDirection: 'column', gap: 8,
         alignItems: 'flex-end', pointerEvents: 'none',
       }}>

@@ -389,7 +389,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
 
       {/* write box */}
       {userId ? (
-        <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 'var(--sp-lg)', alignItems: 'flex-start' }}>
           {renderAvatar('나', 36)}
           <div style={{ flex: 1 }}>
             <textarea

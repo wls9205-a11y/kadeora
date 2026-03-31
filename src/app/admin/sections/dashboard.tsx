@@ -82,14 +82,14 @@ export default function DashboardSection() {
       {/* ── Header + Auto-refresh ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0 }}>Mission Control</h1>
+          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: C.text, margin: 0 }}>Mission Control</h1>
           <p style={{ fontSize: 11, color: C.textDim, margin: '2px 0 0' }}>
             {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
             {lastUpdate && <span> · {lastUpdate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} 업데이트</span>}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <button onClick={() => runGodMode('full')} disabled={godRunning} style={{
+          <button aria-label="닫기" onClick={() => runGodMode('full')} disabled={godRunning} style={{
             padding: '6px 14px', borderRadius: 8, border: 'none',
             background: godRunning ? C.yellow : 'linear-gradient(135deg, #2563EB, #7C3AED)',
             color: '#fff', cursor: godRunning ? 'wait' : 'pointer', fontSize: 11, fontWeight: 800,
@@ -147,7 +147,7 @@ export default function DashboardSection() {
           { mode: 'content', label: '📝 콘텐츠', color: C.yellow },
           { mode: 'system', label: '🔧 시스템', color: C.textSec },
         ].map(g => (
-          <button key={g.mode} onClick={() => runGodMode(g.mode)} disabled={godRunning}
+          <button aria-label="닫기" key={g.mode} onClick={() => runGodMode(g.mode)} disabled={godRunning}
             style={{ padding: '4px 10px', borderRadius: 6, border: `1px solid ${g.color}30`, background: `${g.color}10`, color: g.color, fontSize: 10, fontWeight: 700, cursor: godRunning ? 'wait' : 'pointer' }}>
             {g.label}
           </button>
@@ -191,7 +191,7 @@ export default function DashboardSection() {
             <div key={item.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
               <div style={{ fontSize: 10, color: C.textDim, marginBottom: 3 }}>{item.icon} {item.label}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 20, fontWeight: 800, color: item.color }}>{fmt(item.value)}</span>
+                <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: item.color }}>{fmt(item.value)}</span>
                 {d && <span style={{ fontSize: 10, fontWeight: 700, color: d.color }}>{d.arrow}{Math.abs(d.pct)}%</span>}
               </div>
             </div>
@@ -464,11 +464,11 @@ export default function DashboardSection() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
             <div style={{ background: C.bg, borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
-              <div style={{ fontSize: 20, fontWeight: 900, color: (premiumKpi?.subscribers ?? 0) > 0 ? C.yellow : C.textDim }}>{premiumKpi?.subscribers ?? 0}</div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: (premiumKpi?.subscribers ?? 0) > 0 ? C.yellow : C.textDim }}>{premiumKpi?.subscribers ?? 0}</div>
               <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>구독자</div>
             </div>
             <div style={{ background: C.bg, borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
-              <div style={{ fontSize: 20, fontWeight: 900, color: (premiumKpi?.totalRevenue ?? 0) > 0 ? C.green : C.textDim }}>₩{((premiumKpi?.totalRevenue ?? 0) / 1000).toFixed(0)}K</div>
+              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: (premiumKpi?.totalRevenue ?? 0) > 0 ? C.green : C.textDim }}>₩{((premiumKpi?.totalRevenue ?? 0) / 1000).toFixed(0)}K</div>
               <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>총 매출</div>
             </div>
           </div>

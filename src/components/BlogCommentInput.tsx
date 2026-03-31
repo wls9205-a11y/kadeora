@@ -33,7 +33,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
   };
 
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div style={{ marginBottom: 'var(--sp-lg)' }}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
         <textarea
           value={content}

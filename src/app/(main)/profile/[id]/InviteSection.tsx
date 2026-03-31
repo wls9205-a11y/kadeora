@@ -38,13 +38,13 @@ export default function InviteSection({ inviteCode, inviteCount, onCopy }: Props
   };
 
   return (
-    <div style={{ marginTop: 16, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
-      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>👥 친구 초대</div>
-      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
+    <div style={{ marginTop: 16, background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16 }}>
+      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>👥 친구 초대</div>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>
         친구가 이 코드로 가입하면 둘 다 +50 포인트!
         {inviteCount > 0 && <span style={{ marginLeft: 8, color: 'var(--brand)', fontWeight: 700 }}>초대 {inviteCount}명 완료!</span>}
       </div>
-      <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12, fontSize: 22, fontWeight: 800, letterSpacing: 4, color: 'var(--brand)', textAlign: 'center', marginBottom: 12 }}>
+      <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: 12, fontSize: 22, fontWeight: 800, letterSpacing: 4, color: 'var(--brand)', textAlign: 'center', marginBottom: 'var(--sp-md)' }}>
         {inviteCode}
       </div>
       <div style={{ display: 'flex', gap: 8 }}>

@@ -121,7 +121,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
         ].map(opt => (
           <button key={opt.key} onClick={() => handleVote(opt.key)} disabled={voting}
             style={{
-              width: '100%', padding: '14px 16px', marginBottom: 8, borderRadius: 12,
+              width: '100%', padding: '14px 16px', marginBottom: 'var(--sp-sm)', borderRadius: 12,
               border: myVote === opt.key ? '2px solid var(--brand)' : '1px solid var(--border)',
               background: 'var(--bg-base)', cursor: voting ? 'not-allowed' : 'pointer',
               textAlign: 'left', position: 'relative', overflow: 'hidden',
@@ -147,11 +147,11 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
       </section>
 
       {/* Comments */}
-      <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginTop: 16 }}>
+      <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginTop: 16 }}>
         <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
 
         {/* Input */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-lg)' }}>
           {user ? (
             <>
               <input value={input} onChange={e => setInput(e.target.value)} placeholder="의견을 남겨보세요" maxLength={500}

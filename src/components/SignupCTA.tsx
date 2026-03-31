@@ -15,7 +15,7 @@ export default function SignupCTA() {
       border: '1px solid var(--border)',
       borderRadius: 16,
       overflow: 'hidden',
-      marginBottom: 12,
+      marginBottom: 'var(--sp-md)',
     }}>
       {/* 상단 */}
       <div style={{ padding: '24px 20px 20px', textAlign: 'center' }}>
@@ -54,7 +54,7 @@ export default function SignupCTA() {
             fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none',
             background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
             boxShadow: '0 4px 20px rgba(254,229,0,0.25)',
-            marginBottom: 8,
+            marginBottom: 'var(--sp-sm)',
           }}
         >
           <svg width="18" height="18" viewBox="0 0 512 512" fill="#191919">
@@ -67,7 +67,7 @@ export default function SignupCTA() {
         <Link
           href="/feed"
           style={{
-            display: 'block', width: '100%', padding: 11, borderRadius: 12,
+            display: 'block', width: '100%', padding: 11, borderRadius: 'var(--radius-card)',
             border: '1px solid var(--border)', background: 'transparent',
             color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)',
             textDecoration: 'none', textAlign: 'center',

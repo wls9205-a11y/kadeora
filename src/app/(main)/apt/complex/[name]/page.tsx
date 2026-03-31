@@ -253,7 +253,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         })}} />
       )}
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, flexWrap: 'wrap' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
@@ -267,7 +267,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
       {/* 이미지 갤러리 (apt_sites 이미지 있을 때) */}
       {siteImages.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: siteImages.length >= 3 ? '2fr 1fr 1fr' : siteImages.length === 2 ? '1fr 1fr' : '1fr', gap: 4, marginBottom: 12, borderRadius: 12, overflow: 'hidden', maxHeight: 200 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: siteImages.length >= 3 ? '2fr 1fr 1fr' : siteImages.length === 2 ? '1fr 1fr' : '1fr', gap: 4, marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', overflow: 'hidden', maxHeight: 200 }}>
           {siteImages.slice(0, 3).map((url, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img key={i} src={url.startsWith('http') ? url : `https:${url}`}
@@ -280,7 +280,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       )}
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라 부동산팀')}`} alt={`${decoded} 아파트 ${region} ${sigungu} 실거래가 시세 ${latestPrice > 0 ? fmtAmount(latestPrice) : ''}`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="lazy" />
+      <img src={`/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라 부동산팀')}`} alt={`${decoded} 아파트 ${region} ${sigungu} 실거래가 시세 ${latestPrice > 0 ? fmtAmount(latestPrice) : ''}`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="lazy" />
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>{decoded}</h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
         <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
@@ -288,7 +288,7 @@ export default async function ComplexDetailPage({ params }: Props) {
         {builtYear > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{builtYear}년 준공</span>}
       </div>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>{region} {sigungu} {dong} · 매매 {tradeList.length}건{rentTrades.length > 0 ? ` · 전월세 ${rentTrades.length}건` : ''}</p>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--sp-md)' }}>
         <ShareButtons title={`${decoded} 아파트 실거래가·시세 — ${region} ${sigungu}`} postId={`complex-${name}`} />
       </div>
 
@@ -305,7 +305,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
       {/* ═══ 핵심 시세 요약 — 히어로 카드 ═══ */}
       <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16,
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 'var(--sp-lg)',
       }}>
         {/* 매매 메인 카드 */}
         <div style={{
@@ -316,7 +316,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           <div style={{ position: 'absolute', top: -30, right: -30, width: 100, height: 100, borderRadius: '50%', background: 'rgba(59,123,246,0.15)' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
             <div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: 4 }}>최근 매매가</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>최근 매매가</div>
               <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', lineHeight: 1.1 }}>{fmtAmount(latestPrice)}</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>평균 {fmtAmount(avgPrice)} · 최고 {fmtAmount(maxPrice)}</div>
             </div>
@@ -335,12 +335,12 @@ export default async function ComplexDetailPage({ params }: Props) {
 
         {/* 전세 카드 */}
         <div style={{
-          borderRadius: 12, padding: '14px 16px',
+          borderRadius: 'var(--radius-card)', padding: '14px 16px',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderLeft: '3px solid #3b82f6',
         }}>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>💙 전세</div>
-          <div style={{ fontSize: 20, fontWeight: 900, color: '#3b82f6' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>💙 전세</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#3b82f6' }}>
             {latestJeonse ? fmtAmount(latestJeonse.deposit) : '—'}
           </div>
           {latestJeonse && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{latestJeonse.exclusive_area}㎡ · {latestJeonse.deal_date}</div>}
@@ -348,12 +348,12 @@ export default async function ComplexDetailPage({ params }: Props) {
 
         {/* 월세 카드 */}
         <div style={{
-          borderRadius: 12, padding: '14px 16px',
+          borderRadius: 'var(--radius-card)', padding: '14px 16px',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderLeft: '3px solid #f97316',
         }}>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>🧡 월세</div>
-          <div style={{ fontSize: 20, fontWeight: 900, color: '#f97316' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>🧡 월세</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#f97316' }}>
             {latestMonthly ? `${latestMonthly.monthly_rent}만` : '—'}
           </div>
           {latestMonthly && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>보증 {fmtAmount(latestMonthly.deposit)}</div>}
@@ -375,10 +375,10 @@ export default async function ComplexDetailPage({ params }: Props) {
         const color = isUp ? '#ef4444' : '#3b82f6';
         return (
           <div style={{
-            borderRadius: 14, padding: '18px 20px', marginBottom: 16,
+            borderRadius: 14, padding: '18px 20px', marginBottom: 'var(--sp-lg)',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
               <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📈 월별 시세 추이</span>
               <div style={{
                 fontSize: 12, fontWeight: 800, color,
@@ -422,14 +422,14 @@ export default async function ComplexDetailPage({ params }: Props) {
         const maxAvg = Math.max(...areaStats.map(a => a.avg));
         const colors = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#ec4899','#10b981','#6366f1'];
         return (
-        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 14px' }}>📐 면적별 비교</h2>
           <div style={{ marginBottom: 14 }}>
             {areaStats.slice(0, 6).map((a, i) => {
               const pct = maxAvg > 0 ? (a.avg / maxAvg) * 100 : 0;
               const c = colors[i % colors.length];
               return (
-                <div key={a.area} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <div key={a.area} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: c, minWidth: 48, textAlign: 'right' }}>{a.area}</span>
                   <div style={{ flex: 1, height: 24, borderRadius: 8, background: 'var(--bg-hover)', overflow: 'hidden', position: 'relative' }}>
                     <div style={{ height: '100%', width: `${pct}%`, borderRadius: 8, background: `linear-gradient(90deg, ${c}, ${c}80)`, boxShadow: `0 2px 6px ${c}30`, transition: 'width 0.6s ease' }} />
@@ -464,7 +464,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       <AptPriceTrendChart aptName={decoded} region={region} />
 
       {/* 📋 매매 거래 이력 — 테이블 스타일 */}
-      <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+      <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>📋 매매 거래 이력</span>
           <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{tradeList.length}건</span>
@@ -501,7 +501,7 @@ export default async function ComplexDetailPage({ params }: Props) {
 
       {/* 🏠 전월세 거래 이력 */}
       {rentTrades.length > 0 && (
-        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>🏠 전월세 이력</span>
             <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{rentTrades.length}건</span>
@@ -546,7 +546,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       <AptReviewSection aptName={decoded} region={region} />
 
       {/* 🔗 외부 링크 — 아이콘 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: siteSlug ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: siteSlug ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr', gap: 8, marginBottom: 'var(--sp-lg)' }}>
         {[
           ...(siteSlug ? [{ emoji: '🏗️', label: '현장 정보', href: `/apt/${siteSlug}`, ext: false }] : []),
           { emoji: '🗺️', label: '카카오맵', href: `https://map.kakao.com/?q=${encodeURIComponent(decoded + ' ' + dong)}`, ext: true },
@@ -558,12 +558,12 @@ export default async function ComplexDetailPage({ params }: Props) {
           return (
             <Tag key={l.label} href={l.href} {...(extraProps as any)} style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-              padding: '14px 8px', borderRadius: 12,
+              padding: '14px 8px', borderRadius: 'var(--radius-card)',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               color: 'var(--text-primary)', textDecoration: 'none',
               transition: 'border-color 0.12s',
             }}>
-              <span style={{ fontSize: 24 }}>{l.emoji}</span>
+              <span style={{ fontSize: 'var(--fs-xl)' }}>{l.emoji}</span>
               <span style={{ fontSize: 12, fontWeight: 700 }}>{l.label}</span>
             </Tag>
           );
@@ -572,8 +572,8 @@ export default async function ComplexDetailPage({ params }: Props) {
 
       {/* 📰 관련 분석 */}
       {relatedBlogs.length > 0 && (
-        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>📰 관련 분석</div>
+        <div style={{ borderRadius: 14, padding: '18px 20px', marginBottom: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📰 관련 분석</div>
           {relatedBlogs.map((b: Record<string, any>) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',

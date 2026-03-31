@@ -64,11 +64,11 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
       )}
 
       {/* ═══ HERO ═══ */}
-      <div style={{ padding: '16px 14px', background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 8 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div style={{ padding: '16px 14px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', marginBottom: 'var(--sp-sm)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>카더라 데일리 #{d.issueNo}</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{isArchive ? '투자 브리핑 아카이브' : '오늘의 투자 브리핑'}</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{isArchive ? '투자 브리핑 아카이브' : '오늘의 투자 브리핑'}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <select
@@ -115,8 +115,8 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
 
         {/* 어젯밤 달라진 것 */}
-        <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--bg-base)', border: '1px solid var(--border)', marginBottom: 8 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>어젯밤 달라진 것</div>
+        <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--bg-base)', border: '1px solid var(--border)', marginBottom: 'var(--sp-sm)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>어젯밤 달라진 것</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
             {d.stockTop10.slice(0, 4).filter(s => s.week_pct != null && s.week_pct !== 0).map(s => (
               <span key={s.symbol} style={{
@@ -155,7 +155,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       {/* ═══ S1: 주식 시장 ═══ */}
       <SH icon="📈" title="국내 시장 · 시총 TOP 10" />
-      <div style={{ background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', padding: '10px 12px', marginBottom: 6 }}>
+      <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '10px 12px', marginBottom: 6 }}>
         <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)' }}>
@@ -215,7 +215,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       {/* 글로벌 */}
       <SH icon="🌎" title="글로벌 마켓" />
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 4, marginBottom: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 4, marginBottom: 'var(--sp-sm)' }}>
         {d.globalStocks.slice(0, 6).map(s => (
           <div key={s.symbol} style={{ background: 'var(--bg-surface)', borderRadius: 8, padding: '6px 4px', textAlign: 'center', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)' }}>{s.symbol}</div>
@@ -227,7 +227,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       {/* ═══ S2: 청약 캘린더 ═══ */}
       <SH icon="🏗️" title="이번주 청약 캘린더" />
-      <div style={{ background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', padding: '10px 12px', marginBottom: 6 }}>
+      <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '10px 12px', marginBottom: 6 }}>
         {d.subscriptions.filter(s => s.status !== '마감').length === 0 ? (
           <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 16 }}>이번주 청약 일정이 없습니다.</div>
         ) : (
@@ -266,7 +266,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
       {d.guPrices.length > 0 && (
         <>
           <SH icon="🏢" title={`${d.region} 아파트 시세 (${d.guPrices.length}개 구/시)`} />
-          <div style={{ background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', padding: '10px 12px', marginBottom: 6 }}>
+          <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '10px 12px', marginBottom: 6 }}>
             {d.guPrices.slice(0, 12).map((g, i) => {
               const salePct = Math.round(g.sale / maxGu * 100);
               const jonsePct = Math.round(g.jeonse / maxGu * 100);
@@ -306,7 +306,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
         <div>
           <SH icon="🏚️" title="미분양" />
-          <div style={{ background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', padding: '10px 12px' }}>
+          <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '10px 12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <div><span style={{ fontSize: 16, fontWeight: 800 }}>{d.unsoldUnits.toLocaleString()}</span><span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>세대</span></div>
               <span style={{ fontSize: 10, fontWeight: 600, color: localUnsoldPct < 5 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
@@ -337,12 +337,12 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
         <div>
           <SH icon="🔨" title={`${d.region} 재개발`} />
-          <div style={{ background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', padding: '10px 12px' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>
+          <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '10px 12px' }}>
+            <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 'var(--sp-xs)' }}>
               {d.redevTotal}건 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-secondary)' }}>재개발 {d.redevTotal - d.redevRebuild} · 재건축 {d.redevRebuild}</span>
             </div>
             {d.redevStages.length > 0 && (
-              <div style={{ display: 'flex', gap: 1, marginBottom: 4 }}>
+              <div style={{ display: 'flex', gap: 1, marginBottom: 'var(--sp-xs)' }}>
                 {d.redevStages.map((st, i) => {
                   const total = d.redevStages.reduce((s, x) => s + x.cnt, 0);
                   const colors = ['var(--text-tertiary)', 'var(--text-brand)', '#7C3AED', 'var(--accent-yellow)', 'var(--accent-green)', 'var(--accent-green)'];
@@ -371,8 +371,8 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       {/* ═══ S5: 요약 + 내일 체크포인트 ═══ */}
       <SH icon="📋" title="오늘의 요약 + 내일 체크포인트" />
-      <div className="report-summary" style={{ background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)', padding: '12px' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 8 }}>
+      <div className="report-summary" style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px' }}>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 'var(--sp-sm)' }}>
           <b style={{ color: 'var(--text-primary)' }}>주식</b>: TOP 10 중 상승 {weekUp}종목 · 하락 {weekDn}종목. {d.sectors[0]?.sector} 섹터 {pctStr(d.sectors[0]?.avg_pct || null)} 최고. {d.sectors.length}개 섹터 중 {sectorUp}개 상승 {sectorDn}개 하락.
           <br />
           <b style={{ color: 'var(--text-primary)' }}>청약</b>: 이번주 {d.subCountThisWeek}건({d.subUnitsThisWeek.toLocaleString()}세대).

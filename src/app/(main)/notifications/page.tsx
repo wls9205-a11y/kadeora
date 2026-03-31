@@ -94,7 +94,7 @@ export default function NotificationsPage() {
 
   if (!user && !loading) return (
     <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
-      <div style={{ fontSize: 40, marginBottom: 12 }}>🔔</div>
+      <div style={{ fontSize: 40, marginBottom: 'var(--sp-md)' }}>🔔</div>
       <p>로그인이 필요합니다</p>
       <a href="/login?redirect=/notifications" style={{ color: 'var(--brand)', fontWeight: 700 }}>로그인하기 →</a>
     </div>
@@ -104,7 +104,7 @@ export default function NotificationsPage() {
     <PullToRefresh>
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-lg)' }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
             🔔 알림
@@ -147,7 +147,7 @@ export default function NotificationsPage() {
       ) : notifs.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>🔔</div>
-          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>아직 알림이 없어요</div>
+          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>아직 알림이 없어요</div>
           <div style={{ fontSize: 'var(--fs-sm)' }}>댓글, 좋아요, 팔로우 알림이 여기 표시돼요</div>
         </div>
       ) : (

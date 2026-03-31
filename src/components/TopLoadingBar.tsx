@@ -26,7 +26,7 @@ export default function TopLoadingBar() {
 
   return (
     <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999,
+      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
       height: 3, background: 'transparent', pointerEvents: 'none',
     }}>
       <div style={{

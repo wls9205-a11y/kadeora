@@ -74,7 +74,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
     <div>
       {/* 툴팁 */}
       <div style={{
-        minHeight: 44, marginBottom: 8, padding: '6px 10px',
+        minHeight: 44, marginBottom: 'var(--sp-sm)', padding: '6px 10px',
         background: d ? 'var(--bg-hover)' : 'transparent',
         borderRadius: 8, transition: 'background 0.15s',
         display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',

@@ -78,9 +78,9 @@ export default function PortfolioTab() {
       {/* 요약 카드 */}
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 12, padding: 16, marginBottom: 12,
+        borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-md)',
       }}>
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>총 평가 손익</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>총 평가 손익</div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: pnlColor }}>
             {summary.totalPnl >= 0 ? '+' : ''}{summary.totalPnl.toLocaleString('ko-KR')}원
@@ -121,9 +121,9 @@ export default function PortfolioTab() {
         return (
           <div style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderRadius: 12, padding: '12px 14px', marginBottom: 12,
+            borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>📈 30일 수익률 추이</span>
               <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color }}>{isUp ? '+' : ''}{lastPct.toFixed(2)}%</span>
             </div>
@@ -159,7 +159,7 @@ export default function PortfolioTab() {
         display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '10px 14px',
         background: showAdd ? 'var(--bg-hover)' : 'var(--bg-surface)',
         border: '1px dashed var(--border)', borderRadius: 10, cursor: 'pointer',
-        color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, marginBottom: 12,
+        color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, marginBottom: 'var(--sp-md)',
       }}>
         <Plus size={16} /> 종목 추가
       </button>
@@ -168,9 +168,9 @@ export default function PortfolioTab() {
       {showAdd && (
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 12, padding: 14, marginBottom: 12,
+          borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 'var(--sp-md)',
         }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 'var(--sp-sm)' }}>
             <input placeholder="종목코드 (예: 005930)" value={form.symbol}
               onChange={e => setForm(p => ({ ...p, symbol: e.target.value.toUpperCase() }))}
               style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />

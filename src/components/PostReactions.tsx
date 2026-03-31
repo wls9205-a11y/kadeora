@@ -104,7 +104,7 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
 
         {/* 피커 팝업 */}
         {showPicker && (
-          <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 4, display: 'flex', gap: 2, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px 6px', zIndex: 10 }}>
+          <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 'var(--sp-xs)', display: 'flex', gap: 2, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px 6px', zIndex: 10 }}>
             {REACTIONS.map(r => (
               <button key={r.key} onClick={e => { e.preventDefault(); e.stopPropagation(); handleReact(r.key); }}
                 title={r.label}

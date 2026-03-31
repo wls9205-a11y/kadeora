@@ -117,8 +117,8 @@ export default function WeeklyPrediction() {
   const medals = ['🥇', '🥈', '🥉'];
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, marginBottom: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 12, marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{ fontSize: 14 }}>🎯</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-yellow)' }}>이번주 코스피 예측</span>
@@ -126,7 +126,7 @@ export default function WeeklyPrediction() {
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>D-{data.daysLeft} 마감</span>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-sm)' }}>
         <div style={{ flex: 1, textAlign: 'center', padding: '6px 0' }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>현재</div>
           <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{data.currentKospi.toLocaleString()}</div>

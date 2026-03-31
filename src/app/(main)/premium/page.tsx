@@ -49,7 +49,7 @@ export default function PremiumPage() {
     <article style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 80px' }}>
 
       {/* 브레드크럼 */}
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>프리미엄</span>
@@ -57,9 +57,9 @@ export default function PremiumPage() {
 
       {/* OG 히어로 이미지 (검색엔진 썸네일) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general&subtitle=${encodeURIComponent('AI 분석 · 청약 알림 · 광고 없는 피드')}`} alt="카더라 프리미엄 멤버십 — AI 종목 분석 청약 알림 광고 없는 피드" width={1200} height={630} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="eager" />
+      <img src={`/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general&subtitle=${encodeURIComponent('AI 분석 · 청약 알림 · 광고 없는 피드')}`} alt="카더라 프리미엄 멤버십 — AI 종목 분석 청약 알림 광고 없는 피드" width={1200} height={630} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="eager" />
 
-      <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'block', marginBottom: 12 }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
+      <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'block', marginBottom: 'var(--sp-md)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
 
       {/* FAQPage JSON-LD */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '카더라 프리미엄 멤버십 가격은?', acceptedAnswer: { '@type': 'Answer', text: '월 9,900원입니다. AI 종목 분석 리포트, 청약 마감 알림, 광고 없는 피드, 전용 배지 등 프리미엄 기능을 이용할 수 있습니다.' } }, { '@type': 'Question', name: '프리미엄 가입 없이도 카더라를 사용할 수 있나요?', acceptedAnswer: { '@type': 'Answer', text: '네, 카더라의 주식 시세 조회, 청약 일정 확인, 블로그 열람, 커뮤니티 글 작성은 모두 무료입니다. 프리미엄은 추가 기능을 제공합니다.' } }] }) }} />
@@ -68,13 +68,13 @@ export default function PremiumPage() {
 
       {/* 히어로 */}
       <div className="kd-card-glow" style={{
-        padding: '32px 20px', textAlign: 'center', marginBottom: 24,
+        padding: '32px 20px', textAlign: 'center', marginBottom: 'var(--sp-2xl)',
         background: 'linear-gradient(135deg, #0D1F42 0%, #081228 100%)',
         borderRadius: 16, position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'repeating-linear-gradient(0deg,#4A9EFF 0,#4A9EFF 1px,transparent 1px,transparent 20px),repeating-linear-gradient(90deg,#4A9EFF 0,#4A9EFF 1px,transparent 1px,transparent 20px)' }} />
         <div style={{ position: 'relative' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>👑</div>
+          <div style={{ fontSize: 40, marginBottom: 'var(--sp-md)' }}>👑</div>
           <h1 style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 900, color: '#E8F2FF', margin: '0 0 8px', letterSpacing: '-0.5px' }}>
             프리미엄 멤버십
           </h1>
@@ -86,7 +86,7 @@ export default function PremiumPage() {
             <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand-hover)', letterSpacing: '-1px' }}>9,900</span>
             <span style={{ fontSize: 14, color: 'var(--text-tertiary)', fontWeight: 600 }}>원/월</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 20 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xl)' }}>
             하루 330원 · 언제든 해지 가능
           </div>
           <Link href="/payment?product=premium_monthly" className="kd-btn-glow" style={{
@@ -99,7 +99,7 @@ export default function PremiumPage() {
       </div>
 
       {/* 프리미엄 기능 */}
-      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14, letterSpacing: '-0.3px' }}>
+      <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14, letterSpacing: '-0.3px' }}>
         프리미엄에서만 가능한 것들
       </h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 28 }}>
@@ -108,18 +108,18 @@ export default function PremiumPage() {
             padding: '14px 12px', background: 'var(--bg-surface)',
             border: '1px solid var(--border)', borderRadius: 12,
           }}>
-            <div style={{ fontSize: 24, marginBottom: 8 }}>{f.icon}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{f.title}</div>
+            <div style={{ fontSize: 'var(--fs-xl)', marginBottom: 'var(--sp-sm)' }}>{f.icon}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>{f.title}</div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{f.desc}</div>
           </div>
         ))}
       </div>
 
       {/* 비교 테이블 */}
-      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
+      <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
         무료 vs 프리미엄
       </h2>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 28 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', overflow: 'hidden', marginBottom: 28 }}>
         {/* 헤더 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px', padding: '10px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)' }}>기능</span>
@@ -149,7 +149,7 @@ export default function PremiumPage() {
       </div>
 
       {/* FAQ */}
-      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
+      <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
         자주 묻는 질문
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
@@ -176,10 +176,10 @@ export default function PremiumPage() {
         padding: '24px 20px', textAlign: 'center',
         background: 'var(--bg-surface)', borderRadius: 14,
       }}>
-        <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+        <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
           투자에 진심이라면, 프리미엄
         </div>
-        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
+        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)' }}>
           월 9,900원 · 하루 330원 · 언제든 해지
         </div>
         <Link href="/payment?product=premium_monthly" className="kd-btn-glow" style={{

@@ -80,7 +80,7 @@ export default function StockComparePage() {
   const SelectBox = ({ value, search, setSearch, onSelect, placeholder }: { value: Stock | null; search: string; setSearch: (v: string) => void; onSelect: (s: Stock | null) => void; placeholder: string }) => (
     <div style={{ position: 'relative', flex: 1 }}>
       {value ? (
-        <div style={{ padding: '12px 16px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '12px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{value.name}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{value.symbol} · {value.market}</div>
@@ -90,11 +90,11 @@ export default function StockComparePage() {
       ) : (
         <div>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={placeholder} aria-label={placeholder}
-            style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
+            style={{ width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
           {search && (
             <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: 4, maxHeight: 200, overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
               {filterStocks(search).map(s => (
-                <button key={s.symbol} onClick={() => { onSelect(s); setSearch(''); }} style={{
+                <button aria-label="닫기" key={s.symbol} onClick={() => { onSelect(s); setSearch(''); }} style={{
                   display: 'flex', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
                   background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)',
                   borderBottom: '1px solid var(--border)', textAlign: 'left',
@@ -114,10 +114,10 @@ export default function StockComparePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
       <Link href="/stock" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 12px' }}>종목 비교</h1>
+      <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 12px' }}>종목 비교</h1>
 
       {/* 종목 선택 */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 'var(--sp-lg)', alignItems: 'flex-start' }}>
         <SelectBox value={stockA} search={searchA} setSearch={setSearchA} onSelect={setStockA} placeholder="종목 A 검색..." />
         <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-tertiary)', paddingTop: 10 }}>VS</div>
         <SelectBox value={stockB} search={searchB} setSearch={setSearchB} onSelect={setStockB} placeholder="종목 B 검색..." />
@@ -182,8 +182,8 @@ export default function StockComparePage() {
             const h = 120;
             const toPoints = (vals: number[]) => vals.map((v, i) => `${(i / (vals.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
             return (
-              <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📈 30일 수익률 비교 (%)</div>
+              <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📈 30일 수익률 비교 (%)</div>
                 <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: h }}>
                   <polyline points={toPoints(nA)} fill="none" stroke="var(--brand)" strokeWidth="2" />
                   <polyline points={toPoints(nB)} fill="none" stroke="var(--accent-orange)" strokeWidth="2" />
@@ -199,15 +199,15 @@ export default function StockComparePage() {
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>⚔️</div>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, marginBottom: 8 }}>두 종목을 선택해서 비교하세요</div>
+          <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>⚔️</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, marginBottom: 'var(--sp-sm)' }}>두 종목을 선택해서 비교하세요</div>
           <div style={{ fontSize: 'var(--fs-sm)' }}>시가총액, 등락률, 거래량 등을 한눈에 비교</div>
         </div>
       )}
 
       {/* 인기 비교 조합 */}
       <div style={{ marginTop: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>인기 비교</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>인기 비교</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {[
             ['삼성전자', 'SK하이닉스'], ['현대차', '기아'], ['NAVER', '카카오'],

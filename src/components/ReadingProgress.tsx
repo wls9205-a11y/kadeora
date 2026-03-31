@@ -19,7 +19,7 @@ export default function ReadingProgress() {
   return (
     <>
       <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         height: 3, background: 'rgba(37,99,235,0.08)', pointerEvents: 'none',
       }}>
         <div style={{
@@ -31,7 +31,7 @@ export default function ReadingProgress() {
       </div>
       {progress > 10 && progress < 98 && (
         <div style={{
-          position: 'fixed', top: 8, right: 12, zIndex: 9999,
+          position: 'fixed', top: 8, right: 12, zIndex: 100,
           fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)',
           background: 'var(--bg-elevated)', padding: '2px 8px',
           borderRadius: 10, border: '1px solid var(--border)',

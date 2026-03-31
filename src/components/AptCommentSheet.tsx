@@ -44,10 +44,10 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
   if (!open) return null;
   return (
     <BottomSheet open={open} onClose={onClose} title={`✏️ ${houseNm} 한줄평`}>
-        <div style={{ flex: 1, overflowY: 'auto', marginBottom: 12 }}>
+        <div style={{ flex: 1, overflowY: 'auto', marginBottom: 'var(--sp-md)' }}>
           {comments.length === 0 && (
             <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
-              <div style={{ fontSize: 'var(--fs-base)', marginBottom: 12 }}>첫 한줄평을 남겨보세요! 👋</div>
+              <div style={{ fontSize: 'var(--fs-base)', marginBottom: 'var(--sp-md)' }}>첫 한줄평을 남겨보세요! 👋</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {(houseType === 'sub' ? [
                   '💬 모델하우스 다녀오셨나요?',

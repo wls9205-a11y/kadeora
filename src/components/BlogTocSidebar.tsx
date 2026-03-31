@@ -68,7 +68,7 @@ export default function BlogTocSidebar({ toc }: { toc: TocItem[] }) {
       }}
     >
       {/* 읽기 진행률 */}
-      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ marginBottom: 'var(--sp-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ flex: 1, height: 3, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
           <div style={{ height: '100%', background: 'var(--brand)', borderRadius: 2, width: `${readProgress}%`, transition: 'width 0.15s' }} />
         </div>

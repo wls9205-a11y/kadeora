@@ -107,7 +107,7 @@ export default function PersonalDashboard() {
   };
 
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div style={{ marginBottom: 'var(--sp-lg)' }}>
       <button onClick={toggle} style={{
         display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
         color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600,
@@ -121,7 +121,7 @@ export default function PersonalDashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
           {/* 관심 종목 카드 */}
           {watchStocks.length > 0 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <TrendingUp size={14} color="var(--accent-blue)" />
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 종목</span>
@@ -146,7 +146,7 @@ export default function PersonalDashboard() {
 
           {/* 관심 청약 D-day */}
           {favApts.length > 0 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Building2 size={14} color="var(--accent-green)" />
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 청약</span>
@@ -179,7 +179,7 @@ export default function PersonalDashboard() {
 
           {/* 관심 청약 빈 상태 */}
           {favApts.length === 0 && watchStocks.length > 0 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Building2 size={14} color="var(--accent-green)" />
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>관심 청약</span>
@@ -192,7 +192,7 @@ export default function PersonalDashboard() {
 
           {/* 읽지 않은 알림 */}
           {alerts.length > 0 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <Bell size={14} color="var(--accent-orange)" />
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>새 알림 {alerts.length}개</span>
@@ -213,7 +213,7 @@ export default function PersonalDashboard() {
 
           {/* 추천 블로그 */}
           {recBlogs.length > 0 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                 <span style={{ fontSize: 14 }}>📰</span>
                 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-secondary)' }}>추천 읽을거리</span>

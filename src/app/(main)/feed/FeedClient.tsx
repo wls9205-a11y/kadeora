@@ -274,7 +274,7 @@ export default function FeedClient({
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
 
         {/* 헤더 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, padding: '4px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-lg)', padding: '4px 0' }}>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5 }}>카더라</h1>
           <div style={{ display: 'flex', gap: 8 }}>
             <Link href="/search" aria-label="검색" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 12, color: 'var(--text-secondary)', textDecoration: 'none' }}>
@@ -295,20 +295,13 @@ export default function FeedClient({
         <WeeklyPrediction />
 
         {/* ━━━ 카테고리 탭 ━━━ */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', flexWrap: 'nowrap', paddingBottom: 2 }}>
+        <div className="kd-scroll-row" style={{ marginBottom: 10 }}>
           {categories.map(cat => {
             const isActive = activeCategory === cat.key;
             return (
               <button key={cat.key} aria-pressed={isActive}
-                onClick={() => router.push(buildUrl({ category: cat.key, region: 'all' }))}
-                style={{
-                  padding: '7px 14px', borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0,
-                  fontWeight: isActive ? 700 : 500, fontSize: 'var(--fs-sm)',
-                  background: isActive ? 'var(--text-primary)' : 'var(--bg-surface)',
-                  color: isActive ? 'var(--bg-base, #fff)' : 'var(--text-secondary)',
-                  transition: 'all 0.15s', fontFamily: 'inherit',
-                  display: 'flex', alignItems: 'center', gap: 4,
-                }}>
+                className={`kd-tab-btn${isActive ? ' active' : ''}`}
+                onClick={() => router.push(buildUrl({ category: cat.key, region: 'all' }))}>
                 <span style={{ fontSize: 13 }}>{cat.icon}</span> {cat.label}
               </button>
             );
@@ -317,21 +310,13 @@ export default function FeedClient({
 
         {/* ━━━ 정렬 옵션 ━━━ */}
         {activeCategory !== 'following' && (
-          <div style={{ display: 'flex', gap: 6, marginBottom: 12, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)', alignItems: 'center' }}>
             {sortOptions.map(opt => {
               const isActive = activeSort === opt.key;
               return (
                 <button key={opt.key}
-                  onClick={() => router.push(buildUrl({ sort: opt.key }))}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 4,
-                    padding: '5px 12px', borderRadius: 999,
-                    border: `1px solid ${isActive ? 'var(--brand)' : 'var(--border)'}`,
-                    cursor: 'pointer', fontFamily: 'inherit', fontSize: 'var(--fs-xs)', fontWeight: isActive ? 700 : 500,
-                    background: isActive ? 'var(--brand-bg, rgba(37,99,235,0.08))' : 'transparent',
-                    color: isActive ? 'var(--brand)' : 'var(--text-tertiary)',
-                    transition: 'all 0.15s',
-                  }}>
+                  className={`kd-sort-btn${isActive ? ' active' : ''}`}
+                  onClick={() => router.push(buildUrl({ sort: opt.key }))}>
                   {opt.icon} {opt.label}
                 </button>
               );
@@ -344,19 +329,13 @@ export default function FeedClient({
 
         {/* 지역 필터 */}
         {activeCategory === 'local' && (
-          <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none', flexWrap: 'nowrap' }}>
+          <div className="kd-scroll-row" style={{ marginBottom: 'var(--sp-md)' }}>
             {REGIONS.map(r => {
               const isActive = activeRegion === r.value || (activeRegion === 'all' && r.value === 'all');
               return (
                 <button key={r.value}
-                  onClick={() => router.push(buildUrl({ region: r.value }))}
-                  style={{
-                    padding: '5px 12px', borderRadius: 999,
-                    border: `1px solid ${isActive ? 'var(--brand)' : 'var(--border)'}`,
-                    cursor: 'pointer', flexShrink: 0, fontWeight: 600, fontSize: 'var(--fs-xs)', fontFamily: 'inherit',
-                    background: isActive ? 'var(--brand)' : 'transparent',
-                    color: isActive ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-                  }}>
+                  className={`kd-pill${isActive ? ' active' : ''}`}
+                  onClick={() => router.push(buildUrl({ region: r.value }))}>
                   {r.label}
                 </button>
               );
@@ -366,10 +345,10 @@ export default function FeedClient({
 
         {/* 팔로잉 비로그인 */}
         {activeCategory === 'following' && !currentUserId && (
-          <div style={{ padding: '24px 16px', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 12 }}>
-            <div style={{ fontSize: 36, marginBottom: 8 }}>👥</div>
-            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>로그인 후 팔로잉 피드를 볼 수 있어요</div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>관심 유저를 팔로우하고 맞춤 피드를 만들어 보세요</div>
+          <div style={{ padding: '24px 16px', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-md)' }}>
+            <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👥</div>
+            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>로그인 후 팔로잉 피드를 볼 수 있어요</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 유저를 팔로우하고 맞춤 피드를 만들어 보세요</div>
             <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
               카카오로 로그인
             </Link>
@@ -404,7 +383,7 @@ export default function FeedClient({
           <Link href="/write" style={{
             display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
             background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12,
-            textDecoration: 'none', color: 'inherit', marginBottom: 12,
+            textDecoration: 'none', color: 'inherit', marginBottom: 'var(--sp-md)',
           }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>✍️</div>
             <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 무슨 생각을 하고 계세요?</span>
@@ -413,9 +392,9 @@ export default function FeedClient({
 
         {/* HOT 배너 */}
         {showHotBanner && hotPosts.length > 0 && (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 14, position: 'relative' }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 14, position: 'relative' }}>
             <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }} aria-label="닫기">✕</button>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 'var(--sp-sm)', display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
             {hotPosts.slice(0, 3).map((hp: Record<string, unknown>, i: number) => (
               <Link key={hp.id as number} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 18 }}>{i + 1}</span>
@@ -495,7 +474,7 @@ export default function FeedClient({
                   try { const arr = Array.from(nv).slice(-200); localStorage.setItem('kd_visited', JSON.stringify(arr)); } catch {}
                 }} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                   {post.title && (
-                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.45, marginBottom: 4 }}>
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.45, marginBottom: 'var(--sp-xs)' }}>
                       {post.title}
                     </div>
                   )}
@@ -529,14 +508,8 @@ export default function FeedClient({
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
                     {postTags.slice(0, 5).map((tag: string) => (
                       <button key={tag}
-                        onClick={(e) => { e.preventDefault(); setActiveTag(activeTag === tag ? null : tag); }}
-                        style={{
-                          padding: '2px 8px', borderRadius: 999,
-                          border: `1px solid ${activeTag === tag ? 'var(--brand)' : 'var(--border)'}`,
-                          background: activeTag === tag ? 'var(--brand-bg, rgba(37,99,235,0.08))' : 'transparent',
-                          color: activeTag === tag ? 'var(--brand)' : 'var(--text-tertiary)',
-                          fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.12s',
-                        }}>
+                        className={`kd-tag${activeTag === tag ? ' active' : ''}`}
+                        onClick={(e) => { e.preventDefault(); setActiveTag(activeTag === tag ? null : tag); }}>
                         #{tag}
                       </button>
                     ))}
@@ -547,14 +520,12 @@ export default function FeedClient({
                 {(stockTags.length > 0 || aptTags.length > 0) && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
                     {stockTags.slice(0, 3).map((tag: string) => (
-                      <Link key={`s-${tag}`} href="/stock"
-                        style={{ padding: '2px 8px', borderRadius: 999, border: '1px solid rgba(56,189,248,0.3)', background: 'rgba(56,189,248,0.08)', color: '#38BDF8', fontSize: 10, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <Link key={`s-${tag}`} href="/stock" className="kd-badge kd-badge-stock" style={{ textDecoration: 'none' }}>
                         📈 {tag}
                       </Link>
                     ))}
                     {aptTags.slice(0, 3).map((tag: string) => (
-                      <Link key={`a-${tag}`} href="/apt"
-                        style={{ padding: '2px 8px', borderRadius: 999, border: '1px solid rgba(52,211,153,0.3)', background: 'rgba(52,211,153,0.08)', color: '#2EE8A5', fontSize: 10, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <Link key={`a-${tag}`} href="/apt" className="kd-badge kd-badge-apt" style={{ textDecoration: 'none' }}>
                         🏢 {tag}
                       </Link>
                     ))}
@@ -562,14 +533,12 @@ export default function FeedClient({
                 )}
 
                 {/* 인터랙션 바 */}
-                <div className="kd-interaction-bar" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, paddingTop: 7, borderTop: '1px solid var(--border)' }}>
+                <div className="kd-interaction-bar" style={{ marginTop: 8 }}>
                   <PostReactions postId={post.id as number} userId={currentUserId} initialLikes={displayLikes} compact />
-                  <Link href={`${postHref}#comments`} aria-label="댓글"
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, background: 'var(--bg-hover)', borderRadius: 16, padding: '4px 10px' }}>
+                  <Link href={`${postHref}#comments`} aria-label="댓글" className="kd-action-btn" style={{ textDecoration: 'none' }}>
                     <MessageCircle size={14} /> {commentCount > 0 ? numFmt(commentCount) : '댓글'}
                   </Link>
-                  <button onClick={(e) => handleShare(e, post)} aria-label="공유"
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-hover)', border: 'none', borderRadius: 16, cursor: 'pointer', color: 'var(--text-tertiary)', padding: '4px 10px', fontSize: 11, fontWeight: 600, fontFamily: 'inherit' }}>
+                  <button onClick={(e) => handleShare(e, post)} aria-label="공유" className="kd-action-btn">
                     <Share2 size={14} /> 공유
                   </button>
                   {/* 북마크 카운트 */}
@@ -600,14 +569,14 @@ export default function FeedClient({
               nodes.push(
                 <div key="signup-cta" className="kd-card-glow" style={{ padding: '24px 18px', margin: '6px 0' }}>
                   <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🚀</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-lg)' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', flexShrink: 0 }}>🚀</div>
                       <div>
                         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>지금 합류하세요</div>
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>투자자들의 실시간 대화에 참여</div>
                       </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 16 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 'var(--sp-lg)' }}>
                       {[
                         { icon: '📈', text: '관심 종목 알림' },
                         { icon: '🏠', text: '청약 마감 알림' },
@@ -635,8 +604,8 @@ export default function FeedClient({
         {activeCategory === 'following' && currentUserId && visiblePosts.length === 0 && !loadingMore && (
           <div style={{ textAlign: 'center', padding: '40px 16px' }}>
             <div style={{ fontSize: 36, marginBottom: 10 }}>👥</div>
-            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>팔로우한 사람의 글이 없어요</div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>관심 있는 유저를 팔로우해보세요</div>
+            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>팔로우한 사람의 글이 없어요</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 있는 유저를 팔로우해보세요</div>
             <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>전체 피드 보기</Link>
           </div>
         )}
@@ -644,8 +613,8 @@ export default function FeedClient({
         {/* 해시태그 필터 빈 결과 */}
         {activeTag && visiblePosts.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 16px' }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>#{activeTag} 태그 글이 없어요</div>
+            <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>🔍</div>
+            <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>#{activeTag} 태그 글이 없어요</div>
             <button onClick={() => setActiveTag(null)} style={{ padding: '8px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>필터 해제</button>
           </div>
         )}

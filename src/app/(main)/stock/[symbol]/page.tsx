@@ -187,7 +187,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* JSON-LD: Dataset (가격 히스토리 — Google Dataset Search) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Dataset', name: `${s.name} (${symbol}) 주가 데이터`, description: `${s.name} ${s.market} 상장 종목의 실시간 시세, 시가총액, 등락률, 거래량 데이터`, url: `${SITE_URL}/stock/${encodeURIComponent(symbol)}`, creator: { '@type': 'Organization', name: '카더라', url: SITE_URL }, temporalCoverage: '2024/..', variableMeasured: [{ '@type': 'PropertyValue', name: 'price', value: s.price }, { '@type': 'PropertyValue', name: 'change_pct', value: changePct }, { '@type': 'PropertyValue', name: 'market_cap', value: s.market_cap }] }) }} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)' }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
           <span>›</span>
@@ -212,7 +212,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 히어로 시세 카드 */}
       <div className="stock-price-header" style={{
         background: isUp ? 'linear-gradient(135deg, rgba(248,113,113,0.06), var(--bg-surface))' : isDown ? 'linear-gradient(135deg, rgba(96,165,250,0.06), var(--bg-surface))' : 'var(--bg-surface)',
-        border: '1px solid var(--border)', borderRadius: 14, padding: '18px 16px', marginBottom: 12,
+        border: '1px solid var(--border)', borderRadius: 14, padding: '18px 16px', marginBottom: 'var(--sp-md)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
@@ -224,7 +224,7 @@ export default async function StockDetailPage({ params }: Props) {
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 'var(--sp-xs)' }}>
           <span style={{ fontSize: 'clamp(28px, 8vw, 36px)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
           {!isStale && (
             <span style={{ fontSize: 16, fontWeight: 700, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
@@ -233,7 +233,7 @@ export default async function StockDetailPage({ params }: Props) {
           )}
         </div>
         {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
             {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준 · 시총 {fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}
           </div>
         )}
@@ -263,7 +263,7 @@ export default async function StockDetailPage({ params }: Props) {
       </div>
 
       {/* 기본 정보 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, marginBottom: 'var(--sp-md)' }}>
         {items.map(({ label, value }) => (
           <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
@@ -278,7 +278,7 @@ export default async function StockDetailPage({ params }: Props) {
       </div>
 
       {/* 투자 지표 대시보드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 'var(--sp-md)' }}>
         {/* 등락률 게이지 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>일간 등락</div>
@@ -309,7 +309,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 52주 가격 범위 바 */}
       {high52 && low52 && high52 > 0 && low52 > 0 && high52 !== low52 && (
-        <div style={{ marginBottom: 12, padding: '10px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
+        <div style={{ marginBottom: 'var(--sp-md)', padding: '10px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>가격 범위 (기간)</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 12, color: 'var(--accent-blue)', fontWeight: 600 }}>
@@ -332,7 +332,7 @@ export default async function StockDetailPage({ params }: Props) {
       )}
 
       {/* 투자 요약 (네이버 크롤러 가시적 텍스트) */}
-      <section className="stock-investment-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+      <section className="stock-investment-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 'var(--sp-md)' }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📋 {s.name} ({symbol}) 종목 요약</h2>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 8px', wordBreak: 'keep-all' }}>
           {s.name}({symbol})은 {s.market} 시장에 상장된 {s.sector || '종목'}입니다.
@@ -364,7 +364,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 최신 뉴스 요약 (서버 렌더링) */}
       {(newsR.data ?? []).length > 0 && (
-        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>📰 {s.name} 최신 뉴스</h2>
           {/* 감성 분석 요약 바 */}
           {(() => {
@@ -404,7 +404,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 수급 요약 (서버 렌더링) */}
       {(flowR.data ?? []).length > 0 && (
-        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📊 {s.name} 투자자별 매매동향</h2>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, wordBreak: 'keep-all' }}>
             {(() => {
@@ -420,7 +420,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 공시 요약 (서버 렌더링) */}
       {(discR.data ?? []).length > 0 && (
-        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 'var(--sp-md)' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>📄 {s.name} 최근 공시</h2>
           {(discR.data ?? []).slice(0, 3).map((d: any) => (
             <div key={d.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)' }}>
@@ -480,7 +480,7 @@ export default async function StockDetailPage({ params }: Props) {
       )}
 
       {/* 자주 묻는 질문 (본문 렌더링 — 네이버 FAQ 리치스니펫) */}
-      <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }}>
+      <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 'var(--sp-md)' }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>❓ {s.name} 자주 묻는 질문</h2>
         {[
           { q: `${s.name} 현재 주가는?`, a: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` },
@@ -497,7 +497,7 @@ export default async function StockDetailPage({ params }: Props) {
       </section>
 
       {/* 업데이트 시간 + 태그 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, fontSize: 11, color: 'var(--text-tertiary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)', fontSize: 11, color: 'var(--text-tertiary)' }}>
         <time dateTime={s.updated_at || new Date().toISOString()}>
           최종 업데이트: {new Date(s.updated_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
         </time>
@@ -512,7 +512,7 @@ export default async function StockDetailPage({ params }: Props) {
       <Disclaimer type="stock" compact />
 
       {/* 프리미엄 업셀 */}
-      <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 12 }}>
+      <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 22 }}>🤖</span>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -525,11 +525,11 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, padding: '6px 10px', borderRadius: 8, background: 'rgba(59,123,246,0.03)', border: '1px solid rgba(59,123,246,0.08)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-lg)', padding: '6px 10px', borderRadius: 8, background: 'rgba(59,123,246,0.03)', border: '1px solid rgba(59,123,246,0.08)' }}>
         <ShareButtons title={`${s.name} (${symbol}) 주가 — 실시간 시세·차트·섹터 분석`} postId={symbol} />
       </div>
 
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)' }}>
         <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
           ⚔️ 다른 종목과 비교
         </Link>

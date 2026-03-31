@@ -61,9 +61,9 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
   const quickStocks = useMemo(() => stocks.filter(s => s.price > 0 && s.market_cap > 0).sort((a, b) => (b.market_cap - a.market_cap)).slice(0, 8), [stocks]);
 
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div style={{ marginBottom: 'var(--sp-lg)' }}>
       {/* KPI 상단 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 'var(--sp-md)' }}>
         {[
           { label: '투자 원금', val: `₩${amount.toLocaleString()}만`, color: 'var(--text-primary)' },
           { label: '예상 수익', val: holdings.length ? profitStr : '—', color: profitColor },
@@ -85,13 +85,13 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       </div>
 
       {/* 검색 */}
-      <div style={{ position: 'relative', marginBottom: 8 }}>
+      <div style={{ position: 'relative', marginBottom: 'var(--sp-sm)' }}>
         <input value={search} onChange={e => { setSearch(e.target.value); setShowSearch(true); }} onFocus={() => setShowSearch(true)}
           placeholder="종목 검색해서 추가..." className="kd-search-input" style={{ width: '100%' }} />
         {showSearch && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, zIndex: 50, marginTop: 4, overflow: 'hidden' }}>
             {searchResults.map(s => (
-              <button key={s.symbol} onClick={() => addHolding(s)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', borderBottom: '1px solid var(--border)' }}>
+              <button aria-label="닫기" key={s.symbol} onClick={() => addHolding(s)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
                 <span style={{ fontSize: 11, fontWeight: 700, color: (s.change_pct ?? 0) > 0 ? (s.currency === 'USD' ? 'var(--accent-green)' : 'var(--accent-red)') : 'var(--accent-blue)' }}>{(s.change_pct ?? 0) > 0 ? '+' : ''}{(s.change_pct ?? 0).toFixed(2)}%</span>
@@ -127,11 +127,11 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
             ))}
           </div>
           {totalAlloc !== 100 && (
-            <div style={{ fontSize: 9, color: 'var(--accent-yellow)', fontFamily: 'monospace', marginBottom: 4 }}>비중 합계 {totalAlloc}% (100% 맞춰주세요)</div>
+            <div style={{ fontSize: 9, color: 'var(--accent-yellow)', fontFamily: 'monospace', marginBottom: 'var(--sp-xs)' }}>비중 합계 {totalAlloc}% (100% 맞춰주세요)</div>
           )}
 
           {/* 종목 리스트 + 슬라이더 */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', overflow: 'hidden', marginBottom: 'var(--sp-sm)' }}>
             {holdings.map((h, i) => {
               const c = h.stock.pct > 0 ? (h.stock.isUS ? 'var(--accent-green)' : 'var(--accent-red)') : h.stock.pct < 0 ? (h.stock.isUS ? 'var(--accent-red)' : 'var(--accent-blue)') : 'var(--text-tertiary)';
               const seg = SEG_COLORS[i % SEG_COLORS.length];
@@ -169,8 +169,8 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
 
       {!holdings.length && (
         <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 28, marginBottom: 8 }}>💼</div>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>종목을 담아보세요</div>
+          <div style={{ fontSize: 28, marginBottom: 'var(--sp-sm)' }}>💼</div>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 'var(--sp-xs)' }}>종목을 담아보세요</div>
           <div style={{ fontSize: 11 }}>비중 조절 후 예상 수익을 계산합니다</div>
         </div>
       )}

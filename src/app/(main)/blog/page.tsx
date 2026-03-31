@@ -246,19 +246,19 @@ export default async function BlogPage({ searchParams }: Props) {
       </div>
 
       {/* 검색 */}
-      <form action="/blog" method="GET" style={{ marginBottom: 12, position: 'relative' }}>
+      <form action="/blog" method="GET" style={{ marginBottom: 'var(--sp-md)', position: 'relative' }}>
         {category !== 'all' && <input type="hidden" name="category" value={category} />}
         {sort !== 'latest' && <input type="hidden" name="sort" value={sort} />}
         <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-tertiary)', pointerEvents: 'none' }}>🔍</span>
         <input name="q" defaultValue={q} placeholder="주식, 청약, 미분양 검색..." style={{
-          width: '100%', padding: '10px 14px 10px 36px', fontSize: 13, borderRadius: 12,
+          width: '100%', padding: '10px 14px 10px 36px', fontSize: 13, borderRadius: 'var(--radius-card)',
           border: '1px solid var(--border)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
         }} />
       </form>
 
       {/* 카테고리 탭 — 밑줄 스타일 */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {CATS.map(c => (
           <Link key={c.key} href={`/blog${c.key !== 'all' ? `?category=${c.key}` : ''}${sort !== 'latest' ? `${c.key !== 'all' ? '&' : '?'}sort=${sort}` : ''}${q ? `${c.key !== 'all' || sort !== 'latest' ? '&' : '?'}q=${q}` : ''}`}
             style={{
@@ -340,20 +340,20 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 오늘의 추천 */}
       {pageNum === 1 && !q && category === 'all' && todayPicks.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>✨ 오늘의 추천</div>
+        <div style={{ marginBottom: 'var(--sp-md)' }}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>✨ 오늘의 추천</div>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
             {todayPicks.map((p: any) => {
               const catEmoji: Record<string, string> = { stock: '📈', apt: '🏢', unsold: '🏚️', finance: '💰' };
               const catLabel: Record<string, string> = { stock: '주식', apt: '청약', unsold: '미분양', finance: '재테크' };
               return (
                 <Link key={p.id} href={`/blog/${p.slug}`} style={{
-                  flexShrink: 0, width: 180, padding: '12px 14px', borderRadius: 12,
+                  flexShrink: 0, width: 180, padding: '12px 14px', borderRadius: 'var(--radius-card)',
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   textDecoration: 'none', color: 'inherit',
                 }}>
-                  <div style={{ fontSize: 20, marginBottom: 6 }}>{catEmoji[p.category] || '📝'}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginBottom: 4 }}>{catLabel[p.category] || p.category}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 6 }}>{catEmoji[p.category] || '📝'}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{catLabel[p.category] || p.category}</div>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, lineHeight: 1.35 }}>{p.title}</div>
                 </Link>
               );
@@ -401,7 +401,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 검색 결과 안내 */}
       {q && (
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>
           &quot;{q}&quot; 검색 결과 {(posts ?? []).length}건
         </div>
       )}
@@ -421,16 +421,16 @@ export default async function BlogPage({ searchParams }: Props) {
             const dateStr = new Date(p.created_at || Date.now()).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
             return (
               <Link key={p.id} href={`/blog/${p.slug}`} className="kd-card-hover" style={{
-                display: 'block', padding: '12px', borderRadius: 12, textDecoration: 'none', color: 'inherit',
+                display: 'block', padding: '12px', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit',
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 'var(--sp-xs)' }}>
                   <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: `${catColor}15`, color: catColor }}>{CATS.find(c => c.key === p.category)?.label || p.category}</span>
                   {p.view_count >= 100 && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-red)' }}>HOT</span>}
                   {p.rewritten_at && <span style={{ fontSize: 8, fontWeight: 700, padding: '0 4px', borderRadius: 3, background: 'var(--accent-green-bg, rgba(52,211,153,0.1))', color: 'var(--accent-green)' }}>UP</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)' }}>{dateStr}</span>
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 'var(--sp-xs)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{q ? highlightTitle(p.title, q) : p.title}</div>
                 {p.excerpt && <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as const }}>{p.excerpt}</div>}
                 <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
                   <span>📖 {readMin}분</span>
@@ -446,7 +446,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 인기 시리즈 (SEO 내부링크) */}
       {topSeries.length > 0 && (
-        <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+        <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>📚 인기 시리즈</span>
             <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
@@ -458,7 +458,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 background: 'var(--bg-hover)', borderRadius: 10, textDecoration: 'none',
                 border: '1px solid var(--border)', transition: 'border-color var(--transition-fast)',
               }}>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.post_count}편</div>
               </Link>
             ))}
@@ -469,7 +469,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 다음 페이지 미리보기 */}
       {nextPagePosts.length > 0 && (
         <div style={{ marginTop: 16, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8 }}>다음 페이지 미리보기</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>다음 페이지 미리보기</div>
           {nextPagePosts.map((p: any) => (
             <Link key={p.id} href={`/blog/${p.slug}`} style={{
               display: 'block', padding: '4px 0', fontSize: 13, color: 'var(--text-secondary)',
@@ -483,7 +483,7 @@ export default async function BlogPage({ searchParams }: Props) {
       )}
 
       {/* 페이지네이션 */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20, marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20, marginBottom: 'var(--sp-xl)' }}>
         {pageNum > 1 && (
           <Link href={`/blog?${category !== 'all' ? `category=${category}&` : ''}${sort !== 'latest' ? `sort=${sort}&` : ''}${q ? `q=${q}&` : ''}page=${pageNum - 1}`}
             style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>

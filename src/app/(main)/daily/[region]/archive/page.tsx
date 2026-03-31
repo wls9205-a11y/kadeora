@@ -64,9 +64,9 @@ export default async function ArchivePage({ params }: Props) {
         ],
       }) }} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📂 카더라 데일리 아카이브</h1>
+          <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📂 카더라 데일리 아카이브</h1>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>{region} · {reports.length}개 리포트</p>
         </div>
         <Link href={`/daily/${encodeURIComponent(region)}`} style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>오늘 보기 →</Link>
@@ -74,7 +74,7 @@ export default async function ArchivePage({ params }: Props) {
 
       {reports.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>📭</div>
+          <div style={{ fontSize: 36, marginBottom: 'var(--sp-md)' }}>📭</div>
           <p style={{ fontSize: 13 }}>아직 저장된 리포트가 없습니다.</p>
           <p style={{ fontSize: 11, marginTop: 4 }}>매일 오전 7시에 자동 저장됩니다.</p>
         </div>
@@ -82,7 +82,7 @@ export default async function ArchivePage({ params }: Props) {
         Array.from(grouped.entries()).map(([month, items]) => {
           const [y, m] = month.split('-');
           return (
-            <div key={month} style={{ marginBottom: 16 }}>
+            <div key={month} style={{ marginBottom: 'var(--sp-lg)' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
                 {y}년 {parseInt(m)}월 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>({items.length}일)</span>
               </div>

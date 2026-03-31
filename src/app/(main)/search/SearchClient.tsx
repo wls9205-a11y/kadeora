@@ -236,7 +236,7 @@ export default function SearchClient() {
       <h1 style={{ margin: '0 0 20px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
 
       {/* Search input */}
-      <div style={{ position: 'relative', marginBottom: 16 }}>
+      <div style={{ position: 'relative', marginBottom: 'var(--sp-lg)' }}>
         <input
           ref={inputRef}
           type="text"
@@ -266,7 +266,7 @@ export default function SearchClient() {
               top: '100%',
               left: 0,
               width: '100%',
-              zIndex: 500,
+              zIndex: 60,
               backgroundColor: 'var(--bg-surface)',
               border: '1px solid var(--border)',
               borderRadius: 8,
@@ -448,7 +448,7 @@ export default function SearchClient() {
       </div>
 
       {/* Category filter */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-xl)' }}>
         {[['all', '전체'], ['stock', '주식'], ['apt', '청약'], ['discuss', '토론'], ['free', '자유']].map(([k, l]) => (
           <button key={k} onClick={() => { setCategory(k); setPage(0); }}
             style={{
@@ -481,13 +481,13 @@ export default function SearchClient() {
           return (
             <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 18px',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '16px 18px',
                 transition: 'border-color 0.15s',
               }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
                 onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
                   <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
@@ -523,7 +523,7 @@ export default function SearchClient() {
           {/* Recent searches */}
           {recentSearches.length > 0 && (
             <div style={{ marginBottom: 28 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>최근 검색어</span>
                 <button
                   onClick={() => { clearRecentSearches(); setRecentSearches([]); }}
@@ -548,7 +548,7 @@ export default function SearchClient() {
 
           {/* Popular searches */}
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🔥 인기 검색어</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>🔥 인기 검색어</div>
             <div className="apt-pill-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
               {POPULAR.map((s, i) => (
                 <button

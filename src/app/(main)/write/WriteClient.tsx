@@ -178,7 +178,7 @@ export default function WriteClient() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
       {/* 상단 바 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600 }}>← 돌아가기</Link>
         <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>글쓰기</span>
         <button onClick={handleSubmit} disabled={!canSubmit} style={{
@@ -193,7 +193,7 @@ export default function WriteClient() {
       {draftRestored && !editId && (
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 14px', marginBottom: 12, borderRadius: 10,
+          padding: '10px 14px', marginBottom: 'var(--sp-md)', borderRadius: 10,
           background: 'var(--brand-bg)', border: '1px solid rgba(37,99,235,0.2)',
           fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)',
         }}>
@@ -205,7 +205,7 @@ export default function WriteClient() {
       )}
 
       {/* 카테고리 칩 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-lg)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         {CATEGORIES.map(c => (
           <button key={c.value} onClick={() => setCategory(c.value)} style={{
             padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,
@@ -237,7 +237,7 @@ export default function WriteClient() {
         maxLength={100}
         style={{
           width: '100%', fontSize: 'var(--fs-lg)', fontWeight: 700, padding: '12px 16px',
-          border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-surface)',
+          border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
           transition: 'border-color 0.2s',
         }}
@@ -287,13 +287,13 @@ export default function WriteClient() {
             🗳️ 투표 {showPollForm ? '제거' : '추가'}
           </button>
           {showPollForm && (
-            <div style={{ marginTop: 10, padding: '14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+            <div style={{ marginTop: 10, padding: '14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
               <input
                 value={pollQuestion}
                 onChange={e => setPollQuestion(e.target.value)}
                 placeholder="투표 질문을 입력하세요"
                 maxLength={100}
-                style={{ width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box', marginBottom: 8 }}
+                style={{ width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box', marginBottom: 'var(--sp-sm)' }}
               />
               {pollOptions.map((opt: string, i: number) => (
                 <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
@@ -333,7 +333,7 @@ export default function WriteClient() {
 
       {/* 태그 */}
       <div style={{ marginTop: 16 }}>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 'var(--sp-sm)' }}>
           {tags.map(t => (
             <span key={t} style={{
               fontSize: 'var(--fs-sm)', padding: '3px 10px', borderRadius: 999,

@@ -93,7 +93,7 @@ export default function OnboardingClient() {
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: 'clamp(20px, 5vw, 40px) clamp(16px, 4vw, 36px)' }}>
         {/* 진행 바 */}
         <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
             <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>Step {step} / {TOTAL}</span>
             <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>{stepLabels[step - 1]}</span>
           </div>
@@ -109,11 +109,11 @@ export default function OnboardingClient() {
             <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 32px', lineHeight: 1.6 }}>
               카더라에서 사용할 닉네임을 설정해주세요.<br />닉네임은 나중에 프로필에서 변경할 수 있습니다.
             </p>
-            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>
               닉네임 <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="2~20자" maxLength={20}
-              className="kd-input" style={{ fontSize: 'var(--fs-base)', marginBottom: 8 }} autoFocus
+              className="kd-input" style={{ fontSize: 'var(--fs-base)', marginBottom: 'var(--sp-sm)' }} autoFocus
               onKeyDown={e => e.key === 'Enter' && nickname.trim().length >= 2 && setStep(2)} />
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
             <button onClick={() => { const v = validateNickname(nickname); if (!v.valid) { error(v.error!); return; } setStep(2); }}
@@ -128,7 +128,7 @@ export default function OnboardingClient() {
           <div>
             <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>관심 분야를 선택해주세요 📊</h1>
             <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>최대 5개 선택 ({selectedInterests.length}/5)</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
               {INTERESTS.map(({ key, label }) => {
                 const sel = selectedInterests.includes(key);
                 return (
@@ -156,7 +156,7 @@ export default function OnboardingClient() {
             <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>
               맞춤 콘텐츠와 화면 설정에 활용됩니다.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
               {AGE_GROUPS.map(({ value, label }) => {
                 const sel = ageGroup === value;
                 return (
@@ -171,7 +171,7 @@ export default function OnboardingClient() {
               })}
             </div>
             {(ageGroup === '50s' || ageGroup === '60+') && (
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 14px', marginBottom: 'var(--sp-lg)' }}>
                 💡 글씨 크기가 &apos;크게&apos;로 자동 설정됩니다. 나중에 설정에서 변경할 수 있어요.
               </div>
             )}
@@ -187,7 +187,7 @@ export default function OnboardingClient() {
           <div>
             <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>거의 다 됐어요! 🎯</h1>
             <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: 1.6 }}>지역 맞춤 청약 정보를 받으려면 거주 지역을 선택해주세요.</p>
-            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+            <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>
               거주 지역 <span style={{ color: 'var(--error)' }}>*</span>
               <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 4, background: 'var(--error)', color: 'var(--text-inverse)', marginLeft: 6, fontWeight: 700 }}>필수</span>
             </label>
@@ -197,7 +197,7 @@ export default function OnboardingClient() {
               </div>
             )}
             <select value={region} onChange={e => { setRegion(e.target.value); setDistrict(''); }} style={{
-              width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 8,
+              width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 'var(--sp-sm)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
             }}>
@@ -206,7 +206,7 @@ export default function OnboardingClient() {
             </select>
             {region && SIGUNGU_MAP[region] && (
               <select value={district} onChange={e => setDistrict(e.target.value)} style={{
-                width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 20,
+                width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 'var(--sp-xl)',
                 background: 'var(--bg-hover)', border: '1px solid var(--border)',
                 color: district ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
               }}>
@@ -215,11 +215,11 @@ export default function OnboardingClient() {
               </select>
             )}
             {!region && !district && (
-              <div style={{ height: 20, marginBottom: 20 }} />
+              <div style={{ height: 20, marginBottom: 'var(--sp-xl)' }} />
             )}
             <label style={{
               display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: '14px',
-              borderRadius: 10, marginBottom: 24,
+              borderRadius: 10, marginBottom: 'var(--sp-2xl)',
               background: marketing ? 'var(--brand-light)' : 'var(--bg-base)',
               border: `1px solid ${marketing ? 'var(--brand)' : 'var(--border)'}`, transition: 'all 0.15s',
             }}>
@@ -232,7 +232,7 @@ export default function OnboardingClient() {
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>새 기능, 이벤트, 투자 인사이트 등을 이메일로 받아보세요</div>
               </div>
             </label>
-            <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12, textAlign: 'center' as const }}>
+            <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)', textAlign: 'center' as const }}>
               🔔 버튼을 누르면 알림 허용 여부를 물어봐요. 허용하면 새 소식을 바로 받을 수 있어요!
             </p>
             <div style={{ display: 'flex', gap: 10 }}>

@@ -95,7 +95,7 @@ export default function AutoPushPrompt() {
 
   return (
     <div style={{
-      position: 'fixed', bottom: 72, left: 12, right: 12, zIndex: 180,
+      position: 'fixed', bottom: 72, left: 12, right: 12, zIndex: 60,
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
       borderRadius: 16, padding: '16px 20px',
       boxShadow: '0 -4px 24px rgba(0,0,0,0.3)',
@@ -127,7 +127,7 @@ export default function AutoPushPrompt() {
         onClick={handleDismiss}
         style={{
           background: 'none', border: 'none', color: 'var(--text-tertiary)',
-          fontSize: 18, cursor: 'pointer', padding: 4, flexShrink: 0,
+          fontSize: 'var(--fs-md)', cursor: 'pointer', padding: 4, flexShrink: 0,
         }}
         aria-label="닫기"
       >

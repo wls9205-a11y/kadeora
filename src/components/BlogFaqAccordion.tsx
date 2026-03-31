@@ -17,13 +17,13 @@ export default function BlogFaqAccordion({ items }: Props) {
 
   return (
     <div style={{ margin: '24px 0' }}>
-      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>
         자주 묻는 질문
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {items.map((item, i) => (
           <div key={i} style={{
-            borderRadius: 12, border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-card)', border: '1px solid var(--border)',
             overflow: 'hidden', background: 'var(--bg-surface)',
           }}>
             <button

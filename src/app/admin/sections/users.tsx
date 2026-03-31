@@ -59,7 +59,7 @@ export default function UsersSection() {
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 20px' }}>👤 유저 관리 <span style={{ fontSize: 14, color: C.textDim, fontWeight: 400 }}>({fmt(total)}명)</span></h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 20px' }}>👤 유저 관리 <span style={{ fontSize: 14, color: C.textDim, fontWeight: 400 }}>({fmt(total)}명)</span></h1>
 
       {/* Controls */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -93,7 +93,7 @@ export default function UsersSection() {
             />
             {/* Pagination */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
-              <button disabled={page <= 1} onClick={() => { setPage(page - 1); load(page - 1); }}
+              <button aria-label="닫기" disabled={page <= 1} onClick={() => { setPage(page - 1); load(page - 1); }}
                 style={{ padding: '6px 14px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.card, color: C.text, cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1 }}>← 이전</button>
               <span style={{ padding: '6px 14px', color: C.textSec, fontSize: 13 }}>{page} / {Math.ceil(total / 50) || 1}</span>
               <button disabled={page * 50 >= total} onClick={() => { setPage(page + 1); load(page + 1); }}
@@ -106,7 +106,7 @@ export default function UsersSection() {
             <div style={{ width: 370, flexShrink: 0, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, alignSelf: 'flex-start', position: 'sticky', top: 20, maxHeight: '90vh', overflowY: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: C.text, margin: 0 }}>{GRADE_EMOJI[selected.grade]} {selected.nickname}</h3>
-                <button onClick={() => { setSelected(null); setUserDetail(null); }} style={{ background: 'none', border: 'none', color: C.textDim, cursor: 'pointer', fontSize: 18 }}>✕</button>
+                <button onClick={() => { setSelected(null); setUserDetail(null); }} style={{ background: 'none', border: 'none', color: C.textDim, cursor: 'pointer', fontSize: 'var(--fs-md)' }}>✕</button>
               </div>
 
               {/* ── 기본 정보 ── */}

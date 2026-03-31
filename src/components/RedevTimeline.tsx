@@ -16,7 +16,7 @@ export default function RedevTimeline({ currentStage }: { currentStage: string }
   return (
     <div style={{ margin: '12px 0 16px', overflow: 'hidden' }}>
       {/* 프로그레스 바 */}
-      <div style={{ position: 'relative', height: 4, background: 'var(--border)', borderRadius: 2, marginBottom: 8 }}>
+      <div style={{ position: 'relative', height: 4, background: 'var(--border)', borderRadius: 2, marginBottom: 'var(--sp-sm)' }}>
         <div style={{
           position: 'absolute', left: 0, top: 0, height: '100%', borderRadius: 2,
           width: `${((activeIdx + 1) / STAGES.length) * 100}%`,

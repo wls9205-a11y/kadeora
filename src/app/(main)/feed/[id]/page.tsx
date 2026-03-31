@@ -301,7 +301,7 @@ export default async function FeedDetailPage({ params }: Props) {
       }) }} />
 
       {/* Back link */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)' }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
           <span>›</span>
@@ -318,7 +318,7 @@ export default async function FeedDetailPage({ params }: Props) {
         </h1>
 
         {/* Author row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
           <div style={{
             width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
             background: getAvatarColor(post.profiles?.nickname ?? '익명'),
@@ -349,7 +349,7 @@ export default async function FeedDetailPage({ params }: Props) {
         </div>
 
         {/* 글자 크기 조절 */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--sp-sm)' }}>
           <FontSizeControl />
         </div>
 
@@ -373,7 +373,7 @@ export default async function FeedDetailPage({ params }: Props) {
             display: 'grid',
             gridTemplateColumns: post.images.length === 1 ? '1fr' : post.images.length === 2 ? '1fr 1fr' : 'repeat(3, 1fr)',
             gap: 8,
-            marginBottom: 24,
+            marginBottom: 'var(--sp-2xl)',
           }}>
             {post.images.map((url: string, i: number) => (
               <a key={i} href={url} target="_blank" rel="noopener noreferrer"
@@ -396,8 +396,8 @@ export default async function FeedDetailPage({ params }: Props) {
 
         {/* 비로그인 가입 유도 — 이미지 아래에 배치 */}
         {!currentUserId && (
-          <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 24 }}>
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>전체 글을 보려면 로그인하세요</div>
+          <div style={{ textAlign: 'center', padding: '24px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-2xl)' }}>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>전체 글을 보려면 로그인하세요</div>
             <Link href={`/login?redirect=/feed/${id}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
               카카오로 로그인
             </Link>
@@ -413,11 +413,11 @@ export default async function FeedDetailPage({ params }: Props) {
       {/* 관련 실시간 데이터 */}
       {relatedQuote && (
         <Link href={`/stock/${relatedQuote.symbol}`} style={{
-          display: 'flex', alignItems: 'center', gap: 12, padding: 12, marginBottom: 12,
+          display: 'flex', alignItems: 'center', gap: 12, padding: 12, marginBottom: 'var(--sp-md)',
           background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10,
           textDecoration: 'none', color: 'inherit',
         }}>
-          <span style={{ fontSize: 20 }}>📈</span>
+          <span style={{ fontSize: 'var(--fs-lg)' }}>📈</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{relatedQuote.name}</div>
             <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{relatedQuote.currency === 'USD' ? `$${Number(relatedQuote.price).toFixed(2)}` : `₩${Number(relatedQuote.price).toLocaleString()}`}</div>
@@ -429,11 +429,11 @@ export default async function FeedDetailPage({ params }: Props) {
       )}
       {relatedAptCount > 0 && (
         <Link href="/apt" style={{
-          display: 'flex', alignItems: 'center', gap: 12, padding: 12, marginBottom: 12,
+          display: 'flex', alignItems: 'center', gap: 12, padding: 12, marginBottom: 'var(--sp-md)',
           background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10,
           textDecoration: 'none', color: 'inherit',
         }}>
-          <span style={{ fontSize: 20 }}>🏢</span>
+          <span style={{ fontSize: 'var(--fs-lg)' }}>🏢</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>관련 청약 정보</div>
             <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>현재 {relatedAptCount}건 접수중</div>
@@ -444,7 +444,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
       {/* 액션 바 — 본문과 댓글 사이 (인라인) */}
       {/* 인게이지먼트 미니 대시보드 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)' }}>
         {[
           { icon: '👁', label: '조회', value: post.view_count ?? 0, max: 1000, color: '#60A5FA' },
           { icon: '🤍', label: '좋아요', value: post.likes_count ?? 0, max: 100, color: '#F87171' },
@@ -483,13 +483,13 @@ export default async function FeedDetailPage({ params }: Props) {
       <PollWidget postId={post.id} />
 
       {/* Comments — 로그인 여부 상관없이 댓글 목록 표시, 입력만 분기 */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 'var(--sp-lg)' }}>
         <CommentSection postId={post.id} initialComments={comments} />
       </div>
 
       {/* Related posts */}
       {related.filter((r: Record<string, any>) => !r._type).length > 0 && (
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>더 읽어보기</h3>
           {related.filter((r: Record<string, any>) => !r._type).map((r: Record<string, any>) => (
             <Link key={r.id} href={`/feed/${r.slug || r.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
@@ -502,7 +502,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
       {/* 관련 부동산 현장 (내부 링크 SEO) */}
       {related.filter((r: Record<string, any>) => r._type === 'site').length > 0 && (
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>🏢 관련 현장</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {related.filter((r: Record<string, any>) => r._type === 'site').map((s: Record<string, any>) => (
@@ -517,7 +517,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
       {/* 관련 종목 (내부 링크 SEO) */}
       {related.filter((r: Record<string, any>) => r._type === 'stock').length > 0 && (
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📈 관련 종목</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {related.filter((r: Record<string, any>) => r._type === 'stock').map((s: Record<string, any>) => (
@@ -534,7 +534,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
       {/* 📝 관련 블로그 크로스셀 */}
       {relatedBlogs.length > 0 && (
-        <div style={{ marginBottom: 20, padding: 16, background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(167,139,250,0.04) 100%)', borderRadius: 14, border: '1px solid rgba(37,99,235,0.12)' }}>
+        <div style={{ marginBottom: 'var(--sp-xl)', padding: 16, background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(167,139,250,0.04) 100%)', borderRadius: 14, border: '1px solid rgba(37,99,235,0.12)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <h2 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>📰 관련 분석 글</h2>
             <Link href="/blog" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>더보기 →</Link>

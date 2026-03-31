@@ -106,7 +106,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
           return (
           <>
-        <button onClick={() => setSelectedAge(null)} style={{
+        <button aria-label="닫기" onClick={() => setSelectedAge(null)} style={{
           padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
           fontSize: 10, fontWeight: !selectedAge ? 700 : 500,
           background: !selectedAge ? 'rgba(59,123,246,0.2)' : 'transparent',
@@ -192,8 +192,8 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
         {filtered.length === 0 && (
           <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px 20px', color: 'var(--text-tertiary)' }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>🔍</div>
-            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>검색 결과가 없습니다</div>
+            <div style={{ fontSize: 40, marginBottom: 'var(--sp-sm)' }}>🔍</div>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 'var(--sp-xs)' }}>검색 결과가 없습니다</div>
             <div style={{ fontSize: 12 }}>다른 검색어나 필터를 시도해보세요</div>
           </div>
         )}
@@ -222,7 +222,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               )}
 
               {/* 이름 + 스파크라인 */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-sm)' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.aptName}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -235,16 +235,16 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               </div>
 
               {/* 매매 크게 + 원형 게이지 */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
                 <div>
                   <div style={{ fontSize: 8, color: 'var(--text-tertiary)', fontWeight: 600 }}>매매</div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{c.lastPrice > 0 ? fmtAmount(c.lastPrice) : '—'}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{c.lastPrice > 0 ? fmtAmount(c.lastPrice) : '—'}</div>
                 </div>
                 {c.jeonseRatio ? <Gauge ratio={c.jeonseRatio} size={42} /> : null}
               </div>
 
               {/* 3열 부가 데이터 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4, marginBottom: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4, marginBottom: 'var(--sp-sm)' }}>
                 {[
                   { label: '전세', value: c.jeonse > 0 ? fmtAmount(c.jeonse) : '—' },
                   { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—' },

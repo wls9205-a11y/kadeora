@@ -99,22 +99,22 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             {/* 현황 요약 */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전체</div>
               </div>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent-blue)' }}>{redevCount}</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--accent-blue)' }}>{redevCount}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재개발</div>
               </div>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent-orange)' }}>{rebuildCount}</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--accent-orange)' }}>{rebuildCount}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재건축</div>
               </div>
             </div>
 
             {/* 재개발 단계별 파이프라인 */}
             <div className="kd-card">
-              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🏗️ 단계별 파이프라인</div>
+              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🏗️ 단계별 파이프라인</div>
               <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
                 {STAGE_ORDER.map((stage, i) => {
                   const regionFiltered = redevRegion === '전체' ? redevelopment : redevelopment.filter((r) => r.region === redevRegion);
@@ -136,7 +136,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 유형 필터 + 검색 */}
-            <div style={{ display: 'flex', gap: 5, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 5, marginBottom: 'var(--sp-sm)', flexWrap: 'wrap', alignItems: 'center' }}>
               {pill('전체', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재개발', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
               {pill('재건축', redevType, (v) => { setRedevType(v); setRedevPage(1); })}
@@ -150,13 +150,13 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             </div>
 
             {/* 안내 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>서울시 정비사업 정보몽땅 · 경기도 공공데이터 · 부산시 정비사업현황 API 기준{freshDate ? ` · ${freshDate} 갱신` : ''} · 매주 월요일 자동 갱신</div>
               <SectionShareButton section="apt-redev" label="재개발·재건축 현황 — 단계별 진행상황" pagePath="/apt?tab=redev" />
             </div>
 
             {/* 결과 카운트 */}
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
               총 <strong style={{ color: 'var(--text-primary)' }}>{filteredRedev.length}</strong>건
             </div>
 
@@ -170,7 +170,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               return (
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{
                   display: 'block', textDecoration: 'none', color: 'inherit',
-                  padding: '12px 14px 10px', borderRadius: 12,
+                  padding: '12px 14px 10px', borderRadius: 'var(--radius-card)',
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   cursor: 'pointer',
                   position: 'relative', overflow: 'hidden',
@@ -222,7 +222,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               <button onClick={() => setRedevPage(p => p + 1)} style={{
                 width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)',
                 background: 'var(--bg-surface)', color: 'var(--text-secondary)',
-                fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 8,
+                fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 'var(--sp-sm)',
               }}>
                 더 보기 ({Math.min(redevPage * 20, filteredRedev.length)} / {filteredRedev.length}건)
               </button>

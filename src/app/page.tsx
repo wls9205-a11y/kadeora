@@ -254,7 +254,7 @@ export default async function HomePage() {
                 <rect width={72} height={72} rx={18} fill="url(#hg)" />
                 <circle cx={18} cy={36} r={7} fill="white" /><circle cx={36} cy={36} r={7} fill="white" /><circle cx={54} cy={36} r={7} fill="white" />
               </svg>
-              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>카더라</span>
+              <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>카더라</span>
             </Link>
             <nav style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Link href="/feed" className="home-nav-link">피드</Link>
@@ -350,7 +350,7 @@ export default async function HomePage() {
                   return (
                     <Link key={idx.symbol} href="/stock" className="kd-section-card" style={{ flexShrink: 0, minWidth: 150, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'inherit', textAlign: 'center' }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '0.03em' }}>{idx.name}</div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', marginTop: 4, letterSpacing: '-0.5px' }}>{Number(idx.price).toLocaleString()}</div>
+                      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 900, color: 'var(--text-primary)', marginTop: 4, letterSpacing: '-0.5px' }}>{Number(idx.price).toLocaleString()}</div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: pct > 0 ? 'var(--accent-red)' : pct < 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)', marginTop: 4, padding: '2px 8px', borderRadius: 6, background: pct > 0 ? 'rgba(255,107,107,0.08)' : pct < 0 ? 'rgba(108,180,255,0.08)' : 'transparent', display: 'inline-block' }}>
                         {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'}{pct > 0 ? '+' : ''}{pct.toFixed(2)}%
                       </div>
@@ -432,7 +432,7 @@ export default async function HomePage() {
                 </div>
                 <div style={{ padding: 'clamp(12px, 2vw, 16px)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                    <span style={{ fontSize: 18 }}>{s.emoji}</span>
+                    <span style={{ fontSize: 'var(--fs-md)' }}>{s.emoji}</span>
                     <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{s.title}</h3>
                   </div>
                   <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 8px' }}>{s.desc}</p>
@@ -500,7 +500,7 @@ export default async function HomePage() {
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                   {faq.q}
-                  <span style={{ fontSize: 18, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 12 }}>+</span>
+                  <span style={{ fontSize: 'var(--fs-md)', color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 12 }}>+</span>
                 </summary>
                 <div style={{
                   padding: '0 20px 16px', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7,

@@ -40,7 +40,7 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
       {children}
       {showGate && (
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 9998,
+          position: 'fixed', inset: 0, zIndex: 80,
           backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
           background: 'rgba(0,0,0,0.5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -51,11 +51,11 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
             maxWidth: 380, width: '100%', textAlign: 'center',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>👀</div>
-            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+            <div style={{ fontSize: 40, marginBottom: 'var(--sp-md)' }}>👀</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
               더 보려면 가입하세요
             </div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 'var(--sp-xl)' }}>
               주식 시세 · 청약 알림 · 실시간 토론<br />
               무료로 모든 기능을 이용할 수 있어요
             </div>

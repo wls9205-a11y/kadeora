@@ -64,7 +64,7 @@ export default async function SeriesDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${series.title} 시리즈`, url: `${SITE_URL}/blog/series/${slug}`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.series-description'] }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(series.title)}&category=blog` }) }} />
       {/* FAQPage — SERP 면적 확장 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: `${series.title} 시리즈는 몇 편인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${series.title} 시리즈는 총 ${posts?.length || 0}편으로 구성되어 있습니다. 카더라 블로그에서 주제별 심층 분석을 순서대로 읽을 수 있습니다.` } }, { '@type': 'Question', name: `${series.title} 시리즈는 어떤 내용인가요?`, acceptedAnswer: { '@type': 'Answer', text: series.description || `${series.title}에 대한 심층 분석 시리즈입니다. 투자 인사이트와 데이터 기반 분석을 제공합니다.` } }] }) }} />
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog/series" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 시리즈 목록</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>📚 {series.title}</h1>
         {series.description && (
@@ -74,7 +74,7 @@ export default async function SeriesDetailPage({ params }: Props) {
       </div>
 
       {/* 시리즈 진행률 바 */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 'var(--sp-lg)' }}>
         <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
           <div style={{ height: '100%', width: '100%', background: 'var(--brand)', borderRadius: 2 }} />
         </div>

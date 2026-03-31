@@ -35,7 +35,7 @@ export default function RealEstateSection() {
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 20px' }}>🏢 부동산 관리</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 20px' }}>🏢 부동산 관리</h1>
       <div style={{ display: 'flex', gap: 4, marginBottom: 16, flexWrap: 'wrap' }}>
         {tabs.map(t => <Pill key={t.key} active={tab === t.key} onClick={() => setTab(t.key)}>{t.icon} {t.label}</Pill>)}
       </div>

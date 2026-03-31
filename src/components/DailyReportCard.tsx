@@ -73,7 +73,7 @@ export default function DailyReportCard() {
   return (
     <Link href={`/daily/${encodeURIComponent(data.region)}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 10 }}>
       <div style={{
-        padding: '14px 16px', borderRadius: 14,
+        padding: 'var(--card-p) 16px', borderRadius: 'var(--radius-lg)',
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.04) 100%)',
         border: '1.5px solid rgba(59,123,246,0.2)',
         transition: 'transform 0.1s, border-color 0.15s',

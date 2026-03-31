@@ -62,7 +62,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
   return (
     <div style={{
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
-      borderRadius: 12, padding: 14, marginBottom: 12,
+      borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 'var(--sp-md)',
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>

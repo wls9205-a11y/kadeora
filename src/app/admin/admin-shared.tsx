@@ -63,7 +63,7 @@ export function KPICard({ icon, label, value, sub, color }: { icon: string; labe
     <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '16px 18px', display: 'flex', gap: 14, alignItems: 'center', transition: 'border-color .15s' }}
       onMouseEnter={e => (e.currentTarget.style.borderColor = color)}
       onMouseLeave={e => (e.currentTarget.style.borderColor = C.border)}>
-      <div style={{ width: 42, height: 42, borderRadius: 10, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>{icon}</div>
+      <div style={{ width: 42, height: 42, borderRadius: 10, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)' }}>{icon}</div>
       <div>
         <div style={{ fontSize: 11, color: C.textDim, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</div>
         <div style={{ fontSize: 22, fontWeight: 800, color: C.text, lineHeight: 1.2 }}>{typeof value === 'number' ? fmt(value) : value}</div>

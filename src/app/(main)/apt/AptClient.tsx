@@ -126,7 +126,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
           <SectionShareButton section="apt-main" label="부동산 청약·분양·실거래 정보 한눈에!" pagePath="/apt" />
@@ -165,7 +165,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         </div>
       </div>
       {globalSearch && (
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8, marginTop: -6 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)', marginTop: -6 }}>
           🔍 &quot;{globalSearch}&quot; — 현재 탭에서 필터링 중
         </div>
       )}
@@ -315,8 +315,8 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
           .slice(0, 5);
         if (ddayList.length === 0) return null;
         return (
-          <div style={{ marginBottom: 10, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📅 이번 주 청약 D-day</div>
+          <div style={{ marginBottom: 10, padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📅 이번 주 청약 D-day</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {ddayList.map((a: any) => (
                 <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 6, borderBottom: '1px solid var(--border)' }}>
@@ -351,7 +351,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       )}
 
       {/* 지역별 부동산 내부 링크 (SEO) */}
-      <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+      <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏙️ 지역별 부동산 정보</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
@@ -369,7 +369,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const bigApts = apts.filter((a: any) => (a.tot_supply_hshld_co || 0) >= 300).slice(0, 12);
         if (bigApts.length === 0) return null;
         return (
-          <div style={{ marginTop: 12, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+          <div style={{ marginTop: 12, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 인기 분양 현장</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {bigApts.map((a: any) => {
@@ -392,7 +392,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
           background: 'var(--bg-elevated, #1e293b)', color: 'var(--text-inverse)', padding: '12px 20px',
-          borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 600, zIndex: 9999,
+          borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 600, zIndex: 100,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
           animation: 'fadeIn 0.2s ease-out',
         }}>{toast}</div>

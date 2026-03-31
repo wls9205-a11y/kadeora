@@ -172,7 +172,7 @@ export function Navigation() {
     <>
       {/* ── 헤더 ── */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 200,
+        position: 'sticky', top: 0, zIndex: 50,
         background: 'rgba(12,21,40,0.88)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border)',
@@ -321,7 +321,7 @@ export function Navigation() {
                       position:'absolute', right:0, top:'calc(100% + 6px)',
                       background:'var(--bg-surface)', border:'1px solid var(--border)',
                       borderRadius:8, overflow:'hidden', minWidth:168,
-                      boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex:300,
+                      boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex: 60,
                     }}>
                       {[
                         { href:`/profile/${userId}`, label:'내 프로필', LIcon: UserIcon },
@@ -397,7 +397,7 @@ export function Navigation() {
 
       {/* ── 모바일 하단 탭바 ── */}
       <nav style={{
-        position:'fixed', bottom:0, left:0, right:0, zIndex:200,
+        position:'fixed', bottom:0, left:0, right:0, zIndex: 50,
         background:'rgba(12,21,40,0.92)',
         backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
         borderTop:'1px solid var(--nav-border)',
@@ -471,7 +471,7 @@ export function Navigation() {
 
       {/* 더보기 시트 */}
       {moreOpen && (
-        <div style={{ position:'fixed', inset:0, zIndex:201 }}>
+        <div style={{ position:'fixed', inset:0, zIndex: 60 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
           {/* 모바일: 바텀 시트 */}
           <div className="md:hidden" style={{
@@ -490,7 +490,7 @@ export function Navigation() {
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span style={{ fontSize:24 }}>{item.emoji}</span>
+                  <span style={{ fontSize: 'var(--fs-xl)' }}>{item.emoji}</span>
                   <span style={{ fontSize:'var(--fs-xs)', fontWeight:600 }}>{item.label}</span>
                   {item.emoji === '🔔' && unread > 0 && (
                     <span style={{
@@ -537,7 +537,7 @@ export function Navigation() {
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span style={{ fontSize:24 }}>{item.emoji}</span>
+                  <span style={{ fontSize: 'var(--fs-xl)' }}>{item.emoji}</span>
                   <span style={{ fontSize:'var(--fs-xs)', fontWeight:600 }}>{item.label}</span>
                   {item.emoji === '🔔' && unread > 0 && (
                     <span style={{
@@ -556,7 +556,7 @@ export function Navigation() {
         </div>
       )}
 
-      {menuOpen && <div className="hidden md:block" style={{ position:'fixed', inset:0, zIndex:199 }} onClick={()=>setMenuOpen(false)} />}
+      {menuOpen && <div className="hidden md:block" style={{ position:'fixed', inset:0, zIndex: 49 }} onClick={()=>setMenuOpen(false)} />}
     </>
   );
 }

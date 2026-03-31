@@ -78,14 +78,14 @@ export default async function AptSearchPage({ searchParams }: Props) {
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>전국 {totalCount.toLocaleString()}건의 실거래 데이터</p>
 
       {/* 검색 폼 */}
-      <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-lg)' }}>
         <input name="q" defaultValue={q} placeholder="단지명, 동 검색..." aria-label="실거래가 검색"
           style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
         <button type="submit" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>검색</button>
       </form>
 
       {/* 필터 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
         {[
           { key: '', label: '전체 면적' },
           { key: 'small', label: '소형 (~60㎡)' },
@@ -103,8 +103,8 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
       {/* 인기 지역 (검색어 없을 때) */}
       {!q && regionStats && (
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>인기 지역</div>
+        <div style={{ marginBottom: 'var(--sp-lg)' }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>인기 지역</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {regionStats.slice(0, 10).map((r: any) => (
               <Link key={r.region_nm} href={`/apt/search?region=${r.region_nm}`} style={{
@@ -119,15 +119,15 @@ export default async function AptSearchPage({ searchParams }: Props) {
       )}
 
       {/* 결과 */}
-      {q && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 12 }}>&quot;{q}&quot; 검색 결과 {totalCount.toLocaleString()}건</div>}
+      {q && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>&quot;{q}&quot; 검색 결과 {totalCount.toLocaleString()}건</div>}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {(trades || []).map((t: any) => {
           const amt = t.deal_amount || 0;
           const color = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)';
           return (
-            <Link key={t.id} href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} className="kd-card-hover" style={{ display: 'block', padding: '12px 16px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+            <Link key={t.id} href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} className="kd-card-hover" style={{ display: 'block', padding: '12px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-xs)' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{t.apt_name}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -154,8 +154,8 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
       {(trades || []).length === 0 && (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>{q ? '🔍' : '🏠'}</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+          <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>{q ? '🔍' : '🏠'}</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
             {q ? `"${q}" 검색 결과가 없습니다` : '실거래가를 검색하세요'}
           </div>
           <div style={{ fontSize: 'var(--fs-sm)' }}>
@@ -185,8 +185,8 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
       {/* 관련 블로그 */}
       {relatedBlogs.length > 0 && (
-        <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>📰 관련 분석 글</div>
+        <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>📰 관련 분석 글</div>
           {relatedBlogs.map((b: any) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -201,7 +201,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
       )}
 
       {/* 지역별 부동산 내부 링크 (SEO) */}
-      <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 20 }}>
+      <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-xl)' }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏙️ 지역별 부동산 정보</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (

@@ -66,9 +66,9 @@ function D1(C: typeof CAT[string], title: string, sub: string, author: string, f
       {/* 스트라이프1: 컬러 헤더 */}
       <div style={{ background: C.a, height:72, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 48px', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          {Logo(26)}<span style={{ fontSize:20, fontWeight:900, color:'#000' }}>카더라</span>
+          {Logo(26)}<span style={{ fontSize: 'var(--fs-lg)', fontWeight:900, color:'#000' }}>카더라</span>
         </div>
-        <span style={{ fontSize:18, fontWeight:900, color:'#000', letterSpacing:1 }}>{C.I}  {C.L.toUpperCase()}</span>
+        <span style={{ fontSize: 'var(--fs-md)', fontWeight:900, color:'#000', letterSpacing:1 }}>{C.I}  {C.L.toUpperCase()}</span>
       </div>
       {/* 스트라이프2: 메타 바 */}
       <div style={{ background:'#111', height:52, display:'flex', alignItems:'center', padding:'0 48px', gap:16, flexShrink:0, borderBottom:'0.5px solid rgba(255,255,255,.06)' }}>
@@ -88,7 +88,7 @@ function D1(C: typeof CAT[string], title: string, sub: string, author: string, f
       {/* 스트라이프3: 제목 */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 48px' }}>
         <div style={{ fontSize: title.length > 22 ? 38 : title.length > 16 ? 44 : 50, fontWeight:900, color:'#fff', lineHeight:1.18, letterSpacing:-1.5 }}>{title}</div>
-        {sub && <div style={{ fontSize:17, color:'#6b7280', marginTop:14, lineHeight:1.55 }}>{sub}</div>}
+        {sub && <div style={{ fontSize: 'var(--fs-base)', color:'#6b7280', marginTop:14, lineHeight:1.55 }}>{sub}</div>}
       </div>
       {/* 스트라이프4: KPI 바 */}
       <div style={{ background:C.b, borderTop:`0.5px solid ${C.a}30`, height:58, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 48px', flexShrink:0 }}>
@@ -210,7 +210,7 @@ function D3(C: typeof CAT[string], title: string, sub: string, author: string, f
             {Logo(20)}<span style={{ fontSize:13, fontWeight:900, color:'#000' }}>카더라</span>
           </div>
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.5)', letterSpacing:2, marginBottom:4 }}>{C.E}</div>
-          <div style={{ fontSize:17, fontWeight:900, color:'#000' }}>{C.L}  {C.I}</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight:900, color:'#000' }}>{C.L}  {C.I}</div>
         </div>
         {author && (
           <div style={{ display:'flex', alignItems:'center', gap:7 }}>
@@ -250,7 +250,7 @@ function D4(C: typeof CAT[string], title: string, sub: string, author: string, f
             {Logo(20)}<span style={{ fontSize:13, fontWeight:900, color:'rgba(0,0,0,.6)' }}>카더라</span>
           </div>
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,.4)', letterSpacing:2 }}>{C.E}</div>
-          <div style={{ fontSize:18, fontWeight:900, color:'#000', marginTop:4 }}>{C.L}  {C.I}</div>
+          <div style={{ fontSize: 'var(--fs-md)', fontWeight:900, color:'#000', marginTop:4 }}>{C.L}  {C.I}</div>
         </div>
         {author && (
           <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', gap:7 }}>

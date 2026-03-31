@@ -114,7 +114,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
         공유
       </button>
       <BottomSheet open={open} onClose={() => setOpen(false)} title="공유하기" maxWidth={480}>
-        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
           {platforms.map(p => (
             <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 60 }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: 'var(--fs-xl)', fontWeight: 900 }}>

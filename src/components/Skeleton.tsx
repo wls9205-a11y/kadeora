@@ -24,9 +24,9 @@ export function SkeletonCard({ lines = 3 }: { lines?: number }) {
       <style>{shimmer}</style>
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 12, padding: 16, marginBottom: 10,
+        borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 10,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-md)' }}>
           <Bone w={36} h={36} r={18} />
           <div style={{ flex: 1 }}>
             <Bone w="40%" h={14} mb={6} />
@@ -75,7 +75,7 @@ export function SkeletonAptCard() {
       <style>{shimmer}</style>
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 12, padding: 16, marginBottom: 10,
+        borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 10,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <Bone w="60%" h={18} />
@@ -99,7 +99,7 @@ export function SkeletonChart({ height = 200 }: { height?: number }) {
       <style>{shimmer}</style>
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 12, padding: 16, marginBottom: 10,
+        borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 10,
       }}>
         <Bone w="30%" h={16} mb={12} />
         <Bone h={height} r={8} />
@@ -112,9 +112,9 @@ export function SkeletonDashboard() {
   return (
     <>
       <style>{shimmer}</style>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, marginBottom: 'var(--sp-lg)' }}>
         {[1, 2, 3, 4].map(i => (
-          <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+          <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16 }}>
             <Bone w="50%" h={12} mb={8} />
             <Bone w="70%" h={24} mb={4} />
             <Bone w="40%" h={10} />

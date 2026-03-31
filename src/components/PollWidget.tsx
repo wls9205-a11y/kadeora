@@ -62,8 +62,8 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
 
   if (loading) return (
     <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--bg-hover)', borderRadius: 8, opacity: 0.5 }}>
-      <div style={{ height: 12, background: 'var(--border)', borderRadius: 6, marginBottom: 8 }} />
-      <div style={{ height: 28, background: 'var(--border)', borderRadius: 6, marginBottom: 4 }} />
+      <div style={{ height: 12, background: 'var(--border)', borderRadius: 6, marginBottom: 'var(--sp-sm)' }} />
+      <div style={{ height: 28, background: 'var(--border)', borderRadius: 6, marginBottom: 'var(--sp-xs)' }} />
       <div style={{ height: 28, background: 'var(--border)', borderRadius: 6 }} />
     </div>
   );

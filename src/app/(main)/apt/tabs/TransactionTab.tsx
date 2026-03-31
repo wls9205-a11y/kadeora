@@ -141,7 +141,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const data = tradeMonthly.filter((s) => s.region === active);
         return (
           <div className="kd-card">
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 지역별 평균 거래가 추이</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 지역별 평균 거래가 추이</div>
             <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
               {regions.slice(0, 8).map(r => (
                 <button key={r} onClick={() => setChartRegion(r)} style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 10, border: (chartRegion || regions[0]) === r ? '1px solid var(--brand)' : 'none', background: (chartRegion || regions[0]) === r ? 'var(--brand)' : 'var(--bg-hover)', color: (chartRegion || regions[0]) === r ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'pointer' }}>{r}</button>
@@ -184,7 +184,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         if (withPP.length === 0) return null;
         const maxPP = withPP[0].pp;
         return (
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 'var(--sp-md)' }}>
             <button onClick={() => setShowTop10(!showTop10)} style={{
               width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)',
@@ -229,7 +229,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const isMax = maxP > 0 && amt >= maxP && sameApt.length >= 2;
         return (
           <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="kd-card-hover" style={{
-            padding: '14px 16px', borderRadius: 14, marginBottom: 8,
+            padding: '14px 16px', borderRadius: 14, marginBottom: 'var(--sp-sm)',
             background: isMax ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)',
             border: isMax ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
             cursor: 'pointer',
@@ -244,7 +244,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
               </button>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 'var(--sp-xs)' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 2 }}>{t.apt_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>전용 {t.exclusive_area}㎡ · {t.floor}층{t.built_year ? ` · ${t.built_year}년식` : ''}</div>
@@ -263,7 +263,7 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         <button onClick={() => setPage(p => p + 1)} style={{
           width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-secondary)',
-          fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 8,
+          fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 'var(--sp-sm)',
         }}>더 보기 ({Math.min(page * 20, filtered.length)} / {filtered.length}건)</button>
       )}
 
@@ -286,9 +286,9 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const related = transactions.filter((x) => x.apt_name === t.apt_name && x.dong === t.dong).slice(0, 20);
         return (
           <BottomSheet open={!!selected} onClose={() => setSelected(null)} title={t.apt_name}>
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}>{t.region_nm} {t.sigungu} {t.dong}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>{t.region_nm} {t.sigungu} {t.dong}</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8, marginBottom: 'var(--sp-lg)' }}>
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>거래가</div>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>{fmtAmount(t.deal_amount || 0)}</div>
@@ -303,14 +303,14 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-lg)' }}>
                 <a href={`https://map.kakao.com/?q=${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
                 <a href={`https://map.naver.com/p/search/${encodeURIComponent(t.apt_name + ' ' + (t.dong || ''))}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
                 <a href={`/apt/complex/${encodeURIComponent(t.apt_name)}`} style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--brand-bg)', border: '1px solid var(--brand-border)', color: 'var(--brand)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>📊 단지 상세</a>
               </div>
 
               {/* 거래 이력 */}
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>거래 이력 ({related.length}건)</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>거래 이력 ({related.length}건)</div>
               {related.map((r, i: number) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-sm)' }}>
                   <span style={{ color: 'var(--text-tertiary)' }}>{r.deal_date}</span>

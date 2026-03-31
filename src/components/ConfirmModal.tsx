@@ -45,7 +45,7 @@ export function ConfirmModal({
   return (
     <div
       style={{
-        position: 'fixed', inset: 0, zIndex: 10000,
+        position: 'fixed', inset: 0, zIndex: 90,
         background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 20,

@@ -54,11 +54,11 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
   if (sectors.length === 0) return null;
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🗺️ 섹터 히트맵</div>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🗺️ 섹터 히트맵</div>
 
       {/* 히트맵 그리드 */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 12 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 'var(--sp-md)' }}>
         {sectors.map(sec => {
           const widthPct = Math.max(12, (sec.totalCap / totalCap) * 100);
           const topStock = sec.stocks.sort((a, b) => b.market_cap - a.market_cap)[0];

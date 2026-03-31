@@ -205,7 +205,7 @@ export default function MapClient() {
       />}
 
       {/* 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
         <div>
           <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
           <h1 style={{ margin: '4px 0 0', fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>🗺️ 부동산 지도</h1>
@@ -218,7 +218,7 @@ export default function MapClient() {
           const conf = LAYER_CONF[l];
           const active = layers.has(l);
           return (
-            <button key={l} onClick={() => toggleLayer(l)} style={{
+            <button aria-label="닫기" key={l} onClick={() => toggleLayer(l)} style={{
               padding: '6px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
               border: `1.5px solid ${active ? conf.color : 'var(--border)'}`,
               background: active ? `${conf.color}15` : 'var(--bg-surface)',
@@ -232,7 +232,7 @@ export default function MapClient() {
       </div>
 
       {/* 지도 */}
-      <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
+      <div style={{ position: 'relative', borderRadius: 'var(--radius-card)', overflow: 'hidden', border: '1px solid var(--border)' }}>
         <div ref={mapRef} style={{ width: '100%', height: sdkError ? 'auto' : 'min(500px, 60vh)', background: 'var(--bg-hover)' }}>
           {sdkError ? (
             <div style={{ padding: '20px 16px', textAlign: 'center' }}>
@@ -254,11 +254,11 @@ export default function MapClient() {
           <div style={{
             position: 'absolute', bottom: 16, left: 16, right: 16,
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderRadius: 12, padding: 14, boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            borderRadius: 'var(--radius-card)', padding: 14, boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                   <span style={{
                     fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 4,
                     background: `${LAYER_CONF[selectedPin.layer].color}20`,
@@ -272,7 +272,7 @@ export default function MapClient() {
                 {selectedPin.extra && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 4 }}>{selectedPin.extra}</div>}
               </div>
               <button onClick={() => setSelectedPin(null)} style={{
-                background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 18,
+                background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-md)',
               }}>✕</button>
             </div>
           </div>
@@ -282,7 +282,7 @@ export default function MapClient() {
       {/* 핀 리스트 (지도 아래) */}
       {loading ? <SkeletonChart /> : (
         <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>총 {pins.length}건</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>총 {pins.length}건</div>
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
             {pins.slice(0, 30).map(pin => (
               <div key={pin.id} onClick={() => setSelectedPin(pin)} style={{

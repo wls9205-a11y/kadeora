@@ -73,8 +73,8 @@ export default function LoungeLivePreview() {
 
   return (
     <Link href={roomId ? `/discuss/${roomId}` : '/discuss'} style={{ display: 'block', textDecoration: 'none', color: 'inherit', marginBottom: 10 }}>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: 12, padding: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: 'var(--radius-card)', padding: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#A78BFA', display: 'inline-block', animation: 'livePulse 1.5s infinite' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: '#A78BFA' }}>라운지 LIVE</span>
@@ -83,7 +83,7 @@ export default function LoungeLivePreview() {
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{participantCount}명 참여</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 'var(--sp-sm)' }}>
           {messages.map(m => (
             <div key={m.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
               <div style={{ width: 20, height: 20, borderRadius: '50%', background: m.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff', flexShrink: 0 }}>

@@ -144,7 +144,7 @@ export default function NoticeBanner() {
           alignItems: 'center',
           overflow: 'hidden',
           position: 'relative',
-          zIndex: 52,
+          zIndex: 50,
           flexShrink: 0,
           cursor: 'pointer',
           padding: '6px 0',
@@ -196,11 +196,11 @@ export default function NoticeBanner() {
       {/* ═══ 바텀시트 상세 ═══ */}
       {showSheet && (
         <>
-          <div onClick={() => setShowSheet(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999 }} />
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000, background: 'var(--bg-surface)', borderRadius: '16px 16px 0 0', padding: '20px 16px', maxHeight: '65vh', overflowY: 'auto' }} className="animate-modalIn">
+          <div onClick={() => setShowSheet(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100 }} />
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 90, background: 'var(--bg-surface)', borderRadius: '16px 16px 0 0', padding: '20px 16px', maxHeight: '65vh', overflowY: 'auto' }} className="animate-modalIn">
 
             {/* 헤더 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {style.icon} {notice.is_paid ? '전광판 광고' : '공지사항'}
@@ -220,7 +220,7 @@ export default function NoticeBanner() {
 
             {/* 작성자 (유료) */}
             {notice.author && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'var(--bg-hover)', borderRadius: 12, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
                 <Avatar src={notice.author.avatar_url} nickname={notice.author.nickname} size={40} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{notice.author.nickname ?? '사용자'}</div>
@@ -231,20 +231,20 @@ export default function NoticeBanner() {
             )}
 
             {/* 내용 */}
-            <div style={{ fontSize: 'var(--fs-base)', lineHeight: 1.7, color: 'var(--text-primary)', whiteSpace: 'pre-line', marginBottom: 16, padding: '16px', background: 'var(--bg-hover)', borderRadius: 12, borderLeft: `3px solid ${textColor}` }}>
+            <div style={{ fontSize: 'var(--fs-base)', lineHeight: 1.7, color: 'var(--text-primary)', whiteSpace: 'pre-line', marginBottom: 'var(--sp-lg)', padding: '16px', background: 'var(--bg-hover)', borderRadius: 12, borderLeft: `3px solid ${textColor}` }}>
               {notice.content}
             </div>
 
             {/* 게시글 링크 */}
             {notice.linked_post_id && (
-              <a href={`/feed/${notice.linked_post_id}`} style={{ display: 'block', padding: '12px 16px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', marginBottom: 16, fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>
+              <a href={`/feed/${notice.linked_post_id}`} style={{ display: 'block', padding: '12px 16px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', marginBottom: 'var(--sp-lg)', fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>
                 📄 관련 게시글 보기 →
               </a>
             )}
 
             {/* 통계 (유료만) */}
             {notice.is_paid && (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-lg)' }}>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 8 }}>
                   <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{notice.impression_count || 0}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>노출</div>
@@ -270,12 +270,12 @@ export default function NoticeBanner() {
 
             {/* 유료 표시 + 구매 유도 */}
             {notice.is_paid && (
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 12 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginBottom: 'var(--sp-md)' }}>
                 이 전광판은 유료 노출 상품으로 등록된 콘텐츠입니다
               </div>
             )}
 
-            <button onClick={() => setShowSheet(false)} style={{ width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>닫기</button>
+            <button aria-label="닫기" onClick={() => setShowSheet(false)} style={{ width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>닫기</button>
           </div>
         </>
       )}

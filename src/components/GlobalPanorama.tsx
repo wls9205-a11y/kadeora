@@ -43,7 +43,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
   const fmtPrice = (s: Stock) => s.currency === 'USD' ? `$${Number(s.price).toFixed(2)}` : `₩${Number(s.price).toLocaleString()}`;
 
   return (
-    <div style={{ marginBottom: 12 }}>
+    <div style={{ marginBottom: 'var(--sp-md)' }}>
       {/* 티커 테이프 */}
       <div style={{ background: 'var(--bg-hover)', borderRadius: 8, overflow: 'hidden', marginBottom: 10, height: 28, position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', position: 'absolute', whiteSpace: 'nowrap', animation: 'kd-ticker 30s linear infinite' }}>
@@ -65,7 +65,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
       <style>{`@keyframes kd-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
 
       {/* 상단 우측: 시간 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
         <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace' }}>글로벌 파노라마</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{ time } KST</span>
       </div>
@@ -102,7 +102,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
         {/* 환율 + 심리 요약 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 6 }}>USD/KRW</div>
-          <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: 4 }}>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: 'var(--sp-xs)' }}>
             {exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}
           </div>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>

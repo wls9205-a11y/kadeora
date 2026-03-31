@@ -105,9 +105,9 @@ export async function GET(req: NextRequest) {
         <div style={{ background: C.color, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, height: 72 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <LogoSVG size={26} />
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#000' }}>카더라</span>
+            <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#000' }}>카더라</span>
           </div>
-          <span style={{ fontSize: 20, fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.en}</span>
+          <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: '#000', letterSpacing: 1 }}>{C.icon}  {C.en}</span>
         </div>
 
         {/* 스트라이프 2: 핵심 수치 */}
@@ -144,7 +144,7 @@ export async function GET(req: NextRequest) {
             { n: '무료',      l: '이용' },
           ].map((k, i, a) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <span style={{ fontSize: 20, fontWeight: 900, color: C.color, lineHeight: 1 }}>{k.n}</span>
+              <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, color: C.color, lineHeight: 1 }}>{k.n}</span>
               <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: 1 }}>{k.l}</span>
             </div>
           ))}

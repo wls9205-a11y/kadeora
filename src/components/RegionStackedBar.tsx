@@ -126,7 +126,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
   });
 
   return (
-    <div style={{ marginBottom: 8, maxWidth: '100%', overflow: 'hidden' }}>
+    <div style={{ marginBottom: 'var(--sp-sm)', maxWidth: '100%', overflow: 'hidden' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
         <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)' }}>지역별 현황</span>

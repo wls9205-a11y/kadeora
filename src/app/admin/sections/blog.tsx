@@ -44,7 +44,7 @@ export default function BlogSection() {
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 20px' }}>✍️ 블로그 관리</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 20px' }}>✍️ 블로그 관리</h1>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>

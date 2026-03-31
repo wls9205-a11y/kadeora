@@ -45,13 +45,13 @@ export default function StockTreemap({ stocks, isKR }: Props) {
   const fmtCap = (v: number) => v >= 1e13 ? `${(v/1e12).toFixed(0)}조` : v >= 1e12 ? `${(v/1e12).toFixed(1)}조` : `${(v/1e8).toFixed(0)}억`;
 
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
+    <div style={{ marginBottom: 'var(--sp-md)' }}>
+      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
         시총 트리맵 · 크기=시총 · 색상=등락
       </div>
 
       {/* 트리맵 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '24px', gap: 3, marginBottom: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '24px', gap: 3, marginBottom: 'var(--sp-sm)' }}>
         {sectors.map((sec, i) => {
           const capRatio = sec.total / maxTotal;
           const cs = Math.max(2, Math.round(capRatio * 10));
@@ -80,7 +80,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
       {/* 선택된 섹터 상세 */}
       {selected && (
         <div style={{ background: 'var(--bg-surface)', border: `1px solid ${selected.avg > 0 ? (isKR ? 'rgba(255,107,107,0.3)' : 'rgba(46,232,165,0.3)') : (isKR ? 'rgba(108,180,255,0.3)' : 'rgba(255,107,107,0.3)')}`, borderRadius: 10, padding: '10px 12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
             <div>
               <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginRight: 8 }}>{selected.name}</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: selected.avg > 0 ? upC : dnC, fontFamily: 'monospace' }}>

@@ -68,7 +68,7 @@ export default async function ProfilePage({ params }: Props) {
     {/* 최근 활동 타임라인 */}
     {((posts && posts.length > 0) || (recentComments && recentComments.length > 0)) && (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 16px' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>최근 활동</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>최근 활동</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', paddingLeft: 16 }}>
           <div style={{ position: 'absolute', left: 5, top: 6, bottom: 6, width: 2, background: 'var(--border)', borderRadius: 1 }} />
           {[

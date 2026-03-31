@@ -32,7 +32,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   }, [globalRegion]);
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
-    <button key={v} onClick={() => set(v)} style={{
+    <button aria-label="닫기" key={v} onClick={() => set(v)} style={{
       padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
       color: sel === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
@@ -84,7 +84,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   return (
         <div>
           {/* 정렬 + 상태 필터 한 줄 */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-sm)', alignItems: 'center' }}>
             <select value={aptSort} onChange={e => setAptSort(e.target.value as typeof aptSort)} style={{
               padding: '6px 10px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)',
               background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
@@ -105,7 +105,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   'closed': filtered.filter(a => getStatus(a) === 'closed').length,
                 };
                 return (
-                  <button key={v} onClick={() => setStatusFilter(v)} style={{
+                  <button aria-label="닫기" key={v} onClick={() => setStatusFilter(v)} style={{
                     padding: '4px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
                     background: statusFilter === v ? 'var(--brand)' : 'var(--bg-hover)',
                     color: statusFilter === v ? '#fff' : 'var(--text-secondary)',
@@ -156,13 +156,13 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>투기과열</span>}
                   {(apt as Record<string, any>)['MDAT_TRGET_AREA_SECD'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange-light)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{apt.region_nm}</span>
-                  <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`subscription:${apt.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
+                  <button aria-label="닫기" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`subscription:${apt.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                     {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}
                   </button>
                 </div>
                 {/* 경쟁률 */}
                 {(apt.competition_rate_1st != null && Number(apt.competition_rate_1st) > 0) && (
-                  <div style={{ fontSize: 'var(--fs-xs)', marginBottom: 4, display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', marginBottom: 'var(--sp-xs)', display: 'flex', gap: 6, alignItems: 'center' }}>
                     <span style={{ color: Number(apt.competition_rate_1st) >= 10 ? 'var(--accent-red)' : Number(apt.competition_rate_1st) >= 5 ? 'var(--accent-orange)' : 'var(--accent-green)', fontWeight: 800 }}>
                       {Number(apt.competition_rate_1st) >= 10 ? '🔥' : ''} 1순위 {Number(apt.competition_rate_1st).toFixed(1)}:1
                     </span>
@@ -222,7 +222,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
 
           {/* 청약 캘린더 */}
           <div className="kd-card">
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--sp-xs)' }}>
               <SectionShareButton section="apt-calendar" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />
             </div>
             {(() => {
@@ -241,7 +241,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               }
               return (
                 <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
                   <button onClick={() => { setCalOffset(p => p - 1); setSelectedCalDate(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-lg)', color: 'var(--text-secondary)', padding: '4px 8px' }}>‹</button>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📅 {monthLabel}</div>
                   <button onClick={() => { setCalOffset(p => p + 1); setSelectedCalDate(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-lg)', color: 'var(--text-secondary)', padding: '4px 8px' }}>›</button>
@@ -276,7 +276,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
               const dayApts = apts.filter(a => selectedCalDate >= String(a.rcept_bgnde || '').slice(0, 10) && selectedCalDate <= String(a.rcept_endde || '').slice(0, 10));
               return dayApts.length > 0 ? (
                 <div style={{ marginTop: 12, padding: '12px', background: 'var(--bg-hover)', borderRadius: 8 }}>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
                     📅 {selectedCalDate.slice(5).replace('-', '월 ')}일 청약 일정 ({dayApts.length}건)
                   </div>
                   {dayApts.map(a => (

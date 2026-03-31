@@ -108,7 +108,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
   return (
     <div style={{
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
-      borderRadius: 12, padding: 14, marginBottom: 12,
+      borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 'var(--sp-md)',
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -135,10 +135,10 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
       {showForm && (
         <div style={{
           border: '1px solid var(--border)', borderRadius: 10, padding: 12,
-          marginBottom: 12, background: 'var(--bg-hover)',
+          marginBottom: 'var(--sp-md)', background: 'var(--bg-hover)',
         }}>
-          <div style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 4 }}>평점 *</div>
+          <div style={{ marginBottom: 'var(--sp-sm)' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>평점 *</div>
             <StarRating rating={form.rating} size={20} interactive onChange={r => setForm(p => ({ ...p, rating: r }))} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 6 }}>
@@ -152,7 +152,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
           <textarea placeholder="리뷰 내용 (20자 이상) *" value={form.content} rows={3}
             onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
             style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)', resize: 'vertical', marginBottom: 6 }} />
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
             <input placeholder="거주 년수" type="number" value={form.living_years}
               onChange={e => setForm(p => ({ ...p, living_years: e.target.value }))}
               style={{ width: 80, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />
@@ -235,7 +235,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
           background: 'var(--bg-elevated, #1e293b)', color: 'var(--text-inverse)', padding: '10px 18px',
-          borderRadius: 10, fontSize: 'var(--fs-xs)', fontWeight: 600, zIndex: 9999,
+          borderRadius: 10, fontSize: 'var(--fs-xs)', fontWeight: 600, zIndex: 100,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
           animation: 'fadeIn 0.2s ease-out',
         }}>{toast}</div>

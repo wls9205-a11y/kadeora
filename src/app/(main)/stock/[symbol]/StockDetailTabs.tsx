@@ -32,7 +32,7 @@ function MiniChart({ data }: { data: { date: string; close_price: number; open_p
   const color = isUp ? 'var(--accent-red)' : 'var(--accent-blue)';
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
         <span style={{ fontWeight: 600 }}>📈 1개월 추이</span>
         <span style={{ color, fontWeight: 700 }}>{isUp ? '▲' : '▼'} {((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(1)}%</span>
       </div>
@@ -50,7 +50,7 @@ function MiniChart({ data }: { data: { date: string; close_price: number; open_p
         const pos = high > low ? ((current - low) / (high - low)) * 100 : 50;
         return (
           <div style={{ marginTop: 12 }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>가격 범위</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>가격 범위</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{low.toLocaleString()}</span>
               <div style={{ flex: 1, height: 6, background: 'var(--bg-hover)', borderRadius: 3, position: 'relative' }}>
@@ -112,7 +112,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
         {hasOHLC && (
           <div style={{ display: 'flex', background: 'var(--bg-hover)', borderRadius: 6, padding: 2 }}>
             {(['candle', 'line'] as const).map(t => (
-              <button key={t} onClick={() => setChartType(t)} style={{
+              <button aria-label="닫기" key={t} onClick={() => setChartType(t)} style={{
                 padding: '4px 10px', border: 'none', borderRadius: 5, cursor: 'pointer',
                 fontSize: 11, fontWeight: 600,
                 background: chartType === t ? 'var(--brand)' : 'transparent',
@@ -216,7 +216,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
   return (
     <div>
       {/* 탭 */}
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '7px 14px', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 6, flexShrink: 0,
@@ -248,7 +248,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             const signalBorder = aiComment.signal === 'bullish' ? '1px solid rgba(5,150,105,0.2)' : aiComment.signal === 'bearish' ? '1px solid rgba(248,113,113,0.2)' : '1px solid var(--border)';
             return (
               <div className="kd-card" style={{ background: signalBg, border: signalBorder }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: signalColor, padding: '2px 10px', borderRadius: 999, background: aiComment.signal === 'bullish' ? 'rgba(5,150,105,0.12)' : aiComment.signal === 'bearish' ? 'rgba(248,113,113,0.12)' : 'var(--bg-hover)' }}>{signalLabel}</span>
                 </div>
@@ -260,13 +260,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             );
           })()}
           {!aiComment && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16, textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 4 }}>🤖 AI 한줄평</div>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)', textAlign: 'center' }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>🤖 AI 한줄평</div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>이 종목의 AI 분석이 준비되면 표시됩니다</div>
             </div>
           )}
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8 }}>🏢 회사 소개</div>
+          <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏢 회사 소개</div>
             <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.75 }}>{description}</p>
           </div>
         </div>
@@ -280,12 +280,12 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 수급 */}
       {tab === 'flow' && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 투자자별 수급</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 투자자별 수급</div>
           {investorFlow.length > 0 && (() => {
             const totalForeign = investorFlow.reduce((s: number, d) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
             const totalInst = investorFlow.reduce((s: number, d) => s + ((d.inst_buy || 0) - (d.inst_sell || 0)), 0);
             return (
-              <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+              <div style={{ display: 'flex', gap: 12, marginBottom: 'var(--sp-md)' }}>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>외국인 누적</div>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: totalForeign >= 0 ? 'var(--accent-blue)' : 'var(--accent-red)', marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
@@ -342,7 +342,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             const neu = news.length - pos - neg;
             const total = news.length || 1;
             return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                 <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>긍정 {pos}</span>
                 <span>중립 {neu}</span>
                 <span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>부정 {neg}</span>

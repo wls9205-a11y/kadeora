@@ -75,7 +75,7 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
     <>
       {/* 등급 진행 바 */}
       <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--bg-base)', borderRadius: 10, border: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: gradeColor }}>{gradeEmoji} {gradeTitle}</span>
           <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
             {(currentPoints ?? 0).toLocaleString()} / {gradeNum < 10 ? (nextPoints ?? 0).toLocaleString() : '∞'} pts
@@ -100,7 +100,7 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginTop: 16, background: 'var(--bg-base)', borderRadius: 12, border: '1px solid var(--border)', padding: '12px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginTop: 16, background: 'var(--bg-base)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 0' }}>
         {stats.map((stat, i) => (
           <div key={stat.label} style={{ display: 'contents' }}>
             {i > 0 && <div style={{ height: 24, width: 1, background: 'var(--border)' }} />}

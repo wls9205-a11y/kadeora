@@ -78,7 +78,7 @@ export default function GuestWelcome() {
 
   return (
     <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1001,
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 90,
       background: 'linear-gradient(to top, var(--bg-surface) 90%, transparent)',
       padding: '16px 16px calc(16px + env(safe-area-inset-bottom, 0px))',
     }}>
@@ -89,9 +89,9 @@ export default function GuestWelcome() {
         boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
         animation: 'guestSlideUp 0.4s ease',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
-          <div style={{ fontSize: 36, marginBottom: 8 }}>👋</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--sp-lg)' }}>
+          <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👋</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>
             카더라에 오신 걸 환영해요!
           </div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
@@ -100,7 +100,7 @@ export default function GuestWelcome() {
         </div>
 
         {/* 혜택 3개 */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20, justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-xl)', justifyContent: 'center' }}>
           {[
             { emoji: '🔔', text: '실시간 알림' },
             { emoji: '⚡', text: '앱처럼 빠름' },
@@ -110,7 +110,7 @@ export default function GuestWelcome() {
               flex: 1, textAlign: 'center', padding: '10px 6px',
               background: 'var(--bg-hover)', borderRadius: 10,
             }}>
-              <div style={{ fontSize: 20, marginBottom: 4 }}>{b.emoji}</div>
+              <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 'var(--sp-xs)' }}>{b.emoji}</div>
               <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{b.text}</div>
             </div>
           ))}

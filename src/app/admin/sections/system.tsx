@@ -6,7 +6,7 @@ export default function SystemSection() {
   const [tab, setTab] = useState<'crons' | 'infra' | 'env' | 'flags'>('crons');
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 16px' }}>⚙️ 시스템</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 16px' }}>⚙️ 시스템</h1>
       <div style={{ display: 'flex', gap: 4, marginBottom: 16, flexWrap: 'wrap' }}>
         <Pill active={tab === 'crons'} onClick={() => setTab('crons')}>🔄 크론</Pill>
         <Pill active={tab === 'infra'} onClick={() => setTab('infra')}>🖥️ 인프라</Pill>
@@ -132,7 +132,7 @@ function InfraTab() {
             display: 'block', padding: 14, borderRadius: 10, textDecoration: 'none', textAlign: 'center',
             background: C.card, border: `1px solid ${C.border}`,
           }}>
-            <div style={{ fontSize: 18, marginBottom: 4 }}>{l.icon}</div>
+            <div style={{ fontSize: 'var(--fs-md)', marginBottom: 4 }}>{l.icon}</div>
             <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{l.label}</div>
           </a>
         ))}

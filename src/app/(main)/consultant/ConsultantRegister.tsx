@@ -76,29 +76,29 @@ export default function ConsultantRegister() {
   if (loading) return <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-tertiary)' }}>로딩 중...</div>;
   if (!user) return (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>분양 상담사 등록</h1>
-      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 24 }}>로그인 후 분양 상담사로 등록하고, 프리미엄 리스팅으로 고객을 만나세요.</p>
+      <div style={{ fontSize: 48, marginBottom: 'var(--sp-lg)' }}>🏢</div>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>분양 상담사 등록</h1>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-2xl)' }}>로그인 후 분양 상담사로 등록하고, 프리미엄 리스팅으로 고객을 만나세요.</p>
       <Link href="/login?redirect=/consultant" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
     </div>
   );
 
-  const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 16 };
+  const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' };
   const input = { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '0 16px 40px' }}>
-      <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>← 부동산</Link>
+      <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 'var(--sp-lg)' }}>← 부동산</Link>
 
       {/* 헤더 */}
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <div style={{ fontSize: 40, marginBottom: 8 }}>🏢</div>
+      <div style={{ textAlign: 'center', marginBottom: 'var(--sp-2xl)' }}>
+        <div style={{ fontSize: 40, marginBottom: 'var(--sp-sm)' }}>🏢</div>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>분양 상담사</h1>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: 0 }}>카더라에서 분양 고객을 만나세요</p>
       </div>
 
       {/* 스텝 인디케이터 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 24, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-2xl)', justifyContent: 'center' }}>
         {['등록', '요금제', '대시보드'].map((s, i) => {
           const steps = ['register', 'pricing', 'dashboard'];
           const active = steps.indexOf(step) >= i;
@@ -116,30 +116,30 @@ export default function ConsultantRegister() {
       {step === 'register' && (
         <div>
           <div style={card}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>기본 정보</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-lg)' }}>기본 정보</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 4, display: 'block' }}>이름 *</label>
+                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>이름 *</label>
                 <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" style={input} />
               </div>
               <div>
-                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 4, display: 'block' }}>연락처 *</label>
+                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>연락처 *</label>
                 <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="010-1234-5678" style={input} />
               </div>
               <div>
-                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 4, display: 'block' }}>카카오톡 ID</label>
+                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>카카오톡 ID</label>
                 <input value={kakaoId} onChange={e => setKakaoId(e.target.value)} placeholder="카카오톡 오픈채팅 링크 또는 ID" style={input} />
               </div>
               <div>
-                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 4, display: 'block' }}>소속 회사</label>
+                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>소속 회사</label>
                 <input value={company} onChange={e => setCompany(e.target.value)} placeholder="○○부동산, ○○공인중개사사무소" style={input} />
               </div>
               <div>
-                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 4, display: 'block' }}>공인중개사 자격번호</label>
+                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>공인중개사 자격번호</label>
                 <input value={licenseNo} onChange={e => setLicenseNo(e.target.value)} placeholder="인증 시 ✅ 마크 부여" style={input} />
               </div>
               <div>
-                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 4, display: 'block' }}>자기소개 (200자)</label>
+                <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>자기소개 (200자)</label>
                 <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 200))} placeholder="경력, 전문 분야, 강점 등을 소개해주세요" rows={3} style={{ ...input, resize: 'none' }} />
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>{bio.length}/200</div>
               </div>
@@ -147,7 +147,7 @@ export default function ConsultantRegister() {
           </div>
 
           <div style={card}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>담당 지역 (복수 선택)</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>담당 지역 (복수 선택)</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {REGIONS.map(r => (
                 <button key={r} onClick={() => toggleRegion(r)} style={{
@@ -174,7 +174,7 @@ export default function ConsultantRegister() {
       {/* Step 2: 요금제 선택 */}
       {step === 'pricing' && (
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ textAlign: 'center', marginBottom: 'var(--sp-xl)' }}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>프리미엄 리스팅 요금제</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 4 }}>분양중 탭에서 고객에게 직접 노출되세요</div>
           </div>
@@ -187,14 +187,14 @@ export default function ConsultantRegister() {
               position: 'relative',
             }}>
               {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 12px', borderRadius: 10, background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 24 }}>{tier.icon}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)' }}>
+                <span style={{ fontSize: 'var(--fs-xl)' }}>{tier.icon}</span>
                 <div>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tier.color }}>{tier.name}</div>
                   <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>월 {tier.price.toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)', fontWeight: 400, color: 'var(--text-tertiary)' }}>원</span></div>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 'var(--sp-lg)' }}>
                 {tier.features.map(f => (
                   <div key={f} style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', display: 'flex', gap: 6 }}>
                     <span style={{ color: tier.color }}>✓</span> {f}
@@ -220,7 +220,7 @@ export default function ConsultantRegister() {
           </div>
 
           <div style={{ ...card, marginTop: 16, background: 'rgba(96,165,250,0.06)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 8 }}>💡 왜 프리미엄 리스팅인가요?</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--sp-sm)' }}>💡 왜 프리미엄 리스팅인가요?</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               분양 상담 1건 계약 시 수백~수천만 원의 수수료가 발생합니다.<br/>
               월 4.9만~29.9만 원으로 카더라의 분양 관심 유저에게 직접 노출되어,<br/>
@@ -234,7 +234,7 @@ export default function ConsultantRegister() {
       {step === 'dashboard' && profile && (
         <div>
           <div style={card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
               <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>내 프로필</div>
               <button onClick={() => setStep('register')} style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>수정</button>
             </div>
@@ -252,7 +252,7 @@ export default function ConsultantRegister() {
 
           {/* 리스팅 현황 */}
           <div style={card}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>📊 내 리스팅</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 내 리스팅</div>
             {profile.premium_listings?.length > 0 ? profile.premium_listings.map((l: any) => (
               <div key={l.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -274,7 +274,7 @@ export default function ConsultantRegister() {
               </div>
             )) : (
               <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
-                <div style={{ fontSize: 'var(--fs-sm)', marginBottom: 8 }}>아직 활성 리스팅이 없어요</div>
+                <div style={{ fontSize: 'var(--fs-sm)', marginBottom: 'var(--sp-sm)' }}>아직 활성 리스팅이 없어요</div>
                 <button onClick={() => setStep('pricing')} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid var(--brand)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>프리미엄 리스팅 시작</button>
               </div>
             )}

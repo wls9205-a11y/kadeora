@@ -123,7 +123,7 @@ export default function PromoSheet() {
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 1100,
+      position: 'fixed', inset: 0, zIndex: 90,
       animation: 'promoFadeIn 0.2s ease',
     }}>
       {/* Dim overlay */}
@@ -177,7 +177,7 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
   return (
     <>
       {/* Logo + title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-lg)' }}>
         <div style={{
           width: 44, height: 44, borderRadius: 12,
           background: 'linear-gradient(135deg, #0F1B3E, #2563EB)',
@@ -190,13 +190,13 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
           </svg>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>카더라에 오신 걸 환영합니다</div>
+          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800 }}>카더라에 오신 걸 환영합니다</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>대한민국 소리소문 정보 커뮤니티</div>
         </div>
       </div>
 
       {/* Feature pills */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
         {[
           { label: '실시간 주식 시세', color: '#93c5fd', bg: 'rgba(96,165,250,0.12)' },
           { label: '청약 알림', color: '#6ee7b7', bg: 'rgba(52,211,153,0.12)' },
@@ -267,7 +267,7 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
   return (
     <>
       {/* Center icon */}
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+      <div style={{ textAlign: 'center', marginBottom: 'var(--sp-xl)' }}>
         <div style={{
           width: 64, height: 64, borderRadius: 16,
           background: 'linear-gradient(135deg, #0F1B3E, #2563EB)',
@@ -280,19 +280,19 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
             <circle cx="54" cy="36" r="6" fill="#fff" />
           </svg>
         </div>
-        <div style={{ fontSize: 19, fontWeight: 800, marginBottom: 4 }}>홈 화면에 카더라 추가</div>
+        <div style={{ fontSize: 19, fontWeight: 800, marginBottom: 'var(--sp-xs)' }}>홈 화면에 카더라 추가</div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>앱처럼 빠른 실행, 실시간 푸시 알림</div>
       </div>
 
       {/* Feature cards */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
-        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 10px', textAlign: 'center' }}>
-          <div style={{ fontSize: 20, marginBottom: 6 }}>📱</div>
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-card)', padding: '14px 10px', textAlign: 'center' }}>
+          <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 6 }}>📱</div>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>앱 다운로드 불필요</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>설치 없이 바로 추가</div>
         </div>
-        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 10px', textAlign: 'center' }}>
-          <div style={{ fontSize: 20, marginBottom: 6 }}>🔔</div>
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-card)', padding: '14px 10px', textAlign: 'center' }}>
+          <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 6 }}>🔔</div>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>실시간 푸시 알림</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>청약/주식 알림 즉시</div>
         </div>

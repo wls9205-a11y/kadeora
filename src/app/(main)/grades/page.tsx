@@ -70,8 +70,8 @@ export default async function GradesPage() {
         const remaining = next ? next.min_score - userPoints! : 0;
         const progress = next ? ((userPoints! - current.min_score) / (next.min_score - current.min_score)) * 100 : 100;
         return (
-          <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
               <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{current.emoji} {current.title} (Lv.{current.grade})</span>
               <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{userPoints}P</span>
             </div>

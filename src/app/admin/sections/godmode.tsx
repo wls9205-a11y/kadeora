@@ -76,7 +76,7 @@ export default function GodModeSection() {
 
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 8px' }}>⚡ GOD MODE</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 8px' }}>⚡ GOD MODE</h1>
       <p style={{ fontSize: 13, color: C.textDim, margin: '0 0 24px' }}>Phase 순차 실행 — AI/콘텐츠는 Fire&amp;Forget (백그라운드 실행)</p>
 
       {/* Mode Buttons */}
@@ -99,7 +99,7 @@ export default function GodModeSection() {
       {running && (
         <div style={{ background: C.card, border: `1px solid ${C.brand}40`, borderRadius: 12, padding: 20, marginBottom: 20, textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 8, animation: 'pulse 1.5s infinite' }}>⚡</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: C.text }}>{mode.toUpperCase()} 실행 중...</div>
+          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: C.text }}>{mode.toUpperCase()} 실행 중...</div>
           <div style={{ fontSize: 14, color: C.brand, fontWeight: 600, marginTop: 4 }}>{(elapsed / 1000).toFixed(1)}초</div>
         </div>
       )}

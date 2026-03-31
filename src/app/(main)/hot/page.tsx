@@ -114,7 +114,7 @@ export default async function HotPage() {
         </nav>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>🔥 이번 주 HOT</h1>
+            <h1 style={{ margin: 0, fontSize: 'var(--fs-lg)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>🔥 이번 주 HOT</h1>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
               <time dateTime={new Date().toISOString()}>{dateRange}</time> · 좋아요 기준
             </div>
@@ -129,7 +129,7 @@ export default async function HotPage() {
         const totalComments = (topPosts ?? []).reduce((s: number, p: any) => s + (p.comments_count ?? 0), 0);
         const totalViews = (topPosts ?? []).reduce((s: number, p: any) => s + (p.view_count ?? 0), 0);
         return (
-          <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none' }}>
             {[
               { label: '게시글', value: (topPosts ?? []).length, unit: '편', max: 10, color: 'var(--brand)', icon: '📝' },
               { label: '좋아요', value: totalLikes, unit: '', max: 100, color: 'var(--accent-red)', icon: '🤍' },
@@ -209,7 +209,7 @@ export default async function HotPage() {
       {/* ── 지역별 HOT (데이터 있는 지역만, 가로 스크롤) ── */}
       {Object.keys(regionPosts).length > 0 && (
         <div style={{ marginBottom: 14 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📍 지역별 HOT</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📍 지역별 HOT</h2>
           <div className="apt-pill-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
             {REGION_SECTIONS.map(region => {
               const posts = regionPosts[region];

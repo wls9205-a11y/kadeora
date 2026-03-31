@@ -6,7 +6,7 @@ export default function ReportsSection() {
   const [tab, setTab] = useState<'reports' | 'payments'>('reports');
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 16px' }}>🚨 신고 / 결제</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 16px' }}>🚨 신고 / 결제</h1>
       <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
         <Pill active={tab === 'reports'} onClick={() => setTab('reports')}>🚨 신고 관리</Pill>
         <Pill active={tab === 'payments'} onClick={() => setTab('payments')}>💳 결제 내역</Pill>
@@ -83,7 +83,7 @@ function PaymentsTab() {
         ].map(s => (
           <div key={s.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 16px' }}>
             <div style={{ fontSize: 11, color: C.textDim }}>{s.label}</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: s.color }}>{s.value}</div>
           </div>
         ))}
       </div>

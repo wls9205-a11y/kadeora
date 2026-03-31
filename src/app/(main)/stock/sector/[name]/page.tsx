@@ -104,7 +104,7 @@ export default async function SectorPage({ params }: Props) {
         ],
       })}} />
       {/* 가시적 브레드크럼 */}
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>
@@ -113,7 +113,7 @@ export default async function SectorPage({ params }: Props) {
       </nav>
 
       {/* 히어로 이미지 */}
-      <div style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+      <div style={{ marginBottom: 'var(--sp-md)', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`/api/og?title=${encodeURIComponent(sector + ' 섹터 종목')}&design=2&category=stock&subtitle=${encodeURIComponent(stocks.length + '종목 · 시총 ' + fmtCap(totalCap, stocks[0]?.currency ?? undefined))}`}
@@ -124,7 +124,7 @@ export default async function SectorPage({ params }: Props) {
         />
       </div>
 
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 'var(--sp-lg)' }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>{sector} 섹터</h1>
         <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
           {stocks.length}종목 · 합산 시총 {fmtCap(totalCap, stocks[0]?.currency ?? undefined)} · 평균 등락 {avgPct >= 0 ? '+' : ''}{avgPct.toFixed(2)}%
@@ -145,7 +145,7 @@ export default async function SectorPage({ params }: Props) {
       </p>
 
       {/* 섹터 요약 — 시각 대시보드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 8, marginBottom: 'var(--sp-lg)' }}>
         {/* 상승/하락 도넛 차트 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <svg viewBox="0 0 80 80" style={{ width: 70, height: 70 }}>
@@ -211,12 +211,12 @@ export default async function SectorPage({ params }: Props) {
 
       {/* 시총 분포 바 (Top 5) */}
       {stocks.length >= 3 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>시총 비중 TOP5</div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 'var(--sp-md)' }}>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>시총 비중 TOP5</div>
           {stocks.slice(0, 5).map((s, i) => {
             const pct = totalCap > 0 ? ((s.market_cap || 0) / totalCap) * 100 : 0;
             return (
-              <div key={s.symbol} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <div key={s.symbol} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 50, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
                 <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--bg-hover)', overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, borderRadius: 3, background: `hsl(${220 - i * 20}, 70%, ${50 + i * 5}%)` }} />
@@ -229,8 +229,8 @@ export default async function SectorPage({ params }: Props) {
       )}
 
       {/* 종목 리스트 */}
-      <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📊 {sector} 섹터 시총 순위</h2>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px' }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📊 {sector} 섹터 시총 순위</h2>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '0 16px' }}>
         {stocks.map((s, i) => {
           const pct = s.change_pct ?? 0;
           return (
@@ -261,7 +261,7 @@ export default async function SectorPage({ params }: Props) {
       </div>
 
       {/* 다른 섹터 링크 */}
-      <div style={{ marginTop: 20, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+      <div style={{ marginTop: 20, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 다른 섹터</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['반도체', '금융', '자동차', '바이오', '화학', '철강', '건설', '유통', 'IT', '에너지', '통신', '엔터', '방산', '조선'].map(s => (

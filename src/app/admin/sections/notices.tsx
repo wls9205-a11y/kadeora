@@ -6,7 +6,7 @@ export default function NoticesSection() {
   const [tab, setTab] = useState<'notices' | 'push'>('notices');
   return (
     <div style={{ animation: 'fadeIn .4s ease' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: C.text, margin: '0 0 16px' }}>📢 공지 · 알림</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: C.text, margin: '0 0 16px' }}>📢 공지 · 알림</h1>
       <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
         <Pill active={tab === 'notices'} onClick={() => setTab('notices')}>📡 공지 전광판</Pill>
         <Pill active={tab === 'push'} onClick={() => setTab('push')}>📣 푸시 알림</Pill>

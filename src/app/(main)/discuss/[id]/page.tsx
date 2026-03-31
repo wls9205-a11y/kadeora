@@ -147,7 +147,7 @@ export default async function DiscussDetailPage({ params }: Props) {
       }) }} />
 
       {/* Back */}
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <Link href="/discuss" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>토론</Link>
@@ -156,7 +156,7 @@ export default async function DiscussDetailPage({ params }: Props) {
       </nav>
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent(topic.title)}&design=2&category=${topic.category}&subtitle=${encodeURIComponent(topic.option_a + ' vs ' + topic.option_b)}`} alt={`${topic.title} — 카더라 토론`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }} loading="lazy" />
+      <img src={`/api/og?title=${encodeURIComponent(topic.title)}&design=2&category=${topic.category}&subtitle=${encodeURIComponent(topic.option_a + ' vs ' + topic.option_b)}`} alt={`${topic.title} — 카더라 토론`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="lazy" />
 
       {/* Topic Header — SSR rendered for crawlers */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
@@ -167,7 +167,7 @@ export default async function DiscussDetailPage({ params }: Props) {
           {topic.is_hot && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 700, background: 'var(--error)', color: '#fff' }}>HOT</span>}
         </div>
 
-        <h1 itemProp="headline" style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.35 }}>
+        <h1 itemProp="headline" style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.35 }}>
           {topic.title}
         </h1>
         {topic.description && (
@@ -188,10 +188,10 @@ export default async function DiscussDetailPage({ params }: Props) {
 
       {/* A vs B 시각적 비교 */}
       {topic.option_a && topic.option_b && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', gap: 0, marginBottom: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 12px', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '14px 12px', alignItems: 'center' }}>
           {/* A */}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 900, color: '#60A5FA' }}>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: '#60A5FA' }}>
               {total > 0 ? Math.round(((topic.vote_a || 0) / total) * 100) : 50}%
             </div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 4 }}>{topic.option_a}</div>
@@ -216,7 +216,7 @@ export default async function DiscussDetailPage({ params }: Props) {
           </div>
           {/* B */}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 900, color: '#F87171' }}>
+            <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: '#F87171' }}>
               {total > 0 ? Math.round(((topic.vote_b || 0) / total) * 100) : 50}%
             </div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, marginTop: 4 }}>{topic.option_b}</div>
@@ -231,7 +231,7 @@ export default async function DiscussDetailPage({ params }: Props) {
 
       {/* 관련 블로그 (내부 링크 SEO) */}
       {relatedBlogs.length > 0 && (
-        <div style={{ marginTop: 20, marginBottom: 16 }}>
+        <div style={{ marginTop: 20, marginBottom: 'var(--sp-lg)' }}>
           <h3 style={{ margin: '0 0 10px', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>📰 관련 분석 글</h3>
           {relatedBlogs.map((b: any) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', fontSize: 'var(--fs-sm)' }}>

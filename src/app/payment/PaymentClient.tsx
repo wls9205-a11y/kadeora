@@ -138,7 +138,7 @@ export default function PaymentClient() {
       {(products.length === 0 || products.every(p => !p.is_active)) && (
         <div style={{textAlign:'center', padding:'60px 20px'}}>
           <div style={{fontSize:48, marginBottom:16}}>🏗️</div>
-          <h2 style={{fontSize:20, fontWeight:700, color:'var(--text-primary)', marginBottom:8}}>상점 준비중입니다</h2>
+          <h2 style={{fontSize: 'var(--fs-lg)', fontWeight:700, color:'var(--text-primary)', marginBottom:8}}>상점 준비중입니다</h2>
           <p style={{fontSize:14, color:'var(--text-secondary)', lineHeight:1.6}}>더 나은 서비스를 위해 준비중입니다.<br/>빠른 시일 내에 오픈할 예정입니다.</p>
         </div>
       )}

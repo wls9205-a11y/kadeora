@@ -52,7 +52,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
   return (
     <div
       style={{
-        position: 'fixed', inset: 0, zIndex: 10000,
+        position: 'fixed', inset: 0, zIndex: 90,
         background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
       }}
@@ -68,7 +68,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
       >
         {submitted ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+            <div style={{ fontSize: 40, marginBottom: 'var(--sp-md)' }}>✅</div>
             <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
               신고가 접수되었습니다
             </h3>
@@ -89,7 +89,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
               🚨 콘텐츠 신고
             </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 'var(--sp-lg)' }}>
               {REPORT_REASONS.map(r => (
                 <label
                   key={r.value}
@@ -130,7 +130,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                 width: '100%', padding: '10px 14px', borderRadius: 10, boxSizing: 'border-box',
                 border: '1px solid var(--border)', background: 'var(--bg-base)',
                 color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', resize: 'none',
-                marginBottom: 16, fontFamily: 'inherit', lineHeight: 1.5,
+                marginBottom: 'var(--sp-lg)', fontFamily: 'inherit', lineHeight: 1.5,
               }}
               onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
               onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}

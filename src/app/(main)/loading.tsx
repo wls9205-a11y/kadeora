@@ -6,7 +6,7 @@ export default function MainLoading() {
         <div style={{fontSize:48, marginBottom:16}}>📡</div>
         <p style={{color:'var(--text-secondary)', fontSize:14}}>잠시만요...</p>
       </div>
-      <div style={{ height: 16, width: 100, borderRadius: 8, background: "var(--bg-surface)", marginBottom: 16 }} />
+      <div style={{ height: 16, width: 100, borderRadius: 8, background: "var(--bg-surface)", marginBottom: 'var(--sp-lg)' }} />
       <div style={{ height: 72, borderRadius: 12, background: "var(--bg-surface)", marginBottom: 18, animation: "pulse 2s infinite" }} />
       <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
         {[1, 2, 3, 4, 5].map((i) => (

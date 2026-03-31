@@ -202,7 +202,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
 
               {/* Replies */}
               {msg.replies && msg.replies.length > 0 && (
-                <div style={{ marginLeft: 56, paddingLeft: 10, borderLeft: '2px solid var(--border)', marginBottom: 4 }}>
+                <div style={{ marginLeft: 56, paddingLeft: 10, borderLeft: '2px solid var(--border)', marginBottom: 'var(--sp-xs)' }}>
                   {msg.replies.map(reply => {
                     const rp = reply.profiles as MsgProfile | null;
                     const rg = GRADE_INFO[rp?.grade ?? 1] ?? GRADE_INFO[1];
@@ -245,7 +245,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
               <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: avc(user.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>{(myNickname ?? '나')[0]}</div>
               <div style={{ flex: 1, position: 'relative' }}>
                 {showMention && mentionList.length > 0 && (
-                  <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 4, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', zIndex: 100, boxShadow: '0 -4px 16px rgba(0,0,0,0.12)' }}>
+                  <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 'var(--sp-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', zIndex: 100, boxShadow: '0 -4px 16px rgba(0,0,0,0.12)' }}>
                     {mentionList.map((u, i) => (
                       <div key={u.id} onClick={() => selectMention(u.nickname ?? '')} style={{ padding: '7px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--fs-sm)', background: i === mentionIndex ? 'var(--bg-hover)' : 'transparent' }}>
                         <div style={{ width: 22, height: 22, borderRadius: '50%', background: avc(u.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{(u.nickname ?? '?')[0]}</div>
@@ -273,7 +273,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
       {/* Mini Profile Sheet */}
       {sheetUser && (
         <BottomSheet open={!!sheetUser} onClose={() => setSheetUser(null)} title={sheetUser.nickname ?? '사용자'} maxWidth={480}>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 'var(--sp-xl)' }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', background: avc(sheetUser.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', fontWeight: 700 }}>{(sheetUser.nickname ?? '?')[0]}</div>
               <div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: (GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).color, fontWeight: 600 }}>

@@ -48,15 +48,15 @@ function TopicCard({ topic }: { topic: Topic }) {
     <Link href={`/discuss/${topic.id}`} style={{ textDecoration: 'none' }}>
       <div className="kd-card-hover" style={{
         padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 12, marginBottom: 8,
+        borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-sm)',
       }}>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-sm)', alignItems: 'center' }}>
           <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
           {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
         <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
         {topic.topic_type === 'poll' && (
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 'var(--sp-md)' }}>
             {[
               { label: topic.option_a, pct: pctA, winning: pctA >= pctB },
               { label: topic.option_b, pct: pctB, winning: pctB > pctA },
@@ -213,13 +213,13 @@ export default function DiscussClient() {
 
           {/* 새 토론 만들기 */}
           <button onClick={() => user ? setShowCreate(!showCreate) : router.push(`/login?redirect=${encodeURIComponent(pathname)}`)} style={{
-            width: '100%', padding: '12px', marginBottom: 12, borderRadius: 12,
+            width: '100%', padding: '12px', marginBottom: 'var(--sp-md)', borderRadius: 12,
             border: '1px dashed var(--border)', background: 'var(--bg-surface)',
             color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer',
           }}>✍️ 새 토론 만들기</button>
 
           {showCreate && (
-            <div style={{ padding: 16, marginBottom: 12, borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+            <div style={{ padding: 16, marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                 {['stock', 'apt', 'economy', 'free'].map(c => (
                   <button key={c} onClick={() => setNewCat(c)} style={{
@@ -230,7 +230,7 @@ export default function DiscussClient() {
                 ))}
               </div>
               <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="토론 주제 (5자 이상)" maxLength={100}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', marginBottom: 8, boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', marginBottom: 'var(--sp-sm)', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                 <input value={newOptA} onChange={e => setNewOptA(e.target.value)} placeholder="옵션 A" maxLength={20}
                   style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
@@ -247,15 +247,15 @@ export default function DiscussClient() {
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>로딩 중...</div>
           ) : topics.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', background: 'var(--bg-surface)', borderRadius: 12, border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 40, marginBottom: 8 }}>🗳️</div>
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 40, marginBottom: 'var(--sp-sm)' }}>🗳️</div>
               <div style={{ fontSize: 'var(--fs-base)' }}>아직 토론이 없습니다. 첫 번째 토론을 시작해보세요!</div>
             </div>
           ) : (
             <>
               {hotTopics.length > 0 && (
-                <div style={{ marginBottom: 8 }}>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>🔥 HOT 토론</div>
+                <div style={{ marginBottom: 'var(--sp-sm)' }}>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>🔥 HOT 토론</div>
                   {hotTopics.map(t => <TopicCard key={t.id} topic={t} />)}
                 </div>
               )}

@@ -86,13 +86,13 @@ export default function InstallBanner() {
   return (
     <>
       <div style={{
-        position: 'fixed', bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))', left: 12, right: 12, zIndex: 8000,
+        position: 'fixed', bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))', left: 12, right: 12, zIndex: 60,
         background: 'linear-gradient(135deg, var(--brand), var(--accent-blue))',
         borderRadius: 16, padding: '14px 16px',
         boxShadow: '0 8px 32px rgba(37,99,235,0.45)',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
-        <div style={{ fontSize: 30, flexShrink: 0 }}>📲</div>
+        <div style={{ fontSize: 'var(--fs-2xl)', flexShrink: 0 }}>📲</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-inverse)', marginBottom: 2 }}>앱처럼 사용하기</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'rgba(255,255,255,0.9)' }}>홈화면에 추가하면 푸시 알림도 받을 수 있어요!</div>
@@ -111,14 +111,14 @@ export default function InstallBanner() {
 
       {showIOSGuide && (
         <>
-          <div onClick={() => setShowIOSGuide(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9000 }} />
+          <div onClick={() => setShowIOSGuide(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 80 }} />
           <div style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9001,
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 90,
             background: 'var(--bg-surface)', borderRadius: '20px 20px 0 0', padding: '20px 24px 40px',
           }}>
             <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }} />
-            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>📲 홈화면에 추가하기</div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 20 }}>Safari에서 아래 순서로 따라하세요</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>📲 홈화면에 추가하기</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xl)' }}>Safari에서 아래 순서로 따라하세요</div>
             {[
               { n: '1', text: 'Safari 하단 가운데 공유 버튼(⬆️) 탭' },
               { n: '2', text: '스크롤해서 "홈 화면에 추가" 탭' },

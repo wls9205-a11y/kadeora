@@ -94,7 +94,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       </h3>
 
       {/* 댓글 입력 — 채팅 스타일 */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 'var(--sp-xl)' }}>
         {replyTo && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '4px 10px', background: 'rgba(37,99,235,0.06)', borderRadius: 8, fontSize: 12, color: 'var(--brand)' }}>
             ↩ <strong>{replyTo.nickname}</strong>에게 답글
@@ -164,7 +164,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
               </Link>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ background: isReply ? 'var(--bg-hover)' : 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: isReply ? '4px 12px 12px 12px' : '4px 14px 14px 14px', padding: '10px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
                   </div>

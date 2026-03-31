@@ -88,8 +88,8 @@ export default function GuideInstallButton() {
 
   if (state === 'installed') return (
     <div style={cardStyle}>
-      <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 8 }}>
+      <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>✅</div>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 'var(--sp-sm)' }}>
         설치 완료!
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
@@ -101,11 +101,11 @@ export default function GuideInstallButton() {
 
   if (state === 'can-install') return (
     <div style={cardStyle}>
-      <div style={{ fontSize: 48, marginBottom: 12 }}>📲</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+      <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📲</div>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
-      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 20 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-xl)' }}>
         앱스토어 없이 바로 설치!<br />
         푸시 알림 · 빠른 실행 · 오프라인 지원
       </div>
@@ -128,11 +128,11 @@ export default function GuideInstallButton() {
 
   if (state === 'ios-safari') return (
     <div style={cardStyle}>
-      <div style={{ fontSize: 48, marginBottom: 12 }}>📱</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+      <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📱</div>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
-      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.8, marginBottom: 4 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.8, marginBottom: 'var(--sp-xs)' }}>
         Safari 하단 <strong style={{ color: 'var(--text-primary)' }}>공유 버튼(⬆️)</strong> 누르기
       </div>
       <div style={{ fontSize: 28, margin: '8px 0' }}>⬇️</div>
@@ -152,11 +152,11 @@ export default function GuideInstallButton() {
   // unsupported
   return (
     <div style={cardStyle}>
-      <div style={{ fontSize: 48, marginBottom: 12 }}>💻</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+      <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>💻</div>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
-      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 16 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-lg)' }}>
         Chrome 또는 Edge 주소창 오른쪽의<br />
         <strong style={{ color: 'var(--text-primary)' }}>설치(⊕) 아이콘</strong>을 클릭하세요
       </div>

@@ -93,7 +93,7 @@ export default function MiniWatchlist() {
 
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-xs)' }}>
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>⭐ 내 관심 종목</span>
         <Link href="/profile?tab=watchlist" style={{ fontSize: 11, color: 'var(--brand)', textDecoration: 'none' }}>편집</Link>
       </div>

@@ -98,7 +98,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 9999,
+            zIndex: 100,
           }}
         >
           <div
@@ -117,7 +117,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
               신고하기
             </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 'var(--sp-lg)' }}>
               {REASONS.map(r => (
                 <label
                   key={r}
@@ -161,7 +161,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                   fontFamily: 'inherit',
                   lineHeight: 1.5,
                   boxSizing: 'border-box',
-                  marginBottom: 12,
+                  marginBottom: 'var(--sp-md)',
                 }}
               />
             )}
@@ -170,7 +170,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
               <div style={{
                 fontSize: 'var(--fs-sm)',
                 color: result.includes('접수') ? 'var(--success)' : 'var(--error)',
-                marginBottom: 12,
+                marginBottom: 'var(--sp-md)',
               }}>
                 {result}
               </div>

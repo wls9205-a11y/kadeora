@@ -57,7 +57,7 @@ export default function MissionControl() {
       {/* 모바일 상단 바 */}
       <div className="admin-mobile-bar" style={{ display: 'none', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 80, background: C.surface, padding: '10px 16px', borderBottom: `1px solid ${C.border}`, alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{SECTIONS.find(s => s.key === section)?.icon} {SECTIONS.find(s => s.key === section)?.label}</span>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: C.text, fontSize: 20, cursor: 'pointer', padding: '4px 8px' }}>{sidebarOpen ? '✕' : '☰'}</button>
+        <button aria-label="닫기" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: C.text, fontSize: 'var(--fs-lg)', cursor: 'pointer', padding: '4px 8px' }}>{sidebarOpen ? '✕' : '☰'}</button>
       </div>
 
       {/* 사이드바 */}

@@ -49,19 +49,19 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
     scores.map((s, i) => toXY(i, (s / 100) * R).join(',')).join(' ');
 
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
+    <div style={{ marginBottom: 'var(--sp-md)' }}>
+      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 'var(--sp-sm)' }}>
         종목 레이더 비교 (최대 3개)
       </div>
 
       {/* 검색 */}
-      <div style={{ position: 'relative', marginBottom: 8 }}>
+      <div style={{ position: 'relative', marginBottom: 'var(--sp-sm)' }}>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="비교할 종목 검색..."
           className="kd-search-input" style={{ width: '100%' }} />
         {searchRes.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, zIndex: 50, marginTop: 3 }}>
             {searchRes.map(s => (
-              <button key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              <button aria-label="닫기" key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
                 <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
                 <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
                 {selected.includes(s.symbol) && <span style={{ fontSize: 10, color: 'var(--brand)' }}>✓</span>}

@@ -61,8 +61,8 @@ export default async function AptMapPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '지도' }] }) }} />
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🗺️ 지역별 부동산 현황</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
+          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🗺️ 지역별 부동산 현황</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <ShareButtons title="지역별 부동산 현황 — 청약·미분양·재개발 지도" postId="apt-map" />
             <Link href="/apt" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
@@ -75,10 +75,10 @@ export default async function AptMapPage() {
             const redev = redevByRegion[r] || 0;
             return (
               <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{
-                padding: 14, borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                padding: 14, borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 textDecoration: 'none', color: 'inherit', transition: 'border-color var(--transition-fast)',
               }}>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>{r}</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{r}</div>
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                   {sub > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>청약 {sub}</span>}
                   {unsold > 0 && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>미분양 {unsold}</span>}

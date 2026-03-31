@@ -34,9 +34,9 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
 
   return (
     <div>
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>✏️ 한줄평 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>{comments.length}</span></div>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>✏️ 한줄평 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 400 }}>{comments.length}</span></div>
       {userId ? (
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 'var(--sp-md)' }}>
           <div style={{ position: 'relative' }}>
             <textarea value={text} onChange={e => setText(e.target.value.slice(0, 200))} rows={2} maxLength={200} placeholder="이 현장 어때요? (200자)"
               style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
@@ -47,7 +47,7 @@ export default function AptCommentInline({ houseKey, houseNm, houseType }: { hou
           </button>
         </div>
       ) : (
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 12 }}><a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요</div>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}><a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)' }}>로그인</a> 후 한줄평을 남길 수 있어요</div>
       )}
       <div style={{ maxHeight: 300, overflowY: 'auto' }}>
         {comments.length === 0 && <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>첫 한줄평을 남겨보세요! 👋</div>}
