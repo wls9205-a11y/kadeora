@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { fetchDailyReportData, REPORT_REGIONS } from '@/lib/daily-report-data';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
@@ -16,24 +16,31 @@ export async function GET(req: Request) {
   const dateStr = now.toISOString().slice(0, 10);
   const results: { region: string; ok: boolean; error?: string }[] = [];
 
-  // 17개 지역 순차 처리 (병렬하면 DB 부하)
-  for (const region of REPORT_REGIONS) {
-    try {
-      const data = await fetchDailyReportData(region);
-      const { error } = await (sb as any).from('daily_reports').upsert({
-        region,
-        report_date: dateStr,
-        issue_no: data.issueNo,
-        data,
-      }, { onConflict: 'region,report_date' });
-
-      if (error) {
-        results.push({ region, ok: false, error: error.message });
-      } else {
+  // 5개씩 병렬 배치 (DB 부하 제한 + 타임아웃 방지)
+  const BATCH = 5;
+  for (let i = 0; i < REPORT_REGIONS.length; i += BATCH) {
+    const batch = REPORT_REGIONS.slice(i, i + BATCH);
+    const batchResults = await Promise.allSettled(
+      batch.map(async (region) => {
+        const data = await fetchDailyReportData(region);
+        const { error } = await (sb as any).from('daily_reports').upsert({
+          region,
+          report_date: dateStr,
+          issue_no: data.issueNo,
+          data,
+        }, { onConflict: 'region,report_date' });
+        if (error) throw new Error(error.message);
+        return region;
+      })
+    );
+    for (let j = 0; j < batchResults.length; j++) {
+      const r = batchResults[j];
+      const region = batch[j];
+      if (r.status === 'fulfilled') {
         results.push({ region, ok: true });
+      } else {
+        results.push({ region, ok: false, error: (r.reason as Error)?.message || 'unknown' });
       }
-    } catch (e: any) {
-      results.push({ region, ok: false, error: e?.message || 'unknown' });
     }
   }
 
