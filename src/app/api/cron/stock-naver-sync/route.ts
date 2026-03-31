@@ -38,14 +38,34 @@ async function fetchNaverSingle(symbol: string): Promise<NaverQuote | null> {
   } catch { return null; }
 }
 
-// 네이버 해외주식 API — 개별 종목
-async function fetchNaverWorldStock(symbol: string): Promise<NaverQuote | null> {
+// 네이버 해외주식 API — 개별 종목 (NASDAQ=.O, NYSE=.N)
+async function fetchNaverWorldStock(symbol: string, market: string): Promise<NaverQuote | null> {
+  const suffix = market === 'NASDAQ' ? '.O' : '.N';
+  const naverSymbol = `${symbol}${suffix}`;
   try {
-    const res = await fetch(`https://api.stock.naver.com/stock/${symbol}/basic`, {
+    const res = await fetch(`https://api.stock.naver.com/stock/${naverSymbol}/basic`, {
       headers: { ...HEADERS, Referer: 'https://m.stock.naver.com/worldstock/' },
       signal: AbortSignal.timeout(4000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // suffix 없이 재시도
+      const res2 = await fetch(`https://api.stock.naver.com/stock/${symbol}/basic`, {
+        headers: { ...HEADERS, Referer: 'https://m.stock.naver.com/worldstock/' },
+        signal: AbortSignal.timeout(4000),
+      });
+      if (!res2.ok) return null;
+      const j2 = await res2.json();
+      const price2 = parseFloat(String(j2?.closePrice ?? '0').replace(/,/g, ''));
+      if (!price2) return null;
+      return {
+        symbol,
+        price: price2,
+        change_pct: CLAMP(parseFloat(String(j2?.fluctuationsRatio ?? '0'))),
+        change_amt: parseFloat(String(j2?.compareToPreviousClosePrice ?? '0').replace(/,/g, '')),
+        volume: parseInt(String(j2?.accumulatedTradingVolume ?? '0').replace(/,/g, '')),
+        market_cap: 0,
+      };
+    }
     const j = await res.json();
     const price = parseFloat(String(j?.closePrice ?? '0').replace(/,/g, ''));
     if (!price) return null;
@@ -55,7 +75,7 @@ async function fetchNaverWorldStock(symbol: string): Promise<NaverQuote | null> 
       change_pct: CLAMP(parseFloat(String(j?.fluctuationsRatio ?? '0'))),
       change_amt: parseFloat(String(j?.compareToPreviousClosePrice ?? '0').replace(/,/g, '')),
       volume: parseInt(String(j?.accumulatedTradingVolume ?? '0').replace(/,/g, '')),
-      market_cap: 0, // 해외종목은 market_cap 별도
+      market_cap: 0,
     };
   } catch { return null; }
 }
@@ -110,7 +130,7 @@ export async function GET(req: Request) {
 
   // ═══ 2. 해외 주식 (NYSE + NASDAQ) — 네이버 해외주식 API ═══
   const { data: usStocks } = await sb.from('stock_quotes')
-    .select('symbol')
+    .select('symbol, market')
     .in('market', ['NYSE', 'NASDAQ'])
     .eq('is_active', true)
     .gt('price', 0)
@@ -123,7 +143,7 @@ export async function GET(req: Request) {
       const batch = usStocks.slice(i, i + BATCH);
       const results = await Promise.allSettled(
         batch.map(async (s: any) => {
-          const q = await fetchNaverWorldStock(s.symbol);
+          const q = await fetchNaverWorldStock(s.symbol, s.market);
           if (q && q.price > 0) {
             const updates: Record<string, any> = {
               price: q.price,
