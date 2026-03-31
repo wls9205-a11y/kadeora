@@ -18,6 +18,8 @@ const AptPriceTrendChart = dynamic(() => import('@/components/charts/AptPriceTre
 const AptReviewSection = dynamic(() => import('@/components/AptReviewSection'));
 const InterestRegistration = dynamic(() => import('@/components/InterestRegistration'));
 const SignupCTA = dynamic(() => import('@/components/SignupCTA'));
+const KpiCards = dynamic(() => import('@/components/apt/KpiCards'));
+const ComplexScale = dynamic(() => import('@/components/apt/ComplexScale'));
 
 export const revalidate = 3600;
 export const maxDuration = 60;
@@ -475,12 +477,10 @@ export default async function AptUnifiedPage({ params }: Props) {
         const generalSupply = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
         const specialSupply = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
         const hasBreakdown = generalSupply > 0 || specialSupply > 0;
-
         const totalHouseholds = Number(sub?.total_households || 0);
-        const showTotalHH = totalHouseholds > 0 && totalHouseholds !== totalUnits;
 
         const cards = [
-          { l: '총 공급', v: totalUnits > 0 ? `${totalUnits.toLocaleString()}` : '-', sub: [showTotalHH ? `단지 전체 ${totalHouseholds.toLocaleString()}세대 중` : '', hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : ''].filter(Boolean).join('\n'), c: 'var(--text-primary)', icon: '🏢', bar: Math.min((totalUnits / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null as string | null },
+          { l: '총 공급', v: totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : '-', sub: hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : '', c: 'var(--text-primary)', icon: '🏢', bar: Math.min((totalUnits / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null },
           { l: sub ? '분양가' : '시세', v: (() => {
             const pMin = site?.price_min || unsold?.sale_price_min || 0;
             const pMax = site?.price_max || 0;
@@ -488,7 +488,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
             if (pMin && pMax && pMin !== pMax) return `${fmt(pMin)}~\n${fmt(pMax)}`;
             return fmt(pMin || pMax);
-          })(), sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)', scrollTo: null as string | null },
+          })(), sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)', scrollTo: null },
           { l: '입주예정', v: fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || '-', sub: (() => {
             const ym = site?.move_in_date || sub?.mvn_prearnge_ym;
             if (!ym || ym.length < 6) return '';
@@ -498,22 +498,23 @@ export default async function AptUnifiedPage({ params }: Props) {
             if (diffM <= 0) return '';
             const y = Math.floor(diffM / 12); const m = diffM % 12;
             return y > 0 ? `약 ${y}년${m > 0 ? ` ${m}개월` : ''} 후` : `약 ${m}개월 후`;
-          })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)', scrollTo: null as string | null },
+          })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)', scrollTo: null },
           { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
         ];
 
         return (
-          <div className="kd-grid-4" style={{ gap: 6, marginBottom: 14 }}>
-            {cards.map(s => (
-              <div key={s.l} onClick={() => { if (s.scrollTo) { document.getElementById(s.scrollTo)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 8px', textAlign: 'center', cursor: s.scrollTo ? 'pointer' : 'default', transition: 'border-color 0.15s' }} onMouseEnter={e => { if (s.scrollTo) e.currentTarget.style.borderColor = s.barColor; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
-                <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2, whiteSpace: 'pre-line' }}>{s.v}</div>
-                {s.sub && <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.3 }}>{s.sub}</div>}
-                {s.bar > 0 && <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}><div style={{ height: '100%', width: `${s.bar}%`, borderRadius: 2, background: s.barColor }} /></div>}
-              </div>
-            ))}
-          </div>
+          <>
+            <KpiCards cards={cards} />
+            <ComplexScale
+              totalHouseholds={totalHouseholds}
+              supplyUnits={totalUnits}
+              generalSupply={generalSupply}
+              specialSupply={specialSupply}
+              dongCount={Number(sub?.total_dong_count || sub?.total_dong_co || 0)}
+              maxFloor={Number(sub?.max_floor || 0)}
+              parkingCount={Number(sub?.parking_total || sub?.parking_co || 0)}
+            />
+          </>
         );
       })()}
 
