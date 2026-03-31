@@ -94,7 +94,7 @@ export default async function DailyReportPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
-        headline: `카더라 데일리 리포트 리포트 — ${region} 투자 브리핑 #${data.issueNo}`,
+        headline: `카더라 데일리 리포트 — ${region} 투자 브리핑 #${data.issueNo}`,
         description: `${region} 부동산 청약·미분양·재개발 + 국내외 주식 시황`,
         url: `${SITE_URL}/daily/${encodeURIComponent(region)}`,
         datePublished: new Date(now.setHours(7, 0, 0, 0)).toISOString(),
