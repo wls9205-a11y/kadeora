@@ -476,8 +476,11 @@ export default async function AptUnifiedPage({ params }: Props) {
         const specialSupply = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
         const hasBreakdown = generalSupply > 0 || specialSupply > 0;
 
+        const totalHouseholds = Number(sub?.total_households || 0);
+        const showTotalHH = totalHouseholds > 0 && totalHouseholds !== totalUnits;
+
         const cards = [
-          { l: '총 공급', v: totalUnits > 0 ? `${totalUnits.toLocaleString()}` : '-', sub: hasBreakdown ? `일반 ${generalSupply} · 특별 ${specialSupply}` : '', c: 'var(--text-primary)', icon: '🏢', bar: Math.min((totalUnits / 5000) * 100, 100), barColor: 'var(--brand)' },
+          { l: '총 공급', v: totalUnits > 0 ? `${totalUnits.toLocaleString()}` : '-', sub: [showTotalHH ? `단지 전체 ${totalHouseholds.toLocaleString()}세대 중` : '', hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : ''].filter(Boolean).join('\n'), c: 'var(--text-primary)', icon: '🏢', bar: Math.min((totalUnits / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null as string | null },
           { l: sub ? '분양가' : '시세', v: (() => {
             const pMin = site?.price_min || unsold?.sale_price_min || 0;
             const pMax = site?.price_max || 0;
@@ -485,7 +488,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
             if (pMin && pMax && pMin !== pMax) return `${fmt(pMin)}~\n${fmt(pMax)}`;
             return fmt(pMin || pMax);
-          })(), sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)' },
+          })(), sub: '', c: 'var(--brand)', icon: '💰', bar: 0, barColor: 'var(--brand)', scrollTo: null as string | null },
           { l: '입주예정', v: fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || '-', sub: (() => {
             const ym = site?.move_in_date || sub?.mvn_prearnge_ym;
             if (!ym || ym.length < 6) return '';
@@ -495,14 +498,14 @@ export default async function AptUnifiedPage({ params }: Props) {
             if (diffM <= 0) return '';
             const y = Math.floor(diffM / 12); const m = diffM % 12;
             return y > 0 ? `약 ${y}년${m > 0 ? ` ${m}개월` : ''} 후` : `약 ${m}개월 후`;
-          })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)' },
-          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, sub: '', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B' },
+          })(), c: 'var(--accent-green)', icon: '📅', bar: 0, barColor: 'var(--accent-green)', scrollTo: null as string | null },
+          { l: unsold ? '미분양' : '관심', v: unsold ? `${(unsold.tot_unsold_hshld_co || 0).toLocaleString()}호` : `${site?.interest_count || 0}명`, sub: unsold ? '' : '클릭하여 등록', c: unsold ? 'var(--accent-red)' : '#FFD43B', icon: unsold ? '⚠️' : '❤️', bar: unsold ? Math.min((unsold.tot_unsold_hshld_co || 0) / 500 * 100, 100) : Math.min((site?.interest_count || 0) / 50 * 100, 100), barColor: unsold ? 'var(--accent-red)' : '#FFD43B', scrollTo: unsold ? null : 'interest-section' },
         ];
 
         return (
           <div className="kd-grid-4" style={{ gap: 6, marginBottom: 14 }}>
             {cards.map(s => (
-              <div key={s.l} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 8px', textAlign: 'center' }}>
+              <div key={s.l} onClick={() => { if (s.scrollTo) { document.getElementById(s.scrollTo)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 8px', textAlign: 'center', cursor: s.scrollTo ? 'pointer' : 'default', transition: 'border-color 0.15s' }} onMouseEnter={e => { if (s.scrollTo) e.currentTarget.style.borderColor = s.barColor; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
                 <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{s.l}</div>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: s.c, lineHeight: 1.2, whiteSpace: 'pre-line' }}>{s.v}</div>
@@ -1342,7 +1345,9 @@ export default async function AptUnifiedPage({ params }: Props) {
       </div>
 
       {/* 관심단지 등록 CTA */}
-      {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} />}
+      <div id="interest-section">
+        {site?.id && <InterestRegistration siteId={site.id} siteName={name} interestCount={site.interest_count || 0} slug={slug} />}
+      </div>
 
       {/* 비로그인 가입 유도 CTA */}
       {!aptUser && <SignupCTA />}
