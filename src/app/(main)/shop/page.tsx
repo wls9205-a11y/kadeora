@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: '카더라 상점 — 프로 멤버십 · 확성기 · 아이템',
   description: `카더라 프로 멤버십 월 ${PRO_PRICING.monthly.label} — 관심 종목 무제한, AI 분석 주 5건, 급등락 알림, 청약 D-7 알림, 단지 비교, CSV 다운로드. 확성기로 내 글을 전체 유저에게 노출.`,
   alternates: { canonical: `${SITE}/shop` },
+  robots: { index: false, follow: false },
   openGraph: {
     title: '카더라 상점 | 프로 멤버십 · 확성기',
     description: '주식+부동산 올인원 프리미엄. 관심 종목 무제한 · AI 분석 · 급등락 알림.',

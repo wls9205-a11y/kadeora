@@ -59,7 +59,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
 
     const staticPaths = [
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
-      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/shop',
+      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', 
       '/grades', '/daily', '/apt/map', '/apt/diagnose', '/apt/search', '/apt/complex', '/stock/compare', '/blog/series',
     ];
     const entries: SitemapEntry[] = [

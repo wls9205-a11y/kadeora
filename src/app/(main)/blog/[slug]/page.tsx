@@ -599,7 +599,7 @@ export default async function BlogDetailPage({ params }: Props) {
             stock: { href: '/stock', icon: '📈', title: '실시간 주식 시세 보기', desc: '코스피·코스닥·해외 주식 시세를 확인하세요' },
             apt: { href: '/apt', icon: '🏢', title: '전국 청약 일정 확인', desc: '접수중·예정 청약 정보를 한눈에' },
             unsold: { href: '/apt?tab=unsold', icon: '🏚️', title: '미분양 현황 보기', desc: '전국 미분양 아파트를 확인하세요' },
-            finance: { href: '/shop', icon: '💰', title: '재테크 상품 둘러보기', desc: '알뜰한 금융 상품을 비교하세요' },
+            finance: { href: '/blog?category=finance', icon: '💰', title: '재테크 정보 더 보기', desc: '투자·재테크 블로그를 확인하세요' },
           };
           const cta = ctaMap[post.category];
           if (!cta) return null;
@@ -637,8 +637,8 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 9. 다음글 플로팅 카드 (스크롤 60% 도달 시) */}
       {nextPost && <NextArticleFloat nextSlug={nextPost.slug} nextTitle={nextPost.title} category={post.category} />}
 
-      {/* 프리미엄 업셀 배너 — 프리미엄 유저에게는 숨김 */}
-      {!isPremiumUser && (
+      {/* 프로 업셀 배너 — 결제 시스템 출시 전까지 비공개 */}
+      {false && !isPremiumUser && (
       <div className="kd-card-glow" style={{ padding: '18px 16px', margin: '16px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
           <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-md)', flexShrink: 0 }}>👑</div>

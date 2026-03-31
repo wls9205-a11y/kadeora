@@ -1375,8 +1375,8 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       </div>
 
-      {/* 프로 업셀 */}
-      <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)' }}>
+      {/* 프로 업셀 — 결제 시스템 출시 전까지 비공개 */}
+      {false && <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 'var(--fs-xl)' }}>🔔</span>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -1387,7 +1387,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             자세히
           </Link>
         </div>
-      </div>
+      </div>}
 
       <Disclaimer />
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '8px 0 40px', lineHeight: 1.6 }}>📊 데이터 출처: 국토교통부 · 청약홈 · 한국부동산원 · 각 지자체</p>

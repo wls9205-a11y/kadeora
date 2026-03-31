@@ -511,19 +511,19 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 면책고지 */}
       <Disclaimer type="stock" compact />
 
-      {/* 프로 업셀 */}
-      <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)' }}>
+      {/* 프로 업셀 — 결제 시스템 출시 전까지 비공개 */}
+      {false && <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 'var(--fs-xl)' }}>🤖</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 {s.name} 리포트</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 {s?.name} 리포트</div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프로 멤버십 · 급등락 알림 + AI 분석</div>
           </div>
           <Link href="/shop" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
             자세히
           </Link>
         </div>
-      </div>
+      </div>}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,123,246,0.03)', border: '1px solid rgba(59,123,246,0.08)' }}>
         <ShareButtons title={`${s.name} (${symbol}) 주가 — 실시간 시세·차트·섹터 분석`} postId={symbol} />
