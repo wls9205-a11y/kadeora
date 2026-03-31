@@ -24,7 +24,7 @@ interface Theme { id: number; theme_name: string; change_pct: number; is_hot: bo
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
 interface Props { initialStocks: Stock[]; briefing?: Record<string, any>; briefingUS?: Record<string, any>; exchangeHistory?: Record<string, any>[]; themeHistory?: Record<string, any>[]; }
 
-const IDX_SYMBOLS = new Set(['SPY','QQQ','DIA','IWM','VOO','VTI','TQQQ','SQQQ','SOXL','SPXL','ARKK','GLD','SLV','TLT','USO','VNQ','SCHD','JEPI','XLK','XLF','XLE','XLV','KWEB','EEM','EWJ','FXI','UVXY']);
+const IDX_SYMBOLS = new Set(['KOSPI_IDX','KOSDAQ_IDX','SPY','QQQ','DIA','IWM','VOO','VTI','TQQQ','SQQQ','SOXL','SPXL','ARKK','GLD','SLV','TLT','USO','VNQ','SCHD','JEPI','XLK','XLF','XLE','XLV','KWEB','EEM','EWJ','FXI','UVXY']);
 function isIdx(s: Stock) {
   if (IDX_SYMBOLS.has(s.symbol)) return true;
   if (s.sector === 'ETF') return true;
@@ -379,10 +379,10 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                 ? (ind.krStyle ? 'var(--accent-blue)' : 'var(--accent-red)')
                 : 'var(--text-tertiary)';
             return (
-              <div key={ind.label} style={{ background: 'var(--bg-surface)', padding: '6px 5px', borderLeft: `2px solid ${color}`, borderRadius: 0 }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{ind.label}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{ind.val}</div>
-                {ind.pct !== 0 && <div style={{ fontSize: 9, color, fontWeight: 600 }}>{ind.pct > 0 ? '+' : ''}{ind.pct.toFixed(2)}%</div>}
+              <div key={ind.label} style={{ background: 'var(--bg-surface)', padding: '8px 8px', borderLeft: `3px solid ${color}`, borderRadius: 0 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{ind.label}</div>
+                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{ind.val}</div>
+                {ind.pct !== 0 && <div style={{ fontSize: 'var(--fs-xs)', color, fontWeight: 700 }}>{ind.pct > 0 ? '+' : ''}{ind.pct.toFixed(2)}%</div>}
               </div>
             );
           });
@@ -474,40 +474,63 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         );
       })()}
 
-      {/* ─ ⚡ 이슈 배너 ─ */}
+      {/* ─ ⚡ 이슈 종목 — 세분화 ─ */}
       {(() => {
-        const bigMovers = sentimentStocks.filter(s => Math.abs(s.change_pct ?? 0) >= 5 && s.price > 0).sort((a, b) => Math.abs(b.change_pct ?? 0) - Math.abs(a.change_pct ?? 0)).slice(0, 3);
-        if (!bigMovers.length) return null;
+        const allMovers = sentimentStocks.filter(s => s.price > 0);
+        const isGlobal = !isDomestic;
+        const upColor = isGlobal ? 'var(--accent-green)' : 'var(--accent-red)';
+        const dnColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
+
+        // 카테고리별 분류
+        const surgeUp = allMovers.filter(s => (s.change_pct ?? 0) >= 5).sort((a, b) => (b.change_pct ?? 0) - (a.change_pct ?? 0)).slice(0, 5);
+        const surgeDn = allMovers.filter(s => (s.change_pct ?? 0) <= -5).sort((a, b) => (a.change_pct ?? 0) - (b.change_pct ?? 0)).slice(0, 5);
+        const highVol = [...allMovers].sort((a, b) => (b.volume ?? 0) - (a.volume ?? 0)).filter(s => Math.abs(s.change_pct ?? 0) >= 1).slice(0, 5);
+
+        const categories = [
+          { key: 'up', label: '급등', icon: '🔺', items: surgeUp, color: upColor },
+          { key: 'dn', label: '급락', icon: '🔻', items: surgeDn, color: dnColor },
+          { key: 'vol', label: '거래 폭증', icon: '📊', items: highVol, color: 'var(--accent-yellow)' },
+        ].filter(c => c.items.length > 0);
+
+        if (!categories.length) return null;
         return (
           <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', overflow: 'hidden', marginBottom: 'var(--sp-md)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', background: 'var(--bg-hover)', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 11 }}>⚡</span>
-              <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--accent-yellow)', letterSpacing: '1.5px', fontFamily: 'monospace' }}>이슈 종목</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'var(--bg-hover)', borderBottom: '1px solid var(--border)' }}>
+              <span style={{ fontSize: 12 }}>⚡</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--accent-yellow)', letterSpacing: '1px' }}>이슈 종목</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{isDomestic ? '국내' : '해외'}</span>
             </div>
-            {bigMovers.map((s, idx) => {
-              const pct = s.change_pct ?? 0;
-              const isUp = pct > 0;
-              const isGlobal = s.currency === 'USD';
-              const upColor = isGlobal ? 'var(--accent-green)' : 'var(--accent-red)';
-              const dnColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
-              const col = isUp ? upColor : dnColor;
-              return (
-                <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '8px 12px', borderBottom: idx < bigMovers.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none', transition: 'background 0.12s' }} className="kd-feed-card">
-                  <div style={{ width: 3, height: 30, borderRadius: 2, background: col, flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {s.name}
-                      {Math.abs(pct) >= 10 && <span style={{ fontSize: 8, fontWeight: 800, padding: '1px 4px', borderRadius: 3, marginLeft: 5, background: isUp ? upColor : dnColor, color: '#fff' }}>{isUp ? '급등' : '급락'}</span>}
-                    </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, fontFamily: 'monospace' }}>{s.symbol} · {s.sector}</div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{isGlobal ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}</div>
-                    <div style={{ fontSize: 12, fontWeight: 900, color: col }}>{isUp ? '▲' : '▼'} {Math.abs(pct).toFixed(2)}%</div>
-                  </div>
-                </Link>
-              );
-            })}
+            {categories.map(cat => (
+              <div key={cat.key}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}>
+                  <span style={{ fontSize: 11 }}>{cat.icon}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: cat.color }}>{cat.label}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{cat.items.length}종목</span>
+                </div>
+                {cat.items.map((s, idx) => {
+                  const pct = s.change_pct ?? 0;
+                  const isUp = pct > 0;
+                  const col = isUp ? upColor : dnColor;
+                  return (
+                    <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '7px 12px', borderBottom: idx < cat.items.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none', transition: 'background 0.12s' }} className="kd-feed-card">
+                      <div style={{ width: 3, height: 28, borderRadius: 2, background: col, flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {s.name}
+                          {Math.abs(pct) >= 15 && <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 3, marginLeft: 5, background: col, color: '#fff' }}>{isUp ? '상한' : '하한'}</span>}
+                          {Math.abs(pct) >= 10 && Math.abs(pct) < 15 && <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 4px', borderRadius: 3, marginLeft: 5, background: col, color: '#fff' }}>{isUp ? '급등' : '급락'}</span>}
+                        </div>
+                        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.symbol} · {s.sector || '-'}</div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{s.currency === 'USD' ? `$${s.price?.toFixed(2)}` : `₩${fmt(s.price)}`}</div>
+                        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 900, color: col }}>{isUp ? '▲' : '▼'} {Math.abs(pct).toFixed(2)}%</div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         );
       })()}
