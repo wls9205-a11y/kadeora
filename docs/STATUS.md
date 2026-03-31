@@ -1,9 +1,10 @@
-# 카더라 STATUS.md — 세션 65 (2026-04-01 03:30 KST)
+# 카더라 STATUS.md — 세션 65 최종 (2026-04-01 03:35 KST)
 
 ## 최신 커밋
-- `7802812` — 파서 공유 모듈 추출 (parse-announcement.ts) + batch-reparse 재작성
+- `1ebdc43` — **토스 앱인토스 → 카더라 유입 퍼널 풀스택 구현**
+- `27a854b` — 크론 파서 공유 모듈 리팩터 (412→55줄)
+- `9eda529` — 앱인토스 v7 빌드 — 반려 3건 수정 + 5탭 + 피드 API v2
 - `e9a75e4` — KOSPI/KOSDAQ 지수 크론 자동 갱신 (네이버 API + 시장 평균 폴백)
-- `c516d81` — 데이터 backfill (브랜드964/사업유형2694) + 크론 가속 (4h×50건)
 - `d9cc4d2` — 모집공고 파서 대폭 강화 + 상세페이지 풀스택 정보 표시 (+30필드)
 - `7b761a6` — 앱인토스 반려 3건 수정 + 주식 SSR limit(2000) + 해외 시세 0.00% 폴백
 - `f29ab9f` — 공유하기 중복 제거 + 주식 헤더 공유 추가 + 피드 정리 + 지수 매칭 수정
@@ -12,6 +13,15 @@
 - `ce92465` — 데이터 커버리지 100% (분양가/좌표/이미지/종목설명 전체 backfill)
 
 ## 주요 성과
+
+### 토스 앱인토스 → 카더라 유입 퍼널 (풀스택)
+- **전략**: 앱인토스는 토스 3,000만 유저 풀에서 유입 채널 — 맛보기만 보여주고 본앱 유도
+- **TossTeaser.tsx**: 재사용 CTA 컴포넌트 (4가지 variant: card/inline/banner/gate)
+- **BlogTossGate.tsx**: 블로그 본문 30% truncate + "전체 글 읽기" CTA
+- **TossBottomBanner.tsx**: 하단 고정 배너 (페이지별 맞춤 메시지)
+- **toss-mode.ts v3**: `openInBrowser()` — TossApp.openExternal → window.open 폴백
+- **페이지별 제한**: 피드 5개, 주식 10종목, 청약 5건, 블로그 30% → 전부 CTA 유도
+- **앱인토스 빌드**: v7 (.ait 4.6KB), SDK 2.1.0, 반려 3건 수정 완료
 
 ### 모집공고 파서 대폭 강화 (+30 필드)
 - 건물스펙: total_households/total_dong_count/max_floor/min_floor/parking_total+ratio/heating_type/structure_type/exterior_finish
