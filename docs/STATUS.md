@@ -1,6 +1,7 @@
-# 카더라 STATUS.md — 세션 65 (2026-04-01 03:00 KST)
+# 카더라 STATUS.md — 세션 65 (2026-04-01 04:00 KST)
 
 ## 최신 커밋
+- `c516d81` — 데이터 backfill (브랜드964/사업유형2694) + 크론 가속 (4h×50건)
 - `d9cc4d2` — 모집공고 파서 대폭 강화 + 상세페이지 풀스택 정보 표시 (+30필드)
 - `7b761a6` — 앱인토스 반려 3건 수정 + 주식 SSR limit(2000) + 해외 시세 0.00% 폴백
 - `f29ab9f` — 공유하기 중복 제거 + 주식 헤더 공유 추가 + 피드 정리 + 지수 매칭 수정
@@ -11,6 +12,33 @@
 - `91a0607` — 모집공고문 파싱 크론 신설 + DB 30개 컬럼 확장
 
 ## 주요 성과
+
+### 모집공고 파서 대폭 강화 (+30 필드)
+- 건물스펙: total_households/total_dong_count/max_floor/min_floor/parking_total+ratio/heating_type/structure_type/exterior_finish
+- 면적: land_area/building_area/floor_area_ratio/building_coverage
+- 금융: balcony_extension+cost/loan_available/loan_rate(유이자·무이자 구분)
+- 규제: transfer_limit/resale_restriction_months/residence_obligation+years/savings_requirement/priority_supply_area
+- 시설: model_house_addr/community_facilities(17키워드 매칭)
+- 사업: business_approval_date/construction_start_date/completion_date/project_type
+- 자동계산: payment_schedule(10%/60%/30%)/acquisition_tax_estimate/parking_ratio
+
+### 상세페이지 풀스택 정보 확장
+- 단지개요 12행: 시공사/시행사/브랜드/사업유형/총세대수/공급세대/동수/층수/주차/난방/구조/외장재
+- 면적/용적 4열 KPI: 대지면적/건축면적/용적률/건폐율
+- 납부일정 프로그레스바: 계약금/중도금/잔금 + 취득세 + 중도금 유이자·무이자 배지
+- 규제·청약자격: 전매제한/거주의무/청약저축요건/우선공급지역
+- 사업일정: 사업승인/착공/준공예정
+- 커뮤니티 시설: pill 태그 (피트니스/수영장/독서실 등)
+
+### DB backfill (즉시 완료)
+- 브랜드명: 964건 자동 매핑 (22개 시공사→브랜드)
+- 사업유형: 2,694건 전체 (민간1718/재개발457/공공366/재건축153)
+- 납부일정+취득세: 2,522건 (supply_price_info 기반 자동계산)
+
+### 크론 가속 + 재파싱
+- apt-parse-announcement: 1일1회 → 4시간마다 (6회/일) + 배치 30→50건
+- 2,694건 announcement_parsed_at 리셋 완료 → 약 9일 내 전체 재파싱 예정
+- DB 트리거 fn_regenerate_ai_summary: 데이터 변경 시 ai_summary 자동 갱신
 
 ### 카더라 데일리 리포트 — VIP 골드 디자인 + 회원전용 게이트
 - **명칭**: 카더라 데일리 → 카더라 데일리 리포트 (7파일 통일)
