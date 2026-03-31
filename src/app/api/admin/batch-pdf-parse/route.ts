@@ -20,8 +20,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Dynamic import for pdf-parse (Node.js only)
-  const pdfParse = (await import('pdf-parse')).default;
+  // pdf-parse v1 (CJS → dynamic import)
+  const pdfParse: (buf: Buffer, opts?: Record<string, unknown>) => Promise<{ text: string; numpages: number }> = (await import('pdf-parse')) as any;
   const sb = getSupabaseAdmin();
 
   // PDF가 있고, 아직 건물스펙이 없는 건
