@@ -84,11 +84,11 @@ export default function RightPanel() {
       )}
       {!userId && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)', textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>카더라와 함께하세요!</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>주식 알림 · 청약 마감 알림</div>
           <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
             display: 'block', padding: '8px 0', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 700,
-            background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none',
-          }}>로그인 / 회원가입</Link>
+            background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', textDecoration: 'none',
+          }}>카카오로 3초 가입</Link>
         </div>
       )}
 
@@ -145,15 +145,6 @@ export default function RightPanel() {
             }}>{b.title}</Link>
           ))}
         </div>
-      )}
-
-      {/* 비로그인 가입 유도 */}
-      {!userId && (
-        <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
-          display: 'block', textAlign: 'center', padding: 'var(--sp-md) var(--card-p)',
-          borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', textDecoration: 'none',
-          fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--kakao-text, #191919)',
-        }}>카카오로 3초 가입</Link>
       )}
 
       {/* 등급 안내 (항상 펼침) */}
