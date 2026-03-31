@@ -15,7 +15,7 @@ export const revalidate = 3600; // 1시간 캐시
 export async function GET() {
   const sb = getSupabaseAdmin();
 
-  const [sitesR, blogsR, stocksR, complexR] = await Promise.all([
+  const [sitesR, blogsR] = await Promise.all([
     sb.from('apt_sites')
       .select('slug, name, images, region, sigungu')
       .eq('is_active', true)
@@ -28,16 +28,6 @@ export async function GET() {
       .not('cover_image', 'is', null)
       .order('published_at', { ascending: false })
       .limit(50000),
-    sb.from('stock_quotes')
-      .select('symbol, name, market, sector, price, change_pct, currency')
-      .gt('price', 0)
-      .limit(1000),
-    (sb as any).from('apt_complex_profiles')
-      .select('apt_name, region_nm, sigungu, age_group, latest_sale_price, latest_jeonse_price')
-      .not('age_group', 'is', null)
-      .gt('latest_sale_price', 0)
-      .order('sale_count_1y', { ascending: false })
-      .limit(5000),
   ]);
 
   const entries: string[] = [];
@@ -71,11 +61,12 @@ ${imageXml}
     }
   }
 
-  // ━━━ 블로그 커버 이미지 ━━━
+  // ━━━ 블로그 커버 이미지 (실제 이미지만 — /api/og 동적 URL 제외) ━━━
   for (const b of blogsR.data || []) {
     if (!b.cover_image) continue;
+    // /api/og 동적 URL은 Google Image에서 인식 불가 → 제외
+    if (b.cover_image.includes('/api/og')) continue;
     const catLabel = b.category === 'stock' ? '주식' : b.category === 'apt' ? '부동산' : b.category === 'unsold' ? '미분양' : '재테크';
-    const ogSquareUrl = `${BASE}/api/og-square?title=${encodeURIComponent(b.title)}&category=${b.category}&author=${encodeURIComponent(b.category === 'stock' ? '카더라 주식팀' : '카더라 부동산팀')}`;
     entries.push(`  <url>
     <loc>${BASE}/blog/${encodeURIComponent(b.slug)}</loc>
       <image:image>
@@ -83,53 +74,14 @@ ${imageXml}
         <image:title>${escapeXml(b.image_alt || b.title)}</image:title>
         <image:caption>${escapeXml(`카더라 ${catLabel} 블로그 — ${b.title}`)}</image:caption>
       </image:image>
-      <image:image>
-        <image:loc>${escapeXml(ogSquareUrl)}</image:loc>
-        <image:title>${escapeXml(b.title)}</image:title>
-        <image:caption>${escapeXml(`카더라 ${catLabel} — ${b.title} (1:1 이미지)`)}</image:caption>
-      </image:image>
   </url>`);
   }
 
-  // ━━━ 주식 종목 이미지 ━━━
-  for (const s of stocksR.data || []) {
-    const pct = Number(s.change_pct) || 0;
-    const arrow = pct >= 0 ? '▲' : '▼';
-    const priceStr = s.currency === 'USD' ? `$${Number(s.price).toFixed(2)}` : `₩${Number(s.price).toLocaleString()}`;
-    const titleText = escapeXml(`${s.name} (${s.symbol}) ${priceStr} ${arrow}${Math.abs(pct).toFixed(2)}%`);
-    const ogUrl = `${BASE}/api/og?title=${encodeURIComponent(`${s.name} (${s.symbol}) ${priceStr} ${arrow}${Math.abs(pct).toFixed(2)}%`)}&design=2&category=stock`;
-    entries.push(`  <url>
-    <loc>${BASE}/stock/${encodeURIComponent(s.symbol)}</loc>
-      <image:image>
-        <image:loc>${escapeXml(ogUrl)}</image:loc>
-        <image:title>${titleText}</image:title>
-        <image:caption>${escapeXml(`${s.name} ${s.market} 상장 ${s.sector || ''} 종목 주가 시세`)}</image:caption>
-      </image:image>
-  </url>`);
-  }
+  // ━━━ 주식 종목 — /api/og 동적 URL이라 image-sitemap에서 제외 ━━━
+  // Google Image Search는 동적 OG 이미지를 인덱싱하지 않음
+  // 대신 sitemap.xml의 페이지 URL + OG 메타태그로 자동 수집
 
-  // ━━━ 단지백과 이미지 (OG + Square) ━━━
-  for (const c of complexR.data || []) {
-    const saleStr = c.latest_sale_price > 0 ? `매매 ${Math.round(c.latest_sale_price / 10000)}억` : '';
-    const jeonseStr = c.latest_jeonse_price > 0 ? `전세 ${Math.round(c.latest_jeonse_price / 10000)}억` : '';
-    const subtitle = [saleStr, jeonseStr].filter(Boolean).join(' · ') || '실거래가 시세';
-    const ogUrl = `${BASE}/api/og?title=${encodeURIComponent(c.apt_name)}&design=2&category=apt&subtitle=${encodeURIComponent(subtitle)}&author=${encodeURIComponent('카더라 부동산팀')}`;
-    const ogSquareUrl = `${BASE}/api/og-square?title=${encodeURIComponent(c.apt_name)}&category=apt&subtitle=${encodeURIComponent(subtitle)}`;
-    const titleText = escapeXml(`${c.apt_name} ${c.region_nm} ${c.sigungu} ${c.age_group || ''} 아파트 실거래가`);
-    entries.push(`  <url>
-    <loc>${BASE}/apt/complex/${encodeURIComponent(c.apt_name)}</loc>
-      <image:image>
-        <image:loc>${escapeXml(ogUrl)}</image:loc>
-        <image:title>${titleText}</image:title>
-        <image:caption>${escapeXml(`${c.apt_name} 아파트 ${subtitle} — 카더라 단지백과`)}</image:caption>
-      </image:image>
-      <image:image>
-        <image:loc>${escapeXml(ogSquareUrl)}</image:loc>
-        <image:title>${titleText}</image:title>
-        <image:caption>${escapeXml(`${c.apt_name} 단지백과 네이버 모바일용`)}</image:caption>
-      </image:image>
-  </url>`);
-  }
+  // ━━━ 단지백과 — /api/og 동적 URL이라 image-sitemap에서 제외 ━━━
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
