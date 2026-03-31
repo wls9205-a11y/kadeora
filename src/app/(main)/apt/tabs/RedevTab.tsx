@@ -170,7 +170,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               return (
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{
                   display: 'block', textDecoration: 'none', color: 'inherit',
-                  padding: '12px 14px 10px', borderRadius: 'var(--radius-card)',
+                  padding: '10px 10px 8px', borderRadius: 'var(--radius-card)',
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   cursor: 'pointer',
                   position: 'relative', overflow: 'hidden',
