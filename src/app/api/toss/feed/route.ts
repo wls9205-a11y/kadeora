@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const [postsR, hotR, tickerR, aptR, blogR] = await Promise.all([
       // 최신 게시글
       sb.from('posts')
-        .select('id, title, category, likes_count, comments_count, created_at, profiles!inner(nickname)')
+        .select('id, title, category, likes_count, comments_count, created_at, profiles(nickname)')
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
         .limit(20),
