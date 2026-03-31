@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { REPORT_REGIONS, type ReportRegion } from '@/lib/daily-report-data';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import DailyReportClient from '../DailyReportClient';
+import ShareButtons from '@/components/ShareButtons';
 
 interface Props { params: Promise<{ region: string; date: string }> }
 
@@ -108,6 +109,9 @@ export default async function DailyReportDatePage({ params }: Props) {
         prevDate={prevRow?.report_date || null}
         nextDate={nextRow?.report_date || null}
       />
+      <div style={{ marginTop: 16 }}>
+        <ShareButtons title={`카더라 데일리 리포트 — ${region} ${dateStr}`} postId={`daily-${region}-${dateStr}`} />
+      </div>
     </div>
   );
 }

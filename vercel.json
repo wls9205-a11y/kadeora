@@ -6,6 +6,12 @@
     "src/app/api/admin/god-mode/*.ts": {
       "maxDuration": 300
     },
+    "src/app/api/admin/batch-pdf-parse/*.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/admin/batch-reparse/*.ts": {
+      "maxDuration": 300
+    },
     "src/app/api/cron/sync-apt-sites/*.ts": {
       "maxDuration": 180
     },
@@ -251,6 +257,10 @@
     {
       "path": "/api/cron/apt-parse-announcement",
       "schedule": "0 */4 * * *"
+    },
+    {
+      "path": "/api/admin/batch-pdf-parse",
+      "schedule": "30 */2 * * *"
     },
     {
       "path": "/api/cron/apt-crawl-pricing",

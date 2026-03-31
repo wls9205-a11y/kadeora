@@ -16,7 +16,9 @@ export const runtime = 'nodejs';
  */
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
-  if (token !== process.env.CRON_SECRET && token !== 'kd-reparse-2026') {
+  const authHeader = req.headers.get('authorization');
+  const isAuthed = token === 'kd-reparse-2026' || token === process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+  if (!isAuthed) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest) {
     .neq('announcement_pdf_url', '')
     .is('max_floor', null)
     .order('id', { ascending: false })
-    .limit(20);
+    .limit(50);
 
   if (!targets?.length) return NextResponse.json({ ok: true, message: 'PDF 파싱 완료!', remaining: 0 });
 
