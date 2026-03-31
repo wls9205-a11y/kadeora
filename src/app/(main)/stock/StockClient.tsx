@@ -24,9 +24,10 @@ interface Theme { id: number; theme_name: string; change_pct: number; is_hot: bo
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
 interface Props { initialStocks: Stock[]; briefing?: Record<string, any>; briefingUS?: Record<string, any>; exchangeHistory?: Record<string, any>[]; themeHistory?: Record<string, any>[]; }
 
-const IDX_SYMBOLS = new Set(['SPY','QQQ','DIA','IWM','VOO','VTI']);
+const IDX_SYMBOLS = new Set(['SPY','QQQ','DIA','IWM','VOO','VTI','TQQQ','SQQQ','SOXL','SPXL','ARKK','GLD','SLV','TLT','USO','VNQ','SCHD','JEPI','XLK','XLF','XLE','XLV','KWEB','EEM','EWJ','FXI','UVXY']);
 function isIdx(s: Stock) {
   if (IDX_SYMBOLS.has(s.symbol)) return true;
+  if (s.sector === 'ETF') return true;
   return ['KOSPI','KOSDAQ','NIKKEI'].some(idx => s.name.toUpperCase().includes(idx) || s.symbol.toUpperCase().includes(idx));
 }
 

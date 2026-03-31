@@ -9,7 +9,7 @@ export async function GET() {
     .select('symbol, name, market, price, change_pct, currency, sector, updated_at')
     .gt('price', 0)
     .order('updated_at', { ascending: false })
-    .limit(50);
+    .limit(200);
 
   const items = (stocks || []).map(s => {
     const pct = Number(s.change_pct) || 0;
@@ -31,7 +31,7 @@ export async function GET() {
   <channel>
     <title>카더라 주식 RSS</title>
     <link>${SITE_URL}/stock</link>
-    <description>최근 업데이트된 종목 50개 실시간 시세</description>
+    <description>최근 업데이트된 종목 200개 실시간 시세 — 국내외 1,700+ 종목</description>
     <language>ko</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${SITE_URL}/stock/feed" rel="self" type="application/rss+xml" />

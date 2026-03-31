@@ -5,7 +5,7 @@ import { SITE_URL as BASE } from '@/lib/constants';
 export const revalidate = 3600;
 
 const REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주','강남구','서초구','송파구','마포구','용산구','성남시','수원시','고양시','화성시','평택시','해운대구','부산진구','동래구'];
-const SECTORS = ['반도체','금융','자동차','바이오','화학','철강','건설','유통','IT','에너지','통신','엔터','방산','조선'];
+const SECTORS_FALLBACK = ['반도체','금융','자동차','바이오','IT','에너지','ETF','방산'];
 const BLOG_PER_SITEMAP = 5000;
 
 interface SitemapEntry {
@@ -43,6 +43,20 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
 
   // ── 0: static + region + sector ──
   if (id === 0) {
+    const sb = getSupabaseAdmin();
+    // 섹터 목록: DB에서 동적 조회 (새 종목/섹터 추가 시 자동 반영)
+    let SECTORS = SECTORS_FALLBACK;
+    try {
+      const { data: sectorData } = await sb.from('stock_quotes')
+        .select('sector')
+        .not('sector', 'is', null)
+        .neq('sector', '')
+        .gt('price', 0);
+      if (sectorData?.length) {
+        SECTORS = [...new Set(sectorData.map((s: any) => s.sector as string))];
+      }
+    } catch {}
+
     const staticPaths = [
       '', '/feed', '/hot', '/stock', '/apt', '/discuss', '/blog',
       '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/premium',

@@ -49,7 +49,31 @@ async function handler(_req: NextRequest) {
         `${SITE_URL}/discuss`,
       ];
 
-      const allUrls = [...staticUrls, ...blogUrls];
+      // 3-b) 주식 종목 + 섹터 URL (최근 업데이트 100개)
+      let stockUrls: string[] = [];
+      try {
+        const { data: recentStocks } = await sb.from('stock_quotes')
+          .select('symbol')
+          .eq('is_active', true)
+          .gt('price', 0)
+          .order('updated_at', { ascending: false })
+          .limit(100);
+        if (recentStocks?.length) {
+          stockUrls = recentStocks.map((s: any) => `${SITE_URL}/stock/${s.symbol}`);
+        }
+        // 섹터 페이지
+        const { data: sectors } = await sb.from('stock_quotes')
+          .select('sector')
+          .not('sector', 'is', null)
+          .neq('sector', '')
+          .gt('price', 0);
+        if (sectors?.length) {
+          const uniqueSectors = [...new Set(sectors.map((s: any) => s.sector))];
+          stockUrls.push(...uniqueSectors.map(s => `${SITE_URL}/stock/sector/${encodeURIComponent(s)}`));
+        }
+      } catch {}
+
+      const allUrls = [...staticUrls, ...stockUrls, ...blogUrls];
 
       // 4) IndexNow 전송 (3개 엔드포인트 동시)
       const endpoints = [

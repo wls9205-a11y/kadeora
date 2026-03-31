@@ -11,6 +11,20 @@ export const revalidate = 3600;
 
 interface Props { params: Promise<{ name: string }> }
 
+export async function generateStaticParams() {
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+    const sb = getSupabaseAdmin();
+    const { data } = await sb.from('stock_quotes')
+      .select('sector')
+      .not('sector', 'is', null)
+      .neq('sector', '')
+      .gt('price', 0);
+    const sectors = [...new Set((data || []).map((s: any) => s.sector))];
+    return sectors.map(s => ({ name: encodeURIComponent(s) }));
+  } catch { return []; }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
   const sector = decodeURIComponent(name);
