@@ -205,6 +205,10 @@
       "schedule": "0 14,16,18,20,22 * * 1-5"
     },
     {
+      "path": "/api/cron/stock-naver-sync",
+      "schedule": "*/10 0-7 * * 1-5"
+    },
+    {
       "path": "/api/cron/stock-desc-gen",
       "schedule": "30 0,6,12,18 * * *"
     },
