@@ -165,10 +165,10 @@ export default function DashboardSection() {
         <HealthBadge label="프리미엄" value={`${premiumKpi?.subscribers ?? 0}명`} ok={(premiumKpi?.subscribers ?? 0) > 0} />
         <HealthBadge label="IndexNow" value={`${premiumKpi?.indexNow?.pct ?? 0}%`} ok={(premiumKpi?.indexNow?.pct ?? 0) > 50} />
         {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
-        {dataCoverage && <HealthBadge label="분양가" value={`${dataCoverage.aptPrice.pct}%`} ok={dataCoverage.aptPrice.pct > 30} />}
-        {dataCoverage && <HealthBadge label="좌표" value={`${dataCoverage.aptCoords.pct}%`} ok={dataCoverage.aptCoords.pct > 30} />}
-        {dataCoverage && <HealthBadge label="이미지" value={`${dataCoverage.aptImages?.pct ?? 0}%`} ok={(dataCoverage.aptImages?.pct ?? 0) > 10} />}
-        {dataCoverage && <HealthBadge label="종목설명" value={`${dataCoverage.stockDesc.pct}%`} ok={dataCoverage.stockDesc.pct > 50} />}
+        {dataCoverage && <HealthBadge label="분양가" value={`${dataCoverage.aptPrice.pct}%`} ok={dataCoverage.aptPrice.pct > 90} />}
+        {dataCoverage && <HealthBadge label="좌표" value={`${dataCoverage.aptCoords.pct}%`} ok={dataCoverage.aptCoords.pct > 95} />}
+        {dataCoverage && <HealthBadge label="이미지" value={`${dataCoverage.aptImages?.pct ?? 0}%`} ok={(dataCoverage.aptImages?.pct ?? 0) > 50} />}
+        {dataCoverage && <HealthBadge label="종목설명" value={`${dataCoverage.stockDesc.pct}%`} ok={dataCoverage.stockDesc.pct > 95} />}
         {dataCoverage?.aiSummary && <HealthBadge label="AI요약" value={`${dataCoverage.aiSummary.pct}%`} ok={dataCoverage.aiSummary.pct > 30} />}
         {dataCoverage?.stockRefresh && <HealthBadge label="시세" value={dataCoverage.stockRefresh.ok ? '정상' : '오류'} ok={dataCoverage.stockRefresh.ok} />}
         {dataCoverage?.dbSize && <HealthBadge label="DB" value={dataCoverage.dbSize} ok={true} />}
