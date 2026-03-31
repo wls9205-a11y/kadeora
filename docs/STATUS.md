@@ -1,6 +1,7 @@
-# 카더라 STATUS.md — 세션 64 최종 (2026-03-31 10:30 KST)
+# 카더라 STATUS.md — 세션 64 최종 (2026-03-31 11:00 KST)
 
 ## 최신 커밋
+- `55026e0` — 포털 노출 면적 최대화 (전 메인 OG 630x630 + max-video-preview)
 - `1141e75` — 피드/부동산 1열 전환 + 주식 페이지 리뉴얼 (탭5개+pill+심리지수데이터기반+섹터히트맵)
 - `99856f2` — 검색/입력 필드 통일 + DB 상폐종목 13개 삭제 + is_active 정리
 - `7c82768` — 모바일 2열 레이아웃 수정 (listing-grid minmax + min-width:0)
@@ -9,6 +10,23 @@
 - `6e671cb` — stock-naver-sync 크론 신설 (국내500+해외500 네이버 크롤링)
 
 ## 주요 성과
+
+### 포털별 노출 면적 최대화 (전수조사 완료)
+- **OG 듀얼 이미지**: 전 메인 페이지 1200x630 + 630x630 동시 등록 (feed/stock/apt/blog/hot/discuss)
+- **max-video-preview: -1**: Google 비디오 리치결과 허용 (layout.tsx)
+- **구조화 데이터 현황** (포털 SERP 확장):
+  - BreadcrumbList: 전 페이지 ✅
+  - FAQPage: stock, apt, apt/region, apt/[id], complex, daily, hot, premium, grades ✅
+  - Article/BlogPosting + Speakable: blog, feed/[id], stock/[symbol], apt/[id], daily ✅
+  - Organization + WebSite + SearchAction: layout.tsx ✅ (Google 사이트링크 검색 박스)
+  - SiteNavigationElement: layout.tsx 6항목 ✅ (Google 확장 사이트링크)
+  - Event + HowTo: apt/[id] 청약 ✅
+  - Product + AggregateOffer + AggregateRating: apt/[id], premium ✅
+  - FinancialProduct + Dataset: stock/[symbol], complex ✅
+  - Place + GeoCoordinates: apt/[id], complex ✅
+  - Naver 메타 (site_name, author, written/updated_time): 전 페이지 ✅
+  - Daum 메타 (daum:site_name): layout.tsx ✅
+  - max-image-preview: large, max-snippet: -1: layout.tsx ✅
 
 ### 레이아웃 전환 + 주식 페이지 리뉴얼
 - listing-grid: 2열→1열 기본 (피드/부동산/블로그) — 모바일 깨짐 근본 해결
