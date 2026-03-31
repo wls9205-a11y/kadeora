@@ -63,7 +63,7 @@ function nameSimilarity(a: string, b: string): number {
 }
 
 async function handler(_req: NextRequest) {
-  if (!KAPT_KEY) return NextResponse.json({ error: 'KAPT_API_KEY not set' }, { status: 500 });
+  if (!KAPT_KEY) return { processed: 0, updated: 0, failed: 0, metadata: { error: 'KAPT_API_KEY not set' } };
 
   const sb = getSupabaseAdmin();
 
