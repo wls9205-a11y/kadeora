@@ -90,14 +90,14 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
     <>
           <div>
             {/* 재개발/재건축 현황 헤더 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>재개발·재건축 현황</span>
               <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--brand)' }}>총 {filteredRedev.length}건 / {totalHouseholds.toLocaleString()}세대</span>
             </div>
 
 
             {/* 현황 요약 */}
-            <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 10 }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
               <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 6px', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전체</div>

@@ -285,7 +285,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
       {/* ① 입주 임박 배너 */}
       {urgentMove.length > 0 && (
-        <div style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(96,165,250,0.1))', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 14 }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(96,165,250,0.1))', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 'var(--sp-md)' }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--accent-green)', marginBottom: 'var(--sp-sm)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ animation: 'pulse 2s infinite' }}>🏠</span> 입주 임박 ({urgentMove.length}건)
           </div>
@@ -304,8 +304,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       )}
 
       {/* 종합 현황 + 수도권/지방 */}
-      <div className="kd-card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏢 {ongoingRegion !== '전체' ? `${ongoingRegion} ` : ''}분양중 현황</div>
+      <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏢 {ongoingRegion !== '전체' ? `${ongoingRegion} ` : ''}분양중 현황</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: 6 }}>
           {[
             { label: '전체', value: filtered.length, color: 'var(--brand)' },
@@ -327,8 +327,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       </div>
 
       {/* ③ 단계별 파이프라인 */}
-      <div className="kd-card" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 분양 진행 단계</div>
+      <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏗️ 분양 진행 단계</div>
         <div style={{ display: 'flex', gap: 3, alignItems: 'stretch' }}>
           {pipeStages.map((stage, i) => {
             const count = pipeCounts[stage] || 0;
@@ -347,8 +347,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
       {/* ④ 분양가 TOP10 바 차트 */}
       {priceTop.length > 0 && (
-        <div className="kd-card" style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>💰 분양가 TOP {Math.min(priceTop.length, 10)}</div>
+        <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>💰 분양가 TOP {Math.min(priceTop.length, 10)}</div>
           {priceTop.map((d, i: number) => {
             const pct = ((d.sale_price_max || 0) / maxPrice) * 100;
             const pAmt = ((d.sale_price_max ?? 0) / 10000).toFixed(1);

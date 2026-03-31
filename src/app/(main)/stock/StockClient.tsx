@@ -249,7 +249,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           ══════════════════════════════════════════ */}
 
       {/* ─ 헤더 ─ */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>주식</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {(() => {
@@ -769,7 +769,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         const upCount7 = m7Stocks.filter(st => (st.change_pct ?? 0) > 0).length;
         const downCount7 = m7Stocks.filter(st => (st.change_pct ?? 0) < 0).length;
         return (
-        <div style={{ marginBottom: 14 }}>
+        <div style={{ marginBottom: 'var(--sp-md)' }}>
           {/* 헤더 */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
             <div>

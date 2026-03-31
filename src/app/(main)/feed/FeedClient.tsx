@@ -277,7 +277,7 @@ export default function FeedClient({
         <DailyReportCard />
 
         {/* ━━━ 카테고리 탭 ━━━ */}
-        <div className="kd-scroll-row" style={{ marginBottom: 10 }}>
+        <div className="kd-scroll-row" style={{ marginBottom: 'var(--sp-sm)' }}>
           {categories.map(cat => {
             const isActive = activeCategory === cat.key;
             return (
@@ -292,7 +292,7 @@ export default function FeedClient({
 
         {/* ━━━ 정렬 옵션 ━━━ */}
         {activeCategory !== 'following' && (
-          <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)', alignItems: 'center' }}>
             {sortOptions.map(opt => {
               const isActive = activeSort === opt.key;
               return (
@@ -351,7 +351,7 @@ export default function FeedClient({
         {/* ━━━ D: 새 글 알림 바 ━━━ */}
         {newCount > 0 && (
           <button onClick={handleRefreshNew} style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--sp-sm)',
             padding: '9px 0', marginBottom: 10, borderRadius: 'var(--radius-md)',
             background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer',
             fontWeight: 700, fontSize: 'var(--fs-sm)',
@@ -390,7 +390,7 @@ export default function FeedClient({
                 )}
 
                 {/* 상단: 아바타 + 메타 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6 }}>
                   <Link href={post.is_anonymous ? '#' : `/profile/${post.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
                     <div style={{ width: 28, height: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-inverse)' }}>
                       {displayName[0].toUpperCase()}
@@ -401,7 +401,7 @@ export default function FeedClient({
                       <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
                       <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}<span className="grade-title-text"> {gradeTitle(post.profiles?.grade ?? 1)}</span></span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 1, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginTop: 1, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
                       <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
                       {(post.view_count ?? 0) > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>· {numFmt(post.view_count ?? 0)}</span>}
@@ -432,7 +432,7 @@ export default function FeedClient({
                     </div>
                   )}
                   {post.images && post.images.length > 1 && (
-                    <div style={{ marginTop: 10, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+                    <div style={{ marginTop: 10, display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
                       {(post.images as string[]).slice(0, 3).map((img, idx) => (
                         <div key={idx} style={{ width: 70, height: 70, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
                           <Image src={img} alt="게시글 이미지" fill sizes="70px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
@@ -520,14 +520,14 @@ export default function FeedClient({
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>투자자들의 실시간 대화에 참여</div>
                       </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 'var(--sp-lg)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
                       {[
                         { icon: '📈', text: '관심 종목 알림' },
                         { icon: '🏠', text: '청약 마감 알림' },
                         { icon: '💬', text: '실시간 토론' },
                         { icon: '🎁', text: '포인트 적립' },
                       ].map(f => (
-                        <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.08)' }}>
+                        <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.08)' }}>
                           <span style={{ fontSize: 14 }}>{f.icon}</span>
                           <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f.text}</span>
                         </div>
@@ -547,7 +547,7 @@ export default function FeedClient({
         {/* 팔로잉 빈 상태 */}
         {activeCategory === 'following' && currentUserId && visiblePosts.length === 0 && !loadingMore && (
           <div style={{ textAlign: 'center', padding: '40px 16px' }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}>👥</div>
+            <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👥</div>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>팔로우한 사람의 글이 없어요</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 있는 유저를 팔로우해보세요</div>
             <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>전체 피드 보기</Link>

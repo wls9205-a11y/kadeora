@@ -24,14 +24,26 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
-      // 프로필 upsert (신규 유저)
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        nickname: data.user.user_metadata?.full_name ?? data.user.user_metadata?.name ?? data.user.email?.split('@')[0] ?? '사용자',
-        avatar_url: data.user.user_metadata?.avatar_url ?? null,
-        provider: data.user.app_metadata?.provider ?? null,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'id', ignoreDuplicates: true });
+      // 프로필 upsert (신규: insert / 기존: avatar 갱신)
+      const meta = data.user.user_metadata;
+      const avatarUrl = meta?.avatar_url || meta?.picture || null;
+      
+      // 먼저 기존 프로필 확인
+      const { data: existing } = await supabase.from('profiles').select('id, avatar_url').eq('id', data.user.id).maybeSingle();
+      
+      if (!existing) {
+        // 신규 유저 — insert
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          nickname: meta?.full_name ?? meta?.name ?? data.user.email?.split('@')[0] ?? '사용자',
+          avatar_url: avatarUrl,
+          provider: data.user.app_metadata?.provider ?? null,
+          updated_at: new Date().toISOString(),
+        });
+      } else if (avatarUrl && !existing.avatar_url) {
+        // 기존 유저 — avatar 없으면 OAuth 사진으로 채움
+        await supabase.from('profiles').update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() }).eq('id', data.user.id);
+      }
 
       // onboarded 여부 확인
       const { data: profile } = await supabase

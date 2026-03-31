@@ -134,7 +134,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       </div>
 
       {/* 통합 검색창 (상단 배치) */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
         <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)} style={{
           padding: '7px 10px', fontSize: 13, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
@@ -197,7 +197,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {/* 지역 필터 활성 배지 */}
       {selectedRegion !== '전체' && (
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10,
+          display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 10,
           padding: '5px 12px', borderRadius: 'var(--radius-xl)', background: 'var(--brand-bg)',
           border: '1px solid var(--brand-border)', fontSize: 12, fontWeight: 600, color: 'var(--brand)',
         }}>
@@ -352,7 +352,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
 
       {/* 지역별 부동산 내부 링크 (SEO) */}
       <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏙️ 지역별 부동산 정보</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏙️ 지역별 부동산 정보</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
             <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{
@@ -370,7 +370,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         if (bigApts.length === 0) return null;
         return (
           <div style={{ marginTop: 'var(--sp-md)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 인기 분양 현장</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏗️ 인기 분양 현장</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {bigApts.map((a: any) => {
                 const slug = (a.house_nm || '').trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.id;

@@ -77,7 +77,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
     return (
      <div>
       {/* 미분양 현황 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>미분양 현황</span>
         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-red)' }}>총 {total.toLocaleString()}세대</span>
       </div>
@@ -85,7 +85,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
       {/* 미분양 급증 경고 배너 — 지역별 현황 아래 */}
       {surgeAlerts.length > 0 && (
         <div style={{
-          marginBottom: 14, padding: '12px 16px', borderRadius: 'var(--radius-card)',
+          marginBottom: 'var(--sp-md)', padding: '12px 16px', borderRadius: 'var(--radius-card)',
           background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-sm)' }}>
@@ -116,8 +116,8 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         const filteredCapital = fu.filter((u: Record<string, any>) => capitalR.some(c => (u.region_nm || '').includes(c))).reduce((s: number, u: any) => s + (u.tot_unsold_hshld_co || 0), 0);
         const filteredLocal = filteredTotal - filteredCapital;
         return (
-        <div className="kd-card" style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 {unsoldRegion !== '전체' ? `${unsoldRegion} ` : ''}미분양 현황</div>
+        <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>📊 {unsoldRegion !== '전체' ? `${unsoldRegion} ` : ''}미분양 현황</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
             <div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{unsoldRegion !== '전체' ? unsoldRegion : '전국'}</div>
@@ -162,8 +162,8 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 미분양 지역별 TOP5 */}
       {unsoldRegionStats.length > 0 && (
-        <div className="kd-card" style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏚️ 미분양 많은 지역 TOP5</div>
+        <div className="kd-card" style={{ marginBottom: 'var(--sp-md)' }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏚️ 미분양 많은 지역 TOP5</div>
           {unsoldRegionStats.slice(0, 5).map((r, i) => (
             <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '6px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)', width: 20 }}>{i + 1}</span>
@@ -257,7 +257,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
             {/* 미분양률 바 */}
             {rate !== null && (
-              <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 10 }}>
+              <div style={{ position: 'relative', height: 5, background: 'var(--bg-hover)', borderRadius: 2, marginBottom: 'var(--sp-sm)' }}>
                 <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(rate, 100)}%`, background: rate > 70 ? 'var(--accent-red)' : rate > 40 ? 'var(--accent-orange)' : 'var(--accent-yellow)' }} />
                 <span style={{ position: 'absolute', right: 0, top: -14, fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-red)' }}>{rate}%</span>
               </div>
