@@ -1,13 +1,56 @@
-# 카더라 STATUS.md — 세션 58~64 통합 (2026-03-31 KST)
+# 카더라 STATUS.md — 세션 64 최종 (2026-03-31 10:00 KST)
 
 ## 최신 커밋
-- `ef80102` — 모바일 반응형 전수조사: 그리드 오버플로우 10건 수정 (8개 유틸 클래스 추가)
-- `364df99` — 디자인 3차: fontWeight 계층 + admin/landing 토큰 (92파일)
-- `3871db8` — CSS 정리: 죽은 클래스 26개 제거 + STATUS.md
-- `8142992` — 디자인 토큰 2차 적용 (borderRadius/gap/padding/transition/color 166파일)
-- `720da76` — 디자인 시스템 전면 정리 (z-index 통일 + 유틸 클래스 14종 + 146파일)
+- `7c82768` — 모바일 2열 레이아웃 수정 (listing-grid minmax(0,1fr) + min-width:0)
+- `62bf14d` — 주식 SEO 전면 자동화 (사이트맵 동적 + generateStaticParams + IndexNow)
+- `e88ce80` — US 종목 88개 대량 추가 + 크론 limit 확대
+- `9fe58b5` — NASDAQ .O/.N suffix 지원
+- `6e671cb` — stock-naver-sync 크론 신설 (국내500+해외500 네이버 크롤링)
+- `0a7ed7e` — stock change_pct ±30% 클램프 — 비정상 등락률 재발 방지
+- `eefe3b2` — 피드 강화 6종 (실시간활동+관심종목+예측랭킹+리액션+라운지프리뷰+베스트댓글)
 
 ## 주요 성과
+
+### 세션 64: 주식 시세 전면 수정 + 네이버 크롤링 + US 종목 대량 추가 + 모바일 2열 수정
+
+#### 주식 시세 정상화
+- 비정상 등락률 (-8247%, -3735% 등) 전부 수정 → 0건
+- change_pct ±30% 클램프 적용 (stock-crawl + stock-refresh)
+- price_history 3/24 이전 오염 데이터 수정 (3/25 가격 기준 통일)
+- 전 종목 change_pct price_history 기반 재계산
+
+#### 네이버 벌크 크롤링 크론 신설 (stock-naver-sync)
+- 국내: 시총순 500종목 네이버 모바일 API (15병렬 × 80ms)
+- 해외: 시총순 500종목 네이버 해외주식 API (20병렬 × 60ms)
+- NASDAQ .O / NYSE .N suffix 자동 적용 + 폴백
+- price_history에 오늘 종가 자동 기록
+- 매 10분 실행 (평일 KST 09:00~16:00)
+- 첫 실행 결과: 국내 477성공(96%), 해외 113성공(56%)
+
+#### US 종목 124개 대량 추가
+- 빅테크: GOOG, CSCO, ACN, TXN, IBM, SNPS, CDNS, DELL, HPQ
+- 전자상거래/핀테크: MELI, NU, CPNG, FUTU, TIGR, FOUR, TOST
+- 소셜/미디어: SNAP, PINS, ROKU, RDDT, ZM, DUOL, NFLX
+- 양자컴퓨팅: IONQ, RGTI, QBTS
+- UAM/우주: ACHR, JOBY, ASTS, LUNR, RDW
+- 원자력/에너지: CCJ, LEU, SMR, VST, CEG
+- 크립토: MSTR, MARA, RIOT, WULF, CLSK
+- 방산: KTOS, RCAT, BWXT
+- ETF 16종: TQQQ, SOXL, SPXL, ARKK, GLD, SLV, TLT, USO, VNQ, VOO, VTI, SCHD, JEPI, XLK~XLV, KWEB, EEM, EWJ, FXI, SQQQ, UVXY
+- 한국 ADR: KB, SHG, PKX, LPL, SKM, KT
+- 총 종목: KOSPI 293 + KOSDAQ 1,013 + NYSE 294 + NASDAQ 194 = **1,794**
+
+#### SEO 전면 자동화 (종목 INSERT만 하면 전부 자동)
+- sitemap SECTORS: 하드코딩 → DB 동적 조회 (55개 섹터)
+- generateStaticParams: stock/[symbol] + sector/[name] 전부 DB 동적
+- IndexNow: 최근 100종목 + 전 섹터 URL 자동 제출
+- RSS feed: 50개 → 200개 확대
+- isIdx: ETF 27종 + sector=ETF 자동 판별
+
+#### 모바일 2열 레이아웃 수정
+- listing-grid: repeat(2, 1fr) → repeat(2, minmax(0, 1fr))
+- 그리드 아이템 min-width:0 + overflow:hidden
+- SubscriptionTab 카드: KPI/타임라인/주소 overflow 처리
 
 ### 디자인 시스템 전면 정리 (세션 64) — 5커밋, 400+파일
 - **CSS 토큰 정의 → 실적용 완료**: --sp-*, --radius-*, --transition-*, --z-* 전부 TSX에서 활용
@@ -90,11 +133,11 @@
 | 전월세 실거래 | 2,095,019건 |
 | 단지백과 프로필 | 34,495개 |
 | apt_sites | 5,522개 |
-| 주식 종목 | 1,670개 (KOSPI 293/KOSDAQ 1,013/NYSE 222/NASDAQ 142) |
-| price_history | 25,198+ rows |
+| 주식 종목 | 1,794개 (KOSPI 293/KOSDAQ 1,013/NYSE 294/NASDAQ 194) |
+| price_history | 28,432+ rows |
 | 유저 | 121명 |
 | DB | ~1,383 MB |
-| 크론 | 88개+ |
+| 크론 | 79개+ (stock-naver-sync 추가) |
 
 ## PENDING
 - [ ] 카카오 지도 SDK — Vercel 캐시 없이 Redeploy 필요
