@@ -205,7 +205,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                         '착공': ' · 사업시행계획 참조',
                       };
                       return stageMsg[r.stage || ''] || ' · 세대수 미확정';
-                    })()}{r.constructor ? ` · ${r.constructor}` : ''}
+                    })()}{r.constructor ? ` · ${r.constructor}` : ''}{(r as any).developer && (r as any).developer !== r.constructor ? ` · 시행 ${(r as any).developer}` : ''}
                   </div>
                   {/* 비고/예상준공 */}
                   {(r.notes || r.expected_completion) && (

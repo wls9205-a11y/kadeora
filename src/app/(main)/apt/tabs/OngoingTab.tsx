@@ -175,6 +175,8 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                     {isUnsold ? '미분양' : '분양중'}
                   </span>
                   {o.competition_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-yellow)' }}>🔥 {o.competition_rate}:1</span>}
+                  {(o as any).brand_name && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)' }}>{(o as any).brand_name}</span>}
+                  {(o as any).project_type && (o as any).project_type !== '민간' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: (o as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : (o as any).project_type === '재건축' ? 'rgba(167,139,250,0.1)' : 'rgba(52,211,153,0.1)', color: (o as any).project_type === '재개발' ? 'var(--accent-orange)' : (o as any).project_type === '재건축' ? 'var(--accent-purple)' : 'var(--accent-green)' }}>{(o as any).project_type}</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{o.region_nm}</span>
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>{o.house_nm || '현장명 없음'}</div>
@@ -187,7 +189,15 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                     return gen > 0 ? ` · 총 ${(o.total_supply ?? 0).toLocaleString()}세대(일반${gen}·특별${spe})` : ` · 총 ${(o.total_supply ?? 0).toLocaleString()}세대`;
                   })() : ''}
                   {o.constructor_nm ? ` · ${o.constructor_nm}` : ''}
+                  {(o as any).developer_nm && (o as any).developer_nm !== o.constructor_nm ? ` · 시행 ${(o as any).developer_nm}` : ''}
                   {priceStr ? ` · ${priceStr}` : ''}
+                </div>
+                {/* 중도금 대출 배지 */}
+                {(o as any).loan_rate && (
+                  <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: (o as any).loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: (o as any).loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)', fontWeight: 600, marginBottom: 4, display: 'inline-block' }}>
+                    중도금 {(o as any).loan_rate}
+                  </span>
+                )}
                 </div>
                 {/* 분양가 범위 바 */}
                 {pMin && pMax && pMin !== pMax && (
