@@ -1,11 +1,11 @@
 # 카더라 STATUS.md — 세션 58~64 통합 (2026-03-31 KST)
 
 ## 최신 커밋
+- `ef80102` — 모바일 반응형 전수조사: 그리드 오버플로우 10건 수정 (8개 유틸 클래스 추가)
 - `364df99` — 디자인 3차: fontWeight 계층 + admin/landing 토큰 (92파일)
 - `3871db8` — CSS 정리: 죽은 클래스 26개 제거 + STATUS.md
 - `8142992` — 디자인 토큰 2차 적용 (borderRadius/gap/padding/transition/color 166파일)
 - `720da76` — 디자인 시스템 전면 정리 (z-index 통일 + 유틸 클래스 14종 + 146파일)
-- `6e671cb` — stock-naver-sync 크론 (국내500+해외200 네이버 벌크)
 
 ## 주요 성과
 
@@ -30,6 +30,15 @@
 - **죽은 CSS 제거**: filter-pills, blog-toc-sidebar, nav-bar, tab-bar, 미사용 responsive 클래스 25개
 - **color var()**: 2,128→2,489 (+17%)
 - Vercel 5배포 전부 READY, TS 에러 0
+- **모바일 반응형 전수조사**: 320~480px 그리드 오버플로우 10건 수정
+  - kd-kpi-5: 5열→480px 3열/380px 2열
+  - kd-grid-4: 4열→480px 2열 (apt/stock/profile)
+  - kd-grid-3: 3열→420px 2열 (complex)
+  - kd-grid-1-2: 1fr+2fr→480px 1열 (apt/region)
+  - kd-grid-6: 6열→480px 3열/380px 2열 (daily global)
+  - kd-cal-grid: 7열 캘린더→380px 축소 (subscription)
+  - kd-region-grid: 5열→380px 4열/320px 3열
+  - kd-stats-4: 4열→380px 2열 (profile)
 
 ### B-2 도넛 리디자인 (최종)
 - 2×4 그리드 8칸: 청약/분양중/미분양/재개발·재건축/실거래(2026)/단지백과/분양사이트/부동산지도
