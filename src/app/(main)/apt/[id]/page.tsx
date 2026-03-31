@@ -1375,15 +1375,15 @@ export default async function AptUnifiedPage({ params }: Props) {
         </div>
       </div>
 
-      {/* 프리미엄 업셀 */}
+      {/* 프로 업셀 */}
       <div className="kd-card-glow" style={{ padding: '16px 14px', margin: '12px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 'var(--fs-xl)' }}>🔔</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>청약 마감 알림 받아보세요</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프리미엄 멤버십 · D-3, D-1 자동 알림</div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프로 멤버십 · D-7 사전 알림 + 전세가율 변동</div>
           </div>
-          <Link href="/premium" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
+          <Link href="/shop" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
             자세히
           </Link>
         </div>

@@ -608,7 +608,7 @@ export default function DashboardSection() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>👑 프리미엄 & 매출</span>
-            <a href="/premium" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: C.brand, textDecoration: 'none', fontWeight: 600 }}>페이지 →</a>
+            <a href="/shop" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: C.brand, textDecoration: 'none', fontWeight: 600 }}>페이지 →</a>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
             <div style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '8px 10px', textAlign: 'center' }}>
@@ -1015,7 +1015,7 @@ export default function DashboardSection() {
         <QuickAction label="💬 토론" href="/discuss" external />
         <QuickAction label="🔥 HOT" href="/hot" external />
         <QuickAction label="🛒 상점" href="/shop" external />
-        <QuickAction label="👑 프리미엄" href="/premium" external />
+        <QuickAction label="👑 프리미엄" href="/shop" external />
         <QuickAction label="🔑 Anthropic" href="https://console.anthropic.com" external />
         <QuickAction label="📊 Vercel" href="https://vercel.com/wls9205-5665s-projects/kadeora" external />
         <QuickAction label="🔍 SearchConsole" href="https://search.google.com/search-console" external />

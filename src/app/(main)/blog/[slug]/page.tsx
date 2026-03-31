@@ -644,9 +644,9 @@ export default async function BlogDetailPage({ params }: Props) {
           <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-md)', flexShrink: 0 }}>👑</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 종목 리포트 받아보세요</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>프리미엄 멤버십 · 하루 330원</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>프로 멤버십 · 하루 830원</div>
           </div>
-          <Link href="/premium" style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
+          <Link href="/shop" style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
             자세히
           </Link>
         </div>

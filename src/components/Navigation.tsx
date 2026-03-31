@@ -27,7 +27,7 @@ const MORE_ITEMS = [
   { href: '/blog',            emoji: '📰', label: '블로그' },
   { href: '/discuss',         emoji: '💬', label: '라운지 토론' },
   { href: '/hot',             emoji: '🔥', label: '이번주 HOT' },
-  { href: '/premium',         emoji: '👑', label: '프리미엄' },
+  { href: '/shop',         emoji: '🛒', label: '상점' },
   { href: '/apt/search',      emoji: '🔍', label: '실거래 검색' },
   { href: '/stock/compare',   emoji: '⚖️', label: '종목 비교' },
   { href: '/apt/map',         emoji: '🗺️', label: '부동산 지도' },
