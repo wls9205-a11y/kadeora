@@ -21,7 +21,7 @@ const GRADE_EMOJI: Record<number, string> = {1:'🌱',2:'🌿',3:'🍀',4:'🌸'
 const PROVIDER_LABEL: Record<string, string> = { kakao: '카카오', google: '구글', email: '이메일', apple: '애플' };
 
 // ── Sections ──
-type Section = 'dashboard' | 'analytics' | 'users' | 'content' | 'blog' | 'realestate' | 'system' | 'reports' | 'notices' | 'shop' | 'godmode' | 'seo' | 'satellite';
+type Section = 'dashboard' | 'analytics' | 'users' | 'content' | 'blog' | 'realestate' | 'system' | 'reports' | 'notices' | 'shop' | 'godmode' | 'seo' | 'satellite' | 'popups';
 const SECTIONS: { key: Section; icon: string; label: string }[] = [
   { key: 'dashboard', icon: '📊', label: '대시보드' },
   { key: 'analytics', icon: '📈', label: '방문자' },
@@ -34,6 +34,7 @@ const SECTIONS: { key: Section; icon: string; label: string }[] = [
   { key: 'reports', icon: '🚨', label: '신고/결제' },
   { key: 'notices', icon: '📢', label: '공지 · 알림' },
   { key: 'shop', icon: '🛍️', label: '상점' },
+  { key: 'popups', icon: '📢', label: '팝업 관리' },
   { key: 'satellite', icon: '🛰️', label: '위성 네트워크' },
   { key: 'godmode', icon: '⚡', label: 'GOD MODE' },
 ];

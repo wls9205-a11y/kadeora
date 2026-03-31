@@ -17,6 +17,7 @@ const NoticesSection = dynamic(() => import('./sections/notices'), { loading: ()
 const ShopSection = dynamic(() => import('./sections/shop'), { loading: () => <Spin /> });
 const GodModeSection = dynamic(() => import('./sections/godmode'), { loading: () => <Spin /> });
 const SatelliteSection = dynamic(() => import('./sections/satellite'), { loading: () => <Spin /> });
+const PopupsSection = dynamic(() => import('./sections/popups'), { loading: () => <Spin /> });
 
 function Spin() {
   return (
@@ -40,6 +41,7 @@ const SECTION_MAP: Record<Section, React.ComponentType> = {
   shop: ShopSection,
   godmode: GodModeSection,
   satellite: SatelliteSection,
+  popups: PopupsSection,
 };
 
 export default function MissionControl() {
