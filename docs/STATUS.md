@@ -1,6 +1,10 @@
-# 카더라 STATUS.md — 세션 65 최종 (2026-04-01 03:35 KST)
+# 카더라 STATUS.md — 세션 65 최종 (2026-04-01 04:00 KST)
 
 ## 최신 커밋
+- `1ea4e2b` — 부동산 탭 카드 업데이트 (사업유형/브랜드/중도금/시행사 pill)
+- `ebc1c3f` — 공유버튼 3곳 추가 + PDF 크론 등록 + maxDuration 설정
+- `c77f64e` — pdf-parse v1 ENOENT 버그 우회 + PDF 파싱 배치 API
+- `7802812` — 파서 공유 모듈 추출 (parse-announcement.ts) + batch-reparse 재작성
 - `1ebdc43` — **토스 앱인토스 → 카더라 유입 퍼널 풀스택 구현**
 - `27a854b` — 크론 파서 공유 모듈 리팩터 (412→55줄)
 - `9eda529` — 앱인토스 v7 빌드 — 반려 3건 수정 + 5탭 + 피드 API v2
@@ -22,6 +26,24 @@
 - **toss-mode.ts v3**: `openInBrowser()` — TossApp.openExternal → window.open 폴백
 - **페이지별 제한**: 피드 5개, 주식 10종목, 청약 5건, 블로그 30% → 전부 CTA 유도
 - **앱인토스 빌드**: v7 (.ait 4.6KB), SDK 2.1.0, 반려 3건 수정 완료
+
+### 부동산 탭 카드 전면 업데이트
+- 청약탭: 사업유형 pill(재개발/재건축/공공) + 중도금 유이자/무이자 배지 + loan_rate SSR 추가
+- 분양중탭: 브랜드명 pill + 사업유형 pill + 시행사 표시 + 중도금 대출 배지
+- 재개발탭: 시행사 표시 추가 (constructor와 다른 경우)
+
+### 공유버튼 전수조사 + 3곳 추가
+- /daily/[region]/[date]: ShareButtons 추가
+- /blog/series/[slug]: ShareButtons 추가
+- /apt/region/[region]: ShareButtons 추가
+- 기존 중복 없음 확인 (/apt/[id]의 4개는 각 섹션별 다른 공유)
+
+### PDF 파싱 시스템 구축
+- pdf-parse v1 라이브러리 추가 (lib/pdf-parse 직접 require로 ENOENT 버그 우회)
+- batch-pdf-parse API: PDF 다운로드 → 텍스트 추출 → regex 매칭
+- 추출 필드: 동수/최고층/주차/난방/구조/외장재/면적4종/대출/전매/거주의무/커뮤니티/사업일정
+- vercel.json 크론 등록: 2시간마다 50건 자동 처리
+- 첫 배치 15건 성공: 동수14/층수7/주차2/난방3/전매11/커뮤니티3/대지면적3 추출
 
 ### 모집공고 파서 대폭 강화 (+30 필드)
 - 건물스펙: total_households/total_dong_count/max_floor/min_floor/parking_total+ratio/heating_type/structure_type/exterior_finish
