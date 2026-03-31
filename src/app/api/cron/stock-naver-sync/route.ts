@@ -191,6 +191,43 @@ export async function GET(req: Request) {
     }
   } catch {}
 
+  // ═══ KOSPI/KOSDAQ 지수 자동 갱신 ═══
+  try {
+    const indices = [
+      { symbol: 'KOSPI_IDX', naverCode: 'KOSPI', name: 'KOSPI' },
+      { symbol: 'KOSDAQ_IDX', naverCode: 'KOSDAQ', name: 'KOSDAQ' },
+    ];
+    for (const idx of indices) {
+      try {
+        // 네이버 국내지수 API
+        const res = await fetch(`https://m.stock.naver.com/api/index/${idx.naverCode}/basic`, {
+          headers: HEADERS, signal: AbortSignal.timeout(4000),
+        });
+        if (res.ok) {
+          const j = await res.json();
+          const price = parseFloat(String(j?.closePrice ?? '0').replace(/,/g, ''));
+          const pct = parseFloat(String(j?.fluctuationsRatio ?? '0'));
+          if (price > 0) {
+            await sb.from('stock_quotes').update({
+              price, change_pct: CLAMP(pct), updated_at: new Date().toISOString(),
+            }).eq('symbol', idx.symbol);
+          }
+        }
+      } catch {
+        // 네이버 API 실패 시 시장 평균으로 폴백
+        const { data: avgData } = await sb.from('stock_quotes')
+          .select('change_pct')
+          .eq('market', idx.name).eq('is_active', true).gt('price', 0).neq('sector', '지수');
+        if (avgData?.length) {
+          const avgPct = +(avgData.reduce((s: number, r: any) => s + (r.change_pct ?? 0), 0) / avgData.length).toFixed(2);
+          await sb.from('stock_quotes')
+            .update({ change_pct: avgPct, updated_at: new Date().toISOString() })
+            .eq('symbol', idx.symbol);
+        }
+      }
+    }
+  } catch {}
+
   // ═══ 로깅 ═══
   try {
     await (sb as any).from('cron_logs').insert({
