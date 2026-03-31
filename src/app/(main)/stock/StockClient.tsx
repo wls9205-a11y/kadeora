@@ -283,8 +283,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
     );
   }, [watchlistSymbols, toggleWatchlist, sparklines, exchangeRate]);
 
-  const domesticTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['sector','🗺️ 섹터'],['themes','🔥 테마'],['news','📰 뉴스'],['calendar','📅 캘린더'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
-  const globalTabs = [['ranking','📊 시총'],['movers','📈 등락률'],['sector','🗺️ 섹터'],['news','📰 뉴스'],['m7','🏆 M7'],['watchlist','⭐ 관심'],['portfolio','💰 포트폴리오']] as const;
+  const domesticTabs = [['ranking','시총'],['movers','등락률'],['sector','섹터'],['themes','테마'],['watchlist','관심']] as const;
+  const globalTabs = [['ranking','시총'],['movers','등락률'],['sector','섹터'],['m7','M7'],['watchlist','관심']] as const;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
@@ -318,7 +318,10 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       {briefing && (() => {
         const bull = briefing.sentiment === 'bullish';
         const bear = briefing.sentiment === 'bearish';
-        const fgScore = bull ? Math.round(60 + Math.random() * 25) : bear ? Math.round(15 + Math.random() * 25) : Math.round(40 + Math.random() * 20);
+        // 실제 상승/하락 비율 기반 심리지수 (Math.random 제거)
+        const activeStocks = sentimentStocks.filter(s => s.change_pct !== 0 && s.price > 0);
+        const upRatio = activeStocks.length > 0 ? activeStocks.filter(s => s.change_pct > 0).length / activeStocks.length : 0.5;
+        const fgScore = Math.round(upRatio * 100);
         const fgLabel = fgScore >= 75 ? '극단탐욕' : fgScore >= 55 ? '탐욕' : fgScore >= 45 ? '중립' : fgScore >= 25 ? '공포' : '극단공포';
         const fgColor = fgScore >= 55 ? 'var(--accent-red)' : fgScore >= 45 ? 'var(--text-tertiary)' : 'var(--accent-blue)';
         const kospiIdx = indexStocks.find(s => s.name.includes('KOSPI') || s.symbol.includes('KOSPI'));
@@ -370,7 +373,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           const up = actives.filter(s => (s.change_pct ?? 0) > 0).length;
           const dn = actives.filter(s => (s.change_pct ?? 0) < 0).length;
           const flat = actives.length - up - dn;
-          const avg = actives.length ? actives.reduce((s, st) => s + (st.change_pct ?? 0), 0) / actives.length : 0;
+          const withPct = actives.filter(s => (s.change_pct ?? 0) !== 0);
+          const avg = withPct.length ? withPct.reduce((s, st) => s + (st.change_pct ?? 0), 0) / withPct.length : 0;
           const total = actives.length || 1;
           return (
             <button key={label} onClick={onClick} style={{ borderRadius: 'var(--radius-card)', padding: '11px 12px 9px', cursor: 'pointer', textAlign: 'left', background: active ? activeBg : 'var(--bg-surface)', border: `${active ? '1.5px' : '1px'} solid ${active ? activeBorder : 'var(--border)'}`, boxShadow: active ? activeShadow : 'none', transition: 'all var(--transition-normal)' }}>
@@ -439,6 +443,67 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         })}
       </div>
 
+      {/* ─ 글로벌 지표 pill 태그 ─ */}
+      {(() => {
+        const globalIndicators: { label: string; symbol: string }[] = [
+          { label: 'USD/KRW', symbol: '' },
+          { label: 'WTI', symbol: '' },
+          { label: '금', symbol: 'GLD' },
+          { label: 'BTC', symbol: '' },
+        ];
+        return (
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 'var(--sp-sm)' }}>
+            <span style={{ fontSize: 9, padding: '3px 7px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+              USD/KRW <span style={{ fontWeight: 700, fontFamily: 'monospace' }}>{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
+            </span>
+            {stocks.filter(s => ['GLD', 'USO', 'TQQQ', 'SOXL'].includes(s.symbol) && s.price > 0).slice(0, 4).map(s => {
+              const pct = s.change_pct ?? 0;
+              const color = pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)';
+              return (
+                <span key={s.symbol} style={{ fontSize: 9, padding: '3px 7px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+                  {s.name.length > 6 ? s.symbol : s.name} <span style={{ fontWeight: 700, color, fontFamily: 'monospace' }}>{pct > 0 ? '+' : ''}{pct.toFixed(1)}%</span>
+                </span>
+              );
+            })}
+          </div>
+        );
+      })()}
+
+      {/* ─ 섹터 미니 히트맵 (항상 표시) ─ */}
+      {(() => {
+        const targetStocks = isDomestic
+          ? stocks.filter(s => s.market !== 'NASDAQ' && s.market !== 'NYSE' && s.sector && s.price > 0 && s.change_pct !== 0)
+          : stocks.filter(s => (s.market === 'NASDAQ' || s.market === 'NYSE') && s.sector && s.price > 0 && s.change_pct !== 0);
+        const sectorMap: Record<string, number[]> = {};
+        targetStocks.forEach(s => { (sectorMap[s.sector!] ??= []).push(s.change_pct ?? 0); });
+        const sectors = Object.entries(sectorMap)
+          .map(([name, pcts]) => ({ name, avg: pcts.reduce((a, b) => a + b, 0) / pcts.length, count: pcts.length }))
+          .filter(s => s.count >= 2)
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
+        if (!sectors.length) return null;
+        return (
+          <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', marginBottom: 'var(--sp-sm)' }}>
+            {sectors.map(sec => {
+              const isUp = sec.avg > 0;
+              const intensity = Math.min(Math.abs(sec.avg) / 5, 1);
+              const bg = isUp
+                ? `rgba(${isDomestic ? '248,113,113' : '46,232,165'},${0.05 + intensity * 0.15})`
+                : `rgba(${isDomestic ? '96,165,250' : '248,113,113'},${0.05 + intensity * 0.15})`;
+              const color = isUp
+                ? (isDomestic ? 'var(--accent-red)' : 'var(--accent-green)')
+                : (isDomestic ? 'var(--accent-blue)' : 'var(--accent-red)');
+              return (
+                <Link key={sec.name} href={`/stock/sector/${encodeURIComponent(sec.name)}`} style={{ textDecoration: 'none', fontSize: 10, padding: '4px 7px', borderRadius: 5, background: bg, display: 'flex', gap: 4, alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{sec.name}</span>
+                  <span style={{ color, fontWeight: 700, fontFamily: 'monospace' }}>{isUp ? '+' : ''}{sec.avg.toFixed(1)}%</span>
+                </Link>
+              );
+            })}
+          </div>
+        );
+      })()}
+
       {/* ─ ⚡ 이슈 배너 ─ */}
       {(() => {
         const bigMovers = sentimentStocks.filter(s => Math.abs(s.change_pct ?? 0) >= 5 && s.price > 0).sort((a, b) => Math.abs(b.change_pct ?? 0) - Math.abs(a.change_pct ?? 0)).slice(0, 3);
@@ -478,14 +543,14 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       })()}
 
       {/* ─ 서브 탭 ─ */}
-      <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '3px' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as any }}>
         {(isDomestic ? domesticTabs : globalTabs).map(([k, l]) => (
           <button key={k} onClick={() => { isDomestic ? setDomesticTab(k as typeof domesticTab) : setGlobalTab(k as typeof globalTab); }} aria-pressed={currentTab === k} style={{
-            flex: 1, padding: '7px 0', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', flexShrink: 0, fontWeight: 700, fontSize: 11, whiteSpace: 'nowrap',
+            padding: '6px 14px', borderRadius: 16, border: currentTab === k ? 'none' : '1px solid var(--border)', cursor: 'pointer', flexShrink: 0, fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap',
             background: currentTab === k ? 'var(--brand)' : 'transparent',
-            color: currentTab === k ? '#fff' : 'var(--text-tertiary)',
-            boxShadow: currentTab === k ? '0 1px 6px rgba(37,99,235,0.35)' : 'none',
+            color: currentTab === k ? '#fff' : 'var(--text-secondary)',
             transition: 'all var(--transition-fast)',
+            fontFamily: 'inherit',
           }}>{l}</button>
         ))}
       </div>
@@ -720,7 +785,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             </div>
           </div>
           {/* 카드 그리드 */}
-          <div className="listing-grid">
+          <div className="listing-grid-2col">
             {m7Stocks.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0)).map((st) => {
               const pct = st.change_pct ?? 0;
               const color = pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)';

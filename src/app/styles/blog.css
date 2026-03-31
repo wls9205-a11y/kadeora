@@ -159,18 +159,26 @@
 }
 
 
-/* ═══ 2열 카드 리스팅 그리드 ═══ */
+/* ═══ 카드 리스팅 그리드 (기본 1열) ═══ */
 .listing-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 6px;
 }
-/* 그리드 아이템: min-width:auto 기본값이 콘텐츠보다 좁아지지 않게 막으므로 해제 */
 .listing-grid > * {
   min-width: 0;
   overflow: hidden;
 }
-/* 극소 화면(320px 미만)에서만 1열 폴백 */
+/* 주식 전용 2열 그리드 */
+.listing-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.listing-grid-2col > * {
+  min-width: 0;
+  overflow: hidden;
+}
 @media (max-width: 320px) {
-  .listing-grid { grid-template-columns: 1fr; }
+  .listing-grid-2col { grid-template-columns: 1fr; }
 }
