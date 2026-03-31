@@ -756,6 +756,14 @@ export async function GET(req: Request) {
       });
     }
 
+    if (section === 'popups-notices') {
+      const { data: notices } = await sb.from('site_notices' as any)
+        .select('id, content, is_active, is_paid, tier, display_start, display_end, click_count, impression_count, max_impressions, priority, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      return NextResponse.json({ notices: notices || [] });
+    }
+
     return NextResponse.json({ error: 'Unknown section' }, { status: 400 });
   } catch (e: unknown) {
     return NextResponse.json({ error: errMsg(e) }, { status: 500 });

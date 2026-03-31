@@ -51,6 +51,7 @@ const ago = (d: string) => {
 
 export default function PopupsSection() {
   const [popups, setPopups] = useState<PopupAd[]>([]);
+  const [siteNotices, setSiteNotices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<PopupAd> | null>(null);
   const [saving, setSaving] = useState(false);
@@ -59,11 +60,12 @@ export default function PopupsSection() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch('/api/admin/popup-ads');
-      if (r.ok) {
-        const d = await r.json();
-        setPopups(d.popups || []);
-      }
+      const [popupR, noticeR] = await Promise.all([
+        fetch('/api/admin/popup-ads').then(r => r.ok ? r.json() : { popups: [] }),
+        fetch('/api/admin/dashboard?section=popups-notices').then(r => r.ok ? r.json() : { notices: [] }).catch(() => ({ notices: [] })),
+      ]);
+      setPopups(popupR.popups || []);
+      setSiteNotices(noticeR.notices || []);
     } catch { /* ignore */ }
     setLoading(false);
   }, []);
@@ -135,6 +137,46 @@ export default function PopupsSection() {
           padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: 'none',
           background: C.brand, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
         }}>+ 새 팝업</button>
+      </div>
+
+      {/* ── 현재 운영 현황 ── */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 10 }}>📊 현재 운영 중인 배너/프로모</div>
+
+        {/* site_notices (DB) */}
+        <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 6 }}>🔔 상단 띠 배너 (site_notices)</div>
+        {siteNotices.length > 0 ? (
+          <div style={{ display: 'grid', gap: 6, marginBottom: 12 }}>
+            {siteNotices.map((n: any) => (
+              <div key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 'var(--radius-xs)', background: n.is_active ? C.greenBg : C.bg, border: `1px solid ${n.is_active ? C.green + '30' : C.border}` }}>
+                <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 3, background: n.is_active ? C.greenBg : C.redBg, color: n.is_active ? C.green : C.red, fontWeight: 700 }}>
+                  {n.is_active ? '활성' : '비활성'}
+                </span>
+                <span style={{ fontSize: 12, color: C.text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.content}</span>
+                <span style={{ fontSize: 10, color: C.textDim, flexShrink: 0 }}>노출 {fmt(n.impression_count || 0)} · 클릭 {fmt(n.click_count || 0)}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ fontSize: 11, color: C.textDim, marginBottom: 12 }}>site_notices 데이터 로딩 중...</div>
+        )}
+
+        {/* 하드코딩 프로모 시스템 */}
+        <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 6 }}>⚙️ 코드 기반 프로모 시스템</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+          {[
+            { name: 'GuestNudge', desc: '비로그인 가입 유도', type: '토스트→배너→모달', status: '자동', color: C.cyan },
+            { name: 'PromoSheet', desc: 'PWA 설치 유도', type: '바텀시트', status: '로그인+미설치', color: C.purple },
+            { name: 'InstallBanner', desc: '홈화면 추가 안내', type: '상단 배너', status: '자동', color: C.green },
+            { name: 'NoticeBanner', desc: 'DB 기반 띠 배너', type: '마퀴 배너', status: `${siteNotices.filter((n: any) => n.is_active).length}개 활성`, color: C.yellow },
+          ].map(s => (
+            <div key={s.name} style={{ padding: '8px 10px', borderRadius: 'var(--radius-xs)', background: `${s.color}08`, border: `1px solid ${s.color}15` }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: s.color }}>{s.name}</div>
+              <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>{s.desc}</div>
+              <div style={{ fontSize: 9, color: C.textSec, marginTop: 1 }}>{s.type} · {s.status}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {msg && <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: msg.startsWith('오류') ? C.redBg : C.greenBg, color: msg.startsWith('오류') ? C.red : C.green, fontSize: 12, fontWeight: 600, marginBottom: 'var(--sp-sm)' }}>{msg}</div>}
