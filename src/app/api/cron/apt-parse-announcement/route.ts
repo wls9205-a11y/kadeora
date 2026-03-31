@@ -216,6 +216,21 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       if (parsed.is_regulated_area != null) ud.is_regulated_area = parsed.is_regulated_area;
       if (parsed.announcement_pdf_url) ud.announcement_pdf_url = parsed.announcement_pdf_url;
 
+      // AI 요약 재생성 — "지역 단지명 · 총 X세대 (일반Y·특별Z) · 시공사 시공"
+      {
+        const { data: cur } = await (sb as any).from('apt_subscriptions')
+          .select('region_nm, tot_supply_hshld_co, supply_count, constructor_nm')
+          .eq('id', apt.id).single();
+        if (cur) {
+          const region = cur.region_nm || '';
+          const total = cur.tot_supply_hshld_co || 0;
+          const gen = ud.general_supply_total ?? cur.supply_count ?? total;
+          const spc = Math.max(total - gen, 0);
+          const builder = ud.constructor_nm || cur.constructor_nm || '';
+          ud.ai_summary = `${region} ${apt.house_nm} · 총 ${total}세대 (일반${gen}·특별${spc})${builder ? ` · ${builder} 시공` : ''}`;
+        }
+      }
+
       await (sb as any).from('apt_subscriptions').update(ud).eq('id', apt.id);
       processed++;
     } catch (err: any) {
