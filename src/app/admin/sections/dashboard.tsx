@@ -317,6 +317,9 @@ export default function DashboardSection() {
               { label: 'price_history', val: fmt(stockKpi.priceHistory), color: C.purple },
               { label: '뉴스 수', val: fmt(stockKpi.newsCount), color: C.yellow },
               { label: '활성률', val: `${Math.round((stockKpi.active / (stockKpi.total || 1)) * 100)}%`, color: stockKpi.active / (stockKpi.total || 1) > 0.95 ? C.green : C.red },
+              { label: '섹터 없음', val: fmt(stockKpi.noSector ?? 0), color: (stockKpi.noSector ?? 0) > 100 ? C.red : C.yellow },
+              { label: '설명 없음', val: fmt(stockKpi.noDesc ?? 0), color: (stockKpi.noDesc ?? 0) > 100 ? C.red : C.yellow },
+              { label: '거래량 없음', val: fmt(stockKpi.noVolume ?? 0), color: (stockKpi.noVolume ?? 0) > 100 ? C.yellow : C.green },
             ].map(item => (
               <div key={item.label} style={{ background: C.bg, borderRadius: 'var(--radius-xs)', padding: '7px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: item.color }}>{item.val}</div>

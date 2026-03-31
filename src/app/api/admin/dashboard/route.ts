@@ -58,13 +58,16 @@ export async function GET(req: Request) {
       ]);
 
       // 주식 상세 KPI (추가)
-      const [stockActiveR, stockPriceHistR, stockBriefingKR, stockBriefingUS, stockNewsR, stockMarketCapR] = await Promise.all([
+      const [stockActiveR, stockPriceHistR, stockBriefingKR, stockBriefingUS, stockNewsR, stockMarketCapR, stockNoSectorR, stockNoVolumeR, stockNoDescR] = await Promise.all([
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).gt('price', 0),
         sb.from('stock_price_history').select('symbol', { count: 'exact', head: true }),
         sb.from('stock_daily_briefing').select('briefing_date').eq('market', 'KR').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
         sb.from('stock_daily_briefing').select('briefing_date').eq('market', 'US').order('briefing_date', { ascending: false }).limit(1).maybeSingle(),
         sb.from('stock_news').select('id', { count: 'exact', head: true }),
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).gt('market_cap', 0),
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).or('sector.is.null,sector.eq.').gt('price', 0).eq('is_active', true),
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).or('volume.is.null,volume.eq.0').gt('price', 0).eq('is_active', true),
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).or('description.is.null,description.eq.').gt('price', 0).eq('is_active', true),
       ]);
       const stockKpi = {
         total: stockR.count ?? 0,
@@ -74,6 +77,9 @@ export async function GET(req: Request) {
         lastUSBriefing: stockBriefingUS.data?.briefing_date ?? null,
         newsCount: stockNewsR.count ?? 0,
         withMarketCap: stockMarketCapR.count ?? 0,
+        noSector: stockNoSectorR.count ?? 0,
+        noVolume: stockNoVolumeR.count ?? 0,
+        noDesc: stockNoDescR.count ?? 0,
       };
 
       // 단지백과 KPI
