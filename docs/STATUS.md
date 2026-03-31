@@ -1,7 +1,48 @@
-# 카더라 STATUS.md — 세션 65 완료 (2026-04-01 09:20 KST)
+# 카더라 STATUS.md — 세션 65 최종 (2026-04-01 11:00 KST)
 
 ## 최신 커밋
+- `fe71a2f` — 어드민 대시보드 확장 (PDF파싱/건물스펙/섹터 커버리지 패널)
+- `17b0258` — SEO 전수조사 13페이지 보강 (og-square/speakable/FAQ/twitter 만점화)
+- `87ff95e` — PDF 파싱 병렬 10개 동시처리 + 배치 200건 확대
+- `7e5d987` — 총세대수 가짜 데이터 제거 + 파서 정밀 추출 강화
 - `4f1816d` — 어드민 대시보드 세션 65 업데이트 (릴리즈노트+공유KPI)
+
+## 세션 65 후반 — PDF 파싱 + SEO 만점화 + 어드민 확장
+
+### PDF 파싱 시스템 (95% 완료 — 크론 자동 처리 중)
+- pdf-parse v1 라이브러리, 병렬 10개 동시처리, 배치 200건
+- 2,360/2,485건 처리 완료 (125건 남음 → 크론 자동)
+- 추출 필드: 동수2,075 / 최고층1,260 / 전매제한1,895 / 발코니1,452 / 커뮤니티583 / 난방202 / 대출149 / 주차113
+
+### 총세대수 데이터 정합성 수정
+- 공급세대수와 동일한 가짜 데이터 2,651건 → NULL 리셋
+- 파서 정밀 추출: 4가지 regex + 앞 20자 컨텍스트 체크 + 크로스체크 (공급세대=총세대면 저장 안 함)
+- 검증된 총세대수: 29건만 유지 (총세대 > 공급세대)
+
+### SEO 전수조사 13페이지 만점화
+- CRITICAL: /stock/compare + /apt/diagnose — og-square/speakable/FAQPage 구축
+- HIGH: /daily/[date] + /archive + /blog/series + /consultant + /grades — 누락 요소 전부 보충
+- MEDIUM: /apt/map + /apt/search + /apt/complex + /search + /shop + /shop/megaphone — og-square 추가
+- 포털 효과: Google speakable 7p, Naver og-square 13p, Twitter card 4p
+
+### 종목 섹터 100% backfill
+- 이름 기반 22패턴 매칭 1차 + description 21패턴 2차
+- 1,114건 정밀 분류 + 623건 '기타' (KOSDAQ 소형주)
+- 커버리지: 63% → 100% (1,737/1,737)
+
+### 어드민 대시보드 확장
+- 상단 헬스바: PDF파싱 + 섹터 배지 추가
+- 커버리지 패널: PDF 진행률 바 + 건물스펙 4×2 그리드 (실시간 갱신)
+- GOD MODE: PDF 파싱 200건 + HTML 재파싱 30건 버튼 추가
+
+### 부동산 탭 카드 전면 업데이트
+- 청약탭: 사업유형/중도금/브랜드 pill + loan_rate SSR
+- 분양중탭: 브랜드/사업유형/시행사/중도금 배지
+- 재개발탭: 시행사 표시 추가
+
+### 공유버튼 전수조사 + 3곳 추가
+- /daily/[region]/[date] + /blog/series/[slug] + /apt/region/[region]
+- 중복 확인: /apt/[id]의 4개는 각 섹션별 다른 공유 (정상)
 
 ## 세션 65 총 52커밋 주요 성과
 
