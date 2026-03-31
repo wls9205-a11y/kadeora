@@ -45,6 +45,7 @@ const CRON_GROUPS = {
     '/api/cron/redev-verify-households',
     '/api/cron/redev-geocode',
     '/api/cron/apt-backfill-details',
+    '/api/cron/apt-parse-announcement',
     '/api/cron/apt-crawl-pricing',
     '/api/cron/apt-price-sync',
     '/api/cron/sync-complex-profiles',
