@@ -10,7 +10,6 @@
   overflow-wrap: break-word;
 }
 .blog-toc-inline { display: block; }
-.blog-toc-sidebar { display: none; }
 
 /* ========================================
    블로그 본문 마크다운

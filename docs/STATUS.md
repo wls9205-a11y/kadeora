@@ -1,24 +1,33 @@
-# 카더라 STATUS.md — 세션 58~63 통합 (2026-03-31 08:30 KST)
+# 카더라 STATUS.md — 세션 58~64 통합 (2026-03-31 KST)
 
 ## 최신 커밋
+- `8142992` — 디자인 토큰 2차 적용 (borderRadius/gap/padding/transition/color 166파일)
+- `720da76` — 디자인 시스템 전면 정리 (z-index 통일 + 유틸 클래스 14종 + 146파일)
+- `6e671cb` — stock-naver-sync 크론 (국내500+해외200 네이버 벌크)
 - `4dc7cc8` — 주식 크론 5개 AI 폴백 완성 (크레딧 없이 전부 작동)
 - `eae50c6` — 부동산 UX 대폭 개선 (통합검색+중복제거+지역타일 리디자인)
-- `e56d5cf` — 모바일 2열 카드 수정 + DailyReportCard 리디자인
-- `6355143` — B-2 도넛 카드 개선 6건 (SPA/뱃지/반응형/지도바)
-- `eb6a895` — B-2 도넛 리디자인 (2×4 프로그레스바+설명글+재개발/재건축 분리)
-- `7b33a13` — 부동산 지도 분양중/미분양 수정
-- `bb745f6` — 부동산 지도 SDK 에러 UI 개선
-- `78f5b6a` — V2-A 도넛 리디자인 + 이미지 높이 최적화
 
 ## 주요 성과
 
-### 부동산 페이지 UX 대폭 개선
-- 통합 검색 상단 이동 (전국 드롭다운 + 단지명/시공사/지역 통합)
-- 중복 탭 세그먼트 제거 (B-2 카드가 탭 전환 대체)
-- 하단 검색창 제거 (상단으로 통합)
-- 상단 🔍검색 링크 제거
-- 지역 타일 리디자인 (5열 미니멀 + 2px 프로그레스바)
-- B-2 카드에 activeTab 하이라이트 추가
+### 디자인 시스템 전면 정리 (세션 64)
+- **CSS 토큰 정의 → 실적용 완료**: --sp-*, --radius-*, --transition-*, --z-* 전부 TSX에서 활용
+- **z-index 통일**: 9999/10000/99999 등 카오스 → 체계적 스케일 (nav:50, modal:90, toast:100, overlay:200) — 19파일
+- **borderRadius 토큰화**: 하드코딩 1076건 → 289건 (74% → var(--radius-*) 전환) — 230+파일
+- **gap/margin 토큰화**: gap 50%+, marginBottom 62%+ → var(--sp-*) 전환
+- **fontSize CSS 변수 확대**: 하드코딩 1577→670건 (58% 감소) — 55파일
+- **transition 토큰**: 하드코딩 0.15s/0.2s → var(--transition-fast/normal) — 25파일
+- **하드코딩 색상 전환**: #34D399→var(--accent-green) 등 — 8파일
+- **padding 토큰**: 6개 공통 패턴 → CSS 변수 조합 — 93파일
+- **카드 래퍼 토큰**: PersonalDashboard, RightPanel 등 padding/radius 토큰 — 3파일
+- **유틸리티 CSS 클래스 14종 추가**:
+  - kd-card-base, kd-badge(7종), kd-action-btn, kd-tab-btn
+  - kd-pill, kd-sort-btn, kd-tag, kd-section-header
+  - kd-avatar(3사이즈), kd-interaction-bar, kd-stat-grid
+  - kd-progress, kd-scroll-row, kd-tabular
+- **FeedClient 클래스 적용**: 탭/정렬/필터/태그/인터랙션 → CSS 클래스로 전환
+- **aria-label 접근성 보강**: 닫기/공유 버튼 12파일
+- **죽은 CSS 제거**: filter-pills, blog-toc-sidebar, nav-bar, tab-bar, 미사용 responsive 클래스 25개
+- 총 **312개 파일** 수정, Vercel 3배포 전부 READY
 
 ### B-2 도넛 리디자인 (최종)
 - 2×4 그리드 8칸: 청약/분양중/미분양/재개발·재건축/실거래(2026)/단지백과/분양사이트/부동산지도
@@ -85,7 +94,7 @@
 - [ ] 무섹터 ~729건 추가 해소
 - [ ] 통신판매업 신고 후 푸터 번호 추가
 
-## 아키텍처 규칙 (11개)
+## 아키텍처 규칙 (12개)
 1. 블로그 삭제 금지 2. stockcoin.net 금지
 3. 포인트 RPC만 4. CSP middleware.ts
 5. 크론 에러 200 6. OG 폰트 Node.js fs
@@ -94,3 +103,4 @@
 9. DB트리거 HOURLY/DAILY_LIMIT 80
 10. Supabase RPC: try/catch (.catch() 금지)
 11. 작업 완료 시 STATUS.md 반드시 업데이트
+12. **디자인 토큰 우선**: borderRadius→var(--radius-*), gap/margin→var(--sp-*), fontSize→var(--fs-*), z-index→var(--z-*) 사용. 하드코딩 px 금지 (4px 이하 micro값 제외)
