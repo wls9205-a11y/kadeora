@@ -279,9 +279,10 @@ async function fetchViaYahoo(supabase: SupabaseClient): Promise<StockResult | nu
       const change_amt = (rawChange != null && rawChange !== 0)
         ? Math.round(rawChange)
         : (prevClose ? Math.round(price - prevClose) : 0);
+      const rawCalcPct = prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0;
       const change_pct = (rawChangePct != null && rawChangePct !== 0)
-        ? +(rawChangePct.toFixed(2))
-        : (prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0);
+        ? +(Math.max(-30, Math.min(30, rawChangePct)).toFixed(2))
+        : (Math.abs(rawCalcPct) > 30 ? 0 : rawCalcPct);
       return {
         symbol: q.symbol?.replace(/\.(KS|KQ)$/, ''),
         price,
@@ -433,9 +434,10 @@ export async function GET(req: NextRequest) {
                 const change_amt = (rawChange != null && rawChange !== 0)
                   ? Math.round(rawChange * 100) / 100
                   : (prevClose ? Math.round((price - prevClose) * 100) / 100 : 0);
+                const rawCalcPct2 = prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0;
                 const change_pct = (rawChangePct != null && rawChangePct !== 0)
-                  ? +(rawChangePct.toFixed(2))
-                  : (prevClose ? +(((price - prevClose) / prevClose * 100).toFixed(2)) : 0);
+                  ? +(Math.max(-30, Math.min(30, rawChangePct)).toFixed(2))
+                  : (Math.abs(rawCalcPct2) > 30 ? 0 : rawCalcPct2);
                 await supabase.from('stock_quotes')
                   .update({
                     price,
@@ -478,7 +480,9 @@ export async function GET(req: NextRequest) {
             if (hist?.[0]?.close_price && Number(hist[0].close_price) > 0) {
               const prev = Number(hist[0].close_price);
               const curr = Number(s.price);
-              const pct = +((curr - prev) / prev * 100).toFixed(2);
+              const rawPct = +((curr - prev) / prev * 100).toFixed(2);
+              // CLAMP: ±30% 초과는 주식분할/오래된 데이터 → 무시
+              const pct = Math.abs(rawPct) > 30 ? 0 : rawPct;
               if (pct !== 0) {
                 await supabase.from('stock_quotes')
                   .update({ change_pct: pct, change_amt: +(curr - prev).toFixed(2) })

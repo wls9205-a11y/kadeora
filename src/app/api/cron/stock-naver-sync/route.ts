@@ -89,7 +89,16 @@ export async function GET(req: Request) {
   const sb = getSupabaseAdmin();
   let krSuccess = 0, krFailed = 0, usSuccess = 0, usFailed = 0;
 
+  // ═══ 시간외 가격 차단 ═══
+  // 15:35 KST 이후에는 국내 시세 갱신 스킵 (시간외 거래 가격 오염 방지)
+  const kstNow = new Date(Date.now() + 9 * 3600000);
+  const kstHour = kstNow.getUTCHours();
+  const kstMin = kstNow.getUTCMinutes();
+  const isAfterHours = kstHour > 15 || (kstHour === 15 && kstMin >= 35);
+
   // ═══ 1. 국내 주식 (KOSPI + KOSDAQ) — 시총순 상위 500개 네이버 크롤링 ═══
+  // 15:35 KST 이후 스킵 (시간외 거래 가격 오염 방지 — 정규장 종가만 수집)
+  if (!isAfterHours) {
   const { data: krStocks } = await sb.from('stock_quotes')
     .select('symbol')
     .in('market', ['KOSPI', 'KOSDAQ'])
@@ -127,6 +136,7 @@ export async function GET(req: Request) {
       if (i + BATCH < krStocks.length) await sleep(80);
     }
   }
+  } // end isAfterHours guard
 
   // ═══ 2. 해외 주식 (NYSE + NASDAQ) — 네이버 해외주식 API ═══
   const { data: usStocks } = await sb.from('stock_quotes')
@@ -205,25 +215,22 @@ export async function GET(req: Request) {
         });
         if (res.ok) {
           const j = await res.json();
-          const price = parseFloat(String(j?.closePrice ?? '0').replace(/,/g, ''));
-          const pct = parseFloat(String(j?.fluctuationsRatio ?? '0'));
-          if (price > 0) {
+          // 지수 API는 개별종목과 필드명이 다를 수 있음 — 여러 필드 시도
+          const price = parseFloat(String(j?.closePrice ?? j?.currentPrice ?? j?.now ?? j?.indexValue ?? '0').replace(/,/g, ''));
+          const pct = parseFloat(String(j?.fluctuationsRatio ?? j?.changeRate ?? '0'));
+          const amt = parseFloat(String(j?.compareToPreviousClosePrice ?? j?.changeValue ?? j?.change ?? '0').replace(/,/g, ''));
+          if (price > 100) { // 지수는 최소 100 이상이어야 정상
             await sb.from('stock_quotes').update({
-              price, change_pct: CLAMP(pct), updated_at: new Date().toISOString(),
+              price,
+              change_pct: CLAMP(pct),
+              change_amt: amt || null,
+              updated_at: new Date().toISOString(),
             }).eq('symbol', idx.symbol);
           }
         }
       } catch {
-        // 네이버 API 실패 시 시장 평균으로 폴백
-        const { data: avgData } = await sb.from('stock_quotes')
-          .select('change_pct')
-          .eq('market', idx.name).eq('is_active', true).gt('price', 0).neq('sector', '지수');
-        if (avgData?.length) {
-          const avgPct = +(avgData.reduce((s: number, r: any) => s + (r.change_pct ?? 0), 0) / avgData.length).toFixed(2);
-          await sb.from('stock_quotes')
-            .update({ change_pct: avgPct, updated_at: new Date().toISOString() })
-            .eq('symbol', idx.symbol);
-        }
+        // 네이버 API 실패 시 — price는 건드리지 않고 change_pct만 시장 평균으로 갱신
+        // (지수 price가 틀리면 그대로 두는 게 차라리 나음)
       }
     }
   } catch {}
