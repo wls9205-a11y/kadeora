@@ -19,6 +19,7 @@ interface Props extends SharedTabProps {
 export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUser, watchlist, toggleWatchlist, setCommentTarget, showToast, globalRegion, globalSearch, freshDate }: Props) {
   const [unsoldRegion, setUnsoldRegion] = useState(globalRegion || '전체');
   const [unsoldSearch, setUnsoldSearch] = useState('');
+  const [unsoldPage, setUnsoldPage] = useState(1);
   const [surgeAlerts, setSurgeAlerts] = useState<{ region_nm: string; current_count: number; prev_count: number; change_pct: number }[]>([]);
   const effectiveSearch = globalSearch || unsoldSearch;
 
@@ -53,6 +54,13 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
     const q = effectiveSearch.toLowerCase();
     return (u.house_nm || '').toLowerCase().includes(q) || (u.region_nm || '').toLowerCase().includes(q) || (u.sigungu_nm || '').toLowerCase().includes(q);
   });
+  const UNSOLD_PER_PAGE = 30;
+  const unsoldTotalPages = Math.ceil(fu.length / UNSOLD_PER_PAGE);
+  const pagedFu = fu.slice((unsoldPage - 1) * UNSOLD_PER_PAGE, unsoldPage * UNSOLD_PER_PAGE);
+
+  // 필터 변경 시 1페이지 리셋
+  useEffect(() => { setUnsoldPage(1); }, [unsoldRegion, effectiveSearch]);
+
   const usRaw = unsoldSummary;
   const us: any = typeof usRaw === 'string' ? (() => { try { return JSON.parse(usRaw); } catch { return null; } })()
     : usRaw?.total != null ? usRaw
@@ -211,7 +219,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
       </div>
 
       {/* 리스트 */}
-      {fu.map((u, i: number) => {
+      {pagedFu.map((u, i: number) => {
         const rate = u.tot_supply_hshld_co ? Math.round(((u.tot_unsold_hshld_co ?? 0) / u.tot_supply_hshld_co) * 100) : null;
         const pMin = u.sale_price_min ? Math.round(u.sale_price_min / 10000 * 10) / 10 : null;
         const pMax = u.sale_price_max ? Math.round(u.sale_price_max / 10000 * 10) / 10 : null;
@@ -277,6 +285,14 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
         );
       })}
 
+      {/* 페이지네이션 */}
+      {unsoldTotalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'var(--sp-sm)', padding: 'var(--sp-md) 0' }}>
+          <button onClick={() => setUnsoldPage(p => Math.max(1, p - 1))} disabled={unsoldPage === 1} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', background: unsoldPage === 1 ? 'var(--bg-hover)' : 'var(--brand)', color: unsoldPage === 1 ? 'var(--text-tertiary)' : '#fff', border: 'none', cursor: unsoldPage === 1 ? 'default' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>← 이전</button>
+          <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{unsoldPage} / {unsoldTotalPages}</span>
+          <button onClick={() => setUnsoldPage(p => Math.min(unsoldTotalPages, p + 1))} disabled={unsoldPage === unsoldTotalPages} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', background: unsoldPage === unsoldTotalPages ? 'var(--bg-hover)' : 'var(--brand)', color: unsoldPage === unsoldTotalPages ? 'var(--text-tertiary)' : '#fff', border: 'none', cursor: unsoldPage === unsoldTotalPages ? 'default' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>다음 →</button>
+        </div>
+      )}
       {fu.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '해당 지역 데이터가 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역으로 검색해보세요</div>}</div>}
     </div>
   );

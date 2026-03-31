@@ -18,7 +18,7 @@ import PostReactions from '@/components/PostReactions';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 
 // 베스트 댓글 미리보기 (카드 내부)
 function BestCommentPreview({ postId }: { postId: number }) {

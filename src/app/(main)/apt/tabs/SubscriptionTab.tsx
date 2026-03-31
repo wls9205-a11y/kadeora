@@ -24,6 +24,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
   const [calOffset, setCalOffset] = useState(0);
   const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
   const [myAlerts, setMyAlerts] = useState<Set<string>>(new Set());
+  const [subPage, setSubPage] = useState(1);
   const effectiveSearch = globalSearch || subSearch;
 
   // globalRegion 변경 시 내부 필터 동기화
@@ -66,6 +67,14 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
     });
     return f;
   }, [apts, region, statusFilter, aptSort, effectiveSearch]);
+
+  // 페이지네이션 (30개씩)
+  const SUB_PER_PAGE = 30;
+  const subTotalPages = Math.ceil(filtered.length / SUB_PER_PAGE);
+  const paged = filtered.slice((subPage - 1) * SUB_PER_PAGE, subPage * SUB_PER_PAGE);
+
+  // 필터 변경 시 1페이지로 리셋
+  useEffect(() => { setSubPage(1); }, [region, statusFilter, aptSort, effectiveSearch]);
 
   const _toggleAlert = async (apt: Apt) => {
     if (!aptUser) return;
@@ -120,7 +129,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
           {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '조건에 맞는 청약이 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>단지명, 지역, 시공사로 검색해보세요</div>}</div>}
 
           <div className="listing-grid">
-          {filtered.map((apt, i) => {
+          {paged.map((apt, i) => {
             const st = getStatus(apt);
             const bd = SB[st];
             const h = apt.house_manage_no || String(apt.id);
@@ -219,6 +228,15 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             );
           })}
           </div>
+
+          {/* 페이지네이션 */}
+          {subTotalPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'var(--sp-sm)', padding: 'var(--sp-md) 0' }}>
+              <button onClick={() => setSubPage(p => Math.max(1, p - 1))} disabled={subPage === 1} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', background: subPage === 1 ? 'var(--bg-hover)' : 'var(--brand)', color: subPage === 1 ? 'var(--text-tertiary)' : '#fff', border: 'none', cursor: subPage === 1 ? 'default' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>← 이전</button>
+              <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{subPage} / {subTotalPages}</span>
+              <button onClick={() => setSubPage(p => Math.min(subTotalPages, p + 1))} disabled={subPage === subTotalPages} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', background: subPage === subTotalPages ? 'var(--bg-hover)' : 'var(--brand)', color: subPage === subTotalPages ? 'var(--text-tertiary)' : '#fff', border: 'none', cursor: subPage === subTotalPages ? 'default' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>다음 →</button>
+            </div>
+          )}
 
           {/* 청약 캘린더 */}
           <div className="kd-card">

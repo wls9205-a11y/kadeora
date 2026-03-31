@@ -52,7 +52,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
   const totalUnsoldUnits = filtered.reduce((s: number, o) => s + (o.unsold_count || 0), 0);
   const allSubCount = filtered.filter((o) => o.source === 'subscription').length;
   const allUnsoldCount = filtered.filter((o) => o.source === 'unsold').length;
-  const PER_PAGE = 20;
+  const PER_PAGE = 30;
   const sorted = [...filtered].sort((a, b) => {
     if (ongoingSort === 'unsold') return (b.unsold_count || 0) - (a.unsold_count || 0);
     if (ongoingSort === 'price') return (b.sale_price_max || 0) - (a.sale_price_max || 0);

@@ -105,7 +105,7 @@ interface Props { searchParams: Promise<{ category?: string; sort?: string; q?: 
 export default async function BlogPage({ searchParams }: Props) {
   const { category = 'all', sort = 'latest', q = '', page = '1', sub = '' } = await searchParams;
   const pageNum = Math.max(1, parseInt(page) || 1);
-  const perPage = 20;
+  const perPage = 30;
   const sb = await createSupabaseServer();
 
   // 카테고리 건수 + 인기글 + 인기태그 — 병렬 조회

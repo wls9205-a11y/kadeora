@@ -162,7 +162,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
             {/* 카드 리스트 (20건씩 페이지네이션) */}
             <div className="listing-grid">
-            {filteredRedev.slice(0, redevPage * 20).map((r) => {
+            {filteredRedev.slice((redevPage - 1) * 30, redevPage * 30).map((r) => {
               const sc = STAGE_COLORS[r.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
               const stageIdx = STAGE_ORDER.indexOf(r.stage || '');
               const progress = stageIdx >= 0 ? Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100) : 0;
@@ -218,14 +218,12 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             })}
             </div>
 
-            {redevPage * 20 < filteredRedev.length && (
-              <button onClick={() => setRedevPage(p => p + 1)} style={{
-                width: '100%', padding: '12px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
-                background: 'var(--bg-surface)', color: 'var(--text-secondary)',
-                fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 'var(--sp-sm)',
-              }}>
-                더 보기 ({Math.min(redevPage * 20, filteredRedev.length)} / {filteredRedev.length}건)
-              </button>
+            {Math.ceil(filteredRedev.length / 30) > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'var(--sp-sm)', padding: 'var(--sp-md) 0' }}>
+                <button onClick={() => setRedevPage(p => Math.max(1, p - 1))} disabled={redevPage === 1} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', background: redevPage === 1 ? 'var(--bg-hover)' : 'var(--brand)', color: redevPage === 1 ? 'var(--text-tertiary)' : '#fff', border: 'none', cursor: redevPage === 1 ? 'default' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>← 이전</button>
+                <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>{redevPage} / {Math.ceil(filteredRedev.length / 30)}</span>
+                <button onClick={() => setRedevPage(p => Math.min(Math.ceil(filteredRedev.length / 30), p + 1))} disabled={redevPage >= Math.ceil(filteredRedev.length / 30)} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', background: redevPage >= Math.ceil(filteredRedev.length / 30) ? 'var(--bg-hover)' : 'var(--brand)', color: redevPage >= Math.ceil(filteredRedev.length / 30) ? 'var(--text-tertiary)' : '#fff', border: 'none', cursor: redevPage >= Math.ceil(filteredRedev.length / 30) ? 'default' : 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>다음 →</button>
+              </div>
             )}
 
             {filteredRedev.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>{effectiveSearch ? `"${effectiveSearch}" 검색 결과가 없습니다` : '조건에 맞는 프로젝트가 없습니다'}{effectiveSearch && <div style={{ fontSize: 'var(--fs-xs)', marginTop: 6 }}>구역명, 지역, 시공사로 검색해보세요</div>}</div>}

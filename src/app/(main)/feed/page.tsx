@@ -56,7 +56,7 @@ async function getPosts(category: string, region: string = 'all', sort: SortKey 
       .eq('is_deleted', false)
       .in('author_id', ids)
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(30);
     return (data ?? []) as unknown as PostWithProfile[];
   }
 
@@ -65,7 +65,7 @@ async function getPosts(category: string, region: string = 'all', sort: SortKey 
     .select('id,title,excerpt,category,created_at,likes_count,comments_count,view_count,bookmarks_count,is_pinned,is_anonymous,author_id,region_id,images,tags,stock_tags,apt_tags,profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
     .eq('is_deleted', false)
     .order(orderCol, { ascending: false })
-    .limit(20);
+    .limit(30);
   if (sort === 'latest') q = q.lte('created_at', new Date().toISOString());
   if (sort === 'popular') q = q.gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
   if (category !== 'all') q = q.eq('category', category);
