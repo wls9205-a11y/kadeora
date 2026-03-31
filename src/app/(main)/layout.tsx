@@ -4,7 +4,7 @@ import { Navigation } from '@/components/Navigation';
 import TrendingTicker from '@/components/TrendingTicker';
 import { ToastProvider } from '@/components/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt, PromoSheet, GuestNudge, PopupAdManager } from '@/components/ClientDynamics';
+import { Sidebar, RightPanel, InstallBanner, PWAInstallTracker, NoticeBanner, PageViewTracker, AutoPushPrompt, PromoSheet, GuestNudge, PopupAdManager, SignupNudge } from '@/components/ClientDynamics';
 import TopLoadingBar from '@/components/TopLoadingBar';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider } from '@/components/AuthProvider';
@@ -52,6 +52,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <InstallBanner />
       <PWAInstallTracker />
       <GuestNudge />
+      <SignupNudge />
       <PromoSheet />
       <PopupAdManager />
       <AutoPushPrompt />

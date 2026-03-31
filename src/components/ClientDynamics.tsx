@@ -12,3 +12,4 @@ export const PageViewTracker = dynamic(() => import('@/components/PageViewTracke
 export const AutoPushPrompt = dynamic(() => import('@/components/AutoPushPrompt'), { ssr: false });
 export const PromoSheet = dynamic(() => import('@/components/PromoSheet'), { ssr: false });
 export const PopupAdManager = dynamic(() => import('@/components/PopupAdManager'), { ssr: false });
+export const SignupNudge = dynamic(() => import('@/components/SignupNudge'), { ssr: false });
