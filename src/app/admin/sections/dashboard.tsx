@@ -162,7 +162,7 @@ export default function DashboardSection() {
         <HealthBadge label="댓글" value={`오늘 ${commentStats?.today ?? 0}개`} ok={(commentStats?.today ?? 0) > 0} />
         <HealthBadge label="24h 생산" value={fmt(totalRecordsCreated || 0) + '건'} ok={(totalRecordsCreated || 0) > 0} />
         <HealthBadge label="사이트맵" value={`${seo?.sitemapPct || 0}%`} ok={(seo?.sitemapPct || 0) > 80} />
-        <HealthBadge label="프리미엄" value={`${premiumKpi?.subscribers ?? 0}명`} ok={(premiumKpi?.subscribers ?? 0) > 0} />
+        <HealthBadge label="프로" value={`${premiumKpi?.subscribers ?? 0}명`} ok={(premiumKpi?.subscribers ?? 0) > 0} />
         <HealthBadge label="IndexNow" value={`${premiumKpi?.indexNow?.pct ?? 0}%`} ok={(premiumKpi?.indexNow?.pct ?? 0) > 50} />
         {cron.anthropicCreditWarning && <HealthBadge label="AI" value="크레딧 부족" ok={false} />}
         {dataCoverage && <HealthBadge label="분양가" value={`${dataCoverage.aptPrice.pct}%`} ok={dataCoverage.aptPrice.pct > 90} />}
@@ -607,7 +607,7 @@ export default function DashboardSection() {
         {/* 프리미엄 & 매출 */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>👑 프리미엄 & 매출</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>⭐ 프로 멤버십 👑 프리미엄 & 매출 매출</span>
             <a href="/shop" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: C.brand, textDecoration: 'none', fontWeight: 600 }}>페이지 →</a>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
@@ -1015,7 +1015,7 @@ export default function DashboardSection() {
         <QuickAction label="💬 토론" href="/discuss" external />
         <QuickAction label="🔥 HOT" href="/hot" external />
         <QuickAction label="🛒 상점" href="/shop" external />
-        <QuickAction label="👑 프리미엄" href="/shop" external />
+        <QuickAction label="⭐ 프로" href="/shop" external />
         <QuickAction label="🔑 Anthropic" href="https://console.anthropic.com" external />
         <QuickAction label="📊 Vercel" href="https://vercel.com/wls9205-5665s-projects/kadeora" external />
         <QuickAction label="🔍 SearchConsole" href="https://search.google.com/search-console" external />

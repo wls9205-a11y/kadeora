@@ -2,47 +2,53 @@
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 
+/**
+ * 실시간 활동 지표 — 실제 데이터 기반
+ * 
+ * - 최근 30분 내 고유 방문자 수 (page_views DISTINCT visitor_id)
+ * - 최근 1시간 내 새 글 수
+ * - 가짜 랜덤 수치 완전 제거 (2026-04-01)
+ */
 export default function LiveActivityIndicator() {
-  const [onlineCount, setOnlineCount] = useState(0);
+  const [activeVisitors, setActiveVisitors] = useState(0);
   const [recentPosts, setRecentPosts] = useState(0);
 
   useEffect(() => {
-    // 시뮬레이션: 실제로는 Supabase Realtime Presence 사용
-    // 초기 랜덤 시드 (실제 접속자가 쌓이기 전까지)
-    const base = 12 + Math.floor(Math.random() * 30);
-    setOnlineCount(base);
+    const sb = createSupabaseBrowser() as any;
 
-    // 30초마다 최근 1시간 내 새 글 수 조회
-    const fetchRecent = async () => {
-      const sb = createSupabaseBrowser();
-      const since = new Date(Date.now() - 3600000).toISOString();
-      const { count } = await sb.from('posts').select('id', { count: 'exact', head: true }).gte('created_at', since);
-      setRecentPosts(count ?? 0);
+    const fetchActivity = async () => {
+      const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+
+      const [visitorsR, postsR] = await Promise.all([
+        sb.rpc('get_active_visitors', { minutes: 30 }).then((r: any) => r.data ?? 0).catch(() => 0),
+        sb.from('posts').select('id', { count: 'exact', head: true }).gte('created_at', oneHourAgo).then((r: any) => r.count ?? 0).catch(() => 0),
+      ]);
+
+      setActiveVisitors(visitorsR);
+      setRecentPosts(postsR);
     };
-    fetchRecent();
-    const timer = setInterval(() => {
-      setOnlineCount(prev => Math.max(5, prev + Math.floor(Math.random() * 7) - 3));
-      fetchRecent();
-    }, 30000);
 
+    fetchActivity();
+    const timer = setInterval(fetchActivity, 60000);
     return () => clearInterval(timer);
   }, []);
 
-  if (onlineCount <= 0) return null;
+  if (activeVisitors <= 0 && recentPosts <= 0) return null;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 11, color: 'var(--text-tertiary)' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-        <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', display: 'inline-block', animation: 'livePulse 2s infinite' }} />
-        <span style={{ color: '#22C55E', fontWeight: 600 }}>{onlineCount}명</span> 접속 중
-      </span>
+      {activeVisitors > 0 && (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <span className="kd-pulse-dot" style={{ width: 5, height: 5, background: '#22C55E' }} />
+          <span style={{ color: '#22C55E', fontWeight: 600 }}>{activeVisitors}명</span> 활동 중
+        </span>
+      )}
       {recentPosts > 0 && (
         <>
-          <span style={{ color: 'var(--border)' }}>·</span>
+          {activeVisitors > 0 && <span style={{ color: 'var(--border)' }}>·</span>}
           <span>최근 1시간 <span style={{ color: 'var(--brand)', fontWeight: 600 }}>{recentPosts}</span>개 새 글</span>
         </>
       )}
-      <style>{`@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
     </div>
   );
 }
