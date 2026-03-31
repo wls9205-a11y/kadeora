@@ -5,7 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 export const maxDuration = 300;
 export const runtime = 'nodejs';
 
-const KAPT_KEY = process.env.KAPT_API_KEY || '';
+const KAPT_KEY = process.env.KAPT_API_KEY || process.env.KAPT_APT_KEY || '';
 const BASE_URL = 'https://apis.data.go.kr/1613000/AptBasisInfoServiceV4';
 
 interface KaptItem {
