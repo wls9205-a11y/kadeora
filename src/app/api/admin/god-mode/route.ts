@@ -186,11 +186,11 @@ function fireAndForget(
 
 // Phase별 타임아웃 설정
 const PHASE_TIMEOUTS: Record<string, number> = {
-  data: 30000,     // 30s — 외부 API 호출
+  data: 120000,    // 120s — crawl-apt-trade 87s, crawl-apt-rent 61s
   process: 120000, // 120s — geocode, pricing 등 오래 걸림
   ai: 0,           // fire-and-forget
   content: 0,      // fire-and-forget
-  system: 30000,   // 30s — 내부 작업
+  system: 45000,   // 45s — 내부 작업
 };
 
 // Phase 실행 (대기 또는 fire-and-forget)
@@ -291,9 +291,28 @@ export async function POST(req: NextRequest) {
     }
 
     const success = allResults.filter(r => r.ok).length;
-    const failed = allResults.filter(r => !r.ok).length;
+    let failed = allResults.filter(r => !r.ok).length;
     const dispatched = allResults.filter(r => r.status === 202).length;
-    const failedList = allResults.filter(r => !r.ok).map(r => r.endpoint);
+    let failedList = allResults.filter(r => !r.ok).map(r => r.endpoint);
+
+    // ★ 자동 재시도: full 모드에서 실패한 크론 1회 재시도
+    let retryResults: CronResult[] = [];
+    if (mode === 'full' && failedList.length > 0 && failedList.length <= 10) {
+      await new Promise(r => setTimeout(r, 2000)); // 2초 쿨다운
+      const retryPromises = failedList
+        .filter(ep => !FIRE_AND_FORGET_PHASES.has(ep)) // fire-and-forget은 재시도 불필요
+        .map(ep => runCron(ep, baseUrl, cronSecret, 120000, 'retry'));
+      const settled = await Promise.allSettled(retryPromises);
+      retryResults = settled.map((r, i) => 
+        r.status === 'fulfilled' ? r.value : { endpoint: failedList[i], name: '', ok: false, status: 0, duration: 0, phase: 'retry', error: r.reason?.message }
+      );
+      const retrySuccess = retryResults.filter(r => r.ok).length;
+      if (retrySuccess > 0) {
+        failed -= retrySuccess;
+        failedList = failedList.filter(ep => !retryResults.find(r => r.endpoint === ep && r.ok));
+      }
+    }
+
     const totalDuration = Date.now() - startTime;
 
     // 로그 기록
@@ -314,10 +333,13 @@ export async function POST(req: NextRequest) {
         total: allResults.length,
         success,
         failed,
-        dispatched,  // fire-and-forget로 보낸 건수
+        dispatched,
+        retried: retryResults.length,
+        retrySuccess: retryResults.filter(r => r.ok).length,
         duration: totalDuration,
       },
       results: allResults,
+      retryResults: retryResults.length > 0 ? retryResults : undefined,
       failedList,
     });
 

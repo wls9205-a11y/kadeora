@@ -322,6 +322,22 @@ export async function GET(req: Request) {
         cronByCategory[cat].created += info.created;
       }
 
+      // ── 섹션별 7일 펄스 데이터 (일간 트렌드) ──
+      const sbAny = sb as any;
+      const [feedPulseR, blogPulseR, stockPulseR, aptPulseR] = await Promise.all([
+        sbAny.rpc('get_feed_pulse_7d').then((r: any) => r.data).catch(() => null),
+        sbAny.rpc('get_blog_pulse_7d').then((r: any) => r.data).catch(() => null),
+        sbAny.rpc('get_stock_pulse').then((r: any) => r.data).catch(() => null),
+        sbAny.rpc('get_apt_pulse').then((r: any) => r.data).catch(() => null),
+      ]);
+
+      const sectionPulse = {
+        feed: feedPulseR,
+        blog: blogPulseR,
+        stock: stockPulseR,
+        apt: aptPulseR,
+      };
+
       return NextResponse.json({
         kpi: {
           users: usersR.count ?? 0,
@@ -383,6 +399,7 @@ export async function GET(req: Request) {
         },
         cronByCategory,
         dataCoverage,
+        sectionPulse,
       });
     }
 

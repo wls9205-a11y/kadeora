@@ -302,6 +302,113 @@ export default function DashboardSection() {
         </div>
       </div>
 
+      {/* ── 섹션별 7일 펄스 ── */}
+      {(data as any).sectionPulse && (() => {
+        const p = (data as any).sectionPulse;
+        const barW = (v: number, max: number) => max > 0 ? `${Math.max(4, (v / max) * 100)}%` : '4%';
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+            {/* 피드 펄스 */}
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>💬 피드 7일 추이</div>
+              {(p.feed || []).map((d: any) => {
+                const maxP = Math.max(...(p.feed || []).map((x: any) => x.posts || 0));
+                return (
+                  <div key={d.d} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                    <span style={{ fontSize: 9, color: C.textDim, width: 36, flexShrink: 0 }}>{d.d?.slice(5)}</span>
+                    <div style={{ flex: 1, background: C.bg, borderRadius: 2, height: 14, overflow: 'hidden' }}>
+                      <div style={{ width: barW(d.posts, maxP), height: '100%', background: C.brand, borderRadius: 2, transition: 'width .3s' }} />
+                    </div>
+                    <span style={{ fontSize: 9, color: C.textSec, width: 28, textAlign: 'right', flexShrink: 0 }}>{d.posts}</span>
+                  </div>
+                );
+              })}
+              <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 9, color: C.textDim }}>
+                <span>총 {(p.feed || []).reduce((s: number, d: any) => s + (d.posts || 0), 0)}글</span>
+                <span>♥ {(p.feed || []).reduce((s: number, d: any) => s + (d.likes || 0), 0)}</span>
+                <span>💬 {(p.feed || []).reduce((s: number, d: any) => s + (d.comments || 0), 0)}</span>
+              </div>
+            </div>
+
+            {/* 블로그 펄스 */}
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>📝 블로그 7일 생산</div>
+              {(p.blog || []).map((d: any) => {
+                const maxT = Math.max(...(p.blog || []).map((x: any) => x.total || 0));
+                return (
+                  <div key={d.d} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                    <span style={{ fontSize: 9, color: C.textDim, width: 36, flexShrink: 0 }}>{d.d?.slice(5)}</span>
+                    <div style={{ flex: 1, background: C.bg, borderRadius: 2, height: 14, overflow: 'hidden', display: 'flex' }}>
+                      {d.stock > 0 && <div style={{ width: barW(d.stock, maxT), height: '100%', background: C.green }} />}
+                      {d.apt > 0 && <div style={{ width: barW(d.apt, maxT), height: '100%', background: C.cyan }} />}
+                      {(d.realestate || 0) > 0 && <div style={{ width: barW(d.realestate, maxT), height: '100%', background: C.purple }} />}
+                      {(d.other || 0) > 0 && <div style={{ width: barW(d.other, maxT), height: '100%', background: C.yellow }} />}
+                    </div>
+                    <span style={{ fontSize: 9, color: C.textSec, width: 28, textAlign: 'right', flexShrink: 0 }}>{d.total}</span>
+                  </div>
+                );
+              })}
+              <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 9 }}>
+                <span style={{ color: C.green }}>■ 주식</span>
+                <span style={{ color: C.cyan }}>■ 청약</span>
+                <span style={{ color: C.purple }}>■ 부동산</span>
+                <span style={{ color: C.yellow }}>■ 기타</span>
+              </div>
+            </div>
+
+            {/* 주식 시장 펄스 */}
+            {p.stock && (
+              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>📈 주식 시장 현황</div>
+                {(p.stock.markets || []).map((m: any) => (
+                  <div key={m.market} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.border}` }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: C.text }}>{m.market}</span>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 10 }}>
+                      <span style={{ color: C.textSec }}>{m.total}종목</span>
+                      <span style={{ color: m.zero_pct > m.total * 0.3 ? C.red : C.green }}>0%: {m.zero_pct}</span>
+                      <span style={{ color: m.avg_change >= 0 ? C.red : C.cyan }}>{m.avg_change > 0 ? '+' : ''}{m.avg_change}%</span>
+                    </div>
+                  </div>
+                ))}
+                {(p.stock.topMovers || []).length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ fontSize: 9, color: C.textDim, marginBottom: 4 }}>등락률 TOP 5</div>
+                    {(p.stock.topMovers || []).map((s: any) => (
+                      <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '2px 0' }}>
+                        <span style={{ color: C.textSec }}>{s.name}</span>
+                        <span style={{ fontWeight: 700, color: s.change_pct >= 0 ? C.red : C.cyan }}>{s.change_pct > 0 ? '+' : ''}{s.change_pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 부동산 펄스 */}
+            {p.apt && (
+              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>🏢 부동산 현황</div>
+                {[
+                  { label: '청약 총건', val: fmt(p.apt.subscriptions?.total), color: C.text },
+                  { label: '접수중', val: fmt(p.apt.subscriptions?.active), color: C.green },
+                  { label: '이번주 신규', val: fmt(p.apt.subscriptions?.thisWeek), color: C.cyan },
+                  { label: '규제지역', val: fmt(p.apt.subscriptions?.regulated), color: C.red },
+                  { label: '파싱 완료', val: fmt(p.apt.subscriptions?.parsed), color: C.purple },
+                  { label: '단지 프로필', val: fmt(p.apt.complexProfiles), color: C.yellow },
+                  { label: 'SEO 사이트', val: fmt(p.apt.sites?.total), color: C.text },
+                  { label: '이미지 보유', val: fmt(p.apt.sites?.withImages), color: C.green },
+                ].map(r => (
+                  <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: `1px solid ${C.border}` }}>
+                    <span style={{ fontSize: 10, color: C.textSec }}>{r.label}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: r.color }}>{r.val}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* ── 주식 상세 KPI 패널 ── */}
       {stockKpi && (
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
