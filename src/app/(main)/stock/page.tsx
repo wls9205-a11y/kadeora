@@ -24,7 +24,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       title, description: desc,
       url: SITE_URL + '/stock',
       siteName: '카더라', locale: 'ko_KR', type: 'website',
-      images: [{ url: ogImg, alt: `카더라 ${title}` }],
+      images: [
+        { url: ogImg, width: 1200, height: 630, alt: `카더라 ${title}` },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('실시간 주식 시세')}&category=stock`, width: 630, height: 630, alt: `카더라 ${title}` },
+      ],
     },
     other: {
       'naver:written_time': '2026-01-15T00:00:00Z',

@@ -22,7 +22,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     openGraph: {
       title, description: desc,
       url: SITE_URL + '/apt', siteName: '카더라', locale: 'ko_KR', type: 'website',
-      images: [{ url: ogImg, width: 1200, height: 630, alt: `카더라 ${title}` }],
+      images: [
+        { url: ogImg, width: 1200, height: 630, alt: `카더라 ${title}` },
+        { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('부동산')}&category=apt`, width: 630, height: 630, alt: `카더라 ${title}` },
+      ],
     },
     twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
     other: { 'article:section': '부동산', 'article:tag': '부동산,청약,분양,미분양,재개발,실거래가,아파트', 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'naver:author': '카더라', 'og:updated_time': new Date().toISOString(), 'dg:plink': SITE_URL + '/apt' },

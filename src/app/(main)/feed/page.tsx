@@ -11,7 +11,10 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: SITE_URL + '/images/brand/kadeora-hero.png', alt: '카더라 피드' }],
+    images: [
+      { url: `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 커뮤니티')}&subtitle=${encodeURIComponent('주식 · 부동산 · 재테크')}&design=2`, width: 1200, height: 630, alt: '카더라 피드' },
+      { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 커뮤니티')}&category=feed`, width: 630, height: 630, alt: '카더라 피드' },
+    ],
   },
   other: {
     'naver:written_time': '2026-01-15T00:00:00Z',

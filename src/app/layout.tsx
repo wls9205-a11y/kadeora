@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     description: '부동산 · 주식 · 청약 · 지역 소식',
     images: [SITE_URL + '/api/og', SITE_URL + '/api/og-square'],
   },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
   verification: {
     google: 'ozIZYKHPCsd47yk_paPH5mbsSNSCpc-hzLGgQw0lhyU',
     other: { 'naver-site-verification': '0d8703ac50ef51c3c2feb0ee48784069936492f5' },

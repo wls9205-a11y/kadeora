@@ -17,7 +17,10 @@ export const metadata: Metadata = {
     siteName: '카더라',
     locale: 'ko_KR',
     type: 'website',
-    images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent('실시간 토론')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 토론' }],
+    images: [
+      { url: `${SITE_URL}/api/og?title=${encodeURIComponent('실시간 토론')}&design=2&category=general`, width: 1200, height: 630, alt: '카더라 토론' },
+      { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('실시간 토론')}&category=general`, width: 630, height: 630, alt: '카더라 토론' },
+    ],
   },
   twitter: { card: 'summary_large_image', title: '카더라 토론', description: '주식·부동산·경제 실시간 토론과 투표' },
   other: { 'naver:written_time': '2026-01-15T00:00:00Z', 'naver:updated_time': new Date().toISOString(), 'article:section': '토론', 'article:tag': '토론,투표,주식,부동산,커뮤니티,실시간', 'dg:plink': SITE_URL + '/discuss', 'naver:author': '카더라', 'og:updated_time': new Date().toISOString() },
