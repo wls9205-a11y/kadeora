@@ -360,7 +360,7 @@ export default function FeedClient({
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 10, padding: '7px 12px', background: 'var(--brand-bg, rgba(37,99,235,0.08))', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-border, rgba(37,99,235,0.15))' }}>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', fontWeight: 700 }}>#{activeTag}</span>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>태그 필터 중</span>
-            <button onClick={() => setActiveTag(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontFamily: 'inherit', padding: '2px 6px', borderRadius: 4 }}>
+            <button onClick={() => setActiveTag(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4 }}>
               ✕ 해제
             </button>
           </div>
@@ -372,7 +372,7 @@ export default function FeedClient({
             width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             padding: '9px 0', marginBottom: 10, borderRadius: 'var(--radius-md)',
             background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer',
-            fontWeight: 700, fontSize: 'var(--fs-sm)', fontFamily: 'inherit',
+            fontWeight: 700, fontSize: 'var(--fs-sm)',
           }}>
             ↑ 새 글 {newCount}개 올라왔어요 — 새로고침
           </button>
@@ -615,7 +615,7 @@ export default function FeedClient({
           <div style={{ textAlign: 'center', padding: '40px 16px' }}>
             <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>🔍</div>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>#{activeTag} 태그 글이 없어요</div>
-            <button onClick={() => setActiveTag(null)} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>필터 해제</button>
+            <button onClick={() => setActiveTag(null)} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer' }}>필터 해제</button>
           </div>
         )}
 

@@ -45,7 +45,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
           style={{
             flex: 1, background: 'var(--bg-hover)', border: '1px solid var(--border)',
             borderRadius: 'var(--radius-card)', color: 'var(--text-primary)', padding: 'var(--sp-md) var(--card-p)',
-            fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
+            fontSize: 'var(--fs-base)', resize: 'none', lineHeight: 1.5, boxSizing: 'border-box',
           }}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
         />

@@ -53,7 +53,7 @@ export default function FeedbackButton() {
           <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="어떤 점이 불편하셨나요? 어떤 기능이 있었으면 좋겠나요?" rows={5}
             style={{
               width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
-              background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', resize: 'vertical', fontFamily: 'inherit',
+              background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', resize: 'vertical',
             }} />
           <button onClick={handleSubmit} disabled={submitting || !message.trim()} style={{
             width: '100%', padding: '13px', borderRadius: 'var(--radius-md)', border: 'none',

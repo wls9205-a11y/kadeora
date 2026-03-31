@@ -139,7 +139,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
             <div>
               <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>자기소개</label>
               <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="자기소개를 입력해주세요" maxLength={200} rows={3}
-                style={{ width: '100%', boxSizing: 'border-box', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '10px 16px', fontSize: 'var(--fs-sm)', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
+                style={{ width: '100%', boxSizing: 'border-box', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '10px 16px', fontSize: 'var(--fs-sm)', resize: 'vertical', lineHeight: 1.5 }}
                 onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
                 onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')} />
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 'var(--sp-xs)', padding: '0 4px' }}>{bio.length}/200</div>

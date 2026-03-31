@@ -310,7 +310,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             );
           })()}
           <Link href="/stock/compare" className="kd-action-link" style={{ fontSize: 11 }}>⚔️ 비교</Link>
-          <button onClick={() => refresh()} aria-label="새로고침" style={{ width: 30, height: 30, borderRadius: '50%', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontFamily: 'inherit', transition: 'border-color var(--transition-fast)' }} title="시세 새로고침">🔄</button>
+          <button onClick={() => refresh()} aria-label="새로고침" style={{ width: 30, height: 30, borderRadius: '50%', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, transition: 'border-color var(--transition-fast)' }} title="시세 새로고침">🔄</button>
         </div>
       </div>
 
@@ -373,7 +373,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
           const avg = actives.length ? actives.reduce((s, st) => s + (st.change_pct ?? 0), 0) / actives.length : 0;
           const total = actives.length || 1;
           return (
-            <button key={label} onClick={onClick} style={{ borderRadius: 'var(--radius-card)', padding: '11px 12px 9px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', background: active ? activeBg : 'var(--bg-surface)', border: `${active ? '1.5px' : '1px'} solid ${active ? activeBorder : 'var(--border)'}`, boxShadow: active ? activeShadow : 'none', transition: 'all var(--transition-normal)' }}>
+            <button key={label} onClick={onClick} style={{ borderRadius: 'var(--radius-card)', padding: '11px 12px 9px', cursor: 'pointer', textAlign: 'left', background: active ? activeBg : 'var(--bg-surface)', border: `${active ? '1.5px' : '1px'} solid ${active ? activeBorder : 'var(--border)'}`, boxShadow: active ? activeShadow : 'none', transition: 'all var(--transition-normal)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 7 }}>
                 <div>
                   <div style={{ fontSize: 'var(--fs-md)', marginBottom: 2 }}>{flag}</div>
@@ -485,7 +485,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             background: currentTab === k ? 'var(--brand)' : 'transparent',
             color: currentTab === k ? '#fff' : 'var(--text-tertiary)',
             boxShadow: currentTab === k ? '0 1px 6px rgba(37,99,235,0.35)' : 'none',
-            transition: 'all var(--transition-fast)', fontFamily: 'inherit',
+            transition: 'all var(--transition-fast)',
           }}>{l}</button>
         ))}
       </div>
@@ -525,7 +525,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                     const color = isUp ? upC : downC;
                     const isSelected = sectorFilter === sec.name;
                     return (
-                      <button key={sec.name} onClick={() => { setSectorFilter(isSelected ? 'all' : sec.name); isDomestic ? setDomesticTab('ranking') : setGlobalTab('ranking'); }} style={{ display: 'flex', alignItems: 'center', gap: 7, background: isSelected ? (isUp ? (isDomestic?'rgba(255,107,107,0.06)':'rgba(46,232,165,0.06)') : (isDomestic?'rgba(108,180,255,0.06)':'rgba(248,113,113,0.06)')) : 'transparent', borderRadius: 'var(--radius-xs)', padding: '3px 4px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', width: '100%', transition: 'background 0.15s' }}>
+                      <button key={sec.name} onClick={() => { setSectorFilter(isSelected ? 'all' : sec.name); isDomestic ? setDomesticTab('ranking') : setGlobalTab('ranking'); }} style={{ display: 'flex', alignItems: 'center', gap: 7, background: isSelected ? (isUp ? (isDomestic?'rgba(255,107,107,0.06)':'rgba(46,232,165,0.06)') : (isDomestic?'rgba(108,180,255,0.06)':'rgba(248,113,113,0.06)')) : 'transparent', borderRadius: 'var(--radius-xs)', padding: '3px 4px', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'background 0.15s' }}>
                         <span style={{ fontSize: 10, color: isSelected ? 'var(--text-primary)' : 'var(--text-tertiary)', minWidth: 52, flexShrink: 0, fontWeight: isSelected ? 700 : 400, textAlign: 'right' }}>{sec.name}</span>
                         <div style={{ flex: 1, height: 5, background: 'var(--bg-hover)', borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
                           {isUp

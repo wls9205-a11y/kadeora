@@ -114,7 +114,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   const inputStyle: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 'var(--radius-sm)',
     border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)',
-    fontSize: 'var(--fs-sm)', fontFamily: 'inherit',
+    fontSize: 'var(--fs-sm)',
   };
   const labelStyle: React.CSSProperties = {
     fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-xs)',

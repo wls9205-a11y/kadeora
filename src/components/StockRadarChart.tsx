@@ -61,7 +61,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
         {searchRes.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', zIndex: 50, marginTop: 3 }}>
             {searchRes.map(s => (
-              <button aria-label="닫기" key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              <button aria-label="닫기" key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
                 <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
                 <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
                 {selected.includes(s.symbol) && <span style={{ fontSize: 10, color: 'var(--brand)' }}>✓</span>}
@@ -77,7 +77,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
           const idx = selected.indexOf(s.symbol);
           const col = idx >= 0 ? COLORS[idx] : undefined;
           return (
-            <button key={s.symbol} onClick={() => toggle(s.symbol)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: col ? `${col}20` : 'var(--bg-surface)', border: `1px solid ${col || 'var(--border)'}`, color: col || 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: col ? 700 : 400 }}>
+            <button key={s.symbol} onClick={() => toggle(s.symbol)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: col ? `${col}20` : 'var(--bg-surface)', border: `1px solid ${col || 'var(--border)'}`, color: col || 'var(--text-secondary)', cursor: 'pointer', fontWeight: col ? 700 : 400 }}>
               {col && <span style={{ marginRight: 3 }}>●</span>}{s.name.length > 6 ? s.name.slice(0, 6) + '..' : s.name}
             </button>
           );

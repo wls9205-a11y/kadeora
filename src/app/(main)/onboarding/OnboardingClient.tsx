@@ -199,7 +199,7 @@ export default function OnboardingClient() {
             <select value={region} onChange={e => { setRegion(e.target.value); setDistrict(''); }} style={{
               width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--sp-sm)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
+              color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)',
             }}>
               <option value="">시·도를 선택해주세요</option>
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
@@ -208,7 +208,7 @@ export default function OnboardingClient() {
               <select value={district} onChange={e => setDistrict(e.target.value)} style={{
                 width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--sp-xl)',
                 background: 'var(--bg-hover)', border: '1px solid var(--border)',
-                color: district ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
+                color: district ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)',
               }}>
                 <option value="">시·군·구 선택 (선택사항)</option>
                 {SIGUNGU_MAP[region].map(d => <option key={d} value={d}>{d}</option>)}

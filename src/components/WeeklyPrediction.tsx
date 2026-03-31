@@ -152,10 +152,10 @@ export default function WeeklyPrediction() {
         <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
           <input type="number" placeholder="금요일 종가 예측"
             value={inputVal} onChange={e => setInputVal(e.target.value)}
-            style={{ flex: 1, height: 34, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', padding: '0 10px', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}
+            style={{ flex: 1, height: 34, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', padding: '0 10px', fontSize: 13, outline: 'none' }}
           />
           <button onClick={handleSubmit} disabled={submitting}
-            style={{ height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-yellow)', color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', opacity: submitting ? 0.6 : 1 }}>
+            style={{ height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-yellow)', color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', opacity: submitting ? 0.6 : 1 }}>
             참여 +10P
           </button>
         </div>

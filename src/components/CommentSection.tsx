@@ -114,7 +114,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 style={{
                   width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-lg)', color: 'var(--text-primary)', padding: 'var(--sp-md) var(--card-p)',
-                  fontSize: 16, resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
+                  fontSize: 16, resize: 'none', lineHeight: 1.5, boxSizing: 'border-box',
                   transition: 'border-color var(--transition-fast)',
                 }}
                 onFocus={e => e.currentTarget.style.borderColor = 'var(--brand)'}
@@ -178,7 +178,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                   </button>
                   {!isReply && userId && (
                     <button onClick={() => setReplyTo({ id: comment.id, nickname: comment.profiles?.nickname ?? '익명' })}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>답글</button>
+                      style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0 }}>답글</button>
                   )}
                   {userId === comment.author_id && (
                     <button onClick={() => setDeleteTarget(comment.id)} aria-label="삭제"

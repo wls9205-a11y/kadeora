@@ -295,7 +295,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 display: 'flex', alignItems: 'center', gap: 0, flexDirection: 'column',
                 padding: '5px 4px', background: isActive ? 'rgba(59,123,246,0.06)' : 'transparent',
                 border: isActive ? '1px solid rgba(59,123,246,0.25)' : '0.5px solid var(--border)',
-                borderRadius: 'var(--radius-xs)', cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit', width: '100%',
+                borderRadius: 'var(--radius-xs)', cursor: 'pointer', textAlign: 'center', width: '100%',
                 transition: 'border-color 0.12s, background 0.12s',
               }}
             >

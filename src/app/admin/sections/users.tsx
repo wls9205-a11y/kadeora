@@ -64,7 +64,7 @@ export default function UsersSection() {
       {/* Controls */}
       <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap', alignItems: 'center' }}>
         <input value={search} onChange={e => doSearch(e.target.value)} placeholder="닉네임 / 이름 검색..."
-          style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.card, color: C.text, fontSize: 13, width: 240, fontFamily: 'inherit' }} />
+          style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.card, color: C.text, fontSize: 13, width: 240 }} />
         <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
           {filters.map(f => <Pill key={f.key} active={filter === f.key} onClick={() => { setFilter(f.key); setPage(1); }}>{f.label}</Pill>)}
         </div>

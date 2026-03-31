@@ -46,7 +46,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
         border: '1px solid rgba(37,99,235,0.2)',
         color: 'var(--brand)', cursor: 'pointer',
         fontSize: 13, fontWeight: 700,
-        transition: 'all var(--transition-fast)', fontFamily: 'inherit',
+        transition: 'all var(--transition-fast)',
       }}
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

@@ -5,6 +5,8 @@
 @tailwind utilities;
 
 /* 사이드바 + 오른쪽 패널 (데스크탑 only) */
+/* 폼 요소 폰트 리셋 — 브라우저 기본 system-ui 방지 */
+button, input, select, textarea { font-family: inherit; }
 .sidebar-wrapper { display: none; }
 .right-panel-wrapper { display: none; }
 @media (min-width: 900px) { .sidebar-wrapper { display: block; } }

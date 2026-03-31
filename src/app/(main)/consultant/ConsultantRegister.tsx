@@ -84,7 +84,7 @@ export default function ConsultantRegister() {
   );
 
   const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' };
-  const input = { width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
+  const input = { width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box' as const };
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '0 16px 40px' }}>

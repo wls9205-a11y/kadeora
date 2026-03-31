@@ -241,7 +241,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                   border: `1px solid var(--brand)`,
                   background: followingIds.has(c.author_id) ? 'var(--brand)' : 'transparent',
                   color: followingIds.has(c.author_id) ? 'white' : 'var(--brand)',
-                  fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                 }}>
                   {followingIds.has(c.author_id) ? '팔로잉' : '팔로우'}
                 </button>

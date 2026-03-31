@@ -234,7 +234,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
                 padding: '6px 8px', textDecoration: 'none',
                 background: isActive ? 'rgba(59,123,246,0.06)' : 'var(--bg-surface)',
                 border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
-                borderRadius: 7, width: '100%', fontFamily: 'inherit',
+                borderRadius: 7, width: '100%',
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-xs)' }}>

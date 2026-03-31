@@ -130,7 +130,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
                 width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', boxSizing: 'border-box',
                 border: '1px solid var(--border)', background: 'var(--bg-base)',
                 color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', resize: 'none',
-                marginBottom: 'var(--sp-lg)', fontFamily: 'inherit', lineHeight: 1.5,
+                marginBottom: 'var(--sp-lg)', lineHeight: 1.5,
               }}
               onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
               onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}

@@ -97,7 +97,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
                 color: isActive ? '#fff' : 'var(--text-secondary)',
                 border: isActive ? 'none' : '1px solid var(--border)',
                 cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
+                display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
                 transition: 'all var(--transition-fast)',
               }}
             >

@@ -91,7 +91,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
         {showSearch && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', zIndex: 50, marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
             {searchResults.map(s => (
-              <button aria-label="닫기" key={s.symbol} onClick={() => addHolding(s)} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', borderBottom: '1px solid var(--border)' }}>
+              <button aria-label="닫기" key={s.symbol} onClick={() => addHolding(s)} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
                 <span style={{ fontSize: 11, fontWeight: 600, color: (s.change_pct ?? 0) > 0 ? (s.currency === 'USD' ? 'var(--accent-green)' : 'var(--accent-red)') : 'var(--accent-blue)' }}>{(s.change_pct ?? 0) > 0 ? '+' : ''}{(s.change_pct ?? 0).toFixed(2)}%</span>
@@ -107,7 +107,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 5 }}>시총 상위 빠른 추가</div>
           <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
             {quickStocks.map(s => (
-              <button key={s.symbol} onClick={() => addHolding(s)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+              <button key={s.symbol} onClick={() => addHolding(s)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
                 {s.name.length > 5 ? s.name.slice(0, 5) + '..' : s.name}
               </button>
             ))}

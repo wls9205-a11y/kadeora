@@ -59,7 +59,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
       {isArchive && (
         <div style={{ padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-yellow)' }}>📂 {viewDate} 아카이브</span>
-          <button onClick={goToToday} style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', background: 'none', border: '1px solid var(--brand)', borderRadius: 'var(--radius-xs)', padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>오늘 보기 →</button>
+          <button onClick={goToToday} style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', background: 'none', border: '1px solid var(--brand)', borderRadius: 'var(--radius-xs)', padding: '2px 8px', cursor: 'pointer' }}>오늘 보기 →</button>
         </div>
       )}
 
@@ -77,7 +77,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 const base = `/daily/${encodeURIComponent(e.target.value)}`;
                 router.push(viewDate ? `${base}/${viewDate}` : base);
               }}
-              style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '3px 8px', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '3px 8px', cursor: 'pointer' }}
             >
               {regions.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
@@ -89,7 +89,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           <button
             onClick={() => prevDate && goToDate(prevDate)}
             disabled={!prevDate}
-            style={{ fontSize: 12, fontWeight: 700, color: prevDate ? 'var(--brand)' : 'var(--text-tertiary)', background: 'none', border: 'none', cursor: prevDate ? 'pointer' : 'default', fontFamily: 'inherit', padding: '4px 8px' }}
+            style={{ fontSize: 12, fontWeight: 700, color: prevDate ? 'var(--brand)' : 'var(--text-tertiary)', background: 'none', border: 'none', cursor: prevDate ? 'pointer' : 'default', padding: '4px 8px' }}
           >◀ 이전</button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -110,7 +110,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           <button
             onClick={() => nextDate ? goToDate(nextDate) : (!isArchive ? undefined : goToToday())}
             disabled={!nextDate && !isArchive}
-            style={{ fontSize: 12, fontWeight: 700, color: (nextDate || isArchive) ? 'var(--brand)' : 'var(--text-tertiary)', background: 'none', border: 'none', cursor: (nextDate || isArchive) ? 'pointer' : 'default', fontFamily: 'inherit', padding: '4px 8px' }}
+            style={{ fontSize: 12, fontWeight: 700, color: (nextDate || isArchive) ? 'var(--brand)' : 'var(--text-tertiary)', background: 'none', border: 'none', cursor: (nextDate || isArchive) ? 'pointer' : 'default', padding: '4px 8px' }}
           >{nextDate ? '다음 ▶' : isArchive ? '오늘 ▶' : '최신'}</button>
         </div>
 

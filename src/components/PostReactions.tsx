@@ -88,7 +88,7 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 3, position: 'relative' }}>
         <button onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPicker(!showPicker); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 2, background: myReaction ? 'rgba(59,123,246,0.08)' : 'none', border: myReaction ? '1px solid rgba(59,123,246,0.2)' : '1px solid transparent', borderRadius: 99, padding: '2px 6px', cursor: 'pointer', fontSize: 11, fontFamily: 'inherit', color: myReaction ? REACTION_COLORS[myReaction] : 'var(--text-tertiary)' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 2, background: myReaction ? 'rgba(59,123,246,0.08)' : 'none', border: myReaction ? '1px solid rgba(59,123,246,0.2)' : '1px solid transparent', borderRadius: 99, padding: '2px 6px', cursor: 'pointer', fontSize: 11, color: myReaction ? REACTION_COLORS[myReaction] : 'var(--text-tertiary)' }}>
           <span style={{ fontSize: 13 }}>{myReaction ? REACTIONS.find(r => r.key === myReaction)?.emoji : '👍'}</span>
           {total > 0 && <span>{total}</span>}
         </button>

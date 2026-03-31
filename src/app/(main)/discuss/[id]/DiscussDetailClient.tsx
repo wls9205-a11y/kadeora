@@ -156,7 +156,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
             <>
               <input value={input} onChange={e => setInput(e.target.value)} placeholder="의견을 남겨보세요" maxLength={500}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleComment(); } }}
-                style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit' }} />
+                style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }} />
               <button onClick={handleComment} disabled={!input.trim() || sending}
                 style={{ padding: '10px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 'var(--fs-base)', cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>
                 전송

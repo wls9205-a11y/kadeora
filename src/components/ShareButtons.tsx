@@ -107,7 +107,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.08) 100%)',
         border: '1px solid rgba(59,123,246,0.2)',
         color: 'var(--brand)', cursor: 'pointer',
-        fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
+        fontSize: 13, fontWeight: 700,
         transition: 'all var(--transition-fast)',
       }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>

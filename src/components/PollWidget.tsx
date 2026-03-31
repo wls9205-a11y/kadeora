@@ -107,7 +107,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
               style={{
                 position: 'relative', overflow: 'hidden',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 12px', borderRadius: 'var(--radius-sm)', textAlign: 'left', fontFamily: 'inherit',
+                padding: '8px 12px', borderRadius: 'var(--radius-sm)', textAlign: 'left',
                 border: `1.5px solid ${isMine ? 'var(--brand)' : 'var(--border)'}`,
                 background: showResults ? 'transparent' : 'var(--bg-hover)',
                 cursor: showResults ? 'default' : 'pointer',

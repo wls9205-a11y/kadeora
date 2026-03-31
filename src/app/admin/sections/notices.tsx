@@ -67,7 +67,7 @@ function NoticeManager() {
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 'var(--sp-sm)' }}>새 공지 등록</div>
         <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="전광판에 표시할 공지 내용..." rows={3}
-          style={{ width: '100%', boxSizing: 'border-box', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.surface, color: C.text, padding: '10px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit' }} />
+          style={{ width: '100%', boxSizing: 'border-box', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.surface, color: C.text, padding: '10px 12px', fontSize: 13, resize: 'vertical' }} />
         <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-sm)', alignItems: 'center' }}>
           <button onClick={handleSave} disabled={saving || !content.trim()} style={{
             padding: '8px 20px', borderRadius: 'var(--radius-sm)', border: 'none', background: content.trim() ? C.brand : C.border,
@@ -132,7 +132,7 @@ function PushManager() {
 
   if (loading) return <Spinner />;
 
-  const inp: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '10px 12px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-sm)', color: C.text, fontSize: 13, fontFamily: 'inherit' };
+  const inp: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '10px 12px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-sm)', color: C.text, fontSize: 13 };
 
   return (
     <div>

@@ -66,7 +66,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               background: bg, border: `1px solid ${isSelected ? col : border}`,
               borderRadius: 'var(--radius-xs)', cursor: 'pointer', display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center', gap: 1, overflow: 'hidden',
-              transition: 'all var(--transition-fast)', padding: 4, fontFamily: 'inherit',
+              transition: 'all var(--transition-fast)', padding: 4,
               boxShadow: isSelected ? `0 0 0 2px ${col}60` : 'none',
             }}>
               {cs >= 2 && rs >= 2 && <span style={{ fontSize: Math.min(10, 7 + cs), fontWeight: 700, color: '#E0EAFF', lineHeight: 1.1, textAlign: 'center' }}>{sec.name}</span>}

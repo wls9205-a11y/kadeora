@@ -260,7 +260,7 @@ export default function WriteClient() {
         style={{
           width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-card)', color: 'var(--text-primary)', padding: '12px 16px', marginTop: 'var(--sp-sm)',
-          fontSize: 'var(--fs-md)', resize: 'none', fontFamily: 'inherit',
+          fontSize: 'var(--fs-md)', resize: 'none',
           lineHeight: 1.8, boxSizing: 'border-box', minHeight: 200, outline: 'none',
           transition: 'border-color var(--transition-normal)',
         }}
@@ -281,7 +281,7 @@ export default function WriteClient() {
               borderRadius: 'var(--radius-pill)', border: `1px solid ${showPollForm ? 'var(--brand)' : 'var(--border)'}`,
               background: showPollForm ? 'var(--brand-bg, rgba(37,99,235,0.08))' : 'transparent',
               color: showPollForm ? 'var(--brand)' : 'var(--text-tertiary)',
-              cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600, fontFamily: 'inherit',
+              cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
               transition: 'all var(--transition-fast)',
             }}>
             🗳️ 투표 {showPollForm ? '제거' : '추가'}
@@ -313,7 +313,7 @@ export default function WriteClient() {
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'center', marginTop: 'var(--sp-xs)' }}>
                 {pollOptions.length < 6 && (
                   <button onClick={() => setPollOptions((prev: string[]) => [...prev, ''])}
-                    style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+                    style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
                     + 선택지 추가
                   </button>
                 )}
