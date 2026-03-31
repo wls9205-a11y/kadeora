@@ -181,7 +181,6 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>청약정보</div>
                 {barStyle(Math.round(cats.sub / maxVal * 100), COLORS.sub)}
               </div>
-              </div>
               {/* 분양중 */}
               <div style={cardStyle(COLORS.ongoing, 'ongoing')} onClick={() => onTabChange?.('ongoing')} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
