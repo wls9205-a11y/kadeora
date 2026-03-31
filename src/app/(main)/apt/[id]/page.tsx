@@ -808,16 +808,21 @@ export default async function AptUnifiedPage({ params }: Props) {
             </div>
           </div>
 
-          {/* 단지 개요 행 */}
+          {/* 단지 개요 행 — 모집공고 파싱 데이터 전체 표시 */}
           {(() => {
             const rows = [
               ['시공사', sub.constructor_nm || site?.builder],
               ['시행사', sub.developer_nm || site?.developer],
-              ['총 공급', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대` : null],
-              ['동수', sub.total_dong_co ? `${sub.total_dong_co}개 동` : null],
-              ['최고 층수', sub.max_floor ? `지상 ${sub.max_floor}층` : null],
-              ['주차', sub.parking_co ? `${Number(sub.parking_co).toLocaleString()}대` : null],
+              ['브랜드', sub.brand_name],
+              ['사업유형', sub.project_type],
+              ['총세대수', sub.total_households ? `${Number(sub.total_households).toLocaleString()}세대 (단지 전체)` : null],
+              ['공급세대', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대 (일반${sub.general_supply_total || '-'} · 특별${sub.special_supply_total || '-'})` : null],
+              ['동수', (sub.total_dong_count || sub.total_dong_co) ? `${sub.total_dong_count || sub.total_dong_co}개 동` : null],
+              ['층수', sub.max_floor ? `지상 ${sub.max_floor}층${sub.min_floor ? ` / 지하 ${sub.min_floor}층` : ''}` : null],
+              ['주차', sub.parking_total || sub.parking_co ? `${Number(sub.parking_total || sub.parking_co).toLocaleString()}대${sub.parking_ratio ? ` (세대당 ${sub.parking_ratio}대)` : ''}` : null],
               ['난방', sub.heating_type],
+              ['구조', sub.structure_type],
+              ['외장재', sub.exterior_finish],
             ].filter(r => r[1]);
             if (!rows.length) return null;
             return (
@@ -825,12 +830,107 @@ export default async function AptUnifiedPage({ params }: Props) {
                 {rows.map(([l, v], i) => (
                   <div key={l as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 13 }}>
                     <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{v}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', textAlign: 'right', maxWidth: '60%' }}>{v}</span>
                   </div>
                 ))}
               </div>
             );
           })()}
+
+          {/* 면적/용적 정보 */}
+          {(sub.land_area || sub.floor_area_ratio) && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 4, marginTop: 8 }}>
+              {sub.land_area > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>대지면적</div><div style={{ fontSize: 11, fontWeight: 700 }}>{Number(sub.land_area).toLocaleString()}㎡</div></div>}
+              {sub.building_area > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>건축면적</div><div style={{ fontSize: 11, fontWeight: 700 }}>{Number(sub.building_area).toLocaleString()}㎡</div></div>}
+              {sub.floor_area_ratio > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>용적률</div><div style={{ fontSize: 11, fontWeight: 700 }}>{sub.floor_area_ratio}%</div></div>}
+              {sub.building_coverage > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>건폐율</div><div style={{ fontSize: 11, fontWeight: 700 }}>{sub.building_coverage}%</div></div>}
+            </div>
+          )}
+
+          {/* 💰 납부일정 + 대출 */}
+          {sub.payment_schedule && (() => {
+            const ps = typeof sub.payment_schedule === 'string' ? JSON.parse(sub.payment_schedule) : sub.payment_schedule;
+            const fmtA = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
+            return (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>💰 납부일정 (최고 분양가 기준)</div>
+                {['deposit', 'interim', 'balance'].map(k => {
+                  const item = ps[k];
+                  if (!item) return null;
+                  const colors: Record<string, string> = { deposit: 'var(--brand)', interim: 'var(--accent-yellow)', balance: 'var(--accent-green)' };
+                  return (
+                    <div key={k} style={{ marginBottom: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 2 }}>
+                        <span style={{ color: 'var(--text-tertiary)' }}>{item.label} ({item.pct}%){k === 'interim' && item.loan ? ` — ${item.loan}` : ''}</span>
+                        <span style={{ fontWeight: 700, color: colors[k] }}>{fmtA(item.amount)}</span>
+                      </div>
+                      <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${item.pct}%`, background: colors[k], borderRadius: 2 }} />
+                      </div>
+                    </div>
+                  );
+                })}
+                {sub.acquisition_tax_estimate > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 4, padding: '4px 0', borderTop: '1px solid var(--border)' }}>
+                    <span style={{ color: 'var(--text-tertiary)' }}>예상 취득세</span>
+                    <span style={{ fontWeight: 700, color: 'var(--accent-red)' }}>약 {fmtA(sub.acquisition_tax_estimate)}</span>
+                  </div>
+                )}
+                {sub.loan_rate && (
+                  <div style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: sub.loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: sub.loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)', fontWeight: 600, marginTop: 4, display: 'inline-block' }}>
+                    🏦 중도금 {sub.loan_rate}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* 📋 규제/자격 조건 */}
+          {(sub.transfer_limit || sub.residence_obligation || sub.savings_requirement || sub.priority_supply_area) && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📋 규제 · 청약자격</div>
+              {[
+                sub.transfer_limit && ['전매제한', sub.transfer_limit, sub.resale_restriction_months ? `(${sub.resale_restriction_months}개월)` : ''],
+                sub.residence_obligation && ['거주의무', sub.residence_obligation, sub.residence_obligation_years ? `(${sub.residence_obligation_years}년)` : ''],
+                sub.savings_requirement && ['청약저축', sub.savings_requirement],
+                sub.priority_supply_area && ['우선공급', sub.priority_supply_area],
+              ].filter(Boolean).map(([l, v, extra]: any) => (
+                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12, borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right', maxWidth: '60%' }}>{v} {extra || ''}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 🏗️ 사업일정 */}
+          {(sub.business_approval_date || sub.construction_start_date || sub.completion_date) && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🏗️ 사업일정</div>
+              {[
+                sub.business_approval_date && ['사업승인', sub.business_approval_date],
+                sub.construction_start_date && ['착공', sub.construction_start_date],
+                sub.completion_date && ['준공예정', sub.completion_date],
+              ].filter(Boolean).map(([l, v]: any) => (
+                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12, borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 🏊 커뮤니티 시설 */}
+          {sub.community_facilities?.length > 0 && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🏊 커뮤니티 시설</div>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {sub.community_facilities.map((f: string) => (
+                  <span key={f} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{f}</span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 견본주택 */}
           {sub.model_house_addr && (
