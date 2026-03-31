@@ -955,15 +955,15 @@ export default function DashboardSection() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { tag: 'VIRAL', label: '공유 시스템 v2', desc: '밴드 추가 · UTM · 공유횟수 · 7개 페이지 CTA', color: C.brand, commit: '1c75bf6' },
+            { tag: 'VIRAL', label: '가입 유도 팝업 2종', desc: '웰컴(첫방문) + 탐색(5페이지) · 카카오 CTA', color: C.brand, commit: '55180bf' },
+            { tag: 'FEAT', label: '팝업 광고 관리', desc: 'DB+API+어드민CRUD+모달/배너/토스트', color: C.purple, commit: '66c38db' },
+            { tag: 'VIRAL', label: '공유 시스템 v2', desc: '밴드+UTM+공유횟수 · 7페이지 CTA', color: C.cyan, commit: '1c75bf6' },
             { tag: 'FEAT', label: '지수 KPI 6열', desc: 'KOSPI/KOSDAQ/S&P500/NASDAQ/환율/금', color: C.cyan, commit: '4d97492' },
-            { tag: 'FEAT', label: '프로 ₩24,900', desc: 'DB+plan-limits+UpgradeModal+상점 (비공개)', color: C.purple, commit: 'ce6d9ee' },
-            { tag: 'FEAT', label: '리포트 강화', desc: '지수/환율 섹션 + 등락률 + 공유 CTA', color: C.yellow, commit: 'f10f424' },
-            { tag: 'FIX', label: '가짜 접속자→실제', desc: 'RPC get_active_visitors (page_views)', color: C.green, commit: '85639c4' },
-            { tag: 'FIX', label: 'CSS 버그 2건', desc: 'kd-btn-ghost/danger 미정의 (12곳)', color: C.red, commit: 'fb168a0' },
-            { tag: 'FIX', label: '크론 에러 3건', desc: 'sync타임아웃·UUID·시세3대버그', color: C.red, commit: '3cb3cc2' },
-            { tag: 'UX', label: 'GuestNudge v2', desc: '6→1 CTA 통합 · 단계적 넛지', color: C.cyan, commit: '7b0e869' },
-            { tag: 'FEAT', label: '인기검색어 10개', desc: 'RightPanel 5→10 + FALLBACK 10개', color: C.purple, commit: 'f9ec695' },
+            { tag: 'FEAT', label: '프로 ₩24,900', desc: 'DB+plan-limits+UpgradeModal (비공개)', color: C.purple, commit: 'ce6d9ee' },
+            { tag: 'FIX', label: 'Search Console', desc: 'image-sitemap 438에러+robots.txt 21→5', color: C.green, commit: 'adbbcc7' },
+            { tag: 'FIX', label: '크론 에러 4건', desc: 'sync·UUID·시세·리포트504', color: C.red, commit: '6650038' },
+            { tag: 'UX', label: 'GuestNudge v2', desc: '6→1 CTA · 단계적 넛지', color: C.cyan, commit: '7b0e869' },
+            { tag: 'FEAT', label: '리포트+인기검색어', desc: '지수/환율 섹션 + FALLBACK 10개', color: C.yellow, commit: 'f10f424' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
