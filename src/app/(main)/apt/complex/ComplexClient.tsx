@@ -244,7 +244,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               </div>
 
               {/* 3열 부가 데이터 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
+              <div className="kd-grid-3" style={{ gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
                 {[
                   { label: '전세', value: c.jeonse > 0 ? fmtAmount(c.jeonse) : '—' },
                   { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—' },

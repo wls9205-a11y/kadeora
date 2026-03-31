@@ -158,7 +158,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
       </div>
 
       {/* ═══ KPI 3열 ═══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 14 }}>
+      <div className="kd-grid-3" style={{ gap: 6, marginBottom: 14 }}>
         {[
           { label: '평균 매매가', value: fmtAmount(avgSale), icon: '💰' },
           { label: '평균 전세가율', value: `${avgRatio}%`, icon: '📊', color: ratioColor },

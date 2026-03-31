@@ -340,7 +340,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             </div>
             {/* KPI 4개 */}
             {briefingOpen && (
-              <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6 }}>
+              <div className="kd-grid-4" style={{ position: 'relative', gap: 6 }}>
                 {[
                   { label: 'KOSPI', val: kospiIdx ? fmt(kospiIdx.price) : '—', chg: kospiPct, chgStr: `${kospiPct > 0 ? '▲' : '▼'}${Math.abs(kospiPct).toFixed(2)}%`, color: kospiPct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)' },
                   { label: '심리지수', val: String(fgScore), chg: 0, chgStr: fgLabel, color: fgColor },

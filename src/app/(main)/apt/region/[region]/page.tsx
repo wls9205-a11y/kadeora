@@ -185,7 +185,7 @@ export default async function RegionLandingPage({ params }: Props) {
       </p>
 
       {/* 요약 카드 — 시각 대시보드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-xl)' }}>
+      <div className="kd-grid-1-2" style={{ gap: 'var(--sp-sm)', marginBottom: 'var(--sp-xl)' }}>
         {/* 현장 유형별 도넛 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {(() => {

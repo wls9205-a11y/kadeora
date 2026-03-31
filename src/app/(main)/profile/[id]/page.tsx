@@ -50,7 +50,7 @@ export default async function ProfilePage({ params }: Props) {
     <>
     {/* 활동 통계 */}
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 12px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+      <div className="kd-stats-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
         {[
           { label: '게시글', value: profile?.posts_count || posts?.length || 0 },
           { label: '댓글', value: commentCount || 0 },

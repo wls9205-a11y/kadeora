@@ -284,7 +284,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       </div>
 
       {/* 지역별 — 깔끔 5열 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 3, marginBottom: 6 }}>
+      <div className="kd-region-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 3, marginBottom: 6 }}>
         {regions.map((r: RegionData) => {
           const isActive = activeRegion === r.name;
           return (

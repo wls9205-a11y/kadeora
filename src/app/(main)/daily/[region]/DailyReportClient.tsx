@@ -136,7 +136,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
 
         {/* KPI 스트립 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--sp-xs)' }}>
+        <div className="kd-kpi-5">
           {[
             { v: d.subCountThisWeek + '건', l: '이번주 청약', s: d.subUnitsThisWeek.toLocaleString() + '세대', sc: 'var(--text-secondary)' },
             { v: d.unsoldUnits.toLocaleString(), l: '전국 미분양', s: `${d.region} ${localUnsoldPct}%`, sc: localUnsoldPct < 5 ? 'var(--accent-green)' : 'var(--accent-red)' },
@@ -215,7 +215,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       {/* 글로벌 */}
       <SH icon="🌎" title="글로벌 마켓" />
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
+      <div className="kd-grid-6" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
         {d.globalStocks.slice(0, 6).map(s => (
           <div key={s.symbol} style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-primary)' }}>{s.symbol}</div>

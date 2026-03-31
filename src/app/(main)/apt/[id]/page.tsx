@@ -498,7 +498,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         ];
 
         return (
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 6, marginBottom: 14 }}>
+          <div className="kd-grid-4" style={{ gap: 6, marginBottom: 14 }}>
             {cards.map(s => (
               <div key={s.l} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
@@ -1175,7 +1175,7 @@ export default async function AptUnifiedPage({ params }: Props) {
             const trend = latest > avg ? '↑' : latest < avg ? '↓' : '→';
             const tColor = latest > avg ? '#34D399' : latest < avg ? '#F87171' : 'var(--text-tertiary)';
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 'var(--sp-xs)', marginBottom: 10 }}>
+              <div className="kd-grid-4" style={{ gap: 'var(--sp-xs)', marginBottom: 10 }}>
                 {[
                   { label: '최근', value: fmtAmount(latest), color: tColor, sub: trend },
                   { label: '평균', value: fmtAmount(avg), color: 'var(--brand)', sub: '' },

@@ -546,7 +546,7 @@ export default async function ComplexDetailPage({ params }: Props) {
       <AptReviewSection aptName={decoded} region={region} />
 
       {/* 🔗 외부 링크 — 아이콘 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: siteSlug ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
+      <div className={siteSlug ? 'kd-grid-4' : 'kd-grid-3'} style={{ gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
         {[
           ...(siteSlug ? [{ emoji: '🏗️', label: '현장 정보', href: `/apt/${siteSlug}`, ext: false }] : []),
           { emoji: '🗺️', label: '카카오맵', href: `https://map.kakao.com/?q=${encodeURIComponent(decoded + ' ' + dong)}`, ext: true },

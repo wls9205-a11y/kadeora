@@ -872,3 +872,62 @@ body {
 /* ── 프로그레스 바 ── */
 .kd-progress { height: 3px; border-radius: 2px; background: var(--bg-elevated); overflow: hidden; margin-top: var(--sp-sm); }
 .kd-progress-bar { height: 100%; border-radius: 2px; }
+
+/* ═══════════════════════════════════════════
+   반응형 그리드 보정 — 모바일 오버플로우 방지
+   ═══════════════════════════════════════════ */
+
+/* 캘린더 7열 — 모바일 글꼴/패딩 축소 */
+@media (max-width: 380px) {
+  .kd-cal-grid { font-size: 10px !important; gap: 1px !important; }
+  .kd-cal-grid > div { padding: 2px !important; }
+}
+
+/* KPI 5열 → 모바일 3+2열 또는 스크롤 */
+.kd-kpi-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-xs); }
+@media (max-width: 480px) {
+  .kd-kpi-5 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 380px) {
+  .kd-kpi-5 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* KPI 4열 → 모바일 2열 */
+.kd-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 480px) {
+  .kd-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 3열 → 모바일 2열 */
+.kd-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 420px) {
+  .kd-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 2열 (1fr+2fr) → 모바일 1열 스택 */
+.kd-grid-1-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); }
+@media (max-width: 480px) {
+  .kd-grid-1-2 { grid-template-columns: 1fr; }
+}
+
+/* 글로벌 주식 6열 → 모바일 3열 */
+.kd-grid-6 { display: grid; }
+@media (max-width: 480px) {
+  .kd-grid-6 { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 380px) {
+  .kd-grid-6 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* 5열 지역 타일 → 모바일 4열 / 극소 3열 */
+@media (max-width: 380px) {
+  .kd-region-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 320px) {
+  .kd-region-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
+/* 프로필 통계 4열 → 모바일 2열 */
+@media (max-width: 380px) {
+  .kd-stats-4 { grid-template-columns: repeat(2, 1fr) !important; }
+}
