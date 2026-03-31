@@ -198,7 +198,6 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                     중도금 {(o as any).loan_rate}
                   </span>
                 )}
-                </div>
                 {/* 분양가 범위 바 */}
                 {pMin && pMax && pMin !== pMax && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-xs)' }}>
