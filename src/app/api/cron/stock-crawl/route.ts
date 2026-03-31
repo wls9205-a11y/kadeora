@@ -77,7 +77,7 @@ async function fetchKRXStocks(apiKey: string): Promise<{ stocks: any[]; debug: s
           market: marketCode,
           price,
           change_amt: parseInt(item.vs) || 0,
-          change_pct: parseFloat(item.fltRt) || 0,
+          change_pct: Math.max(-30, Math.min(30, parseFloat(item.fltRt) || 0)),
           volume: parseInt(item.trqu) || 0,
           market_cap: parseInt(item.mrktTotAmt) || 0,
           currency: 'KRW',
@@ -100,7 +100,7 @@ async function fetchKRXStocks(apiKey: string): Promise<{ stocks: any[]; debug: s
             for (const item of arr2) {
               const price = parseInt(item.clpr) || 0;
               if (price <= 0) continue;
-              stocks.push({ symbol: item.srtnCd || item.isinCd, name: item.itmsNm, market: marketCode, price, change_amt: parseInt(item.vs)||0, change_pct: parseFloat(item.fltRt)||0, volume: parseInt(item.trqu)||0, market_cap: parseInt(item.mrktTotAmt)||0, currency: 'KRW' });
+              stocks.push({ symbol: item.srtnCd || item.isinCd, name: item.itmsNm, market: marketCode, price, change_amt: parseInt(item.vs)||0, change_pct: Math.max(-30, Math.min(30, parseFloat(item.fltRt)||0)), volume: parseInt(item.trqu)||0, market_cap: parseInt(item.mrktTotAmt)||0, currency: 'KRW' });
             }
             if (arr2.length < fullRows) break;
             pg++;

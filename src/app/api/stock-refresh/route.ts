@@ -94,7 +94,7 @@ async function fetchViaKis(supabase: SupabaseClient): Promise<StockResult | null
         const quote = await fetchKisQuote(stock.symbol, token, appkey, appsecret);
         if (quote) {
           await supabase.from('stock_quotes')
-            .update({ price: quote.price, change_amt: quote.change_amt, change_pct: quote.change_pct, volume: quote.volume, updated_at: new Date().toISOString() })
+            .update({ price: quote.price, change_amt: quote.change_amt, change_pct: Math.max(-30, Math.min(30, quote.change_pct)), volume: quote.volume, updated_at: new Date().toISOString() })
             .eq('symbol', stock.symbol);
           return true;
         }
