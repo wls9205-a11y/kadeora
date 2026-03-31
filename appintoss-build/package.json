@@ -1,18 +1,12 @@
 {
   "name": "appintoss-build",
   "version": "1.0.0",
-  "description": "",
+  "description": "카더라 앱인토스 미니앱 빌드",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node build-web.js",
+    "package": "node package-ait.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "commonjs",
-  "dependencies": {
-    "@apps-in-toss/web-framework": "^2.0.9",
-    "es-toolkit": "^1.45.1"
-  },
-  "devDependencies": {}
+  "dependencies": {}
 }

@@ -1,4 +1,10 @@
 {
   "appName": "kadeora",
-  "permissions": []
+  "sdkVersion": "2.1.0",
+  "permissions": [],
+  "platform": {
+    "web": {
+      "entryPoint": "web/index.html"
+    }
+  }
 }
