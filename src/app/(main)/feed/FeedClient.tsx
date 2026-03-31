@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { MessageCircle, Share2, Search, User, TrendingUp, Clock, Users } from 'lucide-react';
+import { MessageCircle, Share2, TrendingUp, Clock, Users } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -257,20 +257,8 @@ export default function FeedClient({
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
 
         {/* 헤더 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-lg)', padding: '4px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)', padding: '4px 0' }}>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5 }}>카더라</h1>
-          <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
-            <Link href="/search" aria-label="검색" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 'var(--radius-card)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
-              <Search size={20} />
-            </Link>
-            <Link href="/profile" aria-label="프로필" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 'var(--radius-card)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
-              <User size={20} />
-            </Link>
-          </div>
-        </div>
-
-        {/* 실시간 활동 표시 — 우측 정렬 */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
           <LiveActivityIndicator />
         </div>
 

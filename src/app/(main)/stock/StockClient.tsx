@@ -264,6 +264,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
             );
           })()}
           <Link href="/stock/compare" style={{ fontSize: 11, color: 'var(--text-secondary)', textDecoration: 'none', padding: '3px 8px', borderRadius: 12, border: '1px solid var(--border)' }}>비교</Link>
+          <SectionShareButton section={isDomestic ? 'stock-kr' : 'stock-us'} label="주식 시황 한눈에 보기!" pagePath="/stock" />
           <button onClick={() => refresh()} aria-label="새로고침" style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }} title="시세 새로고침">↻</button>
         </div>
       </div>
@@ -278,7 +279,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         const fgScore = Math.round(upRatio * 100);
         const fgLabel = fgScore >= 75 ? '극단탐욕' : fgScore >= 55 ? '탐욕' : fgScore >= 45 ? '중립' : fgScore >= 25 ? '공포' : '극단공포';
         const fgColor = fgScore >= 55 ? 'var(--accent-red)' : fgScore >= 45 ? 'var(--text-tertiary)' : 'var(--accent-blue)';
-        const kospiIdx = indexStocks.find(s => s.name.includes('KOSPI') || s.symbol.includes('KOSPI'));
+        const kospiIdx = indexStocks.find(s => s.symbol === 'KOSPI_IDX' || s.name.includes('KOSPI 지수'));
         const kospiPct = kospiIdx?.change_pct ?? 0;
         return (
           <div style={{ borderRadius: 'var(--radius-lg)', padding: '12px 14px 10px', marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
@@ -363,8 +364,8 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       {/* ─ 지수 KPI 4열 ─ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 4, marginBottom: 'var(--sp-sm)' }}>
         {(() => {
-          const kospi = indexStocks.find(s => s.name.includes('KOSPI') || s.symbol.includes('KOSPI'));
-          const kosdaq = indexStocks.find(s => s.name.includes('KOSDAQ') || s.symbol.includes('KOSDAQ'));
+          const kospi = indexStocks.find(s => s.symbol === 'KOSPI_IDX' || s.name.includes('KOSPI 지수'));
+          const kosdaq = indexStocks.find(s => s.symbol === 'KOSDAQ_IDX' || s.name.includes('KOSDAQ 지수'));
           const sp500 = indexStocks.find(s => s.symbol === 'SPY' || s.symbol === 'VOO');
           const indicators = [
             { label: 'KOSPI', val: kospi ? fmt(kospi.price) : '—', pct: kospi?.change_pct ?? 0, krStyle: true },
@@ -552,10 +553,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
       {/* 섹터 탭 — 히트맵 + 섹터 랭킹 */}
       {currentTab === 'sector' && (
         <div style={{ marginBottom: 'var(--sp-lg)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>섹터별 등락률</div>
-            <SectionShareButton section={isDomestic ? 'stock-kr' : 'stock-us'} label="주식 종목 한눈에 보기!" pagePath="/stock" />
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>섹터별 등락률</div>
           {/* 섹터 랭킹 바 차트 */}
           {(() => {
             const targetStocks = isDomestic

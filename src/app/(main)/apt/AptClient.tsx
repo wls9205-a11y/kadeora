@@ -191,7 +191,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         activeTab={activeTab}
         redevRedevCount={redevRedevCount}
         redevRebuildCount={redevRebuildCount}
-        shareButton={<SectionShareButton section="apt-region" label="청약 정보, 부동산 정보(분양/미분양/실거래/재개발재건축) 찾기 힘드시죠? 여기는 보기 편해요!" pagePath="/apt" />}
+        shareButton={null}
       />
 
       {/* 지역 필터 활성 배지 */}
