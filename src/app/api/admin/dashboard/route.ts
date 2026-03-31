@@ -82,6 +82,22 @@ export async function GET(req: Request) {
         noDesc: stockNoDescR.count ?? 0,
       };
 
+      // 주식 시세 건강도
+      const [zeroPctR, abnormalPctR, kospiR, kosdaqR] = await Promise.all([
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).eq('change_pct', 0).gt('price', 0).eq('is_active', true).neq('sector', '지수'),
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).gt('change_pct', 30).eq('is_active', true),
+        sb.from('stock_quotes').select('price, change_pct').eq('symbol', 'KOSPI_IDX').maybeSingle(),
+        sb.from('stock_quotes').select('price, change_pct').eq('symbol', 'KOSDAQ_IDX').maybeSingle(),
+      ]);
+      const stockHealth = {
+        zeroPct: zeroPctR.count ?? 0,
+        abnormalPct: abnormalPctR.count ?? 0,
+        kospiPrice: kospiR.data?.price ?? 0,
+        kospiPct: kospiR.data?.change_pct ?? 0,
+        kosdaqPrice: kosdaqR.data?.price ?? 0,
+        kosdaqPct: kosdaqR.data?.change_pct ?? 0,
+      };
+
       // 단지백과 KPI
       const [complexTotalR, complexWithSaleR, complexWithJeonseR, complexWithCoordsR, rentTotalR] = await Promise.all([
         (sb as any).from('apt_complex_profiles').select('id', { count: 'exact', head: true }),
@@ -343,6 +359,7 @@ export async function GET(req: Request) {
         dailyStats: dailyR.data ?? [],
         cron: { total: cronData.length, success: cronSuccess, fail: cronFail, failNames: cronFailNames, anthropicCreditWarning },
         stockKpi,
+        stockHealth,
         complexKpi,
         premiumKpi,
         seo: {

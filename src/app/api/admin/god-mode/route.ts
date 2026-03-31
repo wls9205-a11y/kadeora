@@ -113,6 +113,12 @@ const CRON_GROUPS = {
     '/api/cron/push-apt-deadline',
     '/api/cron/push-daily-reminder',
     '/api/cron/invite-reward',
+    '/api/cron/daily-report-snapshot',
+    '/api/cron/indexnow-mass',
+    '/api/cron/premium-expire',
+    '/api/cron/refresh-mv',
+    '/api/cron/stock-naver-sync',
+    '/api/admin/batch-pdf-parse',
   ],
 };
 

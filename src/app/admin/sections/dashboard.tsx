@@ -350,6 +350,44 @@ export default function DashboardSection() {
         </div>
       )}
 
+      {/* ── 시세 건강도 + 앱인토스 상태 ── */}
+      {(data as any).stockHealth && (() => {
+        const h = (data as any).stockHealth;
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🏥 시세 건강도</div>
+              {[
+                { label: 'KOSPI', val: `${Number(h.kospiPrice).toLocaleString()} (${h.kospiPct > 0 ? '+' : ''}${h.kospiPct}%)`, ok: h.kospiPrice > 1000 },
+                { label: 'KOSDAQ', val: `${Number(h.kosdaqPrice).toLocaleString()} (${h.kosdaqPct > 0 ? '+' : ''}${h.kosdaqPct}%)`, ok: h.kosdaqPrice > 500 },
+                { label: '등락률 0%', val: `${h.zeroPct}건`, ok: h.zeroPct < 300 },
+                { label: '비정상 (>30%)', val: `${h.abnormalPct}건`, ok: h.abnormalPct === 0 },
+              ].map(r => (
+                <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.border}` }}>
+                  <span style={{ fontSize: 11, color: C.textSec }}>{r.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: r.ok ? C.green : C.red }}>{r.val}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>📱 앱인토스 현황</div>
+              {[
+                { label: '상태', val: 'v8 검토 요청됨', ok: true },
+                { label: '콘솔', val: '#23948', ok: true },
+                { label: 'SDK', val: '2.4.0', ok: true },
+                { label: '퍼널', val: '5페이지 제한 적용', ok: true },
+                { label: '피드 API', val: '/api/toss/feed', ok: true },
+              ].map(r => (
+                <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.border}` }}>
+                  <span style={{ fontSize: 11, color: C.textSec }}>{r.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: r.ok ? C.green : C.yellow }}>{r.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── 단지백과 KPI 패널 ── */}
       {complexKpi && (
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
