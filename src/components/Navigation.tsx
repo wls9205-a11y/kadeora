@@ -289,13 +289,17 @@ export function Navigation() {
                     onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
                     onMouseLeave={e=>(e.currentTarget.style.borderColor='var(--border)')}
                   >
-                    <span style={{
-                      width:22, height:22, borderRadius:'50%', background:'var(--brand)',
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      fontSize: 'var(--fs-xs)', fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
-                    }}>
-                      {(profile?.nickname ?? 'U')[0].toUpperCase()}
-                    </span>
+                    {profile?.avatarUrl ? (
+                      <img src={profile.avatarUrl} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    ) : (
+                      <span style={{
+                        width:22, height:22, borderRadius:'50%', background:'var(--brand)',
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        fontSize: 'var(--fs-xs)', fontWeight:800, color:'var(--text-inverse)', flexShrink:0,
+                      }}>
+                        {(profile?.nickname ?? 'U')[0].toUpperCase()}
+                      </span>
+                    )}
                     <span className="hidden md:inline" style={{ fontWeight:600, maxWidth:72, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                       {profile?.nickname ?? '유저'}
                     </span>

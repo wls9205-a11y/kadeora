@@ -1,7 +1,9 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { DailyReportData } from '@/lib/daily-report-data';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Props {
   data: DailyReportData;
@@ -38,6 +40,7 @@ const SH = ({ icon, title }: { icon: string; title: string }) => (
 
 export default function DailyReportClient({ data, regions, viewDate, prevDate, nextDate }: Props) {
   const router = useRouter();
+  const { userId, profile, loading: authLoading } = useAuth();
   const d = data;
   const isArchive = !!viewDate;
 
@@ -66,6 +69,63 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
     if (e.target.value) goToDate(e.target.value);
   };
 
+  // ═══ 회원전용 게이트 (SSR은 유지 → SEO 노출, 클라이언트만 차단) ═══
+  const isGated = !authLoading && (!userId || !profile?.regionText);
+  const gateReason = !userId ? 'login' : 'region';
+
+  if (isGated) {
+    return (
+      <div>
+        {/* 게이트 카드 */}
+        <div style={{
+          padding: '24px 20px', borderRadius: 'var(--radius-card)',
+          background: G.gradientHero, border: `1.5px solid ${G.goldBorder}`,
+          position: 'relative', overflow: 'hidden', textAlign: 'center',
+        }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${G.goldDark}, ${G.gold}, ${G.goldLight}, ${G.gold}, ${G.goldDark})` }} />
+
+          {/* 골드 로고 */}
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: `linear-gradient(135deg, ${G.gold}, ${G.goldDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="7" cy="12" r="4" fill="#E8C778" opacity="0.7"/><circle cx="12" cy="8" r="4" fill="#F5DDA0" opacity="0.8"/><circle cx="17" cy="12" r="4" fill="#E8C778" opacity="0.7"/></svg>
+          </div>
+
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>
+            {gateReason === 'login' ? '회원 전용 리포트입니다' : '거주지 등록이 필요합니다'}
+          </div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, marginBottom: 16 }}>
+            {gateReason === 'login'
+              ? '카더라 데일리 리포트는 회원만 열람할 수 있습니다.\n3초 가입 후 매일 아침 투자 브리핑을 받아보세요.'
+              : '내 지역 맞춤 리포트를 받으려면 거주지를 등록해 주세요.\n프로필에서 시/도, 시/군/구를 선택하면 바로 읽을 수 있습니다.'}
+          </div>
+          {gateReason === 'login' ? (
+            <Link href={`/login?redirect=${encodeURIComponent(`/daily/${encodeURIComponent(d.region)}`)}`} style={{
+              display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-xl)',
+              background: `linear-gradient(135deg, ${G.gold}, ${G.goldDark})`, color: '#fff',
+              fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none',
+              boxShadow: `0 2px 12px rgba(212,168,83,0.4)`,
+            }}>카카오로 3초 가입</Link>
+          ) : (
+            <Link href={`/profile/${userId}`} style={{
+              display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-xl)',
+              background: `linear-gradient(135deg, ${G.gold}, ${G.goldDark})`, color: '#fff',
+              fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none',
+              boxShadow: `0 2px 12px rgba(212,168,83,0.4)`,
+            }}>거주지 등록하기</Link>
+          )}
+
+          {/* 리포트 미리보기 힌트 */}
+          <div style={{ marginTop: 20, padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: G.goldBg, border: `1px solid ${G.goldBorder}` }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: G.gold, fontWeight: 600, marginBottom: 4 }}>✦ 오늘 리포트 미리보기</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+              {dateLabel} · #{d.issueNo}호 · {d.region} 투자 브리핑<br/>
+              시총 TOP 10 · 섹터 히트맵 · 청약 {d.subCountThisWeek}건 · 미분양 {d.unsoldUnits.toLocaleString()}세대
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* 아카이브 모드 배너 */}
@@ -76,7 +136,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
       )}
 
-      {/* ═══ HERO — VIP Premium ═══ */}
+      {/* ═══ HERO — 회원전용 Premium ═══ */}
       <div style={{
         padding: '18px 16px', borderRadius: 'var(--radius-card)',
         background: G.gradientHero,
@@ -394,7 +454,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
       </div>
 
-      {/* ═══ S5: 요약 + 내일 체크포인트 — VIP 골드 ═══ */}
+      {/* ═══ S5: 요약 + 내일 체크포인트 — 회원전용 골드 ═══ */}
       <SH icon="📋" title="오늘의 요약 + 내일 체크포인트" />
       <div className="report-summary" style={{
         background: `linear-gradient(145deg, var(--bg-surface) 0%, rgba(212,168,83,0.04) 100%)`,
