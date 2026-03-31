@@ -298,7 +298,7 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
     .not('pblanc_url', 'is', null)
     .neq('pblanc_url', '')
     .order('rcept_bgnde', { ascending: false })
-    .limit(30);
+    .limit(50);
 
   if (!targets?.length) return NextResponse.json({ ok: true, message: '파싱 대상 없음', processed: 0 });
 

@@ -250,7 +250,7 @@
     },
     {
       "path": "/api/cron/apt-parse-announcement",
-      "schedule": "0 5 * * *"
+      "schedule": "0 */4 * * *"
     },
     {
       "path": "/api/cron/apt-crawl-pricing",
