@@ -67,6 +67,32 @@ export async function GET(req: NextRequest) {
       const ud: Record<string, any> = {};
       let fieldsFound = 0;
 
+      // ══════ 총세대수 (단지 전체 — 공급세대수와 명확히 구분) ══════
+      // 모집공고 PDF: "총세대수 1,200세대" vs "공급세대수 569세대"
+      const hhPatterns = [
+        /총\s*세대\s*수\s*[:\s]*([0-9,]+)\s*세대/i,
+        /총\s*세대\s*수\s*[:\s]*([0-9,]+)/i,
+        /단지\s*(?:전체)?\s*(?:총)?\s*([0-9,]+)\s*세대/i,
+        /([0-9,]+)\s*세대\s*규모\s*(?:의|인)?\s*(?:단지|아파트)/i,
+      ];
+      const supplyPat = /(?:공급|금회|이번|분양)\s*세대/i;
+      for (const pat of hhPatterns) {
+        const m = text.match(pat);
+        if (m) {
+          const idx = text.indexOf(m[0]);
+          const before = text.slice(Math.max(0, idx - 20), idx);
+          if (!supplyPat.test(before)) {
+            const v = num(m[1]);
+            // 크로스체크: 공급세대수와 동일하거나 작으면 가짜
+            if (v && v > 0 && v !== apt.tot_supply_hshld_co && v >= (apt.tot_supply_hshld_co || 0)) {
+              ud.total_households = v;
+              fieldsFound++;
+            }
+            break;
+          }
+        }
+      }
+
       // ══════ 건물 스펙 ══════
       const dongM = text.match(/(\d{1,3})\s*개?\s*동[\s\(（,]/i) || text.match(/총\s*(\d{1,3})\s*개?\s*동/i) || text.match(/동\s*수\s*[:\s]*(\d{1,3})/i);
       if (dongM) { const v = num(dongM[1]); if (v && v > 0 && v <= 200) { ud.total_dong_count = v; fieldsFound++; } }

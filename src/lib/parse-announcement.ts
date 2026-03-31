@@ -52,8 +52,29 @@ export function parseAnnouncementHtml(html: string): Record<string, any> {
   }
 
   // ══════ 건물 스펙 (PDF에만 있을 수 있음 — text에서 최대한 추출) ══════
-  const totalHH = text.match(/총\s*세대수?\s*[:\s]*([0-9,]+)\s*세대/i) || text.match(/(\d{2,5})\s*세대\s*규모/i);
-  if (totalHH) data.total_households = num(totalHH[1]);
+  // 총세대수 추출 — 공급세대수와 명확히 구분해야 함
+  // 모집공고 PDF에서: "총세대수 1,200세대" vs "공급세대수 569세대"
+  // "공급세대수" "금회 공급" 등은 반드시 제외
+  const totalHHPatterns = [
+    /총\s*세대\s*수\s*[:\s]*([0-9,]+)\s*세대/i,           // "총세대수: 1,200세대"
+    /총\s*세대\s*수\s*[:\s]*([0-9,]+)/i,                   // "총세대수: 1200"
+    /단지\s*(?:전체)?\s*(?:총)?\s*([0-9,]+)\s*세대/i,      // "단지 전체 1,200세대"
+    /([0-9,]+)\s*세대\s*규모\s*(?:의|인)?\s*(?:단지|아파트)/i, // "1,200세대 규모의 단지"
+  ];
+  // 공급세대수 패턴 — 이건 절대 total_households에 넣으면 안 됨
+  const supplyPatterns = /(?:공급|금회|이번|분양)\s*세대/i;
+  for (const pat of totalHHPatterns) {
+    const m = text.match(pat);
+    if (m) {
+      // 매칭된 위치 앞에 "공급" "금회" 등이 있으면 제외
+      const idx = text.indexOf(m[0]);
+      const before = text.slice(Math.max(0, idx - 20), idx);
+      if (!supplyPatterns.test(before)) {
+        data.total_households = num(m[1]);
+        break;
+      }
+    }
+  }
   const dongMatch = text.match(/(\d{1,3})\s*개?\s*동\s*[\(（]/i) || text.match(/총\s*(\d{1,3})\s*개?\s*동/i);
   if (dongMatch) { const v = num(dongMatch[1]); if (v && v <= 200) data.total_dong_count = v; }
   const floorMatch = text.match(/지상\s*(\d{1,3})\s*층/i);
@@ -244,6 +265,15 @@ export function buildUpdateDict(parsed: Record<string, any>, totSupply?: number)
     if (parsed[f] != null && parsed[f] !== '') ud[f] = parsed[f];
   }
   if (parsed.is_regulated_area != null) ud.is_regulated_area = parsed.is_regulated_area;
+
+  // ★ 크로스체크: 총세대수가 공급세대수와 동일하면 가짜 데이터 → 저장하지 않음
+  // 총세대수는 반드시 공급세대수보다 크거나 같아야 하며, 동일하면 구분이 안 된 것
+  if (ud.total_households && totSupply && ud.total_households === totSupply) {
+    delete ud.total_households; // 공급세대수와 동일 → 구분 안 됨
+  }
+  if (ud.total_households && totSupply && ud.total_households < totSupply) {
+    delete ud.total_households; // 총세대수 < 공급세대수는 불가능
+  }
 
   // 자동 계산: 납부일정
   const prices = parsed.supply_price_info || [];
