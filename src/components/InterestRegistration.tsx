@@ -111,11 +111,8 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
 
   if (loading) return null;
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 'var(--radius-sm)',
-    border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)',
-    fontSize: 'var(--fs-sm)',
-  };
+  const inputStyle: React.CSSProperties = {}; // kd-input 클래스 사용
+  const inputCls = "kd-input";
   const labelStyle: React.CSSProperties = {
     fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-xs)',
   };
@@ -125,21 +122,21 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
         <div>
           <label style={labelStyle}>이름 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" style={inputStyle} />
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" className="kd-input" />
         </div>
         <div>
           <label style={labelStyle}>전화번호 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <input value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="01012345678" inputMode="tel" maxLength={11} style={inputStyle} />
+          <input value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="01012345678" inputMode="tel" maxLength={11} className="kd-input" />
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
         <div>
           <label style={labelStyle}>생년월일 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={inputStyle} />
+          <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} className="kd-input" />
         </div>
         <div>
           <label style={labelStyle}>거주 지역 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <select value={city} onChange={e => { setCity(e.target.value); setDistrict(''); }} style={{ ...inputStyle, cursor: 'pointer' }}>
+          <select value={city} onChange={e => { setCity(e.target.value); setDistrict(''); }} className="kd-input" style={{ cursor: 'pointer' }}>
             <option value="">시/도 선택</option>
             {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
@@ -148,7 +145,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       {city && (SIGUNGU_MAP[city] || []).length > 0 && (
         <div style={{ marginBottom: 'var(--sp-sm)' }}>
           <label style={labelStyle}>시/군/구 <span style={{ color: 'var(--error)' }}>*</span></label>
-          <select value={district} onChange={e => setDistrict(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+          <select value={district} onChange={e => setDistrict(e.target.value)} className="kd-input" style={{ cursor: 'pointer' }}>
             <option value="">시/군/구 선택</option>
             {(SIGUNGU_MAP[city] || []).map(d => <option key={d} value={d}>{d}</option>)}
           </select>

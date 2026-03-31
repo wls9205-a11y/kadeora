@@ -173,16 +173,16 @@ export default function PortfolioTab() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
             <input placeholder="종목코드 (예: 005930)" value={form.symbol}
               onChange={e => setForm(p => ({ ...p, symbol: e.target.value.toUpperCase() }))}
-              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              className="kd-input" style={{ fontSize: 'var(--fs-sm)' }} />
             <input placeholder="매수가" type="number" value={form.buy_price}
               onChange={e => setForm(p => ({ ...p, buy_price: e.target.value }))}
-              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              className="kd-input" style={{ fontSize: 'var(--fs-sm)' }} />
             <input placeholder="수량" type="number" value={form.quantity}
               onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))}
-              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              className="kd-input" style={{ fontSize: 'var(--fs-sm)' }} />
             <input placeholder="메모 (선택)" value={form.memo}
               onChange={e => setForm(p => ({ ...p, memo: e.target.value }))}
-              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              className="kd-input" style={{ fontSize: 'var(--fs-sm)' }} />
           </div>
           <button onClick={handleAdd} disabled={submitting} style={{
             width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',

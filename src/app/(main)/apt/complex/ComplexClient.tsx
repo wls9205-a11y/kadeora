@@ -174,11 +174,8 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
         <div style={{ position: 'relative', flex: '1 1 200px' }}>
           <input type="text" value={searchQuery} onChange={(e: any) => handleSearch(e.target.value)}
             placeholder="🔍 단지명 검색..."
-            style={{
-              width: '100%', padding: '9px 14px', borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border)', background: 'var(--bg-surface)',
-              color: 'var(--text-primary)', fontSize: 12, outline: 'none', boxSizing: 'border-box',
-            }}
+            className="kd-search-input"
+            style={{ width: '100%', boxSizing: 'border-box' }}
           />
           {searching && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 10, color: 'var(--text-tertiary)' }}>...</span>}
           {searchResults && !searching && <span onClick={() => { setSearchQuery(''); setSearchResults(null); }} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 10, color: 'var(--brand)', cursor: 'pointer', fontWeight: 700 }}>✕</span>}

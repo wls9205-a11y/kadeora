@@ -230,13 +230,13 @@ export default function DiscussClient() {
                 ))}
               </div>
               <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="토론 주제 (5자 이상)" maxLength={100}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', marginBottom: 'var(--sp-sm)', boxSizing: 'border-box' }} />
+                className="kd-input" style={{ marginBottom: 'var(--sp-sm)' }} />
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 10 }}>
                 <input value={newOptA} onChange={e => setNewOptA(e.target.value)} placeholder="옵션 A" maxLength={20}
-                  style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+                  className="kd-input" style={{ flex: 1, fontSize: 'var(--fs-sm)' }} />
                 <span style={{ alignSelf: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>vs</span>
                 <input value={newOptB} onChange={e => setNewOptB(e.target.value)} placeholder="옵션 B" maxLength={20}
-                  style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+                  className="kd-input" style={{ flex: 1, fontSize: 'var(--fs-sm)' }} />
               </div>
               <button onClick={handleCreate} disabled={creating} style={{
                 width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,

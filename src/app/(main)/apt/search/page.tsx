@@ -80,7 +80,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
       {/* 검색 폼 */}
       <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
         <input name="q" defaultValue={q} placeholder="단지명, 동 검색..." aria-label="실거래가 검색"
-          style={{ flex: 1, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
+          className="kd-search-input" style={{ flex: 1 }} />
         <button type="submit" style={{ padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>검색</button>
       </form>
 
