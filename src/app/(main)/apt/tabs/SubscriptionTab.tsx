@@ -162,6 +162,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                     </span>
                   )}
                   {(apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit ? <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>분양가상한</span> : null}
+                  {(apt as any).brand_name && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(59,123,246,0.08)', color: 'var(--brand)' }}>{(apt as any).brand_name}</span>}
                   {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>투기과열</span>}
                   {(apt as Record<string, any>)['MDAT_TRGET_AREA_SECD'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange-light)' }}>조정대상</span>}
                   <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{apt.region_nm}</span>
@@ -182,16 +183,11 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                 )}
                 {/* 단지명 */}
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{apt.house_nm}</div>
-                {/* 주소 + 세대수 + 시공사 */}
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
-                  {shortAddr}{apt.tot_supply_hshld_co > 0 ? (() => {
-                    const types = Array.isArray((apt as any).house_type_info) ? (apt as any).house_type_info : [];
-                    const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
-                    const spe = types.reduce((s: number, t: any) => s + (t.spsply_hshldco || 0), 0);
-                    return gen > 0 ? ` · 총 ${apt.tot_supply_hshld_co.toLocaleString()}세대(일반${gen}·특별${spe})` : ` · 총 ${apt.tot_supply_hshld_co.toLocaleString()}세대`;
-                  })() : ''}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}
+                {/* 주소 + 시공사/시행사 */}
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                  {shortAddr}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}{(apt as any).developer_nm && (apt as any).developer_nm !== apt.constructor_nm ? ` · 시행 ${(apt as any).developer_nm}` : ''}
                 </div>
-                {/* 💰 분양가 + 세대수 + 입주 KPI */}
+                {/* 💰 분양가 + 평당가 + 세대수 + 일반/특별 + 입주 KPI */}
                 {(() => {
                   const hti = (apt as Record<string, any>).house_type_info;
                   const prices = Array.isArray(hti) ? hti.map((t: any) => t.lttot_top_amount).filter((p: number) => p > 0) : [];
@@ -199,22 +195,47 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const pMax = prices.length > 0 ? Math.max(...prices) : 0;
                   const fmtP = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
                   const mvnYm = apt.mvn_prearnge_ym;
-                  const mvnLabel = mvnYm ? `${mvnYm.slice(0, 4)}.${parseInt(mvnYm.slice(4, 6))}` : null;
+                  const mvnLabel = mvnYm ? `${mvnYm.slice(0, 4)}.${parseInt(mvnYm.slice(4, 6))}` : ((apt as any).move_in_month || null);
+                  const ppAvg = (apt as any).price_per_pyeong_avg;
+                  const genT = (apt as any).general_supply_total || 0;
+                  const spcT = (apt as any).special_supply_total || 0;
+                  const totS = apt.tot_supply_hshld_co || 0;
+                  const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
                   return (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 2, marginBottom: 6, background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', padding: '6px 4px' }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>분양가</div>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{pMax > 0 ? (pMin !== pMax ? `${fmtP(pMin)}~${fmtP(pMax)}` : fmtP(pMax)) : '미정'}</div>
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 2, marginBottom: 4, background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', padding: '5px 3px' }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>분양가</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{pMax > 0 ? (pMin !== pMax ? `${fmtP(pMin)}~${fmtP(pMax)}` : fmtP(pMax)) : '미정'}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평당가</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)' }}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총공급</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>{totS > 0 ? `${totS.toLocaleString()}세대` : '-'}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>일반/특별</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: genT > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>{genT > 0 || spcT > 0 ? `${genT}/${spcT}` : '-'}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>입주</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{mvnLabel || '-'}</div>
+                        </div>
                       </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총공급</div>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)' }}>{apt.tot_supply_hshld_co > 0 ? `${apt.tot_supply_hshld_co.toLocaleString()}세대` : '-'}</div>
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>입주예정</div>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{mvnLabel || '-'}</div>
-                      </div>
-                    </div>
+                      {/* 일반/특별 공급 비율 바 */}
+                      {totS > 0 && (genT > 0 || spcT > 0) && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                          <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', display: 'flex' }}>
+                            <div style={{ width: `${genPct}%`, height: '100%', background: 'var(--accent-blue-light, #60A5FA)', borderRadius: '2px 0 0 2px' }} />
+                            <div style={{ width: `${100 - genPct}%`, height: '100%', background: 'var(--accent-purple, #A78BFA)' }} />
+                          </div>
+                          <span style={{ fontSize: 8, color: 'var(--text-tertiary)', flexShrink: 0 }}>일반{genPct}%</span>
+                        </div>
+                      )}
+                    </>
                   );
                 })()}
                 {/* 타임라인 바 */}
