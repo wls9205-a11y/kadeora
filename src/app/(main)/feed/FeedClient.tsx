@@ -167,11 +167,13 @@ export default function FeedClient({
 
   const handleShare = async (e: React.MouseEvent, post: PostWithProfile) => {
     e.preventDefault(); e.stopPropagation();
-    const url = `${window.location.origin}/feed/${post.slug || post.id}`;
+    const baseUrl = `${window.location.origin}/feed/${post.slug || post.id}`;
     let platform = 'clipboard';
     if (navigator.share) {
+      const url = `${baseUrl}?utm_source=native&utm_medium=share&utm_campaign=viral`;
       try { await navigator.share({ title: post.title, url }); platform = 'native'; } catch { return; }
     } else {
+      const url = `${baseUrl}?utm_source=clipboard&utm_medium=share&utm_campaign=viral`;
       try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
     }
     fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: post.id, platform }) }).catch(() => { /* ignore */ });

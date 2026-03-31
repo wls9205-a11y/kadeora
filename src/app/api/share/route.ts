@@ -3,6 +3,21 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
+/** GET /api/share?post_id=xxx — 공유 횟수 조회 */
+export async function GET(req: NextRequest) {
+  const postId = req.nextUrl.searchParams.get('post_id');
+  if (!postId) return NextResponse.json({ count: 0 });
+  try {
+    const sb = getSupabaseAdmin();
+    const { count } = await sb.from('share_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('post_id', parseInt(postId, 10) || 0);
+    return NextResponse.json({ count: count ?? 0 });
+  } catch {
+    return NextResponse.json({ count: 0 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
   try {

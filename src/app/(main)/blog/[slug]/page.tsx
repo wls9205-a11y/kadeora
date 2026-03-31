@@ -626,11 +626,28 @@ export default async function BlogDetailPage({ params }: Props) {
           borderTop: '1px solid var(--border)', paddingTop: 20, marginTop: 28,
           display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
           background: 'linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(167,139,250,0.04) 100%)',
-          margin: '28px -16px 0', padding: '16px 16px', borderRadius: '0 0 12px 12px',
+          margin: '28px -16px 0', padding: '16px 16px',
         }}>
-          <ShareButtons title={post.title} postId={slug} />
+          <ShareButtons title={post.title} postId={slug} content={post.excerpt || post.meta_description || undefined} />
           <div style={{ flex: 1 }} />
           <BlogActions blogPostId={post.id} initialHelpfulCount={post.helpful_count ?? 0} />
+        </div>
+
+        {/* 바이럴 CTA: 공유 유도 */}
+        <div style={{
+          margin: '0 -16px', padding: '20px 16px', borderRadius: '0 0 12px 12px',
+          background: 'linear-gradient(135deg, rgba(59,123,246,0.06) 0%, rgba(46,232,165,0.04) 100%)',
+          textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+            이 글이 도움이 됐다면?
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+            주변에 공유하면 포인트 +5P 적립! 카카오톡·밴드로 바로 공유해보세요
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <ShareButtons title={`${post.title} — 카더라 블로그`} postId={slug} content={post.excerpt || post.meta_description || undefined} />
+          </div>
         </div>
       </article>
 
