@@ -79,7 +79,7 @@ async function fetchRegionData(region: string) {
 
   const [subsRes, tradesRes, redevRes, unsoldRes, priceRes] = await Promise.all([
     s.from('apt_subscriptions')
-      .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary,house_type_info,price_per_pyeong_avg')
+      .select('id,house_nm,region_nm,rcept_bgnde,rcept_endde,tot_supply_hshld_co,hssply_adres,is_price_limit,constructor_nm,ai_summary,house_type_info,price_per_pyeong_avg,brand_name,project_type,loan_rate,is_regulated_area,developer_nm,total_households')
       .ilike('region_nm', `%${region}%`)
       .order('rcept_endde', { ascending: false }).limit(10) as unknown as Promise<any>,
     s.from('apt_transactions')
@@ -286,9 +286,13 @@ export default async function RegionLandingPage({ params }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
                 {s.is_price_limit && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
+                {s.brand_name && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{s.brand_name}</span>}
+                {s.project_type && s.project_type !== '민간' && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: s.project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(52,211,153,0.1)', color: s.project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-green)', flexShrink: 0 }}>{s.project_type}</span>}
+                {s.is_regulated_area && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)', flexShrink: 0 }}>규제</span>}
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                 {s.constructor_nm ? `${s.constructor_nm} · ` : ''}{s.tot_supply_hshld_co}세대 · ~{s.rcept_endde?.slice(5)}
+                {s.loan_rate && <span style={{ marginLeft: 4, fontSize: 9, fontWeight: 600, padding: '1px 4px', borderRadius: 3, background: s.loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: s.loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>중도금 {s.loan_rate}</span>}
               </div>
               {s.ai_summary && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {s.ai_summary}</div>}
               {/* 분양가 (house_type_info에서 추출) */}

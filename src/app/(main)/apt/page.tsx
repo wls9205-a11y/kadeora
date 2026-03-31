@@ -185,6 +185,14 @@ async function fetchAptData() {
       cntrct_cncls_bgnde: a.cntrct_cncls_bgnde || null,
       cntrct_cncls_endde: a.cntrct_cncls_endde || null,
       nearby_avg_price: regionAvgPriceMap[normalizeRegion(a.region_nm || '')] || null,
+      // PDF 파싱 + 데이터 강화 필드
+      brand_name: a.brand_name || null,
+      project_type: a.project_type || null,
+      developer_nm: a.developer_nm || null,
+      loan_rate: a.loan_rate || null,
+      is_regulated_area: a.is_regulated_area || false,
+      total_households: a.total_households || null,
+      address: a.hssply_adres || a.supply_addr || '',
     }));
 
   // 소스2: 미분양 (준공 후 포함)
