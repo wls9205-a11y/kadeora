@@ -1,9 +1,8 @@
-# 카더라 STATUS.md — 세션 65 (2026-04-01 03:10 KST)
+# 카더라 STATUS.md — 세션 65 (2026-04-01 03:30 KST)
 
 ## 최신 커밋
+- `7802812` — 파서 공유 모듈 추출 (parse-announcement.ts) + batch-reparse 재작성
 - `e9a75e4` — KOSPI/KOSDAQ 지수 크론 자동 갱신 (네이버 API + 시장 평균 폴백)
-- `476e285` — 토스 피드 posts FK 명시 (posts_author_id_fkey)
-- `07367c9` — 토스 피드 posts join + 청약 규제지역 배지 + SSR 필드 확장
 - `c516d81` — 데이터 backfill (브랜드964/사업유형2694) + 크론 가속 (4h×50건)
 - `d9cc4d2` — 모집공고 파서 대폭 강화 + 상세페이지 풀스택 정보 표시 (+30필드)
 - `7b761a6` — 앱인토스 반려 3건 수정 + 주식 SSR limit(2000) + 해외 시세 0.00% 폴백
@@ -32,13 +31,16 @@
 - 커뮤니티 시설: pill 태그 (피트니스/수영장/독서실 등)
 
 ### DB backfill (즉시 완료)
-- 브랜드명: 964건 자동 매핑 (22개 시공사→브랜드)
+- 공급대상 테이블(supply_breakdown): **2,694건 100%** — house_type_info에서 SQL 직접 생성
+- 브랜드명: 979건 자동 매핑 (22개 시공사→브랜드)
 - 사업유형: 2,694건 전체 (민간1718/재개발457/공공366/재건축153)
 - 납부일정+취득세: 2,522건 (supply_price_info 기반 자동계산)
 
-### 크론 가속 + 재파싱
-- apt-parse-announcement: 1일1회 → 4시간마다 (6회/일) + 배치 30→50건
-- 2,694건 announcement_parsed_at 리셋 완료 → 약 9일 내 전체 재파싱 예정
+### 파서 공유 모듈 + 크론 가속
+- `src/lib/parse-announcement.ts`: parseAnnouncementHtml + buildUpdateDict 공유 모듈
+- apt-parse-announcement 크론 + batch-reparse API 모두 공유 파서 사용
+- apt-parse-announcement: 1일1회 → 4시간마다 (6회/일) + 배치 50건
+- 2,564건 재파싱 대기 중 (크론 자동 처리, ~9일 내 완료)
 - DB 트리거 fn_regenerate_ai_summary: 데이터 변경 시 ai_summary 자동 갱신
 
 ### 카더라 데일리 리포트 — VIP 골드 디자인 + 회원전용 게이트
