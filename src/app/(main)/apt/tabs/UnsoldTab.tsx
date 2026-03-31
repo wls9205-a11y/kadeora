@@ -253,7 +253,16 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
               {u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}
               {u.tot_supply_hshld_co && <span> · 총 {u.tot_supply_hshld_co.toLocaleString()}세대</span>}
               {u.completion_ym && <span> · 준공 {u.completion_ym.slice(0, 4)}.{u.completion_ym.slice(4, 6)}</span>}
+              {u.constructor_nm && <span> · {u.constructor_nm}</span>}
             </div>
+            {/* 추가 정보 (역세권/할인/시행사) */}
+            {(u.nearest_station || u.discount_info || (u.developer_nm && u.developer_nm !== u.constructor_nm)) && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+                {u.nearest_station && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', fontWeight: 600 }}>🚇 {u.nearest_station}</span>}
+                {u.discount_info && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(52,211,153,0.08)', color: 'var(--accent-green)', fontWeight: 600 }}>💰 {u.discount_info}</span>}
+                {u.developer_nm && u.developer_nm !== u.constructor_nm && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>시행 {u.developer_nm}</span>}
+              </div>
+            )}
 
             {/* 미분양률 바 */}
             {rate !== null && (
