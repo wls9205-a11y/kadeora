@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
@@ -135,10 +135,10 @@ export async function GET(req: Request) {
     .eq('is_active', true)
     .gt('price', 0)
     .order('market_cap', { ascending: false })
-    .limit(200);
+    .limit(500);
 
   if (usStocks?.length) {
-    const BATCH = 10;
+    const BATCH = 20;
     for (let i = 0; i < usStocks.length; i += BATCH) {
       const batch = usStocks.slice(i, i + BATCH);
       const results = await Promise.allSettled(
@@ -162,7 +162,7 @@ export async function GET(req: Request) {
         if (r.status === 'fulfilled' && r.value) usSuccess++;
         else usFailed++;
       }
-      if (i + BATCH < usStocks.length) await sleep(120);
+      if (i + BATCH < usStocks.length) await sleep(60);
     }
   }
 
