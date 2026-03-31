@@ -142,7 +142,7 @@ async function handler(_req: NextRequest) {
     }
   }
 
-  return { processed, updated, failed, results: results.slice(0, 20) };
+  return { processed, updated, failed, metadata: { results: results.slice(0, 20) } };
 }
 
 export async function GET(req: NextRequest) {
@@ -151,9 +151,11 @@ export async function GET(req: NextRequest) {
   if (token !== process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  return withCronLogging('kapt-sync', () => handler(req));
+  const result = await withCronLogging('kapt-sync', () => handler(req));
+  return NextResponse.json(result);
 }
 
 export async function POST(req: NextRequest) {
-  return withCronLogging('kapt-sync', () => handler(req));
+  const result = await withCronLogging('kapt-sync', () => handler(req));
+  return NextResponse.json(result);
 }
