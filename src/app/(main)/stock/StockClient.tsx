@@ -26,7 +26,7 @@ interface Theme { id: number; theme_name: string; change_pct: number; is_hot: bo
 interface CalendarEvent { id: number; event_date: string; title: string; category: string; importance: string; description?: string; }
 interface Props { initialStocks: Stock[]; briefing?: Record<string, any>; briefingUS?: Record<string, any>; exchangeHistory?: Record<string, any>[]; themeHistory?: Record<string, any>[]; }
 
-const IDX_SYMBOLS = new Set(['KOSPI_IDX','KOSDAQ_IDX','SPY','QQQ','DIA','IWM','VOO','VTI','TQQQ','SQQQ','SOXL','SPXL','ARKK','GLD','SLV','TLT','USO','VNQ','SCHD','JEPI','XLK','XLF','XLE','XLV','KWEB','EEM','EWJ','FXI','UVXY']);
+const IDX_SYMBOLS = new Set(['KOSPI_IDX','KOSDAQ_IDX','SPY','QQQ','DIA','IWM','VOO','VTI','TQQQ','SQQQ','SOXL','SPXL','ARKK','GLD','SLV','TLT','USO','VNQ','SCHD','JEPI','XLK','XLF','XLE','XLV','KWEB','EEM','EWJ','EWY','FXI','UVXY']);
 function isIdx(s: Stock) {
   if (IDX_SYMBOLS.has(s.symbol)) return true;
   if (s.sector === 'ETF') return true;
@@ -364,17 +364,21 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
         })}
       </div>
 
-      {/* ─ 지수 KPI 4열 ─ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 4, marginBottom: 'var(--sp-sm)' }}>
+      {/* ─ 지수 KPI 6열 (3×2 모바일, 6열 데스크탑) ─ */}
+      <div className="kd-index-kpi" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 4, marginBottom: 'var(--sp-sm)' }}>
         {(() => {
           const kospi = indexStocks.find(s => s.symbol === 'KOSPI_IDX' || s.name.includes('KOSPI 지수'));
           const kosdaq = indexStocks.find(s => s.symbol === 'KOSDAQ_IDX' || s.name.includes('KOSDAQ 지수'));
-          const sp500 = indexStocks.find(s => s.symbol === 'SPY' || s.symbol === 'VOO');
+          const sp500 = stocks.find(s => s.symbol === 'SPY');
+          const nasdaq = stocks.find(s => s.symbol === 'QQQ');
+          const gold = stocks.find(s => s.symbol === 'GLD');
           const indicators = [
             { label: 'KOSPI', val: kospi ? fmt(kospi.price) : '—', pct: kospi?.change_pct ?? 0, krStyle: true },
             { label: 'KOSDAQ', val: kosdaq ? fmt(kosdaq.price) : '—', pct: kosdaq?.change_pct ?? 0, krStyle: true },
-            { label: 'S&P 500', val: sp500 ? sp500.price.toLocaleString('en', { maximumFractionDigits: 0 }) : '—', pct: sp500?.change_pct ?? 0, krStyle: false },
+            { label: 'S&P 500', val: sp500 ? Number(sp500.price).toLocaleString('en', { maximumFractionDigits: 0 }) : '—', pct: sp500?.change_pct ?? 0, krStyle: false },
+            { label: 'NASDAQ', val: nasdaq ? Number(nasdaq.price).toLocaleString('en', { maximumFractionDigits: 0 }) : '—', pct: nasdaq?.change_pct ?? 0, krStyle: false },
             { label: 'USD/KRW', val: exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 }), pct: 0, krStyle: false },
+            { label: '금(GLD)', val: gold ? '$' + Number(gold.price).toLocaleString('en', { maximumFractionDigits: 0 }) : '—', pct: gold?.change_pct ?? 0, krStyle: false },
           ];
           return indicators.map(ind => {
             const color = ind.pct > 0
@@ -384,34 +388,30 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                 : 'var(--text-tertiary)';
             return (
               <div key={ind.label} style={{ background: 'var(--bg-surface)', padding: '8px 8px', borderLeft: `3px solid ${color}`, borderRadius: 0 }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{ind.label}</div>
-                <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{ind.val}</div>
-                {ind.pct !== 0 && <div style={{ fontSize: 'var(--fs-xs)', color, fontWeight: 700 }}>{ind.pct > 0 ? '+' : ''}{ind.pct.toFixed(2)}%</div>}
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', letterSpacing: '0.3px' }}>{ind.label}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{ind.val}</div>
+                {ind.pct !== 0 && <div style={{ fontSize: 9, color, fontWeight: 700 }}>{ind.pct > 0 ? '▲' : '▼'}{Math.abs(ind.pct).toFixed(2)}%</div>}
               </div>
             );
           });
         })()}
       </div>
 
-      {/* ─ 글로벌 지표 pill 태그 ─ */}
+      {/* ─ 글로벌 지표 pill 태그 (확장) ─ */}
       {(() => {
-        const globalIndicators: { label: string; symbol: string }[] = [
-          { label: 'USD/KRW', symbol: '' },
-          { label: 'WTI', symbol: '' },
-          { label: '금', symbol: 'GLD' },
-          { label: 'BTC', symbol: '' },
-        ];
+        const pillStocks = stocks.filter(s => ['DIA','USO','TLT','TQQQ','SOXL','IWM'].includes(s.symbol) && s.price > 0);
         return (
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 'var(--sp-sm)' }}>
             <span style={{ fontSize: 9, padding: '3px 7px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
               USD/KRW <span style={{ fontWeight: 700, fontFamily: 'monospace' }}>{exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</span>
             </span>
-            {stocks.filter(s => ['GLD', 'USO', 'TQQQ', 'SOXL'].includes(s.symbol) && s.price > 0).slice(0, 4).map(s => {
+            {pillStocks.map(s => {
               const pct = s.change_pct ?? 0;
               const color = pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)';
+              const label = s.symbol === 'DIA' ? '다우' : s.symbol === 'USO' ? '원유' : s.symbol === 'TLT' ? '국채' : s.symbol === 'IWM' ? '러셀' : s.symbol;
               return (
                 <span key={s.symbol} style={{ fontSize: 9, padding: '3px 7px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
-                  {s.name.length > 6 ? s.symbol : s.name} <span style={{ fontWeight: 700, color, fontFamily: 'monospace' }}>{pct > 0 ? '+' : ''}{pct.toFixed(1)}%</span>
+                  {label} <span style={{ fontWeight: 700, color, fontFamily: 'monospace' }}>{pct > 0 ? '+' : ''}{pct.toFixed(1)}%</span>
                 </span>
               );
             })}

@@ -894,6 +894,10 @@ body {
   .kd-kpi-5 { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* 지수 KPI 6열 (모바일 3×2, 데스크탑 6열) */
+.kd-index-kpi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+@media (min-width: 768px) { .kd-index-kpi { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+
 /* KPI 4열 → 모바일 2열 */
 .kd-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 480px) {
