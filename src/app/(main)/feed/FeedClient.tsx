@@ -12,13 +12,9 @@ import { SkeletonCard } from '@/components/Skeleton';
 import PullToRefresh from '@/components/PullToRefresh';
 import EmptyState from '@/components/EmptyState';
 import AttendanceBanner from '@/components/AttendanceBanner';
-import PersonalDashboard from '@/components/PersonalDashboard';
 import DailyReportCard from '@/components/DailyReportCard';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
-import MiniWatchlist from '@/components/MiniWatchlist';
-import WeeklyPrediction from '@/components/WeeklyPrediction';
 import PostReactions from '@/components/PostReactions';
-import LoungeLivePreview from '@/components/LoungeLivePreview';
 import { timeAgo, numFmt } from '@/lib/format';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -89,9 +85,6 @@ export default function FeedClient({
     initialPosts.forEach(p => { c[p.id] = p.likes_count ?? 0; });
     return c;
   });
-  const [showHotBanner, setShowHotBanner] = useState(false);
-  const [hotPosts, setHotPosts] = useState<Record<string, unknown>[]>([]);
-  const [hotBlog, setHotBlog] = useState<{ slug: string; title: string; view_count: number } | null>(null);
   const loadedAtRef = useRef<string>(new Date().toISOString());
   const [newCount, setNewCount] = useState(0);
   const newCheckTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -119,19 +112,9 @@ export default function FeedClient({
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setShowHotBanner(!sessionStorage.getItem('kd_hot_banner_closed'));
+      // cleaned up
     }
     const sb = createSupabaseBrowser();
-    sb.from('posts')
-      .select('id,title,category,likes_count,profiles!posts_author_id_fkey(nickname)')
-      .eq('is_deleted', false)
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-      .order('likes_count', { ascending: false })
-      .limit(3)
-      .then(({ data }: { data: Record<string, unknown>[] | null }) => { if (data && data.length > 0) setHotPosts(data); });
-    sb.from('blog_posts').select('slug,title,view_count').eq('is_published', true)
-      .order('view_count', { ascending: false }).limit(1).maybeSingle()
-      .then(({ data }: { data: { slug: string; title: string; view_count: number | null } | null }) => { if (data) setHotBlog({ slug: data.slug, title: data.title, view_count: data.view_count ?? 0 }); });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 새 글 폴링 30초
@@ -286,13 +269,12 @@ export default function FeedClient({
           </div>
         </div>
 
-        {/* 실시간 활동 표시 */}
-        <LiveActivityIndicator />
+        {/* 실시간 활동 표시 — 우측 정렬 */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+          <LiveActivityIndicator />
+        </div>
 
-        <PersonalDashboard />
-        <MiniWatchlist />
         <DailyReportCard />
-        <WeeklyPrediction />
 
         {/* ━━━ 카테고리 탭 ━━━ */}
         <div className="kd-scroll-row" style={{ marginBottom: 10 }}>
@@ -377,44 +359,6 @@ export default function FeedClient({
             ↑ 새 글 {newCount}개 올라왔어요 — 새로고침
           </button>
         )}
-
-        {/* 글쓰기 CTA */}
-        {currentUserId && (
-          <Link href="/write" style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: 'var(--sp-md) var(--card-p)',
-            background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)',
-            textDecoration: 'none', color: 'inherit', marginBottom: 'var(--sp-md)',
-          }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>✍️</div>
-            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 무슨 생각을 하고 계세요?</span>
-          </Link>
-        )}
-
-        {/* HOT 배너 */}
-        {showHotBanner && hotPosts.length > 0 && (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 14, position: 'relative' }}>
-            <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }} aria-label="닫기">✕</button>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 'var(--sp-sm)', display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>🔥 이번 주 인기글</div>
-            {hotPosts.slice(0, 3).map((hp: Record<string, unknown>, i: number) => (
-              <Link key={hp.id as number} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 18 }}>{i + 1}</span>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title as string}</span>
-                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>♥ {hp.likes_count as number}</span>
-              </Link>
-            ))}
-            {hotBlog && (
-              <Link href={`/blog/${hotBlog.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', color: 'inherit', marginTop: 'var(--sp-xs)' }}>
-                <span style={{ fontSize: 12 }}>📰</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hotBlog.title}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>👀 {hotBlog.view_count}</span>
-              </Link>
-            )}
-            <Link href="/hot" style={{ display: 'block', textAlign: 'center', padding: '6px 0', fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, marginTop: 'var(--sp-xs)' }}>전체 보기 →</Link>
-          </div>
-        )}
-
-        {/* 라운지 라이브 프리뷰 */}
-        <LoungeLivePreview />
 
         {/* ━━━ 게시글 목록 ━━━ */}
         <div className="listing-grid">

@@ -74,61 +74,58 @@ export default function DailyReportCard() {
     <Link href={`/daily/${encodeURIComponent(data.region)}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 10 }}>
       <div style={{
         padding: 'var(--card-p) 16px', borderRadius: 'var(--radius-lg)',
-        background: 'linear-gradient(135deg, rgba(212,168,83,0.06) 0%, rgba(184,148,46,0.02) 100%)',
-        border: '1.5px solid rgba(212,168,83,0.2)',
+        background: 'linear-gradient(145deg, rgba(212,168,83,0.08) 0%, rgba(184,148,46,0.03) 50%, rgba(212,168,83,0.06) 100%)',
+        border: '1.5px solid rgba(212,168,83,0.25)',
         transition: 'transform 0.1s, border-color var(--transition-fast)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* 배경 데코 원 — 골드 */}
-        <div style={{ position: 'absolute', right: -20, top: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(212,168,83,0.04)' }} />
-        <div style={{ position: 'absolute', right: 30, bottom: -15, width: 50, height: 50, borderRadius: '50%', background: 'rgba(232,199,120,0.03)' }} />
         {/* 상단 골드 라인 */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, #D4A853, #E8C778, #D4A853, transparent)' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #B8942E, #D4A853, #E8C778, #D4A853, #B8942E)' }} />
+        {/* 배경 데코 */}
+        <div style={{ position: 'absolute', right: -30, top: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(212,168,83,0.04)' }} />
 
         {/* 헤더 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #D4A853, #B8942E)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>📊</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #D4A853, #B8942E)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>📊</div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.3 }}>카더라 데일리</span>
-                <span style={{ fontSize: 8, fontWeight: 700, color: '#D4A853', letterSpacing: 1.5 }}>PREMIUM</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.3 }}>카더라 데일리</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#D4A853', letterSpacing: 2, background: 'rgba(212,168,83,0.1)', padding: '2px 6px', borderRadius: 3, border: '1px solid rgba(212,168,83,0.2)' }}>VIP</span>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-                {now.getMonth() + 1}월 {now.getDate()}일 {dayNames[now.getDay()]}요일 {isWeekend ? '· 주말판' : ''}
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                {now.getMonth() + 1}월 {now.getDate()}일 {dayNames[now.getDay()]}요일 {isWeekend ? '· 주말판' : '· 투자 브리핑'}
               </div>
             </div>
           </div>
           <div style={{
-            padding: '6px 14px', borderRadius: 'var(--radius-xl)',
+            padding: '8px 18px', borderRadius: 'var(--radius-xl)',
             background: 'linear-gradient(135deg, #D4A853, #B8942E)', color: '#fff',
-            fontSize: 12, fontWeight: 700, flexShrink: 0,
+            fontSize: 'var(--fs-sm)', fontWeight: 700, flexShrink: 0,
+            boxShadow: '0 2px 8px rgba(212,168,83,0.3)',
           }}>읽기 →</div>
         </div>
 
-        {/* 핵심 지표 3칸 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, position: 'relative' }}>
-          {/* 주식 */}
-          <div style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>시총 1위</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--brand)' }}>
+        {/* 핵심 지표 3칸 — 골드 테두리 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-sm)', position: 'relative' }}>
+          <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(212,168,83,0.05)', border: '1px solid rgba(212,168,83,0.15)' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#D4A853', marginBottom: 3, fontWeight: 600 }}>시총 1위</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
               {data.topStock.slice(0, 6)}
             </div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--brand)' }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
               {data.topStockPct > 0 ? '▲' : '▼'}{Math.abs(data.topStockPct).toFixed(1)}%
             </div>
           </div>
-          {/* 청약 */}
-          <div style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>이번주 청약</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-green)' }}>{data.subCount}건</div>
-            {data.topSub && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.topSub.slice(0, 8)}</div>}
+          <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(212,168,83,0.05)', border: '1px solid rgba(212,168,83,0.15)' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#D4A853', marginBottom: 3, fontWeight: 600 }}>이번주 청약</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: '#E8C778' }}>{data.subCount}건</div>
+            {data.topSub && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.topSub.slice(0, 10)}</div>}
           </div>
-          {/* 미분양 */}
-          <div style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>전국 미분양</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-orange)' }}>{(data.unsoldUnits / 10000).toFixed(1)}만</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{data.unsoldUnits.toLocaleString()}세대</div>
+          <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(212,168,83,0.05)', border: '1px solid rgba(212,168,83,0.15)' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#D4A853', marginBottom: 3, fontWeight: 600 }}>전국 미분양</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: '#E8C778' }}>{(data.unsoldUnits / 10000).toFixed(1)}만</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{data.unsoldUnits.toLocaleString()}세대</div>
           </div>
         </div>
       </div>
