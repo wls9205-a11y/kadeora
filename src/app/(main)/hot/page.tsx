@@ -210,7 +210,7 @@ export default async function HotPage() {
       {Object.keys(regionPosts).length > 0 && (
         <div style={{ marginBottom: 14 }}>
           <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📍 지역별 HOT</h2>
-          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+          <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
             {REGION_SECTIONS.map(region => {
               const posts = regionPosts[region];
               if (!posts || posts.length === 0) return null;

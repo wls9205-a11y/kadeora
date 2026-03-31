@@ -549,7 +549,7 @@ export default function SearchClient() {
           {/* Popular searches */}
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>🔥 인기 검색어</div>
-            <div className="apt-pill-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+            <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
               {POPULAR.map((s, i) => (
                 <button
                   key={s}

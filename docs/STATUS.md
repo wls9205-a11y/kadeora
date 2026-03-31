@@ -1,24 +1,25 @@
 # 카더라 STATUS.md — 세션 58~64 통합 (2026-03-31 KST)
 
 ## 최신 커밋
+- `364df99` — 디자인 3차: fontWeight 계층 + admin/landing 토큰 (92파일)
+- `3871db8` — CSS 정리: 죽은 클래스 26개 제거 + STATUS.md
 - `8142992` — 디자인 토큰 2차 적용 (borderRadius/gap/padding/transition/color 166파일)
 - `720da76` — 디자인 시스템 전면 정리 (z-index 통일 + 유틸 클래스 14종 + 146파일)
 - `6e671cb` — stock-naver-sync 크론 (국내500+해외200 네이버 벌크)
-- `4dc7cc8` — 주식 크론 5개 AI 폴백 완성 (크레딧 없이 전부 작동)
-- `eae50c6` — 부동산 UX 대폭 개선 (통합검색+중복제거+지역타일 리디자인)
 
 ## 주요 성과
 
-### 디자인 시스템 전면 정리 (세션 64)
+### 디자인 시스템 전면 정리 (세션 64) — 5커밋, 400+파일
 - **CSS 토큰 정의 → 실적용 완료**: --sp-*, --radius-*, --transition-*, --z-* 전부 TSX에서 활용
 - **z-index 통일**: 9999/10000/99999 등 카오스 → 체계적 스케일 (nav:50, modal:90, toast:100, overlay:200) — 19파일
-- **borderRadius 토큰화**: 하드코딩 1076건 → 289건 (74% → var(--radius-*) 전환) — 230+파일
-- **gap/margin 토큰화**: gap 50%+, marginBottom 62%+ → var(--sp-*) 전환
-- **fontSize CSS 변수 확대**: 하드코딩 1577→670건 (58% 감소) — 55파일
-- **transition 토큰**: 하드코딩 0.15s/0.2s → var(--transition-fast/normal) — 25파일
-- **하드코딩 색상 전환**: #34D399→var(--accent-green) 등 — 8파일
+- **borderRadius 토큰화**: 하드코딩 1076→135건 (87%↓) — 230+파일
+- **fontSize CSS 변수 확대**: 하드코딩 1577→595건 (62%↓) — 55파일
+- **gap 토큰화**: 하드코딩 830→295건 (64%↓) — 126파일
+- **marginBottom 토큰화**: 하드코딩 900→222건 (75%↓) — 115파일
+- **fontWeight 계층 정리**: 700 독점(755건) → 600:597/700:569/800:350 균형 분포 — 75파일
+- **transition 토큰**: 하드코딩 → var(--transition-fast/normal) — 25파일
 - **padding 토큰**: 6개 공통 패턴 → CSS 변수 조합 — 93파일
-- **카드 래퍼 토큰**: PersonalDashboard, RightPanel 등 padding/radius 토큰 — 3파일
+- **하드코딩 색상 전환**: #34D399→var(--accent-green) 등 — 8파일
 - **유틸리티 CSS 클래스 14종 추가**:
   - kd-card-base, kd-badge(7종), kd-action-btn, kd-tab-btn
   - kd-pill, kd-sort-btn, kd-tag, kd-section-header
@@ -27,7 +28,8 @@
 - **FeedClient 클래스 적용**: 탭/정렬/필터/태그/인터랙션 → CSS 클래스로 전환
 - **aria-label 접근성 보강**: 닫기/공유 버튼 12파일
 - **죽은 CSS 제거**: filter-pills, blog-toc-sidebar, nav-bar, tab-bar, 미사용 responsive 클래스 25개
-- 총 **312개 파일** 수정, Vercel 3배포 전부 READY
+- **color var()**: 2,128→2,489 (+17%)
+- Vercel 5배포 전부 READY, TS 에러 0
 
 ### B-2 도넛 리디자인 (최종)
 - 2×4 그리드 8칸: 청약/분양중/미분양/재개발·재건축/실거래(2026)/단지백과/분양사이트/부동산지도

@@ -77,7 +77,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
     >
       <div
         ref={scrollRef}
-        className="apt-pill-scroll"
+        className="apt-pill-scroll kd-scroll-row"
         style={{
           display: 'flex', gap: 5, overflowX: 'auto',
           scrollbarWidth: 'none', paddingBottom: 2,

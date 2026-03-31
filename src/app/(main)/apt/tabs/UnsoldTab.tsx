@@ -202,7 +202,7 @@ export default function UnsoldTab({ unsold, unsoldMonthly, unsoldSummary, aptUse
 
       {/* 안내 + 검색 + 필터 */}
       <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>국토교통부 미분양주택현황 월간 통계 (2~3개월 지연) · 최근 12개월 데이터</div>
-      <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 'var(--sp-sm)', paddingBottom: 2 }}>
+      <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 5, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 'var(--sp-sm)', paddingBottom: 2 }}>
         {regs.map(r => pill(r, unsoldRegion, setUnsoldRegion))}
         <div style={{ flexShrink: 0, width: 16 }} aria-hidden />
       </div>

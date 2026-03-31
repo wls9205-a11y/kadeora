@@ -384,7 +384,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 인기 태그 — 가로 스크롤 1줄 */}
       {popularTags.length > 0 && pageNum === 1 && !q && (
-        <div className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+        <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 5, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
           {popularTags.slice(0, 12).map((t: any) => (
             <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
               style={{
