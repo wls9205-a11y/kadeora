@@ -170,6 +170,8 @@ export default function DashboardSection() {
         {dataCoverage && <HealthBadge label="이미지" value={`${dataCoverage.aptImages?.pct ?? 0}%`} ok={(dataCoverage.aptImages?.pct ?? 0) > 50} />}
         {dataCoverage && <HealthBadge label="종목설명" value={`${dataCoverage.stockDesc.pct}%`} ok={dataCoverage.stockDesc.pct > 95} />}
         {dataCoverage?.aiSummary && <HealthBadge label="AI요약" value={`${dataCoverage.aiSummary.pct}%`} ok={dataCoverage.aiSummary.pct > 30} />}
+        {dataCoverage?.pdfParsing && <HealthBadge label="PDF파싱" value={`${dataCoverage.pdfParsing.pct}%`} ok={dataCoverage.pdfParsing.pct > 90} />}
+        {dataCoverage?.stockSector && <HealthBadge label="섹터" value={`${dataCoverage.stockSector.pct}%`} ok={dataCoverage.stockSector.pct > 80} />}
         {dataCoverage?.stockRefresh && <HealthBadge label="시세" value={dataCoverage.stockRefresh.ok ? '정상' : '오류'} ok={dataCoverage.stockRefresh.ok} />}
         {dataCoverage?.dbSize && <HealthBadge label="DB" value={dataCoverage.dbSize} ok={true} />}
       </div>
@@ -599,6 +601,62 @@ export default function DashboardSection() {
               <div style={{ marginTop: 'var(--sp-xs)', fontSize: 8, color: C.yellow, fontWeight: 600 }}>{fmt(dataCoverage.stockDesc.total - dataCoverage.stockDesc.done)}개 누락</div>
             </div>
           </div>
+
+          {/* ── PDF 파싱 + 건물스펙 + 섹터 커버리지 ── */}
+          {dataCoverage.pdfParsing && (
+            <div style={{ marginTop: 'var(--sp-md)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.text, marginBottom: 8 }}>📄 PDF 파싱 + 건물스펙 (자동 갱신)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-sm)' }}>
+                {/* PDF 파싱 진행률 */}
+                <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: C.text }}>📄 PDF 파싱</span>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.pdfParsing.pct > 80 ? C.green : dataCoverage.pdfParsing.pct > 30 ? C.yellow : C.red }}>{dataCoverage.pdfParsing.pct}%</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 'var(--sp-xs)' }}>
+                    <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.pdfParsing.pct > 80 ? C.green : C.yellow, width: `${dataCoverage.pdfParsing.pct}%`, transition: 'width 0.6s' }} />
+                  </div>
+                  <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.pdfParsing.done)}/{fmt(dataCoverage.pdfParsing.total)}건</div>
+                </div>
+                {/* 종목 섹터 */}
+                <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: C.text }}>🏷️ 종목 섹터</span>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: dataCoverage.stockSector.pct > 80 ? C.green : C.yellow }}>{dataCoverage.stockSector.pct}%</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: C.border, overflow: 'hidden', marginBottom: 'var(--sp-xs)' }}>
+                    <div style={{ height: '100%', borderRadius: 3, background: dataCoverage.stockSector.pct > 80 ? C.green : C.yellow, width: `${dataCoverage.stockSector.pct}%` }} />
+                  </div>
+                  <div style={{ fontSize: 9, color: C.textDim }}>{fmt(dataCoverage.stockSector.done)}/{fmt(dataCoverage.stockSector.total)}개</div>
+                </div>
+                {/* 건물스펙 요약 2칸 */}
+                <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px', gridColumn: 'span 2' }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: C.text, marginBottom: 6 }}>🏗️ 건물스펙 (PDF 추출)</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
+                    {[
+                      { label: '동수', val: dataCoverage.buildingSpecs.dong },
+                      { label: '최고층', val: dataCoverage.buildingSpecs.floor },
+                      { label: '전매제한', val: dataCoverage.buildingSpecs.transfer },
+                      { label: '발코니', val: dataCoverage.buildingSpecs.balcony },
+                      { label: '커뮤니티', val: dataCoverage.buildingSpecs.community },
+                      { label: '난방', val: dataCoverage.buildingSpecs.heating },
+                      { label: '대출', val: dataCoverage.buildingSpecs.loan },
+                      { label: '주차', val: dataCoverage.buildingSpecs.parking },
+                    ].map(s => {
+                      const pct = dataCoverage.buildingSpecs.total > 0 ? Math.round((s.val / dataCoverage.buildingSpecs.total) * 100) : 0;
+                      return (
+                        <div key={s.label} style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 9, color: C.textDim }}>{s.label}</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: pct > 30 ? C.green : pct > 10 ? C.yellow : C.red }}>{fmt(s.val)}</div>
+                          <div style={{ fontSize: 8, color: C.textDim }}>{pct}%</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

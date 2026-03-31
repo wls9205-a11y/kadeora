@@ -144,6 +144,16 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.cyan}40`, background: C.card, color: C.cyan, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🔢 블로그 생성 한도 원복 (→10)
           </button>
+          <button onClick={() => runSpecial('/api/admin/batch-pdf-parse?token=kd-reparse-2026', 'PDF 배치 파싱 200건')}
+            disabled={specialRunning}
+            style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.red}40`, background: C.card, color: C.red, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            📄 PDF 파싱 200건 실행
+          </button>
+          <button onClick={() => runSpecial('/api/admin/batch-reparse?token=kd-reparse-2026', 'HTML 재파싱 30건')}
+            disabled={specialRunning}
+            style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.purple}40`, background: C.card, color: C.purple, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
+            🔄 HTML 재파싱 30건 실행
+          </button>
         </div>
         {/* 벌크 수집 */}
         <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 20, marginBottom: 'var(--sp-sm)' }}>📦 실거래 벌크 수집</div>

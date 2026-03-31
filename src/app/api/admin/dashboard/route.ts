@@ -139,16 +139,29 @@ export async function GET(req: Request) {
       };
 
       // 데이터 커버리지 KPI
-      const [aptPriceR, aptCoordsR, stockDescR, aptCrawlLastR, aptImagesR, aiSummaryAccurateR, stockRefreshR] = await Promise.all([
+      const [aptPriceR, aptCoordsR, stockDescR, aptCrawlLastR, aptImagesR, aiSummaryAccurateR, stockRefreshR,
+        pdfDoneR, pdfTotalR, dongR, floorR, parkingR, heatingR, loanR, transferR, communityR, balconyR, sectorR,
+      ] = await Promise.all([
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).gt('price_min', 0),
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).not('latitude', 'is', null),
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).neq('description', '').not('description', 'is', null),
         sb.from('cron_logs').select('created_at, status, records_created, error_message').eq('cron_name', 'apt-crawl-pricing').order('created_at', { ascending: false }).limit(5),
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).or('images.neq.[],og_image_url.neq.'),
-        // ai_summary 정확도 (총·일반·특별 포함 = 정확)
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).like('ai_summary', '%총%세대%일반%특별%'),
-        // stock-refresh 최근 실행
         sb.from('cron_logs').select('created_at, status').eq('cron_name', 'stock-refresh').order('created_at', { ascending: false }).limit(1).maybeSingle(),
+        // PDF 파싱 진행률
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('max_floor', 'is', null),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('announcement_pdf_url', 'is', null),
+        // 건물스펙 커버리지
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gt('total_dong_count', 0),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gt('max_floor', 0),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gt('parking_total', 0),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('heating_type', 'is', null).neq('heating_type', ''),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('loan_rate', 'is', null).neq('loan_rate', ''),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('transfer_limit', 'is', null).neq('transfer_limit', ''),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('community_facilities', 'is', null),
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).eq('balcony_extension', true),
+        sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).not('sector', 'is', null).neq('sector', '').eq('is_active', true),
       ]);
       // DB 크기 조회
       let dbSizeStr = '?';
@@ -165,6 +178,16 @@ export async function GET(req: Request) {
         stockRefresh: stockRefreshR.data ? { lastAt: stockRefreshR.data.created_at, ok: stockRefreshR.data.status === 'success' } : null,
         aptCrawlRecent: (aptCrawlLastR.data || []).map((r: any) => ({ at: r.created_at, ok: r.status === 'success', created: r.records_created ?? 0, err: r.error_message?.slice(0, 60) })),
         dbSize: dbSizeStr,
+        // PDF 파싱 진행률
+        pdfParsing: { done: pdfDoneR.count ?? 0, total: pdfTotalR.count ?? 0, pct: pdfTotalR.count ? Math.round(((pdfDoneR.count ?? 0) / (pdfTotalR.count ?? 1)) * 100) : 0 },
+        // 건물스펙 커버리지 (PDF 추출)
+        buildingSpecs: {
+          dong: dongR.count ?? 0, floor: floorR.count ?? 0, parking: parkingR.count ?? 0,
+          heating: heatingR.count ?? 0, loan: loanR.count ?? 0, transfer: transferR.count ?? 0,
+          community: communityR.count ?? 0, balcony: balconyR.count ?? 0,
+          total: aptR.count ?? 0,
+        },
+        stockSector: { done: sectorR.count ?? 0, total: stockR.count ?? 0, pct: stockR.count ? Math.round(((sectorR.count ?? 0) / (stockR.count ?? 1)) * 100) : 0 },
       };
 
       // 최근 가입 유저 5명
