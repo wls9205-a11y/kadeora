@@ -628,11 +628,11 @@ export async function GET(req: Request) {
       const [sitesR, subsR, unsoldR, redevR, interestsR] = await Promise.all([
         sb.from('apt_sites').select('id, slug, name, site_type, region, sigungu, content_score, interest_count, status, created_at, updated_at')
           .eq('is_active', true).order('interest_count', { ascending: false }).limit(100),
-        sb.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co')
+        sb.from('apt_subscriptions').select('id, house_nm, region_nm, rcept_bgnde, rcept_endde, tot_supply_hshld_co, brand_name, project_type, loan_rate, is_regulated_area, total_households, developer_nm, constructor_nm, announcement_parsed_at, max_floor')
           .order('rcept_bgnde', { ascending: false }).limit(50),
-        sb.from('unsold_apts').select('id, house_nm, region_nm, tot_unsold_hshld_co, tot_supply_hshld_co')
-          .order('unsold_count', { ascending: false }).limit(50),
-        sb.from('redevelopment_projects').select('id, district_name, region, stage, total_households')
+        sb.from('unsold_apts').select('id, house_nm, region_nm, sigungu_nm, tot_unsold_hshld_co, tot_supply_hshld_co, constructor_nm, developer_nm, nearest_station, discount_info, completion_ym')
+          .eq('is_active', true).order('tot_unsold_hshld_co', { ascending: false }).limit(50),
+        sb.from('redevelopment_projects').select('id, district_name, region, stage, total_households, constructor, developer, project_type')
           .eq('is_active', true).limit(50),
         sb.from('apt_site_interests').select('id, site_id, name, phone_encrypted, created_at, is_member')
           .order('created_at', { ascending: false }).limit(50),

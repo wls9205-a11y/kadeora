@@ -56,29 +56,44 @@ export default function RealEstateSection() {
       )}
       {tab === 'subscriptions' && (
         <DataTable
-          headers={['단지명', '지역', '접수시작', '접수종료', '세대수']}
+          headers={['단지명', '지역', '접수', '세대수', '브랜드', '유형', '대출', '규제', 'PDF']}
           rows={(data?.subscriptions ?? []).map((s: any) => [
-            s.house_nm || '—', s.region_nm || '—', s.rcept_bgnde || '—', s.rcept_endde || '—', s.tot_supply_hshld_co || '—',
+            <a key="n" href={`/apt/${s.id}`} target="_blank" rel="noopener" style={{ color: C.brand, textDecoration: 'none', fontWeight: 600, fontSize: 12 }}>{s.house_nm || '—'}</a>,
+            s.region_nm || '—',
+            <span key="d" style={{ fontSize: 11 }}>{s.rcept_bgnde?.slice(5) || '—'}~{s.rcept_endde?.slice(5) || ''}</span>,
+            <span key="u" style={{ fontWeight: 700 }}>{s.tot_supply_hshld_co || '—'}{s.total_households && s.total_households !== s.tot_supply_hshld_co ? <span style={{ color: C.textDim, fontSize: 10 }}> /{s.total_households}</span> : ''}</span>,
+            s.brand_name ? <Badge key="b" color={C.brand}>{s.brand_name}</Badge> : '—',
+            s.project_type && s.project_type !== '민간' ? <Badge key="pt" color={s.project_type === '재개발' ? '#FB923C' : s.project_type === '재건축' ? '#A78BFA' : C.green}>{s.project_type}</Badge> : '민간',
+            s.loan_rate ? <Badge key="l" color={s.loan_rate.includes('무이자') ? C.green : C.yellow}>{s.loan_rate}</Badge> : '—',
+            s.is_regulated_area ? <Badge key="r" color={C.red}>규제</Badge> : '—',
+            s.max_floor !== null ? <Badge key="pdf" color={C.green}>✓</Badge> : <Badge key="pdf" color={C.textDim}>—</Badge>,
           ])}
         />
       )}
       {tab === 'unsold' && (
         <DataTable
-          headers={['단지명', '지역', '미분양', '총세대']}
+          headers={['단지명', '지역', '미분양', '총세대', '시공사', '역세권', '할인']}
           rows={(data?.unsold ?? []).map((u: Record<string, any>) => [
-            u.complex_name || '—', u.region || '—',
-            <span key="c" style={{ color: C.red, fontWeight: 700 }}>{u.unsold_count || 0}</span>,
-            u.total_units || '—',
+            u.house_nm || '—',
+            <span key="r" style={{ fontSize: 11 }}>{u.region_nm}{u.sigungu_nm ? ` ${u.sigungu_nm}` : ''}</span>,
+            <span key="c" style={{ color: C.red, fontWeight: 700 }}>{u.tot_unsold_hshld_co || 0}</span>,
+            u.tot_supply_hshld_co || '—',
+            u.constructor_nm || '—',
+            u.nearest_station ? <Badge key="st" color={C.brand}>🚇 {u.nearest_station}</Badge> : '—',
+            u.discount_info ? <Badge key="dc" color={C.green}>💰 {u.discount_info}</Badge> : '—',
           ])}
         />
       )}
       {tab === 'redev' && (
         <DataTable
-          headers={['구역명', '지역', '단계', '세대수']}
+          headers={['구역명', '지역', '단계', '유형', '세대수', '시공사', '시행사']}
           rows={(data?.redevelopment ?? []).map((r: any) => [
-            r.district_name, r.region || '—',
+            r.district_name || '—', r.region || '—',
             <Badge key="s" color={C.yellow}>{r.stage || '—'}</Badge>,
+            r.project_type ? <Badge key="pt" color={r.project_type === '재개발' ? '#FB923C' : '#A78BFA'}>{r.project_type}</Badge> : '—',
             r.total_households || '—',
+            r.constructor || '—',
+            r.developer && r.developer !== r.constructor ? r.developer : '—',
           ])}
         />
       )}
