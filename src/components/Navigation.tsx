@@ -161,7 +161,7 @@ export function Navigation() {
     color: active ? 'var(--brand)' : 'var(--nav-text)',
     textDecoration: 'none' as const,
     borderBottom: active ? '2px solid var(--brand)' : '2px solid transparent',
-    transition: 'color 0.15s, border-color 0.15s',
+    transition: 'color var(--transition-fast), border-color var(--transition-fast)',
     letterSpacing: '-0.2px',
   });
 
@@ -179,7 +179,7 @@ export function Navigation() {
       }}>
         <div style={{
           maxWidth: 1340, margin: '0 auto', padding: '0 14px',
-          height: 44, display: 'flex', alignItems: 'center', gap: 8,
+          height: 44, display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
         }}>
           {/* 로고 */}
           <Link href="/feed" style={{ display:'flex', alignItems:'center', gap:6, textDecoration:'none', flexShrink:0, marginRight:2 }}>
@@ -194,8 +194,8 @@ export function Navigation() {
             flex:1, maxWidth:360, minWidth:160, height:34,
             background:'var(--bg-hover)',
             border:'1px solid var(--border)',
-            borderRadius:17, alignItems:'center', padding:'0 14px', gap:8,
-            textDecoration:'none', transition:'border-color 0.15s',
+            borderRadius:17, alignItems:'center', padding:'0 14px', gap: 'var(--sp-sm)',
+            textDecoration:'none', transition:'border-color var(--transition-fast)',
             justifyContent:'space-between',
           }}
             onMouseEnter={e=>(e.currentTarget.style.borderColor='var(--border-strong)')}
@@ -305,7 +305,7 @@ export function Navigation() {
                     {unread > 0 && (
                       <span className="md:hidden" style={{
                         position:'absolute', top:-4, right:-4,
-                        minWidth:16, height:16, borderRadius:8,
+                        minWidth:16, height:16, borderRadius: 'var(--radius-sm)',
                         background:'var(--accent-red)', color:'#fff',
                         fontSize:10, fontWeight:800,
                         display:'flex', alignItems:'center', justifyContent:'center',
@@ -320,7 +320,7 @@ export function Navigation() {
                     <div style={{
                       position:'absolute', right:0, top:'calc(100% + 6px)',
                       background:'var(--bg-surface)', border:'1px solid var(--border)',
-                      borderRadius:8, overflow:'hidden', minWidth:168,
+                      borderRadius: 'var(--radius-sm)', overflow:'hidden', minWidth:168,
                       boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex: 60,
                     }}>
                       {[
@@ -329,7 +329,7 @@ export function Navigation() {
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
-                          display:'flex', alignItems:'center', gap:8, padding:'11px 16px',
+                          display:'flex', alignItems:'center', gap: 'var(--sp-sm)', padding:'11px 16px',
                           color:'var(--text-primary)', fontSize:'var(--fs-sm)', textDecoration:'none',
                           borderBottom:'1px solid var(--border)',
                           transition:'background 0.1s',
@@ -341,10 +341,10 @@ export function Navigation() {
                       {/* 글씨 크기 */}
                       <div style={{ padding:'9px 16px', borderBottom:'1px solid var(--border)' }}>
                         <div style={{ fontSize:12, color:'var(--text-tertiary)', marginBottom:6, fontWeight:600 }}>글씨 크기</div>
-                        <div style={{ display:'flex', gap:4 }}>
+                        <div style={{ display:'flex', gap: 'var(--sp-xs)' }}>
                           {([['small','작게'],['medium','보통'],['large','크게']] as const).map(([val, label]) => (
                             <button key={val} onClick={() => handleFontSize(val)} aria-label={`글씨 크기 ${label}`} aria-pressed={fontSize === val} style={{
-                              flex:1, padding:'4px 0', borderRadius:6, fontSize: val === 'small' ? 11 : val === 'large' ? 15 : 13,
+                              flex:1, padding:'4px 0', borderRadius: 'var(--radius-xs)', fontSize: val === 'small' ? 11 : val === 'large' ? 15 : 13,
                               fontWeight: fontSize === val ? 700 : 400, border:'none', cursor:'pointer',
                               background: fontSize === val ? 'var(--brand)' : 'var(--bg-hover)',
                               color: fontSize === val ? 'var(--text-inverse)' : 'var(--text-secondary)',
@@ -360,7 +360,7 @@ export function Navigation() {
                       }}
                         onMouseEnter={e=>(e.currentTarget.style.background='var(--error-bg)')}
                         onMouseLeave={e=>(e.currentTarget.style.background='transparent')}
-                      ><span style={{ display:'flex', alignItems:'center', gap:8 }}><LogOut size={16} /> 로그아웃</span></button>
+                      ><span style={{ display:'flex', alignItems:'center', gap: 'var(--sp-sm)' }}><LogOut size={16} /> 로그아웃</span></button>
                     </div>
                   )}
                 </div>
@@ -413,7 +413,7 @@ export function Navigation() {
               padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
               justifyContent:'center', flex:1, position:'relative',
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
-              transition:'color 0.15s ease',
+              transition:'color var(--transition-fast) ease',
             }}>
               {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
               <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
@@ -424,7 +424,7 @@ export function Navigation() {
         {/* 글쓰기 */}
         <Link key="write" href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} style={{
           display:'flex', alignItems:'center', justifyContent:'center',
-          width:44, height:44, borderRadius:14,
+          width:44, height:44, borderRadius: 'var(--radius-lg)',
           background:'var(--brand)', color:'var(--text-inverse)',
           marginTop:-8, flexShrink:0, textDecoration:'none',
           boxShadow:'0 2px 12px rgba(59,123,246,0.35)',
@@ -442,7 +442,7 @@ export function Navigation() {
               padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
               justifyContent:'center', flex:1, position:'relative',
               color: active ? 'var(--brand)' : 'var(--text-tertiary)',
-              transition:'color 0.15s ease',
+              transition:'color var(--transition-fast) ease',
             }}>
               {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius:2, background:'var(--brand)' }} />}
               <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
@@ -459,7 +459,7 @@ export function Navigation() {
             padding:'10px 8px 6px', minHeight:56,
             justifyContent:'center', flex:1, position:'relative',
             color: moreOpen ? 'var(--brand)' : 'var(--text-tertiary)',
-            transition:'color 0.15s ease',
+            transition:'color var(--transition-fast) ease',
             background:'none', border:'none', cursor:'pointer',
           }}
         >
@@ -478,13 +478,13 @@ export function Navigation() {
             position:'absolute', bottom:60, left:12, right:12,
             maxWidth: 400, marginLeft: 'auto', marginRight: 'auto',
             background:'var(--bg-surface)', border:'1px solid var(--border)',
-            borderRadius:16, padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
+            borderRadius: 'var(--radius-lg)', padding:16, boxShadow:'0 -8px 32px rgba(0,0,0,0.3)',
           }}>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:8 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 'var(--sp-sm)' }}>
               {MORE_ITEMS.map(item => (
                 <Link key={item.href} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                  display:'flex', flexDirection:'column', alignItems:'center', gap:4,
-                  padding:'12px 0', borderRadius:12, textDecoration:'none',
+                  display:'flex', flexDirection:'column', alignItems:'center', gap: 'var(--sp-xs)',
+                  padding:'12px 0', borderRadius: 'var(--radius-card)', textDecoration:'none',
                   color:'var(--text-primary)', position:'relative',
                 }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
@@ -495,7 +495,7 @@ export function Navigation() {
                   {item.emoji === '🔔' && unread > 0 && (
                     <span style={{
                       position: 'absolute', top: -2, right: -2,
-                      minWidth: 16, height: 16, borderRadius: 8,
+                      minWidth: 16, height: 16, borderRadius: 'var(--radius-sm)',
                       background: 'var(--accent-red)', color: '#fff',
                       fontSize: 10, fontWeight: 800, display: 'flex',
                       alignItems: 'center', justifyContent: 'center',
@@ -506,14 +506,14 @@ export function Navigation() {
               ))}
             </div>
             {userId && (
-              <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--border)', display:'flex', gap:8 }}>
+              <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--border)', display:'flex', gap: 'var(--sp-sm)' }}>
                 <Link href={`/profile/${userId}`} onClick={() => setMoreOpen(false)} style={{
-                  flex:1, textAlign:'center', padding:'10px 0', borderRadius:10,
+                  flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
                   background:'var(--bg-hover)', color:'var(--text-primary)',
                   fontSize:13, fontWeight:600, textDecoration:'none',
                 }}>내 프로필</Link>
                 <Link href="/notifications" onClick={() => setMoreOpen(false)} style={{
-                  flex:1, textAlign:'center', padding:'10px 0', borderRadius:10,
+                  flex:1, textAlign:'center', padding:'10px 0', borderRadius: 'var(--radius-md)',
                   background:'var(--bg-hover)', color:'var(--text-primary)',
                   fontSize:13, fontWeight:600, textDecoration:'none',
                 }}>알림{unread > 0 ? ` (${unread})` : ''}</Link>
@@ -525,13 +525,13 @@ export function Navigation() {
             position:'absolute', top:52, right:16,
             width: 400,
             background:'var(--bg-surface)', border:'1px solid var(--border)',
-            borderRadius:12, padding:16, boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
+            borderRadius: 'var(--radius-card)', padding:16, boxShadow:'0 8px 32px rgba(0,0,0,0.25)',
           }}>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:8 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap: 'var(--sp-sm)' }}>
               {MORE_ITEMS.map(item => (
                 <Link key={item.href + '-d'} href={item.href} onClick={() => setMoreOpen(false)} style={{
-                  display:'flex', flexDirection:'column', alignItems:'center', gap:4,
-                  padding:'12px 0', borderRadius:12, textDecoration:'none',
+                  display:'flex', flexDirection:'column', alignItems:'center', gap: 'var(--sp-xs)',
+                  padding:'12px 0', borderRadius: 'var(--radius-card)', textDecoration:'none',
                   color:'var(--text-primary)', position:'relative',
                 }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
@@ -542,7 +542,7 @@ export function Navigation() {
                   {item.emoji === '🔔' && unread > 0 && (
                     <span style={{
                       position: 'absolute', top: -2, right: -2,
-                      minWidth: 16, height: 16, borderRadius: 8,
+                      minWidth: 16, height: 16, borderRadius: 'var(--radius-sm)',
                       background: 'var(--accent-red)', color: '#fff',
                       fontSize: 10, fontWeight: 800, display: 'flex',
                       alignItems: 'center', justifyContent: 'center',

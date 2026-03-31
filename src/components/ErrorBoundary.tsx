@@ -16,7 +16,7 @@ export default class ErrorBoundary extends Component<Props, State> {
         <p style={{ color:'var(--text-secondary)', marginBottom:24 }}>{this.state.error?.message}</p>
         <button onClick={() => this.setState({ hasError: false })} style={{
           background:'var(--brand)', color:'var(--text-inverse)', border:'none',
-          borderRadius:20, padding:'10px 24px', cursor:'pointer', fontWeight:700
+          borderRadius: 'var(--radius-xl)', padding:'10px 24px', cursor:'pointer', fontWeight:700
         }}>다시 시도</button>
       </div>
     );

@@ -125,7 +125,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
   const tradeCount = tradeTotalCount || (lazyTx ? lazyTx.length : 0);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
         <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>🏢 부동산</h1>
         <div style={{ display: 'flex', gap: 6 }}>
@@ -136,7 +136,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {/* 통합 검색창 (상단 배치) */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
         <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)} style={{
-          padding: '7px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+          padding: '7px 10px', fontSize: 13, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
         }}>
           <option value="전체">전국</option>
@@ -198,7 +198,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       {selectedRegion !== '전체' && (
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10,
-          padding: '5px 12px', borderRadius: 20, background: 'var(--brand-bg)',
+          padding: '5px 12px', borderRadius: 'var(--radius-xl)', background: 'var(--brand-bg)',
           border: '1px solid var(--brand-border)', fontSize: 12, fontWeight: 600, color: 'var(--brand)',
         }}>
           📍 {selectedRegion} 필터 적용 중
@@ -319,14 +319,14 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📅 이번 주 청약 D-day</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {ddayList.map((a: any) => (
-                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 6, borderBottom: '1px solid var(--border)' }}>
+                <Link key={a.id} href={`/apt/${a.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderRadius: 'var(--radius-xs)', borderBottom: '1px solid var(--border)' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.house_nm}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{a.region_nm} · {a.isOpen ? '접수중' : '접수예정'}</div>
                   </div>
                   <span style={{
                     fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, marginLeft: 8,
-                    padding: '2px 10px', borderRadius: 6,
+                    padding: '2px 10px', borderRadius: 'var(--radius-xs)',
                     color: a.dday <= 1 ? 'var(--accent-red)' : a.dday <= 3 ? 'var(--accent-orange)' : 'var(--brand)',
                     background: a.dday <= 1 ? 'rgba(255,107,107,0.1)' : a.dday <= 3 ? 'rgba(255,159,67,0.1)' : 'var(--brand-bg)',
                   }}>
@@ -351,12 +351,12 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
       )}
 
       {/* 지역별 부동산 내부 링크 (SEO) */}
-      <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+      <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏙️ 지역별 부동산 정보</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
             <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{
-              padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
+              padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500,
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
               border: '1px solid var(--border)',
             }}>{r}</Link>
@@ -369,14 +369,14 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         const bigApts = apts.filter((a: any) => (a.tot_supply_hshld_co || 0) >= 300).slice(0, 12);
         if (bigApts.length === 0) return null;
         return (
-          <div style={{ marginTop: 12, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+          <div style={{ marginTop: 'var(--sp-md)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>🏗️ 인기 분양 현장</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {bigApts.map((a: any) => {
                 const slug = (a.house_nm || '').trim().replace(/\s+/g, '-').replace(/[^\w가-힣\-]/g, '').toLowerCase() || a.id;
                 return (
                   <Link key={a.id} href={`/apt/${slug}`} style={{
-                    padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
+                    padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500,
                     background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
                     border: '1px solid var(--border)',
                   }}>{a.house_nm} ({(a.tot_supply_hshld_co || 0).toLocaleString()}세대)</Link>
@@ -392,7 +392,7 @@ export default function AptClient({ apts, unsold = [], redevelopment = [], trans
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
           background: 'var(--bg-elevated, #1e293b)', color: 'var(--text-inverse)', padding: '12px 20px',
-          borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 600, zIndex: 100,
+          borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-sm)', fontWeight: 600, zIndex: 100,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
           animation: 'fadeIn 0.2s ease-out',
         }}>{toast}</div>

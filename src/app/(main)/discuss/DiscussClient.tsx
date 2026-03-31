@@ -51,8 +51,8 @@ function TopicCard({ topic }: { topic: Topic }) {
         borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-sm)',
       }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-sm)', alignItems: 'center' }}>
-          <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
-          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 999, fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
         <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
         {topic.topic_type === 'poll' && (
@@ -61,7 +61,7 @@ function TopicCard({ topic }: { topic: Topic }) {
               { label: topic.option_a, pct: pctA, winning: pctA >= pctB },
               { label: topic.option_b, pct: pctB, winning: pctB > pctA },
             ].map((opt, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, minWidth: 60, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
                 <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 11, overflow: 'hidden' }}>
                   <div style={{ width: `${opt.pct}%`, height: '100%', background: opt.winning ? 'var(--brand)' : 'var(--border)', borderRadius: 11, transition: 'width 0.3s', minWidth: opt.pct > 0 ? 8 : 0 }} />
@@ -71,7 +71,7 @@ function TopicCard({ topic }: { topic: Topic }) {
             ))}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 12, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           <span>💬 {topic.comment_count || 0}</span>
           <span>👁 {topic.view_count || 0}</span>
           <span>🗳 {total}명</span>
@@ -154,24 +154,24 @@ export default function DiscussClient() {
 
   // Fullscreen flex layout for chat tabs, normal scroll for poll tab
   const containerStyle: React.CSSProperties = isChat ? {
-    maxWidth: 720, margin: '0 auto', padding: '0 16px',
+    maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)',
     display: 'flex', flexDirection: 'column',
     height: 'calc(100dvh - 104px)',
     minHeight: 'calc(100vh - 160px)',
   } : {
-    maxWidth: 720, margin: '0 auto', padding: '0 16px',
+    maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)',
   };
 
   return (
     <div style={containerStyle}>
       <div style={{ flexShrink: 0, marginBottom: isChat ? 8 : 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-sm)' }}>
           <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>💬 라운지</h1>
           <SectionShareButton section="discuss" label="실시간 토론 라운지 — 주식·부동산·경제 이슈" pagePath="/discuss" />
         </div>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들
           {activeUsers > 0 && (
-            <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 700, marginLeft: 8 }}>
+            <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 700, marginLeft: 8 }}>
               🟢 {activeUsers}명 참여중
             </span>
           )}
@@ -180,13 +180,13 @@ export default function DiscussClient() {
 
       {/* 탭 */}
       <div style={{
-        display: 'flex', gap: 4, marginBottom: isChat ? 8 : 12, overflowX: 'auto', scrollbarWidth: 'none',
-        background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px',
+        display: 'flex', gap: 'var(--sp-xs)', marginBottom: isChat ? 8 : 12, overflowX: 'auto', scrollbarWidth: 'none',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '4px',
         flexShrink: 0,
       }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} aria-pressed={tab === t.key} style={{
-            padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', flexShrink: 0,
+            padding: '7px 14px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', flexShrink: 0,
             fontWeight: 700, fontSize: 'var(--fs-sm)',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
             color: tab === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
@@ -201,10 +201,10 @@ export default function DiscussClient() {
       {tab === 'poll' && (
         <>
           {/* 투표 카테고리 서브필터 */}
-          <div style={{ display: 'flex', gap: 4, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {POLL_CATS.map(c => (
               <button key={c.key} onClick={() => setPollCat(c.key)} aria-pressed={pollCat === c.key} style={{
-                padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
+                padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
                 background: pollCat === c.key ? 'var(--text-primary)' : 'var(--bg-hover)',
                 color: pollCat === c.key ? 'var(--bg-base)' : 'var(--text-secondary)',
               }}>{c.label}</button>
@@ -213,7 +213,7 @@ export default function DiscussClient() {
 
           {/* 새 토론 만들기 */}
           <button onClick={() => user ? setShowCreate(!showCreate) : router.push(`/login?redirect=${encodeURIComponent(pathname)}`)} style={{
-            width: '100%', padding: '12px', marginBottom: 'var(--sp-md)', borderRadius: 12,
+            width: '100%', padding: '12px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)',
             border: '1px dashed var(--border)', background: 'var(--bg-surface)',
             color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer',
           }}>✍️ 새 토론 만들기</button>
@@ -223,23 +223,23 @@ export default function DiscussClient() {
               <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                 {['stock', 'apt', 'economy', 'free'].map(c => (
                   <button key={c} onClick={() => setNewCat(c)} style={{
-                    padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer',
+                    padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer',
                     background: newCat === c ? 'var(--brand)' : 'var(--bg-hover)',
                     color: newCat === c ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>{(CAT_STYLE[c] || CAT_STYLE.free).label}</button>
                 ))}
               </div>
               <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="토론 주제 (5자 이상)" maxLength={100}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', marginBottom: 'var(--sp-sm)', boxSizing: 'border-box' }} />
-              <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', marginBottom: 'var(--sp-sm)', boxSizing: 'border-box' }} />
+              <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 10 }}>
                 <input value={newOptA} onChange={e => setNewOptA(e.target.value)} placeholder="옵션 A" maxLength={20}
-                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+                  style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
                 <span style={{ alignSelf: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>vs</span>
                 <input value={newOptB} onChange={e => setNewOptB(e.target.value)} placeholder="옵션 B" maxLength={20}
-                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+                  style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
               </div>
               <button onClick={handleCreate} disabled={creating} style={{
-                width: '100%', padding: '10px', borderRadius: 8, border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
+                width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
               }}>{creating ? '생성 중...' : '토론 시작하기'}</button>
             </div>
           )}

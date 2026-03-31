@@ -67,7 +67,7 @@ export default function MiniWatchlist() {
   // 비로그인 또는 관심 종목 없음 → CTA
   if (!userId) {
     return (
-      <div style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>⭐ 관심 종목 시세를 피드에서 바로 확인하세요</span>
         <Link href="/login" style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>로그인 →</Link>
       </div>
@@ -77,7 +77,7 @@ export default function MiniWatchlist() {
   if (loading) return null;
   if (items.length === 0) {
     return (
-      <div style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>⭐ 관심 종목을 등록하면 여기서 시세를 확인할 수 있어요</span>
         <Link href="/stock" style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>등록하기 →</Link>
       </div>
@@ -101,7 +101,7 @@ export default function MiniWatchlist() {
         {items.map(item => (
           <Link key={`${item.item_type}-${item.item_id}`}
             href={item.item_type === 'stock' ? `/stock/${item.item_id}` : `/apt/complex/${item.item_id}`}
-            style={{ minWidth: 100, padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, textDecoration: 'none', flexShrink: 0 }}>
+            style={{ minWidth: 100, padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.item_name}</div>
             {item.price ? (
               <>

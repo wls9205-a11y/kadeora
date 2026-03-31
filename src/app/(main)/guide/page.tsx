@@ -56,7 +56,7 @@ const FEATURES = [
 
 export default function GuidePage() {
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"가이드","item":SITE_URL + "/guide"}]}) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org", "@type": "FAQPage",
@@ -77,29 +77,29 @@ export default function GuidePage() {
       <div style={{ marginBottom: 'var(--sp-xl)', padding: 16, background: 'linear-gradient(135deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06))', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🚀 빠른 시작 3단계</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
             <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>1</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>카카오 로그인</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>3초면 가입 완료, 별도 회원가입 불필요</div>
             </div>
-            <Link href="/login" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontWeight: 700, flexShrink: 0 }}>시작 →</Link>
+            <Link href="/login" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontWeight: 700, flexShrink: 0 }}>시작 →</Link>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
             <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>2</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>관심 종목·지역 등록</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>주식 ⭐ 관심종목, 부동산 ❤️ 관심단지</div>
             </div>
-            <Link href="/stock" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>등록 →</Link>
+            <Link href="/stock" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>등록 →</Link>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
             <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0 }}>3</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>첫 글 작성</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>의견을 나누고 포인트도 적립하세요</div>
             </div>
-            <Link href="/write" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>작성 →</Link>
+            <Link href="/write" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 700, border: '1px solid var(--border)', flexShrink: 0 }}>작성 →</Link>
           </div>
         </div>
       </div>
@@ -191,7 +191,7 @@ export default function GuidePage() {
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)', lineHeight: 1.6 }}>
           버그 신고, 기능 제안, 문의사항이 있으시면 언제든 연락해주세요.
         </div>
-        <a href="mailto:kadeora.app@gmail.com" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>
+        <a href="mailto:kadeora.app@gmail.com" style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none' }}>
           📧 kadeora.app@gmail.com
         </a>
       </div>

@@ -23,22 +23,22 @@ const ITEMS = [
 
 export default function ShopPage() {
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
-      <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 4px' }}>🛒 아이템 상점</h1>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 4px' }}>🛒 아이템 상점</h1>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 20px' }}>포인트를 모아 아이템을 구매하세요</p>
 
-      <div style={{ display: 'grid', gap: 12 }}>
+      <div style={{ display: 'grid', gap: 'var(--sp-md)' }}>
         {ITEMS.map(item => (
           <Link key={item.title} href={item.href} style={{
             display: 'flex', alignItems: 'center', gap: 14, padding: 16,
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderRadius: 14, textDecoration: 'none', color: 'inherit',
+            borderRadius: 'var(--radius-lg)', textDecoration: 'none', color: 'inherit',
             opacity: item.available ? 1 : 0.5,
-            transition: 'border-color 0.15s',
+            transition: 'border-color var(--transition-fast)',
             pointerEvents: item.available ? 'auto' : 'none',
           }}>
             <div style={{
-              width: 52, height: 52, borderRadius: 14, flexShrink: 0,
+              width: 52, height: 52, borderRadius: 'var(--radius-lg)', flexShrink: 0,
               background: `${item.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 26,
             }}>{item.emoji}</div>
@@ -56,7 +56,7 @@ export default function ShopPage() {
         ))}
       </div>
 
-      <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-hover)', borderRadius: 12, textAlign: 'center' }}>
+      <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', textAlign: 'center' }}>
         <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           💡 포인트 획득 방법: 출석체크(10P), 글쓰기(20P), 댓글(5P), 좋아요 받기(3P)
         </div>

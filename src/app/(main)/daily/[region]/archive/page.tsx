@@ -76,7 +76,7 @@ export default async function ArchivePage({ params }: Props) {
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)' }}>
           <div style={{ fontSize: 36, marginBottom: 'var(--sp-md)' }}>📭</div>
           <p style={{ fontSize: 13 }}>아직 저장된 리포트가 없습니다.</p>
-          <p style={{ fontSize: 11, marginTop: 4 }}>매일 오전 7시에 자동 저장됩니다.</p>
+          <p style={{ fontSize: 11, marginTop: 'var(--sp-xs)' }}>매일 오전 7시에 자동 저장됩니다.</p>
         </div>
       ) : (
         Array.from(grouped.entries()).map(([month, items]) => {
@@ -86,12 +86,12 @@ export default async function ArchivePage({ params }: Props) {
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
                 {y}년 {parseInt(m)}월 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>({items.length}일)</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 4 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 'var(--sp-xs)' }}>
                 {items.map(r => {
                   const d = new Date(r.report_date);
                   return (
                     <Link key={r.report_date} href={`/daily/${encodeURIComponent(region)}/${r.report_date}`} style={{
-                      padding: '8px 10px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                      padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)',
                       textDecoration: 'none', display: 'block', transition: 'border-color 0.12s',
                     }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{d.getDate()}일 ({dayNames[d.getDay()]})</div>

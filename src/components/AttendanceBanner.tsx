@@ -41,7 +41,7 @@ export default function AttendanceBanner() {
       border: '1px solid rgba(37,99,235,0.15)',
       padding: '12px 16px',
       display: 'flex', flexDirection: 'column', gap: 10,
-      marginBottom: 10, borderRadius: 12,
+      marginBottom: 10, borderRadius: 'var(--radius-card)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
@@ -55,10 +55,10 @@ export default function AttendanceBanner() {
         </div>
         {!done && (
           <button onClick={handleCheckIn} disabled={loading} style={{
-            padding: '8px 18px', borderRadius: 20, border: 'none',
+            padding: '8px 18px', borderRadius: 'var(--radius-xl)', border: 'none',
             background: 'var(--brand)', color: '#fff',
             fontSize: 13, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1, transition: 'all 0.15s',
+            opacity: loading ? 0.7 : 1, transition: 'all var(--transition-fast)',
           }}>
             {loading ? '...' : '\u2728 출석'}
           </button>

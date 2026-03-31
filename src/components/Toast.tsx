@@ -54,8 +54,8 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
     <div
       className={leaving ? 'animate-toastOut' : 'animate-toastIn'}
       style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        padding: '12px 16px', borderRadius: 12,
+        display: 'flex', alignItems: 'center', gap: 'var(--sp-md)',
+        padding: '12px 16px', borderRadius: 'var(--radius-card)',
         background: c.bg, border: `1px solid ${c.border}`,
         backdropFilter: 'blur(12px)',
         boxShadow: '0 8px 32px var(--shadow-color, rgba(0,0,0,0.4))',
@@ -98,7 +98,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div role="log" aria-live="polite" aria-atomic="false" style={{
         position: 'fixed', bottom: 80, right: 20, zIndex: 100,
-        display: 'flex', flexDirection: 'column', gap: 8,
+        display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)',
         alignItems: 'flex-end', pointerEvents: 'none',
       }}>
         {toasts.map(t => (

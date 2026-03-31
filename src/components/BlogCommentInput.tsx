@@ -34,7 +34,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
 
   return (
     <div style={{ marginBottom: 'var(--sp-lg)' }}>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'flex-end' }}>
         <textarea
           value={content}
           onChange={e => setContent(e.target.value)}
@@ -44,14 +44,14 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
           rows={2}
           style={{
             flex: 1, background: 'var(--bg-hover)', border: '1px solid var(--border)',
-            borderRadius: 12, color: 'var(--text-primary)', padding: '10px 14px',
+            borderRadius: 'var(--radius-card)', color: 'var(--text-primary)', padding: 'var(--sp-md) var(--card-p)',
             fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
           }}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
         />
         <button onClick={handleSubmit} disabled={loading || !content.trim()}
           style={{
-            padding: '10px 16px', borderRadius: 12, border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
+            padding: '10px 16px', borderRadius: 'var(--radius-card)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
             color: content.trim() ? 'white' : 'var(--text-tertiary)',
             cursor: content.trim() && !loading ? 'pointer' : 'default', flexShrink: 0,
@@ -59,7 +59,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
           {loading ? '...' : '등록'}
         </button>
       </div>
-      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 4 }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 'var(--sp-xs)' }}>
         {content.length}/1000
       </div>
     </div>

@@ -64,12 +64,12 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
       aria-pressed={liked}
       style={{
         display: 'flex', alignItems: 'center', gap: 5,
-        padding: '6px 14px', borderRadius: 20,
+        padding: '6px 14px', borderRadius: 'var(--radius-xl)',
         background: liked ? 'rgba(248,113,113,0.08)' : 'var(--bg-hover)',
         border: `1px solid ${liked ? 'rgba(248,113,113,0.3)' : 'var(--border)'}`,
         color: liked ? 'var(--accent-red)' : 'var(--text-secondary)',
         cursor: loading ? 'not-allowed' : 'pointer',
-        transition: 'all 0.15s',
+        transition: 'all var(--transition-fast)',
         fontSize: 'var(--fs-sm)', fontWeight: 600,
         opacity: loading ? 0.7 : 1,
       }}

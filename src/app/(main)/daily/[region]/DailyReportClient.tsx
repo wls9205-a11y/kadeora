@@ -17,7 +17,7 @@ function pctColor(v: number | null) { return !v ? 'var(--text-tertiary)' : v > 0
 function pctStr(v: number | null) { return v == null ? '-' : (v > 0 ? '+' : '') + v.toFixed(1) + '%'; }
 
 const SH = ({ icon, title }: { icon: string; title: string }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '18px 0 8px' }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', margin: '18px 0 8px' }}>
     <span style={{ fontSize: 14 }}>{icon}</span>
     <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{title}</span>
   </div>
@@ -57,9 +57,9 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
     <div>
       {/* 아카이브 모드 배너 */}
       {isArchive && (
-        <div style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-yellow)' }}>📂 {viewDate} 아카이브</span>
-          <button onClick={goToToday} style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', background: 'none', border: '1px solid var(--brand)', borderRadius: 6, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>오늘 보기 →</button>
+          <button onClick={goToToday} style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)', background: 'none', border: '1px solid var(--brand)', borderRadius: 'var(--radius-xs)', padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>오늘 보기 →</button>
         </div>
       )}
 
@@ -77,7 +77,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 const base = `/daily/${encodeURIComponent(e.target.value)}`;
                 router.push(viewDate ? `${base}/${viewDate}` : base);
               }}
-              style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '3px 8px', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {regions.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
@@ -115,9 +115,9 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
 
         {/* 어젯밤 달라진 것 */}
-        <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--bg-base)', border: '1px solid var(--border)', marginBottom: 'var(--sp-sm)' }}>
+        <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', marginBottom: 'var(--sp-sm)' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>어젯밤 달라진 것</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
             {d.stockTop10.slice(0, 4).filter(s => s.week_pct != null && s.week_pct !== 0).map(s => (
               <span key={s.symbol} style={{
                 fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 4,
@@ -136,7 +136,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
 
         {/* KPI 스트립 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--sp-xs)' }}>
           {[
             { v: d.subCountThisWeek + '건', l: '이번주 청약', s: d.subUnitsThisWeek.toLocaleString() + '세대', sc: 'var(--text-secondary)' },
             { v: d.unsoldUnits.toLocaleString(), l: '전국 미분양', s: `${d.region} ${localUnsoldPct}%`, sc: localUnsoldPct < 5 ? 'var(--accent-green)' : 'var(--accent-red)' },
@@ -144,7 +144,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             { v: (sectorUp > sectorDn ? '+' : '') + d.sectors[0]?.avg_pct + '%', l: d.sectors[0]?.sector || '', s: sectorUp + '↑ ' + sectorDn + '↓', sc: 'var(--text-secondary)' },
             { v: d.guPrices[0] ? fmt(d.guPrices[0].sale) : '-', l: d.guPrices[0]?.sigungu + ' 매매', s: '전세율 ' + (d.guPrices[0]?.jeonse_ratio || '-') + '%', sc: 'var(--text-secondary)' },
           ].map((k, i) => (
-            <div key={i} style={{ background: 'var(--bg-base)', borderRadius: 8, padding: '8px 4px', textAlign: 'center' }}>
+            <div key={i} style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius-sm)', padding: '8px 4px', textAlign: 'center' }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{k.v}</div>
               <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{k.l}</div>
               <div style={{ fontSize: 9, fontWeight: 600, color: k.sc, marginTop: 1 }}>{k.s}</div>
@@ -189,7 +189,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             ))}
           </tbody>
         </table>
-        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4, textAlign: 'right' }}>
+        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)', textAlign: 'right' }}>
           전주比 상승 {weekUp} · 하락 {weekDn} · 보합 {10 - weekUp - weekDn}
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           const isUp = s.avg_pct > 0;
           return (
             <div key={s.sector} style={{
-              padding: '4px 6px', borderRadius: 6, textAlign: 'center', minWidth: 48,
+              padding: '4px 6px', borderRadius: 'var(--radius-xs)', textAlign: 'center', minWidth: 48,
               background: isUp ? 'rgba(239,68,68,0.06)' : 'rgba(59,130,246,0.06)',
               border: `1px solid ${isUp ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)'}`,
             }}>
@@ -215,9 +215,9 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
 
       {/* 글로벌 */}
       <SH icon="🌎" title="글로벌 마켓" />
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 4, marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
         {d.globalStocks.slice(0, 6).map(s => (
-          <div key={s.symbol} style={{ background: 'var(--bg-surface)', borderRadius: 8, padding: '6px 4px', textAlign: 'center', border: '1px solid var(--border)' }}>
+          <div key={s.symbol} style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)' }}>{s.symbol}</div>
             <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)' }}>${Number(s.price).toFixed(0)}</div>
             <div style={{ fontSize: 8, color: 'var(--text-tertiary)' }}>${fmtB(s.market_cap)}</div>
@@ -232,14 +232,14 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 16 }}>이번주 청약 일정이 없습니다.</div>
         ) : (
           d.subscriptions.filter(s => s.status !== '마감').map((s, i) => (
-            <div key={i} style={{ display: 'flex', gap: 8, padding: '8px 0', borderBottom: i < d.subscriptions.filter(s => s.status !== '마감').length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <div key={i} style={{ display: 'flex', gap: 'var(--sp-sm)', padding: '8px 0', borderBottom: i < d.subscriptions.filter(s => s.status !== '마감').length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ width: 42, textAlign: 'center', flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 6 }}>
                 <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{new Date(s.rcept_bgnde).getDate()}</div>
                 <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{(new Date(s.rcept_bgnde).getMonth() + 1)}월</div>
                 {s.rcept_bgnde === d.date && <div style={{ fontSize: 8, fontWeight: 800, color: 'var(--accent-red)' }}>TODAY</div>}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 700, fontSize: 12, color: 'var(--text-primary)' }}>{s.house_nm}</span>
                   <span style={{
                     fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4,
@@ -257,7 +257,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             </div>
           ))
         )}
-        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4, textAlign: 'right' }}>
+        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)', textAlign: 'right' }}>
           이번주 총 {d.subCountThisWeek}건 · {d.subUnitsThisWeek.toLocaleString()}세대
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
                 {d.guPrices.slice(12).map(g => `${g.sigungu} ${fmt(g.sale)}`).join(' · ')}
               </div>
             )}
-            <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
               <span><span style={{ display: 'inline-block', width: 8, height: 4, borderRadius: 2, background: 'rgba(239,68,68,0.3)', marginRight: 2 }} />매매</span>
               <span><span style={{ display: 'inline-block', width: 8, height: 4, borderRadius: 2, background: 'rgba(59,130,246,0.4)', marginRight: 2 }} />전세</span>
               <span>전세율 <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>68%+</span> = 갭투자 유리</span>
@@ -328,7 +328,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
               );
             })}
             {d.unsoldLocal.length > 0 && (
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
                 <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{d.region} TOP</span>: {d.unsoldLocal.slice(0, 3).map(r => `${r.sigungu} ${r.units}`).join(' · ')}
               </div>
             )}
@@ -361,7 +361,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
               {d.redevStages.map(s => `${s.stage} ${s.cnt}`).join(' · ')}
             </div>
             {d.redevMajor.length > 0 && (
-              <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.5 }}>
+              <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 'var(--sp-xs)', lineHeight: 1.5 }}>
                 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>재건축</span>: {d.redevMajor.slice(0, 5).join(' · ')}
               </div>
             )}
@@ -386,7 +386,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
 
         {/* 내일 체크포인트 */}
-        <div style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)' }}>
+        <div style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3 }}>내일 체크포인트</div>
           <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {d.subscriptions.filter(s => s.status === '접수중').map(s => `• ${s.house_nm} 마감 D-${Math.max(0, Math.ceil((new Date(s.rcept_endde).getTime() - now.getTime()) / 86400000))}`).slice(0, 3).join('\n').split('\n').map((l, i) => <span key={i}>{l}<br /></span>)}
@@ -400,13 +400,13 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         </div>
 
         {/* 프리미엄 업셀 */}
-        <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 8, border: '1px dashed var(--brand)', textAlign: 'center', fontSize: 11, color: 'var(--brand)' }}>
+        <div style={{ marginTop: 'var(--sp-sm)', padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--brand)', textAlign: 'center', fontSize: 11, color: 'var(--brand)' }}>
           💎 시세차익 계산 · 청약 등급 분석 · 주변 시세 비교 · 시나리오별 전략 → <b>카더라 프리미엄</b>
         </div>
       </div>
 
       {/* 푸터 */}
-      <div style={{ textAlign: 'center', padding: '14px 0', borderTop: '1px solid var(--border)', marginTop: 16, fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
+      <div style={{ textAlign: 'center', padding: '14px 0', borderTop: '1px solid var(--border)', marginTop: 'var(--sp-lg)', fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
         카더라 데일리 #{d.issueNo} · 무료<br />
         매일 오전 7시 발행 · 본 리포트는 투자 참고 자료이며 투자 권유가 아닙니다<br />
         © 2026 kadeora.app · 부동산 · 주식 · 올인원

@@ -31,7 +31,7 @@ export default function LiveActivityIndicator() {
   if (onlineCount <= 0) return null;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 11, color: 'var(--text-tertiary)' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
         <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', display: 'inline-block', animation: 'livePulse 2s infinite' }} />
         <span style={{ color: '#22C55E', fontWeight: 600 }}>{onlineCount}명</span> 접속 중

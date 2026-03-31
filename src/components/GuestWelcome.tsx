@@ -85,7 +85,7 @@ export default function GuestWelcome() {
       <div style={{
         maxWidth: 480, margin: '0 auto',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 20, padding: '24px 20px',
+        borderRadius: 'var(--radius-xl)', padding: '24px 20px',
         boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
         animation: 'guestSlideUp 0.4s ease',
       }}>
@@ -100,7 +100,7 @@ export default function GuestWelcome() {
         </div>
 
         {/* 혜택 3개 */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-xl)', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-xl)', justifyContent: 'center' }}>
           {[
             { emoji: '🔔', text: '실시간 알림' },
             { emoji: '⚡', text: '앱처럼 빠름' },
@@ -108,7 +108,7 @@ export default function GuestWelcome() {
           ].map(b => (
             <div key={b.text} style={{
               flex: 1, textAlign: 'center', padding: '10px 6px',
-              background: 'var(--bg-hover)', borderRadius: 10,
+              background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)',
             }}>
               <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 'var(--sp-xs)' }}>{b.emoji}</div>
               <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{b.text}</div>
@@ -120,7 +120,7 @@ export default function GuestWelcome() {
         <button
           onClick={handleStart}
           style={{
-            width: '100%', padding: '15px 0', borderRadius: 14, border: 'none',
+            width: '100%', padding: '15px 0', borderRadius: 'var(--radius-lg)', border: 'none',
             background: 'var(--brand)', color: 'white',
             fontSize: 'var(--fs-base)', fontWeight: 800, cursor: 'pointer',
             marginBottom: 10,
@@ -134,7 +134,7 @@ export default function GuestWelcome() {
         <button
           onClick={handleDismiss}
           style={{
-            width: '100%', padding: '10px 0', borderRadius: 10, border: 'none',
+            width: '100%', padding: '10px 0', borderRadius: 'var(--radius-md)', border: 'none',
             background: 'transparent', color: 'var(--text-tertiary)',
             fontSize: 'var(--fs-sm)', cursor: 'pointer',
           }}
@@ -143,7 +143,7 @@ export default function GuestWelcome() {
         </button>
 
         <div style={{
-          marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)',
+          marginTop: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)',
           textAlign: 'center', lineHeight: 1.5,
         }}>
           계속 이용 시 <Link href="/privacy" style={{ color: 'var(--brand)' }}>개인정보처리방침</Link> 및 쿠키 사용에 동의합니다

@@ -287,7 +287,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 {showMenu && (
                   <div style={{
                     position: 'absolute', right: 0, top: 20, background: 'var(--bg-surface)',
-                    border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     zIndex: 10, overflow: 'hidden', minWidth: 80,
                   }}>
                     <button
@@ -314,13 +314,13 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
             {!isReply && isExpanded && (
               <div style={{ marginTop: 10 }}>
                 {/* emoji reactions */}
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', marginBottom: 10 }}>
                   {REACTIONS.map(emoji => (
                     <button
                       key={emoji}
                       onClick={() => sendReaction(c.id, emoji)}
                       style={{
-                        padding: '4px 8px', borderRadius: 20, fontSize: 'var(--fs-base)', cursor: 'pointer',
+                        padding: '4px 8px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-base)', cursor: 'pointer',
                         border: userReactions[c.id] === emoji ? '2px solid var(--brand)' : '1px solid var(--border)',
                         background: userReactions[c.id] === emoji ? 'var(--bg-hover)' : 'transparent',
                       }}
@@ -333,14 +333,14 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 </div>
                 {/* reply input */}
                 {userId && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                  <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 6 }}>
                     <input
                       value={replyInputs[c.id] || ''}
                       onChange={e => setReplyInputs(prev => ({ ...prev, [c.id]: e.target.value.slice(0, 200) }))}
                       onKeyDown={e => { if (e.key === 'Enter') sendReply(c.id); }}
                       placeholder="답글 남기기..."
                       style={{
-                        flex: 1, padding: '6px 10px', fontSize: 'var(--fs-sm)', borderRadius: 8,
+                        flex: 1, padding: '6px 10px', fontSize: 'var(--fs-sm)', borderRadius: 'var(--radius-sm)',
                         border: '1px solid var(--border)', background: 'var(--bg-base)',
                         color: 'var(--text-primary)', boxSizing: 'border-box',
                       }}
@@ -349,7 +349,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                       onClick={() => sendReply(c.id)}
                       disabled={!(replyInputs[c.id] || '').trim()}
                       style={{
-                        padding: '6px 12px', borderRadius: 8, border: 'none', fontSize: 'var(--fs-sm)',
+                        padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 'var(--fs-sm)',
                         fontWeight: 700, cursor: 'pointer', flexShrink: 0,
                         background: 'var(--brand)', color: 'var(--text-inverse)',
                         opacity: (replyInputs[c.id] || '').trim() ? 1 : 0.5,
@@ -372,13 +372,13 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
       </div>
 
       {/* sort tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 14 }}>
         {([['latest', '최신순'], ['popular', '인기순']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setSort(key)}
             style={{
-              padding: '5px 14px', borderRadius: 20, fontSize: 'var(--fs-sm)', fontWeight: 600,
+              padding: '5px 14px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-sm)', fontWeight: 600,
               cursor: 'pointer', border: 'none',
               background: sort === key ? 'var(--brand)' : 'var(--bg-hover)',
               color: sort === key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -400,7 +400,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
               placeholder="한줄평 남기기..."
               rows={1}
               style={{
-                width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', borderRadius: 10,
+                width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border)', background: 'var(--bg-base)',
                 color: 'var(--text-primary)', boxSizing: 'border-box',
                 resize: 'none', overflow: 'hidden', lineHeight: 1.5,
@@ -412,7 +412,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 onClick={handleSend}
                 disabled={sending || !input.trim()}
                 style={{
-                  padding: '6px 16px', borderRadius: 8, border: 'none', fontSize: 'var(--fs-sm)',
+                  padding: '6px 16px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 'var(--fs-sm)',
                   fontWeight: 700, cursor: 'pointer',
                   background: 'var(--brand)', color: 'var(--text-inverse)',
                   opacity: sending || !input.trim() ? 0.5 : 1,
@@ -426,7 +426,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
           href={`/login?redirect=${encodeURIComponent(pathname)}`}
           style={{
             display: 'block', textAlign: 'center', padding: '12px 0', marginBottom: 14,
-            borderRadius: 10, border: '1px dashed var(--border)',
+            borderRadius: 'var(--radius-md)', border: '1px dashed var(--border)',
             fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', textDecoration: 'none',
           }}
         >

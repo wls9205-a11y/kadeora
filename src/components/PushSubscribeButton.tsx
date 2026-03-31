@@ -57,7 +57,7 @@ export default function PushSubscribeButton() {
   };
 
   const boxStyle = {
-    fontSize: 'var(--fs-sm)', padding: '12px 16px', borderRadius: 10, marginTop: 8,
+    fontSize: 'var(--fs-sm)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginTop: 'var(--sp-sm)',
     lineHeight: 1.5, textAlign: 'center' as const,
   };
 
@@ -96,9 +96,9 @@ export default function PushSubscribeButton() {
   return (
     <button onClick={handleSubscribe}
       style={{
-        padding: '12px 16px', width: '100%', marginTop: 8,
+        padding: '12px 16px', width: '100%', marginTop: 'var(--sp-sm)',
         background: 'var(--brand)', color: 'var(--text-inverse)',
-        border: 'none', borderRadius: 10,
+        border: 'none', borderRadius: 'var(--radius-md)',
         fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer',
         transition: 'opacity 0.15s',
       }}

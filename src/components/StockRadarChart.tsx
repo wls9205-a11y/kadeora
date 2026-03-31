@@ -59,9 +59,9 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="비교할 종목 검색..."
           className="kd-search-input" style={{ width: '100%' }} />
         {searchRes.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, zIndex: 50, marginTop: 3 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', zIndex: 50, marginTop: 3 }}>
             {searchRes.map(s => (
-              <button aria-label="닫기" key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              <button aria-label="닫기" key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
                 <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
                 <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
                 {selected.includes(s.symbol) && <span style={{ fontSize: 10, color: 'var(--brand)' }}>✓</span>}
@@ -72,12 +72,12 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
       </div>
 
       {/* 빠른 선택 */}
-      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap', marginBottom: 10 }}>
         {top10.map((s, i) => {
           const idx = selected.indexOf(s.symbol);
           const col = idx >= 0 ? COLORS[idx] : undefined;
           return (
-            <button key={s.symbol} onClick={() => toggle(s.symbol)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 6, background: col ? `${col}20` : 'var(--bg-surface)', border: `1px solid ${col || 'var(--border)'}`, color: col || 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: col ? 700 : 400 }}>
+            <button key={s.symbol} onClick={() => toggle(s.symbol)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: col ? `${col}20` : 'var(--bg-surface)', border: `1px solid ${col || 'var(--border)'}`, color: col || 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: col ? 700 : 400 }}>
               {col && <span style={{ marginRight: 3 }}>●</span>}{s.name.length > 6 ? s.name.slice(0, 6) + '..' : s.name}
             </button>
           );
@@ -85,7 +85,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
       </div>
 
       {selectedStocks.length > 0 ? (
-        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-md)', alignItems: 'flex-start' }}>
           {/* SVG 레이더 */}
           <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ flexShrink: 0 }}>
             {/* 격자 */}

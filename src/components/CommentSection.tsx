@@ -88,7 +88,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
   };
 
   return (
-    <div style={{ marginTop: 8 }}>
+    <div style={{ marginTop: 'var(--sp-sm)' }}>
       <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 700, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
         💬 대화 {comments.length > 0 && <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 500 }}>{comments.length}개</span>}
       </h3>
@@ -96,14 +96,14 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       {/* 댓글 입력 — 채팅 스타일 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         {replyTo && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '4px 10px', background: 'rgba(37,99,235,0.06)', borderRadius: 8, fontSize: 12, color: 'var(--brand)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '4px 10px', background: 'rgba(37,99,235,0.06)', borderRadius: 'var(--radius-sm)', fontSize: 12, color: 'var(--brand)' }}>
             ↩ <strong>{replyTo.nickname}</strong>에게 답글
             <button onClick={() => setReplyTo(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
           </div>
         )}
         {userId ? (
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 4 }}>나</div>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 'var(--sp-xs)' }}>나</div>
             <div style={{ flex: 1 }}>
               <textarea
                 value={content}
@@ -113,9 +113,9 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 rows={2}
                 style={{
                   width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)',
-                  borderRadius: 16, color: 'var(--text-primary)', padding: '10px 14px',
+                  borderRadius: 'var(--radius-lg)', color: 'var(--text-primary)', padding: 'var(--sp-md) var(--card-p)',
                   fontSize: 16, resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
-                  transition: 'border-color 0.15s',
+                  transition: 'border-color var(--transition-fast)',
                 }}
                 onFocus={e => e.currentTarget.style.borderColor = 'var(--brand)'}
                 onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
@@ -124,17 +124,17 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{content.length}/500</span>
                 <button onClick={handleSubmit} disabled={loading || !content.trim()} style={{
-                  padding: '6px 18px', borderRadius: 20, border: 'none',
+                  padding: '6px 18px', borderRadius: 'var(--radius-xl)', border: 'none',
                   background: content.trim() ? 'var(--brand)' : 'var(--bg-hover)',
                   color: content.trim() ? 'white' : 'var(--text-tertiary)',
                   cursor: content.trim() ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 700,
-                  transition: 'all 0.15s',
+                  transition: 'all var(--transition-fast)',
                 }}>등록</button>
               </div>
             </div>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-surface)', borderRadius: 14, border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+          <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
             💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 700 }}>로그인</a>하고 대화에 참여하세요
           </div>
         )}
@@ -163,14 +163,14 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 </div>
               </Link>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ background: isReply ? 'var(--bg-hover)' : 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: isReply ? '4px 12px 12px 12px' : '4px 14px 14px 14px', padding: '10px 14px' }}>
+                <div style={{ background: isReply ? 'var(--bg-hover)' : 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: isReply ? '4px 12px 12px 12px' : '4px 14px 14px 14px', padding: 'var(--sp-md) var(--card-p)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)' }}>{comment.profiles?.nickname ?? '익명'}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', color: gradeColor(comment.profiles?.grade ?? null) }}>{gradeEmoji(comment.profiles?.grade ?? null)} {gradeTitle(comment.profiles?.grade ?? null)}</span>
                   </div>
                   <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.55, wordBreak: 'break-word' }}>{comment.content}</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4, paddingLeft: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', marginTop: 'var(--sp-xs)', paddingLeft: 4 }}>
                   <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(comment.created_at)}</span>
                   <button onClick={() => handleCommentLike(comment.id, comment.likes_count ?? 0)} disabled={likingIds.has(comment.id)} aria-label="좋아요"
                     style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>

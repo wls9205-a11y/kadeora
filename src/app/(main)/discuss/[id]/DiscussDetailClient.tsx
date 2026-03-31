@@ -114,14 +114,14 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
   return (
     <>
       {/* Vote buttons */}
-      <section style={{ marginTop: 16 }}>
+      <section style={{ marginTop: 'var(--sp-lg)' }}>
         {[
           { key: 'a' as const, label: topic.option_a, pct: pctA, count: topic.vote_a, winning: pctA >= pctB },
           { key: 'b' as const, label: topic.option_b, pct: pctB, count: topic.vote_b, winning: pctB > pctA },
         ].map(opt => (
           <button key={opt.key} onClick={() => handleVote(opt.key)} disabled={voting}
             style={{
-              width: '100%', padding: '14px 16px', marginBottom: 'var(--sp-sm)', borderRadius: 12,
+              width: '100%', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-sm)', borderRadius: 'var(--radius-card)',
               border: myVote === opt.key ? '2px solid var(--brand)' : '1px solid var(--border)',
               background: 'var(--bg-base)', cursor: voting ? 'not-allowed' : 'pointer',
               textAlign: 'left', position: 'relative', overflow: 'hidden',
@@ -129,7 +129,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
             <div style={{
               position: 'absolute', left: 0, top: 0, height: '100%',
               width: `${opt.pct}%`, background: opt.winning ? 'var(--brand-bg)' : 'rgba(128,128,128,0.05)',
-              borderRadius: 12, transition: 'width 0.3s',
+              borderRadius: 'var(--radius-card)', transition: 'width 0.3s',
             }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 700 : 500, color: 'var(--text-primary)' }}>
@@ -147,18 +147,18 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
       </section>
 
       {/* Comments */}
-      <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginTop: 16 }}>
+      <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginTop: 'var(--sp-lg)' }}>
         <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
 
         {/* Input */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
           {user ? (
             <>
               <input value={input} onChange={e => setInput(e.target.value)} placeholder="의견을 남겨보세요" maxLength={500}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleComment(); } }}
-                style={{ flex: 1, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit' }} />
+                style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit' }} />
               <button onClick={handleComment} disabled={!input.trim() || sending}
-                style={{ padding: '10px 16px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 'var(--fs-base)', cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>
+                style={{ padding: '10px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 'var(--fs-base)', cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>
                 전송
               </button>
             </>
@@ -170,7 +170,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
         </div>
 
         {/* Comment list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-md)' }}>
           {comments.map(c => {
             const nick = c.profiles?.nickname ?? '사용자';
             const grade = c.profiles?.grade ?? 1;

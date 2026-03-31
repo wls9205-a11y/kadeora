@@ -104,11 +104,11 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
 
         {/* 피커 팝업 */}
         {showPicker && (
-          <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 'var(--sp-xs)', display: 'flex', gap: 2, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px 6px', zIndex: 10 }}>
+          <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 'var(--sp-xs)', display: 'flex', gap: 2, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '4px 6px', zIndex: 10 }}>
             {REACTIONS.map(r => (
               <button key={r.key} onClick={e => { e.preventDefault(); e.stopPropagation(); handleReact(r.key); }}
                 title={r.label}
-                style={{ fontSize: 16, background: myReaction === r.key ? 'rgba(59,123,246,0.12)' : 'transparent', border: 'none', borderRadius: 6, padding: '4px 6px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                style={{ fontSize: 16, background: myReaction === r.key ? 'rgba(59,123,246,0.12)' : 'transparent', border: 'none', borderRadius: 'var(--radius-xs)', padding: '4px 6px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                 <span>{r.emoji}</span>
                 {(counts[r.key] || 0) > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{counts[r.key]}</span>}
               </button>

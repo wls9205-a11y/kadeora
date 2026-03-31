@@ -112,7 +112,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   if (loading) return null;
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 8,
+    width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 'var(--radius-sm)',
     border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)',
     fontSize: 'var(--fs-sm)', fontFamily: 'inherit',
   };
@@ -122,7 +122,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
 
   const GuestForm = () => (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
         <div>
           <label style={labelStyle}>이름 <span style={{ color: 'var(--error)' }}>*</span></label>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" style={inputStyle} />
@@ -132,7 +132,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           <input value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="01012345678" inputMode="tel" maxLength={11} style={inputStyle} />
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
         <div>
           <label style={labelStyle}>생년월일 <span style={{ color: 'var(--error)' }}>*</span></label>
           <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} style={inputStyle} />
@@ -156,12 +156,12 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       )}
 
       {/* 동의 */}
-      <div style={{ background: 'var(--bg-base)', borderRadius: 8, padding: 10, marginBottom: 10 }}>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+      <div style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius-sm)', padding: 10, marginBottom: 10 }}>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', marginBottom: 6, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
           <input type="checkbox" checked={consentCollection} onChange={e => setConsentCollection(e.target.checked)} style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
           <span><span style={{ color: 'var(--error)' }}>[필수]</span> 개인정보 수집·이용 동의 (이름, 전화번호, 생년월일, 거주지역)</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
           <input type="checkbox" checked={consentMarketing} onChange={e => setConsentMarketing(e.target.checked)} style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
           <span>[선택] 마케팅 정보 수신 동의 (신규 분양 현장 안내)</span>
         </label>
@@ -169,7 +169,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       </div>
 
       <button onClick={handleGuestSubmit} disabled={submitting} style={{
-        width: '100%', padding: 13, borderRadius: 10, border: 'none',
+        width: '100%', padding: 13, borderRadius: 'var(--radius-md)', border: 'none',
         background: consentCollection ? 'var(--brand)' : 'var(--bg-hover)',
         color: consentCollection ? '#fff' : 'var(--text-tertiary)',
         fontSize: 'var(--fs-base)', fontWeight: 700,
@@ -189,7 +189,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
   );
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '2px solid var(--brand)', borderRadius: 14, padding: '20px 16px', marginBottom: 'var(--sp-md)' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '2px solid var(--brand)', borderRadius: 'var(--radius-lg)', padding: '20px 16px', marginBottom: 'var(--sp-md)' }}>
       {/* 헤더 */}
       <div style={{ textAlign: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>관심단지 등록</div>
@@ -199,7 +199,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       {/* 알림 혜택 필 태그 */}
       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 18, flexWrap: 'wrap' }}>
         {['청약 일정', '분양가 · 경쟁률', '입주 소식'].map(tag => (
-          <span key={tag} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 999, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)', fontWeight: 600 }}>{tag}</span>
+          <span key={tag} style={{ fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)', fontWeight: 600 }}>{tag}</span>
         ))}
       </div>
 
@@ -208,7 +208,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           {/* 로그인 유저: 원클릭 버튼 */}
           {registered ? (
             <button onClick={handleMemberUnregister} disabled={submitting} style={{
-              width: '100%', padding: 14, borderRadius: 10, border: '1px solid var(--border)',
+              width: '100%', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600,
               cursor: 'pointer', opacity: submitting ? 0.5 : 1,
             }}>
@@ -216,7 +216,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
             </button>
           ) : (
             <button onClick={handleMemberRegister} disabled={submitting} style={{
-              width: '100%', padding: 14, borderRadius: 10, border: 'none',
+              width: '100%', padding: 14, borderRadius: 'var(--radius-md)', border: 'none',
               background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-base)', fontWeight: 700,
               cursor: 'pointer', opacity: submitting ? 0.5 : 1,
             }}>
@@ -237,12 +237,12 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
           <Divider text="또는" />
 
           {/* 회원 가입 유도 */}
-          <div style={{ background: 'var(--bg-base)', borderRadius: 10, padding: 14, textAlign: 'center' }}>
+          <div style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', padding: 14, textAlign: 'center' }}>
             <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 8px', lineHeight: 1.5 }}>
               회원은 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>입력 없이 원클릭</span> + <span style={{ fontWeight: 700, color: 'var(--brand)' }}>50P 적립</span>
             </p>
             <Link href={`/login?redirect=/apt/${slug}`} style={{
-              display: 'block', padding: 12, borderRadius: 10, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
+              display: 'block', padding: 12, borderRadius: 'var(--radius-md)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
               fontSize: 'var(--fs-sm)', fontWeight: 700, textDecoration: 'none', textAlign: 'center',
             }}>
               카카오로 3초 가입 →
@@ -259,7 +259,7 @@ export default function InterestRegistration({ siteId, siteName, interestCount, 
       )}
 
       {/* 소셜 프루프 */}
-      <p style={{ textAlign: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, marginBottom: 0 }}>
+      <p style={{ textAlign: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-md)', marginBottom: 0 }}>
         현재 <span style={{ color: 'var(--brand)', fontWeight: 800 }}>{count}</span>명이 이 단지에 관심을 보이고 있어요
       </p>
     </div>

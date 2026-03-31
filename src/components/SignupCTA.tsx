@@ -13,7 +13,7 @@ export default function SignupCTA() {
     <div style={{
       background: 'var(--bg-surface)',
       border: '1px solid var(--border)',
-      borderRadius: 16,
+      borderRadius: 'var(--radius-lg)',
       overflow: 'hidden',
       marginBottom: 'var(--sp-md)',
     }}>
@@ -38,7 +38,7 @@ export default function SignupCTA() {
         <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', margin: '14px 0 18px' }}>
           {['청약 마감 알림', '관심 종목 등락 알림', '실거래가 분석', 'AI 투자 요약'].map(t => (
             <span key={t} style={{
-              fontSize: 'var(--fs-xs)', padding: '4px 12px', borderRadius: 20,
+              fontSize: 'var(--fs-xs)', padding: '4px 12px', borderRadius: 'var(--radius-xl)',
               background: 'var(--accent-blue-bg)', color: 'var(--accent-blue)',
               border: '1px solid rgba(59,123,246,0.15)', fontWeight: 600,
             }}>{t}</span>
@@ -50,7 +50,7 @@ export default function SignupCTA() {
           href={`/login?redirect=${encodeURIComponent(pathname)}`}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            width: '100%', padding: 15, border: 'none', borderRadius: 12,
+            width: '100%', padding: 15, border: 'none', borderRadius: 'var(--radius-card)',
             fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none',
             background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)',
             boxShadow: '0 4px 20px rgba(254,229,0,0.25)',

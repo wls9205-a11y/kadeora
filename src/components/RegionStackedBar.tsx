@@ -135,7 +135,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
 
       {/* B-2: Mini donut + 2×4 interactive card grid with progress bars */}
       <div style={{
-        display: 'flex', gap: 8, alignItems: 'center',
+        display: 'flex', gap: 'var(--sp-sm)', alignItems: 'center',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)', padding: '10px 8px', marginBottom: 6,
         overflow: 'hidden',
@@ -195,7 +195,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 {barStyle(Math.round(cats.sub / maxVal * 100), COLORS.sub)}
                 <div style={{ display: 'flex', gap: 2, marginTop: 2, flexWrap: 'wrap' }}>
                   {openCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(59,155,107,0.1)', color: '#3B9B6B', fontWeight: 500 }}>접수 {openCount}</span>}
-                  {upcomingCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(96,165,250,0.08)', color: '#60A5FA', fontWeight: 500 }}>예정 {upcomingCount}</span>}
+                  {upcomingCount > 0 && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'rgba(96,165,250,0.08)', color: 'var(--accent-blue)', fontWeight: 500 }}>예정 {upcomingCount}</span>}
                   {closedCount > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 500 }}>마감 {closedCount}</span>}
                 </div>
               </div>
@@ -295,7 +295,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 display: 'flex', alignItems: 'center', gap: 0, flexDirection: 'column',
                 padding: '5px 4px', background: isActive ? 'rgba(59,123,246,0.06)' : 'transparent',
                 border: isActive ? '1px solid rgba(59,123,246,0.25)' : '0.5px solid var(--border)',
-                borderRadius: 6, cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit', width: '100%',
+                borderRadius: 'var(--radius-xs)', cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit', width: '100%',
                 transition: 'border-color 0.12s, background 0.12s',
               }}
             >

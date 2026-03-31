@@ -97,9 +97,9 @@ export default function AutoPushPrompt() {
     <div style={{
       position: 'fixed', bottom: 72, left: 12, right: 12, zIndex: 60,
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
-      borderRadius: 16, padding: '16px 20px',
+      borderRadius: 'var(--radius-lg)', padding: '16px 20px',
       boxShadow: '0 -4px 24px rgba(0,0,0,0.3)',
-      display: 'flex', alignItems: 'center', gap: 12,
+      display: 'flex', alignItems: 'center', gap: 'var(--sp-md)',
       animation: 'slideUp 0.3s ease',
     }}>
       <div style={{ fontSize: 28, flexShrink: 0 }}>🔔</div>
@@ -115,7 +115,7 @@ export default function AutoPushPrompt() {
         onClick={handleEnable}
         disabled={loading}
         style={{
-          padding: '10px 20px', borderRadius: 10, border: 'none',
+          padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-md)', border: 'none',
           background: 'var(--brand)', color: 'white',
           fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer',
           flexShrink: 0, opacity: loading ? 0.6 : 1,

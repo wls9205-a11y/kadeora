@@ -30,7 +30,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
-      padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+      padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
       color: sel === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
@@ -97,16 +97,16 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
 
             {/* 현황 요약 */}
-            <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 10 }}>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 6px', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)' }}>{redevelopment.length}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전체</div>
               </div>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 6px', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--accent-blue)' }}>{redevCount}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재개발</div>
               </div>
-              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+              <div style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 6px', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--accent-orange)' }}>{rebuildCount}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>재건축</div>
               </div>
@@ -115,7 +115,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
             {/* 재개발 단계별 파이프라인 */}
             <div className="kd-card">
               <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🏗️ 단계별 파이프라인</div>
-              <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
+              <div style={{ display: 'flex', gap: 'var(--sp-xs)', alignItems: 'stretch' }}>
                 {STAGE_ORDER.map((stage, i) => {
                   const regionFiltered = redevRegion === '전체' ? redevelopment : redevelopment.filter((r) => r.region === redevRegion);
                   const count = regionFiltered.filter((r) => r.stage === stage).length;
@@ -123,7 +123,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   const pct = Math.round((count / total) * 100);
                   const sc = STAGE_COLORS[stage] || { bg: 'var(--bg-hover)', color: 'var(--text-tertiary)', border: 'var(--border)' };
                   return (
-                    <div key={stage} onClick={() => { setRedevStage(stage === redevStage ? '전체' : stage); setRedevPage(1); }} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 8, background: redevStage === stage ? sc.border : sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50, cursor: 'pointer', opacity: redevStage !== '전체' && redevStage !== stage ? 0.5 : 1 }}>
+                    <div key={stage} onClick={() => { setRedevStage(stage === redevStage ? '전체' : stage); setRedevPage(1); }} style={{ flex: Math.max(pct, 8), textAlign: 'center', padding: '10px 4px', borderRadius: 'var(--radius-sm)', background: redevStage === stage ? sc.border : sc.bg, border: `1px solid ${sc.border}`, position: 'relative', minWidth: 50, cursor: 'pointer', opacity: redevStage !== '전체' && redevStage !== stage ? 0.5 : 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 600, color: sc.color, opacity: 0.6, marginBottom: 2 }}>{i + 1}/{STAGE_ORDER.length}</div>
                       <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: sc.color }}>{stage.replace('인가', '')}</div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: sc.color, margin: '4px 0' }}>{count}</div>
@@ -182,11 +182,11 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   </div>
                   {/* 1행: 단계 + 유형 + 진행률 + 지역 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, marginTop: 2 }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: sc.bg, color: sc.color }}>{r.stage}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 6, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: sc.bg, color: sc.color }}>{r.stage}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: sc.color }}>{progress}%</span>
                     <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`redev:${r.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`redev:${r.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                       {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
                     </button>
                   </div>
@@ -220,7 +220,7 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
 
             {redevPage * 20 < filteredRedev.length && (
               <button onClick={() => setRedevPage(p => p + 1)} style={{
-                width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--border)',
+                width: '100%', padding: '12px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
                 background: 'var(--bg-surface)', color: 'var(--text-secondary)',
                 fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', marginBottom: 'var(--sp-sm)',
               }}>

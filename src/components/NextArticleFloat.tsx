@@ -30,10 +30,10 @@ export default function NextArticleFloat({ nextSlug, nextTitle, category }: Prop
       position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
       maxWidth: 400, width: 'calc(100% - 32px)', zIndex: 90,
       background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)',
-      borderRadius: 14, padding: '12px 16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      borderRadius: 'var(--radius-lg)', padding: '12px 16px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
       display: 'flex', alignItems: 'center', gap: 10,
     }}>
-      <span style={{ fontSize: 22, flexShrink: 0 }}>{emoji[category || 'general'] || '📝'}</span>
+      <span style={{ fontSize: 'var(--fs-xl)', flexShrink: 0 }}>{emoji[category || 'general'] || '📝'}</span>
       <Link href={`/blog/${nextSlug}`} style={{
         flex: 1, textDecoration: 'none', color: 'inherit', minWidth: 0,
       }}>

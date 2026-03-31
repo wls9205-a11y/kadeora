@@ -103,11 +103,11 @@ export default async function HotPage() {
     {/* SEO 전용 히어로 이미지 — 시각적으로 숨김, 크롤러 인식용 */}
     {/* eslint-disable-next-line @next/next/no-img-element */}
     <img src={`/api/og?title=${encodeURIComponent('이번 주 HOT 게시글')}&design=2&category=free&subtitle=${encodeURIComponent('카더라 커뮤니티 인기글 TOP')}`} alt="카더라 이번 주 HOT 인기 게시글 — 주식 부동산 커뮤니티" width={1200} height={630} style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }} loading="lazy" />
-    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
 
       {/* ── 헤더 ── */}
       <div style={{ marginBottom: 14 }}>
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>
           <a href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</a>
           <span>›</span>
           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>HOT</span>
@@ -136,11 +136,11 @@ export default async function HotPage() {
               { label: '댓글', value: totalComments, unit: '', max: 50, color: 'var(--accent-green)', icon: '💬' },
               { label: '조회수', value: totalViews, unit: '', max: 5000, color: 'var(--accent-blue)', icon: '👁' },
             ].map(s => (
-              <div key={s.label} style={{ flex: 1, padding: '8px 10px', borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', flexShrink: 0, textAlign: 'center', minWidth: 60 }}>
+              <div key={s.label} style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', flexShrink: 0, textAlign: 'center', minWidth: 60 }}>
                 <div style={{ fontSize: 12, marginBottom: 2 }}>{s.icon}</div>
                 <div style={{ fontSize: 16, fontWeight: 800, color: s.color }}>{s.value.toLocaleString()}{s.unit}</div>
                 <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
-                <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}>
+                <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${Math.min((s.value / s.max) * 100, 100)}%`, borderRadius: 2, background: s.color }} />
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default async function HotPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }} className="mc-g2">
 
         {/* 커뮤니티 TOP 5 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>💬 커뮤니티 TOP</h2>
           {(topPosts ?? []).length === 0 ? (
             <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 12, fontSize: 12 }}>이번 주 데이터가 아직 없어요</p>
@@ -179,7 +179,7 @@ export default async function HotPage() {
         </div>
 
         {/* 블로그 HOT 5 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
           <h2 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>📰 블로그 HOT</h2>
           {(hotBlogs ?? []).length === 0 ? (
             <p style={{ color: 'var(--text-tertiary)', textAlign: 'center', padding: 12, fontSize: 12 }}>블로그 데이터 없음</p>
@@ -210,12 +210,12 @@ export default async function HotPage() {
       {Object.keys(regionPosts).length > 0 && (
         <div style={{ marginBottom: 14 }}>
           <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📍 지역별 HOT</h2>
-          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
+          <div className="apt-pill-scroll" style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
             {REGION_SECTIONS.map(region => {
               const posts = regionPosts[region];
               if (!posts || posts.length === 0) return null;
               return (
-                <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', minWidth: 220, flexShrink: 0 }}>
+                <div key={region} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px', minWidth: 220, flexShrink: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>📍 {region}</div>
                   {posts.map((post: any, i: number) => (
                     <Link key={post.id} href={`/feed/${post.slug || post.id}`} className="kd-feed-card" style={{
@@ -237,7 +237,7 @@ export default async function HotPage() {
 
       {/* ── 하단 CTA ── */}
       <div style={{ textAlign: 'center', padding: '16px 0 32px' }}>
-        <Link href="/feed" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+        <Link href="/feed" style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
           📝 커뮤니티 전체 보기
         </Link>
       </div>

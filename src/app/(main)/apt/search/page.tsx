@@ -71,17 +71,17 @@ export default async function AptSearchPage({ searchParams }: Props) {
   const hasMore = (trades?.length || 0) === perPage;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '실거래 검색' }] }) }} />
       <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', margin: '8px 0 4px' }}>🔍 실거래가 검색</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: '0 0 16px' }}>전국 {totalCount.toLocaleString()}건의 실거래 데이터</p>
 
       {/* 검색 폼 */}
-      <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-lg)' }}>
+      <form method="GET" action="/apt/search" style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
         <input name="q" defaultValue={q} placeholder="단지명, 동 검색..." aria-label="실거래가 검색"
-          style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
-        <button type="submit" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>검색</button>
+          style={{ flex: 1, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
+        <button type="submit" style={{ padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>검색</button>
       </form>
 
       {/* 필터 */}
@@ -93,7 +93,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
           { key: 'large', label: '대형 (85㎡~)' },
         ].map(f => (
           <Link key={f.key} href={`/apt/search?${q ? `q=${q}&` : ''}${region ? `region=${region}&` : ''}${f.key ? `area=${f.key}` : ''}`} style={{
-            padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+            padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 600,
             background: area === f.key ? 'var(--brand)' : 'var(--bg-hover)',
             color: area === f.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
             textDecoration: 'none', border: 'none',
@@ -108,7 +108,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {regionStats.slice(0, 10).map((r: any) => (
               <Link key={r.region_nm} href={`/apt/search?region=${r.region_nm}`} style={{
-                padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
+                padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500,
                 background: region === r.region_nm ? 'var(--brand)' : 'var(--bg-surface)',
                 color: region === r.region_nm ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 textDecoration: 'none', border: '1px solid var(--border)',
@@ -121,7 +121,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
       {/* 결과 */}
       {q && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-md)' }}>&quot;{q}&quot; 검색 결과 {totalCount.toLocaleString()}건</div>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
         {(trades || []).map((t: any) => {
           const amt = t.deal_amount || 0;
           const color = amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : 'var(--accent-green)';
@@ -141,7 +141,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
                   )}
                 </div>
               </div>
-              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', paddingTop: 4, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', paddingTop: 4, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
                 <span>📅 {t.deal_date} · {t.trade_type || '매매'}</span>
                 <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', maxWidth: 100 }}>
                   <div style={{ height: '100%', width: `${Math.min(amt / 1500 , 100)}%`, borderRadius: 2, background: color, opacity: 0.6 }} />
@@ -166,15 +166,15 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
       {/* 페이지네이션 */}
       {totalCount > perPage && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20, marginBottom: 40 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--sp-sm)', marginTop: 'var(--sp-xl)', marginBottom: 40 }}>
           {pageNum > 1 && (
             <Link href={`/apt/search?${q ? `q=${q}&` : ''}${region ? `region=${region}&` : ''}${area ? `area=${area}&` : ''}page=${pageNum - 1}`}
-              style={{ padding: '8px 16px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)' }}>← 이전</Link>
+              style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)' }}>← 이전</Link>
           )}
           <span style={{ padding: '8px 16px', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{pageNum} / {Math.ceil(totalCount / perPage)}</span>
           {hasMore && (
             <Link href={`/apt/search?${q ? `q=${q}&` : ''}${region ? `region=${region}&` : ''}${area ? `area=${area}&` : ''}page=${pageNum + 1}`}
-              style={{ padding: '8px 16px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)' }}>다음 →</Link>
+              style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)' }}>다음 →</Link>
           )}
         </div>
       )}
@@ -185,7 +185,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
 
       {/* 관련 블로그 */}
       {relatedBlogs.length > 0 && (
-        <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ marginTop: 'var(--sp-lg)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>📰 관련 분석 글</div>
           {relatedBlogs.map((b: any) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{
@@ -206,7 +206,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].map(r => (
             <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{
-              padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
+              padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500,
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
               border: '1px solid var(--border)',
             }}>{r}</Link>

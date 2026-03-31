@@ -89,7 +89,7 @@ export function NewBadge() {
 export function Pill({ value, selected, onSelect, label }: { value: string; selected: string; onSelect: (v: string) => void; label?: string }) {
   return (
     <button onClick={() => onSelect(value)} style={{
-      padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+      padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: selected === value ? 'var(--brand)' : 'var(--bg-hover)',
       color: selected === value ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,

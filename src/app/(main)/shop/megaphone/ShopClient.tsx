@@ -60,13 +60,13 @@ export default function ShopClient() {
 
   if (loading) return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
-      <div className="skeleton-shimmer" style={{ height: 200, borderRadius: 14 }} />
+      <div className="skeleton-shimmer" style={{ height: 200, borderRadius: 'var(--radius-lg)' }} />
     </div>
   );
 
   return (
     <PullToRefresh>
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <div style={{ marginBottom: 'var(--sp-2xl)' }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>커뮤니티 상점</h1>
         <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>게시글 홍보 및 프리미엄 기능을 이용하세요</p>
@@ -76,12 +76,12 @@ export default function ShopClient() {
       <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-xl)', flexWrap: 'wrap' }}>
         {categories.map(cat => (
           <button key={cat} onClick={() => setSelectedCategory(cat)} style={{
-            padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
             fontSize: 'var(--fs-sm)', fontWeight: 600,
             background: selectedCategory === cat ? 'var(--brand)' : 'var(--bg-surface)',
             color: selectedCategory === cat ? 'var(--text-inverse)' : 'var(--text-secondary)',
             outline: `1px solid ${selectedCategory === cat ? 'var(--brand)' : 'var(--border)'}`,
-            transition: 'all 0.15s',
+            transition: 'all var(--transition-fast)',
           }}>
             {cat === 'all' ? '전체' : CATEGORY_LABELS[cat] ?? cat}
           </button>
@@ -89,12 +89,12 @@ export default function ShopClient() {
       </div>
 
       {/* 상품 목록 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 'var(--sp-md)' }}>
         {filtered.map(p => (
           <div key={p.id} className="kd-card-hover" style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            borderRadius: 14, padding: '20px 20px 16px',
-            transition: 'all 0.15s', position: 'relative',
+            borderRadius: 'var(--radius-lg)', padding: '20px 20px 16px',
+            transition: 'all var(--transition-fast)', position: 'relative',
           }}>
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-md)' }}>{p.icon ?? '🎁'}</div>
             <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{p.name}</h3>
@@ -105,7 +105,7 @@ export default function ShopClient() {
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-secondary)' }}>원</span>
               </div>
               <button onClick={() => setConfirmProduct(p)} style={{
-                padding: '8px 16px', borderRadius: 8, border: 'none',
+                padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: 'none',
                 background: 'var(--brand)', color: 'var(--text-inverse)',
                 fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer',
                 transition: 'opacity 0.15s',
@@ -124,7 +124,7 @@ export default function ShopClient() {
         </div>
       )}
 
-      <p style={{ marginTop: 20, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'right' }}>
+      <p style={{ marginTop: 'var(--sp-xl)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'right' }}>
         ※ 결제는 토스페이먼츠로 진행됩니다. 구매 전 <a href="/terms" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>이용약관</a> 및 <a href="/refund" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>환불정책</a>을 확인해주세요.
       </p>
 

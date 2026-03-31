@@ -179,7 +179,7 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
       {/* Logo + title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-lg)' }}>
         <div style={{
-          width: 44, height: 44, borderRadius: 12,
+          width: 44, height: 44, borderRadius: 'var(--radius-card)',
           background: 'linear-gradient(135deg, #0F1B3E, #2563EB)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
@@ -203,14 +203,14 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
           { label: 'HOT 토론', color: '#fcd34d', bg: 'rgba(251,191,36,0.12)' },
         ].map(p => (
           <span key={p.label} style={{
-            fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 600,
+            fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-xl)', fontWeight: 600,
             background: p.bg, color: p.color,
           }}>{p.label}</span>
         ))}
       </div>
 
       {/* Benefits */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)', marginBottom: 18 }}>
         {[
           { icon: '🔔', title: '맞춤 푸시 알림', desc: '관심 종목 급등락, 청약 마감 D-day 알림', bg: 'rgba(96,165,250,0.12)' },
           { icon: '💰', title: '매일 출석 포인트', desc: '출석만 해도 포인트 적립, 상점에서 사용', bg: 'rgba(52,211,153,0.12)' },
@@ -218,11 +218,11 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
         ].map(b => (
           <div key={b.title} style={{
             display: 'flex', alignItems: 'flex-start', gap: 10,
-            padding: '10px 12px', borderRadius: 10,
+            padding: '10px 12px', borderRadius: 'var(--radius-md)',
             background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <div style={{
-              width: 32, height: 32, borderRadius: 8,
+              width: 32, height: 32, borderRadius: 'var(--radius-sm)',
               background: b.bg,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 15, flexShrink: 0,
@@ -237,7 +237,7 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
 
       {/* CTA */}
       <button onClick={onSignup} style={{
-        display: 'block', width: '100%', border: 'none', borderRadius: 12,
+        display: 'block', width: '100%', border: 'none', borderRadius: 'var(--radius-card)',
         padding: '15px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
         textAlign: 'center', color: '#fff', background: '#2563eb',
       }}>
@@ -249,10 +249,10 @@ function V1Content({ onSignup, onDismiss }: { onSignup: () => void; onDismiss: (
         localStorage.setItem('kd_cookie_consent', 'accepted');
         onDismiss();
       }} style={{
-        display: 'block', width: '100%', border: 'none', borderRadius: 10,
+        display: 'block', width: '100%', border: 'none', borderRadius: 'var(--radius-md)',
         padding: '12px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
         textAlign: 'center', color: 'rgba(255,255,255,0.7)',
-        background: 'rgba(255,255,255,0.06)', marginTop: 8,
+        background: 'rgba(255,255,255,0.06)', marginTop: 'var(--sp-sm)',
       }}>둘러보기</button>
     </>
   );
@@ -269,7 +269,7 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
       {/* Center icon */}
       <div style={{ textAlign: 'center', marginBottom: 'var(--sp-xl)' }}>
         <div style={{
-          width: 64, height: 64, borderRadius: 16,
+          width: 64, height: 64, borderRadius: 'var(--radius-lg)',
           background: 'linear-gradient(135deg, #0F1B3E, #2563EB)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 12px',
@@ -285,7 +285,7 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
       </div>
 
       {/* Feature cards */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 18 }}>
         <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-card)', padding: '14px 10px', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--fs-lg)', marginBottom: 6 }}>📱</div>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>앱 다운로드 불필요</div>
@@ -302,24 +302,24 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
       {(showGuide || isIOS || isSamsung) && (
         <div style={{
           background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.12)',
-          borderRadius: 10, padding: '12px 14px', marginBottom: 14,
+          borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14,
         }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#93c5fd', marginBottom: 10 }}>
             {isIOS ? 'iOS 설치 방법' : isSamsung ? '삼성 인터넷 설치 방법' : 'Chrome 설치 방법'}
           </div>
           {isIOS ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
               <Step n={1} text={'하단 공유 버튼 (↑) 탭'} />
               <Step n={2} text={'"홈 화면에 추가" 선택'} />
               <Step n={3} text={'"추가" 버튼 탭 — 완료!'} />
             </div>
           ) : isSamsung ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
               <Step n={1} text={'우측 하단 메뉴 (≡) 탭'} />
               <Step n={2} text={'"페이지를 다음에 추가" > "홈 화면"'} />
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
               <Step n={1} text={'주소창 오른쪽 설치 아이콘 (⊕) 클릭'} />
               <Step n={2} text={'"설치" 버튼 클릭 — 완료!'} />
             </div>
@@ -330,7 +330,7 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
       {/* CTA — prompt 있으면 직접 설치, 없으면 가이드 표시 */}
       {!showGuide && !isIOS && !isSamsung && (
         <button onClick={onInstall} style={{
-          display: 'block', width: '100%', border: 'none', borderRadius: 12,
+          display: 'block', width: '100%', border: 'none', borderRadius: 'var(--radius-card)',
           padding: '15px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
           textAlign: 'center', color: '#fff', background: '#2563eb',
         }}>
@@ -340,10 +340,10 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
 
       {/* Sub CTA */}
       <button onClick={onDismiss} style={{
-        display: 'block', width: '100%', border: 'none', borderRadius: 10,
+        display: 'block', width: '100%', border: 'none', borderRadius: 'var(--radius-md)',
         padding: '12px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
         textAlign: 'center', color: 'rgba(255,255,255,0.7)',
-        background: 'rgba(255,255,255,0.06)', marginTop: 8,
+        background: 'rgba(255,255,255,0.06)', marginTop: 'var(--sp-sm)',
       }}>나중에 하기</button>
     </>
   );
@@ -351,7 +351,7 @@ function V2Content({ onInstall, onDismiss, deferredPrompt, showGuide }: { onInst
 
 function Step({ n, text }: { n: number; text: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
       <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(96,165,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#60a5fa', fontWeight: 700, flexShrink: 0 }}>{n}</span>
       <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{text}</span>
     </div>

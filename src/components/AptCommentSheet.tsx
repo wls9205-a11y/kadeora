@@ -62,7 +62,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
                   '📋 사업 진행 상황은 어떤가요?',
                   '🏗️ 주민 의견은 어떤가요?',
                 ]).map((q, i) => (
-                  <button key={i} onClick={() => setText(q.replace(/^.{2}/, ''))} style={{ padding: '6px 12px', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', textAlign: 'left' }}>{q}</button>
+                  <button key={i} onClick={() => setText(q.replace(/^.{2}/, ''))} style={{ padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', textAlign: 'left' }}>{q}</button>
                 ))}
               </div>
             </div>
@@ -81,10 +81,10 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
           <div>
             <div style={{ position: 'relative' }}>
               <textarea value={text} onChange={e => setText(e.target.value.slice(0, 200))} rows={2} maxLength={200} placeholder={houseType === 'sub' ? '이 단지 분양가 어때요? 주변 환경은?' : houseType === 'unsold' ? '미분양 이유가 뭘까요? 할인 소식?' : '사업 진행 상황이나 주변 분위기는?'}
-                style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               <span style={{ position: 'absolute', right: 10, bottom: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{text.length}/200</span>
             </div>
-            <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 8, width: '100%', padding: '10px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 8, fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
+            <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 'var(--sp-sm)', width: '100%', padding: '10px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
               {sending ? '등록 중...' : '등록'}
             </button>
           </div>

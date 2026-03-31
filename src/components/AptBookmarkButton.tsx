@@ -46,13 +46,13 @@ export default function AptBookmarkButton({ aptId, isLoggedIn }: Props) {
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(); }}
       disabled={loading}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        padding: '4px 10px', borderRadius: 8, fontSize: 'var(--fs-xs)', fontWeight: 600,
+        display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)',
+        padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-xs)', fontWeight: 600,
         cursor: loading ? 'not-allowed' : 'pointer',
         border: bookmarked ? '1px solid rgba(251,146,60,0.3)' : '1px solid var(--border)',
         background: bookmarked ? 'rgba(251,146,60,0.12)' : 'var(--bg-hover)',
         color: bookmarked ? 'var(--accent-orange)' : 'var(--text-tertiary)',
-        transition: 'all 0.15s',
+        transition: 'all var(--transition-fast)',
         opacity: loading ? 0.6 : 1,
       }}
       aria-label={bookmarked ? '관심단지 해제' : '관심단지 등록'}

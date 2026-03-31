@@ -88,19 +88,19 @@ export default function InstallBanner() {
       <div style={{
         position: 'fixed', bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))', left: 12, right: 12, zIndex: 60,
         background: 'linear-gradient(135deg, var(--brand), var(--accent-blue))',
-        borderRadius: 16, padding: '14px 16px',
+        borderRadius: 'var(--radius-lg)', padding: 'var(--card-p) var(--sp-lg)',
         boxShadow: '0 8px 32px rgba(37,99,235,0.45)',
-        display: 'flex', alignItems: 'center', gap: 12,
+        display: 'flex', alignItems: 'center', gap: 'var(--sp-md)',
       }}>
         <div style={{ fontSize: 'var(--fs-2xl)', flexShrink: 0 }}>📲</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-inverse)', marginBottom: 2 }}>앱처럼 사용하기</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'rgba(255,255,255,0.9)' }}>홈화면에 추가하면 푸시 알림도 받을 수 있어요!</div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)', flexShrink: 0 }}>
           <button onClick={() => { hap('light'); handleInstall(); }} style={{
             padding: '8px 14px', background: 'var(--bg-primary)', color: 'var(--brand)',
-            border: 'none', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 800, cursor: 'pointer',
+            border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 800, cursor: 'pointer',
           }}>{isIOS ? '방법 보기' : '📲 설치하기'}</button>
           <button onClick={handleDismiss} style={{
             padding: '3px 0', background: 'transparent',
@@ -130,7 +130,7 @@ export default function InstallBanner() {
               </div>
             ))}
             <button onClick={() => { hap('light'); setShowIOSGuide(false); handleDismiss(); logInstall('ios'); setTimeout(requestPush, 1000); }}
-              style={{ marginTop: 20, width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 12, fontSize: 'var(--fs-md)', fontWeight: 700, cursor: 'pointer' }}>
+              style={{ marginTop: 'var(--sp-xl)', width: '100%', padding: '14px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-md)', fontWeight: 700, cursor: 'pointer' }}>
               알겠어요!
             </button>
           </div>

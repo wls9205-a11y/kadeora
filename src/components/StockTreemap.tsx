@@ -64,9 +64,9 @@ export default function StockTreemap({ stocks, isKR }: Props) {
             <button key={sec.name} onClick={() => setSelected(isSelected ? null : sec)} style={{
               gridColumn: `span ${Math.min(cs, 12)}`, gridRow: `span ${Math.min(rs, 5)}`,
               background: bg, border: `1px solid ${isSelected ? col : border}`,
-              borderRadius: 6, cursor: 'pointer', display: 'flex', flexDirection: 'column',
+              borderRadius: 'var(--radius-xs)', cursor: 'pointer', display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center', gap: 1, overflow: 'hidden',
-              transition: 'all 0.15s', padding: 4, fontFamily: 'inherit',
+              transition: 'all var(--transition-fast)', padding: 4, fontFamily: 'inherit',
               boxShadow: isSelected ? `0 0 0 2px ${col}60` : 'none',
             }}>
               {cs >= 2 && rs >= 2 && <span style={{ fontSize: Math.min(10, 7 + cs), fontWeight: 700, color: '#E0EAFF', lineHeight: 1.1, textAlign: 'center' }}>{sec.name}</span>}
@@ -79,7 +79,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
 
       {/* 선택된 섹터 상세 */}
       {selected && (
-        <div style={{ background: 'var(--bg-surface)', border: `1px solid ${selected.avg > 0 ? (isKR ? 'rgba(255,107,107,0.3)' : 'rgba(46,232,165,0.3)') : (isKR ? 'rgba(108,180,255,0.3)' : 'rgba(255,107,107,0.3)')}`, borderRadius: 10, padding: '10px 12px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: `1px solid ${selected.avg > 0 ? (isKR ? 'rgba(255,107,107,0.3)' : 'rgba(46,232,165,0.3)') : (isKR ? 'rgba(108,180,255,0.3)' : 'rgba(255,107,107,0.3)')}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
             <div>
               <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginRight: 8 }}>{selected.name}</span>
@@ -91,11 +91,11 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{selected.count}종목 · 시총 {fmtCap(selected.total)}</div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
             {selected.symbols.map(s => {
               const c = s.pct > 0 ? upC : s.pct < 0 ? dnC : 'var(--text-tertiary)';
               return (
-                <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '5px 6px', borderRadius: 6, background: 'var(--bg-hover)' }}>
+                <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', textDecoration: 'none', padding: '5px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)' }}>
                   <div style={{ width: 3, height: 24, borderRadius: 2, background: c, flexShrink: 0 }} />
                   <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
                   <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
@@ -108,13 +108,13 @@ export default function StockTreemap({ stocks, isKR }: Props) {
       )}
 
       {/* 범례 */}
-      <div style={{ display: 'flex', gap: 12, marginTop: 6, fontSize: 9, color: 'var(--text-tertiary)', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-md)', marginTop: 6, fontSize: 9, color: 'var(--text-tertiary)', alignItems: 'center' }}>
         <span>크기 = 시총</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
           <div style={{ width: 10, height: 10, borderRadius: 2, background: upC, opacity: 0.7 }} />
           <span>{isKR ? '상승' : '상승'}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
           <div style={{ width: 10, height: 10, borderRadius: 2, background: dnC, opacity: 0.7 }} />
           <span>{isKR ? '하락' : '하락'}</span>
         </div>

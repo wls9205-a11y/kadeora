@@ -176,13 +176,13 @@ export default function WriteClient() {
   const canSubmit = !loading && content.trim().length > 0;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px', paddingBottom: 80 }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)', paddingBottom: 80 }}>
       {/* 상단 바 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <Link href="/feed" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600 }}>← 돌아가기</Link>
         <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>글쓰기</span>
         <button onClick={handleSubmit} disabled={!canSubmit} style={{
-          padding: '7px 16px', borderRadius: 12, border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
+          padding: '7px 16px', borderRadius: 'var(--radius-card)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
           background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
           color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           cursor: canSubmit ? 'pointer' : 'not-allowed',
@@ -193,7 +193,7 @@ export default function WriteClient() {
       {draftRestored && !editId && (
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 14px', marginBottom: 'var(--sp-md)', borderRadius: 10,
+          padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-md)',
           background: 'var(--brand-bg)', border: '1px solid rgba(37,99,235,0.2)',
           fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)',
         }}>
@@ -208,18 +208,18 @@ export default function WriteClient() {
       <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-lg)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         {CATEGORIES.map(c => (
           <button key={c.value} onClick={() => setCategory(c.value)} style={{
-            padding: '6px 14px', borderRadius: 999, fontSize: 'var(--fs-sm)', fontWeight: 600,
+            padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-sm)', fontWeight: 600,
             cursor: 'pointer', flexShrink: 0, border: 'none',
             background: category === c.value ? 'var(--brand)' : 'var(--bg-hover)',
             color: category === c.value ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-            transition: 'all 0.15s',
+            transition: 'all var(--transition-fast)',
           }}>
             {c.label}
           </button>
         ))}
         {category === 'local' && (
           <select value={regionId} onChange={e => setRegionId(e.target.value)}
-            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 999, padding: '4px 10px', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flexShrink: 0 }}>
+            style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)', padding: '4px 10px', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', flexShrink: 0 }}>
             {REGIONS.filter(r => r.value !== 'all').map(r => (
               <option key={r.value} value={r.value}>{r.label}</option>
             ))}
@@ -239,7 +239,7 @@ export default function WriteClient() {
           width: '100%', fontSize: 'var(--fs-lg)', fontWeight: 700, padding: '12px 16px',
           border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-          transition: 'border-color 0.2s',
+          transition: 'border-color var(--transition-normal)',
         }}
         onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
         onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
@@ -259,10 +259,10 @@ export default function WriteClient() {
         autoFocus
         style={{
           width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 12, color: 'var(--text-primary)', padding: '12px 16px', marginTop: 8,
+          borderRadius: 'var(--radius-card)', color: 'var(--text-primary)', padding: '12px 16px', marginTop: 'var(--sp-sm)',
           fontSize: 'var(--fs-md)', resize: 'none', fontFamily: 'inherit',
           lineHeight: 1.8, boxSizing: 'border-box', minHeight: 200, outline: 'none',
-          transition: 'border-color 0.2s',
+          transition: 'border-color var(--transition-normal)',
         }}
         onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
         onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
@@ -273,16 +273,16 @@ export default function WriteClient() {
 
       {/* 투표 추가 */}
       {!editId && (
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 'var(--sp-lg)' }}>
           <button
             onClick={() => setShowPollForm(p => !p)}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px',
-              borderRadius: 999, border: `1px solid ${showPollForm ? 'var(--brand)' : 'var(--border)'}`,
+              borderRadius: 'var(--radius-pill)', border: `1px solid ${showPollForm ? 'var(--brand)' : 'var(--border)'}`,
               background: showPollForm ? 'var(--brand-bg, rgba(37,99,235,0.08))' : 'transparent',
               color: showPollForm ? 'var(--brand)' : 'var(--text-tertiary)',
               cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600, fontFamily: 'inherit',
-              transition: 'all 0.15s',
+              transition: 'all var(--transition-fast)',
             }}>
             🗳️ 투표 {showPollForm ? '제거' : '추가'}
           </button>
@@ -293,7 +293,7 @@ export default function WriteClient() {
                 onChange={e => setPollQuestion(e.target.value)}
                 placeholder="투표 질문을 입력하세요"
                 maxLength={100}
-                style={{ width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box', marginBottom: 'var(--sp-sm)' }}
+                style={{ width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', boxSizing: 'border-box', marginBottom: 'var(--sp-sm)' }}
               />
               {pollOptions.map((opt: string, i: number) => (
                 <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
@@ -302,7 +302,7 @@ export default function WriteClient() {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPollOptions((prev: string[]) => { const n = [...prev]; n[i] = e.target.value; return n; })}
                     placeholder={`선택지 ${i + 1}`}
                     maxLength={50}
-                    style={{ flex: 1, padding: '7px 10px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
+                    style={{ flex: 1, padding: '7px 10px', fontSize: 'var(--fs-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)' }}
                   />
                   {pollOptions.length > 2 && (
                     <button onClick={() => setPollOptions((prev: string[]) => prev.filter((_: string, j: number) => j !== i))}
@@ -310,7 +310,7 @@ export default function WriteClient() {
                   )}
                 </div>
               ))}
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
+              <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'center', marginTop: 'var(--sp-xs)' }}>
                 {pollOptions.length < 6 && (
                   <button onClick={() => setPollOptions((prev: string[]) => [...prev, ''])}
                     style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
@@ -322,7 +322,7 @@ export default function WriteClient() {
                   value={pollEndsAt}
                   onChange={e => setPollEndsAt(e.target.value)}
                   min={new Date().toISOString().slice(0, 10)}
-                  style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', color: 'var(--text-primary)' }}
+                  style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '4px 8px', color: 'var(--text-primary)' }}
                 />
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>마감일(선택)</span>
               </div>
@@ -332,13 +332,13 @@ export default function WriteClient() {
       )}
 
       {/* 태그 */}
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: 'var(--sp-lg)' }}>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 'var(--sp-sm)' }}>
           {tags.map(t => (
             <span key={t} style={{
-              fontSize: 'var(--fs-sm)', padding: '3px 10px', borderRadius: 999,
+              fontSize: 'var(--fs-sm)', padding: '3px 10px', borderRadius: 'var(--radius-pill)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
-              display: 'inline-flex', alignItems: 'center', gap: 4,
+              display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)',
             }}>
               #{t}
               <button onClick={() => setTags(prev => prev.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', padding: 0 }} aria-label="닫기">×</button>
@@ -361,7 +361,7 @@ export default function WriteClient() {
             style={{
               width: '100%', padding: '8px 12px', fontSize: 'var(--fs-sm)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              borderRadius: 8, color: 'var(--text-primary)', boxSizing: 'border-box',
+              borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', boxSizing: 'border-box',
             }}
           />
         )}
@@ -372,19 +372,19 @@ export default function WriteClient() {
         onClick={handleSubmit}
         disabled={!canSubmit}
         style={{
-          width: '100%', padding: '14px 0', borderRadius: 12, border: 'none',
-          fontSize: 'var(--fs-md)', fontWeight: 700, marginTop: 20,
+          width: '100%', padding: '14px 0', borderRadius: 'var(--radius-card)', border: 'none',
+          fontSize: 'var(--fs-md)', fontWeight: 700, marginTop: 'var(--sp-xl)',
           background: canSubmit ? 'var(--brand)' : 'var(--bg-hover)',
           color: canSubmit ? 'var(--text-inverse)' : 'var(--text-tertiary)',
           cursor: canSubmit ? 'pointer' : 'not-allowed',
-          transition: 'all 0.15s',
+          transition: 'all var(--transition-fast)',
         }}
       >
         {loading ? '등록 중...' : editId ? '수정하기' : '등록하기'}
       </button>
 
       {/* 경고 */}
-      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 12, lineHeight: 1.5, textAlign: 'center' }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-md)', lineHeight: 1.5, textAlign: 'center' }}>
         광고, 비난, 도배성 글을 남기면 활동이 제한될 수 있어요.
       </div>
 
@@ -393,14 +393,14 @@ export default function WriteClient() {
         position: 'fixed', bottom: 0, left: 0, right: 0,
         background: 'var(--bg-base)', borderTop: '1px solid var(--border)',
         padding: '8px 16px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
-        display: 'flex', alignItems: 'center', gap: 12, zIndex: 50,
+        display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', zIndex: 50,
       }}>
         <button onClick={() => document.querySelector<HTMLInputElement>('[data-image-input]')?.click()}
-          type="button" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', padding: '4px 0' }}>
+          type="button" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', padding: '4px 0' }}>
           <Camera size={18} /> 사진
         </button>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', cursor: 'pointer', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
           <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)}
             style={{ width: 13, height: 13, accentColor: 'var(--brand)' }} />
           익명

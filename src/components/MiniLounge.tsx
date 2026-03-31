@@ -94,7 +94,7 @@ export default function MiniLounge() {
     <div style={{
       background: 'var(--bg-surface)',
       border: '1px solid var(--border)',
-      borderRadius: 12,
+      borderRadius: 'var(--radius-card)',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
@@ -136,7 +136,7 @@ export default function MiniLounge() {
           padding: '6px 8px',
           display: 'flex',
           flexDirection: 'column',
-          gap: 4,
+          gap: 'var(--sp-xs)',
           scrollbarWidth: 'thin',
         }}
       >
@@ -152,7 +152,7 @@ export default function MiniLounge() {
         {msgs.map((m) => (
           <div key={m.id} style={{
             display: 'flex', gap: 6, alignItems: 'flex-start',
-            padding: '3px 4px', borderRadius: 6,
+            padding: '3px 4px', borderRadius: 'var(--radius-xs)',
           }}>
             {/* 아바타 이니셜 */}
             <div style={{
@@ -168,7 +168,7 @@ export default function MiniLounge() {
             </div>
             {/* 내용 */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--sp-xs)', marginBottom: 1 }}>
                 <span style={{
                   fontSize: 10, fontWeight: 700,
                   color: m.is_mine ? 'var(--brand)' : 'var(--text-secondary)',
@@ -207,7 +207,7 @@ export default function MiniLounge() {
             style={{
               flex: 1, border: '1px solid var(--border)', outline: 'none',
               background: 'var(--bg-surface)',
-              borderRadius: 8, padding: '6px 10px',
+              borderRadius: 'var(--radius-sm)', padding: '6px 10px',
               fontSize: 11, color: 'var(--text-primary)',
               minWidth: 0,
             }}
@@ -216,7 +216,7 @@ export default function MiniLounge() {
             onClick={send}
             disabled={!input.trim() || sending}
             style={{
-              width: 28, height: 28, borderRadius: 8, border: 'none',
+              width: 28, height: 28, borderRadius: 'var(--radius-sm)', border: 'none',
               background: input.trim() ? 'var(--brand)' : 'var(--bg-surface)',
               color: input.trim() ? '#fff' : 'var(--text-tertiary)',
               fontSize: 13, fontWeight: 700, cursor: input.trim() ? 'pointer' : 'default',

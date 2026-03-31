@@ -433,7 +433,7 @@ export default async function BlogDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)', flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>블로그</Link>
@@ -458,13 +458,13 @@ export default async function BlogDetailPage({ params }: Props) {
         })()}
 
         {/* 히어로 — 카테고리 + 제목 + 저자 통합 */}
-        <div style={{ borderRadius: 16, padding: '22px 20px 18px', marginBottom: 14, background: `linear-gradient(160deg, var(--bg-surface) 0%, ${catColor}06 50%, var(--bg-surface) 100%)`, border: `1px solid ${catColor}15`, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ borderRadius: 'var(--radius-lg)', padding: '22px 20px 18px', marginBottom: 14, background: `linear-gradient(160deg, var(--bg-surface) 0%, ${catColor}06 50%, var(--bg-surface) 100%)`, border: `1px solid ${catColor}15`, position: 'relative', overflow: 'hidden' }}>
           {/* 데코 원형 */}
           <div style={{ position: 'absolute', top: -50, right: -40, width: 160, height: 160, borderRadius: '50%', background: `${catColor}04`, pointerEvents: 'none' }} />
           <div style={{ position: 'relative' }}>
             {/* 카테고리 + 시리즈 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 6, background: `${catColor}18`, color: catColor, letterSpacing: '0.3px' }}>
+              <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 'var(--radius-xs)', background: `${catColor}18`, color: catColor, letterSpacing: '0.3px' }}>
                 {({ stock: '📈', apt: '🏠', unsold: '🏚️', finance: '💰', general: '📝' } as Record<string, string>)[post.category] || '📝'} {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활 정보' } as Record<string, string>)[post.category] || post.category}
               </span>
               {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }}>HOT</span>}
@@ -474,8 +474,8 @@ export default async function BlogDetailPage({ params }: Props) {
             <h1 style={{ fontSize: 21, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1.4, margin: '0 0 14px', wordBreak: 'keep-all', letterSpacing: '-0.5px' }}>{post.title}</h1>
 
             {/* 저자 바 — 히어로 안 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${catColor}25, var(--brand, #3B7BF6)15)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: `linear-gradient(135deg, ${catColor}25, var(--brand, #3B7BF6)15)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ fontSize: 13, fontWeight: 900, color: catColor }}>K</span>
               </div>
               <div style={{ flex: 1 }}>
@@ -514,7 +514,7 @@ export default async function BlogDetailPage({ params }: Props) {
           const isNearEnd = total > 1 && currentIdx >= Math.floor(total * 0.7);
           return (
             <div style={{
-              marginBottom: 'var(--sp-md)', padding: 12, borderRadius: 10,
+              marginBottom: 'var(--sp-md)', padding: 12, borderRadius: 'var(--radius-md)',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -544,10 +544,10 @@ export default async function BlogDetailPage({ params }: Props) {
           <div style={{ position: 'relative' }}>
             <div className="blog-content" itemProp="articleBody" style={{ maxHeight: 'clamp(400px, 60vh, 800px)', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: htmlTruncated }} />
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(transparent, var(--bg-base))' }} />
-            <div style={{ textAlign: 'center', padding: '20px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: -8, position: 'relative' }}>
+            <div style={{ textAlign: 'center', padding: '20px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: -8, position: 'relative' }}>
               <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>전체 글을 보려면 로그인하세요</div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 10 }}>청약 마감 알림도 받을 수 있어요</div>
-              <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
+              <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
                 카카오로 가입
               </Link>
             </div>
@@ -562,7 +562,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div style={{
           textAlign: 'center', padding: '20px 16px', margin: '24px 0',
           background: 'linear-gradient(135deg, rgba(52,211,153,0.06), rgba(96,165,250,0.06))',
-          borderRadius: 12, border: '1px dashed rgba(52,211,153,0.2)',
+          borderRadius: 'var(--radius-card)', border: '1px dashed rgba(52,211,153,0.2)',
         }}>
           <div style={{ fontSize: 'var(--fs-xl)', marginBottom: 6 }}>🎉</div>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -570,7 +570,7 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
           {related.length > 0 && (
             <Link href={`/blog/${related[0].slug}`} style={{
-              display: 'inline-block', marginTop: 8, padding: '6px 16px', borderRadius: 8,
+              display: 'inline-block', marginTop: 'var(--sp-sm)', padding: '6px 16px', borderRadius: 'var(--radius-sm)',
               background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 12,
               fontWeight: 700, textDecoration: 'none',
             }}>
@@ -582,7 +582,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* 자동생성 콘텐츠 면책 & 출처 표기 (E-E-A-T) */}
         {post.source_type === 'auto' && (
-          <div style={{ marginTop: 24, padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+          <div style={{ marginTop: 'var(--sp-2xl)', padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
             <span style={{ fontWeight: 600 }}>ℹ️ 자동 작성 콘텐츠</span> · 이 글은 카더라의 공공 데이터(국토교통부, 한국거래소 등)를 기반으로 자동 작성되었습니다. 
             {post.data_date && <> · 데이터 기준일: {post.data_date}</>}
             {post.source_ref && <> · 출처: {post.source_ref}</>}
@@ -602,7 +602,7 @@ export default async function BlogDetailPage({ params }: Props) {
           if (!cta) return null;
           return (
             <Link href={cta.href} style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: 16, marginBottom: 'var(--sp-lg)',
+              display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', padding: 16, marginBottom: 'var(--sp-lg)',
               background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))',
               border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textDecoration: 'none', color: 'inherit',
             }}>
@@ -636,14 +636,14 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* 프리미엄 업셀 배너 — 프리미엄 유저에게는 숨김 */}
       {!isPremiumUser && (
-      <div className="kd-card-glow" style={{ padding: '18px 16px', margin: '16px 0', background: 'var(--bg-surface)', borderRadius: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-md)', flexShrink: 0 }}>👑</div>
+      <div className="kd-card-glow" style={{ padding: '18px 16px', margin: '16px 0', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-card)', background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-md)', flexShrink: 0 }}>👑</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>AI가 분석한 종목 리포트 받아보세요</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>프리미엄 멤버십 · 하루 330원</div>
           </div>
-          <Link href="/premium" style={{ padding: '8px 16px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
+          <Link href="/premium" style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 700, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
             자세히
           </Link>
         </div>
@@ -662,13 +662,13 @@ export default async function BlogDetailPage({ params }: Props) {
         {isLoggedIn ? (
           <BlogCommentInput blogPostId={post.id} />
         ) : (
-          <div style={{ padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+          <div style={{ padding: 'var(--card-p) var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', textAlign: 'center', marginBottom: 'var(--sp-lg)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
             <Link href={`/login?redirect=/blog/${slug}`} style={{ color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }}>로그인</Link>하면 의견을 남길 수 있어요
           </div>
         )}
 
         {/* 댓글 목록 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-md)' }}>
           {comments.map((c: Record<string, any>) => {
             const nick = c.author_name || c.profiles?.nickname || '사용자';
             return (
@@ -696,10 +696,10 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* CTA 배너 — 비로그인만 */}
       {!isLoggedIn && (
-      <div style={{ padding: '20px 16px', margin: '20px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, textAlign: 'center' }}>
+      <div style={{ padding: '20px 16px', margin: '20px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
         <div style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>매일 업데이트되는 투자 정보를 받아보세요</div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-lg)' }}>청약 마감 알림 · 급등주 알림 · 미분양 업데이트</div>
-        <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
+        <Link href={`/login?redirect=/blog/${slug}`} style={{ display: 'inline-block', padding: '10px 32px', borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-base)', textDecoration: 'none' }}>
           카카오로 3초 가입
         </Link>
       </div>
@@ -717,15 +717,15 @@ export default async function BlogDetailPage({ params }: Props) {
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{seriesInfo.series.title}</span>
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{idx + 1}/{seriesInfo.posts.length}</span>
             </Link>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
               {prev && (
-                <Link href={`/blog/${prev.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
+                <Link href={`/blog/${prev.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
                   <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>← 이전</div>
                   <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prev.title}</div>
                 </Link>
               )}
               {next && (
-                <Link href={`/blog/${next.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)', textAlign: 'right' }}>
+                <Link href={`/blog/${next.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)', textAlign: 'right' }}>
                   <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>다음 →</div>
                   <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{next.title}</div>
                 </Link>
@@ -738,15 +738,15 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 이전/다음글 네비게이션 (시리즈가 없는 글) */}
       {!post.series_id && (prevPost || nextPost) && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-xl)' }}>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
             {prevPost && (
-              <Link href={`/blog/${prevPost.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
+              <Link href={`/blog/${prevPost.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
                 <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>← 이전글</div>
                 <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prevPost.title}</div>
               </Link>
             )}
             {nextPost && (
-              <Link href={`/blog/${nextPost.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)', textAlign: 'right' }}>
+              <Link href={`/blog/${nextPost.slug}`} style={{ flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)', textAlign: 'right' }}>
                 <div style={{ color: 'var(--text-tertiary)', marginBottom: 2 }}>다음글 →</div>
                 <div style={{ color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nextPost.title}</div>
               </Link>
@@ -759,11 +759,11 @@ export default async function BlogDetailPage({ params }: Props) {
       {(related ?? []).length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10, margin: '0 0 10px' }}>📚 관련 글</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--sp-sm)' }}>
             {related!.slice(0, 4).map((r: any) => (
-              <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'block', padding: '12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
+              <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'block', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden', lineHeight: 1.4 }}>{r.title}</span>
-                <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>
                   {r.view_count > 0 && <span>👀 {r.view_count.toLocaleString()}</span>}
                   <span>{r.category === 'stock' ? '📈' : r.category === 'apt' ? '🏠' : '📝'}</span>
                 </div>
@@ -777,9 +777,9 @@ export default async function BlogDetailPage({ params }: Props) {
       {relatedSites.length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🏢 관련 현장 정보</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
             {relatedSites.map((s: Record<string, any>) => (
-              <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
+              <Link key={s.slug} href={`/apt/${s.slug}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{s.region} {s.sigungu || ''}</div>
               </Link>
@@ -792,12 +792,12 @@ export default async function BlogDetailPage({ params }: Props) {
       {relatedStocks.length > 0 && (
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>📈 관련 종목</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
             {relatedStocks.map((s: Record<string, any>) => {
               const pct = Number(s.change_pct);
               const isUp = pct > 0;
               return (
-                <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
+                <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ flex: '1 1 calc(33.3% - 6px)', minWidth: 140, padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none' }}>
                   <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: isUp ? 'var(--accent-red)' : 'var(--accent-blue)', marginTop: 2 }}>
                     {s.currency === 'USD' ? '$' : '₩'}{Number(s.price).toLocaleString()} {isUp ? '▲' : '▼'}{Math.abs(pct).toFixed(2)}%

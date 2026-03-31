@@ -130,13 +130,13 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
 
       {/* ═══ 그라데이션 히어로 ═══ */}
       <div style={{
-        borderRadius: 14, padding: '18px 18px 14px', marginBottom: 14, position: 'relative', overflow: 'hidden',
+        borderRadius: 'var(--radius-lg)', padding: '18px 18px 14px', marginBottom: 14, position: 'relative', overflow: 'hidden',
         background: 'linear-gradient(135deg, #0F1B3E 0%, rgba(59,123,246,0.3) 100%)',
         border: '1px solid rgba(59,123,246,0.15)',
       }}>
         <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(59,123,246,0.08)' }} />
         <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(59,123,246,0.05)' }} />
-        <nav style={{ fontSize: 10, color: 'rgba(232,237,245,0.4)', marginBottom: 6, display: 'flex', gap: 4, position: 'relative', flexWrap: 'wrap' }}>
+        <nav style={{ fontSize: 10, color: 'rgba(232,237,245,0.4)', marginBottom: 6, display: 'flex', gap: 'var(--sp-xs)', position: 'relative', flexWrap: 'wrap' }}>
           <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link><span>›</span>
           <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>부동산</Link><span>›</span>
           {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'rgba(232,237,245,0.9)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'rgba(232,237,245,0.9)' }}>단지백과</span>)}
@@ -145,14 +145,14 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
           <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 900, margin: 0, color: '#E8EDF5' }}>
             🏢 {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             {selectedRegion && (
               <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.15)', padding: '3px 10px', borderRadius: 6 }}>✕ 전체</Link>
             )}
             <span style={{ fontSize: 12, color: 'rgba(232,237,245,0.6)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8, position: 'relative' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--sp-sm)', position: 'relative' }}>
           <ShareButtons title={`${selectedRegion || '전국'} 단지백과 — ${displayCount.toLocaleString()}개 아파트 비교`} postId="complex" />
         </div>
       </div>
@@ -166,7 +166,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
         ].map(k => (
           <div key={k.label} style={{
             background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))',
-            borderRadius: 10, padding: '10px 8px', textAlign: 'center',
+            borderRadius: 'var(--radius-md)', padding: '10px 8px', textAlign: 'center',
             border: '1px solid var(--border)',
           }}>
             <div style={{ fontSize: 14, marginBottom: 2 }}>{k.icon}</div>
@@ -182,7 +182,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
 
         {/* 도넛 + 범례 */}
         <div style={{
-          display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap',
+          display: 'flex', gap: 'var(--sp-md)', alignItems: 'center', flexWrap: 'wrap',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-card)', padding: '10px 12px', marginBottom: 6, overflow: 'hidden',
         }}>
@@ -230,14 +230,14 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
             const pct = maxCount > 0 ? (r.count / maxCount) * 100 : 0;
             return (
               <Link key={r.region} href={isActive ? '/apt/complex' : `/apt/complex?region=${encodeURIComponent(r.region)}`} style={{
-                display: 'flex', alignItems: 'center', gap: 4,
+                display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
                 padding: '6px 8px', textDecoration: 'none',
                 background: isActive ? 'rgba(59,123,246,0.06)' : 'var(--bg-surface)',
                 border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                 borderRadius: 7, width: '100%', fontFamily: 'inherit',
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-xs)' }}>
                     <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>

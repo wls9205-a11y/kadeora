@@ -29,14 +29,14 @@ export default function FontSizeControl() {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
       <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginRight: 4 }}>글자</span>
       {SIZES.map(s => (
         <button
           key={s.value}
           onClick={() => change(s.value)}
           style={{
-            padding: '3px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+            padding: '3px 8px', borderRadius: 'var(--radius-xs)', border: 'none', cursor: 'pointer',
             fontSize: 'var(--fs-xs)', fontWeight: size === s.value ? 700 : 400,
             background: size === s.value ? 'var(--brand)' : 'var(--bg-hover)',
             color: size === s.value ? 'var(--text-inverse)' : 'var(--text-tertiary)',

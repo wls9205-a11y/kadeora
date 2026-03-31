@@ -69,7 +69,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
           { label: '예상 수익', val: holdings.length ? profitStr : '—', color: profitColor },
           { label: '평균 등락', val: holdings.length ? `${weightedPct > 0 ? '+' : ''}${weightedPct.toFixed(2)}%` : '—', color: profitColor },
         ].map(kpi => (
-          <div key={kpi.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+          <div key={kpi.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 10px' }}>
             <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 3 }}>{kpi.label}</div>
             <div style={{ fontSize: 16, fontWeight: 900, color: kpi.color, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.3px' }}>{kpi.val}</div>
           </div>
@@ -77,7 +77,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       </div>
 
       {/* 원금 슬라이더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 10 }}>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace', flexShrink: 0 }}>원금</span>
         <input type="range" min={100} max={10000} step={100} value={amount} onChange={e => setAmount(+e.target.value)}
           style={{ flex: 1, accentColor: 'var(--brand)', height: 4, cursor: 'pointer' }} />
@@ -89,9 +89,9 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
         <input value={search} onChange={e => { setSearch(e.target.value); setShowSearch(true); }} onFocus={() => setShowSearch(true)}
           placeholder="종목 검색해서 추가..." className="kd-search-input" style={{ width: '100%' }} />
         {showSearch && searchResults.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, zIndex: 50, marginTop: 4, overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', zIndex: 50, marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
             {searchResults.map(s => (
-              <button aria-label="닫기" key={s.symbol} onClick={() => addHolding(s)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', borderBottom: '1px solid var(--border)' }}>
+              <button aria-label="닫기" key={s.symbol} onClick={() => addHolding(s)} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
                 <span style={{ fontSize: 11, fontWeight: 700, color: (s.change_pct ?? 0) > 0 ? (s.currency === 'USD' ? 'var(--accent-green)' : 'var(--accent-red)') : 'var(--accent-blue)' }}>{(s.change_pct ?? 0) > 0 ? '+' : ''}{(s.change_pct ?? 0).toFixed(2)}%</span>
@@ -105,9 +105,9 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       {!holdings.length && (
         <div style={{ marginBottom: 10 }}>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 5 }}>시총 상위 빠른 추가</div>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
             {quickStocks.map(s => (
-              <button key={s.symbol} onClick={() => addHolding(s)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 6, background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+              <button key={s.symbol} onClick={() => addHolding(s)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
                 {s.name.length > 5 ? s.name.slice(0, 5) + '..' : s.name}
               </button>
             ))}
@@ -119,7 +119,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
       {holdings.length > 0 && (
         <>
           {/* 비율 바 */}
-          <div style={{ height: 20, borderRadius: 6, overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
+          <div style={{ height: 20, borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
             {holdings.map((h, i) => (
               <div key={h.stock.symbol} style={{ width: `${h.alloc}%`, background: SEG_COLORS[i % SEG_COLORS.length], display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'width .3s', overflow: 'hidden' }}>
                 {h.alloc > 10 && <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap' }}>{h.stock.name.slice(0, 4)}</span>}

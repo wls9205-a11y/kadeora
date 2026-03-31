@@ -45,7 +45,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
       {/* 티커 테이프 */}
-      <div style={{ background: 'var(--bg-hover)', borderRadius: 8, overflow: 'hidden', marginBottom: 10, height: 28, position: 'relative' }}>
+      <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', marginBottom: 10, height: 28, position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', position: 'absolute', whiteSpace: 'nowrap', animation: 'kd-ticker 30s linear infinite' }}>
           {[...tickerStocks, ...tickerStocks].map((s, i) => {
             const pct = s.change_pct ?? 0;
@@ -71,9 +71,9 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
       </div>
 
       {/* 공포탐욕 + VIX */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 10 }}>
         {/* 공포탐욕 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
             <span>공포탐욕 지수</span><span>CNN</span>
           </div>
@@ -100,7 +100,7 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
         </div>
 
         {/* 환율 + 심리 요약 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
           <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace', marginBottom: 6 }}>USD/KRW</div>
           <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: 'var(--sp-xs)' }}>
             {exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}
@@ -121,10 +121,10 @@ export default function GlobalPanorama({ stocks, exchangeRate, briefingKR, brief
               const c = sec.avg > 0 ? '#2EE8A5' : '#FF6B6B';
               const barW = Math.min(Math.abs(sec.avg) / 3 * 100, 100);
               return (
-                <div key={sec.name} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '7px 8px' }}>
+                <div key={sec.name} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '7px 8px' }}>
                   <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{sec.name}</div>
                   <div style={{ fontSize: 12, fontWeight: 800, color: c, fontFamily: 'monospace' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</div>
-                  <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 4, overflow: 'hidden' }}>
+                  <div style={{ height: 2, borderRadius: 1, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
                     <div style={{ width: `${barW}%`, height: '100%', background: c, opacity: 0.7 }} />
                   </div>
                 </div>

@@ -32,16 +32,16 @@ export default function FeedbackButton() {
   return (
     <>
       <button onClick={() => setOpen(true)} style={{
-        width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid var(--border)',
+        width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
         background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)',
-        fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8,
+        fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
       }}>
         💬 건의 · 피드백 보내기
       </button>
       <BottomSheet open={open} onClose={() => setOpen(false)} title="건의 · 피드백" maxWidth={480}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <select value={category} onChange={e => setCategory(e.target.value)} style={{
-            width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)',
+            width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
             background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', cursor: 'pointer',
           }}>
             <option value="">카테고리 선택 (선택)</option>
@@ -52,11 +52,11 @@ export default function FeedbackButton() {
           </select>
           <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="어떤 점이 불편하셨나요? 어떤 기능이 있었으면 좋겠나요?" rows={5}
             style={{
-              width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: 8, border: '1px solid var(--border)',
+              width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
               background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', resize: 'vertical', fontFamily: 'inherit',
             }} />
           <button onClick={handleSubmit} disabled={submitting || !message.trim()} style={{
-            width: '100%', padding: '13px', borderRadius: 10, border: 'none',
+            width: '100%', padding: '13px', borderRadius: 'var(--radius-md)', border: 'none',
             background: message.trim() ? 'var(--brand)' : 'var(--bg-hover)',
             color: message.trim() ? '#fff' : 'var(--text-tertiary)',
             fontSize: 'var(--fs-base)', fontWeight: 700,

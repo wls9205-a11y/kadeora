@@ -152,7 +152,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (showMention && mentionList.length > 0) { if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => Math.min(i + 1, mentionList.length - 1)); return; } if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => Math.max(i - 1, 0)); return; } if (e.key === 'Enter') { e.preventDefault(); selectMention(mentionList[mentionIndex].nickname); return; } if (e.key === 'Escape') { setShowMention(false); return; } } if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden', maxHeight: 'calc(100dvh - 200px)' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden', maxHeight: 'calc(100dvh - 200px)' }}>
       {/* 라운지 공지 */}
       <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
         <span>💬 오늘의 라운지 ({new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}) — 채팅 1회 = 1P</span>
@@ -173,7 +173,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
           return (
             <div key={msg.id} style={{ marginBottom: 1 }}>
               {/* Main message */}
-              <div style={{ display: 'flex', gap: 10, padding: '8px 12px', borderRadius: 8, transition: 'background 0.1s' }}
+              <div style={{ display: 'flex', gap: 10, padding: '8px 12px', borderRadius: 'var(--radius-sm)', transition: 'background 0.1s' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                 <div onClick={() => openSheet(p)} style={{ width: 34, height: 34, borderRadius: '50%', background: avc(msg.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 800, flexShrink: 0, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{nick[0]}</div>
@@ -184,7 +184,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                     <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(msg.created_at)}</span>
                   </div>
                   <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', margin: '0 0 5px', lineHeight: 1.5, wordBreak: 'break-word' }}>{renderContent(msg.content)}</p>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'center' }}>
                     <button onClick={() => toggleLike(msg.id)} style={{ display: 'flex', alignItems: 'center', gap: 3, background: liked ? 'rgba(248,113,113,0.07)' : 'none', border: 'none', cursor: user ? 'pointer' : 'default', color: liked ? 'var(--accent-red)' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: '2px 6px', borderRadius: 4, fontWeight: liked ? 700 : 400 }}>
                       {liked ? '❤️' : '🤍'} {lc > 0 ? lc : ''}
                     </button>
@@ -208,12 +208,12 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                     const rg = GRADE_INFO[rp?.grade ?? 1] ?? GRADE_INFO[1];
                     const rNick = rp?.nickname ?? '사용자';
                     return (
-                      <div key={reply.id} style={{ display: 'flex', gap: 8, padding: '6px 8px', borderRadius: 6, transition: 'background 0.1s' }}
+                      <div key={reply.id} style={{ display: 'flex', gap: 'var(--sp-sm)', padding: '6px 8px', borderRadius: 'var(--radius-xs)', transition: 'background 0.1s' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                         <div onClick={() => openSheet(rp)} style={{ width: 24, height: 24, borderRadius: '50%', background: avc(reply.user_id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 800, flexShrink: 0, cursor: 'pointer' }}>{rNick[0]}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 1 }}>
                             <span onClick={() => openSheet(rp)} style={{ fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', color: 'var(--text-primary)' }}>{rNick}</span>
                             <span style={{ fontSize: 'var(--fs-xs)', background: `${rg.color}18`, color: rg.color, padding: '1px 4px', borderRadius: 3, fontWeight: 600 }}>{rg.emoji}</span>
                             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(reply.created_at)}</span>
@@ -241,13 +241,13 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
         )}
         {user ? (
           <div style={{ padding: '10px 12px' }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'center' }}>
               <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: avc(user.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>{(myNickname ?? '나')[0]}</div>
               <div style={{ flex: 1, position: 'relative' }}>
                 {showMention && mentionList.length > 0 && (
-                  <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 'var(--sp-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', zIndex: 100, boxShadow: '0 -4px 16px rgba(0,0,0,0.12)' }}>
+                  <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 'var(--sp-xs)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', zIndex: 100, boxShadow: '0 -4px 16px rgba(0,0,0,0.12)' }}>
                     {mentionList.map((u, i) => (
-                      <div key={u.id} onClick={() => selectMention(u.nickname ?? '')} style={{ padding: '7px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--fs-sm)', background: i === mentionIndex ? 'var(--bg-hover)' : 'transparent' }}>
+                      <div key={u.id} onClick={() => selectMention(u.nickname ?? '')} style={{ padding: '7px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', background: i === mentionIndex ? 'var(--bg-hover)' : 'transparent' }}>
                         <div style={{ width: 22, height: 22, borderRadius: '50%', background: avc(u.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{(u.nickname ?? '?')[0]}</div>
                         <span style={{ fontWeight: 600 }}>@{u.nickname}</span>
                         <span style={{ fontSize: 'var(--fs-xs)', color: (GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).color, marginLeft: 'auto' }}>{(GRADE_INFO[u.grade ?? 1] ?? GRADE_INFO[1]).emoji}</span>
@@ -258,8 +258,8 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                 <textarea id="chat-input" value={input} onChange={e => handleInput(e.target.value)} onKeyDown={handleKeyDown}
                   placeholder={replyTarget ? `@${replyTarget.nickname}에게 답글...` : '소문 남기기... (@멘션, Enter 전송)'}
                   maxLength={300} rows={1}
-                  style={{ width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', padding: '10px 58px 10px 12px', fontSize: 16, fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5, minHeight: 42 }} />
-                <button onClick={send} disabled={!input.trim() || sending} style={{ position: 'absolute', right: 6, bottom: 6, padding: '6px 14px', borderRadius: 8, border: 'none', background: input.trim() ? (replyTarget ? 'var(--accent-purple)' : 'var(--brand)') : 'transparent', color: input.trim() ? 'white' : 'var(--text-tertiary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: input.trim() ? 'pointer' : 'default', minHeight: 32 }}>{replyTarget ? '↩' : '↑'}</button>
+                  style={{ width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', padding: '10px 58px 10px 12px', fontSize: 16, fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.5, minHeight: 42 }} />
+                <button onClick={send} disabled={!input.trim() || sending} style={{ position: 'absolute', right: 6, bottom: 6, padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none', background: input.trim() ? (replyTarget ? 'var(--accent-purple)' : 'var(--brand)') : 'transparent', color: input.trim() ? 'white' : 'var(--text-tertiary)', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: input.trim() ? 'pointer' : 'default', minHeight: 32 }}>{replyTarget ? '↩' : '↑'}</button>
               </div>
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
       {/* Mini Profile Sheet */}
       {sheetUser && (
         <BottomSheet open={!!sheetUser} onClose={() => setSheetUser(null)} title={sheetUser.nickname ?? '사용자'} maxWidth={480}>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 'var(--sp-xl)' }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-lg)', alignItems: 'center', marginBottom: 'var(--sp-xl)' }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', background: avc(sheetUser.id), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', fontWeight: 700 }}>{(sheetUser.nickname ?? '?')[0]}</div>
               <div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: (GRADE_INFO[sheetUser.grade ?? 1] ?? GRADE_INFO[1]).color, fontWeight: 600 }}>
@@ -282,10 +282,10 @@ export default function ChatRoom({ user, myNickname, room = 'lounge' }: { user: 
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <a href={`/profile/${sheetUser.id}`} onClick={() => setSheetUser(null)} style={{ flex: 1, padding: '10px 0', borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', fontWeight: 600, textAlign: 'center', textDecoration: 'none', display: 'block' }}>프로필 보기</a>
+            <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
+              <a href={`/profile/${sheetUser.id}`} onClick={() => setSheetUser(null)} style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', fontWeight: 600, textAlign: 'center', textDecoration: 'none', display: 'block' }}>프로필 보기</a>
               {user && user.id !== sheetUser.id && (
-                <button onClick={toggleFollow} style={{ flex: 1, padding: '10px 0', borderRadius: 10, border: 'none', background: isFollowing ? 'var(--bg-hover)' : 'var(--brand)', color: isFollowing ? 'var(--text-secondary)' : 'white', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer' }}>{isFollowing ? '팔로잉 ✓' : '팔로우'}</button>
+                <button onClick={toggleFollow} style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-md)', border: 'none', background: isFollowing ? 'var(--bg-hover)' : 'var(--brand)', color: isFollowing ? 'var(--text-secondary)' : 'white', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer' }}>{isFollowing ? '팔로잉 ✓' : '팔로우'}</button>
               )}
             </div>
         </BottomSheet>

@@ -61,7 +61,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: 'var(--bg-surface)', borderRadius: 16, border: '1px solid var(--border)',
+          background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)',
           padding: 28, maxWidth: 440, width: '100%',
         }}
         className="animate-modalIn"
@@ -78,7 +78,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
             <button
               onClick={onClose}
               className="kd-btn kd-btn-primary"
-              style={{ padding: '10px 24px', fontSize: 'var(--fs-sm)' }}
+              style={{ padding: 'var(--sp-md) var(--sp-2xl)', fontSize: 'var(--fs-sm)' }}
             >
               확인
             </button>
@@ -89,16 +89,16 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
               🚨 콘텐츠 신고
             </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 'var(--sp-lg)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
               {REPORT_REASONS.map(r => (
                 <label
                   key={r.value}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '10px 14px', borderRadius: 10, cursor: 'pointer',
+                    padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', cursor: 'pointer',
                     border: `1px solid ${reason === r.value ? 'var(--brand)' : 'var(--border)'}`,
                     background: reason === r.value ? 'var(--brand)' : 'transparent',
-                    transition: 'all 0.15s',
+                    transition: 'all var(--transition-fast)',
                   }}
                 >
                   <input
@@ -127,7 +127,7 @@ export function ReportModal({ targetType, targetId, onClose }: ReportModalProps)
               maxLength={500}
               rows={3}
               style={{
-                width: '100%', padding: '10px 14px', borderRadius: 10, boxSizing: 'border-box',
+                width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)', boxSizing: 'border-box',
                 border: '1px solid var(--border)', background: 'var(--bg-base)',
                 color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none', resize: 'none',
                 marginBottom: 'var(--sp-lg)', fontFamily: 'inherit', lineHeight: 1.5,

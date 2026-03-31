@@ -47,7 +47,7 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
           padding: 24,
         }}>
           <div style={{
-            background: 'var(--bg-surface)', borderRadius: 20, padding: '32px 28px',
+            background: 'var(--bg-surface)', borderRadius: 'var(--radius-xl)', padding: '32px 28px',
             maxWidth: 380, width: '100%', textAlign: 'center',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           }}>
@@ -60,7 +60,7 @@ export function GuestGate({ children, isLoggedIn }: { children: React.ReactNode;
               무료로 모든 기능을 이용할 수 있어요
             </div>
             <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
-              display: 'block', padding: '12px 0', borderRadius: 12,
+              display: 'block', padding: '12px 0', borderRadius: 'var(--radius-card)',
               background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-md)',
               textDecoration: 'none', marginBottom: 10,
             }}>

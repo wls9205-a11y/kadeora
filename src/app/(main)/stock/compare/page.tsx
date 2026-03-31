@@ -92,10 +92,10 @@ export default function StockComparePage() {
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={placeholder} aria-label={placeholder}
             style={{ width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
           {search && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, marginTop: 4, maxHeight: 200, overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: 'var(--sp-xs)', maxHeight: 200, overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
               {filterStocks(search).map(s => (
                 <button aria-label="닫기" key={s.symbol} onClick={() => { onSelect(s); setSearch(''); }} style={{
-                  display: 'flex', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                  display: 'flex', justifyContent: 'space-between', width: '100%', padding: 'var(--sp-md) var(--card-p)',
                   background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)',
                   borderBottom: '1px solid var(--border)', textAlign: 'left',
                 }}>
@@ -112,7 +112,7 @@ export default function StockComparePage() {
   );
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <Link href="/stock" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
       <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 12px' }}>종목 비교</h1>
 
@@ -125,7 +125,7 @@ export default function StockComparePage() {
 
       {/* 비교 테이블 */}
       {stockA && stockB ? (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px 14px 14px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '4px 14px 14px' }}>
           {/* 헤더 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', gap: 6, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
             <div style={{ textAlign: 'right' }}>
@@ -159,10 +159,10 @@ export default function StockComparePage() {
           <CompareRow label="시장" a={stockA.market} b={stockB.market} />
 
           {/* 관련 블로그 */}
-          <div style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Link href={`/stock/${stockA.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{stockA.name} 상세 →</Link>
-              <Link href={`/stock/${stockB.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{stockB.name} 상세 →</Link>
+          <div style={{ marginTop: 'var(--sp-lg)' }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
+              <Link href={`/stock/${stockA.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{stockA.name} 상세 →</Link>
+              <Link href={`/stock/${stockB.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{stockB.name} 상세 →</Link>
             </div>
           </div>
 
@@ -182,14 +182,14 @@ export default function StockComparePage() {
             const h = 120;
             const toPoints = (vals: number[]) => vals.map((v, i) => `${(i / (vals.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
             return (
-              <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+              <div style={{ marginTop: 'var(--sp-lg)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📈 30일 수익률 비교 (%)</div>
                 <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: h }}>
                   <polyline points={toPoints(nA)} fill="none" stroke="var(--brand)" strokeWidth="2" />
                   <polyline points={toPoints(nB)} fill="none" stroke="var(--accent-orange)" strokeWidth="2" />
                   <line x1="0" y1={h - ((0 - min) / range) * h} x2={w} y2={h - ((0 - min) / range) * h} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4" />
                 </svg>
-                <div style={{ display: 'flex', gap: 16, marginTop: 6, fontSize: 11 }}>
+                <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 6, fontSize: 11 }}>
                   <span style={{ color: 'var(--brand)', fontWeight: 700 }}>● {stockA.name}</span>
                   <span style={{ color: 'var(--accent-orange)', fontWeight: 700 }}>● {stockB.name}</span>
                 </div>
@@ -206,9 +206,9 @@ export default function StockComparePage() {
       )}
 
       {/* 인기 비교 조합 */}
-      <div style={{ marginTop: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 12 }}>
+      <div style={{ marginTop: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 12 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>인기 비교</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
           {[
             ['삼성전자', 'SK하이닉스'], ['현대차', '기아'], ['NAVER', '카카오'],
             ['삼성바이오로직스', '셀트리온'], ['LG에너지솔루션', '삼성SDI'],
@@ -219,7 +219,7 @@ export default function StockComparePage() {
               if (sa) setStockA(sa);
               if (sb2) setStockB(sb2);
             }} style={{
-              padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600,
+              padding: '4px 10px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600,
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}>

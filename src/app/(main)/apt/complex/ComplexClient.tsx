@@ -101,13 +101,13 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
   return (
     <>
       {/* 연차 pill + 정렬 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         {(() => {
           const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
           return (
           <>
         <button aria-label="닫기" onClick={() => setSelectedAge(null)} style={{
-          padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+          padding: '4px 10px', borderRadius: 'var(--radius-xs)', cursor: 'pointer',
           fontSize: 10, fontWeight: !selectedAge ? 700 : 500,
           background: !selectedAge ? 'rgba(59,123,246,0.2)' : 'transparent',
           color: !selectedAge ? 'var(--brand)' : 'var(--text-tertiary)',
@@ -118,7 +118,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           const c = ageColors[g] || '#6B82A0';
           return (
             <button key={g} onClick={() => setSelectedAge(active ? null : g)} style={{
-              padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+              padding: '4px 10px', borderRadius: 'var(--radius-xs)', cursor: 'pointer',
               fontSize: 10, fontWeight: active ? 700 : 500,
               background: active ? `${c}20` : 'transparent',
               color: active ? c : 'var(--text-tertiary)',
@@ -129,7 +129,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           </>);
         })()}
         <select value={sortBy} onChange={(e: any) => setSortBy(e.target.value)} style={{
-          marginLeft: 'auto', padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)',
+          marginLeft: 'auto', padding: '4px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 10, cursor: 'pointer',
         }}>
           <option value="saleCount">거래순</option>
@@ -150,7 +150,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
             const c = ageColors[a.group] || '#6B82A0';
             return (
               <div key={a.group} onClick={() => setSelectedAge(selectedAge === a.group ? null : a.group)} style={{
-                flex: 1, background: on ? 'var(--bg-hover)' : 'var(--bg-surface)', borderRadius: 8, padding: '7px 2px',
+                flex: 1, background: on ? 'var(--bg-hover)' : 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', padding: '7px 2px',
                 textAlign: 'center', cursor: 'pointer',
                 border: on ? `1px solid ${c}60` : '1px solid var(--border)',
                 boxShadow: on ? `0 0 10px ${c}25` : 'none',
@@ -170,12 +170,12 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
       })()}
 
       {/* 검색 + 카운트 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 14, alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: '1 1 200px' }}>
           <input type="text" value={searchQuery} onChange={(e: any) => handleSearch(e.target.value)}
             placeholder="🔍 단지명 검색..."
             style={{
-              width: '100%', padding: '9px 14px', borderRadius: 10,
+              width: '100%', padding: '9px 14px', borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border)', background: 'var(--bg-surface)',
               color: 'var(--text-primary)', fontSize: 12, outline: 'none', boxSizing: 'border-box',
             }}
@@ -201,7 +201,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           const trend = makeTrend(c.lastPrice);
           return (
             <Link key={`${c.aptName}__${c.sigungu}`} href={`/apt/complex/${encodeURIComponent(c.aptName)}`} style={{
-              display: 'block', padding: '14px 12px', borderRadius: 14,
+              display: 'block', padding: '14px 12px', borderRadius: 'var(--radius-lg)',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderTop: '3px solid var(--brand)',
               textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
@@ -244,13 +244,13 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               </div>
 
               {/* 3열 부가 데이터 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4, marginBottom: 'var(--sp-sm)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
                 {[
                   { label: '전세', value: c.jeonse > 0 ? fmtAmount(c.jeonse) : '—' },
                   { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—' },
                   { label: '평당가', value: c.pyeongPrice > 0 ? fmtAmount(c.pyeongPrice) : '—' },
                 ].map(p => (
-                  <div key={p.label} style={{ background: 'var(--bg-hover)', borderRadius: 6, padding: '4px 4px', textAlign: 'center' }}>
+                  <div key={p.label} style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '4px 4px', textAlign: 'center' }}>
                     <div style={{ fontSize: 7, color: 'var(--text-tertiary)' }}>{p.label}</div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>{p.value}</div>
                   </div>

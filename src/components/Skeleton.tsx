@@ -37,7 +37,7 @@ export function SkeletonCard({ lines = 3 }: { lines?: number }) {
         {Array.from({ length: lines - 1 }).map((_, i) => (
           <Bone key={i} w={`${70 - i * 15}%`} h={14} mb={6} />
         ))}
-        <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 'var(--sp-md)' }}>
           <Bone w={50} h={14} />
           <Bone w={50} h={14} />
           <Bone w={50} h={14} />
@@ -83,7 +83,7 @@ export function SkeletonAptCard() {
         </div>
         <Bone w="80%" h={13} mb={6} />
         <Bone w="45%" h={13} mb={10} />
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
           <Bone w="33%" h={28} r={6} />
           <Bone w="33%" h={28} r={6} />
           <Bone w="33%" h={28} r={6} />

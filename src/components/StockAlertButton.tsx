@@ -57,7 +57,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
   return (
     <div>
       <button onClick={() => { if (!userId) { info('로그인하면 알림을 설정할 수 있어요'); return; } setOpen(!open); }} style={{
-        display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8,
+        display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '6px 12px', borderRadius: 'var(--radius-sm)',
         background: myAlerts.length > 0 ? 'rgba(251,191,36,0.1)' : 'var(--bg-hover)',
         border: myAlerts.length > 0 ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
         color: myAlerts.length > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)',
@@ -86,19 +86,19 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           {[{ key: 'above' as const, label: '📈 이상 도달' }, { key: 'below' as const, label: '📉 이하 도달' }].map(t => (
             <button key={t.key} onClick={() => setAlertType(t.key)} style={{
-              flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 600,
+              flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 600,
               background: alertType === t.key ? 'var(--brand)' : 'var(--bg-hover)',
               color: alertType === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
               border: alertType === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer',
             }}>{t.label}</button>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
           <input type="number" value={threshold} onChange={e => setThreshold(e.target.value)}
             placeholder={`목표가 (현재 ${fmtPrice(currentPrice)})`} aria-label="목표가 입력"
-            style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
+            style={{ flex: 1, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
           <button onClick={addAlert} disabled={saving || !threshold} style={{
-            padding: '10px 20px', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)',
+            padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: 'var(--text-inverse)',
             fontSize: 'var(--fs-sm)', fontWeight: 700, border: 'none', cursor: 'pointer',
             opacity: saving || !threshold ? 0.5 : 1,
           }}>{saving ? '...' : '추가'}</button>

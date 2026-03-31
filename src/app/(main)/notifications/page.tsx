@@ -102,11 +102,11 @@ export default function NotificationsPage() {
 
   return (
     <PullToRefresh>
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-lg)' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             🔔 알림
             <a href="/notifications/settings" style={{ fontSize: 14, color: 'var(--text-tertiary)', textDecoration: 'none' }} title="알림 설정">⚙️</a>
           </h1>
@@ -119,7 +119,7 @@ export default function NotificationsPage() {
         <div style={{ display: 'flex', gap: 6 }}>
           {readCount > 0 && (
             <button onClick={deleteRead} style={{
-              padding: '7px 14px', borderRadius: 20, border: '1px solid rgba(248,113,113,0.3)',
+              padding: '7px 14px', borderRadius: 'var(--radius-xl)', border: '1px solid rgba(248,113,113,0.3)',
               background: 'transparent', color: 'var(--accent-red)',
               fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
             }}>
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
           )}
           {unreadCount > 0 && (
             <button onClick={markAllRead} style={{
-              padding: '7px 14px', borderRadius: 20, border: '1px solid var(--border)',
+              padding: '7px 14px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)',
               background: 'transparent', color: 'var(--text-secondary)',
               fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
             }}>
@@ -139,7 +139,7 @@ export default function NotificationsPage() {
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
           {[1,2,3].map(i => (
             <div key={i} style={{ height: 64, background: 'var(--bg-surface)', borderRadius: 4, border: '1px solid var(--border)', animation: 'pulse 1.8s ease-in-out infinite' }} />
           ))}
@@ -151,14 +151,14 @@ export default function NotificationsPage() {
           <div style={{ fontSize: 'var(--fs-sm)' }}>댓글, 좋아요, 팔로우 알림이 여기 표시돼요</div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
           {notifs.map(n => (
             <div key={n.id}
               onClick={() => { if (!n.is_read) markOneRead(n.id); router.push(getNotifLink(n)); }}
               className="kd-feed-card"
               style={{
-                display: 'flex', alignItems: 'flex-start', gap: 12,
-                padding: '14px 16px', borderRadius: 10, cursor: 'pointer',
+                display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-md)',
+                padding: 'var(--card-p) var(--sp-lg)', borderRadius: 'var(--radius-md)', cursor: 'pointer',
                 background: n.is_read ? 'var(--bg-surface)' : 'var(--brand-light)',
                 border: `1px solid ${n.is_read ? 'var(--border)' : 'var(--brand-border)'}`,
               }}
@@ -170,12 +170,12 @@ export default function NotificationsPage() {
                 <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.4 }}>
                   {n.message || n.content}
                 </div>
-                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 4 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 'var(--sp-xs)' }}>
                   {timeAgo(n.created_at)}
                 </div>
               </div>
               {!n.is_read && (
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, marginTop: 4 }} />
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', flexShrink: 0, marginTop: 'var(--sp-xs)' }} />
               )}
             </div>
           ))}

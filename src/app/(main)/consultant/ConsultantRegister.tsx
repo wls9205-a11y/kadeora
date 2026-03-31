@@ -79,12 +79,12 @@ export default function ConsultantRegister() {
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-lg)' }}>🏢</div>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>분양 상담사 등록</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-2xl)' }}>로그인 후 분양 상담사로 등록하고, 프리미엄 리스팅으로 고객을 만나세요.</p>
-      <Link href="/login?redirect=/consultant" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 10, background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
+      <Link href="/login?redirect=/consultant" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 700, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
     </div>
   );
 
   const card = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' };
-  const input = { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
+  const input = { width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '0 16px 40px' }}>
@@ -98,12 +98,12 @@ export default function ConsultantRegister() {
       </div>
 
       {/* 스텝 인디케이터 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-2xl)', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-2xl)', justifyContent: 'center' }}>
         {['등록', '요금제', '대시보드'].map((s, i) => {
           const steps = ['register', 'pricing', 'dashboard'];
           const active = steps.indexOf(step) >= i;
           return (
-            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
               <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{i + 1}</div>
               <span style={{ fontSize: 'var(--fs-xs)', color: active ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: active ? 600 : 400 }}>{s}</span>
               {i < 2 && <span style={{ color: 'var(--text-tertiary)', margin: '0 4px' }}>→</span>}
@@ -117,7 +117,7 @@ export default function ConsultantRegister() {
         <div>
           <div style={card}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-lg)' }}>기본 정보</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-md)' }}>
               <div>
                 <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>이름 *</label>
                 <input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" style={input} />
@@ -151,7 +151,7 @@ export default function ConsultantRegister() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {REGIONS.map(r => (
                 <button key={r} onClick={() => toggleRegion(r)} style={{
-                  padding: '6px 12px', borderRadius: 16, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+                  padding: '6px 12px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                   border: `1px solid ${regions.includes(r) ? 'var(--brand)' : 'var(--border)'}`,
                   background: regions.includes(r) ? 'var(--brand)' : 'transparent',
                   color: regions.includes(r) ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -161,7 +161,7 @@ export default function ConsultantRegister() {
           </div>
 
           <button onClick={handleSave} disabled={saving || !name.trim() || !phone.trim()} style={{
-            width: '100%', padding: '14px 0', borderRadius: 10, border: 'none', cursor: 'pointer',
+            width: '100%', padding: '14px 0', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer',
             background: (!name.trim() || !phone.trim()) ? 'var(--bg-hover)' : 'var(--brand)',
             color: (!name.trim() || !phone.trim()) ? 'var(--text-tertiary)' : 'var(--text-inverse)',
             fontSize: 'var(--fs-base)', fontWeight: 700,
@@ -176,7 +176,7 @@ export default function ConsultantRegister() {
         <div>
           <div style={{ textAlign: 'center', marginBottom: 'var(--sp-xl)' }}>
             <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>프리미엄 리스팅 요금제</div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 4 }}>분양중 탭에서 고객에게 직접 노출되세요</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>분양중 탭에서 고객에게 직접 노출되세요</div>
           </div>
 
           {TIERS.map((tier, i) => (
@@ -186,8 +186,8 @@ export default function ConsultantRegister() {
               borderWidth: i === 1 ? 2 : 1,
               position: 'relative',
             }}>
-              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 12px', borderRadius: 10, background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-md)' }}>
+              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 12px', borderRadius: 'var(--radius-md)', background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
                 <span style={{ fontSize: 'var(--fs-xl)' }}>{tier.icon}</span>
                 <div>
                   <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: tier.color }}>{tier.name}</div>
@@ -205,7 +205,7 @@ export default function ConsultantRegister() {
                 // TODO: 토스 결제 연동 후 활성화
                 info(`${tier.name} 요금제 결제 기능은 곧 오픈됩니다. 문의: kadeora.app@gmail.com`);
               }} style={{
-                width: '100%', padding: '10px 0', borderRadius: 8, border: `1px solid ${tier.color}`, cursor: 'pointer',
+                width: '100%', padding: '10px 0', borderRadius: 'var(--radius-sm)', border: `1px solid ${tier.color}`, cursor: 'pointer',
                 background: i === 1 ? tier.color : 'transparent',
                 color: i === 1 ? 'var(--text-inverse)' : tier.color,
                 fontSize: 'var(--fs-sm)', fontWeight: 700,
@@ -215,11 +215,11 @@ export default function ConsultantRegister() {
             </div>
           ))}
 
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <div style={{ textAlign: 'center', marginTop: 'var(--sp-lg)' }}>
             <button onClick={() => setStep('register')} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>← 프로필 수정</button>
           </div>
 
-          <div style={{ ...card, marginTop: 16, background: 'rgba(96,165,250,0.06)' }}>
+          <div style={{ ...card, marginTop: 'var(--sp-lg)', background: 'rgba(96,165,250,0.06)' }}>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--sp-sm)' }}>💡 왜 프리미엄 리스팅인가요?</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               분양 상담 1건 계약 시 수백~수천만 원의 수수료가 발생합니다.<br/>
@@ -238,7 +238,7 @@ export default function ConsultantRegister() {
               <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>내 프로필</div>
               <button onClick={() => setStep('register')} style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>수정</button>
             </div>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-md)' }}>
               <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-inverse)', fontWeight: 800, fontSize: 'var(--fs-lg)' }}>
                 {name.slice(0, 1)}
               </div>
@@ -262,25 +262,25 @@ export default function ConsultantRegister() {
                   </div>
                   <span style={{ fontSize: 'var(--fs-xs)', color: l.is_active ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 600 }}>{l.is_active ? '활성' : '만료'}</span>
                 </div>
-                <div style={{ display: 'flex', gap: 16, marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                   <span>👀 노출 {(l.impressions || 0).toLocaleString()}</span>
                   <span>👆 클릭 {(l.clicks || 0).toLocaleString()}</span>
                   <span>📞 CTA {(l.cta_clicks || 0).toLocaleString()}</span>
                   <span>CTR {l.impressions > 0 ? ((l.clicks / l.impressions) * 100).toFixed(1) : '0.0'}%</span>
                 </div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
                   만료: {new Date(l.expires_at).toLocaleDateString('ko-KR')}
                 </div>
               </div>
             )) : (
               <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', marginBottom: 'var(--sp-sm)' }}>아직 활성 리스팅이 없어요</div>
-                <button onClick={() => setStep('pricing')} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid var(--brand)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>프리미엄 리스팅 시작</button>
+                <button onClick={() => setStep('pricing')} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 700, cursor: 'pointer' }}>프리미엄 리스팅 시작</button>
               </div>
             )}
           </div>
 
-          <button onClick={() => setStep('pricing')} style={{ width: '100%', padding: '12px 0', borderRadius: 10, border: '1px solid var(--brand)', background: 'transparent', color: 'var(--brand)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer' }}>
+          <button onClick={() => setStep('pricing')} style={{ width: '100%', padding: '12px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand)', background: 'transparent', color: 'var(--brand)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer' }}>
             + 새 리스팅 추가
           </button>
         </div>

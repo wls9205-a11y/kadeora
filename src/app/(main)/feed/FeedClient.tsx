@@ -36,7 +36,7 @@ function BestCommentPreview({ postId }: { postId: number }) {
   if (!best) return null;
   return (
     <div style={{ marginTop: 6, padding: '5px 8px', borderLeft: '2px solid rgba(59,123,246,0.3)', background: 'var(--bg-hover)', borderRadius: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 2 }}>
         <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand)' }}>Best</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{best.nickname} {GRADE_EMOJI[best.grade] ?? '🌱'}</span>
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>♥ {best.likes_count}</span>
@@ -271,16 +271,16 @@ export default function FeedClient({
 
   return (
     <PullToRefresh>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
 
         {/* 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-lg)', padding: '4px 0' }}>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5 }}>카더라</h1>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Link href="/search" aria-label="검색" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 12, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
+            <Link href="/search" aria-label="검색" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 'var(--radius-card)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
               <Search size={20} />
             </Link>
-            <Link href="/profile" aria-label="프로필" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 12, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+            <Link href="/profile" aria-label="프로필" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 'var(--radius-card)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
               <User size={20} />
             </Link>
           </div>
@@ -349,7 +349,7 @@ export default function FeedClient({
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👥</div>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>로그인 후 팔로잉 피드를 볼 수 있어요</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 유저를 팔로우하고 맞춤 피드를 만들어 보세요</div>
-            <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 10, background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
+            <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--kakao-bg, #FEE500)', color: 'var(--kakao-text, #191919)', fontWeight: 700, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
               카카오로 로그인
             </Link>
           </div>
@@ -357,7 +357,7 @@ export default function FeedClient({
 
         {/* 해시태그 활성 필터 표시 */}
         {activeTag && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, padding: '7px 12px', background: 'var(--brand-bg, rgba(37,99,235,0.08))', borderRadius: 8, border: '1px solid var(--brand-border, rgba(37,99,235,0.15))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 10, padding: '7px 12px', background: 'var(--brand-bg, rgba(37,99,235,0.08))', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-border, rgba(37,99,235,0.15))' }}>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', fontWeight: 700 }}>#{activeTag}</span>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>태그 필터 중</span>
             <button onClick={() => setActiveTag(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontFamily: 'inherit', padding: '2px 6px', borderRadius: 4 }}>
@@ -370,7 +370,7 @@ export default function FeedClient({
         {newCount > 0 && (
           <button onClick={handleRefreshNew} style={{
             width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            padding: '9px 0', marginBottom: 10, borderRadius: 10,
+            padding: '9px 0', marginBottom: 10, borderRadius: 'var(--radius-md)',
             background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer',
             fontWeight: 700, fontSize: 'var(--fs-sm)', fontFamily: 'inherit',
           }}>
@@ -381,8 +381,8 @@ export default function FeedClient({
         {/* 글쓰기 CTA */}
         {currentUserId && (
           <Link href="/write" style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-            background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12,
+            display: 'flex', alignItems: 'center', gap: 10, padding: 'var(--sp-md) var(--card-p)',
+            background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)',
             textDecoration: 'none', color: 'inherit', marginBottom: 'var(--sp-md)',
           }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>✍️</div>
@@ -394,22 +394,22 @@ export default function FeedClient({
         {showHotBanner && hotPosts.length > 0 && (
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 14, position: 'relative' }}>
             <button onClick={() => { setShowHotBanner(false); sessionStorage.setItem('kd_hot_banner_closed', '1'); }} style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }} aria-label="닫기">✕</button>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 'var(--sp-sm)', display: 'flex', alignItems: 'center', gap: 4 }}>🔥 이번 주 인기글</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--brand)', marginBottom: 'var(--sp-sm)', display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>🔥 이번 주 인기글</div>
             {hotPosts.slice(0, 3).map((hp: Record<string, unknown>, i: number) => (
-              <Link key={hp.id as number} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              <Link key={hp.id as number} href={`/feed/${hp.id}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '5px 0', textDecoration: 'none', color: 'inherit', borderBottom: i < hotPosts.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <span style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: i === 0 ? 'var(--brand)' : 'var(--text-tertiary)', minWidth: 18 }}>{i + 1}</span>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hp.title as string}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>♥ {hp.likes_count as number}</span>
               </Link>
             ))}
             {hotBlog && (
-              <Link href={`/blog/${hotBlog.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8, background: 'var(--bg-hover)', textDecoration: 'none', color: 'inherit', marginTop: 4 }}>
+              <Link href={`/blog/${hotBlog.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', color: 'inherit', marginTop: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 12 }}>📰</span>
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hotBlog.title}</span>
                 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>👀 {hotBlog.view_count}</span>
               </Link>
             )}
-            <Link href="/hot" style={{ display: 'block', textAlign: 'center', padding: '6px 0', fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, marginTop: 4 }}>전체 보기 →</Link>
+            <Link href="/hot" style={{ display: 'block', textAlign: 'center', padding: '6px 0', fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, marginTop: 'var(--sp-xs)' }}>전체 보기 →</Link>
           </div>
         )}
 
@@ -437,7 +437,7 @@ export default function FeedClient({
             const card = (
               <div key={post.id} className={`animate-fadeIn kd-feed-card${visitedIds.has(post.id) ? ' visited' : ''}`}
                 data-cat={post.category}
-                style={{ padding: '12px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 12, transition: 'all var(--transition-fast)', position: 'relative' }}>
+                style={{ padding: '12px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 'var(--radius-card)', transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
                   <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 8px', borderRadius: '0 0 6px 6px' }}>
@@ -453,7 +453,7 @@ export default function FeedClient({
                     </div>
                   </Link>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
                       <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
                       <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}<span className="grade-title-text"> {gradeTitle(post.profiles?.grade ?? 1)}</span></span>
                     </div>
@@ -490,12 +490,12 @@ export default function FeedClient({
                   {post.images && post.images.length > 1 && (
                     <div style={{ marginTop: 10, display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
                       {(post.images as string[]).slice(0, 3).map((img, idx) => (
-                        <div key={idx} style={{ width: 70, height: 70, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
+                        <div key={idx} style={{ width: 70, height: 70, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-hover)', position: 'relative' }}>
                           <Image src={img} alt="게시글 이미지" fill sizes="70px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!img.includes('supabase.co')} />
                         </div>
                       ))}
                       {post.images.length > 3 && (
-                        <div style={{ width: 70, height: 70, borderRadius: 10, flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                        <div style={{ width: 70, height: 70, borderRadius: 'var(--radius-md)', flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
                           +{post.images.length - 3}
                         </div>
                       )}
@@ -505,7 +505,7 @@ export default function FeedClient({
 
                 {/* B: 해시태그 칩 */}
                 {postTags.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', marginTop: 'var(--sp-sm)' }}>
                     {postTags.slice(0, 5).map((tag: string) => (
                       <button key={tag}
                         className={`kd-tag${activeTag === tag ? ' active' : ''}`}
@@ -518,7 +518,7 @@ export default function FeedClient({
 
                 {/* F: stock/apt 태그 미니 칩 */}
                 {(stockTags.length > 0 || aptTags.length > 0) && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', marginTop: 6 }}>
                     {stockTags.slice(0, 3).map((tag: string) => (
                       <Link key={`s-${tag}`} href="/stock" className="kd-badge kd-badge-stock" style={{ textDecoration: 'none' }}>
                         📈 {tag}
@@ -533,7 +533,7 @@ export default function FeedClient({
                 )}
 
                 {/* 인터랙션 바 */}
-                <div className="kd-interaction-bar" style={{ marginTop: 8 }}>
+                <div className="kd-interaction-bar" style={{ marginTop: 'var(--sp-sm)' }}>
                   <PostReactions postId={post.id as number} userId={currentUserId} initialLikes={displayLikes} compact />
                   <Link href={`${postHref}#comments`} aria-label="댓글" className="kd-action-btn" style={{ textDecoration: 'none' }}>
                     <MessageCircle size={14} /> {commentCount > 0 ? numFmt(commentCount) : '댓글'}
@@ -570,7 +570,7 @@ export default function FeedClient({
                 <div key="signup-cta" className="kd-card-glow" style={{ padding: '24px 18px', margin: '6px 0' }}>
                   <div style={{ position: 'relative', zIndex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-lg)' }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', flexShrink: 0 }}>🚀</div>
+                      <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--brand), #2EE8A5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', flexShrink: 0 }}>🚀</div>
                       <div>
                         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)' }}>지금 합류하세요</div>
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>투자자들의 실시간 대화에 참여</div>
@@ -583,13 +583,13 @@ export default function FeedClient({
                         { icon: '💬', text: '실시간 토론' },
                         { icon: '🎁', text: '포인트 적립' },
                       ].map(f => (
-                        <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', borderRadius: 10, background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.08)' }}>
+                        <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.08)' }}>
                           <span style={{ fontSize: 14 }}>{f.icon}</span>
                           <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600 }}>{f.text}</span>
                         </div>
                       ))}
                     </div>
-                    <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="kd-btn-glow" style={{ display: 'block', textAlign: 'center', width: '100%', padding: '13px 0', borderRadius: 12, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
+                    <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="kd-btn-glow" style={{ display: 'block', textAlign: 'center', width: '100%', padding: '13px 0', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
                       카카오로 3초 가입
                     </Link>
                   </div>
@@ -606,7 +606,7 @@ export default function FeedClient({
             <div style={{ fontSize: 36, marginBottom: 10 }}>👥</div>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>팔로우한 사람의 글이 없어요</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 있는 유저를 팔로우해보세요</div>
-            <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>전체 피드 보기</Link>
+            <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>전체 피드 보기</Link>
           </div>
         )}
 
@@ -615,12 +615,12 @@ export default function FeedClient({
           <div style={{ textAlign: 'center', padding: '40px 16px' }}>
             <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>🔍</div>
             <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>#{activeTag} 태그 글이 없어요</div>
-            <button onClick={() => setActiveTag(null)} style={{ padding: '8px 20px', borderRadius: 8, background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>필터 해제</button>
+            <button onClick={() => setActiveTag(null)} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>필터 해제</button>
           </div>
         )}
 
         {hasMore && (
-          <div ref={sentinelRef} style={{ marginTop: 8 }}>
+          <div ref={sentinelRef} style={{ marginTop: 'var(--sp-sm)' }}>
             <SkeletonCard lines={2} />
             <SkeletonCard lines={2} />
           </div>

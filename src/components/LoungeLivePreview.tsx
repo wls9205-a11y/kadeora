@@ -83,7 +83,7 @@ export default function LoungeLivePreview() {
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{participantCount}명 참여</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 'var(--sp-sm)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
           {messages.map(m => (
             <div key={m.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
               <div style={{ width: 20, height: 20, borderRadius: '50%', background: m.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff', flexShrink: 0 }}>

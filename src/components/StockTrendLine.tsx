@@ -62,7 +62,7 @@ export default function StockTrendLine({ data, currency, isKR }: Props) {
   const yLabels = [0, 0.33, 0.67, 1].map(t => ({ val: min + t * range, y: toY(min + t * range) }));
 
   return (
-    <div style={{ marginTop: 8 }}>
+    <div style={{ marginTop: 'var(--sp-sm)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-xs)' }}>
         <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{sorted.length}일 차트 + 트렌드라인</span>
         <span style={{ fontSize: 11, fontWeight: 700, color: lineColor, fontFamily: 'monospace' }}>

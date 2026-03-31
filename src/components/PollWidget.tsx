@@ -61,9 +61,9 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
   };
 
   if (loading) return (
-    <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--bg-hover)', borderRadius: 8, opacity: 0.5 }}>
-      <div style={{ height: 12, background: 'var(--border)', borderRadius: 6, marginBottom: 'var(--sp-sm)' }} />
-      <div style={{ height: 28, background: 'var(--border)', borderRadius: 6, marginBottom: 'var(--sp-xs)' }} />
+    <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', opacity: 0.5 }}>
+      <div style={{ height: 12, background: 'var(--border)', borderRadius: 'var(--radius-xs)', marginBottom: 'var(--sp-sm)' }} />
+      <div style={{ height: 28, background: 'var(--border)', borderRadius: 'var(--radius-xs)', marginBottom: 'var(--sp-xs)' }} />
       <div style={{ height: 28, background: 'var(--border)', borderRadius: 6 }} />
     </div>
   );
@@ -74,10 +74,10 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
 
   return (
     <div style={{
-      marginTop: 10, padding: '12px 14px',
+      marginTop: 10, padding: 'var(--sp-md) var(--card-p)',
       background: 'var(--bg-surface)',
       border: '1px solid var(--border)',
-      borderRadius: 10,
+      borderRadius: 'var(--radius-md)',
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
@@ -107,11 +107,11 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
               style={{
                 position: 'relative', overflow: 'hidden',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 12px', borderRadius: 8, textAlign: 'left', fontFamily: 'inherit',
+                padding: '8px 12px', borderRadius: 'var(--radius-sm)', textAlign: 'left', fontFamily: 'inherit',
                 border: `1.5px solid ${isMine ? 'var(--brand)' : 'var(--border)'}`,
                 background: showResults ? 'transparent' : 'var(--bg-hover)',
                 cursor: showResults ? 'default' : 'pointer',
-                transition: 'border-color 0.15s',
+                transition: 'border-color var(--transition-fast)',
               }}
             >
               {/* 결과 바 */}
@@ -121,7 +121,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
                   width: `${pct}%`,
                   background: isMine ? 'rgba(37,99,235,0.12)' : 'var(--bg-hover)',
                   transition: 'width 0.4s ease',
-                  borderRadius: 6,
+                  borderRadius: 'var(--radius-xs)',
                 }} />
               )}
               <span style={{ position: 'relative', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: isMine ? 700 : 400 }}>
@@ -139,7 +139,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
       </div>
 
       {/* 푸터 */}
-      <div style={{ marginTop: 8, fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', gap: 8 }}>
+      <div style={{ marginTop: 'var(--sp-sm)', fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', gap: 'var(--sp-sm)' }}>
         <span>총 {poll.total}명 참여</span>
         {poll.ends_at && !poll.expired && (
           <span>· {new Date(poll.ends_at).toLocaleDateString('ko-KR')} 마감</span>

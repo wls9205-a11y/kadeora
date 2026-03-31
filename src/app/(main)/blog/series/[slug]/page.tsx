@@ -58,7 +58,7 @@ export default async function SeriesDetailPage({ params }: Props) {
     .order('published_at', { ascending: true });
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈', item: SITE_URL + '/blog/series' }, { '@type': 'ListItem', position: 4, name: series.title }] }) }} />
       {/* Speakable — 음성검색/AI 답변 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${series.title} 시리즈`, url: `${SITE_URL}/blog/series/${slug}`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.series-description'] }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(series.title)}&category=blog` }) }} />
@@ -70,7 +70,7 @@ export default async function SeriesDetailPage({ params }: Props) {
         {series.description && (
           <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{series.description}</p>
         )}
-        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>총 {posts?.length || 0}편</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-sm)' }}>총 {posts?.length || 0}편</div>
       </div>
 
       {/* 시리즈 진행률 바 */}
@@ -123,7 +123,7 @@ export default async function SeriesDetailPage({ params }: Props) {
             </div>
 
             {post.cover_image && (
-              <div style={{ width: 56, height: 42, borderRadius: 6, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+              <div style={{ width: 56, height: 42, borderRadius: 'var(--radius-xs)', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
                 <Image src={post.cover_image} alt="" fill sizes="56px" style={{ objectFit: 'cover' }} loading="lazy" unoptimized={!post.cover_image.includes('supabase.co')} />
               </div>
             )}

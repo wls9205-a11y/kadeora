@@ -28,7 +28,7 @@ export default function StockWatchlistButton({ symbol }: { symbol: string }) {
   return (
     <button onClick={toggle} disabled={loading} style={{
       display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: '8px 16px', borderRadius: 20,
+      padding: '8px 16px', borderRadius: 'var(--radius-xl)',
       border: watched ? '1px solid var(--brand)' : '1px solid var(--border)',
       background: watched ? 'rgba(251,191,36,0.12)' : 'var(--bg-surface)',
       color: watched ? 'var(--brand)' : 'var(--text-secondary)',

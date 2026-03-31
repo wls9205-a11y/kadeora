@@ -89,8 +89,8 @@ export default function OnboardingClient() {
   const stepLabels = ['닉네임 설정', '관심 분야', '연령대', '지역 & 마케팅'];
 
   return (
-    <div style={{ maxWidth: 480, margin: '40px auto', padding: '0 16px' }}>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: 'clamp(20px, 5vw, 40px) clamp(16px, 4vw, 36px)' }}>
+    <div style={{ maxWidth: 480, margin: '40px auto', padding: '0 var(--sp-lg)' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: 'clamp(20px, 5vw, 40px) clamp(16px, 4vw, 36px)' }}>
         {/* 진행 바 */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
@@ -117,7 +117,7 @@ export default function OnboardingClient() {
               onKeyDown={e => e.key === 'Enter' && nickname.trim().length >= 2 && setStep(2)} />
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>{nickname.length}/20</div>
             <button onClick={() => { const v = validateNickname(nickname); if (!v.valid) { error(v.error!); return; } setStep(2); }}
-              className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 24, padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
+              className="kd-btn kd-btn-primary" style={{ width: '100%', marginTop: 'var(--sp-2xl)', padding: '13px', fontSize: 'var(--fs-md)', fontWeight: 700 }}>
               다음 →
             </button>
           </div>
@@ -133,11 +133,11 @@ export default function OnboardingClient() {
                 const sel = selectedInterests.includes(key);
                 return (
                   <button key={key} onClick={() => toggleInterest(key)} style={{
-                    padding: '12px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 'var(--fs-base)', fontWeight: 600,
+                    padding: '12px 16px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--fs-base)', fontWeight: 600,
                     background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
                     border: `1px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
                     color: sel ? 'var(--brand)' : 'var(--text-secondary)',
-                    transition: 'all 0.15s', textAlign: 'left',
+                    transition: 'all var(--transition-fast)', textAlign: 'left',
                   }}>{label}</button>
                 );
               })}
@@ -161,17 +161,17 @@ export default function OnboardingClient() {
                 const sel = ageGroup === value;
                 return (
                   <button key={value} onClick={() => setAgeGroup(value)} style={{
-                    padding: '14px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 'var(--fs-md)', fontWeight: 600,
+                    padding: 'var(--card-p) var(--sp-lg)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontSize: 'var(--fs-md)', fontWeight: 600,
                     background: sel ? 'var(--brand-light)' : 'var(--bg-base)',
                     border: `1px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
                     color: sel ? 'var(--brand)' : 'var(--text-secondary)',
-                    transition: 'all 0.15s', textAlign: 'center',
+                    transition: 'all var(--transition-fast)', textAlign: 'center',
                   }}>{label}</button>
                 );
               })}
             </div>
             {(ageGroup === '50s' || ageGroup === '60+') && (
-              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 8, padding: '10px 14px', marginBottom: 'var(--sp-lg)' }}>
+              <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-lg)' }}>
                 💡 글씨 크기가 &apos;크게&apos;로 자동 설정됩니다. 나중에 설정에서 변경할 수 있어요.
               </div>
             )}
@@ -197,7 +197,7 @@ export default function OnboardingClient() {
               </div>
             )}
             <select value={region} onChange={e => { setRegion(e.target.value); setDistrict(''); }} style={{
-              width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 'var(--sp-sm)',
+              width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--sp-sm)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               color: region ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
             }}>
@@ -206,7 +206,7 @@ export default function OnboardingClient() {
             </select>
             {region && SIGUNGU_MAP[region] && (
               <select value={district} onChange={e => setDistrict(e.target.value)} style={{
-                width: '100%', padding: '10px 14px', borderRadius: 8, marginBottom: 'var(--sp-xl)',
+                width: '100%', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--sp-xl)',
                 background: 'var(--bg-hover)', border: '1px solid var(--border)',
                 color: district ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'var(--fs-base)', fontFamily: 'inherit',
               }}>
@@ -219,9 +219,9 @@ export default function OnboardingClient() {
             )}
             <label style={{
               display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: '14px',
-              borderRadius: 10, marginBottom: 'var(--sp-2xl)',
+              borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-2xl)',
               background: marketing ? 'var(--brand-light)' : 'var(--bg-base)',
-              border: `1px solid ${marketing ? 'var(--brand)' : 'var(--border)'}`, transition: 'all 0.15s',
+              border: `1px solid ${marketing ? 'var(--brand)' : 'var(--border)'}`, transition: 'all var(--transition-fast)',
             }}>
               <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)}
                 style={{ marginTop: 2, accentColor: 'var(--brand)', flexShrink: 0 }} />
@@ -238,7 +238,7 @@ export default function OnboardingClient() {
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(3)} className="kd-btn kd-btn-ghost" style={{ flex: 1, padding: '13px' }}>← 이전</button>
               <button onClick={handleComplete} disabled={saving || !region}
-                style={{ flex: 2, padding: '16px', fontSize: 'var(--fs-base)', fontWeight: 800, border: 'none', borderRadius: 12, cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, var(--brand), var(--accent-blue))', boxShadow: '0 4px 16px rgba(37,99,235,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
+                style={{ flex: 2, padding: '16px', fontSize: 'var(--fs-base)', fontWeight: 800, border: 'none', borderRadius: 'var(--radius-card)', cursor: (saving || !region) ? 'not-allowed' : 'pointer', color: 'var(--text-inverse)', background: 'linear-gradient(135deg, var(--brand), var(--accent-blue))', boxShadow: '0 4px 16px rgba(37,99,235,0.3)', opacity: (saving || !region) ? 0.5 : 1 }}>
                 {saving ? '저장 중...' : !region ? '지역을 선택해주세요' : '카더라 시작하기 🚀'}
               </button>
             </div>

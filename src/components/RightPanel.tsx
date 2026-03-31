@@ -48,7 +48,7 @@ export default function RightPanel() {
   const display = trending.length > 0 ? trending : FALLBACK.map(k => ({ keyword: k }));
 
   return (
-    <div style={{ width: 200, flexShrink: 0, position: 'sticky', top: 72, height: 'fit-content', display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
+    <div style={{ width: 200, flexShrink: 0, position: 'sticky', top: 72, height: 'fit-content', display: 'flex', flexDirection: 'column', gap: 'var(--sp-md)', paddingTop: 8 }}>
       {/* 프로필 카드 */}
       {userId && authProfile && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)' }}>
@@ -62,7 +62,7 @@ export default function RightPanel() {
               {(authProfile.nickname ?? '유')[0].toUpperCase()}
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{authProfile.nickname}</span>
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
@@ -72,11 +72,11 @@ export default function RightPanel() {
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             <Link href={`/profile/${userId}`} style={{
-              flex: 1, textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '6px 0', borderRadius: 8,
+              flex: 1, textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '6px 0', borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none',
             }}>내 프로필</Link>
             <Link href="/write" style={{
-              flex: 1, textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '6px 0', borderRadius: 8,
+              flex: 1, textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '6px 0', borderRadius: 'var(--radius-sm)',
               background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none',
             }}>글쓰기</Link>
           </div>
@@ -86,7 +86,7 @@ export default function RightPanel() {
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--card-p)', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>카더라와 함께하세요!</div>
           <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
-            display: 'block', padding: '8px 0', borderRadius: 8, fontSize: 'var(--fs-sm)', fontWeight: 700,
+            display: 'block', padding: '8px 0', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 700,
             background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none',
           }}>로그인 / 회원가입</Link>
         </div>
@@ -102,7 +102,7 @@ export default function RightPanel() {
           <Link href="/search" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none' }}>더보기</Link>
         </div>
         {display.slice(0, 5).map((item, i) => (
-          <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} className="kd-card-hover" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', padding: '4px 4px', borderRadius: 6, margin: '0 -4px' }}>
+          <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} className="kd-card-hover" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', padding: '4px 4px', borderRadius: 'var(--radius-xs)', margin: '0 -4px' }}>
             <span style={{ fontSize: 10, fontWeight: 800, width: 16, textAlign: 'center', color: i === 0 ? 'var(--brand)' : i < 3 ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>
               {i + 1}
             </span>
@@ -113,9 +113,9 @@ export default function RightPanel() {
 
       {/* 미니 시황 */}
       {indices.length > 0 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)', marginTop: 8 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)', marginTop: 'var(--sp-sm)' }}>
           <Link href="/stock" style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)', display: 'block', textDecoration: 'none' }}>📊 시장 현황</Link>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
             {indices.map(idx => (
               <div key={idx.name} style={{ flex: 1, textAlign: 'center' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{idx.name}</div>
@@ -150,8 +150,8 @@ export default function RightPanel() {
       {/* 비로그인 가입 유도 */}
       {!userId && (
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
-          display: 'block', textAlign: 'center', padding: '12px 14px',
-          borderRadius: 12, background: 'var(--kakao-bg, #FEE500)', textDecoration: 'none',
+          display: 'block', textAlign: 'center', padding: 'var(--sp-md) var(--card-p)',
+          borderRadius: 'var(--radius-card)', background: 'var(--kakao-bg, #FEE500)', textDecoration: 'none',
           fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--kakao-text, #191919)',
         }}>카카오로 3초 가입</Link>
       )}
@@ -159,7 +159,7 @@ export default function RightPanel() {
       {/* 등급 안내 (항상 펼침) */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
         <div style={{
-          padding: '10px 14px', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)',
+          padding: 'var(--sp-md) var(--card-p)', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)',
         }}>
           등급 안내
         </div>
@@ -181,7 +181,7 @@ export default function RightPanel() {
         <Link href="/terms" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>이용약관</Link>
         {' · '}
         <Link href="/privacy" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>개인정보</Link>
-        <div style={{ marginTop: 4 }}>카더라 · 사업자 278-57-00801</div>
+        <div style={{ marginTop: 'var(--sp-xs)' }}>카더라 · 사업자 278-57-00801</div>
       </div>
     </div>
   );

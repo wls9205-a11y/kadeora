@@ -103,12 +103,12 @@ export default function ShareButtons({ title, postId, content }: Props) {
     <>
       <button onClick={() => setOpen(true)} aria-label="공유" style={{
         display: 'inline-flex', alignItems: 'center', gap: 5,
-        padding: '8px 16px', borderRadius: 10,
+        padding: '8px 16px', borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.08) 100%)',
         border: '1px solid rgba(59,123,246,0.2)',
         color: 'var(--brand)', cursor: 'pointer',
         fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
-        transition: 'all 0.15s',
+        transition: 'all var(--transition-fast)',
       }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
         공유
@@ -116,7 +116,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
       <BottomSheet open={open} onClose={() => setOpen(false)} title="공유하기" maxWidth={480}>
         <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
           {platforms.map(p => (
-            <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 60 }}>
+            <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--sp-sm)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 60 }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: 'var(--fs-xl)', fontWeight: 900 }}>
                 {p.id === 'copy' && copied ? '✓' : p.emoji}
               </div>
@@ -124,7 +124,7 @@ export default function ShareButtons({ title, postId, content }: Props) {
             </button>
           ))}
         </div>
-        <div style={{ padding: '10px 14px', background: 'var(--bg-hover)', borderRadius: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ padding: 'var(--sp-md) var(--card-p)', background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {typeof window !== 'undefined' ? window.location.href : ''}
         </div>
       </BottomSheet>

@@ -68,7 +68,7 @@ export default function BlogTocSidebar({ toc }: { toc: TocItem[] }) {
       }}
     >
       {/* 읽기 진행률 */}
-      <div style={{ marginBottom: 'var(--sp-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ marginBottom: 'var(--sp-md)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
         <div style={{ flex: 1, height: 3, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
           <div style={{ height: '100%', background: 'var(--brand)', borderRadius: 2, width: `${readProgress}%`, transition: 'width 0.15s' }} />
         </div>
@@ -108,7 +108,7 @@ export default function BlogTocSidebar({ toc }: { toc: TocItem[] }) {
                 fontWeight: isActive ? 700 : 400,
                 borderLeft: `2px solid ${isActive ? 'var(--brand)' : 'transparent'}`,
                 marginLeft: 0,
-                transition: 'all 0.15s',
+                transition: 'all var(--transition-fast)',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -126,16 +126,16 @@ export default function BlogTocSidebar({ toc }: { toc: TocItem[] }) {
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           style={{
-            marginTop: 16,
+            marginTop: 'var(--sp-lg)',
             padding: '6px 0',
             width: '100%',
             background: 'none',
             border: '1px solid var(--border)',
-            borderRadius: 6,
+            borderRadius: 'var(--radius-xs)',
             color: 'var(--text-tertiary)',
             fontSize: 11,
             cursor: 'pointer',
-            transition: 'all 0.15s',
+            transition: 'all var(--transition-fast)',
           }}
         >
           ↑ 맨 위로

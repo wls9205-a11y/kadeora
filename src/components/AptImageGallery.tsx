@@ -24,7 +24,7 @@ const Watermark = () => (
 
 /** CSS 오버레이 워터마크 — 우하단 텍스트 (recommended 60%) */
 const WatermarkSm = () => (
-  <div style={{ position: 'absolute', bottom: 8, right: 42, opacity: 0.6, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 4, zIndex: 1 }}>
+  <div style={{ position: 'absolute', bottom: 8, right: 42, opacity: 0.6, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', zIndex: 1 }}>
     <svg width="14" height="14" viewBox="0 0 72 72">
       <circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
       <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
@@ -100,7 +100,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
                     background: 'rgba(0,0,0,0.6)', color: '#fff',
-                    fontSize: 11, padding: '3px 10px', borderRadius: 12, zIndex: 1,
+                    fontSize: 11, padding: '3px 10px', borderRadius: 'var(--radius-card)', zIndex: 1,
                   }}>{i + 1} / {total}</span>
                 </div>
                 {img.caption && (
@@ -122,7 +122,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   style={{
                     width: i === idx ? 16 : 6, height: 6, borderRadius: 3,
                     background: i === idx ? '#fff' : 'rgba(255,255,255,0.25)',
-                    transition: 'all 0.2s', cursor: 'pointer',
+                    transition: 'all var(--transition-normal)', cursor: 'pointer',
                   }}
                 />
               ))}
@@ -169,7 +169,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
                     background: 'rgba(0,0,0,0.6)', color: '#fff',
-                    fontSize: 12, padding: '4px 12px', borderRadius: 12, fontWeight: 600,
+                    fontSize: 12, padding: '4px 12px', borderRadius: 'var(--radius-card)', fontWeight: 600,
                   }}>+{total - 3}</span>
                 )}
               </div>
@@ -216,7 +216,7 @@ aria-label="닫기"             onClick={() => setLightbox(null)}
           </div>
 
           {visibleImages[lightbox]?.caption && (
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, marginTop: 12, textAlign: 'center', maxWidth: '80vw' }}>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, marginTop: 'var(--sp-md)', textAlign: 'center', maxWidth: '80vw' }}>
               {visibleImages[lightbox].caption}
             </div>
           )}
@@ -228,7 +228,7 @@ aria-label="닫기"             onClick={() => setLightbox(null)}
                 position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',
                 background: 'rgba(255,255,255,0.15)', border: 'none',
-                color: '#fff', fontSize: 22, cursor: 'pointer',
+                color: '#fff', fontSize: 'var(--fs-xl)', cursor: 'pointer',
               }}
             >‹</button>
           )}
@@ -239,7 +239,7 @@ aria-label="닫기"             onClick={() => setLightbox(null)}
                 position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: '50%',
                 background: 'rgba(255,255,255,0.15)', border: 'none',
-                color: '#fff', fontSize: 22, cursor: 'pointer',
+                color: '#fff', fontSize: 'var(--fs-xl)', cursor: 'pointer',
               }}
             >›</button>
           )}

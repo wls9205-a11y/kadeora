@@ -106,7 +106,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border)',
-              borderRadius: 16,
+              borderRadius: 'var(--radius-lg)',
               padding: '24px 28px',
               width: '100%',
               maxWidth: 400,
@@ -124,7 +124,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 'var(--sp-sm)',
                     fontSize: 'var(--fs-base)',
                     color: 'var(--text-primary)',
                     cursor: 'pointer',
@@ -153,7 +153,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                   width: '100%',
                   background: 'var(--bg-base)',
                   border: '1px solid var(--border)',
-                  borderRadius: 8,
+                  borderRadius: 'var(--radius-sm)',
                   color: 'var(--text-primary)',
                   padding: '10px 12px',
                   fontSize: 'var(--fs-sm)',
@@ -176,13 +176,13 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--sp-sm)' }}>
               <button
                 onClick={() => { setOpen(false); setReason(''); setDetails(''); setResult(''); }}
                 style={{
                   padding: '8px 16px',
                   fontSize: 'var(--fs-sm)',
-                  borderRadius: 8,
+                  borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--border)',
                   background: 'var(--bg-base)',
                   color: 'var(--text-secondary)',
@@ -197,7 +197,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                 style={{
                   padding: '8px 16px',
                   fontSize: 'var(--fs-sm)',
-                  borderRadius: 8,
+                  borderRadius: 'var(--radius-sm)',
                   border: 'none',
                   background: 'var(--error)',
                   color: 'var(--text-inverse)',

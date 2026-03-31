@@ -219,7 +219,7 @@ export default function MapClient() {
           const active = layers.has(l);
           return (
             <button aria-label="닫기" key={l} onClick={() => toggleLayer(l)} style={{
-              padding: '6px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+              padding: '6px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 600,
               border: `1.5px solid ${active ? conf.color : 'var(--border)'}`,
               background: active ? `${conf.color}15` : 'var(--bg-surface)',
               color: active ? conf.color : 'var(--text-tertiary)',
@@ -237,9 +237,9 @@ export default function MapClient() {
           {sdkError ? (
             <div style={{ padding: '20px 16px', textAlign: 'center' }}>
               <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 10 }}>카카오 지도 SDK를 불러올 수 없습니다 · 아래 목록에서 지역별 현황을 확인하세요</div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 8, background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>카카오맵에서 보기</a>
-                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 8, background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>새로고침</button>
+              <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center' }}>
+                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: '#FEE500', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>카카오맵에서 보기</a>
+                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 700 }}>새로고침</button>
               </div>
             </div>
           ) : !sdkReady ? (
@@ -269,7 +269,7 @@ export default function MapClient() {
                 </div>
                 <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{selectedPin.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{selectedPin.address}</div>
-                {selectedPin.extra && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 4 }}>{selectedPin.extra}</div>}
+                {selectedPin.extra && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 'var(--sp-xs)' }}>{selectedPin.extra}</div>}
               </div>
               <button onClick={() => setSelectedPin(null)} style={{
                 background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-md)',
@@ -281,7 +281,7 @@ export default function MapClient() {
 
       {/* 핀 리스트 (지도 아래) */}
       {loading ? <SkeletonChart /> : (
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 'var(--sp-md)' }}>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>총 {pins.length}건</div>
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
             {pins.slice(0, 30).map(pin => (

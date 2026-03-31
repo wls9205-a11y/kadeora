@@ -112,10 +112,10 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>주민 리뷰</span>
           {avgRating > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
               <StarRating rating={Math.round(avgRating)} size={12} />
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{avgRating}</span>
             </div>
@@ -123,8 +123,8 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
           <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>({reviews.length})</span>
         </div>
         <button aria-label="리뷰 작성" onClick={() => setShowForm(!showForm)} style={{
-          display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px',
-          background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 6,
+          display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '4px 10px',
+          background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-xs)',
           fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
         }}>
           <PenSquare size={12} /> 리뷰 쓰기
@@ -134,7 +134,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
       {/* 리뷰 작성 폼 */}
       {showForm && (
         <div style={{
-          border: '1px solid var(--border)', borderRadius: 10, padding: 12,
+          border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 12,
           marginBottom: 'var(--sp-md)', background: 'var(--bg-hover)',
         }}>
           <div style={{ marginBottom: 'var(--sp-sm)' }}>
@@ -144,26 +144,26 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 6 }}>
             <input placeholder="👍 장점" value={form.pros}
               onChange={e => setForm(p => ({ ...p, pros: e.target.value }))}
-              style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />
+              style={{ padding: '6px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />
             <input placeholder="👎 단점" value={form.cons}
               onChange={e => setForm(p => ({ ...p, cons: e.target.value }))}
-              style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />
+              style={{ padding: '6px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />
           </div>
           <textarea placeholder="리뷰 내용 (20자 이상) *" value={form.content} rows={3}
             onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
-            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)', resize: 'vertical', marginBottom: 6 }} />
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
+            style={{ width: '100%', padding: '6px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)', resize: 'vertical', marginBottom: 6 }} />
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
             <input placeholder="거주 년수" type="number" value={form.living_years}
               onChange={e => setForm(p => ({ ...p, living_years: e.target.value }))}
-              style={{ width: 80, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />
-            <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+              style={{ width: 80, padding: '6px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }} />
+            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
               <input type="checkbox" checked={form.is_resident} onChange={e => setForm(p => ({ ...p, is_resident: e.target.checked }))} />
               현재 거주중
             </label>
           </div>
           {error && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', marginBottom: 6 }}>{error}</div>}
           <button aria-label="리뷰 제출" onClick={handleSubmit} disabled={submitting} style={{
-            width: '100%', padding: '8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+            width: '100%', padding: '8px', borderRadius: 'var(--radius-xs)', border: 'none', cursor: 'pointer',
             background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 600, fontSize: 'var(--fs-xs)',
             opacity: submitting ? 0.5 : 1,
           }}>
@@ -182,7 +182,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
       ) : (
         reviews.slice(0, 5).map(r => (
           <div key={r.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6 }}>
               <div style={{
                 width: 24, height: 24, borderRadius: '50%',
                 background: getAvatarColor(r.profiles?.nickname || ''), display: 'flex',
@@ -200,18 +200,18 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
             </div>
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>{r.content}</p>
             {(r.pros || r.cons) && (
-              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+              <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 6 }}>
                 {r.pros && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)' }}>👍 {r.pros}</span>}
                 {r.cons && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)' }}>👎 {r.cons}</span>}
               </div>
             )}
             {/* 좋아요 / 신고 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', marginTop: 'var(--sp-sm)' }}>
               <button aria-label="도움이 됐어요" onClick={() => handleLike(r.id)} style={{
-                display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
+                display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '3px 8px',
                 background: likedSet.has(r.id) ? 'var(--brand-bg)' : 'transparent',
                 border: `1px solid ${likedSet.has(r.id) ? 'var(--brand)' : 'var(--border)'}`,
-                borderRadius: 6, cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600,
+                borderRadius: 'var(--radius-xs)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600,
                 color: likedSet.has(r.id) ? 'var(--brand)' : 'var(--text-tertiary)',
                 transition: 'all 0.15s ease',
               }}>
@@ -235,7 +235,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
           background: 'var(--bg-elevated, #1e293b)', color: 'var(--text-inverse)', padding: '10px 18px',
-          borderRadius: 10, fontSize: 'var(--fs-xs)', fontWeight: 600, zIndex: 100,
+          borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-xs)', fontWeight: 600, zIndex: 100,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
           animation: 'fadeIn 0.2s ease-out',
         }}>{toast}</div>

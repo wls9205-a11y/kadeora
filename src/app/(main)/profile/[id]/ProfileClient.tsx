@@ -29,9 +29,9 @@ export default function ProfileClient({ profile, posts, isOwner, commentCount, f
 
   return (
     <PullToRefresh>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
         {/* 프로필 카드 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(16px, 4vw, 28px) clamp(16px, 4vw, 28px) clamp(14px, 3vw, 24px)', marginBottom: 'var(--sp-xl)' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 'clamp(16px, 4vw, 28px) clamp(16px, 4vw, 28px) clamp(14px, 3vw, 24px)', marginBottom: 'var(--sp-xl)' }}>
           <ProfileHeader
             profile={profile}
             isOwner={isOwner}

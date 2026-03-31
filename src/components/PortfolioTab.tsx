@@ -81,7 +81,7 @@ export default function PortfolioTab() {
         borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-md)',
       }}>
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>총 평가 손익</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--sp-sm)' }}>
           <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: pnlColor }}>
             {summary.totalPnl >= 0 ? '+' : ''}{summary.totalPnl.toLocaleString('ko-KR')}원
           </span>
@@ -89,7 +89,7 @@ export default function PortfolioTab() {
             ({summary.pnlPct >= 0 ? '+' : ''}{summary.pnlPct.toFixed(2)}%)
           </span>
         </div>
-        <div style={{ display: 'flex', gap: 16, marginTop: 10 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 10 }}>
           <div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>투자금액</div>
             <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{summary.totalInvested.toLocaleString('ko-KR')}원</div>
@@ -146,7 +146,7 @@ export default function PortfolioTab() {
               {/* 선 */}
               <polyline points={points} fill="none" stroke={isUp ? '#ef4444' : '#3b82f6'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
               <span>{history[0]?.snapshot_date?.slice(5)}</span>
               <span>{history[history.length - 1]?.snapshot_date?.slice(5)}</span>
             </div>
@@ -156,9 +156,9 @@ export default function PortfolioTab() {
 
       {/* 추가 버튼 */}
       <button onClick={() => setShowAdd(!showAdd)} style={{
-        display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '10px 14px',
+        display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: 'var(--sp-md) var(--card-p)',
         background: showAdd ? 'var(--bg-hover)' : 'var(--bg-surface)',
-        border: '1px dashed var(--border)', borderRadius: 10, cursor: 'pointer',
+        border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', cursor: 'pointer',
         color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, marginBottom: 'var(--sp-md)',
       }}>
         <Plus size={16} /> 종목 추가
@@ -170,22 +170,22 @@ export default function PortfolioTab() {
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-card)', padding: 14, marginBottom: 'var(--sp-md)',
         }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 'var(--sp-sm)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
             <input placeholder="종목코드 (예: 005930)" value={form.symbol}
               onChange={e => setForm(p => ({ ...p, symbol: e.target.value.toUpperCase() }))}
-              style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
             <input placeholder="매수가" type="number" value={form.buy_price}
               onChange={e => setForm(p => ({ ...p, buy_price: e.target.value }))}
-              style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
             <input placeholder="수량" type="number" value={form.quantity}
               onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))}
-              style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
             <input placeholder="메모 (선택)" value={form.memo}
               onChange={e => setForm(p => ({ ...p, memo: e.target.value }))}
-              style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
+              style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)' }} />
           </div>
           <button onClick={handleAdd} disabled={submitting} style={{
-            width: '100%', padding: '10px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
             background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 700, fontSize: 'var(--fs-sm)',
             opacity: submitting ? 0.5 : 1,
           }}>
@@ -203,12 +203,12 @@ export default function PortfolioTab() {
           const color = isProfit ? 'var(--accent-red)' : 'var(--accent-blue)';
           return (
             <div key={h.id} style={{
-              display: 'flex', alignItems: 'center', padding: '12px 14px', gap: 10,
+              display: 'flex', alignItems: 'center', padding: 'var(--sp-md) var(--card-p)', gap: 10,
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
-              borderRadius: 10, marginBottom: 6,
+              borderRadius: 'var(--radius-md)', marginBottom: 6,
             }}>
               <div style={{
-                width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 36, height: 36, borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: isProfit ? 'rgba(239,68,68,0.1)' : 'rgba(59,130,246,0.1)',
               }}>
                 {isProfit ? <TrendingUp size={18} color={color} /> : <TrendingDown size={18} color={color} />}

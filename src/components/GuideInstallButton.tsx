@@ -81,7 +81,7 @@ export default function GuideInstallButton() {
 
   const cardStyle = {
     background: 'var(--bg-surface)', border: '1px solid var(--border)',
-    borderRadius: 16, padding: '28px 24px', textAlign: 'center' as const,
+    borderRadius: 'var(--radius-lg)', padding: '28px 24px', textAlign: 'center' as const,
   };
 
   if (state === 'loading') return null;
@@ -113,7 +113,7 @@ export default function GuideInstallButton() {
         onClick={handleInstall}
         disabled={installing}
         style={{
-          padding: '16px 40px', borderRadius: 14, border: 'none',
+          padding: '16px 40px', borderRadius: 'var(--radius-lg)', border: 'none',
           background: 'var(--brand)', color: 'white',
           fontSize: 'var(--fs-base)', fontWeight: 800, cursor: 'pointer',
           width: '100%', maxWidth: 320,
@@ -140,7 +140,7 @@ export default function GuideInstallButton() {
         <strong style={{ color: 'var(--text-primary)' }}>&quot;홈 화면에 추가&quot;</strong> 누르면 끝!
       </div>
       <div style={{
-        marginTop: 16, padding: '12px 16px', borderRadius: 10,
+        marginTop: 'var(--sp-lg)', padding: '12px 16px', borderRadius: 'var(--radius-md)',
         background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)',
         fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6,
       }}>
@@ -161,7 +161,7 @@ export default function GuideInstallButton() {
         <strong style={{ color: 'var(--text-primary)' }}>설치(⊕) 아이콘</strong>을 클릭하세요
       </div>
       <div style={{
-        padding: '12px 16px', borderRadius: 10,
+        padding: '12px 16px', borderRadius: 'var(--radius-md)',
         background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)',
         fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6,
       }}>

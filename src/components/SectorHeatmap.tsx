@@ -67,7 +67,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
               flex: `0 0 calc(${widthPct}% - 3px)`,
               minWidth: 80, minHeight: 60,
               background: getColor(sec.avgPct, isKR),
-              borderRadius: 8, padding: '8px 10px',
+              borderRadius: 'var(--radius-sm)', padding: '8px 10px',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
               cursor: 'default', transition: 'opacity 0.15s',
               opacity: 0.9,
@@ -95,7 +95,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
       </div>
 
       {/* 범례 */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <span style={{ width: 10, height: 10, borderRadius: 2, background: isKR ? 'var(--accent-red)' : '#059669' }} />
           {isKR ? '상승' : 'Up'}

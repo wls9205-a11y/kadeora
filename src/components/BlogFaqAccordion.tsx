@@ -33,7 +33,7 @@ export default function BlogFaqAccordion({ items }: Props) {
                 justifyContent: 'space-between', padding: '12px 16px',
                 background: 'none', border: 'none', cursor: 'pointer',
                 textAlign: 'left', color: 'var(--text-primary)',
-                fontSize: 'var(--fs-base)', fontWeight: 600, gap: 12,
+                fontSize: 'var(--fs-base)', fontWeight: 600, gap: 'var(--sp-md)',
               }}
             >
               <span>Q. {item.question}</span>

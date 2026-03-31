@@ -24,10 +24,10 @@ export default function EmptyState({ icon, title, description, action, suggestio
         }}>{action.label}</Link>
       )}
       {suggestions && suggestions.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 16 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center', flexWrap: 'wrap', marginTop: 'var(--sp-lg)' }}>
           {suggestions.map(s => (
             <Link key={s.href} href={s.href} style={{
-              fontSize: 'var(--fs-xs)', padding: '6px 14px', borderRadius: 20,
+              fontSize: 'var(--fs-xs)', padding: '6px 14px', borderRadius: 'var(--radius-xl)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
               color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600,
               transition: 'border-color var(--transition-fast)',

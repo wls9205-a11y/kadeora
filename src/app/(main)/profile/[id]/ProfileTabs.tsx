@@ -158,10 +158,10 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
       <div style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', borderRadius: 'var(--radius-card)', padding: 4, border: '1px solid var(--border)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {tabs.map(tab => (
           <button key={tab} onClick={() => handleTabChange(tab)} aria-pressed={activeTab === tab} style={{
-            flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+            flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
             background: activeTab === tab ? 'var(--brand)' : 'transparent',
             color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',
-            fontWeight: 600, fontSize: 'var(--fs-sm)', transition: 'all 0.15s', whiteSpace: 'nowrap', minWidth: 'fit-content',
+            fontWeight: 600, fontSize: 'var(--fs-sm)', transition: 'all var(--transition-fast)', whiteSpace: 'nowrap', minWidth: 'fit-content',
           }}>
             {tabLabels[tab]}
           </button>
@@ -169,7 +169,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
       </div>
 
       {/* 탭 콘텐츠 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(14px, 3vw, 20px) clamp(14px, 3vw, 24px)' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 'clamp(14px, 3vw, 20px) clamp(14px, 3vw, 24px)' }}>
         {/* 게시글 */}
         {activeTab === 'posts' && (
           displayedPosts.length === 0 ? (
@@ -183,9 +183,9 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                     <div style={{ padding: '12px 0', borderBottom: i < displayedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
                       <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
                         <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                       </div>
@@ -195,7 +195,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
               })}
               {hasMorePosts && (
                 <button onClick={loadMorePosts} disabled={loadingMorePosts}
-                  style={{ marginTop: 12, padding: '10px 0', width: '100%', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>
+                  style={{ marginTop: 'var(--sp-md)', padding: '10px 0', width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>
                   {loadingMorePosts ? '불러오는 중...' : '더보기'}
                 </button>
               )}
@@ -287,11 +287,11 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? 'var(--accent-green)' : isClosed ? 'var(--text-tertiary)' : 'var(--accent-yellow)' }}>
+                        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-md)', background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? 'var(--accent-green)' : isClosed ? 'var(--text-tertiary)' : 'var(--accent-yellow)' }}>
                           {isOpen ? '접수중' : isClosed ? '마감' : '접수예정'}
                         </span>
                         {a.rcept_bgnde && (
-                          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
+                          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
                             {a.rcept_bgnde} ~ {a.rcept_endde}
                           </div>
                         )}
@@ -315,9 +315,9 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                   <div style={{ padding: '12px 0', borderBottom: i < blogBookmarks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{post.category}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, flexShrink: 0, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{post.category}</span>
                     <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                       <span>👀{post.view_count || 0}</span>
                       <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                     </div>
@@ -341,9 +341,9 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                     <div style={{ padding: '12px 0', borderBottom: i < bookmarkedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
                       <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
                         <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                       </div>

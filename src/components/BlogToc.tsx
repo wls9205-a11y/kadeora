@@ -92,13 +92,13 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
               data-toc-id={item.id}
               onClick={() => scrollTo(item.id)}
               style={{
-                padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: isActive ? 700 : 500,
+                padding: '6px 12px', borderRadius: 'var(--radius-xl)', fontSize: 11, fontWeight: isActive ? 700 : 500,
                 background: isActive ? 'var(--brand)' : 'var(--bg-surface)',
                 color: isActive ? '#fff' : 'var(--text-secondary)',
                 border: isActive ? 'none' : '1px solid var(--border)',
                 cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4,
-                transition: 'all 0.15s',
+                fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
+                transition: 'all var(--transition-fast)',
               }}
             >
               <span style={{ fontSize: 9, fontWeight: 800, opacity: 0.7 }}>{i + 1}</span>

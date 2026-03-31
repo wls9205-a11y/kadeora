@@ -48,10 +48,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           {title.length > 50 ? title.slice(0, 50) + '...' : title}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 32 }}>
-          {category && <span style={{ fontSize: '20px', color: '#94A8C4' }}>{category}</span>}
-          <span style={{ fontSize: '20px', color: '#94A8C4' }}>@{nickname}</span>
-          <span style={{ fontSize: '20px', color: '#94A8C4' }}>❤ {likes}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-lg)', marginTop: 32 }}>
+          {category && <span style={{ fontSize: '20px', color: 'var(--text-secondary)' }}>{category}</span>}
+          <span style={{ fontSize: '20px', color: 'var(--text-secondary)' }}>@{nickname}</span>
+          <span style={{ fontSize: '20px', color: 'var(--text-secondary)' }}>❤ {likes}</span>
           <span style={{ marginLeft: 'auto', fontSize: '17px', color: '#7D8DA3' }}>kadeora.app</span>
         </div>
       </div>

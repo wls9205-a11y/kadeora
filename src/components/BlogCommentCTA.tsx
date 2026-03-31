@@ -4,7 +4,7 @@ export default function BlogCommentCTA({ commentCount }: { commentCount: number 
   if (commentCount > 0) return null;
   return (
     <div style={{
-      margin: '24px 0', padding: '24px 20px', borderRadius: 16, textAlign: 'center',
+      margin: '24px 0', padding: '24px 20px', borderRadius: 'var(--radius-lg)', textAlign: 'center',
       background: 'linear-gradient(135deg, rgba(167,139,250,0.06) 0%, rgba(96,165,250,0.06) 100%)',
       border: '2px dashed rgba(167,139,250,0.2)',
     }}>
@@ -18,7 +18,7 @@ export default function BlogCommentCTA({ commentCount }: { commentCount: number 
       </div>
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '8px 18px', borderRadius: 999,
+        padding: '8px 18px', borderRadius: 'var(--radius-pill)',
         background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.25)',
       }}>
         <span style={{ fontSize: 'var(--fs-sm)' }}>🎁</span>

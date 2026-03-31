@@ -34,7 +34,7 @@ export default function Sidebar() {
     <aside style={{
       width: 220, flexShrink: 0,
       position: 'sticky', top: 72, height: 'fit-content',
-      display: 'flex', flexDirection: 'column', gap: 4,
+      display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)',
       paddingTop: 8,
     }}>
       {MENU.map(item => {
@@ -42,7 +42,7 @@ export default function Sidebar() {
         return (
           <Link key={item.href} href={item.href} style={{
             display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 14px', borderRadius: 10,
+            padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)',
             textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: active ? 700 : 400,
             color: active ? 'var(--brand)' : 'var(--text-primary)',
             background: active ? 'var(--bg-hover)' : 'transparent',
@@ -62,7 +62,7 @@ export default function Sidebar() {
         <>
           <Link href={`/profile/${userId}?tab=bookmarks`} style={{
             display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 14px', borderRadius: 10,
+            padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)',
             textDecoration: 'none', fontSize: 'var(--fs-base)',
             color: 'var(--text-primary)', background: 'transparent',
           }}
@@ -72,7 +72,7 @@ export default function Sidebar() {
           </Link>
           <Link href={`/profile/${userId}`} style={{
             display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 14px', borderRadius: 10,
+            padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)',
             textDecoration: 'none', fontSize: 'var(--fs-base)',
             color: isActive('/profile') ? 'var(--brand)' : 'var(--text-primary)',
             background: isActive('/profile') ? 'var(--bg-hover)' : 'transparent',
@@ -83,7 +83,7 @@ export default function Sidebar() {
           </Link>
           <Link href="/notifications" style={{
             display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 14px', borderRadius: 10,
+            padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)',
             textDecoration: 'none', fontSize: 'var(--fs-base)',
             color: 'var(--text-primary)', background: 'transparent',
           }}
@@ -94,14 +94,14 @@ export default function Sidebar() {
             {unread > 0 && (
               <span style={{
                 marginLeft: 'auto', background: 'var(--brand)', color: 'var(--text-inverse)',
-                fontSize: 'var(--fs-xs)', fontWeight: 700, borderRadius: 10,
+                fontSize: 'var(--fs-xs)', fontWeight: 700, borderRadius: 'var(--radius-md)',
                 padding: '2px 6px', minWidth: 18, textAlign: 'center',
               }}>{unread}</span>
             )}
           </Link>
           <Link href="/write" style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '11px 14px', borderRadius: 10, marginTop: 4,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--sp-sm)',
+            padding: '11px 14px', borderRadius: 'var(--radius-md)', marginTop: 'var(--sp-xs)',
             textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 700,
             color: 'var(--text-inverse)', background: 'var(--brand)',
           }}>
@@ -114,7 +114,7 @@ export default function Sidebar() {
 
       <Link href="/blog" style={{
         display: 'flex', alignItems: 'center', gap: 10,
-        padding: '10px 14px', borderRadius: 10,
+        padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)',
         textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: isActive('/blog') ? 700 : 400,
         color: isActive('/blog') ? 'var(--brand)' : 'var(--text-primary)',
         background: isActive('/blog') ? 'var(--bg-hover)' : 'transparent',
@@ -127,7 +127,7 @@ export default function Sidebar() {
 
       <Link href="/guide" style={{
         display: 'flex', alignItems: 'center', gap: 10,
-        padding: '10px 14px', borderRadius: 10,
+        padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-md)',
         textDecoration: 'none', fontSize: 'var(--fs-sm)',
         color: 'var(--text-secondary)', background: 'transparent',
       }}
@@ -136,14 +136,14 @@ export default function Sidebar() {
         <span>📖</span> 가이드북
       </Link>
 
-      <div style={{ padding: '0 8px', marginTop: 4 }}>
+      <div style={{ padding: '0 8px', marginTop: 'var(--sp-xs)' }}>
         <PushSubscribeButton />
       </div>
 
       {!userId && (
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          padding: '11px 14px', borderRadius: 10, marginTop: 8,
+          padding: '11px 14px', borderRadius: 'var(--radius-md)', marginTop: 'var(--sp-sm)',
           textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700,
           color: 'var(--kakao-text, #191919)', background: 'var(--kakao-bg, #FEE500)',
         }}>

@@ -49,7 +49,7 @@ export default function PremiumPage() {
     <article style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 80px' }}>
 
       {/* 브레드크럼 */}
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>프리미엄</span>
@@ -57,7 +57,7 @@ export default function PremiumPage() {
 
       {/* OG 히어로 이미지 (검색엔진 썸네일) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general&subtitle=${encodeURIComponent('AI 분석 · 청약 알림 · 광고 없는 피드')}`} alt="카더라 프리미엄 멤버십 — AI 종목 분석 청약 알림 광고 없는 피드" width={1200} height={630} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block', borderRadius: 10, marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="eager" />
+      <img src={`/api/og?title=${encodeURIComponent('프리미엄 멤버십')}&design=2&category=general&subtitle=${encodeURIComponent('AI 분석 · 청약 알림 · 광고 없는 피드')}`} alt="카더라 프리미엄 멤버십 — AI 종목 분석 청약 알림 광고 없는 피드" width={1200} height={630} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block', borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="eager" />
 
       <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'block', marginBottom: 'var(--sp-md)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
 
@@ -70,7 +70,7 @@ export default function PremiumPage() {
       <div className="kd-card-glow" style={{
         padding: '32px 20px', textAlign: 'center', marginBottom: 'var(--sp-2xl)',
         background: 'linear-gradient(135deg, #0D1F42 0%, #081228 100%)',
-        borderRadius: 16, position: 'relative', overflow: 'hidden',
+        borderRadius: 'var(--radius-lg)', position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'repeating-linear-gradient(0deg,#4A9EFF 0,#4A9EFF 1px,transparent 1px,transparent 20px),repeating-linear-gradient(90deg,#4A9EFF 0,#4A9EFF 1px,transparent 1px,transparent 20px)' }} />
         <div style={{ position: 'relative' }}>
@@ -82,7 +82,7 @@ export default function PremiumPage() {
             AI 분석, 맞춤 알림, 클린 피드까지<br />
             투자에 진심인 당신을 위한 프리미엄
           </p>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 4, marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 'var(--sp-xs)', marginBottom: 6 }}>
             <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand-hover)', letterSpacing: '-1px' }}>9,900</span>
             <span style={{ fontSize: 14, color: 'var(--text-tertiary)', fontWeight: 600 }}>원/월</span>
           </div>
@@ -90,7 +90,7 @@ export default function PremiumPage() {
             하루 330원 · 언제든 해지 가능
           </div>
           <Link href="/payment?product=premium_monthly" className="kd-btn-glow" style={{
-            display: 'inline-block', padding: '14px 36px', borderRadius: 14,
+            display: 'inline-block', padding: '14px 36px', borderRadius: 'var(--radius-lg)',
             fontSize: 16, textDecoration: 'none',
           }}>
             프리미엄 시작하기
@@ -102,11 +102,11 @@ export default function PremiumPage() {
       <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14, letterSpacing: '-0.3px' }}>
         프리미엄에서만 가능한 것들
       </h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 'var(--sp-sm)', marginBottom: 28 }}>
         {PREMIUM_FEATURES.map(f => (
           <div key={f.title} className="kd-section-card" style={{
             padding: '14px 12px', background: 'var(--bg-surface)',
-            border: '1px solid var(--border)', borderRadius: 12,
+            border: '1px solid var(--border)', borderRadius: 'var(--radius-card)',
           }}>
             <div style={{ fontSize: 'var(--fs-xl)', marginBottom: 'var(--sp-sm)' }}>{f.icon}</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>{f.title}</div>
@@ -121,7 +121,7 @@ export default function PremiumPage() {
       </h2>
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', overflow: 'hidden', marginBottom: 28 }}>
         {/* 헤더 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px', padding: '10px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px', padding: 'var(--sp-md) var(--card-p)', borderBottom: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)' }}>기능</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', textAlign: 'center' }}>무료</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', textAlign: 'center' }}>프리미엄</span>
@@ -139,11 +139,11 @@ export default function PremiumPage() {
         ].map((row, i) => (
           <div key={row.name} style={{
             display: 'grid', gridTemplateColumns: '1fr 80px 80px',
-            padding: '10px 14px', borderBottom: i < 8 ? '1px solid var(--border)' : 'none',
+            padding: 'var(--sp-md) var(--card-p)', borderBottom: i < 8 ? '1px solid var(--border)' : 'none',
           }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{row.name}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>{row.free === '✅' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', color: '#34D399', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> : row.free === '❌' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(248,113,113,0.15)', color: '#F87171', fontSize: 10, lineHeight: '16px', textAlign: 'center' }}>✕</span> : row.free}</span>
-            <span style={{ fontSize: 12, color: 'var(--brand)', textAlign: 'center', fontWeight: 600 }}>{row.premium === '✅' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.2)', color: '#34D399', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> : row.premium.startsWith('✅') ? <><span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.2)', color: '#34D399', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> <span style={{ fontSize: 10 }}>{row.premium.replace('✅ ', '')}</span></> : row.premium}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>{row.free === '✅' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', color: 'var(--accent-green)', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> : row.free === '❌' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(248,113,113,0.15)', color: 'var(--accent-red)', fontSize: 10, lineHeight: '16px', textAlign: 'center' }}>✕</span> : row.free}</span>
+            <span style={{ fontSize: 12, color: 'var(--brand)', textAlign: 'center', fontWeight: 600 }}>{row.premium === '✅' ? <span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.2)', color: 'var(--accent-green)', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> : row.premium.startsWith('✅') ? <><span style={{ display: 'inline-block', width: 16, height: 16, borderRadius: '50%', background: 'rgba(52,211,153,0.2)', color: 'var(--accent-green)', fontSize: 12, lineHeight: '16px', textAlign: 'center' }}>✓</span> <span style={{ fontSize: 10 }}>{row.premium.replace('✅ ', '')}</span></> : row.premium}</span>
           </div>
         ))}
       </div>
@@ -152,15 +152,15 @@ export default function PremiumPage() {
       <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
         자주 묻는 질문
       </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)', marginBottom: 28 }}>
         {[
           { q: '결제는 어떻게 하나요?', a: '토스 페이먼츠를 통해 카드/간편결제로 안전하게 결제됩니다.' },
           { q: '해지는 언제든 가능한가요?', a: '네, 프로필 설정에서 언제든 해지할 수 있으며, 남은 기간은 계속 이용 가능합니다.' },
           { q: '환불 정책은 어떻게 되나요?', a: '구독 시작 후 7일 이내 미사용 시 전액 환불 가능합니다.' },
           { q: '무료 체험 기간이 있나요?', a: '현재는 무료 체험 없이 바로 구독 방식입니다. 하루 330원으로 부담 없이 시작하세요.' },
         ].map(faq => (
-          <details key={faq.q} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-            <summary style={{ padding: '12px 14px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <details key={faq.q} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+            <summary style={{ padding: 'var(--sp-md) var(--card-p)', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {faq.q}
               <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flexShrink: 0, marginLeft: 8 }}>+</span>
             </summary>
@@ -174,7 +174,7 @@ export default function PremiumPage() {
       {/* 하단 CTA */}
       <div className="kd-card-glow" style={{
         padding: '24px 20px', textAlign: 'center',
-        background: 'var(--bg-surface)', borderRadius: 14,
+        background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)',
       }}>
         <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
           투자에 진심이라면, 프리미엄
@@ -183,7 +183,7 @@ export default function PremiumPage() {
           월 9,900원 · 하루 330원 · 언제든 해지
         </div>
         <Link href="/payment?product=premium_monthly" className="kd-btn-glow" style={{
-          display: 'inline-block', padding: '13px 32px', borderRadius: 12,
+          display: 'inline-block', padding: '13px 32px', borderRadius: 'var(--radius-card)',
           fontSize: 15, textDecoration: 'none',
         }}>
           프리미엄 시작하기

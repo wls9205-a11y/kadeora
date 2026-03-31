@@ -232,7 +232,7 @@ export default function SearchClient() {
 
   return (
     <PullToRefresh>
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <h1 style={{ margin: '0 0 20px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🔍 검색</h1>
 
       {/* Search input */}
@@ -269,9 +269,9 @@ export default function SearchClient() {
               zIndex: 60,
               backgroundColor: 'var(--bg-surface)',
               border: '1px solid var(--border)',
-              borderRadius: 8,
+              borderRadius: 'var(--radius-sm)',
               boxShadow: 'var(--shadow-lg)',
-              marginTop: 4,
+              marginTop: 'var(--sp-xs)',
               maxHeight: 300,
               overflowY: 'auto' as const,
             }}
@@ -350,7 +350,7 @@ export default function SearchClient() {
                       onClick={() => handleAcNavigate(`/feed/${post.id}`)}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                        <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
                         <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {highlight(post.title, inputVal)}
                         </span>
@@ -372,7 +372,7 @@ export default function SearchClient() {
                     onClick={() => handleAcNavigate(`/blog/${blog.slug}`)}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(167,139,250,0.15)', color: 'var(--accent-purple)' }}>📝 블로그</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: 'rgba(167,139,250,0.15)', color: 'var(--accent-purple)' }}>📝 블로그</span>
                       <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {highlight(blog.title, inputVal)}
                       </span>
@@ -393,7 +393,7 @@ export default function SearchClient() {
                   <div key={r.id} className={acItemCls} style={{ padding: '10px 12px', cursor: 'pointer' }}
                     onClick={() => { handleAcNavigate('/apt'); }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 999, fontWeight: 700, background: 'rgba(251,146,60,0.15)', color: 'var(--accent-orange)' }}>🏗️ {r.project_type}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: 'rgba(251,146,60,0.15)', color: 'var(--accent-orange)' }}>🏗️ {r.project_type}</span>
                       <span style={{ fontWeight: 600, fontSize: 'var(--fs-base)', color: 'var(--text-primary)' }}>{highlight(r.district_name || '', inputVal)}</span>
                     </div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{r.region} · {r.stage}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : ''}</div>
@@ -452,11 +452,11 @@ export default function SearchClient() {
         {[['all', '전체'], ['stock', '주식'], ['apt', '청약'], ['discuss', '토론'], ['free', '자유']].map(([k, l]) => (
           <button key={k} onClick={() => { setCategory(k); setPage(0); }}
             style={{
-              padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
+              padding: '6px 14px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: 'var(--fs-sm)', fontWeight: 600,
               background: category === k ? 'var(--brand)' : 'var(--bg-surface)',
               color: category === k ? 'var(--text-inverse)' : 'var(--text-secondary)',
               border: `1px solid ${category === k ? 'var(--brand)' : 'var(--border)'}`,
-              transition: 'all 0.15s',
+              transition: 'all var(--transition-fast)',
             }}
           >{l}</button>
         ))}
@@ -482,13 +482,13 @@ export default function SearchClient() {
             <Link key={post.id} href={`/feed/${post.id}`} style={{ textDecoration: 'none' }}>
               <div style={{
                 background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '16px 18px',
-                transition: 'border-color 0.15s',
+                transition: 'border-color var(--transition-fast)',
               }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
                 onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-sm)' }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 999, fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 700, background: cat.bg, color: cat.color }}>{cat.label}</span>
                   <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{post.profiles?.nickname ?? '익명'} · {timeAgo(post.created_at)}</span>
                 </div>
                 <h3 style={{ margin: '0 0 6px', fontSize: 'var(--fs-md)', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -497,7 +497,7 @@ export default function SearchClient() {
                 <p style={{ margin: '0 0 10px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                   {highlight(post.content.slice(0, 200), query)}
                 </p>
-                <div style={{ display: 'flex', gap: 12, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
+                <div style={{ display: 'flex', gap: 'var(--sp-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>
                   <span>조회수 {post.view_count}</span>
                   <span>❤️ {post.likes_count}</span>
                   <span>💬 {post.comments_count}</span>
@@ -510,7 +510,7 @@ export default function SearchClient() {
 
       {/* Loader */}
       {hasMore && (
-        <div ref={loaderRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 12 }}>
+        <div ref={loaderRef} style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 'var(--sp-md)' }}>
           {loading && (
             <div style={{ width: 24, height: 24, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%' }} className="animate-spin" />
           )}
@@ -530,15 +530,15 @@ export default function SearchClient() {
                   style={{ background: 'none', border: 'none', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', cursor: 'pointer' }}
                 >전체 삭제</button>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-sm)' }}>
                 {recentSearches.map(s => (
                   <button
                     key={s}
                     onClick={() => { setInputVal(s); handleInputChange(s); }}
                     style={{
-                      padding: '6px 14px', borderRadius: 20, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+                      padding: '6px 14px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                       background: 'var(--bg-surface)', color: 'var(--text-secondary)',
-                      border: '1px solid var(--border)', transition: 'all 0.15s',
+                      border: '1px solid var(--border)', transition: 'all var(--transition-fast)',
                     }}
                   >{s}</button>
                 ))}
@@ -555,7 +555,7 @@ export default function SearchClient() {
                   key={s}
                   onClick={() => { setInputVal(s); handleInputChange(s); }}
                   style={{
-                    padding: '6px 12px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    padding: '6px 12px', borderRadius: 'var(--radius-lg)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
                     background: i === 0 ? 'var(--brand-bg)' : 'var(--bg-surface)', color: i === 0 ? 'var(--brand)' : 'var(--text-secondary)',
                     border: `1px solid ${i === 0 ? 'var(--brand-border, rgba(59,123,246,0.3))' : 'var(--border)'}`,
                     flexShrink: 0, whiteSpace: 'nowrap',

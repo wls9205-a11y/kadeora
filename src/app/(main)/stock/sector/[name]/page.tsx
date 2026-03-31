@@ -71,7 +71,7 @@ export default async function SectorPage({ params }: Props) {
   const top10 = stocks.slice(0, 10);
 
   return (
-    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: BreadcrumbList */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -104,7 +104,7 @@ export default async function SectorPage({ params }: Props) {
         ],
       })}} />
       {/* 가시적 브레드크럼 */}
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>
@@ -113,7 +113,7 @@ export default async function SectorPage({ params }: Props) {
       </nav>
 
       {/* 히어로 이미지 */}
-      <div style={{ marginBottom: 'var(--sp-md)', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+      <div style={{ marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`/api/og?title=${encodeURIComponent(sector + ' 섹터 종목')}&design=2&category=stock&subtitle=${encodeURIComponent(stocks.length + '종목 · 시총 ' + fmtCap(totalCap, stocks[0]?.currency ?? undefined))}`}
@@ -145,9 +145,9 @@ export default async function SectorPage({ params }: Props) {
       </p>
 
       {/* 섹터 요약 — 시각 대시보드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 8, marginBottom: 'var(--sp-lg)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
         {/* 상승/하락 도넛 차트 */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <svg viewBox="0 0 80 80" style={{ width: 70, height: 70 }}>
             {(() => {
               const flat = stocks.length - upCount - downCount;
@@ -171,7 +171,7 @@ export default async function SectorPage({ params }: Props) {
               </>);
             })()}
           </svg>
-          <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 10 }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 6, fontSize: 10 }}>
             <span style={{ color: isKR ? 'var(--accent-red)' : 'var(--accent-green)' }}>▲{upCount}</span>
             <span style={{ color: 'var(--text-tertiary)' }}>━{stocks.length - upCount - downCount}</span>
             <span style={{ color: isKR ? 'var(--accent-blue)' : 'var(--accent-red)' }}>▼{downCount}</span>
@@ -179,11 +179,11 @@ export default async function SectorPage({ params }: Props) {
         </div>
         {/* KPI 그리드 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 6 }}>
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>합산 시총</div>
             <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{fmtCap(totalCap, stocks[0]?.currency ?? undefined)}</div>
           </div>
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 등락률</div>
             <div style={{ fontSize: 14, fontWeight: 800, color: avgPct >= 0 ? (isKR ? 'var(--accent-red)' : 'var(--accent-green)') : (isKR ? 'var(--accent-blue)' : 'var(--accent-red)') }}>
               {avgPct >= 0 ? '+' : ''}{avgPct.toFixed(2)}%
@@ -194,12 +194,12 @@ export default async function SectorPage({ params }: Props) {
             const gainer = stocks.reduce((a, b) => (a.change_pct || 0) > (b.change_pct || 0) ? a : b);
             const loser = stocks.reduce((a, b) => (a.change_pct || 0) < (b.change_pct || 0) ? a : b);
             return (<>
-              <div style={{ background: isKR ? 'rgba(248,113,113,0.06)' : 'rgba(52,211,153,0.06)', border: `1px solid ${isKR ? 'rgba(248,113,113,0.2)' : 'rgba(52,211,153,0.2)'}`, borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ background: isKR ? 'rgba(248,113,113,0.06)' : 'rgba(52,211,153,0.06)', border: `1px solid ${isKR ? 'rgba(248,113,113,0.2)' : 'rgba(52,211,153,0.2)'}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>🔥 최고 상승</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gainer.name}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: isKR ? 'var(--accent-red)' : 'var(--accent-green)' }}>+{(gainer.change_pct || 0).toFixed(2)}%</div>
               </div>
-              <div style={{ background: isKR ? 'rgba(96,165,250,0.06)' : 'rgba(248,113,113,0.06)', border: `1px solid ${isKR ? 'rgba(96,165,250,0.2)' : 'rgba(248,113,113,0.2)'}`, borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ background: isKR ? 'rgba(96,165,250,0.06)' : 'rgba(248,113,113,0.06)', border: `1px solid ${isKR ? 'rgba(96,165,250,0.2)' : 'rgba(248,113,113,0.2)'}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>❄️ 최고 하락</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{loser.name}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: isKR ? 'var(--accent-blue)' : 'var(--accent-red)' }}>{(loser.change_pct || 0).toFixed(2)}%</div>
@@ -211,7 +211,7 @@ export default async function SectorPage({ params }: Props) {
 
       {/* 시총 분포 바 (Top 5) */}
       {stocks.length >= 3 && (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 'var(--sp-md)' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>시총 비중 TOP5</div>
           {stocks.slice(0, 5).map((s, i) => {
             const pct = totalCap > 0 ? ((s.market_cap || 0) / totalCap) * 100 : 0;
@@ -230,12 +230,12 @@ export default async function SectorPage({ params }: Props) {
 
       {/* 종목 리스트 */}
       <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📊 {sector} 섹터 시총 순위</h2>
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '0 16px' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '0 var(--sp-lg)' }}>
         {stocks.map((s, i) => {
           const pct = s.change_pct ?? 0;
           return (
             <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 4px',
+              display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '10px 4px',
               borderBottom: i < stocks.length - 1 ? '1px solid var(--border)' : 'none',
               textDecoration: 'none', color: 'inherit',
             }}>
@@ -261,12 +261,12 @@ export default async function SectorPage({ params }: Props) {
       </div>
 
       {/* 다른 섹터 링크 */}
-      <div style={{ marginTop: 20, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+      <div style={{ marginTop: 'var(--sp-xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
         <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10 }}>📊 다른 섹터</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['반도체', '금융', '자동차', '바이오', '화학', '철강', '건설', '유통', 'IT', '에너지', '통신', '엔터', '방산', '조선'].map(s => (
             <Link key={s} href={`/stock/sector/${encodeURIComponent(s)}`} style={{
-              padding: '4px 10px', borderRadius: 6, fontSize: 'var(--fs-xs)', fontWeight: 500,
+              padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500,
               background: s === sector ? 'var(--brand)' : 'var(--bg-hover)',
               color: s === sector ? 'var(--text-inverse)' : 'var(--text-secondary)',
               textDecoration: 'none', border: '1px solid var(--border)',

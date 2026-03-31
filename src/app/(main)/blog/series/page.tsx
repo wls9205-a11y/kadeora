@@ -35,7 +35,7 @@ export default async function BlogSeriesPage() {
   } catch { }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈' }] }) }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
@@ -49,25 +49,25 @@ export default async function BlogSeriesPage() {
           <p style={{ fontSize: 'var(--fs-sm)' }}>아직 시리즈가 없습니다</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div style={{ display: 'grid', gap: 'var(--sp-md)' }}>
           {seriesList.map(s => {
             const catColor = s.category === 'stock' ? '#00E5FF' : s.category === 'apt' ? '#00FF87' : s.category === 'finance' ? '#FFE000' : '#C084FC';
             return (
             <Link key={s.id} href={`/blog/series/${s.slug}`} className="kd-card-hover" style={{
               display: 'block', textDecoration: 'none',
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
-              borderRadius: 14, overflow: 'hidden',
+              borderRadius: 'var(--radius-lg)', overflow: 'hidden',
             }}>
               {/* 매거진 커버 */}
               <div style={{ height: 80, background: `linear-gradient(135deg, ${catColor}18 0%, ${catColor}08 100%)`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 14, position: 'relative' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: `${catColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', flexShrink: 0 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-card)', background: `${catColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xl)', flexShrink: 0 }}>
                   {s.category === 'stock' ? '📈' : s.category === 'apt' ? '🏢' : s.category === 'finance' ? '💰' : '📝'}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>{s.title}</h2>
                   {s.description && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.description}</p>}
                 </div>
-                <div style={{ position: 'absolute', top: 10, right: 14, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: `${catColor}20`, color: catColor, border: `1px solid ${catColor}40` }}>
+                <div style={{ position: 'absolute', top: 10, right: 14, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 'var(--radius-xl)', background: `${catColor}20`, color: catColor, border: `1px solid ${catColor}40` }}>
                   {s.post_count}편
                 </div>
               </div>

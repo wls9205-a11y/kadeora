@@ -34,7 +34,7 @@ export default function ReadingProgress() {
           position: 'fixed', top: 8, right: 12, zIndex: 100,
           fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)',
           background: 'var(--bg-elevated)', padding: '2px 8px',
-          borderRadius: 10, border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
           pointerEvents: 'none', opacity: 0.8,
           fontVariantNumeric: 'tabular-nums',
         }}>

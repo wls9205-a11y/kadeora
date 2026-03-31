@@ -41,12 +41,12 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
       title="친구에게 공유하기"
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '8px 16px', borderRadius: 10,
+        padding: '8px 16px', borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(96,165,250,0.08) 100%)',
         border: '1px solid rgba(37,99,235,0.2)',
         color: 'var(--brand)', cursor: 'pointer',
         fontSize: 13, fontWeight: 700,
-        transition: 'all 0.15s', fontFamily: 'inherit',
+        transition: 'all var(--transition-fast)', fontFamily: 'inherit',
       }}
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

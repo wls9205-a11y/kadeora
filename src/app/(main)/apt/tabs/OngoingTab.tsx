@@ -30,7 +30,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
   const pill = (v: string, sel: string, set: (v: string) => void, label?: string) => (
     <button key={v} onClick={() => set(v)} style={{
-      padding: '5px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 600,
+      padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 600,
       background: sel === v ? 'var(--brand)' : 'var(--bg-hover)',
       color: sel === v ? 'var(--text-inverse)' : 'var(--text-secondary)',
       border: 'none', cursor: 'pointer', flexShrink: 0,
@@ -118,7 +118,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
       {/* 정렬 + 상태 필터 한 줄 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 10, alignItems: 'center' }}>
         <select value={ongoingSort} onChange={e => { setOngoingSort(e.target.value as typeof ongoingSort); setOngoingPage(1); }} style={{
-          padding: '6px 10px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)',
+          padding: '6px 10px', fontSize: 12, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
           background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', flexShrink: 0,
         }}>
           <option value="supply">세대수순</option>
@@ -129,7 +129,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         <div style={{ display: 'flex', gap: 3, flex: 1, justifyContent: 'flex-end' }}>
           {(['전체', '분양중', '미분양'] as const).map(s => (
             <button key={s} onClick={() => { setOngoingStatus(s); setOngoingPage(1); }} style={{
-              padding: '4px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
+              padding: '4px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
               background: ongoingStatus === s ? 'var(--brand)' : 'var(--bg-hover)',
               color: ongoingStatus === s ? '#fff' : 'var(--text-secondary)',
             }}>{s}{s === '전체' ? ` ${totalSites}` : s === '분양중' ? ` ${allSubCount}` : ` ${allUnsoldCount}`}</button>
@@ -162,11 +162,11 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
           <Link key={o.id} href={linkH} className="kd-card-hover" style={{
             display: 'block', textDecoration: 'none', color: 'inherit',
             background: isPremium ? 'linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03))' : 'var(--bg-surface)',
-            border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '12px 14px',
+            border: isPremium ? '1.5px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)',
             borderLeft: `4px solid ${isPremium ? 'var(--accent-yellow)' : accentColor}`,
             boxShadow: isPremium ? '0 0 12px rgba(251,191,36,0.08)' : undefined,
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--sp-sm)' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                   {isPremium && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'linear-gradient(135deg,#FFD43B,#F59E0B)', color: 'var(--bg-base)', marginRight: 4 }}>PREMIUM</span>}
@@ -191,7 +191,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 </div>
                 {/* 분양가 범위 바 */}
                 {pMin && pMax && pMin !== pMax && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 'var(--sp-xs)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-xs)' }}>
                     <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600 }}>{pMin}억</span>
                     <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'linear-gradient(90deg, rgba(96,165,250,0.3), var(--brand), rgba(248,113,113,0.3))', position: 'relative', maxWidth: 120 }}>
                       <div style={{ position: 'absolute', top: -1, left: '50%', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', border: '1px solid var(--bg-surface)', transform: 'translateX(-50%)' }} />
@@ -239,11 +239,11 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                 {/* 인근 시세 비교 */}
                 {o.nearby_avg_price && o.sale_price_min && (() => {
                   const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
-                  return diff > 0 ? <div style={{ marginTop: 4, fontSize: '10px', color: 'var(--accent-green)', fontWeight: 600 }}>📊 인근 시세 대비 약 {diff}% 저렴</div> : null;
+                  return diff > 0 ? <div style={{ marginTop: 'var(--sp-xs)', fontSize: '10px', color: 'var(--accent-green)', fontWeight: 600 }}>📊 인근 시세 대비 약 {diff}% 저렴</div> : null;
                 })()}
                 {/* 프리미엄 상담사 CTA */}
                 {isPremium && premiumMatch?.consultant && (
-                  <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 6, padding: '6px 10px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 6, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
                     <span style={{ fontSize: 12, lineHeight: 1 }}>👔</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)' }}>
@@ -253,7 +253,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
                       {premiumMatch.description && <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{premiumMatch.description}</div>}
                     </div>
                     {(premiumMatch.cta_phone || premiumMatch.consultant.phone) && (
-                      <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
+                      <a href={`tel:${premiumMatch.cta_phone || premiumMatch.consultant.phone}`} onClick={() => { fetch('/api/consultant/listing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listing_id: premiumMatch.id, type: 'phone' }) }).catch(() => {}); }} style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--accent-yellow)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid rgba(251,191,36,0.3)', textDecoration: 'none', whiteSpace: 'nowrap' }}>📞 상담</a>
                     )}
                   </div>
                 )}
@@ -261,7 +261,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(isUnsold ? 'unsold' : 'sub', String(o.link_id)); }} style={{
                 fontSize: 'var(--fs-lg)', background: isWatched ? 'var(--accent-yellow-bg)' : 'transparent',
                 border: isWatched ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)',
-                borderRadius: 8, padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
+                borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
               }}>{isWatched ? '⭐' : '☆'}</button>
             </div>
           </Link>
@@ -271,10 +271,10 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--sp-xs)', marginTop: 'var(--sp-md)' }}>
           {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(p => (
             <button key={p} onClick={() => { setOngoingPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{
-              padding: '6px 10px', borderRadius: 6, fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+              padding: '6px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
               border: `1px solid ${ongoingPage === p ? 'var(--brand)' : 'var(--border)'}`,
               background: ongoingPage === p ? 'var(--brand)' : 'transparent',
               color: ongoingPage === p ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -320,7 +320,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'var(--sp-sm)' }}>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>청약홈 + 국토교통부 미분양 통계 기준{freshDate ? ` · ${freshDate} 수집` : ''}</div>
           <SectionShareButton section="apt-ongoing" label="분양중 아파트 현황 — 분양가·시공사·미분양 한눈에" pagePath="/apt?tab=ongoing" />
         </div>
@@ -334,7 +334,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
             const count = pipeCounts[stage] || 0;
             const pct = Math.round((count / pipeTotal) * 100);
             return (
-              <div key={stage} style={{ flex: Math.max(pct, 10), textAlign: 'center', padding: '8px 2px', borderRadius: 6, background: `${pipeColors[i]}22`, border: `1px solid ${pipeColors[i]}44`, position: 'relative', minWidth: 48 }}>
+              <div key={stage} style={{ flex: Math.max(pct, 10), textAlign: 'center', padding: '8px 2px', borderRadius: 'var(--radius-xs)', background: `${pipeColors[i]}22`, border: `1px solid ${pipeColors[i]}44`, position: 'relative', minWidth: 48 }}>
                 <div style={{ fontSize: '9px', fontWeight: 600, color: pipeColors[i] }}>{stage}</div>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: pipeColors[i], margin: '2px 0' }}>{count}</div>
                 <div style={{ fontSize: '8px', color: pipeColors[i], opacity: 0.7 }}>{pct}%</div>
@@ -366,7 +366,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
         </div>
       )}
 
-      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 12, textAlign: 'center' }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-md)', textAlign: 'center' }}>
         청약홈·국토교통부 미분양 통계 기준{freshDate ? ` · ${freshDate} 수집` : ''} · 청약 마감 후 입주 전 현장 + 미분양 현장 통합 · 정확한 분양 정보는 각 현장에 직접 확인하세요
       </p>
 
@@ -387,7 +387,7 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>{o.region_nm}{o.address ? ` · ${o.address}` : ''}</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 'var(--sp-lg)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
                 {[
                   ['공급 세대수', (o.total_supply ?? 0) > 0 ? (() => {
                     const types = Array.isArray((o as any).house_type_info) ? (o as any).house_type_info : [];
@@ -411,28 +411,28 @@ export default function OngoingTab({ ongoingApts, premiumListings, watchlist, to
               {o.nearby_avg_price && o.sale_price_min && (() => {
                 const diff = Math.round(((o.nearby_avg_price - o.sale_price_min) / o.nearby_avg_price) * 100);
                 return diff > 0 ? (
-                  <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 8, padding: 12, marginBottom: 'var(--sp-lg)' }}>
+                  <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 'var(--radius-sm)', padding: 12, marginBottom: 'var(--sp-lg)' }}>
                     <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-green)' }}>📊 인근 시세 대비 약 {diff}% 저렴</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>지역 평균 실거래가 {(o.nearby_avg_price / 10000).toFixed(1)}억 기준</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>지역 평균 실거래가 {(o.nearby_avg_price / 10000).toFixed(1)}억 기준</div>
                   </div>
                 ) : null;
               })()}
 
-              <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-md)' }}>
-                <a href={linkH} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>자세히 보기 →</a>
-                {o.pblanc_url && <a href={o.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>공고 보기</a>}
+              <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+                <a href={linkH} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 700 }}>자세히 보기 →</a>
+                {o.pblanc_url && <a href={o.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>공고 보기</a>}
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { setSelectedOngoing(null); toggleWatchlist(isU ? 'unsold' : 'sub', String(o.link_id)); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>⭐ 관심단지</button>
-                <button onClick={() => { setSelectedOngoing(null); setCommentTarget({ houseKey: isU ? `unsold_${o.link_id}` : `sub_${o.link_id}`, houseNm: o.house_nm || '현장', houseType: isU ? 'unsold' : 'sub' }); }} style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>💬 한줄평</button>
+              <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
+                <button onClick={() => { setSelectedOngoing(null); toggleWatchlist(isU ? 'unsold' : 'sub', String(o.link_id)); }} style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>⭐ 관심단지</button>
+                <button onClick={() => { setSelectedOngoing(null); setCommentTarget({ houseKey: isU ? `unsold_${o.link_id}` : `sub_${o.link_id}`, houseNm: o.house_nm || '현장', houseType: isU ? 'unsold' : 'sub' }); }} style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>💬 한줄평</button>
               </div>
               {/* 지도 버튼 */}
               {(o.address || o.house_nm) && (
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-sm)' }}>
                   <a href={`https://map.kakao.com/?q=${encodeURIComponent(o.address || o.house_nm)}`} target="_blank" rel="noopener noreferrer"
-                    style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+                    style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 카카오맵</a>
                   <a href={`https://map.naver.com/p/search/${encodeURIComponent(o.address || o.house_nm)}`} target="_blank" rel="noopener noreferrer"
-                    style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+                    style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>🗺️ 네이버지도</a>
                 </div>
               )}
           </BottomSheet>

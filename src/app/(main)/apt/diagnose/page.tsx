@@ -48,7 +48,7 @@ export default function DiagnosePage() {
   const hardRegions = CUTLINES.filter(c => total < c.min);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 청약 목록</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)' }}>🎯 청약 가점 진단</h1>
@@ -58,7 +58,7 @@ export default function DiagnosePage() {
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginBottom: 'var(--sp-lg)' }}>
         <div style={{ marginBottom: 'var(--sp-xl)' }}>
           <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>무주택기간 (만점 32점)</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
             <input type="range" min={0} max={15} value={years} onChange={e => setYears(Number(e.target.value))} style={{ flex: 1, accentColor: 'var(--brand)' }} />
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 50 }}>{years}년</span>
             <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>{housingScore}점</span>
@@ -69,17 +69,17 @@ export default function DiagnosePage() {
           <div style={{ display: 'flex', gap: 6 }}>
             {[0, 1, 2, 3, 4, 5, 6].map(n => (
               <button key={n} onClick={() => setFamily(n)} style={{
-                flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
                 background: family === n ? 'var(--brand)' : 'var(--bg-hover)',
                 color: family === n ? 'var(--text-inverse)' : 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600,
               }}>{n}명</button>
             ))}
           </div>
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600, textAlign: 'right', marginTop: 4 }}>{familyScore}점</div>
+          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600, textAlign: 'right', marginTop: 'var(--sp-xs)' }}>{familyScore}점</div>
         </div>
         <div>
           <label style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 'var(--sp-sm)' }}>청약통장 가입기간 (만점 17점)</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)' }}>
             <input type="range" min={0} max={15} value={bankYears} onChange={e => setBankYears(Number(e.target.value))} style={{ flex: 1, accentColor: 'var(--brand)' }} />
             <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', minWidth: 50 }}>{bankYears}년</span>
             <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>{bankScore}점</span>
@@ -92,13 +92,13 @@ export default function DiagnosePage() {
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>내 청약 가점</div>
         <div style={{ fontSize: 48, fontWeight: 900, color: grade.color }}>{total}<span style={{ fontSize: 'var(--fs-xl)' }}>점</span></div>
         <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: grade.color, marginBottom: 14 }}>{grade.emoji} {grade.label} (상위 {Math.max(1, 100 - pct)}%)</div>
-        <div style={{ position: 'relative', height: 12, background: 'var(--bg-hover)', borderRadius: 6, overflow: 'hidden', marginBottom: 'var(--sp-lg)' }}>
-          <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, var(--accent-blue), ${grade.color})`, borderRadius: 6, transition: 'width 0.3s' }} />
+        <div style={{ position: 'relative', height: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', overflow: 'hidden', marginBottom: 'var(--sp-lg)' }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, var(--accent-blue), ${grade.color})`, borderRadius: 'var(--radius-xs)', transition: 'width 0.3s' }} />
         </div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>무주택 {housingScore}/32</div>
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>부양가족 {familyScore}/35</div>
-          <div style={{ background: 'var(--bg-hover)', borderRadius: 8, padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>통장 {bankScore}/17</div>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>무주택 {housingScore}/32</div>
+          <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>부양가족 {familyScore}/35</div>
+          <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>통장 {bankScore}/17</div>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export default function DiagnosePage() {
             const possible = total >= c.min;
             return (
               <div key={c.region} style={{
-                padding: '10px 12px', borderRadius: 8,
+                padding: '10px 12px', borderRadius: 'var(--radius-sm)',
                 background: canWin ? 'rgba(52,211,153,0.06)' : possible ? 'rgba(251,191,36,0.06)' : 'var(--bg-hover)',
                 border: `1px solid ${canWin ? 'rgba(52,211,153,0.2)' : possible ? 'rgba(251,191,36,0.2)' : 'var(--border)'}`,
               }}>
@@ -137,7 +137,7 @@ export default function DiagnosePage() {
           })}
         </div>
         {possibleRegions.length > 0 && (
-          <div style={{ marginTop: 12, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+          <div style={{ marginTop: 'var(--sp-md)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
             🎯 당첨 가능 지역: <strong style={{ color: 'var(--text-primary)' }}>{possibleRegions.map(r => r.region).join(', ')}</strong>
             {hardRegions.length > 0 && <span> · 도전 필요: {hardRegions.map(r => r.region).join(', ')}</span>}
           </div>
@@ -146,16 +146,16 @@ export default function DiagnosePage() {
 
       {/* 노릴 수 있는 청약 */}
       {total > 0 && (
-        <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ marginTop: 'var(--sp-lg)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
           <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>🎯 내 가점으로 노릴 수 있는 청약</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {CUTLINES.filter(c => total >= c.avg).map(c => (
               <Link key={c.region} href={`/apt?tab=sub`} style={{
-                padding: '6px 12px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 600,
+                padding: '6px 12px', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
                 background: total >= c.max ? 'rgba(52,211,153,0.1)' : total >= c.avg ? 'rgba(96,165,250,0.1)' : 'var(--bg-hover)',
                 color: total >= c.max ? 'var(--accent-green)' : total >= c.avg ? 'var(--accent-blue)' : 'var(--text-tertiary)',
                 border: `1px solid ${total >= c.max ? 'rgba(52,211,153,0.3)' : total >= c.avg ? 'rgba(96,165,250,0.3)' : 'var(--border)'}`,
-                display: 'flex', alignItems: 'center', gap: 4,
+                display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
               }}>
                 {c.region}
                 <span style={{ fontSize: 10, opacity: 0.7 }}>{total >= c.max ? '높음' : '보통'}</span>
@@ -178,18 +178,18 @@ export default function DiagnosePage() {
           { condition: total < 40, tip: '85㎡ 초과 주택은 추첨제 40%가 적용되므로 가점 낮아도 당첨 가능성이 있습니다' },
           { condition: true, tip: '신혼부부·생애최초 특별공급은 가점과 무관하게 소득·자산 기준으로 선정됩니다' },
         ].filter(t => t.condition).slice(0, 4).map((t, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          <div key={i} style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             <span style={{ flexShrink: 0 }}>•</span>
             <span>{t.tip}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--sp-2xl)' }}>
-        <Link href="/apt" style={{ flex: 1, display: 'block', textAlign: 'center', padding: '12px 0', background: 'var(--brand)', color: 'var(--text-inverse)', borderRadius: 10, fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-2xl)' }}>
+        <Link href="/apt" style={{ flex: 1, display: 'block', textAlign: 'center', padding: '12px 0', background: 'var(--brand)', color: 'var(--text-inverse)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none' }}>
           청약 일정 보러가기 →
         </Link>
-        <Link href="/apt?tab=ongoing" style={{ flex: 1, display: 'block', textAlign: 'center', padding: '12px 0', background: 'var(--bg-surface)', color: 'var(--text-primary)', borderRadius: 10, fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none', border: '1px solid var(--border)' }}>
+        <Link href="/apt?tab=ongoing" style={{ flex: 1, display: 'block', textAlign: 'center', padding: '12px 0', background: 'var(--bg-surface)', color: 'var(--text-primary)', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-base)', fontWeight: 700, textDecoration: 'none', border: '1px solid var(--border)' }}>
           분양중 현장 보기
         </Link>
       </div>

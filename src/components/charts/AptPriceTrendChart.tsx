@@ -74,10 +74,10 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
           {(['price', 'pyeong'] as const).map(m => (
             <button key={m} onClick={() => setMode(m)} style={{
-              padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+              padding: '4px 10px', borderRadius: 'var(--radius-xs)', border: 'none', cursor: 'pointer',
               fontSize: 'var(--fs-xs)', fontWeight: 600,
               background: mode === m ? 'var(--brand)' : 'var(--bg-hover)',
               color: mode === m ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -90,7 +90,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
 
       {/* 통계 바 */}
       {stats && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 10 }}>
           {[
             { label: '최근', value: fmtPrice(stats.latest), color: 'var(--accent-blue)' },
             { label: '평균', value: fmtPrice(stats.avg), color: 'var(--text-secondary)' },
@@ -98,7 +98,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
             { label: '최저', value: fmtPrice(stats.min), color: 'var(--accent-green)' },
           ].map(s => (
             <div key={s.label} style={{
-              flex: 1, padding: '6px 8px', background: 'var(--bg-hover)', borderRadius: 6, textAlign: 'center',
+              flex: 1, padding: '6px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', textAlign: 'center',
             }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
               <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: s.color }}>{s.value}</div>
@@ -166,7 +166,7 @@ export default function AptPriceTrendChart({ aptName, region }: { aptName: strin
       {hovered && (
         <div style={{
           fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textAlign: 'center',
-          padding: '6px 0', borderTop: '1px solid var(--border)', marginTop: 4,
+          padding: '6px 0', borderTop: '1px solid var(--border)', marginTop: 'var(--sp-xs)',
         }}>
           {hovered.deal_date} · {fmtPrice(hovered.price)} · {hovered.area}㎡ · 평당 {fmtPrice(hovered.price_per_pyeong)}
         </div>

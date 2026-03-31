@@ -76,8 +76,8 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
       <div style={{
         minHeight: 44, marginBottom: 'var(--sp-sm)', padding: '6px 10px',
         background: d ? 'var(--bg-hover)' : 'transparent',
-        borderRadius: 8, transition: 'background 0.15s',
-        display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+        borderRadius: 'var(--radius-sm)', transition: 'background 0.15s',
+        display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', flexWrap: 'wrap',
       }}>
         {d ? (
           <>

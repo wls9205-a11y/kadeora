@@ -107,12 +107,12 @@ export default function NotificationSettingsPage() {
 
   const boxStyle = {
     background: 'var(--bg-surface)', border: '1px solid var(--border)',
-    borderRadius: 14, padding: '24px 20px', textAlign: 'center' as const,
+    borderRadius: 'var(--radius-lg)', padding: '24px 20px', textAlign: 'center' as const,
   };
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-2xl)' }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-2xl)' }}>
         <Link href="/notifications" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)' }}>← 알림</Link>
         <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>알림 설정</h1>
       </div>
@@ -136,7 +136,7 @@ export default function NotificationSettingsPage() {
             onClick={handleDisable}
             disabled={loading}
             style={{
-              padding: '12px 24px', borderRadius: 10, border: '1px solid var(--border)',
+              padding: '12px 24px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
               fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
               opacity: loading ? 0.6 : 1,
@@ -144,7 +144,7 @@ export default function NotificationSettingsPage() {
           >
             {loading ? '처리 중...' : '알림 끄기'}
           </button>
-          <div style={{ marginTop: 16, padding: 12, background: 'var(--bg-hover)', borderRadius: 10 }}>
+          <div style={{ marginTop: 'var(--sp-lg)', padding: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>활성화된 알림</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {[
@@ -156,7 +156,7 @@ export default function NotificationSettingsPage() {
                 { label: '📈 주식알림', group: '주식' },
                 { label: '📅 출석', group: '시스템' },
               ].map(n => (
-                <span key={n.label} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
+                <span key={n.label} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
                   {n.label}
                 </span>
               ))}
@@ -177,7 +177,7 @@ export default function NotificationSettingsPage() {
             onClick={handleEnable}
             disabled={loading}
             style={{
-              padding: '14px 32px', borderRadius: 12, border: 'none',
+              padding: '14px 32px', borderRadius: 'var(--radius-card)', border: 'none',
               background: 'var(--brand)', color: 'white',
               fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer',
               width: '100%', opacity: loading ? 0.6 : 1,

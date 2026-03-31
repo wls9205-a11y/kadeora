@@ -144,7 +144,7 @@ export default function WeeklyPrediction() {
       </div>
 
       {submitted && data.myPrediction ? (
-        <div style={{ padding: '8px 10px', background: 'var(--bg-hover)', borderRadius: 8, marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '8px 10px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>내 예측: <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{data.myPrediction.toLocaleString()}</span></span>
           <span style={{ fontSize: 11, color: 'var(--accent-green)' }}>✓ 참여 완료 +10P</span>
         </div>
@@ -152,19 +152,19 @@ export default function WeeklyPrediction() {
         <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
           <input type="number" placeholder="금요일 종가 예측"
             value={inputVal} onChange={e => setInputVal(e.target.value)}
-            style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', padding: '0 10px', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}
+            style={{ flex: 1, height: 34, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', padding: '0 10px', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}
           />
           <button onClick={handleSubmit} disabled={submitting}
-            style={{ height: 34, padding: '0 14px', borderRadius: 8, background: 'var(--accent-yellow)', color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', opacity: submitting ? 0.6 : 1 }}>
+            style={{ height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-yellow)', color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', opacity: submitting ? 0.6 : 1 }}>
             참여 +10P
           </button>
         </div>
       ) : null}
 
       {data.lastWeekTop3.length > 0 && (
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
           {data.lastWeekTop3.map((t, i) => (
-            <div key={i} style={{ flex: 1, padding: '5px 6px', borderRadius: 6, background: 'var(--bg-hover)', textAlign: 'center' }}>
+            <div key={i} style={{ flex: 1, padding: '5px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', textAlign: 'center' }}>
               <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{medals[i]} {t.nickname}</div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>오차 {t.diff}</div>
             </div>

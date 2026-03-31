@@ -76,7 +76,7 @@ export default function DailyReportCard() {
         padding: 'var(--card-p) 16px', borderRadius: 'var(--radius-lg)',
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.04) 100%)',
         border: '1.5px solid rgba(59,123,246,0.2)',
-        transition: 'transform 0.1s, border-color 0.15s',
+        transition: 'transform 0.1s, border-color var(--transition-fast)',
         position: 'relative', overflow: 'hidden',
       }}>
         {/* 배경 데코 원 */}
@@ -85,8 +85,8 @@ export default function DailyReportCard() {
 
         {/* 헤더 */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>📊</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>📊</div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.3 }}>카더라 데일리 리포트</div>
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
@@ -95,7 +95,7 @@ export default function DailyReportCard() {
             </div>
           </div>
           <div style={{
-            padding: '6px 14px', borderRadius: 20, background: 'var(--brand)', color: '#fff',
+            padding: '6px 14px', borderRadius: 'var(--radius-xl)', background: 'var(--brand)', color: '#fff',
             fontSize: 12, fontWeight: 700, flexShrink: 0,
           }}>읽기 →</div>
         </div>
@@ -103,7 +103,7 @@ export default function DailyReportCard() {
         {/* 핵심 지표 3칸 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, position: 'relative' }}>
           {/* 주식 */}
-          <div style={{ padding: '6px 8px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>시총 1위</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--brand)' }}>
               {data.topStock.slice(0, 6)}
@@ -113,13 +113,13 @@ export default function DailyReportCard() {
             </div>
           </div>
           {/* 청약 */}
-          <div style={{ padding: '6px 8px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>이번주 청약</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-green)' }}>{data.subCount}건</div>
             {data.topSub && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.topSub.slice(0, 8)}</div>}
           </div>
           {/* 미분양 */}
-          <div style={{ padding: '6px 8px', borderRadius: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 2 }}>전국 미분양</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-orange)' }}>{(data.unsoldUnits / 10000).toFixed(1)}만</div>
             <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{data.unsoldUnits.toLocaleString()}세대</div>

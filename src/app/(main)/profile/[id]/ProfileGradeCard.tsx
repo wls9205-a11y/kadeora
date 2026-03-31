@@ -74,7 +74,7 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
   return (
     <>
       {/* 등급 진행 바 */}
-      <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--bg-base)', borderRadius: 10, border: '1px solid var(--border)' }}>
+      <div style={{ marginTop: 'var(--sp-xl)', padding: 'var(--card-p) var(--sp-lg)', background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
           <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: gradeColor }}>{gradeEmoji} {gradeTitle}</span>
           <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
@@ -89,7 +89,7 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
             다음 등급까지 {((nextPoints ?? 0) - (currentPoints ?? 0)).toLocaleString()}pts
           </div>
         )}
-        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 8 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-sm)' }}>
           현재 혜택: {GRADE_BENEFITS[gradeNum] || '기본 기능 이용'}
           {gradeNum < 10 && (
             <span style={{ marginLeft: 8, color: 'var(--text-secondary)' }}>
@@ -100,11 +100,11 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginTop: 16, background: 'var(--bg-base)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginTop: 'var(--sp-lg)', background: 'var(--bg-base)', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', padding: '12px 0' }}>
         {stats.map((stat, i) => (
           <div key={stat.label} style={{ display: 'contents' }}>
             {i > 0 && <div style={{ height: 24, width: 1, background: 'var(--border)' }} />}
-            <div style={{ minWidth: 60, textAlign: 'center', padding: '0 16px' }}>
+            <div style={{ minWidth: 60, textAlign: 'center', padding: '0 var(--sp-lg)' }}>
               <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)' }}>{(stat.value ?? 0).toLocaleString()}</div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{stat.label}</div>
             </div>
@@ -114,7 +114,7 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
 
       {/* 출석 체크 (본인만) */}
       {isOwner && attendance && (
-        <div style={{ marginTop:16, background:'var(--bg-base)', border:'1px solid var(--border)', borderRadius:12, padding:16 }}>
+        <div style={{ marginTop:16, background:'var(--bg-base)', border:'1px solid var(--border)', borderRadius: 'var(--radius-card)', padding:16 }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
             <div>
               <div style={{ fontSize:15, fontWeight:700, color:'var(--text-primary)' }}>📅 출석 체크</div>
@@ -123,12 +123,12 @@ export default function ProfileGradeCard({ profileId, isOwner, gradeNum, gradeCo
               </div>
             </div>
             {attendance.already_today ? (
-              <span style={{ padding:'8px 16px', borderRadius:20, background:'var(--bg-hover)', color:'var(--text-tertiary)', fontSize:13, fontWeight:600 }}>
+              <span style={{ padding:'8px 16px', borderRadius: 'var(--radius-xl)', background:'var(--bg-hover)', color:'var(--text-tertiary)', fontSize:13, fontWeight:600 }}>
                 ✅ 출석 완료
               </span>
             ) : (
               <button onClick={handleCheckIn} disabled={checkingIn}
-                style={{ padding:'8px 16px', borderRadius:20, border:'none', background:'var(--brand)', color:'var(--text-inverse)', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+                style={{ padding:'8px 16px', borderRadius: 'var(--radius-xl)', border:'none', background:'var(--brand)', color:'var(--text-inverse)', fontSize:13, fontWeight:700, cursor:'pointer' }}>
                 {checkingIn ? '...' : '📅 출석 +10P'}
               </button>
             )}
