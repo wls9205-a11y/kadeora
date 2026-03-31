@@ -39,6 +39,11 @@ export interface UnsoldApt {
   completion_ym: string | null;
   pblanc_url: string | null;
   source: string | null;
+  constructor_nm: string | null;
+  developer_nm: string | null;
+  nearest_station: string | null;
+  discount_info: string | null;
+  price_per_pyeong: number | null;
 }
 
 /** 재개발 (RedevTab) */
