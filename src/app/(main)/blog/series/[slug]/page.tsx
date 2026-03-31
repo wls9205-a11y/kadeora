@@ -9,6 +9,13 @@ interface Props { params: Promise<{ slug: string }> }
 
 const sb = () => getSupabaseAdmin();
 
+export async function generateStaticParams() {
+  try {
+    const { data } = await sb().from('blog_series').select('slug');
+    return (data || []).map((s: any) => ({ slug: s.slug }));
+  } catch { return []; }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { data: s } = await sb().from('blog_series').select('title,description,created_at').eq('slug', slug).single();

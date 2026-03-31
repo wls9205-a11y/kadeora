@@ -216,13 +216,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
   return (
     <div>
       {/* 탭 */}
-      <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 0, marginBottom: 'var(--sp-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as any }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
-            padding: '7px 14px', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 'var(--radius-xs)', flexShrink: 0,
+            padding: '6px 14px', border: tab === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 16, flexShrink: 0, fontFamily: 'inherit',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
-            color: tab === t.key ? '#fff' : 'var(--text-tertiary)',
-            display: 'flex', alignItems: 'center', gap: 2,
+            color: tab === t.key ? '#fff' : 'var(--text-secondary)',
+            transition: 'all 0.15s',
           }}>
             {t.label}
             {t.key === 'disclosure' && disclosures?.some((d: Disclosure) => new Date(d.published_at || d.created_at || '').getTime() > Date.now() - 86400000) && (

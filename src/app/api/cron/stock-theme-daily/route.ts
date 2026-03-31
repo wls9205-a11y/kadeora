@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const today = new Date().toISOString().slice(0, 10);
 
     const { data: themes } = await supabase.from('stock_themes').select('id,theme_name,change_pct,description,related_symbols,is_hot,date');
-    const { data: stocks } = await supabase.from('stock_quotes').select('symbol, change_pct').in('market', ['KOSPI', 'KOSDAQ']);
+    const { data: stocks } = await supabase.from('stock_quotes').select('symbol, change_pct').gt('price', 0);
 
     if (!themes?.length || !stocks?.length) return { processed: 0, created: 0, failed: 0 };
 
@@ -42,8 +42,9 @@ export async function GET(req: NextRequest) {
         top_stocks: { top_symbol: topSymbol, stock_count: pcts.length, symbols: symbols.slice(0, 5) },
       }, { onConflict: 'theme_name,recorded_date' });
 
-      // Update theme's change_pct
-      await supabase.from('stock_themes').update({ change_pct: avg }).eq('id', theme.id);
+      // Update theme's change_pct + date
+      const isHot = Math.abs(avg) >= 2 || pcts.length >= 5;
+      await supabase.from('stock_themes').update({ change_pct: avg, date: today, is_hot: isHot }).eq('id', theme.id);
       created++;
     }
 
