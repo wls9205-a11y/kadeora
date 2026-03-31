@@ -15,13 +15,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region: rawR, date: rawD } = await params;
   const region = decodeURIComponent(rawR);
   const dateStr = rawD;
-  if (!(REPORT_REGIONS as readonly string[]).includes(region)) return { title: '카더라 데일리' };
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return { title: '카더라 데일리' };
+  if (!(REPORT_REGIONS as readonly string[]).includes(region)) return { title: '카더라 데일리 리포트' };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return { title: '카더라 데일리 리포트' };
 
   const d = new Date(dateStr);
-  const title = `카더라 데일리 — ${region} 투자 브리핑 (${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일)`;
+  const title = `카더라 데일리 리포트 — ${region} 투자 브리핑 (${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일)`;
   const desc = `${dateStr} ${region} 부동산 청약·미분양·재개발 + 국내외 주식 시황 아카이브.`;
-  const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 데일리')}&subtitle=${encodeURIComponent(region + ' ' + dateStr)}&design=2`;
+  const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 데일리 리포트')}&subtitle=${encodeURIComponent(region + ' ' + dateStr)}&design=2`;
   const canonical = `${SITE_URL}/daily/${encodeURIComponent(region)}/${dateStr}`;
 
   return {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: {
       title, description: desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'article',
-      images: [{ url: ogImg, width: 1200, height: 630, alt: `카더라 데일리 ${region} ${dateStr}` }],
+      images: [{ url: ogImg, width: 1200, height: 630, alt: `카더라 데일리 리포트 ${region} ${dateStr}` }],
     },
     twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
     other: {
@@ -85,7 +85,7 @@ export default async function DailyReportDatePage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
-        headline: `카더라 데일리 — ${region} 투자 브리핑 #${snapshot.issue_no}`,
+        headline: `카더라 데일리 리포트 리포트 — ${region} 투자 브리핑 #${snapshot.issue_no}`,
         datePublished: new Date(dateStr + 'T07:00:00+09:00').toISOString(),
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL },

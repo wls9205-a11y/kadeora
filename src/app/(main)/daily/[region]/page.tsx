@@ -15,17 +15,17 @@ export const dynamicParams = true;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region: raw } = await params;
   const region = decodeURIComponent(raw);
-  if (!(REPORT_REGIONS as readonly string[]).includes(region)) return { title: '카더라 데일리' };
+  if (!(REPORT_REGIONS as readonly string[]).includes(region)) return { title: '카더라 데일리 리포트' };
 
   const now = new Date();
   const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   const day = dayNames[now.getDay()];
 
-  const title = `카더라 데일리 — ${region} 투자 브리핑 (${dateStr} ${day})`;
+  const title = `카더라 데일리 리포트 — ${region} 투자 브리핑 (${dateStr} ${day})`;
   const desc = `${region} 부동산 청약·미분양·재개발 + 국내외 주식 시황을 매일 아침 한 장에 정리. 오늘의 시장 변동과 내일 체크포인트까지.`;
-  const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 데일리')}&subtitle=${encodeURIComponent(region + ' 투자 브리핑')}&design=2`;
-  const ogSquare = `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 데일리')}&category=daily`;
+  const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 데일리 리포트')}&subtitle=${encodeURIComponent(region + ' 투자 브리핑')}&design=2`;
+  const ogSquare = `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 데일리 리포트')}&category=daily`;
   const canonical = `${SITE_URL}/daily/${encodeURIComponent(region)}`;
 
   return {
@@ -41,8 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: 'ko_KR',
       type: 'article',
       images: [
-        { url: ogImg, width: 1200, height: 630, alt: `카더라 데일리 ${region}` },
-        { url: ogSquare, width: 630, height: 630, alt: `카더라 데일리 ${region}` },
+        { url: ogImg, width: 1200, height: 630, alt: `카더라 데일리 리포트 ${region}` },
+        { url: ogSquare, width: 630, height: 630, alt: `카더라 데일리 리포트 ${region}` },
       ],
     },
     twitter: { card: 'summary_large_image', title, description: desc, images: [ogImg] },
@@ -94,7 +94,7 @@ export default async function DailyReportPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
-        headline: `카더라 데일리 — ${region} 투자 브리핑 #${data.issueNo}`,
+        headline: `카더라 데일리 리포트 리포트 — ${region} 투자 브리핑 #${data.issueNo}`,
         description: `${region} 부동산 청약·미분양·재개발 + 국내외 주식 시황`,
         url: `${SITE_URL}/daily/${encodeURIComponent(region)}`,
         datePublished: new Date(now.setHours(7, 0, 0, 0)).toISOString(),
@@ -102,10 +102,10 @@ export default async function DailyReportPage({ params }: Props) {
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } },
         image: [
-          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 데일리')}&subtitle=${encodeURIComponent(region)}&design=2`, width: 1200, height: 630 },
-          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 데일리')}&category=daily`, width: 630, height: 630 },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent('카더라 데일리 리포트')}&subtitle=${encodeURIComponent(region)}&design=2`, width: 1200, height: 630 },
+          { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 데일리 리포트')}&category=daily`, width: 630, height: 630 },
         ],
-        thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 데일리')}&category=daily`,
+        thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent('카더라 데일리 리포트')}&category=daily`,
         mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/daily/${encodeURIComponent(region)}` },
         speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.report-summary'] },
         about: [
@@ -133,7 +133,7 @@ export default async function DailyReportPage({ params }: Props) {
           {
             '@type': 'Question',
             name: `오늘 ${region} 청약 일정은?`,
-            acceptedAnswer: { '@type': 'Answer', text: `이번주 ${region} 포함 전국 ${data.subCountThisWeek}건(${data.subUnitsThisWeek.toLocaleString()}세대) 청약이 예정되어 있습니다. 카더라 데일리에서 매일 업데이트됩니다.` },
+            acceptedAnswer: { '@type': 'Answer', text: `이번주 ${region} 포함 전국 ${data.subCountThisWeek}건(${data.subUnitsThisWeek.toLocaleString()}세대) 청약이 예정되어 있습니다. 카더라 데일리 리포트에서 매일 업데이트됩니다.` },
           },
           {
             '@type': 'Question',

@@ -22,7 +22,7 @@ const MOBILE_TABS = [
 ];
 
 const MORE_ITEMS = [
-  { href: '/daily',            emoji: '📊', label: '카더라 데일리' },
+  { href: '/daily',            emoji: '📊', label: '카더라 데일리 리포트' },
   { href: '/apt/complex',    emoji: '🏢', label: '단지백과' },
   { href: '/blog',            emoji: '📰', label: '블로그' },
   { href: '/discuss',         emoji: '💬', label: '라운지 토론' },

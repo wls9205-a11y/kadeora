@@ -90,7 +90,7 @@ export default function DailyReportCard() {
             <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #D4A853, #B8942E)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>📊</div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.3 }}>카더라 데일리</span>
+                <span style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.3 }}>카더라 데일리 리포트</span>
                 <span style={{ fontSize: 9, fontWeight: 700, color: '#D4A853', letterSpacing: 2, background: 'rgba(212,168,83,0.1)', padding: '2px 6px', borderRadius: 3, border: '1px solid rgba(212,168,83,0.2)' }}>VIP</span>
               </div>
               <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -106,27 +106,9 @@ export default function DailyReportCard() {
           }}>읽기 →</div>
         </div>
 
-        {/* 핵심 지표 3칸 — 골드 테두리 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-sm)', position: 'relative' }}>
-          <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(212,168,83,0.05)', border: '1px solid rgba(212,168,83,0.15)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: '#D4A853', marginBottom: 3, fontWeight: 600 }}>시총 1위</div>
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
-              {data.topStock.slice(0, 6)}
-            </div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: data.topStockPct > 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
-              {data.topStockPct > 0 ? '▲' : '▼'}{Math.abs(data.topStockPct).toFixed(1)}%
-            </div>
-          </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(212,168,83,0.05)', border: '1px solid rgba(212,168,83,0.15)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: '#D4A853', marginBottom: 3, fontWeight: 600 }}>이번주 청약</div>
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: '#E8C778' }}>{data.subCount}건</div>
-            {data.topSub && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.topSub.slice(0, 10)}</div>}
-          </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--radius-sm)', background: 'rgba(212,168,83,0.05)', border: '1px solid rgba(212,168,83,0.15)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', color: '#D4A853', marginBottom: 3, fontWeight: 600 }}>전국 미분양</div>
-            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: '#E8C778' }}>{(data.unsoldUnits / 10000).toFixed(1)}만</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{data.unsoldUnits.toLocaleString()}세대</div>
-          </div>
+        {/* 설명 */}
+        <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, position: 'relative' }}>
+          주식 시황 · 청약 캘린더 · 미분양 현황 · 재개발 동향 — 매일 아침 한 장으로 정리된 투자 브리핑
         </div>
       </div>
     </Link>

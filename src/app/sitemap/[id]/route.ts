@@ -81,7 +81,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         changeFrequency: 'weekly',
         priority: 0.7,
       })),
-      // 카더라 데일리 — 17개 지역
+      // 카더라 데일리 리포트 — 17개 지역
       ...['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].flatMap(r => [
         { url: `${BASE}/daily/${encodeURIComponent(r)}`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
         { url: `${BASE}/daily/${encodeURIComponent(r)}/archive`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },

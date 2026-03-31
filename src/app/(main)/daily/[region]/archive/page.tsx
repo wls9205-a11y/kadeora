@@ -13,9 +13,9 @@ export const dynamicParams = true;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region: raw } = await params;
   const region = decodeURIComponent(raw);
-  if (!(REPORT_REGIONS as readonly string[]).includes(region)) return { title: '카더라 데일리' };
+  if (!(REPORT_REGIONS as readonly string[]).includes(region)) return { title: '카더라 데일리 리포트' };
 
-  const title = `카더라 데일리 아카이브 — ${region}`;
+  const title = `카더라 데일리 리포트 아카이브 — ${region}`;
   const desc = `${region} 투자 브리핑 전체 아카이브. 날짜별로 과거 리포트를 확인하세요.`;
   const canonical = `${SITE_URL}/daily/${encodeURIComponent(region)}/archive`;
 
@@ -66,7 +66,7 @@ export default async function ArchivePage({ params }: Props) {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div>
-          <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📂 카더라 데일리 아카이브</h1>
+          <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📂 카더라 데일리 리포트 아카이브</h1>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>{region} · {reports.length}개 리포트</p>
         </div>
         <Link href={`/daily/${encodeURIComponent(region)}`} style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>오늘 보기 →</Link>
