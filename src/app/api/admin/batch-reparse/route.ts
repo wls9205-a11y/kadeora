@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     .not('pblanc_url', 'is', null)
     .neq('pblanc_url', '')
     .order('rcept_bgnde', { ascending: false })
-    .limit(100);
+    .limit(30);
 
   if (!targets?.length) return NextResponse.json({ ok: true, message: '재파싱 완료!', remaining: 0 });
 
@@ -136,7 +136,7 @@ export async function GET(req: NextRequest) {
       failed++;
       await (sb as any).from('apt_subscriptions').update({ announcement_parsed_at: new Date().toISOString() }).eq('id', apt.id);
     }
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 100));
   }
 
   return NextResponse.json({ ok: true, processed, failed, batch: targets.length, remaining: (remaining || 0) - targets.length });
