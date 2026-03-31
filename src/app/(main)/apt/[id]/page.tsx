@@ -464,6 +464,8 @@ export default async function AptUnifiedPage({ params }: Props) {
         <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginRight: 2 }}>📢</span>
         <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} postId={slug} />
         {sub && <AptBookmarkButton aptId={sub.id} isLoggedIn={!!aptUser} />}
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>공유 +5P</span>
       </div>
 
       {/* Key metrics — 시각 강화 대시보드 */}

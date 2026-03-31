@@ -525,8 +525,10 @@ export default async function StockDetailPage({ params }: Props) {
         </div>
       </div>}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,123,246,0.03)', border: '1px solid rgba(59,123,246,0.08)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,123,246,0.03)', border: '1px solid rgba(59,123,246,0.08)' }}>
         <ShareButtons title={`${s.name} (${symbol}) 주가 — 실시간 시세·차트·섹터 분석`} postId={symbol} />
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>이 종목 친구에게 공유하면 +5P</span>
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)' }}>
