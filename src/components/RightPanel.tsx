@@ -31,7 +31,7 @@ export default function RightPanel() {
     if (typeof window !== 'undefined' && window.innerWidth < 1200) return;
 
     fetch('/api/search/trending').then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 5)); })
+      .then(d => { if (d?.keywords?.length) setTrending(d.keywords.slice(0, 10)); })
 
     const sb = createSupabaseBrowser();
     sb.from('blog_posts').select('slug, title')
@@ -95,13 +95,13 @@ export default function RightPanel() {
       {/* 실시간 라운지 채팅 */}
       <MiniLounge />
 
-      {/* 인기 검색어 (5개) */}
+      {/* 인기 검색어 (10개) */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)' }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span>🔥 인기 검색어</span>
           <Link href="/search" style={{ fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none' }}>더보기</Link>
         </div>
-        {display.slice(0, 5).map((item, i) => (
+        {display.slice(0, 10).map((item, i) => (
           <Link key={i} href={`/search?q=${encodeURIComponent(item.keyword)}`} className="kd-card-hover" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', padding: '4px 4px', borderRadius: 'var(--radius-xs)', margin: '0 -4px' }}>
             <span style={{ fontSize: 10, fontWeight: 800, width: 16, textAlign: 'center', color: i === 0 ? 'var(--brand)' : i < 3 ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>
               {i + 1}

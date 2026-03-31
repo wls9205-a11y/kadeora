@@ -27,7 +27,10 @@ export interface DailyReportData {
   // 주식
   stockTop10: { name: string; symbol: string; market: string; price: number; change_pct: number; market_cap: number; sector: string; week_ago: number | null; week_pct: number | null }[];
   sectors: { sector: string; cnt: number; avg_pct: number; cap_t: number }[];
-  globalStocks: { name: string; symbol: string; price: number; market_cap: number }[];
+  globalStocks: { name: string; symbol: string; price: number; market_cap: number; change_pct: number }[];
+  // 지수 & 환율
+  indices: { label: string; value: number; change_pct: number }[];
+  exchangeRate: number;
   // 메타
   subCountThisWeek: number;
   subUnitsThisWeek: number;
@@ -53,7 +56,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
   // 병렬 쿼리
   const [
     subsR, unsoldLocalR, unsoldAllR, redevR, redevStagesR, guR, complexR, sitesR,
-    stocksR, sectorsR, globalR, subWeekR,
+    stocksR, sectorsR, globalR, subWeekR, indicesR, exchangeR,
   ] = await Promise.all([
     // 1. 청약 (이번주 ± 3일)
     sb.from('apt_subscriptions')
@@ -120,7 +123,7 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
 
     // 11. 글로벌
     sb.from('stock_quotes')
-      .select('name, symbol, price, market_cap')
+      .select('name, symbol, price, market_cap, change_pct')
       .in('market', ['NYSE', 'NASDAQ'])
       .gt('price', 0)
       .order('market_cap', { ascending: false })
@@ -131,6 +134,19 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
       .select('tot_supply_hshld_co')
       .gte('rcept_bgnde', weekStart.toISOString().slice(0, 10))
       .lte('rcept_bgnde', weekEnd.toISOString().slice(0, 10)),
+
+    // 13. 지수 (KOSPI/KOSDAQ/SPY/QQQ)
+    sb.from('stock_quotes')
+      .select('symbol, name, price, change_pct')
+      .in('symbol', ['KOSPI_IDX', 'KOSDAQ_IDX', 'SPY', 'QQQ'])
+      .limit(4),
+
+    // 14. 환율
+    sb.from('exchange_rate_history')
+      .select('rate')
+      .eq('currency_pair', 'USD/KRW')
+      .order('recorded_at', { ascending: false })
+      .limit(1),
   ]);
 
   // 청약 상태 계산
@@ -245,8 +261,13 @@ export async function fetchDailyReportData(region: ReportRegion): Promise<DailyR
     stockTop10,
     sectors,
     globalStocks: (globalR.data || []).map((r: any) => ({
-      name: r.name, symbol: r.symbol, price: Number(r.price), market_cap: r.market_cap,
+      name: r.name, symbol: r.symbol, price: Number(r.price), market_cap: r.market_cap, change_pct: Number(r.change_pct || 0),
     })),
+    indices: (indicesR.data || []).map((r: any) => {
+      const labelMap: Record<string, string> = { KOSPI_IDX: 'KOSPI', KOSDAQ_IDX: 'KOSDAQ', SPY: 'S&P 500', QQQ: 'NASDAQ' };
+      return { label: labelMap[r.symbol] || r.symbol, value: Number(r.price), change_pct: Number(r.change_pct || 0) };
+    }),
+    exchangeRate: Number(exchangeR.data?.[0]?.rate || 0),
     subCountThisWeek,
     subUnitsThisWeek,
   };

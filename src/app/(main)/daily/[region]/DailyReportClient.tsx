@@ -298,16 +298,47 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
         })}
       </div>
 
+      {/* 지수 & 환율 */}
+      {(d.indices?.length > 0 || d.exchangeRate > 0) && (
+        <>
+          <SH icon="📊" title="지수 & 환율" />
+          <div className="kd-grid-6" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min((d.indices?.length || 0) + (d.exchangeRate > 0 ? 1 : 0), 5)}, 1fr)`, gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
+            {(d.indices || []).map(idx => {
+              const isKr = idx.label === 'KOSPI' || idx.label === 'KOSDAQ';
+              const color = idx.change_pct > 0 ? (isKr ? 'var(--accent-red)' : 'var(--accent-green)') : idx.change_pct < 0 ? (isKr ? 'var(--accent-blue)' : 'var(--accent-red)') : 'var(--text-tertiary)';
+              return (
+                <div key={idx.label} style={{ background: G.goldBg, borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: `1px solid ${G.goldBorder}`, borderLeft: `3px solid ${color}` }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>{idx.label}</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{idx.label.includes('S&P') || idx.label === 'NASDAQ' ? Number(idx.value).toLocaleString('en', { maximumFractionDigits: 0 }) : fmt(idx.value)}</div>
+                  {idx.change_pct !== 0 && <div style={{ fontSize: 9, color, fontWeight: 700 }}>{idx.change_pct > 0 ? '▲' : '▼'}{Math.abs(idx.change_pct).toFixed(2)}%</div>}
+                </div>
+              );
+            })}
+            {d.exchangeRate > 0 && (
+              <div style={{ background: G.goldBg, borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: `1px solid ${G.goldBorder}` }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>USD/KRW</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>₩{d.exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
       {/* 글로벌 */}
       <SH icon="🌎" title="글로벌 마켓" />
       <div className="kd-grid-6" style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.globalStocks.length, 6)}, 1fr)`, gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)' }}>
-        {d.globalStocks.slice(0, 6).map(s => (
-          <div key={s.symbol} style={{ background: G.goldBg, borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: `1px solid ${G.goldBorder}` }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: G.gold }}>{s.symbol}</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>${Number(s.price).toFixed(0)}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>${fmtB(s.market_cap)}</div>
-          </div>
-        ))}
+        {d.globalStocks.slice(0, 6).map(s => {
+          const pct = s.change_pct ?? 0;
+          const color = pct > 0 ? 'var(--accent-green)' : pct < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)';
+          return (
+            <div key={s.symbol} style={{ background: G.goldBg, borderRadius: 'var(--radius-sm)', padding: '6px 4px', textAlign: 'center', border: `1px solid ${G.goldBorder}` }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: G.gold }}>{s.symbol}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, color: 'var(--text-primary)' }}>${Number(s.price).toFixed(0)}</div>
+              {pct !== 0 && <div style={{ fontSize: 9, color, fontWeight: 700 }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</div>}
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>${fmtB(s.market_cap)}</div>
+            </div>
+          );
+        })}
       </div>
 
       {/* ═══ S2: 청약 캘린더 ═══ */}
@@ -474,7 +505,8 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             {d.sectors[0] && <> 섹터별로는 <Link href={`/stock/sector/${encodeURIComponent(d.sectors[0].sector)}`} style={{ color: pctColor(d.sectors[0].avg_pct), textDecoration: 'none', fontWeight: 700 }}>{d.sectors[0].sector}</Link> 섹터가 <span style={{ color: pctColor(d.sectors[0].avg_pct), fontWeight: 700 }}>{pctStr(d.sectors[0].avg_pct)}</span>로 가장 강한 흐름을 보였습니다.</>}
             {' '}전체 {d.sectors.length}개 섹터 가운데 <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>{sectorUp}개 상승</span>, <span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>{sectorDn}개 하락</span>하며 {sectorUp > sectorDn ? '시장 전반에 매수 심리가 우세한' : sectorUp === sectorDn ? '관망세가 짙은' : '매도 압력이 강한'} 장세를 보이고 있습니다.
             {d.stockTop10[0] && <> 시총 1위 <Link href={`/stock/${d.stockTop10[0].symbol}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 700 }}>{d.stockTop10[0].name}</Link>은 현재 <b style={{ color: 'var(--text-primary)' }}>{Number(d.stockTop10[0].price).toLocaleString()}원</b>{d.stockTop10[0].week_pct != null && d.stockTop10[0].week_pct !== 0 ? <>, 주간 <span style={{ color: pctColor(d.stockTop10[0].week_pct), fontWeight: 700 }}>{pctStr(d.stockTop10[0].week_pct)}</span>의 변동을 기록</> : ''}하고 있습니다.</>}
-            {d.globalStocks.length > 0 && <> 해외 시장에서는 {d.globalStocks.slice(0, 3).map((s, i) => <span key={s.symbol}>{i > 0 && ', '}<Link href={`/stock/${s.symbol}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>{s.symbol}</Link> ${Number(s.price).toFixed(0)}</span>)} 수준에서 거래되고 있습니다.</>}
+            {d.globalStocks.length > 0 && <> 해외 시장에서는 {d.globalStocks.slice(0, 3).map((s, i) => <span key={s.symbol}>{i > 0 && ', '}<Link href={`/stock/${s.symbol}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>{s.symbol}</Link> ${Number(s.price).toFixed(0)}{s.change_pct ? <span style={{ color: s.change_pct > 0 ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: 11 }}>({s.change_pct > 0 ? '+' : ''}{s.change_pct.toFixed(1)}%)</span> : ''}</span>)} 수준에서 거래되고 있습니다.</>}
+            {d.exchangeRate > 0 && <> 원/달러 환율은 <b style={{ color: 'var(--text-primary)' }}>₩{d.exchangeRate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}</b>입니다.</>}
           </div>
 
           {/* 청약 시장 요약 */}
