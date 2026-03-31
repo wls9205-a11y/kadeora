@@ -207,6 +207,7 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const genT = (apt as any).general_supply_total || 0;
                   const spcT = (apt as any).special_supply_total || 0;
                   const totS = apt.tot_supply_hshld_co || 0;
+                  const totalHH = (apt as any).total_households || 0;
                   const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
                   return (
                     <>
@@ -220,8 +221,8 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                           <div style={{ fontSize: 11, fontWeight: 800, color: ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)' }}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총공급</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>{totS > 0 ? `${totS.toLocaleString()}세대` : '-'}</div>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{totalHH > 0 && totalHH !== totS ? '총세대/공급' : '총공급'}</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>{totalHH > 0 && totalHH !== totS ? `${totalHH.toLocaleString()}/${totS.toLocaleString()}` : totS > 0 ? `${totS.toLocaleString()}세대` : '-'}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>일반/특별</div>
