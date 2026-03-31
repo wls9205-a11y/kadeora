@@ -633,8 +633,9 @@ export default function DashboardSection() {
                 {/* 건물스펙 요약 2칸 */}
                 <div style={{ background: C.bg, borderRadius: 'var(--radius-sm)', padding: '10px 12px', gridColumn: 'span 2' }}>
                   <div style={{ fontSize: 10, fontWeight: 600, color: C.text, marginBottom: 6 }}>🏗️ 건물스펙 (PDF 추출)</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
                     {[
+                      { label: '총세대수', val: dataCoverage.buildingSpecs.totalHH },
                       { label: '동수', val: dataCoverage.buildingSpecs.dong },
                       { label: '최고층', val: dataCoverage.buildingSpecs.floor },
                       { label: '전매제한', val: dataCoverage.buildingSpecs.transfer },
@@ -950,20 +951,20 @@ export default function DashboardSection() {
       {/* ── 최근 릴리즈 내역 ── */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 65)</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.text }}>🚀 최근 릴리즈 (세션 66)</span>
           <span style={{ fontSize: 10, color: C.textDim }}>2026-04-01</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
+            { tag: 'FIX', label: 'SSR 이벤트핸들러', desc: 'Event handler 에러→KpiCards 클라이언트 분리', color: C.red, commit: '66d209e' },
+            { tag: 'FEAT', label: '단지 규모 섹션', desc: '총세대/공급 분리·비율바·동수/층수/주차', color: C.brand, commit: '66d209e' },
+            { tag: 'UX', label: '관심→등록 스크롤', desc: '❤️ 카드 클릭→InterestRegistration 이동', color: C.cyan, commit: '00a626a' },
+            { tag: 'FEAT', label: '총세대수 표기', desc: '없으면 정보준비중·공급세대와 명확 구분', color: C.purple, commit: '66d209e' },
+            { tag: 'ADMIN', label: '총세대수 커버리지', desc: '건물스펙 9항목 (총세대수 추가) 3×3', color: C.yellow, commit: 'latest' },
             { tag: 'VIRAL', label: '가입 유도 팝업 2종', desc: '웰컴(첫방문) + 탐색(5페이지) · 카카오 CTA', color: C.brand, commit: '55180bf' },
             { tag: 'FEAT', label: '팝업 광고 관리', desc: 'DB+API+어드민CRUD+모달/배너/토스트', color: C.purple, commit: '66c38db' },
             { tag: 'VIRAL', label: '공유 시스템 v2', desc: '밴드+UTM+공유횟수 · 7페이지 CTA', color: C.cyan, commit: '1c75bf6' },
-            { tag: 'FEAT', label: '지수 KPI 6열', desc: 'KOSPI/KOSDAQ/S&P500/NASDAQ/환율/금', color: C.cyan, commit: '4d97492' },
-            { tag: 'FEAT', label: '프로 ₩24,900', desc: 'DB+plan-limits+UpgradeModal (비공개)', color: C.purple, commit: 'ce6d9ee' },
             { tag: 'FIX', label: 'Search Console', desc: 'image-sitemap 438에러+robots.txt 21→5', color: C.green, commit: 'adbbcc7' },
-            { tag: 'FIX', label: '크론 에러 4건', desc: 'sync·UUID·시세·리포트504', color: C.red, commit: '6650038' },
-            { tag: 'UX', label: 'GuestNudge v2', desc: '6→1 CTA · 단계적 넛지', color: C.cyan, commit: '7b0e869' },
-            { tag: 'FEAT', label: '리포트+인기검색어', desc: '지수/환율 섹션 + FALLBACK 10개', color: C.yellow, commit: 'f10f424' },
           ].map(r => (
             <div key={r.commit} style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: `${r.color}08`, border: `1px solid ${r.color}15` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>

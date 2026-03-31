@@ -1,53 +1,46 @@
-# 카더라 STATUS.md — 세션 65 완료 (2026-04-01 09:00 KST)
+# 카더라 STATUS.md — 세션 66 완료 (2026-04-01 09:30 KST)
 
 ## 최신 커밋
+- `66d209e` — SSR 이벤트핸들러 에러 수정 + 단지 규모 섹션 신설
+- `00a626a` — 총세대수 KPI 표기 보강 + 관심 카드 → 등록 섹션 스크롤
 - `55180bf` — 비로그인 가입 유도 팝업 2종 (SignupNudge)
 - `6650038` — daily-report-snapshot 504 수정 (120s + 5병렬)
-- `e9a6464` — 어드민 팝업 섹션 운영 현황 패널
-- `66c38db` — 팝업 광고 관리 시스템 풀스택
-- `adbbcc7` — Search Console image-sitemap + robots.txt 정리
-- `1c75bf6` — 바이럴 인프라 공유 시스템 v2
 
-## 세션 65 전체 성과 (60+ 커밋)
+## 세션 66 성과
 
-### 가입 유도 시스템 (신규)
-- **SignupNudge 웰컴 팝업**: 첫 방문 1.5초 후 (소개 + 3대 혜택 + 카카오 CTA)
-- **SignupNudge 탐색 팝업**: 서로 다른 URL 5개+ 방문 시 (KPI + 추가 기능 + 카카오 CTA)
-- 24시간 쿨다운 + 세션당 1회 + GuestNudge 병행
+### Event handler SSR 에러 수정 (CRITICAL)
+- `/apt/[id]` 전체에서 "Event handlers cannot be passed to Client Component props" 에러 발생
+- `onClick`/`onMouseEnter`/`onMouseLeave` → `KpiCards` 클라이언트 컴포넌트로 분리
+- 최신 배포 에러 0건 확인 완료
 
-### 팝업 광고 관리 시스템
-- DB: popup_ads (title/content/image/link/display_type/target_pages/기간/CTR)
-- 어드민 UI: CRUD + KPI + 운영 현황 패널
-- 프론트: PopupAdManager (모달/배너/토스트 + localStorage)
+### 단지 규모 섹션 (ComplexScale) 신설
+- `src/components/apt/ComplexScale.tsx` — 총세대수/공급세대수 명확 구분 표시
+- 총세대수 없으면 **"정보 준비중"** 표시 (파란색 박스)
+- 공급세대수 (초록색 박스) — 이번 분양 공급 세대수
+- 둘 다 있고 다르면 → 공급 비율 프로그레스 바 표시
+- 하단 그리드: 일반공급/특별공급/동수/최고층/주차 (데이터 있는 것만)
 
-### 바이럴 인프라
-- ShareButtons v2: 카카오/밴드/X/페이스북/링크복사 + UTM + 공유횟수
-- 7개 페이지 CTA + RightPanel 초대 배너
+### KPI 카드 개선
+- `src/components/apt/KpiCards.tsx` — 클라이언트 컴포넌트로 분리
+- ❤️ 관심 카드 클릭 → `InterestRegistration` 섹션으로 smooth scroll
+- hover 시 border-color 변경 + "클릭하여 등록" sub 텍스트
 
-### 주식/리포트/유료상품
-- 지수 KPI 6열 + 글로벌 지표 7개
-- 데일리 리포트 지수/환율 + 공유 CTA
-- 프로 ₩24,900 (비공개)
+### 어드민 업데이트
+- 대시보드 API: 총세대수 커버리지 쿼리 추가 (`totalHhR`)
+- 건물스펙 그리드: 9항목 (총세대수 추가) 3×3 레이아웃
+- 릴리즈 노트: 세션 66 반영
 
-### 버그 수정 (9건)
-- 가짜 접속자→실제 / CSS 2건 / sync 타임아웃 / blog-publish UUID
-- daily-report-snapshot 504 / UnsoldApt 타입 5필드
-- Search Console image-sitemap 438 에러 / 등락률·시간외
-
-### 어드민
-- 릴리즈 노트: 가입유도+팝업관리+공유v2+SearchConsole 반영
-- 공유7d HealthBadge + 📢 팝업 관리 섹션
-
-## 가입 유도 시스템 전체 현황
-| 시스템 | 대상 | 시점 | 형태 |
-|--------|------|------|------|
-| SignupNudge 웰컴 | 첫 방문자 | 즉시 (1.5초) | 모달 |
-| SignupNudge 탐색 | 5페이지+ 탐색 | 세션 중 1회 | 모달 |
-| GuestNudge | 5일+ 재방문 | 단계적 | 토스트→배너→모달 |
-| PromoSheet | 로그인+미설치 | 자동 | 바텀시트 |
-| InstallBanner | PWA 미설치 | 자동 | 상단 배너 |
-| NoticeBanner | 전체 | DB 관리 | 마퀴 배너 |
-| PopupAdManager | 어드민 설정 | DB 관리 | 모달/배너/토스트 |
+## 데이터 현황
+| 항목 | 수치 | 비율 |
+|------|------|------|
+| PDF 파싱 | 2,485/2,485 | 100% |
+| AI 요약 정확 | 2,695 | 100% |
+| 종목 섹터 | 1,737/1,737 | 100% |
+| 블로그 전체 | 22,659 | 100% |
+| 총세대수 | 29/2,695 | 1% |
+| 동수 | 2,075/2,695 | 77% |
+| 최고층 | 46/2,695 | 2% |
+| 주차 | 113/2,695 | 4% |
 
 ## PENDING
 - [ ] Anthropic 크레딧 충전 (최우선)

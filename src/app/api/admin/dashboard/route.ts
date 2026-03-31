@@ -142,7 +142,7 @@ export async function GET(req: Request) {
 
       // 데이터 커버리지 KPI
       const [aptPriceR, aptCoordsR, stockDescR, aptCrawlLastR, aptImagesR, aiSummaryAccurateR, stockRefreshR,
-        pdfDoneR, pdfTotalR, dongR, floorR, parkingR, heatingR, loanR, transferR, communityR, balconyR, sectorR,
+        pdfDoneR, pdfTotalR, dongR, floorR, parkingR, heatingR, loanR, transferR, communityR, balconyR, sectorR, totalHhR,
       ] = await Promise.all([
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).gt('price_min', 0),
         sb.from('apt_sites').select('id', { count: 'exact', head: true }).not('latitude', 'is', null),
@@ -164,6 +164,8 @@ export async function GET(req: Request) {
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).not('community_facilities', 'is', null),
         sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).eq('balcony_extension', true),
         sb.from('stock_quotes').select('symbol', { count: 'exact', head: true }).not('sector', 'is', null).neq('sector', '').eq('is_active', true),
+        // 총세대수 커버리지
+        sb.from('apt_subscriptions').select('id', { count: 'exact', head: true }).gt('total_households', 0),
       ]);
       // DB 크기 조회
       let dbSizeStr = '?';
@@ -186,7 +188,7 @@ export async function GET(req: Request) {
         buildingSpecs: {
           dong: dongR.count ?? 0, floor: floorR.count ?? 0, parking: parkingR.count ?? 0,
           heating: heatingR.count ?? 0, loan: loanR.count ?? 0, transfer: transferR.count ?? 0,
-          community: communityR.count ?? 0, balcony: balconyR.count ?? 0,
+          community: communityR.count ?? 0, balcony: balconyR.count ?? 0, totalHH: totalHhR.count ?? 0,
           total: aptR.count ?? 0,
         },
         stockSector: { done: sectorR.count ?? 0, total: stockR.count ?? 0, pct: stockR.count ? Math.round(((sectorR.count ?? 0) / (stockR.count ?? 1)) * 100) : 0 },
