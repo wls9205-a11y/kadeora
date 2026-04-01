@@ -229,74 +229,69 @@ export default function TransactionTab({ transactions, tradeMonthly, watchlist, 
         const isMax = maxP > 0 && amt >= maxP && sameApt.length >= 2;
         return (
           <div key={`${t.id || i}`} onClick={() => setSelected(t)} className="kd-card-hover" style={{
-            padding: 'var(--card-p) var(--sp-lg)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--sp-sm)',
+            borderRadius: 'var(--radius-lg)', marginBottom: 'var(--sp-sm)', overflow: 'hidden',
             background: isMax ? 'rgba(251,191,36,0.04)' : 'var(--bg-surface)',
             border: isMax ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
-            borderLeft: `3px solid ${amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)'}`,
-            cursor: 'pointer',
+            cursor: 'pointer', display: 'flex',
           }}>
-            {/* 1행: 배지 + 지역 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-              {isNew(t, 'transaction') && <NewBadge />}
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-blue-bg)', color: 'var(--accent-blue-light)' }}>{t.trade_type || '매매'}</span>
-              {isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(251,191,36,0.15)', color: 'var(--accent-yellow)' }}>🏆 신고가</span>}
-              {vsMax !== null && !isMax && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>전고 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
-              <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
-              <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
-                {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
-              </button>
-            </div>
-            {/* 단지명 + 가격 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--sp-md)', marginBottom: 4 }}>
-              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{t.apt_name}</div>
-              <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: borderColor, flexShrink: 0 }}>{fmtAmount(amt)}</div>
-            </div>
-            {/* KPI 5칸 그리드 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 3, marginBottom: 6 }}>
-              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>전용</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.exclusive_area}㎡</div>
+            <div style={{ width: 4, background: amt >= 100000 ? 'var(--accent-red)' : amt >= 50000 ? 'var(--accent-orange)' : amt >= 30000 ? 'var(--accent-yellow)' : 'var(--accent-green)', flexShrink: 0 }} />
+            <div style={{ flex: 1, padding: '10px 12px' }}>
+              {/* 배지 행 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                {isNew(t, 'transaction') && <NewBadge />}
+                <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--accent-blue-bg)', color: 'var(--accent-blue-light)' }}>{t.trade_type || '매매'}</span>
+                {isMax && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 4, background: 'rgba(251,191,36,0.15)', color: 'var(--accent-yellow)' }}>🏆 신고가</span>}
+                {vsMax !== null && !isMax && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 4, background: vsMax >= 0 ? 'var(--accent-red-bg)' : 'var(--accent-blue-bg)', color: vsMax >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>전고 {vsMax >= 0 ? '+' : ''}{vsMax}%</span>}
+                <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>{t.region_nm} {t.sigungu}</span>
+                <button aria-label="즐겨찾기" onClick={(e) => { e.stopPropagation(); toggleWatchlist('transaction', String(t.id)); }} style={{ fontSize: 16, background: watchlist.has(`transaction:${t.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`transaction:${t.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1 }}>
+                  {watchlist.has(`transaction:${t.id}`) ? '⭐' : '☆'}
+                </button>
               </div>
-              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>층</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.floor}층</div>
+              {/* 단지명 + 가격 */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 5 }}>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.apt_name}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: borderColor, flexShrink: 0 }}>{fmtAmount(amt)}</div>
               </div>
-              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(59,123,246,0.04)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평당가</div>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--brand)' }}>{t.exclusive_area > 0 && amt > 0 ? `${Math.round(amt / (t.exclusive_area / 3.3058) / 10000 * 10) / 10}만` : '-'}</div>
+              {/* 6열 KPI 그리드 */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
+                {[
+                  { l: '전용면적', v: `${t.exclusive_area}㎡`, c: 'var(--text-primary)' },
+                  { l: '평형', v: t.exclusive_area > 0 ? `${Math.round(t.exclusive_area / 3.3058)}평` : '-', c: 'var(--text-primary)' },
+                  { l: '층수', v: `${t.floor}층`, c: 'var(--text-primary)' },
+                ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 700, color: k.c }}>{k.v}</div></div>)}
               </div>
-              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>연식</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.built_year || '-'}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, marginBottom: 5, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
+                {[
+                  { l: '평당가', v: t.exclusive_area > 0 && amt > 0 ? `${Math.round(amt / (t.exclusive_area / 3.3058) / 10000 * 10) / 10}만` : '-', c: 'var(--accent-purple)' },
+                  { l: '연식', v: t.built_year ? `${t.built_year}년 (${new Date().getFullYear() - t.built_year}년차)` : '-', c: 'var(--text-primary)' },
+                  { l: '거래일', v: t.deal_date ? t.deal_date.slice(5) : '-', c: 'var(--text-primary)' },
+                ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c }}>{k.v}</div></div>)}
               </div>
-              <div style={{ textAlign: 'center', padding: '4px 1px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>거래일</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{t.deal_date ? t.deal_date.slice(5) : '-'}</div>
-              </div>
-            </div>
-            {/* 미니 시세 흐름 (같은 단지 최근 거래) */}
-            {sameApt.length >= 3 && (() => {
-              const prices = sameApt.slice(0, 6).reverse().map(x => x.deal_amount || 0);
-              const maxVal = Math.max(...prices);
-              const minVal = Math.min(...prices);
-              const range = maxVal - minVal || 1;
-              const diff = prices.length >= 2 ? prices[prices.length - 1] - prices[0] : 0;
-              return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0 }}>최근{prices.length}건</span>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: 20, flex: 1 }}>
-                    {prices.map((p, pi) => (
-                      <div key={pi} style={{ flex: 1, height: `${Math.max(((p - minVal) / range) * 100, 8)}%`, borderRadius: 1, background: pi === prices.length - 1 ? borderColor : 'rgba(59,123,246,0.3)' }} />
-                    ))}
+              {/* 미니 시세 흐름 바차트 */}
+              {sameApt.length >= 3 && (() => {
+                const prices = sameApt.slice(0, 6).reverse().map(x => x.deal_amount || 0);
+                const maxVal = Math.max(...prices);
+                const minVal = Math.min(...prices);
+                const range = maxVal - minVal || 1;
+                const diff = prices.length >= 2 ? prices[prices.length - 1] - prices[0] : 0;
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                    <span style={{ fontSize: 8, color: 'var(--text-tertiary)', flexShrink: 0 }}>최근 {prices.length}건 추이</span>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: 22, flex: 1 }}>
+                      {prices.map((p, pi) => (
+                        <div key={pi} style={{ flex: 1, height: `${Math.max(((p - minVal) / range) * 100, 10)}%`, borderRadius: 1, background: pi === prices.length - 1 ? borderColor : 'rgba(59,123,246,0.3)' }} />
+                      ))}
+                    </div>
+                    {diff !== 0 && <span style={{ fontSize: 10, fontWeight: 700, color: diff > 0 ? 'var(--accent-red)' : 'var(--accent-blue)', flexShrink: 0 }}>{diff > 0 ? '▲' : '▼'} {fmtAmount(Math.abs(diff))}</span>}
                   </div>
-                  {diff !== 0 && <span style={{ fontSize: 10, fontWeight: 700, color: diff > 0 ? 'var(--accent-red)' : 'var(--accent-blue)', flexShrink: 0 }}>{diff > 0 ? '▲' : '▼'} {fmtAmount(Math.abs(diff))}</span>}
-                </div>
-              );
-            })()}
-            {/* 태그 */}
-            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-              {t.dong && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{t.dong}</span>}
-              {t.built_year && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{new Date().getFullYear() - t.built_year}년차</span>}
+                );
+              })()}
+              {/* 태그 */}
+              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                {t.dong && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{t.dong}</span>}
+                {t.built_year && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{new Date().getFullYear() - t.built_year}년차</span>}
+                {t.exclusive_area > 0 && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{t.floor}층/{t.exclusive_area}㎡</span>}
+              </div>
             </div>
           </div>
         );

@@ -170,67 +170,77 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
               return (
                 <Link key={r.id} href={`/apt/${encodeURIComponent(redevSlug)}`} className="kd-card-hover" style={{
                   display: 'block', textDecoration: 'none', color: 'inherit',
-                  padding: '10px 10px 8px', borderRadius: 'var(--radius-card)',
+                  borderRadius: 'var(--radius-card)', overflow: 'hidden',
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  cursor: 'pointer',
-                  position: 'relative', overflow: 'hidden',
-                }}
-                >
-                  {/* 상단 진행률 바 (전체 너비) */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3 }}>
+                  cursor: 'pointer', position: 'relative',
+                }}>
+                  {/* 상단 진행률 바 */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--bg-hover)' }}>
                     <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${sc.border}, var(--brand))` }} />
                   </div>
-                  {/* 1행: 단계 + 유형 + 진행률 + 지역 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, marginTop: 2 }}>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: sc.bg, color: sc.color }}>{r.stage}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, color: sc.color }}>{progress}%</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`redev:${r.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
-                      {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
-                    </button>
-                  </div>
-                  {/* 구역명 */}
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 6, lineHeight: 1.3 }}>
-                    {r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '📋 정보 준비중'}
-                  </div>
-                  {/* KPI 그리드 */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, marginBottom: 8 }}>
-                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(59,123,246,0.04)', borderRadius: 'var(--radius-xs)' }}>
-                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총세대</div>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' }}>{r.total_households ? r.total_households.toLocaleString() : '확인중'}</div>
+                  <div style={{ padding: '14px 12px 8px' }}>
+                    {/* 배지 행 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: sc.bg, color: sc.color }}>{r.stage}</span>
+                      <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: r.project_type === '재개발' ? 'rgba(96,165,250,0.1)' : 'rgba(251,146,60,0.1)', color: r.project_type === '재개발' ? 'var(--accent-blue-light)' : 'var(--accent-orange-light)' }}>{r.project_type}</span>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: sc.color }}>{progress}%</span>
+                      <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>{r.region}</span>
+                      <button aria-label="즐겨찾기" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('redev', String(r.id)); }} style={{ fontSize: 16, background: watchlist.has(`redev:${r.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`redev:${r.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 5px', cursor: 'pointer', lineHeight: 1 }}>
+                        {watchlist.has(`redev:${r.id}`) ? '⭐' : '☆'}
+                      </button>
                     </div>
-                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>시공사</div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.constructor ? r.constructor.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-'}</div>
+                    {/* 구역명 */}
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 800, color: (!r.district_name || r.district_name === '미상' || r.district_name === '정보 준비중') ? 'var(--text-tertiary)' : 'var(--text-primary)', marginBottom: 2, lineHeight: 1.3 }}>
+                      {r.district_name && r.district_name !== '미상' && r.district_name !== '정보 준비중' ? r.district_name : r.address || r.notes || '📋 정보 준비중'}
                     </div>
-                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>시행사</div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(r as any).developer ? String((r as any).developer).split('(')[0].trim().slice(0, 6) : '-'}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>{r.address || ''}</div>
+
+                    {/* 7열 KPI 그리드 (모바일 4+3) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 1, background: 'var(--bg-hover)', borderRadius: '6px 6px 0 0', overflow: 'hidden' }}>
+                      {[
+                        { l: '총세대', v: r.total_households ? r.total_households.toLocaleString() : '확인중', c: r.total_households ? 'var(--brand)' : 'var(--text-tertiary)' },
+                        { l: '시공사', v: r.constructor ? r.constructor.split('(')[0].split('주식')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
+                        { l: '시행사', v: (r as any).developer ? String((r as any).developer).split('(')[0].trim().slice(0, 6) : '-', c: 'var(--text-primary)' },
+                        { l: '예상준공', v: r.expected_completion ? r.expected_completion.replace(/년|예정/g, '').trim().slice(0, 7) : '-', c: r.expected_completion ? 'var(--accent-green)' : 'var(--text-tertiary)' },
+                      ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.v}</div></div>)}
                     </div>
-                    <div style={{ textAlign: 'center', padding: '5px 2px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-xs)' }}>
-                      <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>예상준공</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: r.expected_completion ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{r.expected_completion ? r.expected_completion.replace(/년|예정/g, '').trim().slice(0, 7) : '-'}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1, marginBottom: 6, background: 'var(--bg-hover)', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
+                      {[
+                        { l: '대지면적', v: r.land_area ? `${(r.land_area / 1000).toFixed(0)}천㎡` : '-', c: 'var(--text-primary)' },
+                        { l: '용적률', v: r.floor_area_ratio ? `${r.floor_area_ratio}%` : '-', c: 'var(--accent-purple)' },
+                        { l: '건폐율', v: r.building_coverage ? `${r.building_coverage}%` : '-', c: 'var(--text-primary)' },
+                        { l: '최고층', v: r.max_floor ? `${r.max_floor}F` : '-', c: r.max_floor ? 'var(--accent-yellow)' : 'var(--text-tertiary)' },
+                      ].map((k, ki) => <div key={ki} style={{ textAlign: 'center', padding: '5px 2px', background: 'var(--bg-surface)' }}><div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 1 }}>{k.l}</div><div style={{ fontSize: 11, fontWeight: 800, color: k.c }}>{k.v}</div></div>)}
                     </div>
-                  </div>
-                  {/* 5단계 진행 바 */}
-                  <div style={{ marginBottom: 6 }}>
-                    <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${progress}%`, borderRadius: 2, background: `linear-gradient(90deg, ${sc.border}, var(--brand))`, transition: 'width 0.5s ease' }} />
+
+                    {/* 6단계 진행 바 */}
+                    <div style={{ marginBottom: 6 }}>
+                      <div style={{ height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${progress}%`, borderRadius: 2, background: `linear-gradient(90deg, ${sc.border}, var(--brand))` }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                        {['구역지정', '조합설립', '사업인가', '관리처분', '착공', '준공'].map((s, i) => {
+                          const sp = [10, 25, 45, 65, 85, 100];
+                          const isActive = progress >= sp[i];
+                          return <span key={s} style={{ fontSize: 8, color: isActive ? sc.color : 'var(--text-tertiary)', fontWeight: isActive ? 700 : 400 }}>{s}</span>;
+                        })}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                      {['구역지정', '조합설립', '인가', '착공', '준공'].map((s, i) => {
-                        const sp = [10, 30, 50, 70, 100];
-                        const active = progress >= sp[i];
-                        return <span key={s} style={{ fontSize: 8, color: active ? sc.color : 'var(--text-tertiary)', fontWeight: active ? 700 : 400 }}>{s}</span>;
-                      })}
+
+                    {/* AI 요약 */}
+                    {r.ai_summary && (
+                      <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.5, padding: '5px 7px', background: 'var(--bg-hover)', borderRadius: 5, borderLeft: `2px solid ${sc.border}`, marginBottom: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{r.ai_summary}</div>
+                    )}
+
+                    {/* 위치/특징 배지 */}
+                    <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      {r.sigungu && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>{r.sigungu}</span>}
+                      {r.nearest_station && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', fontWeight: 700 }}>🚇 {r.nearest_station}</span>}
+                      {r.nearest_school && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(52,211,153,0.06)', color: 'var(--accent-green)', fontWeight: 600 }}>🏫 {r.nearest_school}</span>}
+                      {r.key_features && String(r.key_features).split(',').slice(0, 3).map((f: string) => <span key={f} style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(167,139,250,0.06)', color: 'var(--accent-purple)' }}>{f.trim()}</span>)}
+                      {r.address && !r.sigungu && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{r.address.split(' ').slice(-2).join(' ').replace(/일원|일대|번지/g, '').trim()}</span>}
+                      {r.notes && !r.expected_completion && <span style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>{String(r.notes).slice(0, 20)}</span>}
                     </div>
-                  </div>
-                  {/* 위치 태그 */}
-                  <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                    {r.sigungu && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.06)', color: 'var(--brand)', fontWeight: 600 }}>{r.sigungu}</span>}
-                    {r.address && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)' }}>{r.address.split(' ').slice(-2).join(' ').replace(/일원|일대|번지/g, '').trim()}</span>}
-                    {r.notes && !r.expected_completion && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>{String(r.notes).slice(0, 20)}</span>}
                   </div>
                 </Link>
               );
