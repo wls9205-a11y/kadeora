@@ -192,52 +192,79 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
     const downColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
     const barColor = pct > 0 ? upColor : pct < 0 ? downColor : 'var(--border)';
     const pts = sparklines[s.symbol];
-    const isNearHigh = pts?.length >= 2 && pts[pts.length-1] >= Math.max(...pts) * 0.99;
-    const isNearLow = pts?.length >= 2 && pts[pts.length-1] <= Math.min(...pts) * 1.01;
+    // 52주 위치 계산
+    const w52h = pts?.length >= 2 ? Math.max(...pts) : null;
+    const w52l = pts?.length >= 2 ? Math.min(...pts) : null;
+    const w52pos = w52h && w52l && w52h !== w52l ? Math.round(((Number(s.price) - w52l) / (w52h - w52l)) * 100) : null;
     // fill 스파크라인
     const sparkEl = pts?.length >= 2 ? (() => {
       const min = Math.min(...pts); const max = Math.max(...pts); const range = max - min || 1;
       const W = 160; const H = 20;
-      const coords = pts.map((v, i) => [(i / (pts.length - 1)) * W, H - 2 - ((v - min) / range) * (H - 4)]);
-      const line = coords.map(([x,y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-      const fillPath = `M${coords[0][0].toFixed(1)},${H} ` + coords.map(([x,y]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + ` L${coords[coords.length-1][0].toFixed(1)},${H}Z`;
+      const coords = pts.map((v: number, i: number) => [(i / (pts.length - 1)) * W, H - 2 - ((v - min) / range) * (H - 4)]);
+      const line = coords.map(([x,y]: number[]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+      const fillPath = `M${coords[0][0].toFixed(1)},${H} ` + coords.map(([x,y]: number[]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + ` L${coords[coords.length-1][0].toFixed(1)},${H}Z`;
       const fillCol = pct > 0 ? (isGlobal ? 'rgba(46,232,165,0.08)' : 'rgba(255,107,107,0.08)') : pct < 0 ? (isGlobal ? 'rgba(248,113,113,0.08)' : 'rgba(108,180,255,0.08)') : 'rgba(148,163,184,0.05)';
+      const last = coords[coords.length - 1];
       return (
         <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block' }}>
           <path d={fillPath} fill={fillCol} />
           <polyline points={line} fill="none" stroke={barColor} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={last[0]} cy={last[1]} r="2" fill="var(--bg-base)" stroke={barColor} strokeWidth="1.5" />
         </svg>
       );
     })() : null;
     return (
       <Link href={`/stock/${encodeURIComponent(s.symbol)}`} className="kd-card-hover" style={{
-        display: 'block', padding: '9px 9px 6px', borderRadius: 'var(--radius-card)',
+        display: 'block', padding: '10px 10px 8px', borderRadius: 'var(--radius-card)',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: barColor }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${barColor}, ${barColor}40, transparent)` }} />
+        {/* Row 1: Name + sector + description hint */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-            <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 2 }}>
+              <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
+              {s.sector && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: `${barColor}12`, color: barColor, fontWeight: 600 }}>{s.sector}</span>}
+            </div>
           </div>
-          {s.sector && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: `${barColor}12`, color: barColor, flexShrink: 0 }}>{s.sector}</span>}
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.4 }}>
+            {isWatched ? '★' : '☆'}
+          </button>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
-          <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
-            {s.price === 0 ? '—' : isGlobal ? `$${s.price?.toFixed(2)}` : fmt(s.price)}
+        {/* Row 2: Price + Change */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+          <span style={{ fontSize: 17, fontWeight: 900, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.5px' }}>
+            {s.price === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toFixed(2)}` : fmt(Number(s.price))}
           </span>
-          {!isStale && s.price > 0 && (
-            <span style={{ fontSize: 12, fontWeight: 700, color: stockColor(pct, !isGlobal) }}>
-              {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+          {!isStale && Number(s.price) > 0 && (
+            <span style={{ fontSize: 12, fontWeight: 800, color: stockColor(pct, !isGlobal), padding: '1px 6px', borderRadius: 5, background: `${barColor}12` }}>
+              {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {Math.abs(pct).toFixed(2)}%
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)', marginBottom: 4 }}>
-          {s.market_cap > 0 && <span>시총 {fmtCap(s.market_cap, s.currency)}</span>}
-          {s.volume > 0 && <span>{(s.volume / 1000000).toFixed(1)}M</span>}
+        {/* Row 3: Sparkline */}
+        {sparkEl && <div style={{ marginBottom: 4 }}>{sparkEl}</div>}
+        {/* Row 4: 52주 위치 바 */}
+        {w52pos !== null && (
+          <div style={{ marginBottom: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, color: 'var(--text-tertiary)', marginBottom: 1 }}>
+              <span>52주 저</span>
+              <span>{w52pos}%</span>
+              <span>52주 고</span>
+            </div>
+            <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', position: 'relative' }}>
+              <div style={{ height: '100%', width: `${w52pos}%`, borderRadius: 2, background: `linear-gradient(90deg, var(--accent-blue), ${barColor})` }} />
+            </div>
+          </div>
+        )}
+        {/* Row 5: Footer */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)' }}>
+          {s.market_cap > 0 && <span>시총 {fmtCap(Number(s.market_cap), s.currency)}</span>}
+          {s.volume > 0 && <span>{(Number(s.volume) / 1000000).toFixed(1)}M</span>}
+          {s.description && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 80 }}>{s.description.split('.')[0]}</span>}
         </div>
-        {sparkEl && <div style={{ marginTop: 2 }}>{sparkEl}</div>}
       </Link>
     );
   }, [watchlistSymbols, toggleWatchlist, sparklines, exchangeRate]);
@@ -1023,7 +1050,7 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
               )}
             </div>
           ) : viewMode === 'card' && currentTab === 'ranking' ? (
-              /* ── 카드뷰 ── */
+              /* ── 카드뷰 v3 ── */
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--sp-sm)' }}>
                 {displayStocks.map((s) => {
                   const pct = s.change_pct ?? 0;
@@ -1033,42 +1060,71 @@ export default function StockClient({ initialStocks, briefing, briefingUS, excha
                   const downColor = isGlobal ? 'var(--accent-red)' : 'var(--accent-blue)';
                   const priceColor = pct > 0 ? upColor : pct < 0 ? downColor : 'var(--text-tertiary)';
                   const pts = sparklines[s.symbol];
+                  const w52h = pts?.length >= 2 ? Math.max(...pts) : null;
+                  const w52l = pts?.length >= 2 ? Math.min(...pts) : null;
+                  const w52pos = w52h && w52l && w52h !== w52l ? Math.round(((Number(s.price) - w52l) / (w52h - w52l)) * 100) : null;
                   const sparkEl = pts?.length >= 2 ? (() => {
                     const min = Math.min(...pts); const max = Math.max(...pts); const range = max - min || 1;
-                    const W = 60; const H = 24;
-                    const coords = pts.map((v, i) => [(i / (pts.length - 1)) * W, H - 2 - ((v - min) / range) * (H - 4)]);
-                    const line = coords.map(([x,y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-                    const fillPath = `M${coords[0][0].toFixed(1)},${H} ` + coords.map(([x,y]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + ` L${coords[coords.length-1][0].toFixed(1)},${H}Z`;
+                    const W = 80; const H = 26;
+                    const coords = pts.map((v: number, i: number) => [(i / (pts.length - 1)) * W, H - 2 - ((v - min) / range) * (H - 4)]);
+                    const line = coords.map(([x,y]: number[]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+                    const fillPath = `M${coords[0][0].toFixed(1)},${H} ` + coords.map(([x,y]: number[]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + ` L${coords[coords.length-1][0].toFixed(1)},${H}Z`;
                     const fillCol = pct > 0 ? (isGlobal ? 'rgba(46,232,165,0.12)' : 'rgba(255,107,107,0.12)') : pct < 0 ? (isGlobal ? 'rgba(248,113,113,0.12)' : 'rgba(108,180,255,0.12)') : 'rgba(148,163,184,0.08)';
+                    const last = coords[coords.length - 1];
                     return (
-                      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', marginTop: 6 }}>
+                      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
                         <path d={fillPath} fill={fillCol} />
                         <polyline points={line} fill="none" stroke={priceColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx={last[0]} cy={last[1]} r="2" fill="var(--bg-base)" stroke={priceColor} strokeWidth="1.5" />
                       </svg>
                     );
                   })() : null;
                   return (
                     <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} className="kd-section-card" style={{
-                      display: 'block', padding: '12px', background: 'var(--bg-surface)',
+                      display: 'block', padding: 0, background: 'var(--bg-surface)',
                       border: '1px solid var(--border)', borderRadius: 'var(--radius-card)',
-                      textDecoration: 'none', color: 'inherit', position: 'relative',
+                      textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
                     }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-xs)' }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2, fontFamily: 'monospace' }}>{s.symbol}{s.sector ? ` · ${s.sector}` : ''}</div>
+                      <div style={{ height: 3, background: `linear-gradient(90deg, ${priceColor}, ${priceColor}40, transparent)` }} />
+                      <div style={{ padding: '10px 12px 8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{s.name}</div>
+                            <div style={{ display: 'flex', gap: 3, alignItems: 'center', marginTop: 2 }}>
+                              <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{s.symbol}</span>
+                              {s.sector && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: `${priceColor}12`, color: priceColor, fontWeight: 600 }}>{s.sector}</span>}
+                            </div>
+                          </div>
+                          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0, opacity: isWatched ? 1 : 0.4 }}>
+                            {isWatched ? '★' : '☆'}
+                          </button>
                         </div>
-                        <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(s.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: isWatched ? 'var(--accent-yellow)' : 'var(--text-tertiary)', flexShrink: 0 }}>
-                          {isWatched ? '★' : '☆'}
-                        </button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 4 }}>
+                          <div>
+                            <div style={{ fontSize: 17, fontWeight: 900, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.5px' }}>
+                              {s.price === 0 ? '—' : isGlobal ? `$${Number(s.price)?.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2})}` : `₩${fmt(Number(s.price))}`}
+                            </div>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: priceColor, display: 'inline-block', padding: '1px 6px', borderRadius: 5, background: `${priceColor}12`, marginTop: 2 }}>
+                              {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {Math.abs(pct).toFixed(2)}%
+                            </div>
+                          </div>
+                          {sparkEl}
+                        </div>
+                        {w52pos !== null && (
+                          <div style={{ marginBottom: 4 }}>
+                            <div style={{ height: 3, borderRadius: 2, background: 'var(--bg-hover)', position: 'relative' }}>
+                              <div style={{ height: '100%', width: `${w52pos}%`, borderRadius: 2, background: `linear-gradient(90deg, var(--accent-blue), ${priceColor})` }} />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                              <span>52주</span><span>{w52pos}%</span>
+                            </div>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)' }}>
+                          {s.market_cap > 0 && <span>시총 {fmtCap(Number(s.market_cap), s.currency)}</span>}
+                          {s.volume > 0 && <span>{(Number(s.volume) / 1000000).toFixed(1)}M</span>}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 900, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.5px' }}>
-                        {s.price === 0 ? '—' : isGlobal ? `$${s.price?.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2})}` : `₩${fmt(s.price)}`}
-                      </div>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: priceColor, display: 'inline-block', padding: '1px 6px', borderRadius: 4, background: pct > 0 ? `${priceColor}12` : pct < 0 ? `${priceColor}12` : 'transparent', marginTop: 2 }}>
-                        {pct > 0 ? '▲' : pct < 0 ? '▼' : '━'} {Math.abs(pct).toFixed(2)}%
-                      </div>
-                      {sparkEl}
                     </Link>
                   );
                 })}
