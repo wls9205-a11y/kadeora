@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal } from 'lucide-react';
+import { Home, TrendingUp, Building2, Search, Bell, User as UserIcon, PenSquare, LogOut, FileText, MoreHorizontal, Settings } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
@@ -170,7 +170,7 @@ export function Navigation() {
     <>
       {/* ── 헤더 ── */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
+        position: 'sticky', top: 0, zIndex: 100,
         background: 'rgba(12,21,40,0.88)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border)',
@@ -350,6 +350,7 @@ export function Navigation() {
                       {[
                         { href:'/write',              label:'글쓰기', LIcon: PenSquare },
                         { href:'/notifications',      label:`알림${unread>0?` (${unread})`:''}`, LIcon: Bell },
+                        { href:'/notifications/settings', label:'알림 설정', LIcon: Settings },
                       ].map(item => (
                         <Link key={item.href} href={item.href} onClick={()=>setMenuOpen(false)} style={{
                           display:'flex', alignItems:'center', gap: 'var(--sp-sm)', padding:'11px 16px',
@@ -420,7 +421,7 @@ export function Navigation() {
 
       {/* ── 모바일 하단 탭바 ── */}
       <nav style={{
-        position:'fixed', bottom:0, left:0, right:0, zIndex: 50,
+        position:'fixed', bottom:0, left:0, right:0, zIndex: 100,
         background:'rgba(12,21,40,0.92)',
         backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
         borderTop:'1px solid var(--nav-border)',
