@@ -1,10 +1,12 @@
-# 카더라 STATUS.md — 세션 68 (2026-04-01 16:00 KST)
+# 카더라 STATUS.md — 세션 68 완료 (2026-04-01 17:00 KST)
 
 ## 최신 커밋
-- `e3d3d51d` — feat: 미분양+분양중 탭 D-style 리디자인 — 6열KPI(3x2) + 좌측 컬러바
-- `6aee89d6` — feat: 3탭 카드 D-style 맥시멀 리디자인 — 청약(8열KPI+경쟁률링+평형차트+도트타임라인), 재개발(7열KPI+AI요약+역/학교/특징), 실거래(6열KPI+평형환산+좌측컬러바)
-- `e423ee6` — 입주예정 D-day 오류 수정 (D-73335490 → 정상)
-- `f55c0c3` — UI 간격/배치/정렬/크기 전면 통일
+- `d6ab3d97` — feat: 5페이지 공유버튼 추가(shop/blog-series/guide/search)
+- `8d304d80` — feat: OngoingTab 세대수 중복제거 + StockClient 거래량 K/M포맷 + 3페이지 공유버튼
+- `4bcf39ca` — feat: 총세대/공급세대 중복 제거 + 주식 거래량 0→거래없음 + SectionShareButton 카카오톡 분리+멀티공유
+- `9945cf21` — feat: Google Ads 전환 태그 추가 (AW-17792745509)
+- `e3d3d51d` — feat: 미분양+분양중 탭 D-style 리디자인
+- `6aee89d6` — feat: 3탭 카드 D-style 맥시멀 리디자인
 - `5cf1634` — 4개 탭 카드 리디자인 (KPI 그리드+태그+시각화)
 - `392a226` — 총세대수 자동검증 시스템 + UI 확인중 표시
 - `3ec27dc` — 시드 유저 페르소나 + 피드 크론 v3
@@ -27,6 +29,29 @@
 - 셀 내 `overflow:hidden; textOverflow:ellipsis`
 - 평형 칩 가로 스크롤(`overflowX:auto`)
 - 배지 `flexWrap:wrap`
+
+### 총세대 vs 공급세대 구분 개선 ✅
+- SubscriptionTab: 같은 값 → "세대수" 1개, 다르면 "총세대"+"공급세대" 분리
+- OngoingTab: "분양가"와 "세대수" 중복 제거
+
+### 주식 거래량 표시 개선 ✅
+- `volume === 0` → "거래없음" (상세 페이지)
+- StockClient 리스트: 1M↑ → `X.XM`, 1K~999K → `XK`, 1000↓ → 원수
+
+### SectionShareButton 전면 업그레이드 ✅
+- 기존: "공유하기" 1개 (클립보드만)
+- 변경: 💬 **카카오톡** 버튼(노란색 강조) + **공유** 버튼(BottomSheet → 카카오/밴드/X/페이스북/링크복사)
+- 기존 사용처 전부 자동 업그레이드
+
+### 공유 버튼 신규 추가 (11페이지) ✅
+apt/diagnose, stock/compare, grades, feed, apt/search, daily/archive, shop, blog/series, guide, search — 주요 페이지 공유 완료
+
+### Google Ads ✅
+- 전환 태그 `AW-17792745509` layout.tsx에 설치
+- 배너 시안 22개(임팩트형 6카피×4크기) 제공
+- 광고 문구 31개(제목15+긴제목8+설명8) 제공
+- 검색 테마 50개 제공
+- 사이트링크 6개 + 표시경로 4세트 제공
 
 ## 세션 67 성과
 
