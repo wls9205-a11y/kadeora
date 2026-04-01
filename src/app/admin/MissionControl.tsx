@@ -51,7 +51,22 @@ export default function MissionControl() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg) } }
+        @media (max-width: 768px) {
+          .admin-mobile-bar { display: flex !important; }
+          .admin-sidebar { position: fixed !important; left: -220px; top: 0; z-index: 95; height: 100vh !important; transition: left 0.25s ease; box-shadow: none; }
+          .admin-sidebar.open { left: 0 !important; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+          .admin-sidebar-overlay { display: block !important; }
+          .admin-main { padding: 56px 10px 40px !important; max-width: 100% !important; }
+          .mc-g2 { grid-template-columns: 1fr !important; }
+          .mc-g4, .mc-g6 { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 480px) {
+          .admin-main { padding: 52px 6px 28px !important; }
+          .mc-g4, .mc-g6 { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
 
       {/* 모바일 오버레이 */}
       {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} style={{ display: 'none', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 90 }} />}

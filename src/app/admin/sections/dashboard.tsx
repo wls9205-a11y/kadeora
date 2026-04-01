@@ -310,7 +310,7 @@ export default function DashboardSection() {
         const p = (data as any).sectionPulse;
         const barW = (v: number, max: number) => max > 0 ? `${Math.max(4, (v / max) * 100)}%` : '4%';
         return (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+          <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
             {/* 피드 펄스 */}
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>💬 피드 7일 추이</div>
@@ -464,7 +464,7 @@ export default function DashboardSection() {
       {(data as any).stockHealth && (() => {
         const h = (data as any).stockHealth;
         return (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+          <div className="mc-g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 10 }}>🏥 시세 건강도</div>
               {[
