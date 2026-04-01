@@ -122,9 +122,9 @@ export default async function StockDetailPage({ params }: Props) {
 
   const items = [
     { label: '시가총액', value: fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined) },
-    { label: '거래량', value: s.volume ? Number(s.volume).toLocaleString() : '-' },
+    { label: '거래량', value: s.volume != null && Number(s.volume) >= 0 ? Number(s.volume).toLocaleString() : '-' },
     { label: '섹터', value: s.sector || '-' },
-    { label: '전일대비', value: s.change_amt ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
+    { label: '전일대비', value: s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : '-' },
   ];
 
   return (
@@ -290,7 +290,7 @@ export default async function StockDetailPage({ params }: Props) {
               <div style={{ fontSize: 16, fontWeight: 800, color: isUp ? 'var(--accent-red)' : isDown ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
                 {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.change_amt ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : ''}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : ''}</div>
             </div>
           </div>
         </div>

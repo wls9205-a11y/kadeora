@@ -213,7 +213,6 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const totS = apt.tot_supply_hshld_co || 0;
                   const totalHH = (apt as any).total_households || 0;
                   const isRedev = (apt as any).project_type === '재개발' || (apt as any).project_type === '재건축';
-                  const hhNull = !(apt as any).total_households && isRedev;
                   const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
                   return (
                     <>
@@ -227,12 +226,11 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                           <div style={{ fontSize: 11, fontWeight: 800, color: ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)' }}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{totalHH > 0 && totalHH !== totS ? '총세대/공급' : hhNull ? '총세대수' : '총 공급'}</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: totalHH > 0 ? 'var(--text-primary)' : hhNull ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>
-                            {totalHH > 0 && totalHH !== totS 
-                              ? <>{totalHH.toLocaleString()}<span style={{ color: 'var(--text-tertiary)' }}>/</span>{totS.toLocaleString()}</>
-                              : hhNull ? '🔍 확인중' : totS > 0 ? `${totS.toLocaleString()}세대` : '-'}
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총세대수</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+                            {totalHH > 0 ? `${totalHH.toLocaleString()}세대` : totS > 0 ? `${totS.toLocaleString()}세대` : '-'}
                           </div>
+                          {isRedev && totalHH > 0 && totalHH !== totS && <div style={{ fontSize: 8, color: 'var(--accent-green)' }}>공급 {totS.toLocaleString()}</div>}
                         </div>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>일반/특별</div>
