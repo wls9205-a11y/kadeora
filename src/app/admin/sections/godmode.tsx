@@ -11,6 +11,40 @@ export default function GodModeSection() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [specialLog, setSpecialLog] = useState('');
   const [specialRunning, setSpecialRunning] = useState(false);
+  const [verifyItems, setVerifyItems] = useState<any[]>([]);
+  const [verifyCount, setVerifyCount] = useState(0);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+
+  const loadVerifyItems = async () => {
+    setVerifyLoading(true);
+    try {
+      const res = await fetch('/api/admin/verify-households');
+      const data = await res.json();
+      setVerifyItems(data.items || []);
+      setVerifyCount(data.total_null || 0);
+    } catch { /* */ }
+    setVerifyLoading(false);
+  };
+
+  const saveHousehold = async (id: number, name: string, value: string) => {
+    const hh = Number(value);
+    if (!hh || hh <= 0) return;
+    try {
+      const res = await fetch('/api/admin/verify-households', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, total_households: hh }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setSpecialLog(`✅ ${name} → ${hh.toLocaleString()}세대 (공급 ${data.supply} · 비율 ${data.ratio})`);
+        setVerifyItems(prev => prev.filter(v => v.id !== id));
+        setVerifyCount(prev => prev - 1);
+      } else {
+        setSpecialLog(`❌ ${name}: ${data.error}`);
+      }
+    } catch (e: any) { setSpecialLog(`❌ ${errMsg(e)}`); }
+  };
 
   const runSpecial = async (endpoint: string, label: string, body?: Record<string, unknown>) => {
     if (specialRunning) return;
@@ -164,10 +198,10 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.green}40`, background: C.card, color: C.green, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             🏠 K-apt 연동 50건
           </button>
-          <button onClick={() => runSpecial('/api/cron/naver-complex-sync', '네이버 총세대수 교차검증 5건')}
+          <button onClick={() => runSpecial('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.cyan || '#22D3EE'}40`, background: C.card, color: C.cyan || '#22D3EE', fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
-            🔍 네이버 교차검증 5건
+            🤖 K-apt 자동검증 10건
           </button>
           <button onClick={() => runSpecial('/api/admin/batch-reparse?token=kd-reparse-2026', 'HTML 재파싱 30건')}
             disabled={specialRunning}
@@ -194,6 +228,43 @@ export default function GodModeSection() {
             </div>
           ))}
         </div>
+        {/* 총세대수 자동검증 시스템 */}
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 20, marginBottom: 'var(--sp-sm)' }}>🤖 총세대수 자동검증</div>
+        <div style={{ fontSize: 11, color: C.textDim, marginBottom: 10 }}>K-apt 공공데이터 API 기반 자동 교차검증 · 매 6시간 자동 실행 · 확인중 {verifyCount > 0 ? `${verifyCount}건` : ''}</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          <button onClick={() => runSpecial('/api/cron/auto-verify-households', 'K-apt 자동검증 10건')}
+            disabled={specialRunning}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.cyan || '#22D3EE'}40`, background: C.card, color: C.cyan || '#22D3EE', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
+            🤖 자동검증 실행
+          </button>
+          <button onClick={loadVerifyItems} disabled={verifyLoading}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: `1px solid ${C.border}`, background: C.card, color: C.textSec, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
+            {verifyLoading ? '로딩...' : `📋 수동입력 목록`}
+          </button>
+        </div>
+        {verifyItems.length > 0 && (
+          <div style={{ maxHeight: 400, overflowY: 'auto', background: C.card, border: `1px solid ${C.border}`, borderRadius: 'var(--radius-sm)', padding: 8 }}>
+            {verifyItems.map((v: any) => (
+              <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 4px', borderBottom: `1px solid ${C.border}22`, fontSize: 12 }}>
+                <span style={{ flex: 1, fontWeight: 700, color: C.text, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={v.house_nm}>
+                  {v.house_nm}
+                </span>
+                <span style={{ color: C.textDim, fontSize: 10, whiteSpace: 'nowrap' }}>{v.region_nm}·공급{v.tot_supply_hshld_co}</span>
+                <input type="number" placeholder="총세대" 
+                  style={{ width: 70, padding: '3px 6px', borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.05)', color: C.text, fontSize: 12 }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveHousehold(v.id, v.house_nm, (e.target as HTMLInputElement).value);
+                  }}
+                />
+                <button onClick={(e) => {
+                    const input = (e.currentTarget.previousSibling as HTMLInputElement);
+                    if (input?.value) saveHousehold(v.id, v.house_nm, input.value);
+                  }}
+                  style={{ padding: '3px 8px', borderRadius: 4, border: 'none', background: C.green, color: '#000', fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>✓</button>
+              </div>
+            ))}
+          </div>
+        )}
         {specialLog && (
           <div style={{ marginTop: 'var(--sp-md)', padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', background: C.card, border: `1px solid ${C.border}`, fontSize: 12, color: specialLog.startsWith('✅') ? C.green : specialLog.startsWith('❌') ? C.red : C.textSec, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
             {specialLog}

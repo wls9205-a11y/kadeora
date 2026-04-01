@@ -198,13 +198,13 @@ export default function RedevTab({ redevelopment, watchlist, toggleWatchlist, se
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>
                     {r.sigungu}{r.total_households ? ` · ${r.total_households.toLocaleString()}세대` : (() => {
                       const stageMsg: Record<string, string> = {
-                        '정비구역지정': ' · 세대수 미확정 (구역지정 단계)',
-                        '조합설립': ' · 세대수 확정 전 (조합설립 단계)',
-                        '사업시행인가': ' · 세대수 인가 후 확정 예정',
+                        '정비구역지정': ' · 세대수 확인중 (구역지정 단계)',
+                        '조합설립': ' · 세대수 확인중 (조합설립 단계)',
+                        '사업시행인가': ' · 세대수 확인중 (인가 후 확정)',
                         '관리처분': ' · 관리처분계획 참조',
                         '착공': ' · 사업시행계획 참조',
                       };
-                      return stageMsg[r.stage || ''] || ' · 세대수 미확정';
+                      return stageMsg[r.stage || ''] || ' · 세대수 확인중';
                     })()}{r.constructor ? ` · ${r.constructor}` : ''}{(r as any).developer && (r as any).developer !== r.constructor ? ` · 시행 ${(r as any).developer}` : ''}
                   </div>
                   {/* 비고/예상준공 */}

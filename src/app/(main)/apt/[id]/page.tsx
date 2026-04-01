@@ -480,7 +480,7 @@ export default async function AptUnifiedPage({ params }: Props) {
         const totalHouseholds = Number(sub?.total_households || 0);
 
         const cards = [
-          { l: '총세대수', v: totalHouseholds > 0 ? `${totalHouseholds.toLocaleString()}세대` : totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : '-', sub: totalHouseholds > 0 && totalHouseholds !== totalUnits ? `공급 ${totalUnits.toLocaleString()}` : hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : '', c: 'var(--text-primary)', icon: '🏢', bar: Math.min(((totalHouseholds || totalUnits) / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null },
+          { l: '총세대수', v: totalHouseholds > 0 ? `${totalHouseholds.toLocaleString()}세대` : totalUnits > 0 ? `${totalUnits.toLocaleString()}세대` : '🔍 확인중', sub: totalHouseholds > 0 && totalHouseholds !== totalUnits ? `공급 ${totalUnits.toLocaleString()}` : totalHouseholds === 0 && (sub?.project_type === '재개발' || sub?.project_type === '재건축') ? '조합원분양 세대 확인중' : hasBreakdown ? `일반${generalSupply}·특별${specialSupply}` : '', c: totalHouseholds > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', icon: '🏢', bar: Math.min(((totalHouseholds || totalUnits) / 5000) * 100, 100), barColor: 'var(--brand)', scrollTo: null },
           { l: sub ? '분양가' : '시세', v: (() => {
             const pMin = site?.price_min || unsold?.sale_price_min || 0;
             const pMax = site?.price_max || 0;
@@ -821,7 +821,7 @@ export default async function AptUnifiedPage({ params }: Props) {
               ['시행사', sub.developer_nm || site?.developer],
               ['브랜드', sub.brand_name],
               ['사업유형', sub.project_type],
-              ['총세대수', sub.total_households ? `${Number(sub.total_households).toLocaleString()}세대 (단지 전체)` : null],
+              ['총세대수', sub.total_households ? `${Number(sub.total_households).toLocaleString()}세대 (단지 전체)` : '🔍 확인중'],
               ['공급세대', sub.tot_supply_hshld_co ? `${Number(sub.tot_supply_hshld_co).toLocaleString()}세대 (일반${sub.general_supply_total || '-'} · 특별${sub.special_supply_total || '-'})` : null],
               ['동수', (sub.total_dong_count || sub.total_dong_co) ? `${sub.total_dong_count || sub.total_dong_co}개 동` : null],
               ['층수', sub.max_floor ? `지상 ${sub.max_floor}층${sub.min_floor ? ` / 지하 ${sub.min_floor}층` : ''}` : null],

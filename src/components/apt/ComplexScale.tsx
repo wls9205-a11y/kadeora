@@ -46,7 +46,7 @@ export default function ComplexScale({
               {totalHouseholds.toLocaleString()}<span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600 }}>세대</span>
             </div>
           ) : (
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>정보 준비중</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>🔍 확인중</div>
           )}
         </div>
 
