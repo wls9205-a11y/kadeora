@@ -64,24 +64,33 @@ export default function MissionControl() {
           }
           .admin-sidebar.open { left: 0 !important; box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
           .admin-sidebar-overlay { display: block !important; }
-          .admin-main { padding: 56px 12px 32px !important; max-width: 100% !important; }
+          .admin-main { padding: 56px 10px 32px !important; max-width: 100% !important; overflow-x: hidden !important; }
           .mc-g2 { grid-template-columns: 1fr !important; }
           .mc-g4, .mc-g6 { grid-template-columns: repeat(2, 1fr) !important; }
           .mc-g3 { grid-template-columns: 1fr 1fr !important; }
 
           /* 공유 컴포넌트 모바일 조정 */
-          .admin-table-wrap { font-size: 12px !important; }
-          .admin-table-wrap th, .admin-table-wrap td { padding: 8px 8px !important; }
+          .admin-table-wrap { font-size: 11px !important; overflow-x: auto !important; }
+          .admin-table-wrap th, .admin-table-wrap td { padding: 6px 6px !important; white-space: nowrap; }
           .admin-detail-grid { grid-template-columns: 1fr !important; }
+
+          /* 대시보드 내 직접 그리드들 모바일 대응 */
+          .admin-main [style*="repeat(3"] { grid-template-columns: 1fr 1fr !important; }
+          .admin-main [style*="repeat(4"] { grid-template-columns: 1fr 1fr !important; }
+          .admin-main [style*="2fr 1fr"] { grid-template-columns: 1fr !important; }
+          .admin-main [style*="minmax(180"] { grid-template-columns: 1fr 1fr !important; }
         }
 
         /* ── 모바일 반응형 (스마트폰) ── */
         @media (max-width: 480px) {
-          .admin-main { padding: 50px 8px 24px !important; }
+          .admin-main { padding: 48px 6px 20px !important; }
           .mc-g2, .mc-g3, .mc-g4, .mc-g6 { grid-template-columns: 1fr !important; gap: 6px !important; }
+          .admin-main [style*="repeat(2"], .admin-main [style*="repeat(3"], .admin-main [style*="repeat(4"] { grid-template-columns: 1fr !important; }
+          .admin-main [style*="2fr 1fr"], .admin-main [style*="minmax(180"] { grid-template-columns: 1fr !important; }
 
-          /* KPICard / StatBox 간격 축소 */
-          .admin-main [class*="kpi"], .admin-main > div > div { }
+          /* 텍스트 오버플로우 방지 */
+          .admin-main { word-break: break-word; }
+          .admin-main pre, .admin-main code { white-space: pre-wrap !important; word-break: break-all; }
         }
       `}</style>
 

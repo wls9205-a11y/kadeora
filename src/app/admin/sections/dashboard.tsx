@@ -956,6 +956,10 @@ export default function DashboardSection() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
+            { tag: 'FIX', label: '주식 등락률 방어', desc: '비정상 +3750% 필터 + 브리핑 크론 ±35% 클램핑', color: C.red, commit: 'c94e04b' },
+            { tag: 'FEAT', label: '오늘의 운세 세밀화', desc: '12띠×4세트 풀운세+DB저장+금전/애정/건강/행운', color: C.purple, commit: '3903d12' },
+            { tag: 'UX', label: '피드 카드 50% 축소', desc: '메타1행·아바타24·제목14·본문12·인터랙션4px', color: C.cyan, commit: '5c1e59e' },
+            { tag: 'FIX', label: '프로필 닉네임 잘림', desc: '닉네임 첫줄+등급/버튼 둘째줄 분리', color: C.red, commit: '863012e' },
             { tag: 'FIX', label: 'D-day 계산 오류', desc: '입주예정 D-73335490→정상 (YYYYMM 파싱)', color: C.red, commit: 'e423ee6' },
             { tag: 'UX', label: 'UI 정렬 통일', desc: '태그·KPI·바·타임라인 크기/간격 전면 정규화', color: C.cyan, commit: 'f55c0c3' },
             { tag: 'FEAT', label: '4탭 카드 리디자인', desc: '재개발·미분양·실거래·주식·청약 KPI+시각화', color: C.brand, commit: '5cf1634' },
