@@ -225,8 +225,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                           <div style={{ fontSize: 11, fontWeight: 800, color: ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)' }}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{totalHH > 0 && totalHH !== totS ? '총세대/공급' : '총공급'}</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>{totalHH > 0 && totalHH !== totS ? `${totalHH.toLocaleString()}/${totS.toLocaleString()}` : totS > 0 ? `${totS.toLocaleString()}세대` : '-'}</div>
+                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총세대수</div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: totalHH > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>{totalHH > 0 ? `${totalHH.toLocaleString()}세대` : totS > 0 ? `${totS.toLocaleString()}세대` : '-'}</div>
+                          {totalHH > 0 && totalHH !== totS && <div style={{ fontSize: 8, color: 'var(--accent-green)' }}>공급 {totS.toLocaleString()}</div>}
                         </div>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>일반/특별</div>
