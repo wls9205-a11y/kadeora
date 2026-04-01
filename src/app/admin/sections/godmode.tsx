@@ -149,10 +149,10 @@ export default function GodModeSection() {
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.red}40`, background: C.card, color: C.red, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
             📄 PDF 파싱 200건 실행
           </button>
-          <button onClick={() => runSpecial('/api/admin/batch-reparse-v2?token=kd-reparse-2026&limit=200', 'PDF 재파싱 v2 (층수/주차/역) 200건')}
+          <button onClick={() => runSpecial('/api/admin/batch-reparse-v2?token=kd-reparse-2026&limit=50', 'PDF 재파싱 v2 (층수/주차/역) 50건')}
             disabled={specialRunning}
             style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', border: `1px solid ${C.yellow}40`, background: C.card, color: C.yellow, fontWeight: 700, fontSize: 13, cursor: specialRunning ? 'wait' : 'pointer' }}>
-            🔄 PDF 재파싱 v2 200건
+            🔄 PDF 재파싱 v2 50건
           </button>
           <button onClick={() => runSpecial('/api/admin/batch-total-hh', '총세대수 PDF 추출 100건')}
             disabled={specialRunning}

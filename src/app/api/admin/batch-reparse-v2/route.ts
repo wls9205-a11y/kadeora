@@ -30,12 +30,18 @@ async function reparseSingle(
       signal: AbortSignal.timeout(15000),
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
     });
-    if (!res.ok) return { ok: false, fields: 0, name: apt.house_nm };
+    if (!res.ok) {
+      await (sb as any).from('apt_subscriptions').update({ announcement_raw_text: 'FETCH_FAILED' }).eq('id', apt.id);
+      return { ok: false, fields: 0, name: apt.house_nm };
+    }
 
     const buf = Buffer.from(await res.arrayBuffer());
     const pdf = await pdfParse(buf, { max: 10 });
     const text: string = pdf.text || '';
-    if (text.length < 50) return { ok: false, fields: 0, name: apt.house_nm };
+    if (text.length < 50) {
+      await (sb as any).from('apt_subscriptions').update({ announcement_raw_text: 'EMPTY_PDF' }).eq('id', apt.id);
+      return { ok: false, fields: 0, name: apt.house_nm };
+    }
 
     const ud: Record<string, any> = {};
     let f = 0;
@@ -169,6 +175,8 @@ async function reparseSingle(
 
     return { ok: true, fields: f, name: apt.house_nm };
   } catch (e: any) {
+    // 실패한 레코드 마킹 (재시도 방지)
+    try { await (sb as any).from('apt_subscriptions').update({ announcement_raw_text: 'PARSE_FAILED' }).eq('id', apt.id); } catch {}
     return { ok: false, fields: 0, name: apt.house_nm };
   }
 }
@@ -183,23 +191,24 @@ export async function GET(req: NextRequest) {
   const pdfParse = require('pdf-parse');
   const sb = getSupabaseAdmin();
 
-  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '100'), 300);
+  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '50'), 200);
 
-  // max_floor IS NULL인 레코드 타겟 (PDF URL 있는 것만)
+  // announcement_raw_text가 없는 레코드 타겟 (PDF URL 있는 것만)
   const { data: targets } = await (sb as any).from('apt_subscriptions')
     .select('id, house_nm, announcement_pdf_url, tot_supply_hshld_co, total_dong_count, parking_total, nearest_station')
     .not('announcement_pdf_url', 'is', null).neq('announcement_pdf_url', '')
-    .is('max_floor', null)
+    .or('announcement_raw_text.is.null,announcement_raw_text.eq.')
     .order('id', { ascending: false })
     .limit(limit);
 
   if (!targets?.length) {
-    return NextResponse.json({ ok: true, message: '재파싱 대상 없음 (max_floor 전부 채워짐)', remaining: 0 });
+    return NextResponse.json({ ok: true, message: '재파싱 대상 없음 (전부 처리됨)', remaining: 0 });
   }
 
   const { count: remaining } = await (sb as any).from('apt_subscriptions')
     .select('id', { count: 'exact', head: true })
-    .not('announcement_pdf_url', 'is', null).is('max_floor', null);
+    .not('announcement_pdf_url', 'is', null)
+    .or('announcement_raw_text.is.null,announcement_raw_text.eq.');
 
   let processed = 0, failed = 0, totalFields = 0;
   const fieldStats = { max_floor: 0, parking: 0, station: 0, dong: 0, raw_text: 0 };
