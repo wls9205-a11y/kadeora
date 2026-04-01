@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  serverExternalPackages: ['pdf-parse'],
 
   // Edge Runtime에서 /api/og, /api/og-square가 public/fonts/** 접근할 수 있도록 번들에 포함
   outputFileTracingIncludes: {

@@ -126,7 +126,7 @@ export async function POST() {
 async function runExtraction() {
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse/lib/pdf-parse');
+  const mod = 'pdf-parse' + '/lib/pdf-parse'; const pdfParse = eval('require')(mod);
   const sb = getSupabaseAdmin();
 
   // 재건축/재개발 중 총세대수 미보유 + PDF URL 있는 건

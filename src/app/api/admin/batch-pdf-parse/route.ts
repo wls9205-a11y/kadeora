@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
   if (!isAuthed) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse/lib/pdf-parse');
+  const mod = 'pdf-parse' + '/lib/pdf-parse'; const pdfParse = eval('require')(mod);
   const sb = getSupabaseAdmin();
 
   const { data: targets } = await (sb as any).from('apt_subscriptions')
