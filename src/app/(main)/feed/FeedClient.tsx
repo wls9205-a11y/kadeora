@@ -264,19 +264,18 @@ export default function FeedClient({
     <PullToRefresh>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
 
-        {/* 헤더 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)', padding: '4px 0' }}>
+        {/* 헤더 — 카더라 + 공유 + 활동 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, padding: '4px 0' }}>
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5, flexShrink: 0 }}>카더라</h1>
-          <div style={{ flexShrink: 0, textAlign: 'right' }}>
-            <LiveActivityIndicator />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <SectionShareButton section="feed" label="카더라 커뮤니티" pagePath="/feed" />
+            <div style={{ flexShrink: 0 }}>
+              <LiveActivityIndicator />
+            </div>
           </div>
         </div>
 
         <DailyReportCard />
-
-        <div style={{ marginBottom: 'var(--sp-sm)', display: 'flex', justifyContent: 'flex-end' }}>
-          <SectionShareButton section="feed" label="카더라 커뮤니티 — 주식·부동산·경제 실시간 소식" pagePath="/feed" />
-        </div>
 
         {/* ━━━ 카테고리 탭 ━━━ */}
         <div className="kd-scroll-row" style={{ marginBottom: 'var(--sp-sm)' }}>
@@ -383,34 +382,28 @@ export default function FeedClient({
             const card = (
               <div key={post.id} className={`animate-fadeIn kd-feed-card${visitedIds.has(post.id) ? ' visited' : ''}`}
                 data-cat={post.category}
-                style={{ padding: '12px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 'var(--radius-card)', transition: 'all var(--transition-fast)', position: 'relative' }}>
+                style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: `1px solid ${isPinned ? 'var(--brand)' : 'var(--border)'}`, borderRadius: 'var(--radius-card)', transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
-                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '1px 8px', borderRadius: '0 0 6px 6px' }}>
+                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: '0 0 4px 4px' }}>
                     📌 고정
                   </div>
                 )}
 
                 {/* 상단: 아바타 + 메타 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <Link href={post.is_anonymous ? '#' : `/profile/${post.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-inverse)' }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: 'var(--text-inverse)' }}>
                       {displayName[0].toUpperCase()}
                     </div>
                   </Link>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-                      <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{displayName}</span>
-                      <span style={{ fontSize: 11, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}<span className="grade-title-text"> {gradeTitle(post.profiles?.grade ?? 1)}</span></span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginTop: 1, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
-                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
-                      {(post.view_count ?? 0) > 0 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>· {numFmt(post.view_count ?? 0)}</span>}
-                      {/* E: 읽기시간 */}
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Clock size={9} /> {readMin}분
-                      </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 12 }}>{displayName}</span>
+                      <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
+                      <span style={{ fontSize: 10, padding: '0px 5px', borderRadius: 3, background: cat.bg, color: cat.color, fontWeight: 600 }}>{cat.label}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                      {readMin > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}><Clock size={8} /> {readMin}분</span>}
                     </div>
                   </div>
                 </div>
@@ -420,12 +413,12 @@ export default function FeedClient({
                   try { const arr = Array.from(nv).slice(-200); localStorage.setItem('kd_visited', JSON.stringify(arr)); } catch {}
                 }} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                   {post.title && (
-                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.45, marginBottom: 'var(--sp-xs)' }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 2 }}>
                       {post.title}
                     </div>
                   )}
-                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
-                    {stripHtml(post.excerpt || post.content).slice(0, 200)}
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                    {stripHtml(post.excerpt || post.content).slice(0, 150)}
                   </div>
                   {/* 히어로 이미지 (1장) 또는 갤러리 (2장+) */}
                   {post.images && post.images.length === 1 && (
@@ -479,7 +472,7 @@ export default function FeedClient({
                 )}
 
                 {/* 인터랙션 바 */}
-                <div className="kd-interaction-bar" style={{ marginTop: 'var(--sp-sm)' }}>
+                <div className="kd-interaction-bar" style={{ marginTop: 4 }}>
                   <PostReactions postId={post.id as number} userId={currentUserId} initialLikes={displayLikes} compact />
                   <Link href={`${postHref}#comments`} aria-label="댓글" className="kd-action-btn" style={{ textDecoration: 'none' }}>
                     <MessageCircle size={14} /> {commentCount > 0 ? numFmt(commentCount) : '댓글'}
