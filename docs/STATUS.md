@@ -1,15 +1,13 @@
-# 카더라 STATUS.md — 세션 68 완료 (2026-04-01 17:00 KST)
+# 카더라 STATUS.md — 세션 68 완료 (2026-04-01 18:00 KST)
 
 ## 최신 커밋
+- `7516fb72` — feat: GOD MODE 크론 3개 추가(94개) + 버튼 수치 업데이트 + 네이버 단지싱크 특수작업
 - `d6ab3d97` — feat: 5페이지 공유버튼 추가(shop/blog-series/guide/search)
 - `8d304d80` — feat: OngoingTab 세대수 중복제거 + StockClient 거래량 K/M포맷 + 3페이지 공유버튼
 - `4bcf39ca` — feat: 총세대/공급세대 중복 제거 + 주식 거래량 0→거래없음 + SectionShareButton 카카오톡 분리+멀티공유
 - `9945cf21` — feat: Google Ads 전환 태그 추가 (AW-17792745509)
 - `e3d3d51d` — feat: 미분양+분양중 탭 D-style 리디자인
 - `6aee89d6` — feat: 3탭 카드 D-style 맥시멀 리디자인
-- `5cf1634` — 4개 탭 카드 리디자인 (KPI 그리드+태그+시각화)
-- `392a226` — 총세대수 자동검증 시스템 + UI 확인중 표시
-- `3ec27dc` — 시드 유저 페르소나 + 피드 크론 v3
 - `119e08b` — PDF 파싱 패턴 대폭 강화 + batch-reparse-v2
 - `d314805` — 데일리 리포트 3개 신규 섹션
 
@@ -52,6 +50,12 @@ apt/diagnose, stock/compare, grades, feed, apt/search, daily/archive, shop, blog
 - 광고 문구 31개(제목15+긴제목8+설명8) 제공
 - 검색 테마 50개 제공
 - 사이트링크 6개 + 표시경로 4세트 제공
+
+### 어드민 GOD MODE 업데이트 ✅
+- 누락 크론 3개 추가: `auto-verify-households`, `kapt-sync`, `naver-complex-sync` → process 그룹
+- 총 크론 수: **94개** (data 17 / process 13 / ai 7 / content 36 / system 21)
+- 모드별 버튼 설명 수치 정확 반영
+- 특수 작업에 "네이버 단지 싱크" 버튼 추가
 
 ## 세션 67 성과
 
