@@ -36,7 +36,7 @@ export default function LiveActivityIndicator() {
   if (activeVisitors <= 0 && recentPosts <= 0) return null;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', fontSize: 11, color: 'var(--text-tertiary)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-tertiary)', whiteSpace: 'nowrap', justifyContent: 'flex-end' }}>
       {activeVisitors > 0 && (
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <span className="kd-pulse-dot" style={{ width: 5, height: 5, background: '#22C55E' }} />

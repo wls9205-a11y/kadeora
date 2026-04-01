@@ -265,8 +265,10 @@ export default function FeedClient({
 
         {/* 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)', padding: '4px 0' }}>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5 }}>카더라</h1>
-          <LiveActivityIndicator />
+          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 900, color: 'var(--brand)', margin: 0, letterSpacing: -0.5, flexShrink: 0 }}>카더라</h1>
+          <div style={{ flexShrink: 0, textAlign: 'right' }}>
+            <LiveActivityIndicator />
+          </div>
         </div>
 
         <DailyReportCard />

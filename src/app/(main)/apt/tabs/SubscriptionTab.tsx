@@ -150,30 +150,30 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
             const shortAddr = apt.hssply_adres ? apt.hssply_adres.replace(/^[^\s]+\s/, '').split(' ').slice(0, 3).join(' ') : '';
             return (
               <Link key={apt.id} href={`/apt/${encodeURIComponent(generateAptSlug(apt.house_nm) || apt.house_manage_no || String(apt.id))}`} className="kd-card-hover" style={{
-                display: 'block', padding: '10px 10px 8px', borderRadius: 'var(--radius-card)',
+                display: 'block', padding: '12px 14px 10px', borderRadius: 'var(--radius-card)',
                 background: st === 'open' ? 'linear-gradient(135deg, var(--bg-surface), rgba(96,165,250,0.04))' : 'var(--bg-surface)',
                 border: st === 'open' ? '1.5px solid rgba(96,165,250,0.3)' : '1px solid var(--border)',
                 opacity: st === 'closed' ? 0.55 : 1,
                 textDecoration: 'none', color: 'inherit',
               }}>
                 {/* 1행: 상태배지 + D-day + 특성 + 지역 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8, flexWrap: 'wrap' }}>
                   {isNew(apt, 'subscription') && <NewBadge />}
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: bd.bg, color: bd.color, border: `1px solid ${bd.border}` }}>{bd.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: bd.bg, color: bd.color, border: `1px solid ${bd.border}`, lineHeight: '16px' }}>{bd.label}</span>
                   {dday !== null && dday >= 0 && st !== 'closed' && (
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'var(--accent-yellow-bg)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? 'var(--accent-red)' : dday <= 6 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: dday <= 2 ? 'rgba(248,113,113,0.15)' : dday <= 6 ? 'var(--accent-yellow-bg)' : 'rgba(148,163,184,0.1)', color: dday <= 2 ? 'var(--accent-red)' : dday <= 6 ? 'var(--accent-yellow)' : 'var(--text-secondary)', lineHeight: '16px' }}>
                       {st === 'open' ? (dday === 0 ? '🔴 오늘 마감' : `⏰ D-${dday}`) : `D-${dday}`}
                     </span>
                   )}
-                  {(apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit ? <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)' }}>분양가상한</span> : null}
-                  {(apt as any).brand_name && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(59,123,246,0.08)', color: 'var(--brand)' }}>{(apt as any).brand_name}</span>}
-                  {(apt as any).project_type && (apt as any).project_type !== '민간' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: (apt as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : (apt as any).project_type === '재건축' ? 'rgba(167,139,250,0.1)' : 'rgba(52,211,153,0.1)', color: (apt as any).project_type === '재개발' ? 'var(--accent-orange)' : (apt as any).project_type === '재건축' ? 'var(--accent-purple)' : 'var(--accent-green)' }}>{(apt as any).project_type}</span>}
-                  {(apt as any).loan_rate && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: (apt as any).loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: (apt as any).loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>중도금 {(apt as any).loan_rate}</span>}
-                  {(apt as any).is_regulated_area && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)' }}>규제지역</span>}
-                  {(apt as any).balcony_extension && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(34,211,238,0.08)', color: 'var(--accent-cyan, #22D3EE)' }}>발코니확장</span>}
-                  {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)' }}>투기과열</span>}
-                  {(apt as Record<string, any>)['MDAT_TRGET_AREA_SECD'] === 'Y' && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-xs)', background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange-light)' }}>조정대상</span>}
-                  <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>{apt.region_nm}</span>
+                  {(apt as Record<string, any>)['PARCPRC_ULS_AT'] === 'Y' || (apt as Record<string, any>).is_price_limit ? <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--accent-purple-bg)', color: 'var(--accent-purple)', lineHeight: '16px' }}>분양가상한</span> : null}
+                  {(apt as any).brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', lineHeight: '16px' }}>{(apt as any).brand_name}</span>}
+                  {(apt as any).project_type && (apt as any).project_type !== '민간' && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: (apt as any).project_type === '재개발' ? 'rgba(251,146,60,0.1)' : (apt as any).project_type === '재건축' ? 'rgba(167,139,250,0.1)' : 'rgba(52,211,153,0.1)', color: (apt as any).project_type === '재개발' ? 'var(--accent-orange)' : (apt as any).project_type === '재건축' ? 'var(--accent-purple)' : 'var(--accent-green)', lineHeight: '16px' }}>{(apt as any).project_type}</span>}
+                  {(apt as any).loan_rate && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: (apt as any).loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: (apt as any).loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)', lineHeight: '16px' }}>중도금 {(apt as any).loan_rate}</span>}
+                  {(apt as any).is_regulated_area && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)', lineHeight: '16px' }}>규제지역</span>}
+                  {(apt as any).balcony_extension && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(34,211,238,0.08)', color: 'var(--accent-cyan, #22D3EE)', lineHeight: '16px' }}>발코니확장</span>}
+                  {(apt as Record<string, any>)['SPECLT_RDN_EARTH_AT'] === 'Y' && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--accent-red-bg)', color: 'var(--accent-red)', lineHeight: '16px' }}>투기과열</span>}
+                  {(apt as Record<string, any>)['MDAT_TRGET_AREA_SECD'] === 'Y' && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(251,146,60,0.12)', color: 'var(--accent-orange-light)', lineHeight: '16px' }}>조정대상</span>}
+                  <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, flexShrink: 0 }}>{apt.region_nm}</span>
                   <button aria-label="닫기" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist('subscription', String(apt.id)); }} style={{ fontSize: 'var(--fs-lg)', background: watchlist.has(`subscription:${apt.id}`) ? 'var(--accent-yellow-bg)' : 'transparent', border: watchlist.has(`subscription:${apt.id}`) ? '1px solid rgba(251,191,36,0.4)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '2px 6px', cursor: 'pointer', lineHeight: 1 }}>
                     {watchlist.has(`subscription:${apt.id}`) ? '⭐' : '☆'}
                   </button>
@@ -190,12 +190,12 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   </div>
                 )}
                 {/* 단지명 + 브랜드 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{apt.house_nm}</div>
-                  {(apt as any).brand_name && <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(59,123,246,0.1)', color: 'var(--brand)', border: '1px solid rgba(59,123,246,0.2)', flexShrink: 0, whiteSpace: 'nowrap' }}>{(apt as any).brand_name}</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{apt.house_nm}</div>
+                  {(apt as any).brand_name && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'rgba(59,123,246,0.1)', color: 'var(--brand)', border: '1px solid rgba(59,123,246,0.2)', flexShrink: 0, whiteSpace: 'nowrap' }}>{(apt as any).brand_name}</span>}
                 </div>
                 {/* 주소 + 시공사/시행사 + 스펙 */}
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, lineHeight: 1.5 }}>
                   {shortAddr}{apt.constructor_nm ? ` · ${apt.constructor_nm}` : ''}{(apt as any).developer_nm && (apt as any).developer_nm !== apt.constructor_nm ? ` · 시행 ${(apt as any).developer_nm}` : ''}{(apt as any).heating_type ? ` · ${(apt as any).heating_type}` : ''}{(apt as any).parking_ratio ? ` · 주차 ${(apt as any).parking_ratio}대` : ''}
                 </div>
                 {/* 💰 분양가 + 평당가 + 세대수 + 일반/특별 + 입주 KPI */}
@@ -216,39 +216,39 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const genPct = totS > 0 ? Math.round((genT / totS) * 100) : 0;
                   return (
                     <>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 2, marginBottom: 4, background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', padding: '5px 3px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1, marginBottom: 6, background: 'rgba(255,255,255,0.02)', borderRadius: 6, padding: '8px 4px' }}>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>분양가</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)' }}>{pMax > 0 ? (pMin !== pMax ? `${fmtP(pMin)}~${fmtP(pMax)}` : fmtP(pMax)) : '미정'}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>분양가</div>
+                          <div style={{ fontSize: 12, fontWeight: 800, color: pMax > 0 ? 'var(--brand)' : 'var(--text-tertiary)', lineHeight: 1.3 }}>{pMax > 0 ? (pMin !== pMax ? `${fmtP(pMin)}~${fmtP(pMax)}` : fmtP(pMax)) : '미정'}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>평당가</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)' }}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>평당가</div>
+                          <div style={{ fontSize: 12, fontWeight: 800, color: ppAvg > 0 ? 'var(--accent-purple)' : 'var(--text-tertiary)', lineHeight: 1.3 }}>{ppAvg > 0 ? fmtP(ppAvg) : '-'}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>총세대수</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+                          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>총세대수</div>
+                          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>
                             {totalHH > 0 ? `${totalHH.toLocaleString()}세대` : totS > 0 ? `${totS.toLocaleString()}세대` : '-'}
                           </div>
-                          {isRedev && totalHH > 0 && totalHH !== totS && <div style={{ fontSize: 8, color: 'var(--accent-green)' }}>공급 {totS.toLocaleString()}</div>}
+                          {isRedev && totalHH > 0 && totalHH !== totS && <div style={{ fontSize: 9, color: 'var(--accent-green)', marginTop: 1 }}>공급 {totS.toLocaleString()}</div>}
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>일반/특별</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: genT > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>{genT > 0 || spcT > 0 ? `${genT}/${spcT}` : '-'}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>일반/특별</div>
+                          <div style={{ fontSize: 12, fontWeight: 800, color: genT > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)', lineHeight: 1.3 }}>{genT > 0 || spcT > 0 ? `${genT}/${spcT}` : '-'}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>입주</div>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{mvnLabel || '-'}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>입주</div>
+                          <div style={{ fontSize: 12, fontWeight: 800, color: mvnLabel ? 'var(--accent-green)' : 'var(--text-tertiary)', lineHeight: 1.3 }}>{mvnLabel || '-'}</div>
                         </div>
                       </div>
                       {/* 일반/특별 공급 비율 바 */}
                       {totS > 0 && (genT > 0 || spcT > 0) && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                           <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'var(--bg-hover)', overflow: 'hidden', display: 'flex' }}>
                             <div style={{ width: `${genPct}%`, height: '100%', background: 'var(--accent-blue-light, #60A5FA)', borderRadius: '2px 0 0 2px' }} />
                             <div style={{ width: `${100 - genPct}%`, height: '100%', background: 'var(--accent-purple, #A78BFA)' }} />
                           </div>
-                          <span style={{ fontSize: 8, color: 'var(--text-tertiary)', flexShrink: 0 }}>일반{genPct}%</span>
+                          <span style={{ fontSize: 9, color: 'var(--text-tertiary)', flexShrink: 0 }}>일반{genPct}%</span>
                         </div>
                       )}
                     </>
@@ -263,10 +263,10 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const mid = sched?.interim?.pct || 60;
                   const bal = sched?.balance?.pct || 30;
                   return (
-                    <div style={{ display: 'flex', gap: 2, marginBottom: 4 }}>
+                    <div style={{ display: 'flex', gap: 2, marginBottom: 6 }}>
                       {[{l:'계약금',p:dep,c:'var(--brand)'},{l:'중도금',p:mid,c:'var(--accent-purple)'},{l:'잔금',p:bal,c:'var(--accent-orange)'}].map(s => (
-                        <div key={s.l} style={{ flex: s.p, height: 14, borderRadius: 3, background: `${s.c}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 8, color: s.c, fontWeight: 700 }}>{s.l} {s.p}%</span>
+                        <div key={s.l} style={{ flex: s.p, height: 16, borderRadius: 4, background: `${s.c}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: 9, color: s.c, fontWeight: 700 }}>{s.l} {s.p}%</span>
                         </div>
                       ))}
                     </div>
@@ -279,9 +279,9 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   if (!types.length) return null;
                   const fmtPM = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
                   return (
-                    <div style={{ display: 'flex', gap: 3, marginBottom: 4, overflowX: 'auto' }}>
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 6, overflowX: 'auto' }}>
                       {types.map((t: any) => (
-                        <div key={t.type} style={{ padding: '3px 6px', borderRadius: 5, background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.12)', fontSize: 9, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                        <div key={t.type} style={{ padding: '4px 8px', borderRadius: 6, background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.12)', fontSize: 10, color: 'var(--text-secondary)', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
                           <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{t.type?.split?.('.')?.[0] || t.type}</span> {t.area ? `${Number(t.area).toFixed(0)}㎡` : ''} · {fmtPM(t.lttot_top_amount)} · {(t.supply || 0) + (t.spsply_hshldco || 0)}세대
                         </div>
                       ))}
@@ -294,19 +294,19 @@ export default function SubscriptionTab({ apts, alertCounts, regionStats, aptUse
                   const comms = Array.isArray((apt as any).community_facilities) ? (apt as any).community_facilities : [];
                   if (!comms.length) return null;
                   return (
-                    <div style={{ display: 'flex', gap: 2, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 3, marginBottom: 6, flexWrap: 'wrap' }}>
                       {comms.slice(0, 4).map((f: string) => (
-                        <span key={f} style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: 'rgba(34,211,238,0.06)', color: 'var(--accent-cyan, #22D3EE)', border: '1px solid rgba(34,211,238,0.1)' }}>{f}</span>
+                        <span key={f} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4, background: 'rgba(34,211,238,0.06)', color: 'var(--accent-cyan, #22D3EE)', border: '1px solid rgba(34,211,238,0.1)' }}>{f}</span>
                       ))}
                     </div>
                   );
                 })()}
                 {/* 타임라인 바 */}
-                <div style={{ display: 'flex', gap: 2, fontSize: '9px', color: 'var(--text-tertiary)', overflow: 'hidden' }}>
-                  {apt.spsply_rcept_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'var(--accent-purple-bg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>특별 {fmtD(apt.spsply_rcept_bgnde)}</div>}
-                  <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: st === 'open' ? 'rgba(96,165,250,0.15)' : 'rgba(148,163,184,0.06)', color: st === 'open' ? 'var(--accent-blue-light)' : undefined, fontWeight: st === 'open' ? 700 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>접수 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)}</div>
-                  {apt.przwner_presnatn_de && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(52,211,153,0.06)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>당첨 {fmtD(apt.przwner_presnatn_de)}</div>}
-                  {apt.cntrct_cncls_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', borderRadius: 4, background: 'rgba(251,191,36,0.06)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>계약 {fmtD(apt.cntrct_cncls_bgnde)}</div>}
+                <div style={{ display: 'flex', gap: 3, fontSize: 10, color: 'var(--text-tertiary)', overflow: 'hidden', marginTop: 2 }}>
+                  {apt.spsply_rcept_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', borderRadius: 4, background: 'var(--accent-purple-bg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>특별 {fmtD(apt.spsply_rcept_bgnde)}</div>}
+                  <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', borderRadius: 4, background: st === 'open' ? 'rgba(96,165,250,0.15)' : 'rgba(148,163,184,0.06)', color: st === 'open' ? 'var(--accent-blue-light)' : undefined, fontWeight: st === 'open' ? 700 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>접수 {fmtD(apt.rcept_bgnde)}~{fmtD(apt.rcept_endde)}</div>
+                  {apt.przwner_presnatn_de && <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', borderRadius: 4, background: 'rgba(52,211,153,0.06)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>당첨 {fmtD(apt.przwner_presnatn_de)}</div>}
+                  {apt.cntrct_cncls_bgnde && <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', borderRadius: 4, background: 'rgba(251,191,36,0.06)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>계약 {fmtD(apt.cntrct_cncls_bgnde)}</div>}
                 </div>
               </Link>
             );
