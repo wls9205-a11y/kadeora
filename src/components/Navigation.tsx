@@ -323,7 +323,7 @@ export function Navigation() {
                       position:'absolute', right:0, top:'calc(100% + 6px)',
                       background:'var(--bg-surface)', border:'1px solid var(--border)',
                       borderRadius: 'var(--radius-sm)', overflow:'hidden', minWidth:180,
-                      boxShadow:'0 8px 24px rgba(0,0,0,0.15)', zIndex: 60,
+                      boxShadow:'0 8px 24px rgba(0,0,0,0.25)', zIndex: 9999,
                     }}>
                       {/* 프로필 헤더 — 가장 눈에 띄게 */}
                       <Link href={`/profile/${userId}`} onClick={()=>setMenuOpen(false)} style={{
@@ -494,7 +494,7 @@ export function Navigation() {
 
       {/* 더보기 시트 */}
       {moreOpen && (
-        <div style={{ position:'fixed', inset:0, zIndex: 60 }}>
+        <div style={{ position:'fixed', inset:0, zIndex: 9999 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />
           {/* 모바일: 바텀 시트 */}
           <div className="md:hidden" style={{
@@ -598,7 +598,7 @@ export function Navigation() {
         </div>
       )}
 
-      {menuOpen && <div className="hidden md:block" style={{ position:'fixed', inset:0, zIndex: 49 }} onClick={()=>setMenuOpen(false)} />}
+      {menuOpen && <div className="hidden md:block" style={{ position:'fixed', inset:0, zIndex: 9998 }} onClick={()=>setMenuOpen(false)} />}
     </>
   );
 }

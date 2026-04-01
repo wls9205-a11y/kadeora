@@ -324,12 +324,16 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
               <span style={{ fontSize: 10, fontWeight: 700, color: G.gold, letterSpacing: 1.5, textTransform: 'uppercase' }}>KADEORA DAILY REPORT</span>
               <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', background: G.goldBg, padding: '2px 8px', borderRadius: 3, border: `1px solid ${G.goldBorder}` }}>#{d.issueNo}</span>
             </div>
-            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5 }}>
-              {isArchive ? '투자 브리핑 아카이브' : '오늘의 투자 브리핑'}
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: -0.5, marginBottom: 4 }}>
+              {(() => {
+                const h = new Date().getHours();
+                const greeting = h < 12 ? '좋은 아침이에요' : h < 18 ? '오후도 파이팅' : '오늘 하루 수고하셨어요';
+                return isArchive ? '투자 브리핑 아카이브' : `${greeting} 👋`;
+              })()}
             </div>
-            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '4px 0 0', lineHeight: 1.5 }}>
-              매일 아침 {d.region} 부동산(청약·미분양·재개발) + 국내외 주식 시황을 한 장에 정리합니다
-            </p>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+              {dateLabel} · {d.region} 투자 브리핑
+            </div>
           </div>
           <select
             value={d.region}
@@ -341,6 +345,14 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
           >
             {regions.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
+        </div>
+
+        {/* 리포트 소개 */}
+        <div style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.02)', border: `1px solid ${G.goldBorder}`, marginBottom: 10 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.65 }}>
+            📊 이 리포트는 <b style={{ color: 'var(--text-primary)' }}>{d.region}</b> 지역 부동산(청약·미분양·재개발·실거래) + 국내외 주식 시황을 매일 아침 자동으로 수집·분석하여 한 장에 정리한 <b style={{ color: G.gold }}>투자 브리핑</b>입니다.
+            {d.subCountThisWeek > 0 && <> 이번주 청약 <b>{d.subCountThisWeek}건({d.subUnitsThisWeek.toLocaleString()}세대)</b> 예정.</>}
+          </p>
         </div>
 
         {/* 날짜 네비게이션 — 골드 라인 */}
