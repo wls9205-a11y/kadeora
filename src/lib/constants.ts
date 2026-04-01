@@ -10,7 +10,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 4821, likes_count: 183, comments_count: 47, is_deleted: false,
     created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-1', nickname: '아파트왕', avatar_url: null, grade: '골드' }
+    profiles: { id: 'demo-1', nickname: '아파트왕', avatar_url: null, grade: 4 }
   },
   {
     id: 2, author_id: 'demo-2', category: 'stock', title: '삼성전자 5만원대 진입 여부 분석 (기술적 분석)',
@@ -18,7 +18,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 6234, likes_count: 267, comments_count: 89, is_deleted: false,
     created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-2', nickname: '주식고수', avatar_url: null, grade: '플래티넘' }
+    profiles: { id: 'demo-2', nickname: '주식고수', avatar_url: null, grade: 5 }
   },
   {
     id: 3, author_id: 'demo-3', category: 'free', title: '토스뱅크 파킹통장 금리 인상 됐네요',
@@ -26,7 +26,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 2891, likes_count: 94, comments_count: 31, is_deleted: false,
     created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-3', nickname: '금융인싸', avatar_url: null, grade: '실버' }
+    profiles: { id: 'demo-3', nickname: '금융인싸', avatar_url: null, grade: 3 }
   },
   {
     id: 4, author_id: 'demo-4', category: 'stock', title: '코스피 3000 돌파 가능성 있나요? 개인적 분석',
@@ -34,7 +34,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 8102, likes_count: 341, comments_count: 124, is_deleted: false,
     created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-4', nickname: '마켓워처', avatar_url: null, grade: '골드' }
+    profiles: { id: 'demo-4', nickname: '마켓워처', avatar_url: null, grade: 4 }
   },
   {
     id: 5, author_id: 'demo-5', category: 'apt', title: '서울 청약 가점 40점대면 어떤 아파트 狙아야 하나요',
@@ -42,7 +42,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 3456, likes_count: 121, comments_count: 67, is_deleted: false,
     created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-5', nickname: '내집마련', avatar_url: null, grade: '브론즈' }
+    profiles: { id: 'demo-5', nickname: '내집마련', avatar_url: null, grade: 2 }
   },
   {
     id: 6, author_id: 'demo-6', category: 'free', title: 'ETF 초보인데 KODEX200 vs TIGER200 차이점 뭔가요',
@@ -50,7 +50,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 1832, likes_count: 78, comments_count: 43, is_deleted: false,
     created_at: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-6', nickname: 'ETF새내기', avatar_url: null, grade: '브론즈' }
+    profiles: { id: 'demo-6', nickname: 'ETF새내기', avatar_url: null, grade: 2 }
   },
   {
     id: 7, author_id: 'demo-7', category: 'stock', title: 'HBM 관련주 정리해봤습니다 (SK하이닉스, 마이크론 등)',
@@ -58,7 +58,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 5678, likes_count: 234, comments_count: 88, is_deleted: false,
     created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-7', nickname: '반도체덕후', avatar_url: null, grade: '플래티넘' }
+    profiles: { id: 'demo-7', nickname: '반도체덕후', avatar_url: null, grade: 5 }
   },
   {
     id: 8, author_id: 'demo-8', category: 'apt', title: '경기도 청약 당첨 후기 (수원 팔달구 공공분양)',
@@ -66,7 +66,7 @@ export const DEMO_POSTS: any[] = [
     images: null, view_count: 7823, likes_count: 389, comments_count: 156, is_deleted: false,
     created_at: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date().toISOString(),
-    profiles: { id: 'demo-8', nickname: '당첨자', avatar_url: null, grade: '골드' }
+    profiles: { id: 'demo-8', nickname: '당첨자', avatar_url: null, grade: 4 }
   },
   {
     id: 9, author_id: 'demo-9', category: 'free', title: '직장인 점심값 아끼는 현실적인 꿀팁 공유',

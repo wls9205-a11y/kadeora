@@ -563,10 +563,10 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
    모바일 텍스트 깨짐/밀림 방어 — 전역
    ======================================== */
 
-/* 모든 flex 자식에 min-width: 0 — 텍스트 오버플로우 방지 */
+/* 카드 내부 자식에 min-width: 0 — 텍스트 오버플로우 방지 */
 @media (max-width: 640px) {
-  [style*="display: flex"] > *, [style*="display:flex"] > *,
-  .kd-feed-card > div, .apt-card > div {
+  .kd-feed-card > div, .apt-card > div, .kd-card > div,
+  .kd-feed-card > a, .apt-card > a {
     min-width: 0;
   }
 
@@ -602,11 +602,6 @@ html.font-small .kd-list-item { padding: var(--sp-xs) 0; }
   nav[aria-label="breadcrumb"] {
     flex-wrap: wrap;
     gap: 2px 4px !important;
-  }
-
-  /* 가격/수치 줄바꿈 방지 */
-  [style*="fontWeight: 700"], [style*="fontWeight: 800"], [style*="fontWeight: 900"] {
-    white-space: nowrap;
   }
 
   /* select/input 100% 너비 보장 */

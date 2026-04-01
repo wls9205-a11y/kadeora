@@ -320,7 +320,7 @@ export default async function FeedDetailPage({ params }: Props) {
         {/* Author row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 'var(--sp-2xl)' }}>
           {post.profiles?.avatar_url ? (
-            <Image src={post.profiles.avatar_url} alt={post.profiles?.nickname ?? '익명'} width={40} height={40} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} unoptimized />
+            <Image src={post.profiles.avatar_url} alt={post.profiles?.nickname ?? '익명'} width={40} height={40} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} unoptimized={!post.profiles.avatar_url.includes('supabase.co')} />
           ) : (
             <div style={{
               width: 40, height: 40, borderRadius: '50%', flexShrink: 0,

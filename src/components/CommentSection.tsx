@@ -158,8 +158,8 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
           const renderComment = (comment: CommentWithProfile, isReply = false) => (
             <div key={comment.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0', marginLeft: isReply ? 42 : 0 }}>
               <Link href={`/profile/${comment.profiles?.id || comment.author_id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                {(comment.profiles as any)?.avatar_url ? (
-                  <img src={(comment.profiles as any).avatar_url} alt={comment.profiles?.nickname ?? 'U'} style={{ width: isReply ? 26 : 32, height: isReply ? 26 : 32, borderRadius: '50%', objectFit: 'cover' }} />
+                {comment.profiles?.avatar_url ? (
+                  <img src={comment.profiles.avatar_url} alt={comment.profiles?.nickname ?? 'U'} style={{ width: isReply ? 26 : 32, height: isReply ? 26 : 32, borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: isReply ? 26 : 32, height: isReply ? 26 : 32, borderRadius: '50%', background: getAvatarColor(comment.profiles?.nickname ?? 'U'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 10 : 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-inverse)' }}>
                     {(comment.profiles?.nickname ?? 'U')[0].toUpperCase()}

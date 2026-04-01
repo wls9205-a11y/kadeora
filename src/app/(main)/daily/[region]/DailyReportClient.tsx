@@ -419,7 +419,7 @@ export default function DailyReportClient({ data, regions, viewDate, prevDate, n
             {d.region} 지역 {d.subCountThisWeek > 0 ? `이번주 청약 ${d.subCountThisWeek}건(${d.subUnitsThisWeek.toLocaleString()}세대)` : '이번주 예정 청약 없음'}
             {' · '}전국 미분양 {d.unsoldUnits.toLocaleString()}세대
             {d.redevTotal > 0 ? ` · ${d.region} 재개발 ${d.redevTotal}건 진행중` : ''}
-            {d.stockTop10.length > 0 ? ` · 시총 TOP ${d.stockTop10[0]?.name} ${pctStr(d.stockTop10[0]?.pct)}` : ''}
+            {d.stockTop10.length > 0 ? ` · 시총 TOP ${d.stockTop10[0]?.name} ${pctStr(d.stockTop10[0]?.change_pct)}` : ''}
           </p>
         </div>
 
